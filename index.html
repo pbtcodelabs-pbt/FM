@@ -361,6 +361,12 @@
   body.role-admin .screen.admin-only{display:none;}
   body.role-admin .screen.admin-only.active{display:block;}
 
+  /* --- Per-user اسکرین اجازت: صدام (Admin) جس سیلزمین کو جو مخصوص admin-only اسکرین دیکھنے کی
+       اجازت دے، اس پر لاگ ان کے وقت applyUserScreenPermissions() یہ .perm-allowed کلاس لگا دیتا ہے --- */
+  body.role-salesman .navItem.admin-only.perm-allowed{display:flex;}
+  body.role-salesman .screen.admin-only.perm-allowed{display:none;}
+  body.role-salesman .screen.admin-only.perm-allowed.active{display:block;}
+
   /* ===================== BILLING SCREEN ===================== */
   /* --- بلنگ اسکرین: پورا صفحہ صرف پراڈکٹس کے لیے، باقی سب فلوٹنگ بار میں --- */
   .billingTopBar{margin-bottom:4px;}
@@ -3327,13 +3333,29 @@
         <input type="text" id="nuName" placeholder="Full name">
         <input type="text" id="nuUsername" placeholder="Username">
         <input type="password" id="nuPin" placeholder="PIN (4-6 digits)" maxlength="6">
-        <select id="nuRole" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px;">
+        <select id="nuRole" onchange="toggleNewUserScreensBox()" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px;">
           <option value="salesman">🧑‍💼 Salesman (limited access)</option>
           <option value="admin">👑 Admin (full access)</option>
         </select>
+        <div id="nuScreensBox" style="margin-bottom:10px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">🖥️ اس ملازم کو کون سی اسکرینز نظر آئیں:</div>
+          <div id="nuScreensCheckboxes" style="max-height:180px; overflow-y:auto; border:1px solid #dbe1ea; border-radius:8px; padding:8px;"></div>
+        </div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewUserModal()">Cancel</button>
           <button class="saveBtn" onclick="saveNewUser()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT PERMISSIONS MODAL (کسی موجودہ ملازم کی اسکرینز بدلنے کے لیے) -->
+    <div class="modalOverlay" id="editPermsModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBox">
+        <h3>🖥️ Screens for <span id="editPermsUserName"></span></h3>
+        <div id="editPermsCheckboxes" style="max-height:220px; overflow-y:auto; border:1px solid #dbe1ea; border-radius:8px; padding:8px; margin-bottom:10px;"></div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeEditPermissionsModal()">Cancel</button>
+          <button class="saveBtn" onclick="saveEditPermissions()">Save</button>
         </div>
       </div>
     </div>
@@ -5712,11 +5734,85 @@ function getDeveloperContact(){
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM308SU02';
+const APP_BUILD_VERSION = 'FM308SU03';
+// ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
+// ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
+//   rules_version = '2';
+//   service cloud.firestore {
+//     match /databases/{database}/documents {
+//       match /trials/{docId}   { allow read, write: if request.auth != null; }
+//       match /licenses/{docId} { allow read: if true; allow write: if false; }
+//       match /shopData/{docId} { allow read, write: if request.auth != null; }
+//     }
+//   }
+// اور Firebase Console → Authentication → Sign-in method میں "Anonymous" کو Enable کرنا نہ بھولیں ----------
 
 const FIREBASE_PROJECT_ID = 'fm-saddam-mandi';
 const FIREBASE_API_KEY = 'AIzaSyAMmL3RfVrS6ff95rz18WKxRU265lKv3gE';
 const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+
+/* =====================================================================
+   🔐 Firebase Anonymous Auth — ملٹی یوزر (Staff) ڈیٹا کو Firestore Security
+   Rules کے ذریعے محفوظ رکھنے کے لیے۔ صارف کو کچھ نظر نہیں آتا (کوئی ای میل/پاسورڈ
+   نہیں مانگا جاتا) — ایپ خود بخود بیک گراؤنڈ میں ایک anonymous شناخت بنا لیتی ہے،
+   اور ہر Firestore درخواست کے ساتھ اس کا ID Token بھیجا جاتا ہے۔ اس کے بغیر
+   Firestore Rules کو "کھلا" (سب کے لیے پڑھنے/لکھنے کی اجازت) رکھنا پڑتا، جو غیر محفوظ ہے۔
+   ===================================================================== */
+const AUTH_SIGNUP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`;
+const AUTH_REFRESH_URL = `https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`;
+
+// ---------- موجودہ ID Token واپس کریں (اگر میعاد ختم ہو چکی ہو تو خاموشی سے refresh کر لیں،
+// بالکل نیا ڈیوائس ہو تو نئی anonymous شناخت بنا لیں) — یہ ہمیشہ ایک valid token دینے کی کوشش کرتا ہے،
+// انٹرنیٹ نہ ہونے کی صورت میں null واپس کر دیتا ہے تاکہ باقی ایپ آف لائن ہی چلتی رہے ----------
+async function ensureFirebaseAuth(){
+  const auth = AppState.settings.fbAuth;
+  if(auth && auth.idToken && auth.expiresAt && auth.expiresAt > Date.now() + 60000){
+    return auth.idToken; // ابھی کافی وقت باقی ہے، دوبارہ نیٹ ورک کال کی ضرورت نہیں
+  }
+  try{
+    if(auth && auth.refreshToken){
+      // ---------- پرانی anonymous شناخت ہی برقرار رکھیں — صرف token تازہ کریں ----------
+      const res = await fetch(AUTH_REFRESH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(auth.refreshToken)}`
+      });
+      if(res.ok){
+        const data = await res.json();
+        AppState.settings.fbAuth = {
+          localId: data.user_id, idToken: data.id_token, refreshToken: data.refresh_token,
+          expiresAt: Date.now() + (parseInt(data.expires_in || '3600') * 1000)
+        };
+        persistAllData();
+        return AppState.settings.fbAuth.idToken;
+      }
+    }
+    // ---------- بالکل نئی anonymous شناخت بنائیں (پہلی بار، یا refresh ناکام ہونے پر) ----------
+    const res = await fetch(AUTH_SIGNUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ returnSecureToken: true })
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    AppState.settings.fbAuth = {
+      localId: data.localId, idToken: data.idToken, refreshToken: data.refreshToken,
+      expiresAt: Date.now() + (parseInt(data.expiresIn || '3600') * 1000)
+    };
+    persistAllData();
+    return AppState.settings.fbAuth.idToken;
+  }catch(e){
+    return null; // ---------- آف لائن — کوئی مسئلہ نہیں، اگلی بار انٹرنیٹ ملنے پر دوبارہ کوشش ہوگی ----------
+  }
+}
+
+// ---------- Firestore کو authenticated (Bearer token) درخواست بھیجنے کا مختصر طریقہ ----------
+async function authFirestoreFetch(path, options = {}){
+  const token = await ensureFirebaseAuth();
+  if(!token) throw new Error('offline-or-auth-failed');
+  const headers = Object.assign({}, options.headers, { 'Authorization': `Bearer ${token}` });
+  return fetch(`${FIRESTORE_BASE}/${path}`, Object.assign({}, options, { headers }));
+}
 
 // ---------- ہر انسٹالیشن کی منفرد شناخت — ڈیوائس کے fingerprint سے بنتی ہے (بالکل بے ترتیب نہیں) —
 // اسی لیے Data Clear/Uninstall کے بعد بھی وہی ID دوبارہ بنتی ہے (اسی فون پر)، تاکہ کوئی ٹرائل بار بار
@@ -6475,6 +6571,24 @@ function applyRole(role, name){
   document.getElementById('userTag').innerHTML =
     (role==='admin' ? '👑 Admin: ' : '🧑‍💼 Salesman: ') + AppState.currentUser.name +
     (role==='salesman' ? renderTodaysBillBadge() : '');
+
+  applyUserScreenPermissions(name);
+}
+
+// ---------- لاگ ان کرنے والے سیلزمین کی مخصوص اجازت شدہ اسکرینز پر .perm-allowed کلاس لگائیں —
+// تاکہ صدام کی طے کردہ اسکرینز (مثلاً صرف Payments، یا صرف Billing+Advance Orders) اس مخصوص
+// ملازم کو نظر آ جائیں، باقی سب admin-only اسکرینز چھپی رہیں ----------
+function applyUserScreenPermissions(name){
+  // ---------- ہر لاگ ان پر پہلے سب پرانی اجازتیں صاف کر دیں (ورنہ پچھلے سیلزمین کی اجازتیں اگلے پر بھی لگی رہ جائیں) ----------
+  document.querySelectorAll('.perm-allowed').forEach(el => el.classList.remove('perm-allowed'));
+
+  const u = usersData.find(x => x.name === name && x.role === 'salesman');
+  if(!u || !Array.isArray(u.screens)) return;
+  u.screens.forEach(key => {
+    document.querySelectorAll(`[data-screen="${key}"]`).forEach(el => el.classList.add('perm-allowed'));
+    const screenEl = document.getElementById('screen-' + key);
+    if(screenEl) screenEl.classList.add('perm-allowed');
+  });
 }
 
 // ---------- سیلزمین کے اپنے سائیڈ بار ٹیگ کے نیچے آج کے بلوں کی گنتی (چھوٹا بیج) ----------
@@ -6532,11 +6646,18 @@ function goTo(screenName, _isHistoryNav){
   // ---------- Customers/Suppliers الگ الگ نیویگیشن اندراج ہیں مگر اندرونی طور پر ایک ہی DOM اسکرین (screen-parties) شیئر کرتے ہیں تاکہ غلطی سے غلط موڈ پر پارٹی/بل نہ بن جائے ----------
   const actualScreenId = (screenName === 'customers' || screenName === 'suppliers') ? 'parties' : screenName;
 
-  // Role guard: اگر salesman admin-only اسکرین پر جانے کی کوشش کرے تو روک دیں
+  // Role guard: اگر salesman admin-only اسکرین پر جانے کی کوشش کرے تو روک دیں —
+  // البتہ اگر صدام (Admin) نے خاص طور پر اس ملازم کو یہ اسکرین دیکھنے کی اجازت دی ہو
+  // (.perm-allowed، applyUserScreenPermissions سے لاگ ان کے وقت لگتی ہے) تو جانے دیں ----------
   const targetEl = document.getElementById('screen-' + actualScreenId);
-  if(targetEl.classList.contains('admin-only') && AppState.currentRole !== 'admin'){
+  if(targetEl.classList.contains('admin-only') && AppState.currentRole !== 'admin' && !targetEl.classList.contains('perm-allowed')){
     alert('Access to this section is admin-only.');
     return;
+  }
+  // ---------- Users اسکرین پر جاتے وقت (صرف Admin کے لیے قابلِ رسائی) دیگر موبائلز پر ہونے والی
+  // یوزر تبدیلیاں (نیا ملازم، PIN، اسکرین اجازت وغیرہ) تازہ منگوا لیں ----------
+  if(screenName === 'users' && AppState.currentRole === 'admin'){
+    fetchUsersFromCloud();
   }
 
   // ---------- ہسٹری صرف اُس وقت اپڈیٹ کریں جب یہ ایک عام (نئی) نیویگیشن ہو، Back/Forward بٹن سے نہ ہو،
@@ -17025,10 +17146,12 @@ function renderTrendsScreen(){
    ===================================================================== */
 
 // ---------- Dummy Users Data ----------
+// screens: صرف 'salesman' یوزرز کے لیے معنی رکھتا ہے — یہی وہ اسکرینز ہیں جو صدام (Admin) نے اس
+// ملازم کو دیکھنے کی اجازت دی ہے۔ Admin ہمیشہ سب کچھ دیکھتا ہے، اس کے لیے یہ فیلڈ نظرانداز ہوتا ہے ----------
 const USERS_SEED_DATA = [
-  {user_id:1, name:'Admin User', username:'admin', pin:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', role:'admin', is_active:true}, // PIN: 1234
-  {user_id:2, name:'Aslam Bhai', username:'aslam', pin:'0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', role:'salesman', is_active:true}, // PIN: 1111
-  {user_id:3, name:'Bilal', username:'bilal', pin:'edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9', role:'salesman', is_active:false}, // PIN: 2222
+  {user_id:1, name:'Admin User', username:'admin', pin:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', role:'admin', is_active:true, screens:[]}, // PIN: 1234
+  {user_id:2, name:'Aslam Bhai', username:'aslam', pin:'0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', role:'salesman', is_active:true, screens:['billing','advanceorders','billhistory']}, // PIN: 1111
+  {user_id:3, name:'Bilal', username:'bilal', pin:'edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9', role:'salesman', is_active:false, screens:['payments']}, // PIN: 2222
 ];
 let usersData = loadFromStorage('users', USERS_SEED_DATA);
 // ---------- حفاظتی تدبیر: اگر localStorage میں کوئی پرانا/خراب ڈیٹا ہو جس میں کوئی درست Admin موجود نہ ہو،
@@ -17036,7 +17159,80 @@ let usersData = loadFromStorage('users', USERS_SEED_DATA);
 if(!Array.isArray(usersData) || !usersData.some(u => u.role === 'admin' && u.is_active)){
   usersData = USERS_SEED_DATA;
 }
+// ---------- پرانے ڈیوائسز پر محفوظ شدہ یوزرز میں screens فیلڈ نہ ہو تو خالی array لگا دیں (ٹوٹنے سے بچاؤ) ----------
+usersData.forEach(u => { if(!Array.isArray(u.screens)) u.screens = []; });
 let nextUserId = loadFromStorage('nextUserId', 4);
+
+// ---------- ملازم کو دی جا سکنے والی اسکرینز کی فہرست — یہاں سے شامل/ہٹائی جا سکتی ہیں ----------
+const ASSIGNABLE_SCREENS = [
+  {key:'billing', label:'🛒 Billing'},
+  {key:'advanceorders', label:'📋 Advance Orders'},
+  {key:'billhistory', label:'🧾 Bill History'},
+  {key:'payments', label:'💳 Payments'},
+  {key:'dashboard', label:'📊 Dashboard'},
+  {key:'products', label:'📦 Products'},
+  {key:'customers', label:'🧑‍🤝‍🧑 Customers'},
+  {key:'suppliers', label:'🚚 Suppliers'},
+  {key:'purchaseorders', label:'📦 Purchase Orders'},
+  {key:'stockadjustment', label:'🧮 Stock Adjustment'},
+  {key:'expenditure', label:'💸 Expenditure'},
+  {key:'myaccount', label:'🏦 My Account'},
+];
+
+/* =====================================================================
+   ☁️ Staff Users — Firestore Sync (ملٹی موبائل: صدام کے ایڈمن فون پر بنایا گیا
+   ہر یوزر خودکار طور پر باقی موبائلز پر بھی نظر آئے گا، تاکہ وہ کسی بھی فون پر
+   اپنے نام/PIN سے لاگ ان کر سکے)۔ REST API سے real-time نہیں، بلکہ ایپ کھلتے وقت
+   اور Users اسکرین کھولتے وقت تازہ ترین فہرست منگوائی جاتی ہے ----------
+   ===================================================================== */
+const STAFF_DOC_PATH = 'shopData/staffUsers';
+
+async function pushUsersToCloud(){
+  saveToStorage('users', usersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextUserId', nextUserId);
+  try{
+    await authFirestoreFetch(`${STAFF_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(usersData) },
+          nextUserId: { integerValue: String(nextUserId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+  }catch(e){
+    // ---------- آف لائن — کوئی مسئلہ نہیں، ڈیٹا localStorage میں محفوظ ہو چکا ہے، اگلی بار انٹرنیٹ
+    // ملتے ہی (اگلا pushUsersToCloud/fetchUsersFromCloud) خودکار sync ہو جائے گا ----------
+  }
+}
+
+async function fetchUsersFromCloud(silent){
+  try{
+    const res = await authFirestoreFetch(`${STAFF_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی cloud پر محفوظ نہیں ہوا (بالکل نیا شاپ) ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudUsers = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudUsers) || !cloudUsers.some(u => u.role === 'admin' && u.is_active)) return false;
+    cloudUsers.forEach(u => { if(!Array.isArray(u.screens)) u.screens = []; });
+    usersData = cloudUsers;
+    const cloudNextId = parseInt(doc.fields?.nextUserId?.integerValue || '0');
+    if(cloudNextId > nextUserId) nextUserId = cloudNextId;
+    saveToStorage('users', usersData);
+    saveToStorage('nextUserId', nextUserId);
+    if(!silent){
+      if(typeof renderUserList === 'function' && document.getElementById('userListWrap')) renderUserList();
+      if(typeof setupLoginScreen === 'function') setupLoginScreen();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (localStorage والی) فہرست پر ہی کام چلے گا ----------
+  }
+}
 
 // ---------- Dummy Approval Requests (بعد میں Salesman خود Billing اسکرین سے یہ بھیجے گا) ----------
 const APPROVAL_REQUESTS_SEED_DATA = [
@@ -17063,9 +17259,16 @@ function renderUserList(){
       <div>
         <div class="uName">${u.name} <span class="statusDot ${u.is_active ? 'on':'off'}"></span></div>
         <div class="uMeta">@${u.username} — ${u.is_active ? 'Active' : 'Inactive'}</div>
+        ${u.role !== 'admin' ? `<div class="uMeta" style="margin-top:4px;">
+          ${(u.screens && u.screens.length) ? u.screens.map(s => {
+            const found = ASSIGNABLE_SCREENS.find(a => a.key === s);
+            return `<span style="display:inline-block; background:#eef2ff; color:#3730a3; font-size:11px; padding:2px 8px; border-radius:10px; margin:2px 3px 0 0;">${found ? found.label : s}</span>`;
+          }).join('') : '<span style="color:var(--danger); font-size:12px;">⚠️ کوئی اسکرین تفویض نہیں</span>'}
+        </div>` : ''}
       </div>
       <div class="userActions">
         <span class="roleTag ${u.role}">${u.role === 'admin' ? '👑 Admin' : '🧑‍💼 Salesman'}</span>
+        ${u.role !== 'admin' ? `<button class="btnResetPin" onclick="openEditPermissionsModal(${u.user_id})">🖥️ Screens</button>` : ''}
         <button class="btnResetPin" onclick="setCustomUserPin(${u.user_id})">✏️ Set Custom PIN</button>
         <button class="btnToggleActive" onclick="toggleUserActive(${u.user_id})">${u.is_active ? '⏸️ Deactivate' : '▶️ Activate'}</button>
         <button class="btnResetPin" onclick="requestRoleChangeAuth(${u.user_id})">🔄 Change Role</button>
@@ -17078,7 +17281,36 @@ function toggleUserActive(userId){
   const u = usersData.find(x => x.user_id === userId);
   if(!u) return;
   u.is_active = !u.is_active;
-  // TODO: یہاں users table میں UPDATE ہوگا
+  pushUsersToCloud();
+  renderUserList();
+}
+
+// ---------- ملازم کی اسکرین اجازتیں ترمیم کرنے کا Modal ----------
+let editPermsTargetId = null;
+function openEditPermissionsModal(userId){
+  const u = usersData.find(x => x.user_id === userId);
+  if(!u || u.role === 'admin') return;
+  editPermsTargetId = userId;
+  const box = document.getElementById('editPermsCheckboxes');
+  box.innerHTML = ASSIGNABLE_SCREENS.map(s => `
+    <label style="display:flex; align-items:center; gap:8px; padding:6px 0; font-size:14px;">
+      <input type="checkbox" value="${s.key}" ${u.screens.includes(s.key) ? 'checked' : ''}> ${s.label}
+    </label>
+  `).join('');
+  document.getElementById('editPermsUserName').textContent = u.name;
+  document.getElementById('editPermsModal').classList.add('show');
+}
+function closeEditPermissionsModal(){
+  document.getElementById('editPermsModal').classList.remove('show');
+  editPermsTargetId = null;
+}
+function saveEditPermissions(){
+  const u = usersData.find(x => x.user_id === editPermsTargetId);
+  if(!u){ closeEditPermissionsModal(); return; }
+  const checked = Array.from(document.querySelectorAll('#editPermsCheckboxes input[type="checkbox"]:checked')).map(cb => cb.value);
+  u.screens = checked;
+  pushUsersToCloud();
+  closeEditPermissionsModal();
   renderUserList();
 }
 
@@ -17114,8 +17346,7 @@ async function confirmRoleChangeWithPin(){
   const u = usersData.find(x => x.user_id === roleChangeTargetId);
   if(!u){ document.getElementById('roleChangePinModal').classList.remove('show'); return; }
   u.role = u.role === 'admin' ? 'salesman' : 'admin';
-  // TODO: یہاں users table میں UPDATE ہوگا
-  saveToStorage('users', usersData);
+  pushUsersToCloud();
   document.getElementById('roleChangePinModal').classList.remove('show');
   renderUserList();
   alert(`✅ ${u.name} is now ${u.role === 'admin' ? '👑 Admin' : '🧑‍💼 Salesman'}.`);
@@ -17132,25 +17363,47 @@ async function setCustomUserPin(userId){
     return;
   }
   u.pin = await hashPin(newPin.trim());
+  pushUsersToCloud();
   alert(`✅ ${u.name}'s PIN is now set to: ${newPin.trim()}\n\nRemember this — it works everywhere Admin access is needed (login, Admin Control, Bulk Delete).`);
 }
 
 // ---------- New User Modal ----------
 function openNewUserModal(){
   document.getElementById('newUserModal').classList.add('show');
+  renderNewUserScreenCheckboxes();
+  toggleNewUserScreensBox();
 }
 function closeNewUserModal(){
   document.getElementById('newUserModal').classList.remove('show');
   ['nuName','nuUsername','nuPin'].forEach(id => document.getElementById(id).value = '');
+  document.querySelectorAll('#nuScreensCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
+}
+// ---------- Admin منتخب ہو تو اسکرین چیک باکسز چھپا دیں (Admin کو ویسے بھی سب کچھ نظر آتا ہے) ----------
+function toggleNewUserScreensBox(){
+  const isAdmin = document.getElementById('nuRole').value === 'admin';
+  document.getElementById('nuScreensBox').style.display = isAdmin ? 'none' : 'block';
+}
+function renderNewUserScreenCheckboxes(){
+  const box = document.getElementById('nuScreensCheckboxes');
+  box.innerHTML = ASSIGNABLE_SCREENS.map(s => `
+    <label style="display:flex; align-items:center; gap:8px; padding:5px 0; font-size:14px;">
+      <input type="checkbox" value="${s.key}"> ${s.label}
+    </label>
+  `).join('');
 }
 async function saveNewUser(){
   const name = document.getElementById('nuName').value.trim();
   const username = document.getElementById('nuUsername').value.trim();
   const pin = document.getElementById('nuPin').value.trim();
   const role = document.getElementById('nuRole').value;
+  const screens = Array.from(document.querySelectorAll('#nuScreensCheckboxes input[type="checkbox"]:checked')).map(cb => cb.value);
 
   if(!name || !username || pin.length < 4){
     alert('Please fill all fields correctly (PIN at least 4 digits).');
+    return;
+  }
+  if(role === 'salesman' && screens.length === 0){
+    alert('Please select at least one screen this staff member is allowed to use.');
     return;
   }
 
@@ -17160,7 +17413,8 @@ async function saveNewUser(){
     alert('This PIN is already used by another user. Please choose a different PIN.');
     return;
   }
-  usersData.push({user_id: nextUserId++, name, username, pin: hashedPin, role, is_active:true});
+  usersData.push({user_id: nextUserId++, name, username, pin: hashedPin, role, is_active:true, screens: role === 'admin' ? [] : screens});
+  pushUsersToCloud();
 
   closeNewUserModal();
   renderUserList();
@@ -23550,6 +23804,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // پہلے یہ صرف لاگ ان فنکشنز کے اندر چلتا تھا — اگر کہیں لاگ ان کا راستہ جلدی نہ چلے تو ٹرائل تاخیر کا شکار ہو سکتا تھا۔
   // اب یہ ایپ کھلتے ہی، سب سے پہلے، براہ راست چلتا ہے ----------
   try{ getOrCreateDeviceUID(); }catch(e){}
+
+  // ---------- ☁️ اسٹاف یوزرز (نام/PIN/اسکرین اجازتیں) کو Firestore سے تازہ منگوائیں — تاکہ صدام کے
+  // ایڈمن فون پر بنایا/بدلا گیا کوئی بھی یوزر باقی موبائلز پر بھی فوراً کام کرے۔ fire-and-forget:
+  // انٹرنیٹ نہ ہو تو خاموشی سے localStorage والی پرانی فہرست پر ہی کام چلتا رہے گا ----------
+  fetchUsersFromCloud();
 
   // ---------- 📦 اگر پہلے کسی سیشن میں تصویریں IndexedDB میں محفوظ ہو چکی ہیں، انہیں واپس میموری میں جوڑیں —
   // fire-and-forget، ایپ کے فوری کھلنے میں تاخیر نہیں کرنی (تصویریں چند لمحوں میں خودکار نمودار ہو جائیں گی) ----------
