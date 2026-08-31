@@ -108,7 +108,7 @@
     100%{ background-position:300% 50%; }
   }
   .nastaleeqSparkle{
-    font-family:'Noto Nastaliq Urdu', serif;
+    font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif;
     font-size:13px;
     font-weight:700;
     background:linear-gradient(90deg, #fb923c, #f472b6, #a78bfa, #38bdf8, #4ade80, #facc15, #fb923c);
@@ -428,6 +428,15 @@
   body.role-salesman .navItem.admin-only.perm-allowed{display:flex;}
   body.role-salesman .screen.admin-only.perm-allowed{display:none;}
   body.role-salesman .screen.admin-only.perm-allowed.active{display:block;}
+
+  /* --- نیا Allow-List ماڈل (صدام کی ہدایت پر): سیلزمین کو اب صرف وہی نیویگیشن آئٹمز نظر آئیں جو خاص طور
+       پر اسے Assign کیے گئے ہوں — چاہے وہ آئٹم پہلے سب کے لیے عام (بغیر admin-only کے) ہی کیوں نہ ہوتا تھا
+       (Billing/Bill History/Advance Orders/Order Taking/Recovery List/Home)۔ اسی طرح "Change My PIN" بھی
+       اب سیلزمین سے مکمل چھپا دیا گیا ہے — صرف ایڈمن اب PIN تبدیل/سیٹ کر کے دے سکتا ہے --- */
+  body.role-salesman #sidebar .navItem{display:none;}
+  body.role-salesman #sidebar .navItem.perm-allowed{display:flex;}
+  /* --- صرف ایک ہی اسکرین Assign ہو تو نیچے ◀/🏠/▶ بار کی بھی کوئی ضرورت نہیں — سیدھا اسی ایک اسکرین پر رہے --- */
+  body.single-screen-employee .navArrowBar{display:none !important;}
 
   /* ===================== BILLING SCREEN ===================== */
   /* --- بلنگ اسکرین: پورا صفحہ صرف پراڈکٹس کے لیے، باقی سب فلوٹنگ بار میں --- */
@@ -6109,7 +6118,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU06';
+const APP_BUILD_VERSION = 'FM19TU07';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6903,7 +6912,16 @@ function finishLogin(user, rememberOverride){
     return;
   }
   document.getElementById('app').style.display = 'grid';
-  goTo('billing'); // ---------- 🍇 صدام کی ہدایت: لاگ ان کے بعد سیدھا بلنگ/پراڈکٹ اسکرین کھلے، آئیکنوں کی منڈی نہیں ---------- 
+  // ---------- 🍇 صدام کی نئی ہدایت: لاگ ان کے بعد اب سیدھا "پراڈکٹ منڈی" (Billing) نہیں کھلتی —
+  // Admin کے لیے سیدھا Pending Orders کھلے گا، اور جس ملازم کو صرف ایک ہی اسکرین Assign ہو (مثلاً
+  // عبدالوہاب کو صرف Order Taking) اسے سیدھا اسی ایک اسکرین پر لے جائیں، Home یا کوئی اور اسکرین نہیں ---------- -->
+  if(user.role === 'admin'){
+    goTo('advanceorders');
+  } else if(window.__singleAssignedScreen){
+    goTo(window.__singleAssignedScreen);
+  } else {
+    goTo('home');
+  }
   showRoleToast(user.role, user.name); // ---------- صاف صاف بتائیں کہ Admin کے طور پر لاگ ان ہوا یا Salesman کے طور پر ----------
   if(user.role === 'admin'){
     if(!AppState.settings.gdrivePromptShown) setTimeout(showGDriveFirstRunPrompt, 900); // ---------- پہلی بار ایپ استعمال ہو تو Google Drive اکاؤنٹ فوراً جوڑنے کی دعوت دیں ----------
@@ -7236,23 +7254,51 @@ function applyRole(role, name){
     (role==='admin' ? '👑 Admin: ' : '🧑‍💼 Salesman: ') + AppState.currentUser.name +
     (role==='salesman' ? renderTodaysBillBadge() : '');
 
+  updateTopbarUserBadge(); // ---------- اوپر ٹاپ بار پر لاگ ان یوزر کا نام چمکتے ہوئے (Nastaleeq) دکھائیں ----------
   applyUserScreenPermissions(name);
 }
 
+// ---------- ٹاپ بار پر ہمیشہ نظر آنے والا، چمکتا ہوا (glitter) لاگ ان یوزر کا نام — تاکہ ایک نظر میں پتا چل جائے
+// کہ اس وقت صدام حسین لاگ ان ہیں یا کوئی مخصوص ملازم (مثلاً عبدالوہاب) ---------- -->
+function updateTopbarUserBadge(){
+  const el = document.getElementById('mobileBrandText');
+  if(!el || !AppState.currentUser) return;
+  const icon = AppState.currentRole === 'admin' ? '👑' : '🧑‍💼';
+  el.textContent = `${icon} ${AppState.currentUser.name} لاگ ان`;
+  el.classList.add('nastaleeqSparkle');
+}
+
 // ---------- لاگ ان کرنے والے سیلزمین کی مخصوص اجازت شدہ اسکرینز پر .perm-allowed کلاس لگائیں —
-// تاکہ صدام کی طے کردہ اسکرینز (مثلاً صرف Payments، یا صرف Billing+Advance Orders) اس مخصوص
-// ملازم کو نظر آ جائیں، باقی سب admin-only اسکرینز چھپی رہیں ----------
+// اب یہ نہ صرف admin-only اسکرینز کھولتا ہے بلکہ عام (پہلے سب کو نظر آنے والی) اسکرینز کو بھی چھپاتا ہے
+// اگر وہ اس مخصوص ملازم کو Assign نہ کی گئی ہوں (Allow-List ماڈل) — اور اگر صرف ایک ہی اسکرین Assign ہو
+// تو Home/Back/Forward بار بھی خودکار چھپ جاتا ہے، سیدھا اسی ایک اسکرین پر رکھا جاتا ہے ----------
 function applyUserScreenPermissions(name){
   // ---------- ہر لاگ ان پر پہلے سب پرانی اجازتیں صاف کر دیں (ورنہ پچھلے سیلزمین کی اجازتیں اگلے پر بھی لگی رہ جائیں) ----------
   document.querySelectorAll('.perm-allowed').forEach(el => el.classList.remove('perm-allowed'));
+  document.body.classList.remove('single-screen-employee');
+  window.__singleAssignedScreen = null;
+
+  if(AppState.currentRole !== 'salesman') return; // ---------- ایڈمن پر یہ پابندیاں کبھی لاگو نہیں ہوتیں ----------
 
   const u = usersData.find(x => x.name === name && x.role === 'salesman');
-  if(!u || !Array.isArray(u.screens)) return;
-  u.screens.forEach(key => {
+  let assignedKeys = (u && Array.isArray(u.screens)) ? u.screens.slice() : [];
+  // ---------- ابھی تک کوئی اسکرین Assign نہ ہوئی ہو تو نیا ملازم خالی مینو نہ دیکھے — پرانی ڈیفالٹ فہرست ----------
+  if(assignedKeys.length === 0) assignedKeys = ['billing', 'billhistory', 'advanceorders'];
+
+  assignedKeys.forEach(key => {
     document.querySelectorAll(`[data-screen="${key}"]`).forEach(el => el.classList.add('perm-allowed'));
     const screenEl = document.getElementById('screen-' + key);
     if(screenEl) screenEl.classList.add('perm-allowed');
   });
+
+  const singleScreenMode = assignedKeys.length === 1;
+  if(singleScreenMode){
+    window.__singleAssignedScreen = assignedKeys[0];
+    document.body.classList.add('single-screen-employee');
+  } else {
+    // ---------- ایک سے زیادہ اسکرینیں Assign ہوں تو Home آئٹم بھی نظر آئے تاکہ ملازم واپس مین پیج پر آ سکے ----------
+    document.querySelectorAll(`[data-screen="home"]`).forEach(el => el.classList.add('perm-allowed'));
+  }
 }
 
 // ---------- سیلزمین کے اپنے سائیڈ بار ٹیگ کے نیچے آج کے بلوں کی گنتی (چھوٹا بیج) ----------
@@ -7307,10 +7353,11 @@ let navBackStack = [];
 let navForwardStack = [];
 
 function goTo(screenName, _isHistoryNav){
-  // ---------- 🍇 Fruit Mandi POS: Admin کے لیے اب "Home" اور "Billing" ایک ہی صفحہ ہیں — سیدھا پورا پراڈکٹ
-  // گرڈ نظر آئے، الگ سے بڑے Billing/Products بٹن کھڑے نہ ہوں (صدام کی ہدایت پر)۔ Salesman کے لیے کوئی تبدیلی
-  // نہیں — ان کا Home صفحہ پہلے کی طرح آئیکن ٹائلز کے ساتھ ہی رہے گا ---------- -->
-  if(AppState.currentRole === 'admin' && screenName === 'home') screenName = 'billing';
+  // ---------- 🍇 Fruit Mandi POS: صدام کی نئی ہدایت پر — Admin کے لیے اب "Home" کا مطلب پراڈکٹ گرڈ (Billing) نہیں،
+  // بلکہ سیدھا "Pending Orders" (Advance Orders اسکرین، ایڈمن ورژن) ہے — یہی وہ کام ہے جو صدام سب سے پہلے
+  // دیکھنا چاہتے ہیں۔ Billing اپنی جگہ سائیڈ مینیو سے اب بھی کھل سکتی ہے جب واقعی نیا بل/آئٹم شامل کرنا ہو۔
+  // Salesman کے لیے کوئی تبدیلی نہیں — ان کا Home صفحہ پہلے کی طرح آئیکن ٹائلز کے ساتھ ہی رہے گا ---------- -->
+  if(AppState.currentRole === 'admin' && screenName === 'home') screenName = 'advanceorders';
 
   // ---------- Customers/Suppliers الگ الگ نیویگیشن اندراج ہیں مگر اندرونی طور پر ایک ہی DOM اسکرین (screen-parties) شیئر کرتے ہیں تاکہ غلطی سے غلط موڈ پر پارٹی/بل نہ بن جائے ----------
   const actualScreenId = (screenName === 'customers' || screenName === 'suppliers') ? 'parties' : screenName;
@@ -15553,16 +15600,16 @@ function renderAdminPendingOrdersScreen(){
         : `<span class="pendingStatusTag pending">⏳ RATE PENDING</span>`;
       const when = new Date(o.createdAt).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
       return `
-        <div class="billCard" onclick="openAdvOrderPreview(${o.id})" style="cursor:pointer;">
+        <div class="billCard" onclick="openAdvOrderPreview(${o.id})" style="cursor:pointer; padding:8px 12px; margin-bottom:5px;">
           <div>
-            <div class="bNo">🧑 ${o.customerName} ${statusTag}</div>
-            <div class="bMeta">${when} — ${itemCount} item(s)${hasRate ? ' — Rs. ' + advOrderTotal(o).toLocaleString() : ''}</div>
+            <div class="bNo" style="font-size:13.5px;">🧑 ${o.customerName} ${statusTag}</div>
+            <div class="bMeta" style="font-size:11.5px;">${when} — ${itemCount} item(s)${hasRate ? ' — Rs. ' + advOrderTotal(o).toLocaleString() : ''}</div>
           </div>
         </div>`;
     }).join('');
     return `
-      <div style="margin-bottom:16px;">
-        <div style="font-weight:800; font-size:14.5px; color:var(--primary-dark); background:#eef2ff; padding:9px 12px; border-radius:10px; margin-bottom:6px;">
+      <div style="margin-bottom:10px;">
+        <div style="font-weight:800; font-size:13px; color:var(--primary-dark); background:#eef2ff; padding:6px 10px; border-radius:8px; margin-bottom:4px;">
           🧑‍💼 ${emp} کے پینڈنگ آرڈرز — ${orders.length} کسٹمر${empTotal > 0 ? ' • Rs. ' + empTotal.toLocaleString() : ''}
         </div>
         <div style="display:flex; flex-direction:column; gap:6px;">${rows}</div>
