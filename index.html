@@ -2236,6 +2236,7 @@
     <div class="navItem admin-only" data-screen="payments" onclick="goTo('payments')">💳 Payments</div>
     <div class="navItem admin-only" data-screen="products" onclick="goTo('products')">📦 Products</div>
     <div class="navItem admin-only" data-screen="purchaseorders" onclick="goTo('purchaseorders')">📦 Purchase Orders</div>
+    <div class="navItem" data-screen="recoveryList" onclick="goTo('recoveryList')">💰 Recovery List</div>
     <div class="navItem admin-only" data-screen="" onclick="closeSidebar(); openReportCenterModal();">📑 Reports</div>
     <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
     <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')">🧮 Stock Adjustment</div>
@@ -4052,6 +4053,29 @@
       </div>
     </div>
 
+    <!-- =====================================================================
+         💰 RECOVERY LIST — ملازم کے لیے: کسٹمرز سے آج جو ادھار وصول ہوا وہ درج کرے، بغیر اصل
+         کھاتہ (Ledger) سکرین دیکھے۔ ایڈمن کے لیے: تمام ملازمین کی جمع کرائی گئی وصولی، طریقہ ادائیگی کے
+         حساب سے ٹوٹل، اور ہر انٹری کو اصل کھاتے میں درج کرنے کے بعد "Confirm" کرنا — تب ہی customer کا بقایہ کم ہوتا ہے۔
+         ===================================================================== -->
+    <div class="screen" id="screen-recoveryList">
+      <div class="pageTitle">💰 Recovery List — وصولی لسٹ</div>
+
+      <!-- ---------- ملازم کا منظر: صرف بقایہ والے کسٹمرز، ہر ایک کے آگے وصولی کی رقم + طریقہ ادائیگی ---------- -->
+      <div id="rlEmployeeView" class="admin-hide-only">
+        <div id="rlEmployeeList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:70px;"></div>
+        <div style="position:sticky; bottom:8px; padding-top:6px;">
+          <button type="button" onclick="submitRecoveryList()" style="width:100%; padding:16px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">✅ آج کی وصولی جمع کریں</button>
+        </div>
+      </div>
+
+      <!-- ---------- ایڈمن کا منظر: ٹوٹل + طریقہ ادائیگی کے حساب سے بریک ڈاؤن + ہر انٹری کنفرم کرنے کا بٹن ---------- -->
+      <div id="rlAdminView" class="admin-only">
+        <div id="rlAdminSummary" style="background:#eef2ff; border-radius:12px; padding:12px 14px; margin-bottom:12px;"></div>
+        <div id="rlAdminList" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+    </div>
+
     <!-- ---------- Advance Order: کئی ویریئنٹس والا پراڈکٹ دبانے پر — سائز/قسم منتخب کرنے کا پاپ اپ ---------- -->
     <div class="modalOverlay" id="advOrderChooseVariantModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="profileBox" style="width:380px;">
@@ -5318,6 +5342,8 @@ function persistAllData(){
   if(typeof quickDockItems !== 'undefined') saveToStorage('quickDockItems', quickDockItems);
   if(typeof advanceOrdersData !== 'undefined') saveToStorage('advanceOrders', advanceOrdersData);
   if(typeof nextAdvOrderId !== 'undefined') saveToStorage('nextAdvOrderId', nextAdvOrderId);
+  if(typeof recoveryListData !== 'undefined') saveToStorage('recoveryList', recoveryListData);
+  if(typeof nextRecoveryId !== 'undefined') saveToStorage('nextRecoveryId', nextRecoveryId);
   if(typeof paymentsData !== 'undefined') saveToStorage('payments', paymentsData);
   if(typeof nextPaymentId !== 'undefined') saveToStorage('nextPaymentId', nextPaymentId);
   if(typeof diaryData !== 'undefined') saveToStorage('diary', diaryData);
@@ -5372,6 +5398,8 @@ function buildBackupObject(){
     nextPaymentId,
     advanceOrders: advanceOrdersData,
     nextAdvOrderId,
+    recoveryList: recoveryListData,
+    nextRecoveryId,
     customCategories: customCategories,
     expiryAlertDays: expiryAlertDays,
     quickDockItems: quickDockItems,
@@ -5769,6 +5797,8 @@ function proceedWithImport(){
       nextPaymentId = backup.nextPaymentId || nextPaymentId;
       if(typeof advanceOrdersData !== 'undefined'){ advanceOrdersData.length = 0; advanceOrdersData.push(...(backup.advanceOrders || [])); }
       nextAdvOrderId = backup.nextAdvOrderId || nextAdvOrderId;
+      if(typeof recoveryListData !== 'undefined'){ recoveryListData.length = 0; recoveryListData.push(...(backup.recoveryList || [])); }
+      nextRecoveryId = backup.nextRecoveryId || nextRecoveryId;
       // ---------- مکمل آڈٹ کے بعد ملیں: یہ دو بھی بحال کریں ----------
       if(typeof customCategories !== 'undefined' && backup.customCategories){ customCategories.length = 0; customCategories.push(...backup.customCategories); }
       if(backup.expiryAlertDays != null) expiryAlertDays = backup.expiryAlertDays;
@@ -6017,7 +6047,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM318MO26';
+const APP_BUILD_VERSION = 'FM318MO27';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -7218,6 +7248,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'advanceorders') renderAdvanceOrdersScreen();
   if(screenName === 'advOrderPicker') renderAdvOrderPickerScreen();
   if(screenName === 'orderTaking') renderOrderTakingScreen();
+  if(screenName === 'recoveryList') renderRecoveryListScreen();
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
   if(screenName === 'myaccount') renderMyAccountScreen();
@@ -11843,6 +11874,10 @@ let nextCustomerId = loadFromStorage('nextCustomerId', 4);
    ===================================================================== */
 let advanceOrdersData = loadFromStorage('advanceOrders', []);
 let nextAdvOrderId = loadFromStorage('nextAdvOrderId', 1);
+// ---------- 💰 وصولی لسٹ (Recovery List) — ملازم روزانہ کسٹمرز سے وصول کی گئی رقم یہاں درج کرتا ہے،
+// ایڈمن اصل کھاتے میں اندراج کے بعد تصدیق (Confirm) کرتا ہے، تب جا کر customer.total_receivable کم ہوتا ہے ----------
+let recoveryListData = loadFromStorage('recoveryList', []);
+let nextRecoveryId = loadFromStorage('nextRecoveryId', 1);
 
 const SUPPLIERS_SEED_DATA = [
   {supplier_id:1, name:'Unilever Pakistan', phone:'923001112223', address:'Karachi', keywords:'', total_payable:12500},
@@ -14922,6 +14957,157 @@ function submitOrderTakingList(){
   otQtyMap = {};
   alert('آرڈر بھیج دیا گیا — ایڈمن ریویو کرے گا۔');
   goTo('home');
+}
+
+/* =====================================================================
+   💰 RECOVERY LIST — ملازم روزانہ کسٹمرز سے وصول شدہ ادھار درج کرتا ہے (اصل کھاتہ دیکھے بغیر)۔
+   ایڈمن اصل کھاتے میں لکھنے کے بعد ہر انٹری Confirm کرتا ہے — تب ہی customer.total_receivable کم ہوتا ہے۔
+   ===================================================================== */
+const RECOVERY_METHODS = {
+  cash: 'نقد (Cash)',
+  jazzcash: 'جاز کیش',
+  easypaisa: 'ایزی پیسہ',
+  bank: 'بینک (Bank Transfer)'
+};
+let rlAmountMap = {};  // {customer_id: amount} — ملازم کی سکرین پر عارضی
+let rlMethodMap = {};  // {customer_id: method}
+
+function renderRecoveryListScreen(){
+  const isAdmin = document.body.classList.contains('role-admin');
+  if(isAdmin) renderRecoveryListAdminView();
+  else renderRecoveryListEmployeeView();
+}
+
+// ---------- ملازم کا منظر ----------
+function renderRecoveryListEmployeeView(){
+  rlAmountMap = {};
+  rlMethodMap = {};
+  const owing = customersData.filter(c => c.total_receivable > 0).sort((a,b) => a.name.localeCompare(b.name, 'ur'));
+  const list = document.getElementById('rlEmployeeList');
+  if(!list) return;
+
+  if(owing.length === 0){
+    list.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">فی الحال کسی کسٹمر کا بقایہ نہیں</div>`;
+    return;
+  }
+
+  list.innerHTML = owing.map(c => {
+    rlMethodMap[c.customer_id] = 'cash';
+    return `
+    <div class="rlEmpRow" style="background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="font-size:16px; font-weight:800;">${c.name}</div>
+        <div style="font-size:13px; color:var(--danger); font-weight:800;">بقایہ: Rs. ${c.total_receivable.toLocaleString()}</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+        <input type="number" min="0" placeholder="وصولی کی رقم" oninput="updateRlAmount(${c.customer_id}, this.value, ${c.total_receivable})"
+               style="flex:1; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; text-align:center;">
+        <select onchange="rlMethodMap[${c.customer_id}] = this.value;" style="flex:0 0 120px; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+          ${Object.keys(RECOVERY_METHODS).map(k => `<option value="${k}">${RECOVERY_METHODS[k]}</option>`).join('')}
+        </select>
+      </div>
+      <div id="rlRemain-${c.customer_id}" style="font-size:12px; color:var(--muted);">باقی بقیہ: Rs. ${c.total_receivable.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateRlAmount(customerId, val, totalReceivable){
+  const amount = Math.max(0, parseFloat(val) || 0);
+  rlAmountMap[customerId] = amount;
+  const remainEl = document.getElementById('rlRemain-' + customerId);
+  if(remainEl) remainEl.textContent = 'باقی بقیہ: Rs. ' + Math.max(0, totalReceivable - amount).toLocaleString();
+}
+
+function submitRecoveryList(){
+  const entries = Object.keys(rlAmountMap)
+    .map(id => ({customer_id: Number(id), amount: rlAmountMap[id]}))
+    .filter(e => e.amount > 0);
+
+  if(entries.length === 0){ alert('کم از کم ایک کسٹمر کی وصولی کی رقم لکھیں'); return; }
+
+  entries.forEach(e => {
+    const c = customersData.find(x => x.customer_id === e.customer_id);
+    if(!c) return;
+    recoveryListData.unshift({
+      id: nextRecoveryId++,
+      customer_id: e.customer_id,
+      customerName: c.name,
+      totalReceivableAtTime: c.total_receivable,
+      amount: e.amount,
+      method: rlMethodMap[e.customer_id] || 'cash',
+      employeeName: AppState.currentUser?.name || 'Unknown',
+      status: 'pending', // ---------- ایڈمن Confirm کرنے تک اصل کھاتے میں کوئی تبدیلی نہیں ----------
+      createdAt: new Date().toISOString(),
+      confirmedAt: null
+    });
+  });
+  persistAllData();
+
+  rlAmountMap = {};
+  rlMethodMap = {};
+  alert('آج کی وصولی جمع ہو گئی — ایڈمن اصل کھاتے میں اندراج کے بعد تصدیق کریں گے۔');
+  goTo('home');
+}
+
+// ---------- ایڈمن کا منظر: ٹوٹل + طریقہ ادائیگی کے حساب سے بریک ڈاؤن + کنفرم بٹن ----------
+function renderRecoveryListAdminView(){
+  const pending = recoveryListData.filter(r => r.status === 'pending');
+  const summaryEl = document.getElementById('rlAdminSummary');
+  const listEl = document.getElementById('rlAdminList');
+  if(!summaryEl || !listEl) return;
+
+  const total = pending.reduce((s, r) => s + r.amount, 0);
+  const byMethod = {};
+  Object.keys(RECOVERY_METHODS).forEach(k => byMethod[k] = 0);
+  pending.forEach(r => { byMethod[r.method] = (byMethod[r.method] || 0) + r.amount; });
+
+  summaryEl.innerHTML = `
+    <div style="font-size:20px; font-weight:900; color:var(--primary-dark); margin-bottom:8px;">ٹوٹل وصولی: Rs. ${total.toLocaleString()}</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12.5px;">
+      ${Object.keys(RECOVERY_METHODS).map(k => `<div>${RECOVERY_METHODS[k]}: <b>Rs. ${byMethod[k].toLocaleString()}</b></div>`).join('')}
+    </div>`;
+
+  if(pending.length === 0){
+    listEl.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">تصدیق کے لیے کوئی وصولی موجود نہیں</div>`;
+    return;
+  }
+
+  listEl.innerHTML = pending.map(r => `
+    <div class="rlAdminRow" style="background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:15px; font-weight:800;">${r.customerName}</div>
+          <div style="font-size:11.5px; color:var(--muted);">${RECOVERY_METHODS[r.method] || r.method} — بھیجا از: ${r.employeeName}</div>
+        </div>
+        <div style="font-size:16px; font-weight:900; color:var(--success);">Rs. ${r.amount.toLocaleString()}</div>
+      </div>
+      <button type="button" onclick="confirmRecoveryEntry(${r.id})" style="width:100%; margin-top:8px; padding:9px; background:#dcfce7; color:#15803d; border:1px solid #15803d; border-radius:8px; font-weight:800; font-size:12.5px; cursor:pointer;">✅ کھاتے میں درج کر دیا — Confirm</button>
+    </div>`).join('');
+}
+
+// ---------- ایڈمن اصل کھاتے میں ہاتھ سے اندراج کر چکا، اب یہاں ٹک لگا کر تصدیق کرے — تبھی
+// customer.total_receivable اصل میں کم ہوتا ہے اور کسٹمر کے لیجر (walletHistory) میں انٹری بنتی ہے ----------
+function confirmRecoveryEntry(entryId){
+  const entry = recoveryListData.find(r => r.id === entryId);
+  if(!entry) return;
+  const c = customersData.find(x => x.customer_id === entry.customer_id);
+  if(!c){ alert('یہ کسٹمر اب موجود نہیں'); return; }
+  if(!confirm(`تصدیق کریں: ${entry.customerName} — Rs. ${entry.amount.toLocaleString()} اصل کھاتے میں درج ہو چکی ہے؟`)) return;
+
+  c.total_receivable = Math.max(0, c.total_receivable - entry.amount);
+  c.walletHistory = c.walletHistory || [];
+  c.walletHistory.unshift({
+    type: 'receivable_collected',
+    amount: entry.amount,
+    via: entry.method,
+    date: new Date().toISOString().split('T')[0],
+    note: `Recovery List — ${RECOVERY_METHODS[entry.method] || entry.method} — ${entry.employeeName}`
+  });
+
+  entry.status = 'confirmed';
+  entry.confirmedAt = new Date().toISOString();
+  persistAllData();
+  renderRecoveryListAdminView();
 }
 
 function setAdvOrderFilter(f){
