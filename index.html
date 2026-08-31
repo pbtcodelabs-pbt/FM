@@ -803,45 +803,6 @@
     opacity:.95; transition:none !important; touch-action:none;
   }
 
-  /* ===================== Quick Access Dock (ہر صفحے پر — کہیں سے بھی کہیں جائیں) ===================== */
-  .quickDock{
-    position:fixed; top:50%; right:0; transform:translateY(-50%); z-index:400;
-    display:flex; align-items:center;
-  }
-  .quickDockHandle{
-    width:16px; height:64px; background:var(--primary); color:#fff; border-radius:10px 0 0 10px;
-    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px;
-    box-shadow:-2px 2px 8px rgba(0,0,0,.2); writing-mode:vertical-rl; letter-spacing:1px; flex:0 0 auto;
-  }
-  .quickDockPanel{
-    width:0; overflow:hidden; background:#fff; border-radius:12px 0 0 12px; box-shadow:-3px 3px 14px rgba(0,0,0,.18);
-    transition:width .2s ease; max-height:70vh; display:flex; flex-direction:column;
-  }
-  .quickDock.open .quickDockPanel{width:150px;}
-  #quickDockItems{overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:6px;}
-  .quickDockIconBtn{
-    display:flex; align-items:center; gap:8px; width:100%; padding:9px 10px; border:none; border-radius:8px;
-    background:#f8fafc; font-size:13px; font-weight:600; color:var(--text); cursor:pointer; white-space:nowrap;
-    text-align:left;
-  }
-  .quickDockIconBtn:active{background:#eef2ff;}
-  .quickDockEditBtn{
-    margin:6px 8px 8px; padding:9px; border:none; border-radius:8px; background:var(--accent); color:#fff;
-    font-size:12px; font-weight:700; cursor:pointer;
-  }
-  .quickDockEditLabel{font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; margin:6px 2px 2px; letter-spacing:.03em;}
-  .quickDockEditRow{
-    display:flex; justify-content:space-between; align-items:center; padding:8px 9px; border-radius:8px;
-    background:#f8fafc; font-size:12px; font-weight:600; cursor:grab; touch-action:none;
-  }
-  .quickDockEditRow button{
-    border:none; border-radius:6px; width:22px; height:22px; font-size:12px; font-weight:800; cursor:pointer; flex:0 0 auto;
-  }
-  .quickDockEditRow[data-key] button{background:#fef2f2; color:var(--danger);}
-  .quickDockEditRow:not([data-key]) button{background:#dcfce7; color:var(--success);}
-  .quickDockEditRow.dragging{box-shadow:0 4px 10px rgba(0,0,0,.25); background:#eef2ff; z-index:10;}
-  .quickDockEmptyMsg{font-size:11px; color:var(--muted); padding:10px 4px; text-align:center;}
-
   /* ---------- ◀ Back / 🏠 Home / ▶ Forward — نیچے وسط میں ایک کمپیکٹ، چھوٹا، 3D بار،
        Home اسکرین پر خود بخود چھپ جاتا ہے (وہاں ضرورت نہیں) ---------- */
   .navArrowBar{
@@ -1918,6 +1879,9 @@
   <div class="loginBox">
     <h2 id="loginHeading">🔐 Login</h2>
 
+    <!-- ---------- 🏷️ لاگ ان اسکرین پر موٹا/نمایاں ورژن بیج — ایپ کھلنے سے پہلے ہی پتا چل جائے کہ تازہ ترین ورژن اپلوڈ ہوا ہے یا نہیں (خودکار APP_BUILD_VERSION سے بھرتا ہے) ---------- -->
+    <div id="loginVersionBadge" style="display:inline-block; font-size:13px; font-weight:800; letter-spacing:.3px; color:var(--primary-dark); background:#eef2ff; padding:4px 12px; border-radius:20px; margin-bottom:14px;"></div>
+
     <!-- ---------- 🎉 خوش آمدید بینر — بیٹا ٹیسٹنگ کی صاف وضاحت، پہلی نظر میں ---------- -->
     <div class="welcomeTrialBanner" style="display:none;">
       <div class="wtbHeadline">🎉 Best Billing App — Try it FREE for 30 Days!</div>
@@ -2155,15 +2119,6 @@
 <!-- ===================== APP SHELL ===================== -->
 <div id="app">
 
-  <!-- ---------- QUICK ACCESS DOCK (ہر صفحے پر موجود — کہیں سے بھی کہیں جائیں، ہوم پیج پر واپس آئے بغیر) ---------- -->
-  <div id="quickDock" class="quickDock">
-    <div class="quickDockHandle" onclick="toggleQuickDock()">⋮⋮</div>
-    <div class="quickDockPanel">
-      <div id="quickDockItems"></div>
-      <button class="quickDockEditBtn" onclick="toggleQuickDockEdit()">✏️ Edit</button>
-    </div>
-  </div>
-
   <!-- ---------- ◀ Back / 🏠 Home / ▶ Forward — ہر صفحے پر (Home کے علاوہ)، نیچے وسط میں کمپیکٹ بار ---------- -->
   <div class="navArrowBar" id="navArrowBar">
     <button id="navBackBtn" onclick="goBack()" title="Back">◀</button>
@@ -2186,7 +2141,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں ---------- -->
-      <span id="topbarVersionBadge" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px;"></span>
+      <span id="topbarVersionBadge" onclick="handleVersionBadgeTap()" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px; cursor:pointer;"></span>
     </div>
     <!-- ---------- ☰ مینیو بٹن — صدام کی ہدایت پر دائیں کونے میں شفٹ کر دیا گیا، تاکہ مینیو اسی کے بالکل
          نیچے، دائیں کونے میں کھلے (نیچے CSS میں #sidebar بھی اسی مطابق ایک چھوٹے dropdown پینل کی طرح
@@ -2226,10 +2181,16 @@
     <div class="navItem" data-screen="home" onclick="goTo('home')">🏠 Home</div>
     <div class="navItem" data-screen="billing" onclick="goTo('billing')">🛒 Billing</div>
     <div class="navItem" data-screen="billhistory" onclick="goTo('billhistory')">🧾 Bill History</div>
+    <div class="navItem" data-screen="advanceorders" onclick="goTo('advanceorders')">📝 Advance Orders</div>
     <div class="navItem admin-only" data-screen="expenditure" onclick="goTo('expenditure')">💸 Expenditure</div>
 
     <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')">📊 Dashboard</div>
+    <div class="navItem admin-only" data-screen="" onclick="closeSidebar(); openReportCenterModal();">📑 Reports</div>
+    <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')">📈 Trends</div>
+    <div class="navItem admin-only" data-screen="payments" onclick="goTo('payments')">💳 Payments</div>
+    <div class="navItem admin-only" data-screen="mydiary" onclick="goTo('mydiary')">📔 My Diary</div>
     <div class="navItem admin-only" data-screen="products" onclick="goTo('products')">📦 Products</div>
+    <div class="navItem admin-only" data-screen="categories" onclick="goTo('categories')">🏷️ Categories</div>
     <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')">🧮 Stock Adjustment</div>
     <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customers</div>
     <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')">🚚 Suppliers</div>
@@ -2237,6 +2198,7 @@
     <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
     <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
     <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
+    <div class="navItem admin-only" data-screen="billsettings" onclick="goTo('billsettings')">🖨️ Bill & Print Settings</div>
 
     <div class="navItem" data-screen="" onclick="openMyPinChangeModal()">🔑 Change My PIN</div>
 
@@ -4376,45 +4338,17 @@
           <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px;"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 4 16.3"/><path d="M12 12v9"/><path d="M8 17l4 4 4-4"/></svg> Restore from Google Drive</button>
         </div>
 
-        <!-- --- 🔐 Admin Control — PIN سے محفوظ، ڈویلپر کی رابطہ معلومات یہاں سے بدلی جائیں --- -->
+        <!-- --- 🔒 Account Security — PIN سے محفوظ، صرف اسی دکان کے Admin کی اپنی سیکیورٹی سیٹنگز
+             (ڈویلپر کی رابطہ معلومات اب یہاں نہیں — وہ الگ، چھپے ہوئے Developer Panel میں منتقل ہو چکی ہیں) --- -->
         <div class="settingsCard">
-          <h3>🔐 Admin Control</h3>
+          <h3>🔒 Account Security</h3>
           <div id="adminControlLocked">
-            <div class="settingsHint">Enter your app login PIN (the same one you use as Admin to open this app) to edit developer contact details.</div>
+            <div class="settingsHint">Enter your app login PIN (the same one you use as Admin to open this app) to edit these security settings.</div>
             <input type="password" id="adminPinInput" placeholder="Your Admin login PIN" maxlength="8" inputmode="numeric" style="width:100%; padding:11px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;" onkeydown="if(event.key==='Enter') unlockAdminControl()">
             <button class="testPrintBtn" style="margin-top:10px;" onclick="unlockAdminControl()">🔓 Unlock</button>
             <div id="adminPinError" style="color:var(--danger); font-size:12px; margin-top:6px; text-align:center;"></div>
           </div>
           <div id="adminControlUnlocked" style="display:none;">
-            <div class="settingsSubLabel">Developer WhatsApp Number</div>
-            <input type="text" id="devWhatsappInput" placeholder="e.g. 923206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-            <div class="settingsSubLabel">Developer SMS Number</div>
-            <input type="text" id="devSmsInput" placeholder="e.g. 03206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-            <div class="settingsSubLabel">Developer Gmail</div>
-            <input type="text" id="devEmailInput" placeholder="e.g. you@gmail.com" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">App Share Link</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Paste your live GitHub Pages link here. The 📤 Share button on the Login and Home screens will send this link on WhatsApp/etc — update it anytime the link changes, and it updates everywhere automatically.</div>
-            <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/FruitMandiPOS/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Write your own message here (e.g. "Our app is very good, please use it") — it will be sent along with the link above when the 📤 Share button is pressed.</div>
-            <textarea id="appShareMessageInput" placeholder="e.g. Try our Fruit Mandi POS App — it's fast, reliable and free to try!" rows="3" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveAdminControl()"></textarea>
-            <div class="settingsSubLabel">Accounts to Receive Your Payments</div>
-            <div id="devPaymentAccountsListWrap" style="margin-bottom:10px;"></div>
-            <select id="devPaymentTypeInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-              <option value="">— Select Bank/Wallet —</option>
-            </select>
-            <input type="text" id="devPaymentNumberInput" placeholder="Account Number" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-            <input type="text" id="devPaymentNameInput" placeholder="Account Holder Name" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-            <button class="testPrintBtn" style="margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addDevPaymentAccount()">➕ Add This Account</button>
-
-            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">Rate Per Day (Rs.)</div>
-            <input type="number" id="perDayRateInput" placeholder="e.g. 30 (Rs per day)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-
-            <div style="display:none;">
-            <div class="settingsSubLabel">Package Plans (with fixed price per plan)</div>
-            <div id="dayPresetsWrap"></div>
-            <button class="testPrintBtn" style="margin-top:6px; margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addSubscriptionPlan()">➕ Add Plan</button>
-            </div>
-
             <div class="settingsSubLabel">One Admin PIN for Everything</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This panel now unlocks with your app login PIN — no separate PIN to remember. To change it, go to <b>Home → Users</b>, tap the Admin user's <b>✏️ Set Custom PIN</b> button, and enter your new PIN there.</div>
 
@@ -4608,6 +4542,64 @@
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📔 My Diary Summary</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Everyone in My Diary, who owes whom, and the net total</div>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================================
+     🕵️ DEVELOPER PANEL — چھپا ہوا، دکاندار کے Admin PIN سے بالکل الگ۔
+     ورژن بیج پر 7 بار ٹیپ کرنے سے کھلتا ہے (openDevSecretPanel)۔ کوئی بھی دکاندار/یوزر
+     اپنے Admin PIN سے اس تک نہیں پہنچ سکتا — نہ یہ عام مینیو/سیٹنگز میں کہیں نظر آتا ہے۔
+     ===================================================================== -->
+<div class="modalOverlay" id="devSecretModal" style="z-index:990;" onclick="if(event.target===this) closeDevSecretPanel()">
+  <div class="modalBox" style="max-width:420px; position:relative;">
+    <button onclick="closeDevSecretPanel()" style="position:absolute; top:10px; left:10px; background:#f1f5f9; border:none; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--text);">✕</button>
+    <div class="pageTitle" style="margin-top:2px;">🕵️ Developer Panel</div>
+
+    <div id="devSecretLocked">
+      <div class="settingsHint">یہ عام Admin PIN سے نہیں کھلتا — صرف آپ کا اپنا الگ Developer Password درکار ہے۔</div>
+      <input type="password" id="devSecretPasswordInput" placeholder="Developer Password" style="width:100%; padding:11px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;" onkeydown="if(event.key==='Enter') unlockDevSecretPanel()">
+      <button class="testPrintBtn" style="margin-top:10px;" onclick="unlockDevSecretPanel()">🔓 Unlock</button>
+      <div id="devSecretError" style="color:var(--danger); font-size:12px; margin-top:6px; text-align:center;"></div>
+    </div>
+
+    <div id="devSecretUnlocked" style="display:none; max-height:70vh; overflow-y:auto;">
+      <div class="settingsSubLabel">Developer WhatsApp Number</div>
+      <input type="text" id="devWhatsappInput" placeholder="e.g. 923206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveDevSecretPanel()">
+      <div class="settingsSubLabel">Developer SMS Number</div>
+      <input type="text" id="devSmsInput" placeholder="e.g. 03206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveDevSecretPanel()">
+      <div class="settingsSubLabel">Developer Gmail</div>
+      <input type="text" id="devEmailInput" placeholder="e.g. you@gmail.com" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveDevSecretPanel()">
+
+      <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">App Share Link</div>
+      <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Paste your live GitHub Pages link here. The 📤 Share button on the Login and Home screens will send this link on WhatsApp/etc.</div>
+      <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/FruitMandiPOS/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveDevSecretPanel()">
+      <textarea id="appShareMessageInput" placeholder="e.g. Try our Fruit Mandi POS App — it's fast, reliable and free to try!" rows="3" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveDevSecretPanel()"></textarea>
+
+      <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">Accounts to Receive Your Payments</div>
+      <div id="devPaymentAccountsListWrap" style="margin-bottom:10px;"></div>
+      <select id="devPaymentTypeInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <option value="">— Select Bank/Wallet —</option>
+      </select>
+      <input type="text" id="devPaymentNumberInput" placeholder="Account Number" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      <input type="text" id="devPaymentNameInput" placeholder="Account Holder Name" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      <button class="testPrintBtn" style="margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addDevPaymentAccount()">➕ Add This Account</button>
+
+      <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">Rate Per Day (Rs.)</div>
+      <input type="number" id="perDayRateInput" placeholder="e.g. 30 (Rs per day)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveDevSecretPanel()">
+
+      <div style="display:none;">
+        <div class="settingsSubLabel">Package Plans (with fixed price per plan)</div>
+        <div id="dayPresetsWrap"></div>
+        <button class="testPrintBtn" style="margin-top:6px; margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addSubscriptionPlan()">➕ Add Plan</button>
+      </div>
+
+      <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7; color:#b91c1c;">🔑 Change Developer Panel Password</div>
+      <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">یہاں سے آپ خود، کبھی بھی، یہ پاسورڈ بدل سکتے ہیں — کسی دکاندار یا ایڈمن کو یہ کبھی معلوم نہیں ہو سکے گا۔ خالی چھوڑیں تو پرانا پاسورڈ ہی چلتا رہے گا۔</div>
+      <input type="password" id="devSecretNewPasswordInput" placeholder="New Developer Password (leave blank to keep current)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+
+      <button class="testPrintBtn" onclick="saveDevSecretPanel()">💾 Save</button>
+      <div id="devSecretSaveMsg" style="color:var(--success); font-size:12px; margin-top:6px; text-align:center;"></div>
     </div>
   </div>
 </div>
@@ -5936,7 +5928,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM318MO15';
+const APP_BUILD_VERSION = 'FM318MO16';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -7437,132 +7429,10 @@ function renderFontsFabPanel(){
   `).join('');
 }
 
-let quickDockOpen = false;
-let quickDockEditMode = false;
-let quickDockItems = loadFromStorage('quickDockItems', ['billing', 'dashboard', 'settings', 'customers', 'suppliers']); // ڈیفالٹ شارٹ کٹس — اگر پہلے سے محفوظ ترتیب موجود ہو تو وہی لوڈ ہوگی
-
-function toggleQuickDock(){
-  quickDockOpen = !quickDockOpen;
-  document.getElementById('quickDock').classList.toggle('open', quickDockOpen);
-  quickDockEditMode = false;
-  document.querySelector('.quickDockEditBtn').textContent = '✏️ Edit';
-  if(quickDockOpen) renderQuickDock();
-}
-
-function renderQuickDock(){
-  const wrap = document.getElementById('quickDockItems');
-
-  if(quickDockEditMode){
-    // ---------- ایڈٹ موڈ: موجودہ شارٹ کٹس (ہٹانے/ڈریگ کے قابل) + باقی دستیاب آپشنز (شامل کرنے کے قابل) ----------
-    const availableToAdd = Object.keys(NAV_SCREENS).filter(k => !quickDockItems.includes(k));
-    wrap.innerHTML = `
-      <div class="quickDockEditLabel">Your Shortcuts (drag to reorder)</div>
-      ${quickDockItems.map(key => `
-        <div class="quickDockEditRow" data-key="${key}">
-          <span>${NAV_SCREENS[key].icon} ${NAV_SCREENS[key].label}</span>
-          <button onclick="removeQuickDockItem('${key}')">➖</button>
-        </div>
-      `).join('') || `<div class="quickDockEmptyMsg">No shortcuts yet</div>`}
-      <div class="quickDockEditLabel">Add More</div>
-      ${availableToAdd.map(key => `
-        <div class="quickDockEditRow">
-          <span>${NAV_SCREENS[key].icon} ${NAV_SCREENS[key].label}</span>
-          <button onclick="addQuickDockItem('${key}')">➕</button>
-        </div>
-      `).join('') || `<div class="quickDockEmptyMsg">All added</div>`}
-    `;
-    initQuickDockDrag();
-  } else {
-    // ---------- عام حالت: صرف آئیکن بٹن، دبائیں تو سیدھا اس صفحے پر چلے جائیں ----------
-    wrap.innerHTML = quickDockItems.length
-      ? quickDockItems.map(key => `
-          <button class="quickDockIconBtn" onclick="goToFromDock('${key}')">${NAV_SCREENS[key].icon} ${NAV_SCREENS[key].label}</button>
-        `).join('')
-      : `<div class="quickDockEmptyMsg">No shortcuts — tap Edit below</div>`;
-  }
-}
-
-function goToFromDock(screenName){
-  goTo(screenName);
-  toggleQuickDock(); // نیویگیٹ ہونے کے بعد dock خودکار بند ہو جائے
-  requestAnimationFrame(window.resetMainAreaScroll);
-}
-
-function toggleQuickDockEdit(){
-  quickDockEditMode = !quickDockEditMode;
-  document.querySelector('.quickDockEditBtn').textContent = quickDockEditMode ? '✅ Done' : '✏️ Edit';
-  renderQuickDock();
-}
-function addQuickDockItem(key){
-  if(!quickDockItems.includes(key)) quickDockItems.push(key);
-  renderQuickDock();
-  persistAllData();
-}
-function removeQuickDockItem(key){
-  quickDockItems = quickDockItems.filter(k => k !== key);
-  renderQuickDock();
-  persistAllData();
-}
-function saveQuickDockOrderFromDOM(){
-  const rows = document.querySelectorAll('#quickDockItems .quickDockEditRow[data-key]');
-  quickDockItems = Array.from(rows).map(r => r.dataset.key);
-  persistAllData();
-}
-
-// ---------- ایڈٹ موڈ میں شارٹ کٹس کو دبا کر ڈریگ کر کے ترتیب دینا (Long Press) ----------
-function initQuickDockDrag(){
-  const container = document.getElementById('quickDockItems');
-  container.querySelectorAll('.quickDockEditRow[data-key]').forEach(row => {
-    row.addEventListener('pointerdown', (e) => {
-      if(e.target.tagName === 'BUTTON') return; // ➖ بٹن پر ڈریگ شروع نہ ہو
-
-      const startY = e.clientY;
-      let activated = false, cancelled = false;
-
-      const longPressTimer = setTimeout(() => {
-        if(cancelled) return;
-        activated = true;
-        row.classList.add('dragging');
-        if(navigator.vibrate) navigator.vibrate(15);
-      }, 250);
-
-      const onMove = (ev) => {
-        const dy = ev.clientY - startY;
-        if(!activated){
-          if(Math.abs(dy) > 10){ cancelled = true; clearTimeout(longPressTimer); }
-          return;
-        }
-        ev.preventDefault();
-        row.style.transform = `translateY(${dy}px)`;
-
-        row.style.pointerEvents = 'none';
-        const elBelow = document.elementFromPoint(ev.clientX, ev.clientY);
-        row.style.pointerEvents = '';
-        const targetRow = elBelow ? elBelow.closest('.quickDockEditRow[data-key]') : null;
-
-        if(targetRow && targetRow !== row && targetRow.parentElement === container){
-          const rows = Array.from(container.querySelectorAll('.quickDockEditRow[data-key]'));
-          if(rows.indexOf(row) > rows.indexOf(targetRow)) targetRow.before(row);
-          else targetRow.after(row);
-        }
-      };
-      const onUp = () => {
-        clearTimeout(longPressTimer);
-        document.removeEventListener('pointermove', onMove);
-        document.removeEventListener('pointerup', onUp);
-        document.removeEventListener('pointercancel', onUp);
-        if(activated){
-          row.classList.remove('dragging');
-          row.style.transform = '';
-          saveQuickDockOrderFromDOM();
-        }
-      };
-      document.addEventListener('pointermove', onMove, {passive:false});
-      document.addEventListener('pointerup', onUp);
-      document.addEventListener('pointercancel', onUp);
-    });
-  });
-}
+// ---------- 🗑️ Quick Access Dock (دائیں کنارے پر ⋮⋮ والا نقطوں کا بار) ہٹا دیا گیا — صدام کی ہدایت پر،
+// کیونکہ ☰ مینیو میں اب ہر اسکرین پہلے سے موجود ہے، یہ دوسرا/ڈپلیکیٹ راستہ بےفائدہ تھا۔
+// نیچے دیا گیا quickDockItems صرف پرانے بیک اپ فائلز کو بغیر ایرر کے واپس لوڈ کرنے کے لیے رکھا گیا ہے ----------
+let quickDockItems = loadFromStorage('quickDockItems', ['billing', 'dashboard', 'settings', 'customers', 'suppliers']);
 
 // ---------- KEYBOARD SHORTCUT STUB (بعد میں F2=Search, F4=Checkout وغیرہ) ----------
 document.addEventListener('keydown', (e)=>{
@@ -20609,36 +20479,6 @@ async function unlockAdminControl(){
   document.getElementById('adminPinInput').value = '';
   document.getElementById('adminControlLocked').style.display = 'none';
   document.getElementById('adminControlUnlocked').style.display = 'block';
-  document.getElementById('devWhatsappInput').value = AppState.settings.devWhatsapp || '';
-  document.getElementById('devSmsInput').value = AppState.settings.devSms || '';
-  document.getElementById('devEmailInput').value = AppState.settings.devEmail || '';
-  document.getElementById('appShareLinkInput').value = AppState.settings.appShareLink || '';
-  document.getElementById('appShareMessageInput').value = AppState.settings.appShareMessage || '';
-  // ---------- Payment اکاؤنٹ dropdown خالی ہو تو بھریں (وہی BANK_LOGIN_URLS جو سپلائر اکاؤنٹس میں استعمال ہوتی ہے) ----------
-  const payTypeSel = document.getElementById('devPaymentTypeInput');
-  if(payTypeSel.options.length <= 1){
-    Object.keys(BANK_LOGIN_URLS).forEach(bank => {
-      const opt = document.createElement('option');
-      opt.value = bank; opt.textContent = bank;
-      payTypeSel.appendChild(opt);
-    });
-  }
-  // ---------- پرانا واحد اکاؤنٹ ہو اور نئی فہرست ابھی خالی ہو تو خودکار فہرست میں منتقل کر دیں (ایک بار) ----------
-  AppState.settings.devPaymentAccounts = AppState.settings.devPaymentAccounts || [];
-  if(AppState.settings.devPaymentAccounts.length === 0 && AppState.settings.devPaymentType && AppState.settings.devPaymentNumber){
-    AppState.settings.devPaymentAccounts.push({
-      type: AppState.settings.devPaymentType,
-      number: AppState.settings.devPaymentNumber,
-      name: AppState.settings.devPaymentName || ''
-    });
-    persistAllData();
-  }
-  payTypeSel.value = '';
-  document.getElementById('devPaymentNumberInput').value = '';
-  document.getElementById('devPaymentNameInput').value = '';
-  renderDevPaymentAccountsList();
-  document.getElementById('perDayRateInput').value = AppState.settings.perDayRate || '';
-  renderDayPresetsInAdmin();
   // ---------- سیکیورٹی: یہ باکس ہمیشہ خالی کھلے، چاہے پچھلی بار کچھ ٹائپ کر کے سیو کیا گیا ہو —
   // ورنہ ٹائپ کیا گیا جواب اسکرین پر نظر آتا رہتا ہے جو مقصد کے خلاف ہے ----------
   dpReset('securityDobInput');
@@ -20681,17 +20521,106 @@ function deleteDevPaymentAccount(idx){
 }
 
 async function saveAdminControl(){
+  await saveSecurityRecoveryInfo();
+  dpReset('securityDobInput');
+  persistAllData();
+  document.getElementById('adminSaveMsg').textContent = '✅ Saved!';
+  setTimeout(() => { document.getElementById('adminSaveMsg').textContent = ''; }, 2000);
+}
+
+// =====================================================================
+// 🕵️ Developer Panel — دکاندار کے Admin PIN سے بالکل الگ، اپنا خفیہ پاسورڈ۔
+// ورژن بیج پر 7 بار ٹیپ کرنے سے کھلتا ہے۔ نیچے والا ہیش ڈیفالٹ پاسورڈ کا SHA-256 ہے —
+// پینل کے اندر سے ہی نیا پاسورڈ سیٹ کیا جا سکتا ہے (AppState.settings.devPanelPasswordHash میں محفوظ ہوتا ہے)۔
+// =====================================================================
+const DEFAULT_DEV_PANEL_PASSWORD_HASH = 'ecb3e082ae464a263b408b7d3a7792e9a5a88c88786e4e62a76144d9e1687f97'; // ڈیفالٹ پاسورڈ: SHNuV2apB6 — پہلی بار کھول کر فوراً بدل لیں
+
+let devVersionTapCount = 0, devVersionTapTimer = null;
+function handleVersionBadgeTap(){
+  devVersionTapCount++;
+  clearTimeout(devVersionTapTimer);
+  devVersionTapTimer = setTimeout(() => { devVersionTapCount = 0; }, 3000);
+  if(devVersionTapCount >= 7){
+    devVersionTapCount = 0;
+    clearTimeout(devVersionTapTimer);
+    openDevSecretPanel();
+  }
+}
+
+function openDevSecretPanel(){
+  document.getElementById('devSecretModal').classList.add('show');
+  document.getElementById('devSecretLocked').style.display = 'block';
+  document.getElementById('devSecretUnlocked').style.display = 'none';
+  document.getElementById('devSecretPasswordInput').value = '';
+  document.getElementById('devSecretError').textContent = '';
+}
+function closeDevSecretPanel(){
+  document.getElementById('devSecretModal').classList.remove('show');
+}
+
+async function unlockDevSecretPanel(){
+  const entered = document.getElementById('devSecretPasswordInput').value;
+  const enteredHash = await hashPin(entered);
+  const validHash = AppState.settings.devPanelPasswordHash || DEFAULT_DEV_PANEL_PASSWORD_HASH;
+  if(enteredHash !== validHash){
+    document.getElementById('devSecretError').textContent = '❌ Incorrect password.';
+    return;
+  }
+  document.getElementById('devSecretError').textContent = '';
+  document.getElementById('devSecretPasswordInput').value = '';
+  document.getElementById('devSecretLocked').style.display = 'none';
+  document.getElementById('devSecretUnlocked').style.display = 'block';
+
+  document.getElementById('devWhatsappInput').value = AppState.settings.devWhatsapp || '';
+  document.getElementById('devSmsInput').value = AppState.settings.devSms || '';
+  document.getElementById('devEmailInput').value = AppState.settings.devEmail || '';
+  document.getElementById('appShareLinkInput').value = AppState.settings.appShareLink || '';
+  document.getElementById('appShareMessageInput').value = AppState.settings.appShareMessage || '';
+  // ---------- Payment اکاؤنٹ dropdown خالی ہو تو بھریں (وہی BANK_LOGIN_URLS جو سپلائر اکاؤنٹس میں استعمال ہوتی ہے) ----------
+  const payTypeSel = document.getElementById('devPaymentTypeInput');
+  if(payTypeSel.options.length <= 1){
+    Object.keys(BANK_LOGIN_URLS).forEach(bank => {
+      const opt = document.createElement('option');
+      opt.value = bank; opt.textContent = bank;
+      payTypeSel.appendChild(opt);
+    });
+  }
+  // ---------- پرانا واحد اکاؤنٹ ہو اور نئی فہرست ابھی خالی ہو تو خودکار فہرست میں منتقل کر دیں (ایک بار) ----------
+  AppState.settings.devPaymentAccounts = AppState.settings.devPaymentAccounts || [];
+  if(AppState.settings.devPaymentAccounts.length === 0 && AppState.settings.devPaymentType && AppState.settings.devPaymentNumber){
+    AppState.settings.devPaymentAccounts.push({
+      type: AppState.settings.devPaymentType,
+      number: AppState.settings.devPaymentNumber,
+      name: AppState.settings.devPaymentName || ''
+    });
+    persistAllData();
+  }
+  payTypeSel.value = '';
+  document.getElementById('devPaymentNumberInput').value = '';
+  document.getElementById('devPaymentNameInput').value = '';
+  renderDevPaymentAccountsList();
+  document.getElementById('perDayRateInput').value = AppState.settings.perDayRate || '';
+  renderDayPresetsInAdmin();
+  document.getElementById('devSecretNewPasswordInput').value = '';
+}
+
+async function saveDevSecretPanel(){
   AppState.settings.devWhatsapp = document.getElementById('devWhatsappInput').value.trim();
   AppState.settings.devSms = document.getElementById('devSmsInput').value.trim();
   AppState.settings.devEmail = document.getElementById('devEmailInput').value.trim();
   AppState.settings.appShareLink = document.getElementById('appShareLinkInput').value.trim();
   AppState.settings.appShareMessage = document.getElementById('appShareMessageInput').value.trim();
   AppState.settings.perDayRate = parseFloat(document.getElementById('perDayRateInput').value) || 0;
-  await saveSecurityRecoveryInfo();
-  dpReset('securityDobInput');
+
+  const newPw = document.getElementById('devSecretNewPasswordInput').value;
+  if(newPw && newPw.trim()){
+    AppState.settings.devPanelPasswordHash = await hashPin(newPw.trim());
+    document.getElementById('devSecretNewPasswordInput').value = '';
+  }
+
   persistAllData();
-  document.getElementById('adminSaveMsg').textContent = '✅ Saved!';
-  setTimeout(() => { document.getElementById('adminSaveMsg').textContent = ''; }, 2000);
+  document.getElementById('devSecretSaveMsg').textContent = '✅ Saved!';
+  setTimeout(() => { document.getElementById('devSecretSaveMsg').textContent = ''; }, 2000);
 }
 
 // ---------- نک نیم کو محفوظ شکل میں رکھنے کے لیے ایک جیسا فارمیٹ بنائیں (چھوٹے/بڑے حروف، خالی جگہ کا فرق نہ ہو) پھر hash کریں ----------
@@ -24318,6 +24247,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // تاکہ نئی فائل بھیجتے وقت صرف وہ ایک نمبر بدلنا کافی ہو، ہر جگہ خودبخود اپڈیٹ ہو جائے ----------
   document.getElementById('topbarVersionBadge').textContent = APP_BUILD_VERSION;
   document.getElementById('appBuildVersionText').textContent = APP_BUILD_VERSION;
+  document.getElementById('loginVersionBadge').textContent = '🏷️ ' + APP_BUILD_VERSION;
 
   applyTheme(AppState.settings.themeId);
   applyFont(AppState.settings.fontId || 'tahoma');
