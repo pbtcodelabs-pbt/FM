@@ -36,25 +36,26 @@
     --font:'Segoe UI', system-ui, sans-serif;
     --font-weight:400;
   }
-  /* ---------- 🥬 جمیل نوری نستعلیق — سبزیوں کے پراڈکٹ ناموں کے لیے خوبصورت اردو فونٹ (Regular + Kasheeda دونوں انداز) ---------- */
+  /* ---------- 🥬 جمیل نوری نستعلیق — سبزیوں کے پراڈکٹ ناموں کے لیے خوبصورت اردو فونٹ (Regular + Kasheeda دونوں انداز)
+       نوٹ: صدام کے GitHub ریپو میں یہ فونٹ فائلیں الگ fonts فولڈر میں نہیں بلکہ index.html کے ساتھ ہی root میں ہیں،
+       اس لیے راستہ (path) اسی مطابق ٹھیک کیا گیا ہے ---------- */
   @font-face{
     font-family:'JameelNooriNastaleeq';
-    src:url('./fonts/JameelNooriNastaleeq-Regular.ttf') format('truetype');
+    src:url('./JameelNooriNastaleeq-Regular.ttf') format('truetype');
     font-weight:400; font-style:normal; font-display:swap;
   }
   @font-face{
     font-family:'JameelNooriNastaleeqKasheeda';
-    src:url('./fonts/JameelNooriNastaleeq-Kasheeda.ttf') format('truetype');
+    src:url('./JameelNooriNastaleeq-Kasheeda.ttf') format('truetype');
     font-weight:400; font-style:normal; font-display:swap;
   }
-  /* ---------- 🖋️ PDMS Multan — نیا اردو نستعلیق فونٹ — باقی دو فونٹس کی طرح علیحدہ ./fonts/
-       فولڈر سے لوڈ ہوتا ہے (Base64 embed نہیں کیا گیا تاکہ index.html کا سائز نہ بڑھے) ---------- */
+  /* ---------- 🖋️ PDMS Multan — نیا اردو نستعلیق فونٹ — باقی دو فونٹس کی طرح root میں رکھی جانی چاہیے
+       (Base64 embed نہیں کیا گیا تاکہ index.html کا سائز نہ بڑھے) ---------- */
   @font-face{
     font-family:'PDMSMultan';
-    src:url('./fonts/PDMS_Multan_Regular.ttf') format('truetype');
+    src:url('./PDMS_Multan_Regular.ttf') format('truetype');
     font-weight:400; font-style:normal; font-display:swap;
   }
-}
   *{box-sizing:border-box; margin:0; padding:0;}
   /* ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر Category والی تمام UI (Billing/Advance Orders/
   Purchase Orders/Stock Adjustment/Products کی کیٹگری ریل، ڈراپ ڈاؤن اور فلٹر) پوری ایپ سے چھپا دی
@@ -1646,11 +1647,14 @@
     #app{grid-template-columns:1fr; grid-template-rows:56px auto auto 1fr; height:100vh;}
 
     #mobileTopbar{
-      display:flex; align-items:center; gap:12px; padding:0 16px;
+      display:flex; align-items:center; gap:8px; padding:0 10px;
       background:var(--primary-dark); color:#fff; grid-column:1; grid-row:1;
       position:sticky; top:0; z-index:600;
     }
-    #mobileTopbar .mobileBrand{font-size:16px; font-weight:700; flex:1;}
+    #mobileTopbar .mobileBrand{
+      font-size:16px; font-weight:700; flex:1 1 auto; min-width:0;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
     #connStatusBadge{
       flex:0 0 auto; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:20px;
       letter-spacing:.2px; transition:background-color .25s ease, color .25s ease;
@@ -2161,11 +2165,11 @@
          آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے۔
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
-    <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
+    <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px; flex:0 0 auto;">
       <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:none;">Fruit Mandi POS</span>
       <span class="nastaleeqSparkle" style="display:none;">جاگدے رہـنا۔۔۔۔ساڈے تے نہ رہـنا</span>
     </div>
-    <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں ---------- -->
       <span id="topbarVersionBadge" onclick="handleVersionBadgeTap()" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px; cursor:pointer;"></span>
@@ -2205,28 +2209,32 @@
   <div id="sidebar">
     <div class="brand">صدام فروٹ منڈی</div>
 
-    <div class="navItem" data-screen="home" onclick="goTo('home')">🏠 Home</div>
-    <div class="navItem" data-screen="billing" onclick="goTo('billing')">🛒 Billing</div>
-    <div class="navItem" data-screen="billhistory" onclick="goTo('billhistory')">🧾 Bill History</div>
+    <!-- ---------- 🔤 صدام کی ہدایت پر تمام مینیو آئٹمز (اوپر کی سیٹنگز) الفابیٹیکلی (A-Z) ترتیب دیے گئے ہیں —
+         نیچے Change My PIN / Admin ٹیگ / Logout کو جان بوجھ کر الگ رکھا گیا ہے (اس ترتیب میں شامل نہیں) ---------- -->
     <div class="navItem" data-screen="advanceorders" onclick="goTo('advanceorders')">📝 Advance Orders</div>
-    <div class="navItem admin-only" data-screen="expenditure" onclick="goTo('expenditure')">💸 Expenditure</div>
-
-    <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')">📊 Dashboard</div>
-    <div class="navItem admin-only" data-screen="" onclick="closeSidebar(); openReportCenterModal();">📑 Reports</div>
-    <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')">📈 Trends</div>
-    <div class="navItem admin-only" data-screen="payments" onclick="goTo('payments')">💳 Payments</div>
-    <div class="navItem admin-only" data-screen="mydiary" onclick="goTo('mydiary')">📔 My Diary</div>
-    <div class="navItem admin-only" data-screen="products" onclick="goTo('products')">📦 Products</div>
-    <div class="navItem admin-only" data-screen="categories" onclick="goTo('categories')">🏷️ Categories</div>
-    <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')">🧮 Stock Adjustment</div>
-    <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customers</div>
-    <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')">🚚 Suppliers</div>
-    <div class="navItem admin-only" data-screen="purchaseorders" onclick="goTo('purchaseorders')">📦 Purchase Orders</div>
-    <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
-    <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
-    <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
     <div class="navItem admin-only" data-screen="billsettings" onclick="goTo('billsettings')">🖨️ Bill & Print Settings</div>
+    <div class="navItem" data-screen="billhistory" onclick="goTo('billhistory')">🧾 Bill History</div>
+    <div class="navItem" data-screen="billing" onclick="goTo('billing')">🛒 Billing</div>
+    <div class="navItem admin-only" data-screen="categories" onclick="goTo('categories')">🏷️ Categories</div>
+    <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customers</div>
+    <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')">📊 Dashboard</div>
+    <div class="navItem admin-only" data-screen="expenditure" onclick="goTo('expenditure')">💸 Expenditure</div>
+    <div class="navItem" data-screen="home" onclick="goTo('home')">🏠 Home</div>
+    <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
+    <div class="navItem admin-only" data-screen="mydiary" onclick="goTo('mydiary')">📔 My Diary</div>
+    <div class="navItem admin-only" data-screen="payments" onclick="goTo('payments')">💳 Payments</div>
+    <div class="navItem admin-only" data-screen="products" onclick="goTo('products')">📦 Products</div>
+    <div class="navItem admin-only" data-screen="purchaseorders" onclick="goTo('purchaseorders')">📦 Purchase Orders</div>
+    <div class="navItem admin-only" data-screen="" onclick="closeSidebar(); openReportCenterModal();">📑 Reports</div>
+    <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
+    <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')">🧮 Stock Adjustment</div>
+    <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')">🚚 Suppliers</div>
+    <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')">📈 Trends</div>
+    <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
 
+    <!-- ---------- نیچے کی چیزیں (PIN تبدیل کرنا / Admin ٹیگ / Logout) جان بوجھ کر الفابیٹیکل ترتیب سے الگ —
+         باریک لائن سے واضح جدائی ---------- -->
+    <div style="border-top:1px solid rgba(255,255,255,.14); margin:10px 14px 6px;"></div>
     <div class="navItem" data-screen="" onclick="openMyPinChangeModal()">🔑 Change My PIN</div>
 
     <div class="userTag" id="userTag">—</div>
@@ -5955,7 +5963,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM318MO21';
+const APP_BUILD_VERSION = 'FM318MO23';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -8134,11 +8142,14 @@ function renderBillingProductGrid(){
   grid.innerHTML = displayList.map(p => {
     const isHot = hotIds.has(p.product_id);
     const isSingleVariant = p.variants.length === 1;
-    // ---------- نام لمبا ہو تو باریک، چھوٹا ہو تو اچھا موٹا سائز — اور جتنے زیادہ کارڈ ایک لائن میں ہوں (numCols) اتنا ہی سائز خودکار مزید چھوٹا ہو، تاکہ لکھائی کبھی کارڈ سے باہر نہ نکلے یا کٹے ----------
+    // ---------- نام لمبا ہو تو باریک، چھوٹا ہو تو اچھا موٹا سائز — اور جتنے زیادہ کارڈ ایک لائن میں ہوں (numCols) اتنا ہی سائز خودکار مزید چھوٹا ہو، تاکہ لکھائی کبھی کارڈ سے باہر نہ نکلے یا کٹے
+    //          ⚠️ پرانی خرابی: یہاں صارف کے سلائیڈر سائز کو ہمیشہ خودکار (auto) سائز کے ساتھ Math.min کر دیا جاتا تھا،
+    //          یعنی سلائیڈر کو 22px تک بھی لے جائیں تب بھی فونٹ کبھی ~10.5px سے بڑا نہیں ہوتا تھا — صارف کی سیٹنگ عملی طور پر بے اثر تھی۔
+    //          اب صارف کا منتخب کردہ سائز ہی اصل بنیاد ہے (صرف بہت لمبے نام پر تھوڑا سا خودکار کمپریشن، تاکہ لکھائی کارڈ سے باہر نہ نکلے) ----------
     const colsShrink = numCols >= 6 ? 3 : numCols === 5 ? 2 : numCols === 4 ? 1 : 0;
     const userBaseSize = AppState.settings.productCardNameSize || 13;
-    const autoBaseSize = p.name.length > 18 ? 8.5 : p.name.length > 13 ? 9.5 : 10.5;
-    const nameFontSize = Math.max(7, Math.min(userBaseSize, autoBaseSize) - colsShrink) + 'px';
+    const longNameShrink = p.name.length > 22 ? 3 : p.name.length > 16 ? 1.5 : 0;
+    const nameFontSize = Math.max(7, userBaseSize - colsShrink - longNameShrink) + 'px';
 
     let priceLabel, qtyBadgeHtml, actionAreaHtml, outOfStockClass = '', lowStockClass = '', stockBadgeHtml = '', cardOnClick = '';
 
@@ -20147,7 +20158,7 @@ function renderHomeSettingsPanel(){
     </div>
     <div style="padding:2px 12px 2px; font-size:11px; color:var(--muted);">Text size — ${pcnSize}px</div>
     <div style="padding:0 12px 6px;">
-      <input type="range" min="8" max="22" step="1" value="${pcnSize}" oninput="adjustProductCardNameSize(this.value); this.previousElementSibling.textContent='Text size — '+this.value+'px';" style="width:100%;">
+      <input type="range" min="8" max="32" step="1" value="${pcnSize}" oninput="adjustProductCardNameSize(this.value); this.previousElementSibling.textContent='Text size — '+this.value+'px';" style="width:100%;">
     </div>
     <div style="padding:2px 12px 2px; font-size:11px; color:var(--muted);">Boldness — ${pcnWeight}</div>
     <div style="padding:0 12px 6px;">
@@ -20221,7 +20232,7 @@ window.addEventListener('scroll', () => {
 
 // ---------- 🏷️ پراڈکٹ کارڈ کا انداز — سائز/موٹائی/فونٹ/رنگ/پس منظر، سب کچھ خود منتخب کریں ----------
 function adjustProductCardNameSize(px){
-  const clamped = Math.max(8, Math.min(22, Number(px) || 13));
+  const clamped = Math.max(8, Math.min(32, Number(px) || 13));
   AppState.settings.productCardNameSize = clamped;
   persistAllData();
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
