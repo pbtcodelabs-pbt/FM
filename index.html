@@ -1855,14 +1855,38 @@
       <button onclick="quickEnterApp()" style="background:var(--primary); font-size:16px; padding:14px;">🎁 Enter App — Free Trial</button>
     </div>
 
-    <!-- ---------- عام PIN entry — صرف اسی وقت نظر آئے گی جب Admin نے اپنا PIN بدل لیا ہو (یعنی حقیقی/سنجیدہ استعمال شروع ہو چکا) ---------- -->
+    <!-- ---------- 🍇 Fruit Mandi POS: Admin/Employee لاگ ان دو الگ حصوں میں — اوپر ٹیب سے چنیں ---------- -->
     <div id="loginPinWrap" style="display:none;">
-      <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
-      <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
-        <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
-        🔒 Remember me on this device
-      </label>
-      <button onclick="login()">Enter</button>
+      <div style="display:flex; gap:6px; margin-bottom:12px; background:#f1f5f9; border-radius:10px; padding:4px;">
+        <button type="button" id="loginTabAdminBtn" onclick="switchLoginTab('admin')" style="flex:1; padding:9px; border:none; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer; background:var(--primary); color:#fff;">🔑 Admin Access</button>
+        <button type="button" id="loginTabEmployeeBtn" onclick="switchLoginTab('employee')" style="flex:1; padding:9px; border:none; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer; background:transparent; color:var(--muted);">👤 Employee Login</button>
+      </div>
+
+      <!-- ---------- ایڈمن لاگ ان ---------- -->
+      <div id="adminLoginPanel">
+        <div style="text-align:center; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:6px;">Saddam Hussain</div>
+        <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
+        <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
+          <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
+          🔒 Remember me on this device
+        </label>
+        <button onclick="login()">Enter</button>
+      </div>
+
+      <!-- ---------- ملازم (Employee) لاگ ان — نام ڈراپ ڈاؤن سے چنیں، پھر اپنا PIN ڈالیں ---------- -->
+      <div id="employeeLoginPanel" style="display:none;">
+        <label style="display:block; font-size:12px; color:var(--muted); margin:0 0 4px; text-align:left;">Select your name</label>
+        <select id="employeeLoginSelect" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; margin-bottom:8px;"></select>
+        <input type="password" id="employeePinInput" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') employeeLogin()">
+        <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
+          <input type="checkbox" id="employeeRememberChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
+          🔒 Remember me on this device
+        </label>
+        <button onclick="employeeLogin()">Enter</button>
+        <div class="loginHint" style="margin-top:8px;">
+          <a href="javascript:void(0)" onclick="openEmployeePinResetModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Change it with your Date of Birth.</a>
+        </div>
+      </div>
     </div>
 
     <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share This App</button>
@@ -1878,7 +1902,7 @@
       <div id="loginActivationMsg" style="margin-top:8px; font-size:13px; font-weight:700;"></div>
     </div>
 
-    <div class="loginHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
+    <div class="loginHint"><a href="javascript:void(0)" onclick="openDevChat('support')" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Chat with developer for help.</a></div>
   </div>
   <button class="devChatBubble" onclick="openDevChat('subscription')" title="Chat with Developer">💬</button>
 </div>
@@ -1983,6 +2007,57 @@
   </div>
 </div>
 
+<!-- ---------- 🍇 Fruit Mandi POS: ملازم اپنا PIN خود اپنی تاریخ پیدائش سے تبدیل/ری سیٹ کر سکے — ہر ملازم کی اپنی DOB الگ محفوظ ہوتی ہے ---------- -->
+<div class="modalOverlay" id="employeePinResetModal" style="z-index:3700;" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="modalBox" style="max-width:380px;">
+    <h3>🆘 Change Your PIN</h3>
+    <div id="empResetNameLine" style="font-size:13px; font-weight:700; color:var(--primary-dark); margin-bottom:6px;"></div>
+
+    <!-- Step A: پہلی بار ہو تو DOB سیٹ کریں؛ پہلے سے موجود ہو تو تصدیق کے لیے مانگیں -->
+    <div id="empResetStepDob">
+      <div id="empResetDobHint" style="font-size:12.5px; color:var(--muted); margin-bottom:6px;"></div>
+      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Date of Birth</label>
+      <div class="dobPicker">
+        <select id="empResetDobInput_day" onchange="dpOnChange('empResetDobInput')"></select>
+        <select id="empResetDobInput_month" onchange="dpOnMonthChange('empResetDobInput')"></select>
+        <span class="dpYearWrap" id="empResetDobInput_yearWrap">
+          <select id="empResetDobInput_year" onchange="dpOnChange('empResetDobInput')"></select>
+          <input type="text" id="empResetDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('empResetDobInput')">
+          <button type="button" id="empResetDobInput_yearToggleBtn" class="dpYearToggleBtn" onclick="dpToggleYearMode('empResetDobInput')">✍️ Type</button>
+        </span>
+      </div>
+      <input type="hidden" id="empResetDobInput" value="">
+      <button class="checkoutBtn" style="margin-top:14px;" onclick="submitEmployeeDobStep()">Continue</button>
+      <div id="empResetError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
+    </div>
+
+    <!-- Step B: نیا PIN سیٹ کریں -->
+    <div id="empResetStepNewPin" style="display:none;">
+      <div style="background:#dcfce7; color:var(--success); border-radius:8px; padding:10px; font-size:13px; font-weight:700; text-align:center; margin-top:10px;">✅ Verified! Set your new PIN below.</div>
+      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">New PIN (4-8 digits)</label>
+      <input type="password" id="empResetNewPinInput" placeholder="New PIN" maxlength="8" inputmode="numeric" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; text-align:center; letter-spacing:4px;">
+      <button class="checkoutBtn" style="margin-top:14px;" onclick="finishEmployeePinReset()">Set New PIN</button>
+    </div>
+
+    <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('employeePinResetModal').classList.remove('show')">Cancel</button>
+  </div>
+</div>
+
+<!-- ---------- 🍇 Fruit Mandi POS: لاگ ان کے بعد، اپنی مرضی سے کبھی بھی اپنا PIN تبدیل کریں (Admin یا Employee دونوں) ---------- -->
+<div class="modalOverlay" id="myPinChangeModal" style="z-index:3700;" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="modalBox" style="max-width:380px;">
+    <h3>🔑 Change My PIN</h3>
+    <div id="myPinChangeNameLine" style="font-size:13px; font-weight:700; color:var(--primary-dark); margin-bottom:10px;"></div>
+    <label style="display:block; font-size:12px; color:var(--muted); margin:0 0 4px;">Current PIN</label>
+    <input type="password" id="myPinChangeOldInput" placeholder="Current PIN" maxlength="8" inputmode="numeric" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; text-align:center; letter-spacing:4px;">
+    <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">New PIN (4-8 digits)</label>
+    <input type="password" id="myPinChangeNewInput" placeholder="New PIN" maxlength="8" inputmode="numeric" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; text-align:center; letter-spacing:4px;">
+    <button class="checkoutBtn" style="margin-top:14px;" onclick="submitMyPinChange()">Save New PIN</button>
+    <div id="myPinChangeError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
+    <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('myPinChangeModal').classList.remove('show')">Cancel</button>
+  </div>
+</div>
+
 <div id="subscriptionGateScreen" style="display:none; position:fixed; inset:0; z-index:3000; background:var(--bg); align-items:center; justify-content:center; flex-direction:column; padding:20px;">
   <div class="loginBox" style="max-width:340px;">
     <h2>🔒 Subscription Required</h2>
@@ -2034,8 +2109,8 @@
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
-      <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; display:none;">AIODR288FR01</span>
+      <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں ---------- -->
+      <span id="topbarVersionBadge" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px;">FM318MO03</span>
     </div>
   </div>
 
@@ -2082,6 +2157,8 @@
     <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
     <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
     <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
+
+    <div class="navItem" data-screen="" onclick="openMyPinChangeModal()">🔑 Change My PIN</div>
 
     <div class="userTag" id="userTag">—</div>
     <button class="logoutBtn" onclick="logout()">Logout</button>
@@ -2152,14 +2229,14 @@
 
       <div class="billingTopBar">
         <div class="modeToggleRow">
-          <label class="counterSwitchWrap" title="Red = Walk-in customer (no name on bill), Gray = select a registered customer">
+          <label class="counterSwitchWrap" title="Red = Walk-in customer (no name on bill), Gray = select a registered customer" style="display:none;">
             <span class="switchTrack active" id="modeCounterSale" onclick="toggleCounterSale()">🚶</span>
             <span class="switchLabel">Walk-in</span>
           </label>
 
           <div class="billModeToggle" style="flex:1 1 auto; min-width:0;">
-            <button id="modeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Retail</button>
-            <button id="modeWholesale" onclick="setSaleMode('wholesale')">📦 Wholesale</button>
+            <button id="modeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Islamabad</button>
+            <button id="modeWholesale" onclick="setSaleMode('wholesale')">📦 Rawalpindi</button>
           </div>
 
           <!-- ---------- ⚙️ Settings بٹن — بالکل یہیں Billing اسکرین پر، تاکہ تھیم/فونٹ/Product Card میں
@@ -2230,13 +2307,13 @@
 
         <!-- ---------- کارٹ کے اندر ہی Walk-in/Retail/Wholesale — تاکہ بل بناتے وقت اگر موڈ تبدیل کرنا بھول جائیں تو دوبارہ باہر جانے کی ضرورت نہ پڑے ---------- -->
         <div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f8fafc; border-bottom:1px solid #eef1f6; flex-wrap:wrap;">
-          <label class="counterSwitchWrap" title="Red = Walk-in customer (no name on bill), Gray = select a registered customer">
+          <label class="counterSwitchWrap" title="Red = Walk-in customer (no name on bill), Gray = select a registered customer" style="display:none;">
             <span class="switchTrack active" id="cartModeCounterSale" onclick="toggleCounterSale()">🚶</span>
             <span class="switchLabel">Walk-in</span>
           </label>
           <div class="billModeToggle" style="flex:1 1 auto; min-width:0;">
-            <button id="cartModeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Retail</button>
-            <button id="cartModeWholesale" onclick="setSaleMode('wholesale')">📦 Wholesale</button>
+            <button id="cartModeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Islamabad</button>
+            <button id="cartModeWholesale" onclick="setSaleMode('wholesale')">📦 Rawalpindi</button>
           </div>
         </div>
 
@@ -4105,7 +4182,7 @@
         <!-- --- 🏷️ Build Version — ہر نئی فائل کے ساتھ یہ نمبر بدلتا ہے، سپورٹ کے وقت پتا چلتا ہے کہ کسٹمر کون سا ورژن چلا رہا ہے --- -->
         <div class="settingsCard" style="background:#f4f1ea;">
           <h3 style="font-size:12.5px; color:var(--muted); font-weight:700;">🏷️ Build Version</h3>
-          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;">FM318MO02</div>
+          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;">FM318MO03</div>
         </div>
 
         <!-- --- 💾 اسٹوریج کا استعمال — تاکہ صارف کو ہمیشہ پتا رہے کتنی جگہ بچی ہے، اچانک خاموشی سے ڈیٹا ضائع نہ ہو --- -->
@@ -5741,7 +5818,7 @@ function getDeveloperContact(){
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM318MO02';
+const APP_BUILD_VERSION = 'FM318MO03';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6126,10 +6203,9 @@ function renderHomeIconGrid(){
     </button>`;
 
   if(AppState.currentRole === 'admin'){
-    grid.innerHTML = HOME_TILE_GROUPS_ADMIN.map(g => `
-      <div class="homeSectionLabel">${g.section}</div>
-      <div class="homeSectionGrid">${g.tiles.map(tileHtml).join('')}</div>
-    `).join('');
+    // ---------- 🍇 Fruit Mandi POS: کیٹگری وائز سیکشن ہیڈنگز ہٹا دی گئیں — اب سب آئیکن ایک ہی فہرست میں، نام کے حساب سے A-Z ترتیب میں ----------
+    const sortedTiles = HOME_TILES_ADMIN.slice().sort((a, b) => a.label.localeCompare(b.label));
+    grid.innerHTML = `<div class="homeSectionGrid">${sortedTiles.map(tileHtml).join('')}</div>`;
   } else {
     grid.innerHTML = HOME_TILES_SALESMAN.map(tileHtml).join('');
   }
@@ -6325,6 +6401,7 @@ async function setupLoginScreen(){
     const skipPin = stillDefaultPin || trialActive;
     document.getElementById('loginQuickEnterWrap').style.display = skipPin ? 'block' : 'none';
     document.getElementById('loginPinWrap').style.display = skipPin ? 'none' : 'block';
+    if(!skipPin) switchLoginTab('admin');
 
     // ---------- ٹرائل کے دوران "Login" کا لفظ خود بھی کنفیوژن پیدا کرتا ہے — چھپا دیں، صرف ٹرائل ختم ہونے پر واپس نظر آئے ----------
     const heading = document.getElementById('loginHeading');
@@ -6365,8 +6442,9 @@ async function login(){
   }
 
   // ---------- PIN کبھی پلین ٹیکسٹ میں compare نہیں ہوتا — پہلے hash بنائیں پھر محفوظ شدہ hash سے موازنہ کریں ----------
+  // ---------- 🍇 Fruit Mandi POS: یہ Admin Login پینل ہے، اس لیے صرف admin رول والے یوزر میں تلاش کریں ----------
   const enteredHash = await hashPin(pin);
-  const user = usersData.find(u => u.pin === enteredHash);
+  const user = usersData.find(u => u.pin === enteredHash && u.role === 'admin');
 
   if(!user){
     alert('Incorrect PIN. Please try again, or contact Admin if you forgot it.');
@@ -6383,10 +6461,11 @@ async function login(){
   finishLogin(user);
 }
 
-// ---------- لاگ ان مکمل کرنے کا مشترکہ حصہ (عام PIN اور ماسٹر PIN دونوں یہاں سے گزرتے ہیں) ----------
-function finishLogin(user, forceRemember){
-  const rememberChk = document.getElementById('rememberPinChk');
-  if(forceRemember || (rememberChk && rememberChk.checked)){
+// ---------- لاگ ان مکمل کرنے کا مشترکہ حصہ (Admin اور Employee دونوں لاگ ان یہیں سے گزرتے ہیں) ----------
+// rememberOverride: undefined ہو تو Admin پینل کے چیک باکس سے فیصلہ ہوگا؛ true/false ملے تو وہی حتمی فیصلہ ہے (Employee پینل اپنا الگ چیک باکس بھیجتا ہے) ----------
+function finishLogin(user, rememberOverride){
+  const remember = (rememberOverride !== undefined) ? rememberOverride : (document.getElementById('rememberPinChk')?.checked ?? true);
+  if(remember){
     saveToStorage('rememberedSession', { user_id: user.user_id });
   } else {
     saveToStorage('rememberedSession', null);
@@ -6395,6 +6474,8 @@ function finishLogin(user, forceRemember){
   applyRole(user.role, user.name);
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('pinInput').value = '';
+  const empPinEl = document.getElementById('employeePinInput');
+  if(empPinEl) empPinEl.value = '';
 
   // ---------- سبسکرپشن فعال نہ ہو تو ایپ نہیں کھلے گی، فعال سازی صفحہ دکھایا جائے گا ----------
   // (getOrCreateDeviceUID یہاں پہلے چلانا ضروری ہے — بالکل نئے ڈیوائس پر یہی 7 دن کا مفت ٹرائل شروع کرتا ہے)
@@ -6410,6 +6491,161 @@ function finishLogin(user, forceRemember){
     if(!AppState.settings.gdrivePromptShown) setTimeout(showGDriveFirstRunPrompt, 900); // ---------- پہلی بار ایپ استعمال ہو تو Google Drive اکاؤنٹ فوراً جوڑنے کی دعوت دیں ----------
     else setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
   }
+}
+
+/* =====================================================================
+   🍇 Fruit Mandi POS: Admin / Employee لاگ ان ٹیب اور ملازم کا لاگ ان
+   ===================================================================== */
+function switchLoginTab(tab){
+  const isAdmin = tab === 'admin';
+  document.getElementById('adminLoginPanel').style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('employeeLoginPanel').style.display = isAdmin ? 'none' : 'block';
+  const adminBtn = document.getElementById('loginTabAdminBtn');
+  const empBtn = document.getElementById('loginTabEmployeeBtn');
+  adminBtn.style.background = isAdmin ? 'var(--primary)' : 'transparent';
+  adminBtn.style.color = isAdmin ? '#fff' : 'var(--muted)';
+  empBtn.style.background = isAdmin ? 'transparent' : 'var(--primary)';
+  empBtn.style.color = isAdmin ? 'var(--muted)' : '#fff';
+  if(!isAdmin) renderEmployeeLoginDropdown();
+}
+
+// ---------- ایمپلائی لاگ ان کا نام ڈراپ ڈاؤن — فعال (active) سیلزمین یوزرز کی فہرست ----------
+function renderEmployeeLoginDropdown(){
+  const sel = document.getElementById('employeeLoginSelect');
+  if(!sel) return;
+  const employees = usersData.filter(u => u.role === 'salesman' && u.is_active);
+  if(employees.length === 0){
+    sel.innerHTML = '<option value="">No employee accounts yet</option>';
+    return;
+  }
+  sel.innerHTML = employees.map(u => `<option value="${u.user_id}">${u.name}</option>`).join('');
+}
+
+async function employeeLogin(){
+  const userId = parseInt(document.getElementById('employeeLoginSelect').value, 10);
+  const pin = document.getElementById('employeePinInput').value.trim();
+  if(!userId){ alert('Please select your name.'); return; }
+  if(pin.length < 4){
+    alert('Please enter your PIN (at least 4 digits).');
+    return;
+  }
+  const user = usersData.find(u => u.user_id === userId && u.role === 'salesman');
+  if(!user){ alert('Employee account not found.'); return; }
+  if(!user.is_active){
+    alert('This account has been deactivated. Please contact Admin.');
+    return;
+  }
+  const enteredHash = await hashPin(pin);
+  if(user.pin !== enteredHash){
+    alert('Incorrect PIN. Please try again, or use "Forgot your PIN?" below.');
+    document.getElementById('employeePinInput').value = '';
+    return;
+  }
+  const remember = document.getElementById('employeeRememberChk')?.checked ?? true;
+  finishLogin(user, remember);
+}
+
+/* =====================================================================
+   🆘 ملازم اپنا PIN خود اپنی تاریخ پیدائش سے تبدیل/ری سیٹ کرے — ہر یوزر کی اپنی dobHash الگ محفوظ ہوتی ہے
+   ===================================================================== */
+let empResetTargetUserId = null;
+function openEmployeePinResetModal(){
+  const userId = parseInt(document.getElementById('employeeLoginSelect').value, 10);
+  const user = usersData.find(u => u.user_id === userId && u.role === 'salesman');
+  if(!user){ alert('Please select your name first.'); return; }
+  empResetTargetUserId = userId;
+
+  dpReset('empResetDobInput');
+  document.getElementById('empResetNewPinInput').value = '';
+  document.getElementById('empResetError').textContent = '';
+  document.getElementById('empResetNameLine').textContent = `👤 ${user.name}`;
+  document.getElementById('empResetStepDob').style.display = 'block';
+  document.getElementById('empResetStepNewPin').style.display = 'none';
+
+  const hint = document.getElementById('empResetDobHint');
+  if(!user.dobHash){
+    hint.textContent = 'ℹ️ No date of birth on file yet — enter it now to set it up. Remember this date, you\'ll need it next time you forget your PIN.';
+  } else {
+    hint.textContent = 'Enter your date of birth to verify it\'s you.';
+  }
+  document.getElementById('employeePinResetModal').classList.add('show');
+}
+
+async function submitEmployeeDobStep(){
+  const user = usersData.find(u => u.user_id === empResetTargetUserId);
+  if(!user) return;
+  const dob = document.getElementById('empResetDobInput').value;
+  if(!dob){
+    document.getElementById('empResetError').textContent = '❌ Please select your date of birth.';
+    return;
+  }
+  const dobHash = await hashPin(dob);
+
+  if(!user.dobHash){
+    // ---------- پہلی بار — یہیں محفوظ کر لیں، آگے بڑھیں ----------
+    user.dobHash = dobHash;
+    persistAllData();
+  } else if(dobHash !== user.dobHash){
+    document.getElementById('empResetError').textContent = '❌ This does not match our records. Please try again.';
+    return;
+  }
+
+  document.getElementById('empResetError').textContent = '';
+  document.getElementById('empResetStepDob').style.display = 'none';
+  document.getElementById('empResetStepNewPin').style.display = 'block';
+}
+
+async function finishEmployeePinReset(){
+  const user = usersData.find(u => u.user_id === empResetTargetUserId);
+  if(!user) return;
+  const newPin = document.getElementById('empResetNewPinInput').value.trim();
+  if(!/^\d{4,8}$/.test(newPin)){
+    alert('❌ PIN must be 4 to 8 digits only.');
+    return;
+  }
+  user.pin = await hashPin(newPin);
+  persistAllData();
+  document.getElementById('employeePinResetModal').classList.remove('show');
+  document.getElementById('employeePinInput').value = '';
+  alert('✅ Your new PIN has been set. Please log in with it now.');
+}
+
+/* =====================================================================
+   🔑 لاگ ان کے بعد، خود اپنی مرضی سے کبھی بھی PIN تبدیل کریں (Admin یا Employee دونوں کے لیے مشترکہ) ----------
+   ===================================================================== */
+function findCurrentLoggedInUser(){
+  return usersData.find(u => u.name === AppState.currentUser?.name && u.role === AppState.currentRole);
+}
+function openMyPinChangeModal(){
+  const user = findCurrentLoggedInUser();
+  if(!user){ alert('Could not find your account. Please log out and log in again.'); return; }
+  document.getElementById('myPinChangeNameLine').textContent = `👤 ${user.name}`;
+  document.getElementById('myPinChangeOldInput').value = '';
+  document.getElementById('myPinChangeNewInput').value = '';
+  document.getElementById('myPinChangeError').textContent = '';
+  document.getElementById('myPinChangeModal').classList.add('show');
+  toggleSidebar(); // ---------- سائیڈ بار سے کھولا جا رہا ہے، ماڈل کھلتے ہی سائیڈ بار بند کر دیں ----------
+}
+async function submitMyPinChange(){
+  const user = findCurrentLoggedInUser();
+  const errEl = document.getElementById('myPinChangeError');
+  if(!user){ errEl.textContent = '❌ Could not find your account.'; return; }
+
+  const oldPin = document.getElementById('myPinChangeOldInput').value.trim();
+  const newPin = document.getElementById('myPinChangeNewInput').value.trim();
+  const oldHash = await hashPin(oldPin);
+  if(oldHash !== user.pin){
+    errEl.textContent = '❌ Current PIN is incorrect.';
+    return;
+  }
+  if(!/^\d{4,8}$/.test(newPin)){
+    errEl.textContent = '❌ New PIN must be 4 to 8 digits only.';
+    return;
+  }
+  user.pin = await hashPin(newPin);
+  persistAllData();
+  document.getElementById('myPinChangeModal').classList.remove('show');
+  alert('✅ Your PIN has been updated.');
 }
 
 // ---------- 🆕 پہلی بار ایپ کھلنے پر: صرف ایک ہی دفعہ نظر آنے والی دعوت — "ابھی Google Drive جوڑیں" یا "بعد میں" ----------
@@ -6569,7 +6805,7 @@ function tryAutoLogin(){
 }
 
 function applyRole(role, name){
-  AppState.currentUser = { name: name || (role==='admin' ? 'Admin User' : 'Aslam Bhai') };
+  AppState.currentUser = { name: name || (role==='admin' ? 'Saddam Hussain' : 'Abdul Wahab') };
   AppState.currentRole = role;
 
   document.body.classList.remove('role-admin','role-salesman');
@@ -17156,9 +17392,9 @@ function renderTrendsScreen(){
 // screens: صرف 'salesman' یوزرز کے لیے معنی رکھتا ہے — یہی وہ اسکرینز ہیں جو صدام (Admin) نے اس
 // ملازم کو دیکھنے کی اجازت دی ہے۔ Admin ہمیشہ سب کچھ دیکھتا ہے، اس کے لیے یہ فیلڈ نظرانداز ہوتا ہے ----------
 const USERS_SEED_DATA = [
-  {user_id:1, name:'Admin User', username:'admin', pin:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', role:'admin', is_active:true, screens:[]}, // PIN: 1234
-  {user_id:2, name:'Aslam Bhai', username:'aslam', pin:'0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', role:'salesman', is_active:true, screens:['billing','advanceorders','billhistory']}, // PIN: 1111
-  {user_id:3, name:'Bilal', username:'bilal', pin:'edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9', role:'salesman', is_active:false, screens:['payments']}, // PIN: 2222
+  {user_id:1, name:'Saddam Hussain', username:'admin', pin:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', dobHash:'', role:'admin', is_active:true, screens:[]}, // PIN: 1234
+  {user_id:2, name:'Abdul Wahab', username:'aslam', pin:'b3282a2f2a28757b3a18ab833de16a9c54518c0b0cf493e3f0a7cf09386f326a', dobHash:'', role:'salesman', is_active:true, screens:['billing','advanceorders','billhistory']}, // PIN: 1122
+  {user_id:3, name:'ABC', username:'bilal', pin:'b3282a2f2a28757b3a18ab833de16a9c54518c0b0cf493e3f0a7cf09386f326a', dobHash:'', role:'salesman', is_active:true, screens:['payments']}, // PIN: 1122
 ];
 let usersData = loadFromStorage('users', USERS_SEED_DATA);
 // ---------- حفاظتی تدبیر: اگر localStorage میں کوئی پرانا/خراب ڈیٹا ہو جس میں کوئی درست Admin موجود نہ ہو،
@@ -17797,7 +18033,7 @@ function renderBillHistory(){
 
   wrap.innerHTML = filtered.map(inv => {
     // ---------- کس نے بل بنایا — Admin نے خود، یا کسی سیلزمین نے — واضح رنگین بیج کی صورت میں ----------
-    const isAdminGenerated = inv.sold_by === 'Admin User';
+    const isAdminGenerated = inv.sold_by === (usersData.find(u => u.role === 'admin')?.name);
     const creatorBadge = isAdminGenerated
       ? `<span class="creatorBadge admin">🛡️ Admin Generated</span>`
       : `<span class="creatorBadge salesman">👤 ${inv.sold_by}</span>`;
@@ -23867,6 +24103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dpInitPicker('apinDobInput');
   dpInitPicker('recoveryDobInput');
   dpInitPicker('securityDobInput');
+  dpInitPicker('empResetDobInput');
 
   // ---------- Login اسکرین کی حالت (Trial بینر + PIN یا Quick Enter) ہمیشہ پہلے تیار کر لیں ----------
   setupLoginScreen();
