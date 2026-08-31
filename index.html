@@ -1741,11 +1741,13 @@
     body.billing-active #globalUiZoomBar{ padding:3px 12px; }
 
     #sidebar{
-      position:fixed; top:0; right:-260px; bottom:0; width:240px; z-index:800;
-      transition:right .25s ease; box-shadow:-4px 0 20px rgba(0,0,0,.2);
-      overflow-y:auto;
+      position:fixed; top:60px; right:10px; bottom:auto; width:230px; max-height:calc(100vh - 76px);
+      z-index:800; border-radius:14px; overflow-y:auto;
+      opacity:0; transform:translateY(-8px) scale(.97); pointer-events:none;
+      transition:opacity .18s ease, transform .18s ease;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
     }
-    #sidebar.open{right:0;}
+    #sidebar.open{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
 
     #sidebarOverlay{
       position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:700;
@@ -2171,7 +2173,6 @@
 
   <!-- ---------- MOBILE TOPBAR (صرف چھوٹی اسکرین پر نظر آتی ہے) ---------- -->
   <div id="mobileTopbar">
-    <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <button id="topbarSettingsBtn" onclick="toggleHomeSettingsPanel(event)" title="Settings">⚙️</button>
     <span id="mobileBrandText" class="mobileBrand" style="display:inline;">صدام فروٹ منڈی</span>
     <!-- ---------- 🧪 صرف ٹیسٹ فائل میں: یہ لیبل "Fruit Mandi POS" کی بالکل اسی جگہ، اسی بڑے سائز میں کھڑا ہو کر اسے ڈھانپ لیتا ہے —
@@ -2187,6 +2188,10 @@
       <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں ---------- -->
       <span id="topbarVersionBadge" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px;"></span>
     </div>
+    <!-- ---------- ☰ مینیو بٹن — صدام کی ہدایت پر دائیں کونے میں شفٹ کر دیا گیا، تاکہ مینیو اسی کے بالکل
+         نیچے، دائیں کونے میں کھلے (نیچے CSS میں #sidebar بھی اسی مطابق ایک چھوٹے dropdown پینل کی طرح
+         Topbar کے نیچے دائیں کونے میں کھلتا ہے، پوری اسکرین کا drawer اب نہیں رہا) ---------- -->
+    <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
   </div>
 
   <!-- ---------- 🔎 App Search — یونیورسل سرچ، ہمیشہ نظر آنے والی، ہر سکرین پر ایک ہی جگہ —
@@ -2318,9 +2323,8 @@
             <button id="modeWholesale" onclick="setSaleMode('wholesale')">📦 Rawalpindi</button>
           </div>
 
-          <!-- ---------- ⚙️ Settings بٹن — بالکل یہیں Billing اسکرین پر، تاکہ تھیم/فونٹ/Product Card میں
-               کوئی بھی تبدیلی کرتے وقت نیچے موجود اصل پراڈکٹ کارڈز ہمیشہ نظر آتے رہیں ---------- -->
-          <button class="fontsFabMain" id="hbcSettingsBtnBilling" onclick="toggleHomeSettingsPanel(event, 'hbcSettingsBtnBilling')" title="Settings" style="flex:0 0 auto;">⚙️</button>
+          <!-- ---------- ⚙️ Settings بٹن — یہاں سے ہٹا دیا گیا (اوپر Topbar میں موجود ⚙️ بٹن ہی وہی کام
+               کرتا ہے، اس لیے یہاں ڈپلیکیشن تھی — صدام کی ہدایت پر ختم کر دی گئی، کوڈ ڈیلیٹ نہیں کیا) ---------- -->
 
           <!-- ---------- FONTS بٹن — کاؤنٹر سیل کے دائیں طرف، مستقل جگہ پر (پراڈکٹس پر کبھی نہیں چڑھتا) ---------- -->
           <div id="fontsFab" class="fontsFab">
@@ -5932,7 +5936,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM318MO13';
+const APP_BUILD_VERSION = 'FM318MO15';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -20113,7 +20117,7 @@ document.addEventListener('click', (e) => {
    ===================================================================== */
 let homeSettingsPanelOpen = false;
 let homeSettingsActiveTab = 'theme';
-let homeSettingsTriggerBtnId = 'hbcSettingsBtnBilling';
+let homeSettingsTriggerBtnId = 'topbarSettingsBtn';
 
 function positionHomeQuickPanel(btnId, panelId){
   const btn = document.getElementById(btnId);
@@ -20257,7 +20261,7 @@ function closeHomeSettingsPanel(){
 document.addEventListener('click', (e) => {
   const sp = document.getElementById('homeSettingsPanel');
   const sb1 = document.getElementById('hbcSettingsBtn');
-  const sb2 = document.getElementById('hbcSettingsBtnBilling');
+  const sb2 = document.getElementById('topbarSettingsBtn');
   const clickedTrigger = (sb1 && sb1.contains(e.target)) || (sb2 && sb2.contains(e.target));
   if(homeSettingsPanelOpen && sp && !sp.contains(e.target) && !clickedTrigger) closeHomeSettingsPanel();
 });
