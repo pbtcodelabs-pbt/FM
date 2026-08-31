@@ -346,6 +346,10 @@
 
   /* --- Mobile topbar + sidebar overlay (بڑی اسکرین پر چھپے رہتے ہیں) --- */
   #mobileTopbar{display:none;}
+  /* ---------- 🚪 گلوبل لاگ آؤٹ بٹن — صرف بڑی (ڈیسک ٹاپ/ٹیبلٹ) اسکرین پر نظر آئے، جہاں mobileTopbar خود چھپا ہوتا ہے۔
+       چھوٹی اسکرین پر mobileTopbar کا اپنا quickLogoutBtn ہی کافی ہے — دونوں اکٹھے ہونے سے پہلے ہمبرگر مینو کے
+       اوپر بدنما اوورلیپ ہو رہا تھا ---------- -->
+  #globalLogoutBtn{position:fixed; top:10px; inset-inline-end:10px; z-index:400; background:var(--danger,#dc2626); border:none; color:#fff; width:42px; height:42px; border-radius:12px; font-size:19px; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center;}
   #globalSearchBar{display:none;}
   #sidebarOverlay{display:none;}
   .screen{display:none; animation:fadeIn .25s ease;}
@@ -1663,13 +1667,17 @@
     شامل کیا گیا تھا، اس لیے Grid نے اسے خودکار ایک "implicit" چوتھی row میں رکھ دیا جو 100vh کی مقررہ اونچائی
     سے باہر، ناقابلِ رسائی جگہ پر جا گری — کوڈ میں موجود تھا مگر عملی طور پر کبھی نظر نہیں آ رہا تھا۔
     اب اس کے لیے باقاعدہ چوتھی row بنا دی گئی ہے۔ ---------- */
-    #app{grid-template-columns:1fr; grid-template-rows:56px auto auto 1fr; height:100vh;}
+    #app{grid-template-columns:1fr; grid-template-rows:auto auto auto 1fr; height:100vh;}
 
     #mobileTopbar{
-      display:flex; align-items:center; gap:8px; padding:0 10px;
+      display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:6px 10px;
       background:var(--primary-dark); color:#fff; grid-column:1; grid-row:1;
-      position:sticky; top:0; z-index:600;
+      position:sticky; top:0; z-index:600; min-height:56px;
     }
+    /* ---------- زیادہ زوم پر بھی کوئی آئیکن/بٹن سکرین سے باہر جا کر غائب نہ ہو — لائن ٹوٹ کر نیچے آ جائے، ٹاپ بار خود
+         اونچائی میں بڑھ جائے (اوپر گرڈ رو اب auto ہے، fixed 56px نہیں) ---------- */
+    /* ---------- چھوٹی اسکرین پر gلوبل لاگ آؤٹ بٹن چھپا دیں — یہاں mobileTopbar کا اپنا quickLogoutBtn ہی کام کرے گا ---------- */
+    #globalLogoutBtn{display:none;}
     #mobileTopbar .mobileBrand{
       font-size:16px; font-weight:700; flex:1 1 auto; min-width:0;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -2170,7 +2178,7 @@
 
   <!-- ---------- 🚪 ہمیشہ نظر آنے والا LOGOUT بٹن — سکرین کے اوپری کونے میں فکس، موبائل/ڈیسک ٹاپ دونوں پر ہر حال میں نظر آئے
        (پہلے یہ صرف mobileTopbar کے اندر تھا جو بڑی اسکرین پر display:none ہو جاتا تھا، اس لیے نظر نہیں آ رہا تھا) ---------- -->
-  <button id="globalLogoutBtn" onclick="logout()" title="Logout" style="position:fixed; top:10px; inset-inline-end:10px; z-index:9999; background:var(--danger,#dc2626); border:none; color:#fff; width:42px; height:42px; border-radius:12px; font-size:19px; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center;">🚪</button>
+  <button id="globalLogoutBtn" onclick="logout()" title="Logout">🚪</button>
 
   <!-- ---------- ◀ Back / 🏠 Home / ▶ Forward — ہر صفحے پر (Home کے علاوہ)، نیچے وسط میں کمپیکٹ بار ---------- -->
   <div class="navArrowBar" id="navArrowBar">
@@ -4106,7 +4114,7 @@
             <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
           </div>
         </div>
-        <div id="otItemsList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
+        <div id="otItemsList" style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:10px;" dir="rtl"></div>
         <div id="otPager" style="position:sticky; bottom:8px; display:flex; align-items:center; gap:10px; padding-top:6px; margin-bottom:6px;"></div>
       </div>
 
@@ -6146,7 +6154,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU08';
+const APP_BUILD_VERSION = 'FM19TU09';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -7241,7 +7249,7 @@ function tryAutoLogin(){
         return true;
       }
       document.getElementById('app').style.display = 'grid';
-      goTo('billing');
+      goTo('advanceorders'); // ---------- صدام کی ہدایت پر: ایڈمن کا ہوم اب Pending Orders ہے، پراڈکٹ گرڈ نہیں ----------
       setTimeout(checkBackupReminder, 1800);
       return true;
     }
@@ -7265,7 +7273,16 @@ function tryAutoLogin(){
     return true;
   }
   document.getElementById('app').style.display = 'grid';
-  goTo('billing');
+  // ---------- 🍇 صدام کی ہدایت: صفحہ ری فریش/دوبارہ کھلنے پر بھی وہی منطق چلے جو نئے لاگ ان پر چلتی ہے —
+  // Admin سیدھا Pending Orders پر جائے، اور جس ملازم کو صرف ایک ہی اسکرین Assign ہو (مثلاً عبدالوہاب کو صرف
+  // Order Taking) وہ ہمیشہ سیدھا اسی ایک اسکرین پر رہے، کبھی بھی پراڈکٹ گرڈ (Billing) پر نہ جائے ---------- -->
+  if(user.role === 'admin'){
+    goTo('advanceorders');
+  } else if(window.__singleAssignedScreen){
+    goTo(window.__singleAssignedScreen);
+  } else {
+    goTo('home');
+  }
   showRoleToast(user.role, user.name);
   if(user.role === 'admin') setTimeout(checkBackupReminder, 1800); // ---------- Remember-PIN والے خودکار لاگ ان میں بھی یاد دہانی چلے — پہلے یہاں سے مسنگ تھی ----------
   return true;
@@ -15293,13 +15310,13 @@ function renderOtItemsPage(){
     const checked = !!otCheckedMap[v.variant_id];
     const qty = otQtyMap[v.variant_id] || 0;
     return `
-    <div class="otItemRow" data-variant-id="${v.variant_id}" style="display:flex; align-items:center; gap:6px; background:#fff; border:1.5px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:9px; padding:5px 7px; max-width:100%; overflow:hidden;">
-      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(this, ${v.variant_id})" style="width:18px; height:18px; margin:0; flex:0 0 auto; cursor:pointer;">
-      <div style="font-size:13px; font-weight:700; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
-      <div style="display:flex; align-items:center; gap:4px; flex:0 0 auto;">
-        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, -1)" style="width:26px; height:26px; border:none; border-radius:7px; background:#fee2e2; color:#b91c1c; font-size:15px; font-weight:800; cursor:pointer; padding:0;">−</button>
-        <span class="otQtyText" style="min-width:18px; text-align:center; font-size:13px; font-weight:800;">${qty}</span>
-        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:26px; height:26px; border:none; border-radius:7px; background:#dcfce7; color:#15803d; font-size:15px; font-weight:800; cursor:pointer; padding:0;">+</button>
+    <div class="otItemRow" data-variant-id="${v.variant_id}" dir="rtl" style="display:flex; align-items:center; gap:5px; background:#fff; border:1.5px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:9px; padding:5px 6px; max-width:100%; overflow:hidden;">
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(this, ${v.variant_id})" style="width:17px; height:17px; margin:0; flex:0 0 auto; cursor:pointer;">
+      <div style="font-size:12.5px; font-weight:700; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
+      <div style="display:flex; align-items:center; gap:3px; flex:0 0 auto;">
+        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, -1)" style="width:24px; height:24px; border:none; border-radius:6px; background:#fee2e2; color:#b91c1c; font-size:14px; font-weight:800; cursor:pointer; padding:0;">−</button>
+        <span class="otQtyText" style="min-width:16px; text-align:center; font-size:12.5px; font-weight:800;">${qty}</span>
+        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:24px; height:24px; border:none; border-radius:6px; background:#dcfce7; color:#15803d; font-size:14px; font-weight:800; cursor:pointer; padding:0;">+</button>
       </div>
     </div>`;
   }).join('');
