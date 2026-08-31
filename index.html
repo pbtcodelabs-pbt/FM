@@ -48,6 +48,12 @@
   .loginBox h2{margin-bottom:20px; color:var(--primary-dark);}
   .loginBox input{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; text-align:center;}
   .loginBox button{width:100%; padding:12px; margin-top:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;}
+  /* ---------- 🍇 Fruit Mandi POS: لاگ ان ٹیب/بٹن — تھوڑا ابھرا ہوا 3D لُک، فلیٹ رنگ کی بجائے ---------- */  .loginTabWrap{display:flex; gap:6px; margin-bottom:12px; background:linear-gradient(180deg,#e2e8f0,#eef2f7); border-radius:12px; padding:5px; box-shadow:inset 0 1px 3px rgba(0,0,0,.08);}
+  .loginTabBtn{flex:1; padding:10px 6px; border:none; border-radius:9px; font-weight:800; font-size:13px; cursor:pointer; transition:all .15s ease;}
+  .loginTabBtn.tabActive.tabAdmin{background:linear-gradient(180deg,#3b5b8c,#1e3a5f); color:#fff; box-shadow:0 3px 6px rgba(30,58,95,.4), inset 0 1px 0 rgba(255,255,255,.15);}
+  .loginTabBtn.tabActive.tabEmployee{background:linear-gradient(180deg,#14b8a6,#0f766e); color:#fff; box-shadow:0 3px 6px rgba(15,118,110,.4), inset 0 1px 0 rgba(255,255,255,.15);}
+  .loginTabBtn.tabInactive{background:transparent; color:var(--muted);}
+  .loginBtn3d{background:linear-gradient(180deg,#3b5b8c,#1e3a5f) !important; box-shadow:0 4px 8px rgba(30,58,95,.35), inset 0 1px 0 rgba(255,255,255,.2) !important; border:1px solid #16304f !important;}
   .loginHint{margin-top:14px; font-size:12px; color:var(--muted);}
   /* --- 🧪 Test Build لیبل — "Fruit Mandi POS" کی جگہ، اسی بڑے سائز میں، خوبصورت رنگین چمک (صرف aiotestXX.html فائلوں میں نظر آتا ہے)
        پہلے صرف ایک زرد رنگ کی روشنی/مدھم ہوتی تھی جو آنکھوں کو تھکا رہی تھی — اب اس کی جگہ نرم، مسلسل بہتا ہوا رنگین Shimmer ہے --- */
@@ -1857,20 +1863,19 @@
 
     <!-- ---------- 🍇 Fruit Mandi POS: Admin/Employee لاگ ان دو الگ حصوں میں — اوپر ٹیب سے چنیں ---------- -->
     <div id="loginPinWrap" style="display:none;">
-      <div style="display:flex; gap:6px; margin-bottom:12px; background:#f1f5f9; border-radius:10px; padding:4px;">
-        <button type="button" id="loginTabAdminBtn" onclick="switchLoginTab('admin')" style="flex:1; padding:9px; border:none; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer; background:var(--primary); color:#fff;">🔑 Admin Access</button>
-        <button type="button" id="loginTabEmployeeBtn" onclick="switchLoginTab('employee')" style="flex:1; padding:9px; border:none; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer; background:transparent; color:var(--muted);">👤 Employee Login</button>
+      <div class="loginTabWrap">
+        <button type="button" id="loginTabAdminBtn" class="loginTabBtn tabAdmin tabActive" onclick="switchLoginTab('admin')">🔑 Admin<br>Saddam Hussain</button>
+        <button type="button" id="loginTabEmployeeBtn" class="loginTabBtn tabEmployee tabInactive" onclick="switchLoginTab('employee')">👤 Employee<br>Login</button>
       </div>
 
       <!-- ---------- ایڈمن لاگ ان ---------- -->
       <div id="adminLoginPanel">
-        <div style="text-align:center; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:6px;">Saddam Hussain</div>
         <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
         <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
           <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
           🔒 Remember me on this device
         </label>
-        <button onclick="login()">Enter</button>
+        <button class="loginBtn3d" onclick="login()">Enter</button>
       </div>
 
       <!-- ---------- ملازم (Employee) لاگ ان — نام ڈراپ ڈاؤن سے چنیں، پھر اپنا PIN ڈالیں ---------- -->
@@ -1882,7 +1887,7 @@
           <input type="checkbox" id="employeeRememberChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
           🔒 Remember me on this device
         </label>
-        <button onclick="employeeLogin()">Enter</button>
+        <button style="background:linear-gradient(180deg,#14b8a6,#0f766e) !important; box-shadow:0 4px 8px rgba(15,118,110,.35), inset 0 1px 0 rgba(255,255,255,.2); border:1px solid #0a5049 !important;" onclick="employeeLogin()">Enter</button>
         <div class="loginHint" style="margin-top:8px;">
           <a href="javascript:void(0)" onclick="openEmployeePinResetModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Change it with your Date of Birth.</a>
         </div>
@@ -2110,7 +2115,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں ---------- -->
-      <span id="topbarVersionBadge" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px;">FM318MO04</span>
+      <span id="topbarVersionBadge" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px;">FM318MO05</span>
     </div>
   </div>
 
@@ -4182,7 +4187,7 @@
         <!-- --- 🏷️ Build Version — ہر نئی فائل کے ساتھ یہ نمبر بدلتا ہے، سپورٹ کے وقت پتا چلتا ہے کہ کسٹمر کون سا ورژن چلا رہا ہے --- -->
         <div class="settingsCard" style="background:#f4f1ea;">
           <h3 style="font-size:12.5px; color:var(--muted); font-weight:700;">🏷️ Build Version</h3>
-          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;">FM318MO04</div>
+          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;">FM318MO05</div>
         </div>
 
         <!-- --- 💾 اسٹوریج کا استعمال — تاکہ صارف کو ہمیشہ پتا رہے کتنی جگہ بچی ہے، اچانک خاموشی سے ڈیٹا ضائع نہ ہو --- -->
@@ -5818,7 +5823,7 @@ function getDeveloperContact(){
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM318MO04';
+const APP_BUILD_VERSION = 'FM318MO05';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6505,10 +6510,10 @@ function switchLoginTab(tab){
   document.getElementById('employeeLoginPanel').style.display = isAdmin ? 'none' : 'block';
   const adminBtn = document.getElementById('loginTabAdminBtn');
   const empBtn = document.getElementById('loginTabEmployeeBtn');
-  adminBtn.style.background = isAdmin ? 'var(--primary)' : 'transparent';
-  adminBtn.style.color = isAdmin ? '#fff' : 'var(--muted)';
-  empBtn.style.background = isAdmin ? 'transparent' : 'var(--primary)';
-  empBtn.style.color = isAdmin ? 'var(--muted)' : '#fff';
+  adminBtn.classList.toggle('tabActive', isAdmin);
+  adminBtn.classList.toggle('tabInactive', !isAdmin);
+  empBtn.classList.toggle('tabActive', !isAdmin);
+  empBtn.classList.toggle('tabInactive', isAdmin);
   if(!isAdmin) renderEmployeeLoginDropdown();
 }
 
@@ -6516,12 +6521,15 @@ function switchLoginTab(tab){
 function renderEmployeeLoginDropdown(){
   const sel = document.getElementById('employeeLoginSelect');
   if(!sel) return;
+  const prevValue = sel.value;
   const employees = usersData.filter(u => u.role === 'salesman' && u.is_active);
   if(employees.length === 0){
     sel.innerHTML = '<option value="">No employee accounts yet</option>';
     return;
   }
   sel.innerHTML = employees.map(u => `<option value="${u.user_id}">${u.name}</option>`).join('');
+  // ---------- پہلے سے منتخب یوزر اگر اب بھی فہرست میں موجود ہو تو وہی منتخب رہے، ورنہ خاموشی سے پہلے آپشن پر نہ جائے ----------
+  if(prevValue && employees.some(u => String(u.user_id) === prevValue)) sel.value = prevValue;
 }
 
 async function employeeLogin(){
@@ -6610,7 +6618,7 @@ async function finishEmployeePinReset(){
   persistAllData();
   document.getElementById('employeePinResetModal').classList.remove('show');
   document.getElementById('employeePinInput').value = '';
-  alert('✅ Your new PIN has been set. Please log in with it now.');
+  alert(`✅ ${user.name}'s new PIN has been set. Select "${user.name}" from the dropdown and log in with it now.`);
 }
 
 /* =====================================================================
@@ -17407,6 +17415,13 @@ if(!Array.isArray(usersData) || !usersData.some(u => u.role === 'admin' && u.is_
 }
 // ---------- پرانے ڈیوائسز پر محفوظ شدہ یوزرز میں screens فیلڈ نہ ہو تو خالی array لگا دیں (ٹوٹنے سے بچاؤ) ----------
 usersData.forEach(u => { if(!Array.isArray(u.screens)) u.screens = []; });
+// ---------- 🍇 Fruit Mandi POS: اگر اس ڈیوائس پر پرانے سیڈ کے نام (Aslam Bhai/Bilal) پہلے سے محفوظ ہیں تو نئے ناموں پر
+// خودکار منتقل کریں (صرف نام/is_active — ان کا اپنا سیٹ کیا ہوا PIN بالکل نہیں چھیڑا جائے گا)، اور dobHash فیلڈ نہ ہو تو خالی رکھیں ----------
+usersData.forEach(u => {
+  if(u.dobHash === undefined) u.dobHash = '';
+  if(u.role === 'salesman' && u.name === 'Aslam Bhai') u.name = 'Abdul Wahab';
+  if(u.role === 'salesman' && u.name === 'Bilal'){ u.name = 'ABC'; u.is_active = true; }
+});
 let nextUserId = loadFromStorage('nextUserId', 4);
 
 // ---------- ملازم کو دی جا سکنے والی اسکرینز کی فہرست — یہاں سے شامل/ہٹائی جا سکتی ہیں ----------
