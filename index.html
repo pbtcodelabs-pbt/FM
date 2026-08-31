@@ -3982,20 +3982,21 @@
          صرف ایک رف فہرست ہے، جسے بعد میں "Fulfill & Bill" سے اصل بل میں بدلا جا سکتا ہے۔)
          ===================================================================== -->
     <div class="screen" id="screen-advanceorders">
-      <div class="pageTitle">📝 Advance Orders</div>
+      <div class="pageTitle admin-hide-only">📝 Advance Orders</div>
+      <div class="pageTitle admin-only">📋 Pending Orders — Employees</div>
 
-      <div class="partyToolbar">
+      <div class="partyToolbar admin-hide-only">
         <button onclick="openAdvanceOrderModal()" style="flex:1; background:var(--primary); color:#fff; border:none; border-radius:10px; padding:11px; font-weight:700; cursor:pointer;">➕ New Advance Order</button>
         <button onclick="printAdvanceOrdersList()" style="flex:0 0 auto; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; padding:11px 14px; font-weight:700; cursor:pointer;">🖨️ Print List</button>
       </div>
 
-      <div class="modeToggle" style="width:100%; margin:10px 0;">
+      <div class="modeToggle admin-hide-only" style="width:100%; margin:10px 0;">
         <button id="advFilterall" class="active" onclick="setAdvOrderFilter('all')" style="flex:1;">All</button>
         <button id="advFilterpending" onclick="setAdvOrderFilter('pending')" style="flex:1;">⏳ Pending</button>
         <button id="advFilterfulfilled" onclick="setAdvOrderFilter('fulfilled')" style="flex:1;">✅ Fulfilled</button>
       </div>
 
-      <div class="billSummaryBar" id="advOrderSummaryBar"></div>
+      <div class="billSummaryBar admin-hide-only" id="advOrderSummaryBar"></div>
 
       <div id="advOrderListWrap"></div>
     </div>
@@ -4260,9 +4261,27 @@
           <button onclick="applyRateInPreview('wholesale')" style="flex:1; background:#f1f5f9; color:#0f172a; border:1.5px solid #0f172a; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">📦 Rawalpindi Rate</button>
         </div>
 
+        <!-- ---------- ➕ اضافی خرچے — فریٹ/شپنگ/لیبر وغیرہ — صرف ایڈمن کو نظر آئیں، بل مکمل ہونے کے بعد بھی لگائے جا سکتے ہیں ---------- -->
+        <div id="aopExtraChargesPanel" class="admin-only" style="display:none; padding:10px 14px 0;">
+          <div id="aopExtraChargesList" style="display:flex; flex-direction:column; gap:5px; margin-bottom:6px;"></div>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="aopChargeLabel" placeholder="مثلاً: Shipping / Loading" style="flex:1 1 auto; min-width:0; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+            <input type="number" id="aopChargeAmount" placeholder="Rs." style="flex:0 0 80px; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+            <button onclick="addAdvOrderExtraCharge()" style="flex:0 0 auto; background:#eef2ff; color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; padding:0 12px; font-weight:800; font-size:13px; cursor:pointer;">➕</button>
+          </div>
+        </div>
+
         <div class="invoicePreviewScrollArea">
           <canvas id="advOrderCanvas"></canvas>
         </div>
+
+        <!-- ---------- ایڈمن کے لیے: Fulfill/Edit/Delete یہیں پریویو کے اندر سے ---------- -->
+        <div class="previewActions admin-only" id="aopAdminActionsRow">
+          <button class="btnReceiveShipment" onclick="fulfillAdvanceOrder(currentPreviewAdvOrderId)">✅ Fulfill &amp; Bill</button>
+          <button class="btnHistory" onclick="openAdvanceOrderModal(currentPreviewAdvOrderId)">✏️ Edit Items</button>
+          <button class="removeBtn" onclick="deleteAdvOrderFromPreview()">🗑️ Delete</button>
+        </div>
+
         <div class="previewActions">
           <button class="btnPrint" onclick="printAdvOrderPreview()">🖨️ Print</button>
           <button class="btnWhatsapp" onclick="shareAdvOrderWhatsapp()">📱 WhatsApp</button>
@@ -6090,7 +6109,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU05';
+const APP_BUILD_VERSION = 'FM19TU06';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -14986,6 +15005,8 @@ function saveAdvanceOrder(){
       customerName, customerPhone, note,
       items: JSON.parse(JSON.stringify(advOrderCart)),
       status: 'pending',
+      employeeName: AppState.currentUser?.name || 'Unknown',
+      extraCharges: [],
       createdAt: new Date().toISOString(),
       fulfilledAt: null
     });
@@ -15227,6 +15248,8 @@ function postOtOrderToAdmin(){
     note: '',
     items: otReviewItems.map(i => ({variant_id: i.variant_id, name: i.name, label: i.label, qty: i.qty, unitPrice: 0})),
     status: 'pending',
+    employeeName: AppState.currentUser?.name || 'Unknown', // ---------- کس ملازم نے بھیجا — ایڈمن کی سکرین پر ملازم کے نام سے گروپ بندی کے لیے ----------
+    extraCharges: [], // ---------- ایڈمن یہاں بعد میں فریٹ/شپنگ وغیرہ اضافی خرچے شامل کر سکتا ہے ----------
     createdAt: new Date().toISOString(),
     fulfilledAt: null
   });
@@ -15408,7 +15431,9 @@ function deleteAdvanceOrder(orderId){
 
 // ---------- ہر آرڈر کا اندازاً ٹوٹل نکالنے کا مددگار فنکشن ----------
 function advOrderTotal(order){
-  return order.items.reduce((s,i) => s + (i.qty * i.unitPrice), 0);
+  const itemsTotal = order.items.reduce((s,i) => s + (i.qty * i.unitPrice), 0);
+  const chargesTotal = (order.extraCharges || []).reduce((s,c) => s + (Number(c.amount) || 0), 0);
+  return itemsTotal + chargesTotal;
 }
 
 // ---------- اگلے سیل راؤنڈ پر: یہ آرڈر اصل Billing کارٹ میں لوڈ کر دیں تاکہ فوری بل بنایا جا سکے ----------
@@ -15432,6 +15457,7 @@ function fulfillAdvanceOrder(orderId){
   order.fulfilledAt = new Date().toISOString();
   persistAllData();
   renderAdvanceOrdersScreen();
+  if(typeof closeAdvOrderPreview === 'function') closeAdvOrderPreview(); // ---------- پریویو کے اندر سے فُل فِل کیا ہو تو موڈل بھی بند ہو جائے ----------
 
   goTo('billing');
   document.getElementById('custSearchInput') && (document.getElementById('custSearchInput').value = '');
@@ -15451,6 +15477,11 @@ function fulfillAdvanceOrder(orderId){
 }
 
 function renderAdvanceOrdersScreen(){
+  if(AppState.currentRole === 'admin'){
+    renderAdminPendingOrdersScreen();
+    return;
+  }
+
   let filtered = advanceOrdersData;
   if(advOrderListFilter === 'pending') filtered = filtered.filter(o => o.status !== 'fulfilled');
   else if(advOrderListFilter === 'fulfilled') filtered = filtered.filter(o => o.status === 'fulfilled');
@@ -15487,6 +15518,54 @@ function renderAdvanceOrdersScreen(){
           <button class="btnHistory" onclick="openAdvanceOrderModal(${o.id})">✏️ Edit</button>
           <button class="removeBtn" onclick="deleteAdvanceOrder(${o.id})" style="padding:8px 12px;">🗑️</button>
         </div>
+      </div>`;
+  }).join('');
+}
+
+// ---------- ایڈمن کا منظر: "Advance Order" نہیں — یہاں ملازمین کے بھیجے ہوئے PENDING ORDERS ملازم کے نام سے گروپ ہو کر نظر آتے ہیں،
+// ہر کسٹمر پر ٹیپ کرتے ہی اصل بل کھلتا ہے جہاں ریٹ لگا کر فوراً مکمل کیا جا سکتا ہے ---------- 
+function renderAdminPendingOrdersScreen(){
+  const wrap = document.getElementById('advOrderListWrap');
+  if(!wrap) return;
+
+  const pending = advanceOrdersData.filter(o => o.status !== 'fulfilled');
+  if(pending.length === 0){
+    wrap.innerHTML = `<div class="placeholder">فی الحال کوئی پینڈنگ آرڈر موجود نہیں</div>`;
+    return;
+  }
+
+  // ---------- ملازم کے نام سے گروپ بندی ----------
+  const groups = {};
+  pending.forEach(o => {
+    const emp = o.employeeName || 'Unknown';
+    if(!groups[emp]) groups[emp] = [];
+    groups[emp].push(o);
+  });
+
+  wrap.innerHTML = Object.keys(groups).sort().map(emp => {
+    const orders = groups[emp];
+    const empTotal = orders.reduce((s,o) => s + advOrderTotal(o), 0);
+    const rows = orders.map(o => {
+      const hasRate = o.items.some(i => i.unitPrice > 0);
+      const itemCount = o.items.reduce((a,i)=>a+i.qty, 0);
+      const statusTag = hasRate
+        ? `<span class="pendingStatusTag approved">✅ BILL READY</span>`
+        : `<span class="pendingStatusTag pending">⏳ RATE PENDING</span>`;
+      const when = new Date(o.createdAt).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+      return `
+        <div class="billCard" onclick="openAdvOrderPreview(${o.id})" style="cursor:pointer;">
+          <div>
+            <div class="bNo">🧑 ${o.customerName} ${statusTag}</div>
+            <div class="bMeta">${when} — ${itemCount} item(s)${hasRate ? ' — Rs. ' + advOrderTotal(o).toLocaleString() : ''}</div>
+          </div>
+        </div>`;
+    }).join('');
+    return `
+      <div style="margin-bottom:16px;">
+        <div style="font-weight:800; font-size:14.5px; color:var(--primary-dark); background:#eef2ff; padding:9px 12px; border-radius:10px; margin-bottom:6px;">
+          🧑‍💼 ${emp} کے پینڈنگ آرڈرز — ${orders.length} کسٹمر${empTotal > 0 ? ' • Rs. ' + empTotal.toLocaleString() : ''}
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px;">${rows}</div>
       </div>`;
   }).join('');
 }
@@ -15532,9 +15611,61 @@ function closeAdvOrderPreview(){
 // ---------- ریٹ بٹن صرف اسی وقت دکھائیں جب ابھی تک ریٹ نہ لگا ہو — لگتے ہی خودکار غائب ---------- 
 function syncAdvOrderRateRow(order){
   const row = document.getElementById('aopRateApplyRow');
-  if(!row) return;
-  const hasRate = order.items.some(i => i.unitPrice > 0);
-  row.style.display = (!hasRate && order.status !== 'fulfilled') ? 'flex' : 'none';
+  if(row){
+    const hasRate = order.items.some(i => i.unitPrice > 0);
+    row.style.display = (!hasRate && order.status !== 'fulfilled') ? 'flex' : 'none';
+  }
+  renderAdvOrderExtraCharges(order);
+}
+
+// ---------- اضافی خرچے (فریٹ/شپنگ/لیبر وغیرہ) — صرف ایڈمن، بل کے اندر کہیں بھی جوڑے جا سکتے ہیں ---------- 
+function renderAdvOrderExtraCharges(order){
+  const panel = document.getElementById('aopExtraChargesPanel');
+  const list = document.getElementById('aopExtraChargesList');
+  if(!panel || !list) return;
+  if(AppState.currentRole === 'admin') panel.style.display = 'block'; // ---------- صرف ایڈمن کو نظر آئے — CSS کی .admin-only کلاس یہاں انحصار پذیر نہیں رکھ سکتے کیونکہ inline style اسے override کر دیتی، اس لیے یہاں رول خود چیک کیا جا رہا ہے ----------
+  const charges = order.extraCharges || [];
+  list.innerHTML = charges.length === 0 ? '' : charges.map((c, idx) => `
+    <div style="display:flex; align-items:center; justify-content:space-between; background:#f8fafc; border:1px solid #e5e9f0; border-radius:8px; padding:6px 10px; font-size:12.5px; font-weight:700;">
+      <span>${c.label}</span>
+      <span style="display:flex; align-items:center; gap:8px;">Rs. ${Number(c.amount).toLocaleString()}
+        <span onclick="removeAdvOrderExtraCharge(${idx})" style="cursor:pointer; color:#b91c1c; font-weight:800;">✕</span>
+      </span>
+    </div>`).join('');
+}
+
+function addAdvOrderExtraCharge(){
+  if(!currentPreviewAdvOrderId) return;
+  const order = advanceOrdersData.find(o => o.id === currentPreviewAdvOrderId);
+  if(!order) return;
+  const labelEl = document.getElementById('aopChargeLabel');
+  const amountEl = document.getElementById('aopChargeAmount');
+  const label = (labelEl.value || '').trim();
+  const amount = Number(amountEl.value) || 0;
+  if(!label || amount <= 0){ alert('خرچے کا نام اور رقم دونوں درج کریں'); return; }
+  if(!order.extraCharges) order.extraCharges = [];
+  order.extraCharges.push({label, amount});
+  labelEl.value = '';
+  amountEl.value = '';
+  persistAllData();
+  renderAdvOrderExtraCharges(order);
+  renderAdvOrderToCanvas(order);
+}
+
+function removeAdvOrderExtraCharge(idx){
+  if(!currentPreviewAdvOrderId) return;
+  const order = advanceOrdersData.find(o => o.id === currentPreviewAdvOrderId);
+  if(!order || !order.extraCharges) return;
+  order.extraCharges.splice(idx, 1);
+  persistAllData();
+  renderAdvOrderExtraCharges(order);
+  renderAdvOrderToCanvas(order);
+}
+
+function deleteAdvOrderFromPreview(){
+  if(!currentPreviewAdvOrderId) return;
+  deleteAdvanceOrder(currentPreviewAdvOrderId);
+  closeAdvOrderPreview();
 }
 
 // ---------- پریویو کے اندر سے ہی ایک ٹیپ میں ریٹ لگائیں — بل فوراً مکمل ہو کر پرنٹ/شیئر کے لیے تیار ---------- 
@@ -15721,7 +15852,9 @@ async function renderAdvOrderToCanvas(order, canvasEl){
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
   const fmt = (n) => (Number(n)||0).toFixed(decimals);
   const m = useA4 ? 1.6 : 1; // ---------- A4 پر اضافی مارجن/سپیسنگ ----------
-  let estimatedHeight = (30 + 26 + 22 + 22 + 54 + 26 + 40 + 30 + 40) * scale + tableH;
+  const hasRate = order.items.some(i => i.unitPrice > 0); // ---------- ریٹ لگ چکا ہو تو یہ اصل بل ہے — "ADVANCE ORDER" بینر کی ضرورت نہیں ----------
+  const charges = order.extraCharges || [];
+  let estimatedHeight = (30 + 26 + 22 + 22 + (hasRate ? 20 : 54) + 26 + 40 + 30 + 40) * scale + tableH + (charges.length * 20 * scale);
   if(useA4) estimatedHeight += 80;
   if(AppState.settings.businessAddress) estimatedHeight += 16 * scale;
   if(AppState.settings.businessPhone) estimatedHeight += 16 * scale;
@@ -15752,22 +15885,27 @@ async function renderAdvOrderToCanvas(order, canvasEl){
     if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += 16 * scale; }
   }
 
-  // ---------- بڑا واضح بینر — صرف "ADVANCE ORDER" — خالص بلیک اینڈ وائٹ (صدام کی ہدایت پر تھیم کلر ہٹا دیا گیا) ----------
-  y += 6 * scale;
-  const bannerTop = y, bannerH = 34 * scale;
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(tableLeft + 1, bannerTop + 1, tableRight - tableLeft - 2, bannerH - 2);
-  ctx.fillStyle = '#000';
-  ctx.font = F('bold 19px');
-  ctx.fillText('📝 ADVANCE ORDER', pxWidth/2, bannerTop + bannerH/2 + 7 * scale);
-  y = bannerTop + bannerH + 16 * scale;
-  ctx.fillStyle = '#000';
+  // ---------- بڑا واضح بینر — صرف اسی وقت جب ابھی تک ریٹ نہ لگا ہو (یعنی ابھی واقعی ایک Advance Order ہے) —
+  // ریٹ لگتے ہی یہ اصل بل بن جاتا ہے، بینر کی ضرورت نہیں رہتی — خالص بلیک اینڈ وائٹ ---------- -->
+  if(!hasRate){
+    y += 6 * scale;
+    const bannerTop = y, bannerH = 34 * scale;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(tableLeft + 1, bannerTop + 1, tableRight - tableLeft - 2, bannerH - 2);
+    ctx.fillStyle = '#000';
+    ctx.font = F('bold 19px');
+    ctx.fillText('📝 ADVANCE ORDER', pxWidth/2, bannerTop + bannerH/2 + 7 * scale);
+    y = bannerTop + bannerH + 16 * scale;
+    ctx.fillStyle = '#000';
+  } else {
+    y += 10 * scale;
+  }
 
   ctx.font = F('bold 15px');
   const dateObj = new Date(order.createdAt);
   const dd = String(dateObj.getDate()).padStart(2,'0'), mm2 = String(dateObj.getMonth()+1).padStart(2,'0'), yy = String(dateObj.getFullYear()).slice(-2);
-  ctx.fillText(`Advance Order #${order.id} — ${dd}/${mm2}/${yy}`, pxWidth/2, y); y += 22 * scale;
+  ctx.fillText(`${hasRate ? 'Bill' : 'Advance Order'} #${order.id} — ${dd}/${mm2}/${yy}`, pxWidth/2, y); y += 22 * scale;
 
   ctx.font = F('16px');
   ctx.fillText('Customer: ' + order.customerName, pxWidth/2, y); y += 20 * scale;
@@ -15850,7 +15988,20 @@ async function renderAdvOrderToCanvas(order, canvasEl){
     drawTableHLine(hLineY);
   });
 
-  y = tableTop + tableH + 26 * scale;
+  y = tableTop + tableH + 20 * scale;
+
+  // ---------- اضافی خرچے (فریٹ/شپنگ/لیبر وغیرہ) — آئٹمز ٹیبل کے بعد، گرینڈ ٹوٹل سے پہلے ----------
+  if(charges.length > 0){
+    ctx.font = F('13px');
+    charges.forEach(c => {
+      ctx.textAlign = 'left';
+      ctx.fillText(c.label, tableLeft, y);
+      ctx.textAlign = 'right';
+      ctx.fillText('Rs. ' + fmt(c.amount), tableRight, y);
+      y += 20 * scale;
+    });
+    y += 6 * scale;
+  }
 
   ctx.textAlign = 'left';
   ctx.font = F('bold 20px');
@@ -18215,20 +18366,29 @@ usersData.forEach(u => {
 });
 let nextUserId = loadFromStorage('nextUserId', 4);
 
-// ---------- ملازم کو دی جا سکنے والی اسکرینز کی فہرست — یہاں سے شامل/ہٹائی جا سکتی ہیں ----------
+// ---------- ملازم کو دی جا سکنے والی اسکرینز کی فہرست — اب سائیڈ مینیو میں موجود ہر اسکرین یہاں بھی شامل ہے
+// (پہلے یہ فہرست پرانی/نامکمل تھی — Order Taking، Recovery List وغیرہ نئی اسکرینیں اس میں شامل نہیں تھیں) ---------- -->
 const ASSIGNABLE_SCREENS = [
   {key:'billing', label:'🛒 Billing'},
-  {key:'advanceorders', label:'📋 Advance Orders'},
+  {key:'orderTaking', label:'🧾 Order Taking'},
+  {key:'advanceorders', label:'📝 Advance Orders'},
+  {key:'recoveryList', label:'💰 Recovery List'},
   {key:'billhistory', label:'🧾 Bill History'},
   {key:'payments', label:'💳 Payments'},
   {key:'dashboard', label:'📊 Dashboard'},
   {key:'products', label:'📦 Products'},
+  {key:'categories', label:'🏷️ Categories'},
   {key:'customers', label:'🧑‍🤝‍🧑 Customers'},
   {key:'suppliers', label:'🚚 Suppliers'},
   {key:'purchaseorders', label:'📦 Purchase Orders'},
   {key:'stockadjustment', label:'🧮 Stock Adjustment'},
   {key:'expenditure', label:'💸 Expenditure'},
+  {key:'trends', label:'📈 Trends'},
   {key:'myaccount', label:'🏦 My Account'},
+  {key:'mydiary', label:'📔 My Diary'},
+  {key:'billsettings', label:'🖨️ Bill & Print Settings'},
+  {key:'settings', label:'⚙️ Settings'},
+  {key:'users', label:'🔑 Users'},
 ];
 
 /* =====================================================================
