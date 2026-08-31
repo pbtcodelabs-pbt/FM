@@ -2110,7 +2110,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں ---------- -->
-      <span id="topbarVersionBadge" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px;">FM318MO03</span>
+      <span id="topbarVersionBadge" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px;">FM318MO04</span>
     </div>
   </div>
 
@@ -4182,7 +4182,7 @@
         <!-- --- 🏷️ Build Version — ہر نئی فائل کے ساتھ یہ نمبر بدلتا ہے، سپورٹ کے وقت پتا چلتا ہے کہ کسٹمر کون سا ورژن چلا رہا ہے --- -->
         <div class="settingsCard" style="background:#f4f1ea;">
           <h3 style="font-size:12.5px; color:var(--muted); font-weight:700;">🏷️ Build Version</h3>
-          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;">FM318MO03</div>
+          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;">FM318MO04</div>
         </div>
 
         <!-- --- 💾 اسٹوریج کا استعمال — تاکہ صارف کو ہمیشہ پتا رہے کتنی جگہ بچی ہے، اچانک خاموشی سے ڈیٹا ضائع نہ ہو --- -->
@@ -5818,7 +5818,7 @@ function getDeveloperContact(){
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM318MO03';
+const APP_BUILD_VERSION = 'FM318MO04';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6398,7 +6398,10 @@ async function setupLoginScreen(){
     const admin = usersData.find(u => u.role === 'admin' && u.is_active);
     const stillDefaultPin = admin && admin.pin === defaultHash;
 
-    const skipPin = stillDefaultPin || trialActive;
+    // ---------- 🍇 Fruit Mandi POS: پہلے یہاں "PIN ابھی تک ڈیفالٹ ہو یا Trial چل رہی ہو تو لاگ ان اسکرین خودکار چھوڑ دیں" والا رویہ تھا —
+    // اسی وجہ سے Admin کا نیا/اپنی مرضی کا PIN سیٹ کرنے کے باوجود لاگ ان اسکرین کبھی نظر ہی نہیں آتی تھی۔
+    // اب حقیقی کاروبار شروع ہو چکا ہے، اس لیے یہ خودکار Skip ہمیشہ بند رکھیں — لاگ ان اسکرین (Admin/Employee) ہمیشہ دکھے گی ---------- -->
+    const skipPin = false;
     document.getElementById('loginQuickEnterWrap').style.display = skipPin ? 'block' : 'none';
     document.getElementById('loginPinWrap').style.display = skipPin ? 'none' : 'block';
     if(!skipPin) switchLoginTab('admin');
