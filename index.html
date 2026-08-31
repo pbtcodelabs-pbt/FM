@@ -5963,7 +5963,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM318MO23';
+const APP_BUILD_VERSION = 'FM318MO24';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -15028,7 +15028,7 @@ async function renderAdvOrderToCanvas(order){
   const tableH = headerH + (order.items.length * rowH);
 
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.advOrderFontId) || FONT_PRESETS[0];
-  const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const canvasFontFamily = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: بلوں/رپورٹس میں نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی — اب منتخب شدہ فونٹ ہی پرنٹ/رپورٹ کینوس پر حقیقتاً لاگو ہوتا ہے ----------
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
   const fmt = (n) => (Number(n)||0).toFixed(decimals);
   const m = useA4 ? 1.6 : 1; // ---------- A4 پر اضافی مارجن/سپیسنگ ----------
@@ -15328,7 +15328,7 @@ async function renderPoToCanvas(){
   const tableH = headerH + (po.items.length * rowH);
 
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.poFontId) || FONT_PRESETS[0];
-  const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const canvasFontFamily = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: بلوں/رپورٹس میں نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی — اب منتخب شدہ فونٹ ہی پرنٹ/رپورٹ کینوس پر حقیقتاً لاگو ہوتا ہے ----------
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
   const fmt = (n) => (Number(n)||0).toFixed(decimals);
 
@@ -18438,7 +18438,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // صرف نستعلیق کا استثناء ہے: اس کا پیچیدہ عمودی اسٹرکچر چھوٹے تھرمل ڈاٹس پر دھندلا سکتا ہے، اس لیے
   // نستعلیق منتخب ہونے پر پرنٹ خودکار طور پر صاف Arial پر چلا جاتا ہے (باقی سب فونٹ جوں کے توں پرنٹ ہوں گے)۔
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.printFontId) || FONT_PRESETS[0];
-  const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const canvasFontFamily = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: بلوں/رپورٹس میں نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی — اب منتخب شدہ فونٹ ہی پرنٹ/رپورٹ کینوس پر حقیقتاً لاگو ہوتا ہے ----------
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${canvasFontFamily}`;
 
   // ---------- ڈرائنگ سے پہلے یقینی بنائیں کہ منتخب فونٹ مکمل لوڈ ہو چکا ہے (خصوصاً پہلی بار Google Font کے لیے) ----------
@@ -18869,7 +18869,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.fillRect(0, 0, pxWidth, estimatedHeight);
 
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.printFontId) || FONT_PRESETS[0];
-  const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const fontFam = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی ----------
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${fontFam}`; // ---------- اب ہر فونٹ سائز بھی Text سلائیڈر کے ساتھ بدلتا ہے ----------
   try{
     await document.fonts.load(`bold 30px ${fontFam}`);
@@ -22680,7 +22680,7 @@ async function renderReportToCanvas(){
   const decimals = AppState.settings.reportPriceDecimals ?? 0; // ---------- بل کی طرح — رپورٹ کی قیمتوں کے ڈیسیمل پوائنٹس کنٹرول ----------
 
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
-  const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const fontFam = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی ----------
   try{
     await document.fonts.load(`bold 20px ${fontFam}`);
     await document.fonts.load(`13px ${fontFam}`);
@@ -23052,7 +23052,7 @@ async function renderTodaySaleReportToCanvas(){
   const align = AppState.settings.reportAlign || 'left';
   const decimals = AppState.settings.reportPriceDecimals ?? 0;
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
-  const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const fontFam = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی ----------
   try{
     await document.fonts.load(`bold 20px ${fontFam}`);
     await document.fonts.load(`13px ${fontFam}`);
@@ -23588,7 +23588,7 @@ async function renderDiarySummaryReportToCanvas(){
   const decimals = AppState.settings.reportPriceDecimals ?? 0;
   const fmt = (n) => Number(n||0).toFixed(decimals);
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
-  const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const fontFam = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی ----------
   try{
     await document.fonts.load(`bold 20px ${fontFam}`);
     await document.fonts.load(`13px ${fontFam}`);
