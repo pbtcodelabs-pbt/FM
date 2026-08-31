@@ -37,6 +37,23 @@
     --font-weight:400;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  /* ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر Category والی تمام UI (Billing/Advance Orders/
+  Purchase Orders/Stock Adjustment/Products کی کیٹگری ریل، ڈراپ ڈاؤن اور فلٹر) پوری ایپ سے چھپا دی
+  گئی ہے — کوڈ ڈیلیٹ نہیں کیا گیا، صرف display:none کیا گیا ہے ---------- */
+  #billingCategoryDropdownWrap, #advOrderCategoryDropdownWrap, #categoryRail, #poCategoryRail,
+  #stockAdjCategoryFilter{ display:none !important; }
+  /* ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر پرنٹنگ صرف 58/80mm تھرمل (بلوٹوتھ/فاسٹ ٹیکسٹ) اور
+  WhatsApp شیئر تک محدود کر دی گئی ہے — A4/PDF پرنٹنگ اور Android کا یونیورسل پرنٹ ڈائیلاگ (window.print()
+  کے ذریعے) پوری ایپ سے (بل، ایڈوانس آرڈر، پرچیز آرڈر، رپورٹس) چھپا دیا گیا ہے۔ کوڈ ڈیلیٹ نہیں کیا گیا ---------- */
+  #pscOrientRow, #aopscOrientRow, #popscOrientRow, #rpscOrientRow,
+  #pscA4ShareRow, #aopA4ShareRow, #poA4ShareRow, #rpA4ShareRow,
+  .pscCompactRow:has(#pscA4Chk), .pscCompactRow:has(#aopscA4Chk),
+  .pscCompactRow:has(#popscA4Chk), .pscCompactRow:has(#rpscA4Chk),
+  button[onclick^="printCurrentInvoice"], button[onclick^="printAdvOrderPreview"],
+  button[onclick^="printPoPreview"], button[onclick^="printCurrentReport"],
+  button[onclick^="shareInvoiceUniversal"], button[onclick^="shareAdvOrderUniversal"],
+  button[onclick^="sharePoUniversal"], button[onclick^="shareReportUniversal"]
+  { display:none !important; }
   body{font-family:var(--font); font-weight:var(--font-weight); background:var(--bg); color:var(--text); height:100vh; overflow:hidden;}
 
   /* ===================== LOGIN SCREEN ===================== */
@@ -5866,7 +5883,7 @@ function getDeveloperContact(){
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM318MO08';
+const APP_BUILD_VERSION = 'FM318MO10';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6209,8 +6226,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   ]},
   { section: '🛠️ Tools', tiles: [
     {icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
-    {icon:'📋', label:'Reply Templates', action:'openReplyTemplatesModal'},
-    // ---------- 🍇 Fruit Mandi POS: "Package Plans" ٹائل ہوم پیج سے ہائیڈ کر دی گئی ہے (کوڈ/فیچر محفوظ ہے، صرف سامنے نہیں دکھائی جا رہی) ----------
+    // ---------- 🍇 Fruit Mandi POS: "Package Plans" اور "Reply Templates" ٹائلز ہوم پیج سے ہائیڈ کر دی گئی ہیں (کوڈ/فیچر محفوظ ہے، صرف سامنے نہیں دکھائی جا رہی) ----------
   ]},
   { section: '🔴 Liabilities', tiles: [
     {icon:'💸', label:'Expenditure', screen:'expenditure'},
@@ -7136,8 +7152,7 @@ const APP_SEARCH_INDEX = [
   {label:'Settings — Print Text Size', path:'Bill & Print Settings', screen:'billsettings', keywords:'print text size bill font size receipt'},
   {label:'Settings — Barcode Labels', path:'Bill & Print Settings', screen:'billsettings', keywords:'barcode labels print sticker code39 copies variant'},
   {label:'Settings — Storage Usage', path:'Settings', screen:'settings', anchor:'storageUsageCard', keywords:'storage usage space full device limit photos mb used'},
-  {label:'Reply Templates', path:'Home → Tools', action:'openReplyTemplatesModal', keywords:'reply templates canned message whatsapp sms quick reply payment reminder thank you'},
-  // ---------- 🍇 Fruit Mandi POS: "Package Plans" کو App Search میں سے بھی ہٹا دیا گیا ہے (تاکہ سرچ کر کے بھی نہ کھل سکے) ----------
+  // ---------- 🍇 Fruit Mandi POS: "Package Plans" اور "Reply Templates" کو App Search میں سے بھی ہٹا دیا گیا ہے (تاکہ سرچ کر کے بھی نہ کھل سکیں) ----------
 ];
 
 // ---------- 🔍 App Search بار — کمپیکٹ (صرف آئیکن)، دبانے پر کھلتی ہے، باہر ٹیپ کرنے یا نتیجہ چننے پر خودکار بند ----------
