@@ -209,6 +209,18 @@
     border-radius:20px; margin:-6px; padding:6px 10px 18px;
   }
   .homeIconGrid{display:flex; flex-direction:column; gap:1px; margin-top:2px;}
+  /* ---------- 📂 "دیگر فیچرز" ڈراپ ڈاؤن — Products اور Billing کے علاوہ باقی سب سیٹنگز/فیچرز یہاں ایک لائن فہرست میں، آئیکنز کا ڈھیر نہیں ---------- */
+  .otherFeaturesDropWrap{position:relative; margin-top:10px;}
+  .otherFeaturesBtn{width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:13px 16px; border-radius:12px; border:1.5px solid rgba(15,118,110,.18); background:var(--card); color:var(--text); font-size:14px; font-weight:800; cursor:pointer;}
+  .ofdArrow{transition:transform .15s ease; font-size:11px; color:var(--muted);}
+  .otherFeaturesDropWrap.open .ofdArrow{transform:rotate(180deg);}
+  .otherFeaturesList{display:none; margin-top:6px; background:var(--card); border-radius:12px; box-shadow:var(--shadow); overflow-y:auto; max-height:360px;}
+  .otherFeaturesDropWrap.open .otherFeaturesList{display:block;}
+  .ofdItem{display:flex; align-items:center; gap:10px; padding:13px 16px; font-size:13.5px; font-weight:700; border-bottom:1px solid #f1f5f9; cursor:pointer;}
+  .ofdItem:last-child{border-bottom:none;}
+  .ofdItem:active{background:#f8fafc;}
+  .ofdIcon{font-size:16px; flex:0 0 auto;}
+  .ofdLabel{flex:1; min-width:0;}
   .homeSectionLabel{
     display:flex; align-items:center; gap:6px; font-size:10px; font-weight:800; letter-spacing:.4px;
     color:var(--primary-dark); text-transform:uppercase; margin:9px 2px 5px; opacity:.92;
@@ -718,7 +730,8 @@
 
   /* --- نام + قیمت تصویر کے اوپر، نیچے کی طرف، ہلکے گہرے پس منظر کے ساتھ (پڑھنے میں آسانی) --- */
   .pgCaption{position:absolute; left:0; right:0; bottom:0; background:linear-gradient(transparent, rgba(0,0,0,.72) 65%); padding:14px 6px 5px; text-align:center;}
-  .pgCaption .pgName{font-weight:700; line-height:1.15; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6);}
+  /* ---------- نام کبھی درمیان سے کٹے نہیں — ضرورت پڑنے پر 2 لائنوں میں لپٹ جائے (پہلے ایک ہی لائن میں ... سے کٹتا تھا) ---------- */
+  .pgCaption .pgName{font-weight:700; line-height:1.15; overflow:hidden; white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; word-break:break-word; width:100%; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6);}
   .pgCaption .pgPrice{font-weight:800; font-size:11px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6);}
 
   /* --- بٹنوں کی الگ پٹی، تصویر کے نیچے، کبھی اس پر نہیں چڑھتی --- */
@@ -2172,7 +2185,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں ---------- -->
-      <span id="topbarVersionBadge" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px;">FM318MO06</span>
+      <span id="topbarVersionBadge" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px;"></span>
     </div>
   </div>
 
@@ -2282,6 +2295,15 @@
 
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — ہر بڑے سیکشن کا دروازہ ---------- -->
       <div class="homeIconGrid" id="homeIconGrid"></div>
+
+      <!-- ---------- 📂 "دیگر فیچرز" — Products اور Billing کے علاوہ باقی تمام سیٹنگز/فیچرز اسی ڈراپ ڈاؤن کے اندر ---------- -->
+      <div class="otherFeaturesDropWrap" id="otherFeaturesDropWrap" style="display:none;">
+        <button class="otherFeaturesBtn" onclick="toggleOtherFeaturesDrop(event)">
+          <span>📂 دیگر فیچرز / Other Features</span>
+          <span class="ofdArrow">▾</span>
+        </button>
+        <div class="otherFeaturesList" id="otherFeaturesList"></div>
+      </div>
     </div>
 
     <div class="screen" id="screen-billing">
@@ -2327,7 +2349,9 @@
       <!-- ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر کسٹمر سلیکشن اب پہلے ہی صفحے پر —
            کارٹ کھولنے کا انتظار نہیں، بل بننا شروع ہوتے ہی یہیں سے کسٹمر منتخب/ایڈ کریں (کوڈ نیچے سے یہیں
            منتقل کیا گیا ہے، فنکشنز وہی پرانے ہیں) ---------- -->
-      <div id="cartWalkinBanner" style="display:flex; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8; font-weight:700; font-size:13.5px; align-items:center; justify-content:space-between; gap:6px;">
+      <!-- ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر "Walk-in Customer" کی پوری لائن ہوم/بلنگ صفحے سے چھپا دی گئی ہے
+           (کوڈ محفوظ ہے، صرف display:none) — اب صرف نیچے "Select Customer" ہی نظر آئے گا ---------- -->
+      <div id="cartWalkinBanner" style="display:none; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8; font-weight:700; font-size:13.5px; align-items:center; justify-content:space-between; gap:6px;">
         <span id="cartCustomerStatusText">🚶 Walk-in Customer <span style="font-weight:500; color:var(--muted); font-size:11.5px;">(no name on bill)</span></span>
         <button type="button" id="cartEndCustomerBtn" onclick="endCustomerSelection()" title="Clear selected customer and go back to Walk-in"
                 style="display:none; flex:0 0 auto; border:1px solid #f3b985; background:#fff; color:#b45309; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">✖ End</button>
@@ -2335,10 +2359,11 @@
 
       <div id="customerSelectRow" style="display:flex; flex-direction:column; gap:6px; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8;">
         <div style="display:flex; gap:6px;">
+          <!-- ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر نام/فون سرچ باکس چھپا دیا گیا — اب صرف Area فلٹر + Select Customer ---------- -->
           <input type="text" id="custSearchInput" placeholder="🔍 Search customer by name/phone..." onfocus="openCustomerList()" oninput="openCustomerList(); filterCustomerSelectOptions();"
-                 style="flex:1 1 auto; min-width:0; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+                 style="display:none; flex:1 1 auto; min-width:0; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
           <select id="custAreaFilter" onchange="filterCustomerSelectOptions()" title="Filter by City/Area"
-                  style="flex:0 0 120px; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+                  style="flex:1 1 auto; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
             <option value="">🗺️ All Areas</option>
           </select>
         </div>
@@ -2550,7 +2575,9 @@
           <button type="button" onclick="triggerNewProductPhotoUpload()" style="padding:6px 14px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:8px; color:var(--muted); cursor:pointer; font-size:12px;">📷 Add Photo</button>
         </div>
         <input type="text" id="npName" placeholder="Product name (e.g. Lipton Tea)">
-        <input type="text" id="npCategory" placeholder="Category (optional)" list="categoryDatalist" autocomplete="off">
+        <!-- ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر Category والا خانہ پراڈکٹ ایڈ کرتے وقت ہٹا دیا گیا ہے
+             (کوڈ محفوظ ہے، صرف چھپایا گیا ہے) — نیا پراڈکٹ سیدھا بغیر کیٹگری کے شامل ہوگا ---------- -->
+        <input type="text" id="npCategory" placeholder="Category (optional)" list="categoryDatalist" autocomplete="off" style="display:none;">
         <datalist id="categoryDatalist"></datalist>
         <div style="display:none; gap:8px; margin-bottom:10px;">
           <input type="text" id="npBarcode" placeholder="Barcode (scan or type — optional)" style="flex:1; margin-bottom:0;">
@@ -4247,7 +4274,7 @@
         <!-- --- 🏷️ Build Version — ہر نئی فائل کے ساتھ یہ نمبر بدلتا ہے، سپورٹ کے وقت پتا چلتا ہے کہ کسٹمر کون سا ورژن چلا رہا ہے --- -->
         <div class="settingsCard" style="background:#f4f1ea;">
           <h3 style="font-size:12.5px; color:var(--muted); font-weight:700;">🏷️ Build Version</h3>
-          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;">FM318MO06</div>
+          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;"></div>
         </div>
 
         <!-- --- 💾 اسٹوریج کا استعمال — تاکہ صارف کو ہمیشہ پتا رہے کتنی جگہ بچی ہے، اچانک خاموشی سے ڈیٹا ضائع نہ ہو --- -->
@@ -5885,7 +5912,7 @@ function getDeveloperContact(){
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM318MO11';
+const APP_BUILD_VERSION = 'FM318MO12';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6275,10 +6302,16 @@ function renderHomeIconGrid(){
     </button>`;
 
   if(AppState.currentRole === 'admin'){
-    // ---------- 🍇 Fruit Mandi POS: کیٹگری وائز سیکشن ہیڈنگز ہٹا دی گئیں — اب سب آئیکن ایک ہی فہرست میں، نام کے حساب سے A-Z ترتیب میں ----------
-    const sortedTiles = HOME_TILES_ADMIN.slice().sort((a, b) => a.label.localeCompare(b.label));
-    grid.innerHTML = `<div class="homeSectionGrid">${sortedTiles.map(tileHtml).join('')}</div>`;
+    // ---------- 🧭 صدام کی ہدایت پر: ہوم پیج پر صرف "Billing" اور "Products" آئیکن کی صورت میں رہیں گے —
+    // باقی تمام سیٹنگز/فیچرز (Payments, Dashboard, Reports, My Account, Users, Settings وغیرہ) اب آئیکنز کے
+    // ڈھیر کی بجائے نیچے "دیگر فیچرز" ڈراپ ڈاؤن کے اندر ایک لائن فہرست کے طور پر ملیں گے ----------
+    const mainKeys = ['billing', 'products'];
+    const mainTiles = mainKeys.map(k => HOME_TILES_ADMIN.find(t => t.screen === k)).filter(Boolean);
+    const otherTiles = HOME_TILES_ADMIN.filter(t => !mainKeys.includes(t.screen)).sort((a, b) => a.label.localeCompare(b.label));
+    grid.innerHTML = `<div class="homeSectionGrid">${mainTiles.map(tileHtml).join('')}</div>`;
+    renderOtherFeaturesDrop(otherTiles);
   } else {
+    document.getElementById('otherFeaturesDropWrap').style.display = 'none';
     // ---------- 🔧 فکس: پہلے یہاں ہمیشہ ایک fixed فہرست (Billing/Bill History/Advance Orders) دکھائی جاتی
     // تھی — چاہے صدام نے Users اسکرین میں ملازم کو کوئی بھی اور اسکرینز assign کی ہوں۔ اب اسی ملازم کی
     // اپنی assigned screens (u.screens, ASSIGNABLE_SCREENS سے) کے مطابق ہوم پیج کے آئیکن بنائے جاتے ہیں —
@@ -6302,6 +6335,32 @@ function renderHomeIconGrid(){
     grid.innerHTML = salesmanTiles.map(tileHtml).join('');
   }
 }
+
+// ---------- 📂 "دیگر فیچرز" ڈراپ ڈاؤن بھریں — ہر چیز ایک لائن میں، ٹیپ کرنے پر سیدھا وہی اسکرین کھلے ----------
+function renderOtherFeaturesDrop(tiles){
+  const wrap = document.getElementById('otherFeaturesDropWrap');
+  const list = document.getElementById('otherFeaturesList');
+  if(!wrap || !list) return;
+  wrap.style.display = 'block';
+  list.innerHTML = tiles.map(t => `
+    <div class="ofdItem" onclick="closeOtherFeaturesDrop(); ${t.action ? t.action + '()' : `goTo('${t.screen}')`};">
+      <span class="ofdIcon">${t.icon}</span><span class="ofdLabel">${t.label}</span>
+    </div>`).join('');
+}
+let otherFeaturesDropOpen = false;
+function toggleOtherFeaturesDrop(e){
+  if(e) e.stopPropagation();
+  otherFeaturesDropOpen = !otherFeaturesDropOpen;
+  document.getElementById('otherFeaturesDropWrap')?.classList.toggle('open', otherFeaturesDropOpen);
+}
+function closeOtherFeaturesDrop(){
+  otherFeaturesDropOpen = false;
+  document.getElementById('otherFeaturesDropWrap')?.classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('otherFeaturesDropWrap');
+  if(wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) closeOtherFeaturesDrop();
+});
 
 function renderHomeBusinessCard(){
   const s = AppState.settings;
@@ -8112,7 +8171,15 @@ function renderBillingProductGrid(){
 
   // ---------- ایک لائن میں اصل میں کتنے کارڈز فٹ ہوتے ہیں معلوم کریں (فون/ٹیبلٹ ہر ایک پر مختلف ہو سکتا ہے) ----------
   const gridWidth = grid.clientWidth || 320;
-  const numCols = Math.max(1, Math.floor((gridWidth + 6) / (84 + 6)));
+  const forcedCols = AppState.settings.billingGridCols || 0; // 0 = Auto، ورنہ صارف کی اپنی منتخب کردہ تعداد (3/4/5/6)
+  const numCols = forcedCols > 0 ? forcedCols : Math.max(1, Math.floor((gridWidth + 6) / (84 + 6)));
+
+  // ---------- اگر صارف نے "ایک لائن میں کتنے آئٹم" خود منتخب کیا ہو تو گرڈ کو اسی تعداد پر فکس کریں، ورنہ خودکار fill پر چھوڑ دیں ----------
+  if(forcedCols > 0){
+    grid.style.gridTemplateColumns = `repeat(${forcedCols}, 1fr)`;
+  } else {
+    grid.style.gridTemplateColumns = '';
+  }
 
   // ---------- پہلی لائن = ہاٹ سیلنگ پراڈکٹس (صرف وہ جو واقعی بک چکے ہوں)، یہ ہمیشہ فکس رہیں گے ----------
   const hotItems = bySales.filter(p => p.totalSalesCount > 0).slice(0, numCols);
@@ -8137,8 +8204,11 @@ function renderBillingProductGrid(){
   grid.innerHTML = displayList.map(p => {
     const isHot = hotIds.has(p.product_id);
     const isSingleVariant = p.variants.length === 1;
-    // ---------- نام لمبا ہو تو باریک، چھوٹا ہو تو اچھا موٹا سائز ----------
-    const nameFontSize = p.name.length > 18 ? '8.5px' : p.name.length > 13 ? '9.5px' : '10.5px';
+    // ---------- نام لمبا ہو تو باریک، چھوٹا ہو تو اچھا موٹا سائز — اور جتنے زیادہ کارڈ ایک لائن میں ہوں (numCols) اتنا ہی سائز خودکار مزید چھوٹا ہو، تاکہ لکھائی کبھی کارڈ سے باہر نہ نکلے یا کٹے ----------
+    const colsShrink = numCols >= 6 ? 3 : numCols === 5 ? 2 : numCols === 4 ? 1 : 0;
+    const userBaseSize = AppState.settings.productCardNameSize || 13;
+    const autoBaseSize = p.name.length > 18 ? 8.5 : p.name.length > 13 ? 9.5 : 10.5;
+    const nameFontSize = Math.max(7, Math.min(userBaseSize, autoBaseSize) - colsShrink) + 'px';
 
     let priceLabel, qtyBadgeHtml, actionAreaHtml, outOfStockClass = '', lowStockClass = '', stockBadgeHtml = '', cardOnClick = '';
 
@@ -8202,7 +8272,7 @@ function renderBillingProductGrid(){
           ${stockBadgeHtml}
           ${p.image ? `<img src="${p.image}">` : ''}
           <div class="pgCaption${p.image ? '' : ' pgCaptionNoImg'}" style="${p.image ? `background:${getProductCardCaptionBgFinal()};` : `background:${getProductCardBgFinal()};`}">
-            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
+            <div class="pgName" style="font-size:${nameFontSize}; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
             <div class="pgPrice" style="color:${getProductCardTextColorFinal(!!p.image)};">${priceLabel}</div>
           </div>
         </div>
@@ -10150,11 +10220,10 @@ const SCAN_PRODUCT_COLUMNS = [
   {field:'name',      label:'Product Name',  type:'text',   placeholder:'Product name', cls:'scanCellName'},
   {field:'variant',   label:'Variant',       type:'text',   placeholder:'Default'},
   {field:'purchase',  label:'Purchase Price',type:'number', placeholder:'0', num:true},
-  {field:'retail',    label:'Sale Price',    type:'number', placeholder:'0', num:true},
+  {field:'retail',    label:'🏷️ Islamabad Price', type:'number', placeholder:'0', num:true},
   {field:'stock',     label:'Stock',         type:'number', placeholder:'0', num:true},
-  {field:'category',  label:'Category',      type:'text',   placeholder:'Category'},
   {field:'barcode',   label:'Barcode',       type:'text',   placeholder:'Barcode'},
-  {field:'wholesale', label:'Wholesale',     type:'number', placeholder:'0', num:true},
+  {field:'wholesale', label:'📦 Rawalpindi Price', type:'number', placeholder:'0', num:true},
   {field:'lowstock',  label:'Low Stock',     type:'number', placeholder:'5', num:true},
   {field:'expiry',    label:'Expiry',        type:'date',   placeholder:''},
   {field:'location',  label:'Location',      type:'text',   placeholder:'Location'},
@@ -10370,7 +10439,6 @@ function renderProductList(query = ''){
       <div class="productHead" onclick="toggleProductCard(${p.product_id})">
         <div>
           <div class="pName">${p.name}</div>
-          <div class="pMeta">${p.category || 'No category'}</div>
         </div>
         <div class="pActions">
           <span class="variantCount">${p.variants.length} variants</span>
@@ -10434,11 +10502,11 @@ function renderVariantCardSection(productId){
             <input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)">
           </div>
           <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Retail Price</span>
+            <span class="vcFieldLabel">🏷️ Islamabad Price</span>
             <input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
           </div>
           <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Wholesale Price</span>
+            <span class="vcFieldLabel">📦 Rawalpindi Price</span>
             <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)">
           </div>
           <div class="vcFieldWrap vcStockWrap">
@@ -20099,7 +20167,16 @@ function renderHomeSettingsPanel(){
     const pcnBgIntensity = AppState.settings.productCardNameBgIntensity || 0;
     const pcnColor = AppState.settings.productCardNameColor || '#166534';
     const pcnFontId = AppState.settings.productCardNameFont || '';
+    const gridColsVal = AppState.settings.billingGridCols || 0;
     tabContentHtml = `
+    <div class="homeQuickPanelLabel" style="padding-bottom:2px;">Items per row</div>
+    <div class="hsChipRow" style="padding-top:0;">
+      <button class="hsChip ${gridColsVal === 0 ? 'active' : ''}" onclick="adjustBillingGridCols(0)">Auto</button>
+      <button class="hsChip ${gridColsVal === 3 ? 'active' : ''}" onclick="adjustBillingGridCols(3)">3</button>
+      <button class="hsChip ${gridColsVal === 4 ? 'active' : ''}" onclick="adjustBillingGridCols(4)">4</button>
+      <button class="hsChip ${gridColsVal === 5 ? 'active' : ''}" onclick="adjustBillingGridCols(5)">5</button>
+      <button class="hsChip ${gridColsVal === 6 ? 'active' : ''}" onclick="adjustBillingGridCols(6)">6</button>
+    </div>
     <div style="padding:2px 12px 2px; font-size:11px; color:var(--muted);">Text size — ${pcnSize}px</div>
     <div style="padding:0 12px 6px;">
       <input type="range" min="8" max="22" step="1" value="${pcnSize}" oninput="adjustProductCardNameSize(this.value); this.previousElementSibling.textContent='Text size — '+this.value+'px';" style="width:100%;">
@@ -20170,6 +20247,13 @@ function adjustProductCardNameSize(px){
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
   try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
   try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
+}
+// ---------- 🔢 ایک لائن میں کتنے پراڈکٹ کارڈ نظر آئیں — صارف کی اپنی مرضی (Auto/3/4/5/6) ----------
+function adjustBillingGridCols(n){
+  AppState.settings.billingGridCols = Number(n) || 0; // 0 = Auto
+  persistAllData();
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+  try{ if(typeof renderHomeSettingsPanel === 'function') renderHomeSettingsPanel(); }catch(e){}
 }
 function adjustProductCardNameWeight(weight){
   AppState.settings.productCardNameWeight = Math.max(400, Math.min(900, Number(weight) || 800));
@@ -24196,6 +24280,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // ---------- کوئی modal کھلا نہ ہو تو عام رویہ — یعنی اگر یہ ہماری خود ڈالی ہوئی state تھی، کچھ نہ کریں (پہلے ہی صارف کو ایپ میں رکھے گا) ----------
   });
+
+  // ---------- 🏷️ اوپر ہیڈر + Settings کے بلڈ نمبر بیج — ہمیشہ APP_BUILD_VERSION سے خودکار بھریں،
+  // تاکہ نئی فائل بھیجتے وقت صرف وہ ایک نمبر بدلنا کافی ہو، ہر جگہ خودبخود اپڈیٹ ہو جائے ----------
+  document.getElementById('topbarVersionBadge').textContent = APP_BUILD_VERSION;
+  document.getElementById('appBuildVersionText').textContent = APP_BUILD_VERSION;
 
   applyTheme(AppState.settings.themeId);
   applyFont(AppState.settings.fontId || 'tahoma');
