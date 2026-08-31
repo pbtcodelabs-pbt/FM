@@ -2608,23 +2608,50 @@
     <!-- NEW PRODUCT (PARENT) MODAL — صرف parent بنے گا، variants بعد میں کارڈ کھول کر شامل ہوں گے -->
     <div class="modalOverlay" id="newProductModal" onclick="if(event.target===this) closeNewProductModal()">
       <div class="modalBoxWide">
-        <h3 id="newProductModalTitle">📦 New Product (Parent Item)</h3>
-        <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
-          <div id="npProductPhotoPreview" style="width:72px; height:56px; border-radius:10px; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; border:1.5px solid #dbe1ea; flex:0 0 auto;">📦</div>
-          <button type="button" onclick="triggerNewProductPhotoUpload()" style="padding:6px 14px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:8px; color:var(--muted); cursor:pointer; font-size:12px;">📷 Add Photo</button>
+        <h3 id="newProductModalTitle">📦 New Product</h3>
+        <!-- ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر یہ فارم مکمل سادہ کر دیا گیا ہے —
+             نہ کیمرہ/تصویر، نہ بارکوڈ، نہ کیٹیگری، نہ ویرینٹ کا الگ مرحلہ۔ صرف 4 خانے: نام، خرید، اسلام آباد ریٹ،
+             راولپنڈی ریٹ، اسٹاک — ایک ہی جگہ پر، ایک ہی ٹیپ میں محفوظ ---------- -->
+        <input type="text" id="npName" placeholder="Product name (e.g. آلو میٹھا)" style="font-weight:800; font-size:16px;">
+        <!-- ---------- 🏷️ ویرینٹ (پیکنگ کی قسم) — ڈراپ ڈاؤن سے منتخب کریں، خودکار پراڈکٹ کے نام کے ساتھ جُڑ جائے گا
+             (مثلاً "ٹماٹر" + "ٹوکری" = کارڈ پر "ٹماٹر ٹوکری" نظر آئے گا) ---------- -->
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <select id="npVariant" style="flex:1 1 auto; min-width:0; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; background:#fff;"></select>
+          <button type="button" onclick="openManageVariantTypesModal()" title="ویرینٹ کی فہرست ترتیب دیں" style="flex:0 0 auto; background:#eef2ff; color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; padding:0 14px; font-weight:800; cursor:pointer;">⚙️</button>
         </div>
-        <input type="text" id="npName" placeholder="Product name (e.g. Lipton Tea)">
-        <!-- ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر Category والا خانہ پراڈکٹ ایڈ کرتے وقت ہٹا دیا گیا ہے
-             (کوڈ محفوظ ہے، صرف چھپایا گیا ہے) — نیا پراڈکٹ سیدھا بغیر کیٹگری کے شامل ہوگا ---------- -->
+        <input type="number" id="npPurchase" placeholder="💰 Purchase Price (خرید)" style="margin-top:8px;">
+        <input type="number" id="npRetail" placeholder="🏷️ Islamabad Rate (فروخت)" style="margin-top:8px;">
+        <input type="number" id="npWholesale" placeholder="📦 Rawalpindi Rate (فروخت)" style="margin-top:8px;">
+        <input type="number" id="npStock" placeholder="📦 Stock (optional — خالی چھوڑ سکتے ہیں)" style="margin-top:8px;">
+        <!-- ---------- کیٹیگری/بارکوڈ/تصویر — کوڈ محفوظ ہے، صرف چھپایا گیا ہے ---------- -->
         <input type="text" id="npCategory" placeholder="Category (optional)" list="categoryDatalist" autocomplete="off" style="display:none;">
         <datalist id="categoryDatalist"></datalist>
         <div style="display:none; gap:8px; margin-bottom:10px;">
           <input type="text" id="npBarcode" placeholder="Barcode (scan or type — optional)" style="flex:1; margin-bottom:0;">
           <button type="button" onclick="openBarcodeScanner('npBarcode')" title="Scan barcode" style="display:none;">📷</button>
         </div>
+        <div style="display:none; align-items:center; gap:14px; margin-bottom:12px;">
+          <div id="npProductPhotoPreview" style="width:72px; height:56px; border-radius:10px; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; border:1.5px solid #dbe1ea; flex:0 0 auto;">📦</div>
+          <button type="button" onclick="triggerNewProductPhotoUpload()" style="padding:6px 14px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:8px; color:var(--muted); cursor:pointer; font-size:12px;">📷 Add Photo</button>
+        </div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewProductModal()">Cancel</button>
-          <button class="saveBtn" id="newProductSaveBtn" onclick="saveNewProduct()">Create + Add First Variant</button>
+          <button class="saveBtn" id="newProductSaveBtn" onclick="saveNewProduct()">💾 Save Product</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- ⚙️ ویرینٹ کی فہرست ترتیب دیں — ایڈ/ایڈٹ/ڈیلیٹ — یہی فہرست پراڈکٹ فارم کے ڈراپ ڈاؤن میں استعمال ہوتی ہے ---------- -->
+    <div class="modalOverlay" id="manageVariantTypesModal" onclick="if(event.target===this) closeManageVariantTypesModal()">
+      <div class="modalBoxWide" style="width:340px;">
+        <h3>⚙️ Manage Variant Types</h3>
+        <div id="variantTypesList" style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px; max-height:280px; overflow-y:auto;"></div>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="newVariantTypeInput" placeholder="نیا ویرینٹ — مثلاً 'بوری'" style="flex:1 1 auto; min-width:0; padding:10px; border:1px solid #dbe1ea; border-radius:8px;">
+          <button type="button" onclick="addVariantType()" style="flex:0 0 auto; background:var(--primary); color:#fff; border:none; border-radius:8px; padding:0 16px; font-weight:800; cursor:pointer;">➕</button>
+        </div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeManageVariantTypesModal()">Done</button>
         </div>
       </div>
     </div>
@@ -3927,8 +3954,8 @@
               </div>
             </div>
             <div class="pscCompactRow">
-              <button id="pscBoldBtn" class="pscToggleBtn" onclick="togglePreviewBold()">𝐁</button>
-              <button id="pscThinBtn" class="pscToggleBtn" onclick="togglePreviewBold()">Thin</button>
+              <button id="pscBoldBtn" class="pscToggleBtn" onclick="setPreviewBold(true)">𝐁 Bold</button>
+              <button id="pscThinBtn" class="pscToggleBtn" onclick="setPreviewBold(false)">Thin</button>
               <select id="pscFontFamilySelect" onchange="setPreviewFontFamily(this.value)" class="pscDropdown"></select>
             </div>
             <div class="pscCompactRow">
@@ -4839,8 +4866,8 @@
           </div>
         </div>
         <div class="pscCompactRow">
-          <button id="rpscBoldBtn" class="pscToggleBtn" onclick="toggleReportBold()">𝐁</button>
-          <button id="rpscThinBtn" class="pscToggleBtn" onclick="toggleReportBold()">Thin</button>
+          <button id="rpscBoldBtn" class="pscToggleBtn" onclick="setReportBold(true)">𝐁 Bold</button>
+          <button id="rpscThinBtn" class="pscToggleBtn" onclick="setReportBold(false)">Thin</button>
           <select id="rpscFontFamilySelect" onchange="setReportFontFamily(this.value)" class="pscDropdown"></select>
         </div>
         <div class="pscCompactRow">
@@ -5395,6 +5422,7 @@ function saveToStorage(key, value){
 // کوڈ میں کہیں سے بھی کی گئی کوئی بھی تبدیلی (نیا پراڈکٹ، اسٹاک اپڈیٹ، نیا بل وغیرہ) خودکار محفوظ ہو جاتی ہے ----------
 function persistAllData(){
   if(typeof productsData !== 'undefined') saveProductsLight();
+  if(typeof productVariantTypes !== 'undefined') saveToStorage('productVariantTypes', productVariantTypes);
   if(typeof customCategories !== 'undefined') saveToStorage('customCategories', customCategories);
   if(typeof customersData !== 'undefined') saveCustomersLight();
   if(typeof suppliersData !== 'undefined') saveSuppliersLight();
@@ -6045,7 +6073,7 @@ const DEFAULT_SETTINGS = {
   printRowScale: 100,            // 70–150 (%) — آئٹمز ٹیبل کی ہر لائن کی اونچائی (↕ Row)
   printBoldItems: true,          // آئٹم کے نام بولڈ ہوں یا باریک (Thin)
   printItemAlign: 'left',        // آئٹم کے نام کی سیدھ: 'left' یا 'center'
-  receiptColorId: 'green',       // بل/رپورٹ کی سکرین/شیئر رنگت — 6 مقررہ ہلکے رنگوں میں سے ایک (RECEIPT_COLOR_PRESETS)
+  receiptColorId: 'crispbw',       // بل/رپورٹ کی سکرین/شیئر رنگت — صدام کی ہدایت پر ڈیفالٹ اب خالص بلیک اینڈ وائٹ (RECEIPT_COLOR_PRESETS)
   billingSearchSuggestionsOn: true, // بلنگ سرچ بار کے نیچے باریک سجیشن فہرست — بائیں طرف والے بٹن سے آن/آف ہوتی ہے
   printFontId: 'segoe',           // پرنٹ کے لیے مخصوص فونٹ سٹائل — عام ایپ کے فونٹ سے الگ، صرف رسید پر اثر انداز
   priceDecimals: 0,               // قیمتوں کے بعد کتنے ڈیسیمل پوائنٹ دکھائیں (کریانہ/میڈیکل جیسے کاروبار کے لیے)
@@ -6118,7 +6146,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU07';
+const APP_BUILD_VERSION = 'FM19TU08';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -9826,6 +9854,11 @@ function isoDaysFromToday(n){
   return d.toISOString().slice(0,10);
 }
 let productsData = loadFromStorage('products', PRODUCTS_SEED_DATA);
+// ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر — پرانا "کئی variants فی پراڈکٹ" نظام سادہ کر دیا گیا ہے۔
+// اب ہر پراڈکٹ اپنا الگ آئٹم ہے (مثلاً "ٹماٹر ٹوکری" اور "ٹماٹر شاپر" دو الگ الگ پراڈکٹ ہیں، ایک کے دو variants نہیں)۔
+// یہ صرف "ویرینٹ کی قسم" (پیکنگ کی قسم — ٹوکری/شاپر/کارٹن وغیرہ) کی ایک قابلِ ترمیم فہرست ہے، جو نیا پراڈکٹ
+// بناتے وقت ڈراپ ڈاؤن سے منتخب کی جاتی ہے اور خودکار پراڈکٹ کے نام کے ساتھ جُڑ جاتی ہے ---------- -->
+let productVariantTypes = loadFromStorage('productVariantTypes', ['فی کلو', 'ٹوکری', 'شاپر', 'کارٹن', 'دھڑی', 'پیکٹ']);
 let nextProductId = loadFromStorage('nextProductId', 10);
 let nextVariantId = loadFromStorage('nextVariantId', 28);
 
@@ -10676,10 +10709,10 @@ function renderProductList(query = ''){
     <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id})">
         <div>
-          <div class="pName">${p.name}</div>
+          <div class="pName">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
-          <span class="variantCount">${p.variants.length} variants</span>
+          <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
           <button class="productActionBtn danger" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
           <span class="chevron">▶</span>
@@ -10706,7 +10739,7 @@ function renderVariantCardSection(productId){
   const expiryTier = getExpiryTier(v.expiryDate);
 
   return `
-    <div class="vcNavBar">
+    <div class="vcNavBar" style="display:none;">
       <div class="vcNavTitle">
         ${idx === 0 ? `<span class="vcMainBadge">MAIN</span>` : ''}
         <span>Variant ${idx + 1} of ${p.variants.length}</span>
@@ -10717,13 +10750,13 @@ function renderVariantCardSection(productId){
       </div>
     </div>
     <div class="vcCard">
-      <div class="vcPhotoArea">
+      <div class="vcPhotoArea" style="display:none;">
         <div class="vcPhotoBox" onclick="triggerImageUpload(${productId},${v.variant_id})" title="Tap to add/change photo">
           ${v.image ? `<img src="${v.image}">` : `<span class="vcPhotoIcon">📷</span>`}
         </div>
       </div>
       <div class="vcFieldsArea">
-        <div class="vcFieldWrap vcFieldFull vcNameField">
+        <div class="vcFieldWrap vcFieldFull vcNameField" style="display:none;">
           <span class="vcFieldLabel">Variant Name / Size</span>
           <input value="${v.label}" list="fmVariantUnitOptions" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'label',this.value)">
         </div>
@@ -10762,18 +10795,18 @@ function renderVariantCardSection(productId){
             <input type="date" class="expiryInput ${expiryTier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)">
           </div>
         </div>
-        <div class="vcFieldWrap vcFieldFull">
+        <div class="vcFieldWrap vcFieldFull" style="display:none;">
           <span class="vcFieldLabel">Location (Aisle / Shelf / Warehouse)</span>
           <input value="${v.location}" placeholder="e.g. Aisle 4, Shelf B" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)">
         </div>
       </div>
       <div class="vcActionsRow">
         <button class="vcBatchBtn" style="display:none;" onclick="openVariantBatchesModal(${productId},${v.variant_id})">🗓️ Batches${v.batches && v.batches.length > 1 ? ` (${v.batches.length})` : ''}</button>
-        <button class="vcDeleteBtn" onclick="deleteVariant(${productId},${v.variant_id})">🗑️ Delete This Variant</button>
+        <button class="vcDeleteBtn" style="display:none;" onclick="deleteVariant(${productId},${v.variant_id})">🗑️ Delete This Variant</button>
       </div>
     </div>
     <div class="vcBottomBtns">
-      <button class="addVariantBtn" onclick="addVariantRow(${productId})">+ Add New Variant (e.g. 100g)</button>
+      <button class="addVariantBtn" style="display:none;" onclick="addVariantRow(${productId})">+ Add New Variant (e.g. 100g)</button>
       <button class="collapseCardBtn" onclick="toggleProductCard(${productId})">▲ Done — Collapse this product</button>
     </div>
   `;
@@ -11679,33 +11712,113 @@ function openNewProductModal(productId = null){
   editingProductId = productId;
   npProductPhotoDataUrl = null;
   renderCategoryDatalist(); // ---------- ہر بار موڈل کھلنے پر تازہ ترین کیٹیگری فہرست دکھائیں ----------
+  renderNpVariantSelect(); // ---------- ویرینٹ ڈراپ ڈاؤن ہمیشہ تازہ ترین فہرست سے بھریں ----------
 
   if(productId){
     const product = productsData.find(p => p.product_id === productId);
     if(!product) return;
+    const v = product.variants[0] || {};
     document.getElementById('newProductModalTitle').textContent = '✏️ Edit Product';
-    document.getElementById('newProductSaveBtn').textContent = 'Save Changes';
+    document.getElementById('newProductSaveBtn').textContent = '💾 Save Changes';
     document.getElementById('npName').value = product.name || '';
     document.getElementById('npCategory').value = product.category || '';
-    document.getElementById('npBarcode').value = product.variants[0]?.barcode || '';
-    npProductPhotoDataUrl = product.variants[0]?.image || null;
+    document.getElementById('npBarcode').value = v.barcode || '';
+    document.getElementById('npVariant').value = v.label || '';
+    document.getElementById('npPurchase').value = v.purchase || '';
+    document.getElementById('npRetail').value = v.retail || '';
+    document.getElementById('npWholesale').value = v.wholesale || '';
+    document.getElementById('npStock').value = v.stock || '';
+    npProductPhotoDataUrl = v.image || null;
     renderProductPhotoPreview(npProductPhotoDataUrl);
   } else {
-    document.getElementById('newProductModalTitle').textContent = '📦 New Product (Parent Item)';
-    document.getElementById('newProductSaveBtn').textContent = 'Create + Add First Variant';
+    document.getElementById('newProductModalTitle').textContent = '📦 New Product';
+    document.getElementById('newProductSaveBtn').textContent = '💾 Save Product';
     document.getElementById('npName').value = '';
     document.getElementById('npCategory').value = '';
     document.getElementById('npBarcode').value = '';
+    document.getElementById('npVariant').value = '';
+    document.getElementById('npPurchase').value = '';
+    document.getElementById('npRetail').value = '';
+    document.getElementById('npWholesale').value = '';
+    document.getElementById('npStock').value = '';
     renderProductPhotoPreview(null);
   }
 
   document.getElementById('newProductModal').classList.add('show');
 }
+
+// ---------- ویرینٹ ڈراپ ڈاؤن کو موجودہ فہرست (productVariantTypes) سے بھریں — پہلا آپشن ہمیشہ "کوئی نہیں" ----------
+function renderNpVariantSelect(){
+  const sel = document.getElementById('npVariant');
+  if(!sel) return;
+  const current = sel.value;
+  sel.innerHTML = `<option value="">— کوئی ویرینٹ نہیں —</option>` +
+    productVariantTypes.map(t => `<option value="${t.replace(/"/g,'&quot;')}">${t}</option>`).join('');
+  sel.value = current; // ---------- اگر پہلے سے کوئی منتخب تھا تو وہی برقرار رکھیں ----------
+}
+
+// ---------- ⚙️ ویرینٹ کی فہرست ترتیب دیں — ایڈ/ایڈٹ/ڈیلیٹ ----------
+function openManageVariantTypesModal(){
+  renderVariantTypesList();
+  document.getElementById('manageVariantTypesModal').classList.add('show');
+}
+function closeManageVariantTypesModal(){
+  document.getElementById('manageVariantTypesModal').classList.remove('show');
+  renderNpVariantSelect(); // ---------- بند کرتے ہی پیچھے پراڈکٹ فارم کا ڈراپ ڈاؤن بھی تازہ ترین فہرست سے بھر دیں ----------
+}
+function renderVariantTypesList(){
+  const wrap = document.getElementById('variantTypesList');
+  if(!wrap) return;
+  if(productVariantTypes.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="padding:14px 0;">کوئی ویرینٹ موجود نہیں</div>`;
+    return;
+  }
+  wrap.innerHTML = productVariantTypes.map((t, idx) => `
+    <div style="display:flex; align-items:center; justify-content:space-between; background:#f8fafc; border:1px solid #e5e9f0; border-radius:8px; padding:8px 10px;">
+      <span style="font-weight:700; font-size:14px;">${t}</span>
+      <span style="display:flex; gap:10px;">
+        <span onclick="editVariantType(${idx})" style="cursor:pointer;" title="Edit">✏️</span>
+        <span onclick="deleteVariantType(${idx})" style="cursor:pointer; color:#b91c1c;" title="Delete">🗑️</span>
+      </span>
+    </div>`).join('');
+}
+function addVariantType(){
+  const input = document.getElementById('newVariantTypeInput');
+  const val = (input.value || '').trim();
+  if(!val) return;
+  if(productVariantTypes.includes(val)){ alert('یہ ویرینٹ پہلے سے فہرست میں موجود ہے۔'); return; }
+  productVariantTypes.push(val);
+  input.value = '';
+  persistAllData();
+  renderVariantTypesList();
+}
+function editVariantType(idx){
+  const current = productVariantTypes[idx];
+  const updated = prompt('ویرینٹ کا نام تبدیل کریں:', current);
+  if(updated === null) return;
+  const trimmed = updated.trim();
+  if(!trimmed) return;
+  productVariantTypes[idx] = trimmed;
+  persistAllData();
+  renderVariantTypesList();
+}
+function deleteVariantType(idx){
+  if(!confirm(`"${productVariantTypes[idx]}" کو فہرست سے ہٹا دیں؟`)) return;
+  productVariantTypes.splice(idx, 1);
+  persistAllData();
+  renderVariantTypesList();
+}
+
 function closeNewProductModal(){
   document.getElementById('newProductModal').classList.remove('show');
   document.getElementById('npName').value = '';
   document.getElementById('npCategory').value = '';
   document.getElementById('npBarcode').value = '';
+  document.getElementById('npVariant').value = '';
+  document.getElementById('npPurchase').value = '';
+  document.getElementById('npRetail').value = '';
+  document.getElementById('npWholesale').value = '';
+  document.getElementById('npStock').value = '';
   npProductPhotoDataUrl = null;
   editingProductId = null;
 }
@@ -11713,6 +11826,11 @@ function saveNewProduct(){
   const name = document.getElementById('npName').value.trim();
   const category = document.getElementById('npCategory').value.trim();
   const barcode = document.getElementById('npBarcode').value.trim();
+  const variantLabel = document.getElementById('npVariant').value.trim(); // ---------- ویرینٹ (پیکنگ کی قسم) — نام کے ساتھ جُڑ کر کارڈ پر نظر آئے گا ----------
+  const purchase = Number(document.getElementById('npPurchase').value) || 0;
+  const retail = Number(document.getElementById('npRetail').value) || 0;
+  const wholesale = Number(document.getElementById('npWholesale').value) || 0;
+  const stock = Number(document.getElementById('npStock').value) || 0; // ---------- اسٹاک خالی چھوڑا ہو تو بھی 0 کے ساتھ محفوظ ہو جائے ----------
 
   if(!name){
     alert('Please enter product name.');
@@ -11731,7 +11849,7 @@ function saveNewProduct(){
   }
 
   if(editingProductId){
-    // ---------- موجودہ پراڈکٹ ایڈٹ ہو رہا ہے — نام/کیٹیگری/پہلی تصویر/پہلے ویرینٹ کا بارکوڈ اپڈیٹ کریں، باقی variants جوں کے توں رہیں ----------
+    // ---------- موجودہ پراڈکٹ ایڈٹ ہو رہا ہے — نام/کیٹیگری/ویرینٹ/قیمتیں/اسٹاک سب یہیں سے اپڈیٹ ----------
     const product = productsData.find(p => p.product_id === editingProductId);
     if(product){
       product.name = name;
@@ -11739,6 +11857,11 @@ function saveNewProduct(){
       if(product.variants[0]){
         product.variants[0].image = npProductPhotoDataUrl || product.variants[0].image;
         product.variants[0].barcode = barcode;
+        product.variants[0].label = variantLabel;
+        product.variants[0].purchase = purchase;
+        product.variants[0].retail = retail;
+        product.variants[0].wholesale = wholesale;
+        product.variants[0].stock = stock;
       }
     }
     closeNewProductModal();
@@ -11752,7 +11875,7 @@ function saveNewProduct(){
     product_id: nextProductId++,
     name, category,
     variants: [
-      {variant_id: nextVariantId++, label:'Default', barcode, purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', expiryDate:'', image: npProductPhotoDataUrl || null}
+      {variant_id: nextVariantId++, label: variantLabel, barcode, purchase, retail, wholesale, stock, lowStockAt:5, location:'', expiryDate:'', image: npProductPhotoDataUrl || null}
     ]
   };
   productsData.push(newProduct);
@@ -15618,6 +15741,9 @@ function renderAdminPendingOrdersScreen(){
 }
 
 // ---------- ایڈمن ایک ٹیپ سے پورے آرڈر پر ریٹ لگائے — تعداد پہلے سے موجود ہے، صرف قیمت لگتے ہی بل مکمل ----------
+// ---------- ⚡ کارکردگی فکس: پہلے یہاں ہر ٹیپ پر پورا persistAllData() (پورا ڈیٹا بیس محفوظ) + پوری پینڈنگ لسٹ کا
+// دوبارہ رینڈر — دونوں بھاری کام — فوراً ہو جاتے تھے، جس سے بل نظر آنے میں تاخیر محسوس ہوتی تھی۔ اب یہ فنکشن
+// صرف ریٹ لگاتا ہے؛ سیو اور لسٹ ری-رینڈر applyRateInPreview میں تھوڑا بعد میں (بیک گراؤنڈ میں) ہوتے ہیں ----------
 function applyRateToAdvanceOrder(orderId, mode){
   const order = advanceOrdersData.find(o => o.id === orderId);
   if(!order) return;
@@ -15629,8 +15755,6 @@ function applyRateToAdvanceOrder(orderId, mode){
     item.unitPrice = mode === 'wholesale' ? v.wholesale : v.retail;
   });
   order.rateApplied = mode;
-  persistAllData();
-  renderAdvanceOrdersScreen();
 }
 
 /* =====================================================================
@@ -15653,6 +15777,7 @@ async function openAdvOrderPreview(orderId){
 function closeAdvOrderPreview(){
   document.getElementById('advOrderPreviewModal').classList.remove('show');
   currentPreviewAdvOrderId = null;
+  if(AppState.currentRole === 'admin') renderAdvanceOrdersScreen(); // ---------- موڈل بند ہوتے ہی پینڈنگ لسٹ تازہ ترین حالت میں دکھائیں ----------
 }
 
 // ---------- ریٹ بٹن صرف اسی وقت دکھائیں جب ابھی تک ریٹ نہ لگا ہو — لگتے ہی خودکار غائب ---------- 
@@ -20135,8 +20260,8 @@ function togglePscMoreOptions(wrapId, btnId){
   if(btn) btn.textContent = nowOpen ? '⚙️ Less ▴' : '⚙️ More ▾';
 }
 
-function togglePreviewBold(){
-  AppState.settings.printBoldItems = !(AppState.settings.printBoldItems !== false);
+function setPreviewBold(isBold){
+  AppState.settings.printBoldItems = isBold;
   persistAllData();
   syncPreviewStyleControls();
   rerenderInvoicePreview();
@@ -23419,8 +23544,8 @@ function adjustReportStyle(settingKey, delta, min, max){
   syncReportStyleControls();
   renderReportToCanvas();
 }
-function toggleReportBold(){
-  AppState.settings.reportBoldItems = !(AppState.settings.reportBoldItems !== false);
+function setReportBold(isBold){
+  AppState.settings.reportBoldItems = isBold;
   persistAllData();
   syncReportStyleControls();
   renderReportToCanvas();
@@ -25219,6 +25344,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // declare ہوتے ہیں — اوپر top-level پر کال کرنے سے وہ ابھی initialize نہیں ہوئے ہوتے (ReferenceError آتا
   // ہے اور پوری اسکرپٹ رک جاتی ہے، جس سے لاگ ان اسکرین آگے نہیں بڑھتی) ----------
   try{ seedVegetableProductsOnce(); }catch(e){ console.error('seedVegetableProductsOnce failed', e); }
+  // ---------- 🖤 صدام کی ہدایت پر — بل/رپورٹ کے سبز رنگین تھیم کو ایک بار خودکار خالص بلیک اینڈ وائٹ پر بدل دیں
+  // (موجودہ انسٹالیشنز پر بھی، نہ صرف نئی — ورنہ پرانی محفوظ شدہ سیٹنگ 'green' ہی رہ جاتی) ----------
+  try{
+    if(!AppState.settings.forcedCrispBwV1){
+      AppState.settings.receiptColorId = 'crispbw';
+      AppState.settings.forcedCrispBwV1 = true;
+      persistAllData();
+    }
+  }catch(e){ console.error('forcedCrispBwV1 failed', e); }
   applyFont(AppState.settings.fontId || 'tahoma');
   renderFontsFabPanel();
   applyPrintPageSize(AppState.settings.paperWidth || 80);
