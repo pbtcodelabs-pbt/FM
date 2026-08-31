@@ -407,6 +407,11 @@
   .admin-only{display:none;}
   body.role-admin .admin-only{display:block;}
 
+  /* --- الٹا: یہ صرف ملازم (غیر-ایڈمن) کو نظر آئے، ایڈمن سے خودکار چھپ جائے —
+       ایڈوانس آرڈر میں "ریٹ ایڈمن لگائیں گے" جیسے نوٹس کے لیے --- */
+  .admin-hide-only{display:block;}
+  body.role-admin .admin-hide-only{display:none;}
+
   /* --- اہم فکس: #sidebar .navItem{display:flex} چونکہ ID سیلیکٹر رکھتا ہے، یہ .admin-only{display:none}
        سے زیادہ طاقتور بن جاتا ہے اور سیلزمین کو بھی ایڈمن کے مینو آئٹمز نظر آنے لگتے ہیں۔ یہاں زیادہ
        specific رول دے کر یقینی بنایا کہ سیلزمین کو یہ آئٹمز کبھی نظر نہ آئیں۔ --- */
@@ -4067,15 +4072,25 @@
           <button type="button" onclick="addCustomAdvOrderItemPrompt()" style="flex:1; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; padding:10px; font-weight:700; cursor:pointer; font-size:12.5px;">✏️ Custom Item</button>
         </div>
 
+        <!-- ---------- 🏷️📦 صرف ایڈمن کو نظر آنے والی ریٹ موڈ بار — ایک ٹیپ میں تمام آئٹمز پر اسلام آباد/راولپنڈی ریٹ لگ جائے
+             (ملازم کی بھری ہوئی تعداد پہلے سے موجود، صرف ریٹ ضرب ہو کر بل مکمل ہو جاتا ہے) ---------- -->
+        <div id="advRateModeRow" style="display:none; gap:8px; margin-bottom:8px;">
+          <button type="button" onclick="applyAdvOrderRateMode('retail')" style="flex:1; background:#eef2ff; color:var(--primary-dark); border:1.5px solid var(--primary); border-radius:10px; padding:10px; font-weight:800; cursor:pointer; font-size:12.5px;">🏷️ Islamabad Rate Lagayein</button>
+          <button type="button" onclick="applyAdvOrderRateMode('wholesale')" style="flex:1; background:#fff7ed; color:#9a3412; border:1.5px solid #c2790f; border-radius:10px; padding:10px; font-weight:800; cursor:pointer; font-size:12.5px;">📦 Rawalpindi Rate Lagayein</button>
+        </div>
+        <div id="advEmployeeRateNote" class="admin-hide-only" style="background:#eef2ff; color:var(--primary-dark); padding:8px 10px; border-radius:8px; font-size:11.5px; margin-bottom:8px; font-weight:600;">
+          ℹ️ صرف تعداد درج کریں — ریٹ ایڈمن خود لگائیں گے۔
+        </div>
+
         <div class="poTableScroll">
           <table class="cartTable" style="margin-bottom:6px;">
-            <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
+            <thead><tr><th>Item</th><th>Qty</th><th id="advPriceHeadCell">Price</th><th id="advTotalHeadCell">Total</th><th></th></tr></thead>
             <tbody id="advItemsBody"></tbody>
           </table>
         </div>
         <div class="emptyCart" id="advEmptyMsg" style="padding:20px 0;">No items added yet — tap "➕ Add More Items" to pick from the catalog</div>
 
-        <div class="totalsBox" style="margin-top:6px;">
+        <div class="totalsBox" id="advTotalsBox" style="margin-top:6px;">
           <div class="grand"><span>Approx. Subtotal</span><span id="advGrandTotal">Rs. 0</span></div>
         </div>
         <div style="background:#fff7ed; color:#c2410c; padding:8px 10px; border-radius:8px; font-size:11.5px; margin-top:6px; font-weight:600;">
@@ -5963,7 +5978,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM318MO24';
+const APP_BUILD_VERSION = 'FM318MO25';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -14417,6 +14432,9 @@ function renderAdvOrderProductGrid(){
   grid.innerHTML = groupedProducts.map(p => {
     const isSingleVariant = p.variants.length === 1;
     const nameFontSize = p.name.length > 18 ? '8.5px' : p.name.length > 13 ? '9.5px' : '10.5px';
+    // ---------- ملازم کو ایڈوانس آرڈر بناتے وقت ریٹ بالکل نظر نہیں آنا چاہیے، صرف تعداد سلیکٹ کرے —
+    //          ایڈمن ریویو کے وقت راولپنڈی/اسلام آباد بٹن سے ریٹ خودکار لگائے گا ----------
+    const advIsAdmin = document.body.classList.contains('role-admin');
     let priceLabel, qtyBadgeHtml, actionAreaHtml, cardOnClick = '';
 
     if(isSingleVariant){
@@ -14424,7 +14442,7 @@ function renderAdvOrderProductGrid(){
       const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
       const cartItem = advOrderCart.find(c => c.variant_id === v.variant_id);
       const qtyInCart = cartItem ? cartItem.qty : 0;
-      priceLabel = `Rs. ${price}`;
+      priceLabel = advIsAdmin ? `Rs. ${price}` : '';
       qtyBadgeHtml = qtyInCart > 0 ? `<div class="pgQtyBadge">${qtyInCart}</div>` : '';
       actionAreaHtml = `
         <button class="pgMinusBtn" onclick="changeAdvOrderCartQty(${v.variant_id}, -1)">−</button>
@@ -14435,7 +14453,7 @@ function renderAdvOrderProductGrid(){
         const ci = advOrderCart.find(c => c.variant_id === v.variant_id);
         return sum + (ci ? ci.qty : 0);
       }, 0);
-      priceLabel = `${p.variants.length} variants`;
+      priceLabel = advIsAdmin ? `${p.variants.length} variants` : '';
       qtyBadgeHtml = totalQtyInCart > 0 ? `<div class="pgQtyBadge">${totalQtyInCart}</div>` : '';
       actionAreaHtml = `<button class="pgChooseBtn" onclick="openAdvOrderVariantChooser(${p.product_id})">Choose ▾</button>`;
       cardOnClick = `onclick="openAdvOrderVariantChooser(${p.product_id})"`;
@@ -14462,7 +14480,9 @@ function renderAdvOrderProductGrid(){
 function addToAdvOrderCartGrid(variantId){
   const v = getFlatVariants().find(f => f.variant_id === variantId);
   if(!v) return;
-  const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+  // ---------- ملازم کبھی ریٹ سیٹ نہیں کرتا — 0 پر رہے گا، ایڈمن ریویو کے وقت راولپنڈی/اسلام آباد بٹن سے لگائے گا ----------
+  const advIsAdmin = document.body.classList.contains('role-admin');
+  const price = advIsAdmin ? (Billing.saleMode === 'retail' ? v.retail : v.wholesale) : 0;
   const existing = advOrderCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
   else advOrderCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, unitPrice: price});
@@ -14499,6 +14519,7 @@ function renderAdvOrderVariantChooserList(productId){
   const flat = getFlatVariants().filter(v => v.product_id === productId);
   const list = document.getElementById('advOrderChooseVariantList');
   const productName = productsData.find(p=>p.product_id===productId)?.name || '';
+  const advIsAdmin = document.body.classList.contains('role-admin');
 
   list.innerHTML = flat.map(v => {
     const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
@@ -14509,7 +14530,7 @@ function renderAdvOrderVariantChooserList(productId){
       <div class="variantChooseRow">
         <div class="variantChooseInfo">
           <div class="variantChooseLabel">${label}</div>
-          <div class="variantChoosePrice">Rs. ${price}</div>
+          ${advIsAdmin ? `<div class="variantChoosePrice">Rs. ${price}</div>` : ''}
         </div>
         <div class="variantChooseActions">
           <button class="vMinus" onclick="changeAdvOrderCartQty(${v.variant_id}, -1); renderAdvOrderVariantChooserList(${productId});">−</button>
@@ -14681,6 +14702,16 @@ function removeAdvItem(idx){
 function renderAdvOrderCart(){
   const body = document.getElementById('advItemsBody');
   const emptyMsg = document.getElementById('advEmptyMsg');
+  const advIsAdmin = document.body.classList.contains('role-admin');
+  // ---------- ملازم کو ریٹ کالم اور کل ٹوٹل بالکل نظر نہیں آنا چاہیے — صرف ایڈمن کو ---------- 
+  const rateModeRow = document.getElementById('advRateModeRow');
+  const totalsBox = document.getElementById('advTotalsBox');
+  const priceHeadCell = document.getElementById('advPriceHeadCell');
+  const totalHeadCell = document.getElementById('advTotalHeadCell');
+  if(rateModeRow) rateModeRow.style.display = advIsAdmin ? 'flex' : 'none';
+  if(totalsBox) totalsBox.style.display = advIsAdmin ? 'block' : 'none';
+  if(priceHeadCell) priceHeadCell.style.display = advIsAdmin ? '' : 'none';
+  if(totalHeadCell) totalHeadCell.style.display = advIsAdmin ? '' : 'none';
 
   if(advOrderCart.length === 0){
     body.innerHTML = '';
@@ -14698,12 +14729,25 @@ function renderAdvOrderCart(){
     <tr>
       <td>${i.name}</td>
       <td><input type="number" min="1" value="${i.qty}" style="width:50px;" onfocus="this.select()" onchange="updateAdvItemQty(${idx}, parseInt(this.value)||1)"></td>
-      <td><input type="number" min="0" value="${i.unitPrice}" style="width:65px;" onfocus="this.select()" onchange="updateAdvItemPrice(${idx}, parseFloat(this.value)||0)"></td>
-      <td>Rs. ${lineTotal.toLocaleString()}</td>
+      <td ${advIsAdmin ? '' : 'style="display:none;"'}><input type="number" min="0" value="${i.unitPrice}" style="width:65px;" onfocus="this.select()" onchange="updateAdvItemPrice(${idx}, parseFloat(this.value)||0)"></td>
+      <td ${advIsAdmin ? '' : 'style="display:none;"'}>Rs. ${lineTotal.toLocaleString()}</td>
       <td><button class="removeBtn" onclick="removeAdvItem(${idx})">✖</button></td>
     </tr>`;
   }).join('');
   document.getElementById('advGrandTotal').textContent = 'Rs. ' + total.toLocaleString();
+}
+
+// ---------- 🏷️/📦 ایڈمن کے لیے: ایک ٹیپ میں تمام آئٹمز پر اسلام آباد (Retail) یا راولپنڈی (Wholesale) ریٹ لگا دیں —
+//          تعداد پہلے سے ملازم کی بھری ہوئی موجود ہے، صرف ریٹ خودکار ضرب ہو کر مکمل بل بن جاتا ہے ----------
+function applyAdvOrderRateMode(mode){
+  const flat = getFlatVariants();
+  advOrderCart.forEach(item => {
+    if(item.variant_id == null) return; // ---------- کسٹم/رف آئٹم کا کوئی ویریئنٹ نہیں، ریٹ دستی ہی رہے گا ----------
+    const v = flat.find(f => f.variant_id === item.variant_id);
+    if(!v) return;
+    item.unitPrice = mode === 'wholesale' ? v.wholesale : v.retail;
+  });
+  renderAdvOrderCart();
 }
 
 function saveAdvanceOrder(){
