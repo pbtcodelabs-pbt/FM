@@ -2248,11 +2248,9 @@
     <!-- ===================== 🏠 HOME SCREEN — اصل مین پیج، لاگ ان کے فوراً بعد یہی کھلتا ہے ===================== -->
     <div class="screen" id="screen-home">
 
-      <!-- ---------- 🔓 PIN Lock بند ہو تو یاد دہانی — دوبارہ آن کرنا ایک ٹیپ کی دوری پر ---------- -->
-      <div id="homePinLockOffBanner" class="admin-only" style="display:none; background:#fef3c7; color:#92400e; border-radius:12px; padding:10px 14px; margin-bottom:10px; align-items:center; justify-content:space-between; gap:8px;">
-        <span style="font-size:12.5px; font-weight:700;">🔓 PIN Lock is OFF — anyone can open this app</span>
-        <button onclick="openActivatePinLockModal()" style="background:#92400e; color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap;">Activate</button>
-      </div>
+      <!-- ---------- 🍇 Fruit Mandi POS: PIN Lock banner, Subscription boxes اور Trial toast اب یہاں سے
+           screen-billing کے اوپر منتقل کر دیے گئے ہیں — کیونکہ Admin کے لیے اب Billing ہی Home ہے
+           (کوڈ نیچے موجود ہے، صرف یہاں سے ہٹایا گیا) ---------- -->
 
       <!-- ---------- 🏪 HOME BUSINESS CARD — Fruit Mandi POS پر ہائیڈ کر دیا گیا؛ Settings بٹن اوپر Topbar میں شفٹ کر دیا گیا ہے (کوڈ محفوظ ہے) ---------- -->
       <div class="homeBusinessCard" style="display:none;">
@@ -2277,36 +2275,33 @@
       </div>
       <input type="file" id="businessLogoInput" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
 
-      <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں ---------- -->
-      <div class="subBoxRow" id="subBoxRow" style="display:none;">
+      <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
+      <div id="homeUnfinishedCartCard" style="display:none;"></div>
+
+      <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — ہر بڑے سیکشن کا دروازہ (Admin کے لیے اب خالی، Salesman کے لیے بدستور فعال) ---------- -->
+      <div class="homeIconGrid" id="homeIconGrid"></div>
+    </div>
+
+    <div class="screen" id="screen-billing">
+
+      <!-- ---------- 🔓 PIN Lock بند ہو تو یاد دہانی — دوبارہ آن کرنا ایک ٹیپ کی دوری پر (اب یہاں، Admin کا Home یہی صفحہ ہے) ---------- -->
+      <div id="homePinLockOffBanner" class="admin-only" style="display:none; background:#fef3c7; color:#92400e; border-radius:12px; padding:10px 14px; margin-bottom:10px; align-items:center; justify-content:space-between; gap:8px;">
+        <span style="font-size:12.5px; font-weight:700;">🔓 PIN Lock is OFF — anyone can open this app</span>
+        <button onclick="openActivatePinLockModal()" style="background:#92400e; color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap;">Activate</button>
+      </div>
+
+      <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں (صرف Admin کو نظر آئیں) ---------- -->
+      <div class="subBoxRow admin-only" id="subBoxRow" style="display:none;">
         <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
         <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
         <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
       </div>
 
       <!-- ---------- 🎁 روزانہ ایک بار، ہلکا سا چمکتا/حرکت کرتا یاد دہانی Toast — کوئی بٹن نہیں، خود بخود 4.5 سیکنڈ میں غائب ---------- -->
-      <div id="trialReminderToast" style="display:none;">
+      <div id="trialReminderToast" class="admin-only" style="display:none;">
         <span class="trtIcon">🎁</span>
         <span class="trtText" id="trialReminderToastText"></span>
       </div>
-
-      <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
-      <div id="homeUnfinishedCartCard" style="display:none;"></div>
-
-      <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — ہر بڑے سیکشن کا دروازہ ---------- -->
-      <div class="homeIconGrid" id="homeIconGrid"></div>
-
-      <!-- ---------- 📂 "دیگر فیچرز" — Products اور Billing کے علاوہ باقی تمام سیٹنگز/فیچرز اسی ڈراپ ڈاؤن کے اندر ---------- -->
-      <div class="otherFeaturesDropWrap" id="otherFeaturesDropWrap" style="display:none;">
-        <button class="otherFeaturesBtn" onclick="toggleOtherFeaturesDrop(event)">
-          <span>📂 دیگر فیچرز / Other Features</span>
-          <span class="ofdArrow">▾</span>
-        </button>
-        <div class="otherFeaturesList" id="otherFeaturesList"></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-billing">
 
       <div class="pageTitle billingPageTitle">🛒 Billing Screen</div>
       <div id="rejectionNotice"></div>
@@ -2400,6 +2395,17 @@
       <div class="floatingCartBar" id="floatingCartBar" onclick="openCartSheet()">
         <span id="floatingCartText">🛒 Cart is empty</span>
         <span id="floatingCartTotal"></span>
+      </div>
+
+      <!-- ---------- 📂 "دیگر فیچرز" — Products سمیت باقی تمام سیٹنگز/فیچرز اسی ڈراپ ڈاؤن کے اندر —
+           (اب یہاں، Billing اسکرین کے نیچے، کیونکہ Admin کے لیے یہی اب Home ہے؛ Billing بٹن خود اس فہرست
+           میں شامل نہیں کیونکہ اسی صفحے پر ہونا خود Billing ہے) ---------- -->
+      <div class="otherFeaturesDropWrap admin-only" id="otherFeaturesDropWrap" style="display:none;">
+        <button class="otherFeaturesBtn" onclick="toggleOtherFeaturesDrop(event)">
+          <span>📂 دیگر فیچرز / Other Features</span>
+          <span class="ofdArrow">▾</span>
+        </button>
+        <div class="otherFeaturesList" id="otherFeaturesList"></div>
       </div>
     </div>
 
@@ -5911,8 +5917,22 @@ function getDeveloperContact(){
    ایپ اسی فارمولے سے خود تصدیق کر لیتی ہے (کوئی انٹرنیٹ درکار نہیں)۔
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
-// CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM318MO12';
+// CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے
+//
+// 📌 VERSIONING RULE (صدام کی مستقل ہدایت — ہر نئی چیٹ میں بھی یہی فالو کریں، دوبارہ پوچھنے کی ضرورت نہیں):
+// فارمیٹ: FM{date}{month}{dayCode}{seq}
+//   - date, month  = آج کی تاریخ/مہینہ (بغیر leading zero — جیسے 31 اگست = "318")
+//   - dayCode      = SU/MO/TU/WE/TH/FR/SA (ہفتے کے دن کے پہلے دو حروف، انگریزی میں)
+//   - seq          = اسی دن کے اندر بھیجی گئی فائلوں کا سیریل نمبر، 2 ہندسوں میں (01, 02 ... 12, 13...)
+// اصول:
+//   1) جب بھی کوئی نئی فائل (کوئی بھی تبدیلی، چھوٹی ہو یا بڑی) بھیجی جائے تو seq ایک نمبر آگے بڑھائیں —
+//      اگر آج کی آخری فائل FM318MO12 تھی تو اگلی FM318MO13 ہوگی، پھر FM318MO14، وغیرہ۔
+//   2) جیسے ہی تاریخ بدل جائے (نیا دن شروع ہو) تو seq دوبارہ 01 سے شروع کریں — مثلاً 1 ستمبر کی پہلی فائل FM319TU01 ہوگی۔
+//   3) یہی نمبر تین جگہ ایک ساتھ اپڈیٹ کریں: (الف) یہاں APP_BUILD_VERSION، (ب) sw.js کا CACHE_VERSION،
+//      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
+//      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
+//      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
+const APP_BUILD_VERSION = 'FM318MO13';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6171,9 +6191,9 @@ function renderSubscriptionBanner(){
   const row = document.getElementById('subBoxRow');
   if(!row) return;
 
-  // ---------- صرف Home صفحے پر نظر آئے — باقی تمام صفحات (بشمول Billing) پر چھپی رہے ----------
+  // ---------- صرف Home صفحے پر نظر آئے (Admin کے لیے اب یہ Billing اسکرین ہی ہے) — باقی صفحات پر چھپی رہے ----------
   const activeScreen = document.querySelector('.screen.active');
-  const isHomePage = activeScreen && activeScreen.id === 'screen-home';
+  const isHomePage = activeScreen && (activeScreen.id === 'screen-home' || (activeScreen.id === 'screen-billing' && AppState.currentRole === 'admin'));
   if(!isHomePage || !isSubscriptionActive()){ row.style.display = 'none'; return; }
 
   const daysLeft = daysLeftInSubscription();
@@ -6302,13 +6322,13 @@ function renderHomeIconGrid(){
     </button>`;
 
   if(AppState.currentRole === 'admin'){
-    // ---------- 🧭 صدام کی ہدایت پر: ہوم پیج پر صرف "Billing" اور "Products" آئیکن کی صورت میں رہیں گے —
-    // باقی تمام سیٹنگز/فیچرز (Payments, Dashboard, Reports, My Account, Users, Settings وغیرہ) اب آئیکنز کے
-    // ڈھیر کی بجائے نیچے "دیگر فیچرز" ڈراپ ڈاؤن کے اندر ایک لائن فہرست کے طور پر ملیں گے ----------
-    const mainKeys = ['billing', 'products'];
-    const mainTiles = mainKeys.map(k => HOME_TILES_ADMIN.find(t => t.screen === k)).filter(Boolean);
-    const otherTiles = HOME_TILES_ADMIN.filter(t => !mainKeys.includes(t.screen)).sort((a, b) => a.label.localeCompare(b.label));
-    grid.innerHTML = `<div class="homeSectionGrid">${mainTiles.map(tileHtml).join('')}</div>`;
+    // ---------- 🍇 صدام کی نئی ہدایت پر: اب Home پر کوئی بڑا Billing/Products بٹن کھڑا نہیں رہے گا —
+    // Billing خود ہی اب Home ہے (پورا پراڈکٹ گرڈ سیدھا سامنے)، اس لیے Billing کہیں بھی الگ بٹن کی صورت میں
+    // نظر نہیں آئے گا (نہ یہاں، نہ "دیگر فیچرز" میں)۔ Products اپنی جگہ "دیگر فیچرز" ڈراپ ڈاؤن کے اندر
+    // چھپا رہے گا — پراڈکٹ کیٹلاگ کا انتظام (شامل/ترمیم/حذف) الگ کام ہے، بیچنے سے مختلف ---------- -->
+    const mainTiles = [];
+    const otherTiles = HOME_TILES_ADMIN.filter(t => t.screen !== 'billing').sort((a, b) => a.label.localeCompare(b.label));
+    grid.innerHTML = '';
     renderOtherFeaturesDrop(otherTiles);
   } else {
     document.getElementById('otherFeaturesDropWrap').style.display = 'none';
@@ -7043,6 +7063,11 @@ let navBackStack = [];
 let navForwardStack = [];
 
 function goTo(screenName, _isHistoryNav){
+  // ---------- 🍇 Fruit Mandi POS: Admin کے لیے اب "Home" اور "Billing" ایک ہی صفحہ ہیں — سیدھا پورا پراڈکٹ
+  // گرڈ نظر آئے، الگ سے بڑے Billing/Products بٹن کھڑے نہ ہوں (صدام کی ہدایت پر)۔ Salesman کے لیے کوئی تبدیلی
+  // نہیں — ان کا Home صفحہ پہلے کی طرح آئیکن ٹائلز کے ساتھ ہی رہے گا ---------- -->
+  if(AppState.currentRole === 'admin' && screenName === 'home') screenName = 'billing';
+
   // ---------- Customers/Suppliers الگ الگ نیویگیشن اندراج ہیں مگر اندرونی طور پر ایک ہی DOM اسکرین (screen-parties) شیئر کرتے ہیں تاکہ غلطی سے غلط موڈ پر پارٹی/بل نہ بن جائے ----------
   const actualScreenId = (screenName === 'customers' || screenName === 'suppliers') ? 'parties' : screenName;
 
@@ -7086,7 +7111,11 @@ function goTo(screenName, _isHistoryNav){
 
   if(screenName === 'dashboard') renderDashboard();
   if(screenName === 'home') { renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI(); }
-  if(screenName === 'billing') { renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn(); }
+  if(screenName === 'billing') {
+    renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn();
+    // ---------- 🍇 Admin کے لیے یہی صفحہ Home بھی ہے — سبسکرپشن باکس/دیگر فیچرز ڈراپ ڈاؤن/PIN بینر یہیں تازہ کریں ----------
+    if(AppState.currentRole === 'admin'){ renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI(); }
+  }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
       '🧑‍💼 Salesman: ' + AppState.currentUser.name + renderTodaysBillBadge();
