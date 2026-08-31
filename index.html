@@ -5866,7 +5866,7 @@ function getDeveloperContact(){
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM318MO06';
+const APP_BUILD_VERSION = 'FM318MO08';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6027,11 +6027,17 @@ async function resyncLicenseOnline(){
 }
 
 function isSubscriptionActive(){
+  // ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر Package Plans/Subscription Gate اسکرین کو مستقل طور
+  // پر بند/چھپا دیا گیا ہے — اصل چیک نیچے comment میں محفوظ ہے، کبھی دوبارہ چاہیے ہو تو صرف اسے
+  // uncomment کر کے نیچے والی لائن ہٹا دیں ----------
+  return true;
+  /*
   const exp = AppState.settings.subscriptionExpiry;
   if(!exp) return false;
   const today = new Date(); today.setHours(0,0,0,0);
   const expDate = new Date(exp); expDate.setHours(0,0,0,0);
   return expDate >= today;
+  */
 }
 
 function daysLeftInSubscription(){
@@ -6204,7 +6210,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '🛠️ Tools', tiles: [
     {icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
     {icon:'📋', label:'Reply Templates', action:'openReplyTemplatesModal'},
-    {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
+    // ---------- 🍇 Fruit Mandi POS: "Package Plans" ٹائل ہوم پیج سے ہائیڈ کر دی گئی ہے (کوڈ/فیچر محفوظ ہے، صرف سامنے نہیں دکھائی جا رہی) ----------
   ]},
   { section: '🔴 Liabilities', tiles: [
     {icon:'💸', label:'Expenditure', screen:'expenditure'},
@@ -6255,7 +6261,27 @@ function renderHomeIconGrid(){
     const sortedTiles = HOME_TILES_ADMIN.slice().sort((a, b) => a.label.localeCompare(b.label));
     grid.innerHTML = `<div class="homeSectionGrid">${sortedTiles.map(tileHtml).join('')}</div>`;
   } else {
-    grid.innerHTML = HOME_TILES_SALESMAN.map(tileHtml).join('');
+    // ---------- 🔧 فکس: پہلے یہاں ہمیشہ ایک fixed فہرست (Billing/Bill History/Advance Orders) دکھائی جاتی
+    // تھی — چاہے صدام نے Users اسکرین میں ملازم کو کوئی بھی اور اسکرینز assign کی ہوں۔ اب اسی ملازم کی
+    // اپنی assigned screens (u.screens, ASSIGNABLE_SCREENS سے) کے مطابق ہوم پیج کے آئیکن بنائے جاتے ہیں —
+    // تاکہ صدام جسے جو اسکرین دے، اسی ملازم کو ہوم پیج پر وہی نظر آئے ----------
+    const currentUser = usersData.find(x => x.name === AppState.currentUser?.name && x.role === 'salesman');
+    const assignedKeys = (currentUser && Array.isArray(currentUser.screens)) ? currentUser.screens : [];
+    let salesmanTiles;
+    if(assignedKeys.length > 0){
+      salesmanTiles = assignedKeys.map(key => {
+        const def = ASSIGNABLE_SCREENS.find(s => s.key === key);
+        if(!def) return null;
+        const spaceIdx = def.label.indexOf(' ');
+        const icon = spaceIdx > -1 ? def.label.slice(0, spaceIdx) : '📄';
+        const label = spaceIdx > -1 ? def.label.slice(spaceIdx + 1) : def.label;
+        return {icon, label, screen:key};
+      }).filter(Boolean);
+    }
+    // ---------- اگر صدام نے ابھی تک کوئی اسکرین assign نہ کی ہو تو پرانی ڈیفالٹ فہرست (Billing/Bill
+    // History/Advance Orders) دکھائیں — تاکہ نیا ملازم خالی ہوم پیج نہ دیکھے ----------
+    if(!salesmanTiles || salesmanTiles.length === 0) salesmanTiles = HOME_TILES_SALESMAN;
+    grid.innerHTML = salesmanTiles.map(tileHtml).join('');
   }
 }
 
@@ -7111,7 +7137,7 @@ const APP_SEARCH_INDEX = [
   {label:'Settings — Barcode Labels', path:'Bill & Print Settings', screen:'billsettings', keywords:'barcode labels print sticker code39 copies variant'},
   {label:'Settings — Storage Usage', path:'Settings', screen:'settings', anchor:'storageUsageCard', keywords:'storage usage space full device limit photos mb used'},
   {label:'Reply Templates', path:'Home → Tools', action:'openReplyTemplatesModal', keywords:'reply templates canned message whatsapp sms quick reply payment reminder thank you'},
-  {label:'Package Plans', path:'Home → Tools', action:'openPackagePlansModal', keywords:'package plans subscription price days activation code trial google play billing'},
+  // ---------- 🍇 Fruit Mandi POS: "Package Plans" کو App Search میں سے بھی ہٹا دیا گیا ہے (تاکہ سرچ کر کے بھی نہ کھل سکے) ----------
 ];
 
 // ---------- 🔍 App Search بار — کمپیکٹ (صرف آئیکن)، دبانے پر کھلتی ہے، باہر ٹیپ کرنے یا نتیجہ چننے پر خودکار بند ----------
