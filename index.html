@@ -4039,17 +4039,40 @@
     <div class="screen" id="screen-orderTaking">
       <div class="pageTitle">🧾 Order Taking</div>
 
-      <div style="margin-bottom:10px;">
-        <input type="text" id="otCustomerName" placeholder="🧑 کسٹمر کا نام" list="otCustomerList"
-               style="width:100%; padding:14px; border:2px solid var(--primary); border-radius:12px; font-size:18px; font-weight:800; text-align:center;">
-        <datalist id="otCustomerList"></datalist>
+      <!-- STEP 1: پہلے کسٹمر منتخب کریں — ایریا ریکارڈ سے خودبخود آ جائے گا -->
+      <div id="otStepCustomer">
+        <input type="text" id="otCustSearch" placeholder="🔍 کسٹمر کا نام یا ایریا لکھیں" oninput="renderOtCustomerList(this.value)"
+               style="width:100%; padding:14px; border:2px solid var(--primary); border-radius:12px; font-size:17px; font-weight:800; text-align:center; margin-bottom:10px;">
+        <div id="otCustomerListWrap" style="max-height:65vh; overflow-y:auto; padding-bottom:20px;"></div>
       </div>
 
-      <div id="otItemsList" style="display:flex; flex-direction:column; gap:6px; margin-bottom:70px;"></div>
+      <!-- STEP 2: آئٹمز منتخب کریں — ٹک لگائیں، تعداد لگائیں، صفحہ بدلیں -->
+      <div id="otStepItems" style="display:none;">
+        <div id="otTopBar" style="position:sticky; top:0; z-index:5; background:var(--bg); padding:8px 4px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:2px solid var(--primary); margin-bottom:8px;">
+          <div style="min-width:0;">
+            <div style="font-weight:800; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="otTopCustName"></div>
+            <div style="font-size:12px; color:var(--muted);" id="otTopCustArea"></div>
+          </div>
+          <div style="display:flex; gap:6px; flex:0 0 auto;">
+            <button type="button" onclick="backToOtCustomer()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
+            <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
+          </div>
+        </div>
+        <div id="otItemsList" style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;"></div>
+        <div id="otPager" style="position:sticky; bottom:8px; display:flex; align-items:center; gap:10px; padding-top:6px; margin-bottom:6px;"></div>
+      </div>
 
-      <!-- نیچے ہمیشہ نظر آنے والا بڑا Submit بٹن -->
-      <div style="position:sticky; bottom:8px; padding-top:6px;">
-        <button type="button" onclick="submitOrderTakingList()" style="width:100%; padding:16px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">✅ مکمل — ایڈمن کو بھیجیں</button>
+      <!-- STEP 3: ریویو — صرف اشیاء اور تعداد (رقم/ریٹ نہیں)، ایڈمن کو بھیجنے کے لیے تیار -->
+      <div id="otStepReview" style="display:none;">
+        <div style="text-align:center; margin-bottom:12px; background:#fff; border:2px solid var(--primary); border-radius:14px; padding:12px;">
+          <div style="font-size:18px; font-weight:800;" id="otReviewCustName"></div>
+          <div style="font-size:13px; color:var(--muted);" id="otReviewCustArea"></div>
+        </div>
+        <div id="otReviewItemsList" style="display:flex; flex-direction:column; gap:6px; margin-bottom:70px;"></div>
+        <div style="position:sticky; bottom:8px; display:flex; gap:8px; padding-top:6px;">
+          <button type="button" onclick="backToOtItems()" style="flex:1; padding:15px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:14px; font-size:15px; font-weight:800; cursor:pointer;">◀ ترمیم کریں</button>
+          <button type="button" onclick="postOtOrderToAdmin()" style="flex:2; padding:15px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">📤 ایڈمن کو بھیجیں</button>
+        </div>
       </div>
     </div>
 
@@ -6047,7 +6070,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM318MO27';
+const APP_BUILD_VERSION = 'FM19TU01';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -14890,72 +14913,225 @@ function saveAdvanceOrder(){
 }
 
 /* =====================================================================
-   🧾 ORDER TAKING — سادہ سکرین (کم پڑھے لکھے ملازم کے لیے): تمام آئٹمز سیدھی لسٹ میں،
-   نہ سرچ نہ کیٹگری نہ ریٹ۔ Submit پر ایک نیا Advance Order بن کر ایڈمن کے پاس چلا جاتا ہے
-   (اسی ریویو/Rate Lagayein نظام سے گزرے گا جو پہلے سے بنا ہوا ہے)۔
+   🧾 ORDER TAKING — سادہ سکرین (کم پڑھے لکھے ملازم کے لیے)۔
+   تین قدم: (1) کسٹمر منتخب کریں — ایریا ریکارڈ سے خودبخود آ جاتا ہے
+            (2) تمام آئٹمز کی لسٹ میں (صفحہ وار) ٹک لگا کر تعداد لگائیں
+            (3) ریویو — صرف آئٹمز اور تعداد (رقم/ریٹ نہیں) — "ایڈمن کو بھیجیں"
+                دبانے پر نیا Advance Order (status: pending) بن جاتا ہے، جو ایڈمن کی
+                Advance Orders سکرین پر خودبخود نظر آ جاتا ہے (وہیں سے ایڈمن ریٹ لگا کر فائنل کرتا ہے)۔
    ===================================================================== */
-let otQtyMap = {}; // {variant_id: qty} — سکرین کھلی رہنے تک عارضی
-
-function populateOtCustomerList(){
-  const dl = document.getElementById('otCustomerList');
-  if(dl) dl.innerHTML = customersData.map(c => `<option value="${c.name}">`).join('');
-}
+let otCustomer = null;      // {customer_id, name, area} — منتخب شدہ کسٹمر
+let otQtyMap = {};          // {variant_id: qty}
+let otCheckedMap = {};      // {variant_id: true/false}
+let otFlatCache = [];       // موجودہ سکرین کے لیے آئٹمز کی فہرست (ایک بار سورٹ کر کے محفوظ)
+let otPage = 0;             // موجودہ صفحہ نمبر (0 سے شروع)
+let otReviewItems = [];     // ریویو سکرین کے لیے منتخب شدہ آئٹمز
+const OT_PAGE_SIZE = 24;    // ہر صفحے پر کتنے آئٹمز دکھائیں
 
 function renderOrderTakingScreen(){
+  otCustomer = null;
   otQtyMap = {};
-  const nameInput = document.getElementById('otCustomerName');
-  if(nameInput) nameInput.value = '';
-  populateOtCustomerList();
+  otCheckedMap = {};
+  otPage = 0;
+  otReviewItems = [];
 
-  const flat = getFlatVariants().sort((a, b) => a.name.localeCompare(b.name, 'ur'));
+  const s1 = document.getElementById('otStepCustomer');
+  const s2 = document.getElementById('otStepItems');
+  const s3 = document.getElementById('otStepReview');
+  if(s1) s1.style.display = '';
+  if(s2) s2.style.display = 'none';
+  if(s3) s3.style.display = 'none';
+
+  const search = document.getElementById('otCustSearch');
+  if(search) search.value = '';
+  renderOtCustomerList('');
+}
+
+// ---------- STEP 1: کسٹمر لسٹ (سرچ کے ساتھ) — ٹیپ کرتے ہی کسٹمر + ایریا سیٹ ہو جاتا ہے ----------
+function renderOtCustomerList(query){
+  const wrap = document.getElementById('otCustomerListWrap');
+  if(!wrap) return;
+  const q = (query || '').trim().toLowerCase();
+
+  const list = customersData.filter(c => {
+    if(!q) return true;
+    return (c.name || '').toLowerCase().includes(q) ||
+           (c.area || '').toLowerCase().includes(q) ||
+           (c.phone || '').includes(q);
+  }).sort((a, b) => a.name.localeCompare(b.name, 'ur'));
+
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">کوئی کسٹمر نہیں ملا</div>`;
+    return;
+  }
+
+  wrap.innerHTML = list.map(c => `
+    <div onclick="selectOtCustomer(${c.customer_id})" style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:13px 14px; margin-bottom:6px; cursor:pointer;">
+      <div style="font-weight:800; font-size:16px; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</div>
+      <div style="font-size:12.5px; color:var(--muted); flex:0 0 auto; font-weight:700;">${c.area ? '🗺️ ' + c.area : ''}</div>
+    </div>`).join('');
+}
+
+function selectOtCustomer(customerId){
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!c) return;
+  otCustomer = {customer_id: c.customer_id, name: c.name, area: c.area || ''};
+  otQtyMap = {};
+  otCheckedMap = {};
+  otPage = 0;
+
+  const nameEl = document.getElementById('otTopCustName');
+  const areaEl = document.getElementById('otTopCustArea');
+  if(nameEl) nameEl.textContent = '🧑 ' + otCustomer.name;
+  if(areaEl) areaEl.textContent = otCustomer.area ? '🗺️ ' + otCustomer.area : '';
+
+  document.getElementById('otStepCustomer').style.display = 'none';
+  document.getElementById('otStepItems').style.display = '';
+
+  otFlatCache = getFlatVariants().sort((a, b) => a.name.localeCompare(b.name, 'ur'));
+  renderOtItemsPage();
+}
+
+function backToOtCustomer(){
+  if(Object.values(otCheckedMap).some(v => v) && !confirm('واپس جانے پر منتخب شدہ آئٹمز ختم ہو جائیں گے — واپس جائیں؟')) return;
+  document.getElementById('otStepItems').style.display = 'none';
+  document.getElementById('otStepCustomer').style.display = '';
+  const search = document.getElementById('otCustSearch');
+  if(search) search.value = '';
+  renderOtCustomerList('');
+}
+
+// ---------- STEP 2: آئٹمز (صفحہ وار) — ہر آئٹم کی اپنی الگ row/id ہے تاکہ ٹک اور تعداد کبھی
+// دوسرے آئٹم پر اثر انداز نہ ہو (ہر بٹن کا اپنا واضح variant_id ہے، کسی ایک ہی id کا اشتراک نہیں) ----------
+function renderOtItemsPage(){
   const list = document.getElementById('otItemsList');
   if(!list) return;
-  list.innerHTML = flat.map(v => `
-    <div class="otItemRow" style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:10px 12px;">
-      <div style="font-size:17px; font-weight:700; flex:1; min-width:0;">${v.name}</div>
+  const start = otPage * OT_PAGE_SIZE;
+  const pageItems = otFlatCache.slice(start, start + OT_PAGE_SIZE);
+
+  list.innerHTML = pageItems.map(v => {
+    const checked = !!otCheckedMap[v.variant_id];
+    const qty = otQtyMap[v.variant_id] || 0;
+    return `
+    <div class="otItemRow" data-variant-id="${v.variant_id}" style="display:flex; align-items:center; gap:10px; background:#fff; border:2px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:12px; padding:9px 12px;">
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(${v.variant_id}, this.checked)" style="width:22px; height:22px; margin:0; flex:0 0 auto; cursor:pointer;">
+      <div style="font-size:16px; font-weight:700; flex:1; min-width:0; cursor:pointer;" onclick="toggleOtItemFromRow(${v.variant_id})">${v.name}</div>
       <div style="display:flex; align-items:center; gap:8px; flex:0 0 auto;">
-        <button type="button" onclick="changeOtQty(${v.variant_id}, -1)" style="width:38px; height:38px; border:none; border-radius:10px; background:#fee2e2; color:#b91c1c; font-size:20px; font-weight:800; cursor:pointer;">−</button>
-        <span id="otQty-${v.variant_id}" style="min-width:28px; text-align:center; font-size:18px; font-weight:800;">0</span>
-        <button type="button" onclick="changeOtQty(${v.variant_id}, 1)" style="width:38px; height:38px; border:none; border-radius:10px; background:#dcfce7; color:#15803d; font-size:20px; font-weight:800; cursor:pointer;">+</button>
+        <button type="button" onclick="changeOtQty(${v.variant_id}, -1)" style="width:36px; height:36px; border:none; border-radius:10px; background:#fee2e2; color:#b91c1c; font-size:18px; font-weight:800; cursor:pointer;">−</button>
+        <span id="otQty-${v.variant_id}" style="min-width:26px; text-align:center; font-size:16px; font-weight:800;">${qty}</span>
+        <button type="button" onclick="changeOtQty(${v.variant_id}, 1)" style="width:36px; height:36px; border:none; border-radius:10px; background:#dcfce7; color:#15803d; font-size:18px; font-weight:800; cursor:pointer;">+</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+
+  renderOtPager();
+}
+
+function toggleOtItemFromRow(variantId){
+  toggleOtItem(variantId, !otCheckedMap[variantId]);
+  const row = document.querySelector(`.otItemRow[data-variant-id="${variantId}"] input[type="checkbox"]`);
+  if(row) row.checked = !!otCheckedMap[variantId];
+}
+
+function toggleOtItem(variantId, isChecked){
+  otCheckedMap[variantId] = isChecked;
+  if(isChecked && !otQtyMap[variantId]) otQtyMap[variantId] = 1;
+
+  const row = document.querySelector(`.otItemRow[data-variant-id="${variantId}"]`);
+  if(row) row.style.borderColor = isChecked ? 'var(--primary)' : '#e5e9f0';
+  const qtyEl = document.getElementById('otQty-' + variantId);
+  if(qtyEl) qtyEl.textContent = otQtyMap[variantId] || 0;
 }
 
 function changeOtQty(variantId, delta){
   const current = otQtyMap[variantId] || 0;
   const next = Math.max(0, current + delta);
   otQtyMap[variantId] = next;
-  const el = document.getElementById('otQty-' + variantId);
-  if(el) el.textContent = next;
+  otCheckedMap[variantId] = next > 0;
+
+  const qtyEl = document.getElementById('otQty-' + variantId);
+  if(qtyEl) qtyEl.textContent = next;
+  const row = document.querySelector(`.otItemRow[data-variant-id="${variantId}"]`);
+  if(row){
+    row.style.borderColor = next > 0 ? 'var(--primary)' : '#e5e9f0';
+    const chk = row.querySelector('input[type="checkbox"]');
+    if(chk) chk.checked = next > 0;
+  }
 }
 
-function submitOrderTakingList(){
-  const customerName = (document.getElementById('otCustomerName').value || '').trim();
-  if(!customerName){ alert('پہلے کسٹمر کا نام لکھیں'); return; }
+function renderOtPager(){
+  const pager = document.getElementById('otPager');
+  if(!pager) return;
+  const totalPages = Math.max(1, Math.ceil(otFlatCache.length / OT_PAGE_SIZE));
+  pager.innerHTML = `
+    <button type="button" onclick="goOtPage(-1)" ${otPage <= 0 ? 'disabled' : ''} style="flex:1; padding:13px; border:none; border-radius:12px; background:${otPage <= 0 ? '#e5e9f0' : 'var(--primary)'}; color:${otPage <= 0 ? '#94a3b8' : '#fff'}; font-size:15px; font-weight:800; cursor:pointer;">◀ پچھلا صفحہ</button>
+    <div style="font-weight:800; color:var(--muted); font-size:13px; flex:0 0 auto;">صفحہ ${otPage + 1} / ${totalPages}</div>
+    <button type="button" onclick="goOtPage(1)" ${otPage >= totalPages - 1 ? 'disabled' : ''} style="flex:1; padding:13px; border:none; border-radius:12px; background:${otPage >= totalPages - 1 ? '#e5e9f0' : 'var(--primary)'}; color:${otPage >= totalPages - 1 ? '#94a3b8' : '#fff'}; font-size:15px; font-weight:800; cursor:pointer;">اگلا صفحہ ▶</button>
+  `;
+}
 
-  const flat = getFlatVariants();
-  const items = Object.keys(otQtyMap)
-    .map(id => ({variant_id: Number(id), qty: otQtyMap[id]}))
-    .filter(i => i.qty > 0)
-    .map(i => {
-      const v = flat.find(f => f.variant_id === i.variant_id);
-      return {variant_id: i.variant_id, name: v ? v.name : '', label: v ? (v.label || '') : '', qty: i.qty, unitPrice: 0};
+function goOtPage(delta){
+  const totalPages = Math.max(1, Math.ceil(otFlatCache.length / OT_PAGE_SIZE));
+  otPage = Math.min(totalPages - 1, Math.max(0, otPage + delta));
+  renderOtItemsPage();
+}
+
+// ---------- STEP 3: ریویو — صرف دکاندار کا نام، ایریا اور منتخب اشیاء (رقم/ریٹ ابھی نہیں) ----------
+function openOtReview(){
+  if(!otCustomer){ alert('پہلے کسٹمر منتخب کریں'); return; }
+
+  const items = Object.keys(otCheckedMap)
+    .filter(id => otCheckedMap[id] && (otQtyMap[id] || 0) > 0)
+    .map(id => {
+      const v = otFlatCache.find(f => f.variant_id === Number(id));
+      return {variant_id: Number(id), name: v ? v.name : '', label: v ? (v.label || '') : '', qty: otQtyMap[id]};
     });
 
-  if(items.length === 0){ alert('کم از کم ایک چیز کی تعداد سلیکٹ کریں'); return; }
+  if(items.length === 0){ alert('کم از کم ایک چیز کو ٹک کر کے تعداد لگائیں'); return; }
+  otReviewItems = items;
+
+  document.getElementById('otReviewCustName').textContent = '🧑 ' + otCustomer.name;
+  document.getElementById('otReviewCustArea').textContent = otCustomer.area ? '🗺️ ' + otCustomer.area : '';
+  document.getElementById('otReviewItemsList').innerHTML = items.map(i => `
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:11px 14px;">
+      <div style="font-weight:700; font-size:15px;">${i.name}</div>
+      <div style="font-weight:800; color:var(--primary); font-size:15px;">${i.qty} عدد</div>
+    </div>`).join('');
+
+  document.getElementById('otStepItems').style.display = 'none';
+  document.getElementById('otStepReview').style.display = '';
+}
+
+function backToOtItems(){
+  document.getElementById('otStepReview').style.display = 'none';
+  document.getElementById('otStepItems').style.display = '';
+}
+
+// ---------- "ایڈمن کو بھیجیں" — نیا Advance Order (status: pending) بنے گا، ایڈمن کی Advance Orders
+// سکرین میں خودبخود نظر آئے گا، جہاں سے ایڈمن ریٹ لگا کر فائنل کر کے کسٹمر کو بھیج سکتا ہے ----------
+function postOtOrderToAdmin(){
+  if(!otCustomer || !otReviewItems || otReviewItems.length === 0) return;
 
   advanceOrdersData.unshift({
     id: nextAdvOrderId++,
-    customerName, customerPhone: '', note: '',
-    items,
+    customerName: otCustomer.name,
+    customerPhone: '',
+    customerArea: otCustomer.area || '',
+    note: '',
+    items: otReviewItems.map(i => ({variant_id: i.variant_id, name: i.name, label: i.label, qty: i.qty, unitPrice: 0})),
     status: 'pending',
     createdAt: new Date().toISOString(),
     fulfilledAt: null
   });
   persistAllData();
 
+  otCustomer = null;
   otQtyMap = {};
-  alert('آرڈر بھیج دیا گیا — ایڈمن ریویو کرے گا۔');
+  otCheckedMap = {};
+  otReviewItems = [];
+  otPage = 0;
+
+  alert('✅ آرڈر ایڈمن کو بھیج دیا گیا — ایڈمن ریٹ لگا کر فائنل کرے گا۔');
   goTo('home');
 }
 
