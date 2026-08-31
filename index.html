@@ -36,6 +36,17 @@
     --font:'Segoe UI', system-ui, sans-serif;
     --font-weight:400;
   }
+  /* ---------- 🥬 جمیل نوری نستعلیق — سبزیوں کے پراڈکٹ ناموں کے لیے خوبصورت اردو فونٹ (Regular + Kasheeda دونوں انداز) ---------- */
+  @font-face{
+    font-family:'JameelNooriNastaleeq';
+    src:url('./fonts/JameelNooriNastaleeq-Regular.ttf') format('truetype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'JameelNooriNastaleeqKasheeda';
+    src:url('./fonts/JameelNooriNastaleeq-Kasheeda.ttf') format('truetype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
   *{box-sizing:border-box; margin:0; padding:0;}
   /* ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر Category والی تمام UI (Billing/Advance Orders/
   Purchase Orders/Stock Adjustment/Products کی کیٹگری ریل، ڈراپ ڈاؤن اور فلٹر) پوری ایپ سے چھپا دی
@@ -5928,7 +5939,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM318MO17';
+const APP_BUILD_VERSION = 'FM318MO18';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -8175,7 +8186,7 @@ function renderBillingProductGrid(){
           ${stockBadgeHtml}
           ${p.image ? `<img src="${p.image}">` : ''}
           <div class="pgCaption${p.image ? '' : ' pgCaptionNoImg'}" style="${p.image ? `background:${getProductCardCaptionBgFinal()};` : `background:${getProductCardBgFinal()};`}">
-            <div class="pgName" style="font-size:${nameFontSize}; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
+            <div class="pgName" style="font-size:${nameFontSize}; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; line-height:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).isNastaleeq ? '1.9' : '1.15'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
             <div class="pgPrice" style="color:${getProductCardTextColorFinal(!!p.image)};">${priceLabel}</div>
           </div>
         </div>
@@ -9528,6 +9539,42 @@ function isoDaysFromToday(n){
 let productsData = loadFromStorage('products', PRODUCTS_SEED_DATA);
 let nextProductId = loadFromStorage('nextProductId', 10);
 let nextVariantId = loadFromStorage('nextVariantId', 28);
+
+/* =====================================================================
+   🥬 سبزیوں کی فہرست — صدام کی فراہم کردہ 63 آئٹمز، ایک بار خودکار پراڈکٹ کے
+   طور پر شامل کی جاتی ہیں (ریٹ/اسٹاک 0 پر — بعد میں Products اسکرین سے بھر لیں)۔
+   نام جان بوجھ کر ویسے ہی رکھے گئے ہیں جیسے دیے گئے (کچھ نام دہرائے گئے ہیں —
+   مثلاً "ٹماٹر" 4 بار — یہ مختلف کوالٹی/گریڈ ظاہر کرتے ہیں) ---------- */
+const VEGETABLE_NAMES_SEED = [
+  'ٹماٹر','ٹماٹر','ٹماٹر','ٹماٹر','آلو میٹھا','آلو پھیکا','آلو نیا','پیاز لال','پیاز سفید','پالک',
+  'دھنیا','ساگ','کٹم','میتھی','پودینہ','سلاد پتہ','لال مولی','سبز پیاز','مولی','شلجم',
+  'شلجم پتے والا','گاجر','گاجر چائنہ','ٹنڈہ','ٹنڈہ دیسی','مارو','بھنڈی','شلپر','بند گوبھی','لال بند گوبھی',
+  'پھول گوبھی','چائنہ','کچہ لہسن','ادرک','دیسی','کریلا دیسی','لمبا بینگن','گول بینگن','لمبا کدو (لوکی)','گول کدو',
+  'نیمبو گل گل','اروی','توری','کچالو','شملہ','مرچ دیسی','مرچ','فریش','کھیرا','کھیرا شاپر',
+  'مٹر','مٹر','مونگرا','پیٹھہ','چقندر','چھلی','چھولے','شکر قندی','ہلدی','چونگ',
+  'کچنار','آم','سنگھاڑا'
+];
+// ---------- ایک بار خودکار سیڈنگ — پرانی/نئی ہر انسٹالیشن پر صرف ایک بار چلے (فلیگ سے یاد رکھا جاتا ہے)،
+// ساتھ ہی پراڈکٹ کارڈ کا فونٹ خودکار "جمیل نوری نستعلیق (کشیدہ)" پر سیٹ ہو جاتا ہے تاکہ نام خوبصورت،
+// سینٹرلائزڈ اردو نستعلیق میں نظر آئیں ---------- */
+function seedVegetableProductsOnce(){
+  if(AppState.settings.vegProductsSeededV1) return;
+  VEGETABLE_NAMES_SEED.forEach(name => {
+    productsData.push({
+      product_id: nextProductId++,
+      name: name,
+      category: 'سبزیاں',
+      variants: [
+        {variant_id: nextVariantId++, label:'فی کلو', barcode:'', purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', expiryDate:''}
+      ]
+    });
+  });
+  if(!AppState.settings.productCardNameFont) AppState.settings.productCardNameFont = 'jameelnastaleeqkasheeda';
+  AppState.settings.vegProductsSeededV1 = true;
+  saveProductsLight();
+  persistAllData();
+}
+seedVegetableProductsOnce();
 // ---------- خالی/نئی کیٹیگریز جو ابھی کسی پراڈکٹ پر لاگو نہیں ہوئیں — Categories ڈراپ ڈاؤن کے "➕ Add New" سے شامل ہوں گی ----------
 let customCategories = loadFromStorage('customCategories', []);
 
@@ -13928,7 +13975,7 @@ function renderPoBrowseList(){
           ${stockBadgeHtml}
           ${p.image ? `<img src="${p.image}">` : ''}
           <div class="pgCaption${p.image ? '' : ' pgCaptionNoImg'}" style="${p.image ? `background:${getProductCardCaptionBgFinal()};` : `background:${getProductCardBgFinal()};`}">
-            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
+            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; line-height:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).isNastaleeq ? '1.9' : '1.15'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
             <div class="pgPrice" style="color:${getProductCardTextColorFinal(!!p.image)};">${priceLabel}</div>
           </div>
         </div>
@@ -14374,7 +14421,7 @@ function renderAdvOrderProductGrid(){
           ${qtyBadgeHtml}
           ${p.image ? `<img src="${p.image}">` : ''}
           <div class="pgCaption${p.image ? '' : ' pgCaptionNoImg'}" style="${p.image ? `background:${getProductCardCaptionBgFinal()};` : `background:${getProductCardBgFinal()};`}">
-            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
+            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; line-height:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).isNastaleeq ? '1.9' : '1.15'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
             <div class="pgPrice" style="color:${getProductCardTextColorFinal(!!p.image)};">${priceLabel}</div>
           </div>
         </div>
@@ -19825,6 +19872,8 @@ const FONT_PRESETS = [
   {id:'latolight',    label:'Lato Light',      family:"'Lato', sans-serif",                    weight:300},
   {id:'arialnarrow',  label:'Arial Narrow',    family:"'Roboto Condensed', 'Arial Narrow', sans-serif", weight:400},
   {id:'calibri',      label:'Calibri',         family:"'Carlito', Calibri, sans-serif",         weight:400},
+  {id:'jameelnastaleeq',        label:'جمیل نوری نستعلیق',          family:"'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif",         weight:400, isNastaleeq:true},
+  {id:'jameelnastaleeqkasheeda',label:'جمیل نوری نستعلیق (کشیدہ)',  family:"'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif", weight:400, isNastaleeq:true},
 ];
 
 // ---------- پوری ایپ کا سائز (Zoom) — بڑی اسکرین/فونٹ چاہنے والوں کے لیے۔ html root پر zoom لگانے سے

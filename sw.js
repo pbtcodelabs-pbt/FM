@@ -21,7 +21,7 @@
 // اور جیسے ہی نئی تاریخ شروع ہو تو سیریل واپس 01 سے شروع کریں۔ مکمل تفصیل index.html
 // میں APP_BUILD_VERSION کے اوپر والے کمنٹ میں موجود ہے۔
 
-const CACHE_VERSION = 'FM318MO17';
+const CACHE_VERSION = 'FM318MO18';
 const CACHE_NAME = `fruit-mandi-pos-${CACHE_VERSION}`;
 
 // ---------- یہ فائلیں انسٹال کے وقت ہی محفوظ کر لی جائیں گی — آف لائن پہلی بار کھلنے کے لیے ضروری ----------
@@ -32,7 +32,9 @@ const PRECACHE_URLS = [
   './favicon-32.png',
   './icon-180.png',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './fonts/JameelNooriNastaleeq-Regular.ttf',
+  './fonts/JameelNooriNastaleeq-Kasheeda.ttf'
 ];
 
 // ---------- 📦 INSTALL: بنیادی فائلیں کیش میں رکھ دیں ----------
