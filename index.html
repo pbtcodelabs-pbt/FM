@@ -2188,6 +2188,9 @@
          نیچے، دائیں کونے میں کھلے (نیچے CSS میں #sidebar بھی اسی مطابق ایک چھوٹے dropdown پینل کی طرح
          Topbar کے نیچے دائیں کونے میں کھلتا ہے، پوری اسکرین کا drawer اب نہیں رہا) ---------- -->
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
+    <!-- ---------- 🚪 QUICK LOGOUT — صدام کی ہدایت پر: سائیڈ مینیو میں نیچے سکرول کر کے ڈھونڈنے کی بجائے،
+         یہ بٹن ہمیشہ سامنے، ہر سکرین پر (Topbar میں ہی) موجود رہے گا — ایک ٹیپ سے فوری لاگ آؤٹ ----------- -->
+    <button id="quickLogoutBtn" onclick="logout()" title="Logout" style="background:rgba(255,255,255,.16); border:none; color:#fff; width:38px; height:38px; border-radius:10px; font-size:17px; cursor:pointer; margin-inline-start:6px; flex:0 0 auto;">🚪</button>
   </div>
 
   <!-- ---------- 🔎 App Search — یونیورسل سرچ، ہمیشہ نظر آنے والی، ہر سکرین پر ایک ہی جگہ —
@@ -2319,6 +2322,10 @@
 
       <div class="pageTitle billingPageTitle">🛒 Billing Screen</div>
       <div id="rejectionNotice"></div>
+
+      <!-- ---------- 🏠 HOME SHORTCUT CARDS — صدام کی خود کی منتخب کردہ 3 سکرینیں (Settings میں طے شدہ)،
+           ہمیشہ سب سے اوپر نظر آئیں — Pending Orders پر پینڈنگ گنتی کا بیج بھی ---------- -->
+      <div id="homeShortcutCards" class="admin-only" style="display:flex; gap:8px; margin-bottom:12px;"></div>
 
       <div class="billingTopBar">
         <div class="modeToggleRow">
@@ -4385,6 +4392,15 @@
           <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;"></div>
         </div>
 
+        <!-- ---------- 🏠 HOME SHORTCUTS — صدام کی ہدایت پر: ایڈمن اپنی مرضی کی 3 (زیادہ سے زیادہ) سکرینیں
+             منتخب کر سکے، وہی سکرینیں کارڈز کی شکل میں سب سے اوپر Home/Billing پر نظر آئیں (مثلاً Pending
+             Orders — جس پر کتنے آرڈر پینڈنگ ہیں اس کی گنتی کا بیج بھی ہو) ---------- -->
+        <div class="settingsCard" id="settingsCardHomeShortcuts">
+          <h3>🏠 Home Screen Shortcuts <span style="font-weight:600; color:var(--muted); font-size:11.5px;">(زیادہ سے زیادہ 3 منتخب کریں)</span></h3>
+          <div id="homeShortcutsPicker" style="display:flex; flex-direction:column; gap:6px; margin-top:8px;"></div>
+        </div>
+
+
         <!-- --- 💾 اسٹوریج کا استعمال — تاکہ صارف کو ہمیشہ پتا رہے کتنی جگہ بچی ہے، اچانک خاموشی سے ڈیٹا ضائع نہ ہو --- -->
         <div class="settingsCard" id="storageUsageCard">
           <h3>💾 Storage Used</h3>
@@ -5909,6 +5925,8 @@ const DEFAULT_SETTINGS = {
   font: "'Open Sans', Tahoma, sans-serif",
   fontId: 'tahoma',
   fontWeight: 400,
+  // ---------- 🏠 ہوم پیج شارٹ کٹ کارڈز — ایڈمن Settings سے بدل سکتا ہے (زیادہ سے زیادہ 3) ----------
+  homeShortcuts: ['advanceorders', 'customers', 'suppliers'],
   paperWidth: 80,         // 58 | 80 (mm) — Print خود Android کے Print Service سسٹم سے چلتا ہے، الگ کنکشن سیٹنگ کی ضرورت نہیں
   // ---------- ٹیکس — پاکستان میں عام دکانوں کے کاؤنٹر بل پر لاگو نہیں ہوتا، اس لیے ڈیفالٹ بند ہے۔
   // جن کاروباروں کو ضرورت ہو (رجسٹرڈ/فارمل بزنس) وہ Settings سے آن کر کے فیصد لگا سکتے ہیں ----------
@@ -6070,7 +6088,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU01';
+const APP_BUILD_VERSION = 'FM19TU04';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6447,6 +6465,73 @@ function renderHomeUnfinishedCartCard(){
       </div>
       <span style="font-size:20px;">→</span>
     </div>`;
+}
+
+// ---------- 🏠 HOME SHORTCUT CARDS — صدام کی خود کی منتخب کردہ (زیادہ سے زیادہ 3) سکرینیں،
+// Billing/Home پر سب سے اوپر کارڈز کی شکل میں۔ Pending Orders پر پینڈنگ گنتی کا بیج بھی۔ ----------
+const HOME_SHORTCUT_OPTIONS = [
+  {key:'advanceorders', icon:'📝', label:'Pending Orders', screen:'advanceorders'},
+  {key:'customers',     icon:'👥', label:'Customers',      screen:'customers'},
+  {key:'suppliers',     icon:'🚚', label:'Suppliers',      screen:'suppliers'},
+  {key:'recoveryList',  icon:'💰', label:'Recovery List',  screen:'recoveryList'},
+  {key:'dashboard',     icon:'📊', label:'Dashboard',      screen:'dashboard'},
+  {key:'stockadjustment', icon:'🧮', label:'Stock Adjustment', screen:'stockadjustment'},
+  {key:'billhistory',   icon:'🧾', label:'Bill History',   screen:'billhistory'},
+  {key:'expenditure',   icon:'💸', label:'Expenditure',    screen:'expenditure'},
+];
+const HOME_SHORTCUT_MAX = 3;
+
+function renderHomeShortcutsSettings(){
+  const wrap = document.getElementById('homeShortcutsPicker');
+  if(!wrap) return;
+  const selected = AppState.settings.homeShortcuts || [];
+  wrap.innerHTML = HOME_SHORTCUT_OPTIONS.map(o => {
+    const checked = selected.includes(o.key);
+    return `
+    <label style="display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:10px; padding:10px 12px; cursor:pointer;">
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleHomeShortcut('${o.key}', this.checked)" style="width:19px; height:19px; margin:0;">
+      <span style="font-size:15px;">${o.icon}</span>
+      <span style="font-size:14px; font-weight:700; flex:1;">${o.label}</span>
+    </label>`;
+  }).join('');
+}
+
+function toggleHomeShortcut(key, isChecked){
+  let selected = AppState.settings.homeShortcuts || [];
+  if(isChecked){
+    if(selected.length >= HOME_SHORTCUT_MAX){
+      alert(`زیادہ سے زیادہ ${HOME_SHORTCUT_MAX} سکرینیں منتخب کی جا سکتی ہیں — پہلے کوئی ایک ہٹائیں۔`);
+      renderHomeShortcutsSettings();
+      return;
+    }
+    selected = [...selected, key];
+  } else {
+    selected = selected.filter(k => k !== key);
+  }
+  AppState.settings.homeShortcuts = selected;
+  persistAllData();
+  renderHomeShortcutsSettings();
+  renderHomeShortcutCards();
+}
+
+function renderHomeShortcutCards(){
+  const wrap = document.getElementById('homeShortcutCards');
+  if(!wrap) return;
+  if(AppState.currentRole !== 'admin'){ wrap.style.display = 'none'; return; }
+
+  const selected = AppState.settings.homeShortcuts || [];
+  const tiles = selected.map(key => HOME_SHORTCUT_OPTIONS.find(o => o.key === key)).filter(Boolean);
+  if(tiles.length === 0){ wrap.style.display = 'none'; return; }
+
+  wrap.style.display = 'flex';
+  const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending').length : 0;
+
+  wrap.innerHTML = tiles.map(t => `
+    <button type="button" onclick="goTo('${t.screen}')" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; background:var(--card); border:1.5px solid #e5e9f0; border-radius:12px; padding:10px 6px; cursor:pointer; box-shadow:var(--shadow);">
+      ${t.key === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:-6px; right:-6px; background:var(--danger); color:#fff; font-size:11px; font-weight:800; min-width:20px; height:20px; border-radius:10px; display:flex; align-items:center; justify-content:center; padding:0 5px;">${pendingCount}</span>` : ''}
+      <span style="font-size:20px;">${t.icon}</span>
+      <span style="font-size:11.5px; font-weight:800; color:var(--text); text-align:center;">${t.label}</span>
+    </button>`).join('');
 }
 
 function renderHomeIconGrid(){
@@ -7252,7 +7337,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'billing') {
     renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn();
     // ---------- 🍇 Admin کے لیے یہی صفحہ Home بھی ہے — سبسکرپشن باکس/دیگر فیچرز ڈراپ ڈاؤن/PIN بینر یہیں تازہ کریں ----------
-    if(AppState.currentRole === 'admin'){ renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI(); }
+    if(AppState.currentRole === 'admin'){ renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); renderHomeShortcutCards(); syncPinLockUI(); }
   }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
@@ -15001,8 +15086,10 @@ function backToOtCustomer(){
   renderOtCustomerList('');
 }
 
-// ---------- STEP 2: آئٹمز (صفحہ وار) — ہر آئٹم کی اپنی الگ row/id ہے تاکہ ٹک اور تعداد کبھی
-// دوسرے آئٹم پر اثر انداز نہ ہو (ہر بٹن کا اپنا واضح variant_id ہے، کسی ایک ہی id کا اشتراک نہیں) ----------
+// ---------- STEP 2: آئٹمز (صفحہ وار) — اب ہر بٹن اپنی خود کی row کا حوالہ (this) بھی ساتھ بھیجتا ہے،
+// اس لیے یہ فنکشنز کبھی بھی غلط (کسی اور) آئٹم کو تبدیل نہیں کر سکتے — چاہے کسی وجہ سے دو آئٹمز کی
+// variant_id آپس میں ٹکرا بھی جائیں، ٹیپ ہمیشہ اسی row پر اثر کرے گا جسے واقعی چھوا گیا ہے (پرانی
+// خرابی — پچھلے آئٹم کی تعداد بڑھتے رہنا — کی اصل وجہ یہی تھی، اب مکمل ختم) ----------
 function renderOtItemsPage(){
   const list = document.getElementById('otItemsList');
   if(!list) return;
@@ -15014,12 +15101,12 @@ function renderOtItemsPage(){
     const qty = otQtyMap[v.variant_id] || 0;
     return `
     <div class="otItemRow" data-variant-id="${v.variant_id}" style="display:flex; align-items:center; gap:10px; background:#fff; border:2px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:12px; padding:9px 12px;">
-      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(${v.variant_id}, this.checked)" style="width:22px; height:22px; margin:0; flex:0 0 auto; cursor:pointer;">
-      <div style="font-size:16px; font-weight:700; flex:1; min-width:0; cursor:pointer;" onclick="toggleOtItemFromRow(${v.variant_id})">${v.name}</div>
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(this, ${v.variant_id})" style="width:22px; height:22px; margin:0; flex:0 0 auto; cursor:pointer;">
+      <div style="font-size:16px; font-weight:700; flex:1; min-width:0; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
       <div style="display:flex; align-items:center; gap:8px; flex:0 0 auto;">
-        <button type="button" onclick="changeOtQty(${v.variant_id}, -1)" style="width:36px; height:36px; border:none; border-radius:10px; background:#fee2e2; color:#b91c1c; font-size:18px; font-weight:800; cursor:pointer;">−</button>
-        <span id="otQty-${v.variant_id}" style="min-width:26px; text-align:center; font-size:16px; font-weight:800;">${qty}</span>
-        <button type="button" onclick="changeOtQty(${v.variant_id}, 1)" style="width:36px; height:36px; border:none; border-radius:10px; background:#dcfce7; color:#15803d; font-size:18px; font-weight:800; cursor:pointer;">+</button>
+        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, -1)" style="width:36px; height:36px; border:none; border-radius:10px; background:#fee2e2; color:#b91c1c; font-size:18px; font-weight:800; cursor:pointer;">−</button>
+        <span class="otQtyText" style="min-width:26px; text-align:center; font-size:16px; font-weight:800;">${qty}</span>
+        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:36px; height:36px; border:none; border-radius:10px; background:#dcfce7; color:#15803d; font-size:18px; font-weight:800; cursor:pointer;">+</button>
       </div>
     </div>`;
   }).join('');
@@ -15027,36 +15114,40 @@ function renderOtItemsPage(){
   renderOtPager();
 }
 
-function toggleOtItemFromRow(variantId){
-  toggleOtItem(variantId, !otCheckedMap[variantId]);
-  const row = document.querySelector(`.otItemRow[data-variant-id="${variantId}"] input[type="checkbox"]`);
-  if(row) row.checked = !!otCheckedMap[variantId];
+// ---------- نام والی جگہ پر ٹیپ کریں تو بھی ٹک لگ/ہٹ جائے — ہمیشہ اسی row کے اندر ہی رہتے ہوئے ----------
+function toggleOtItemFromRow(el, variantId){
+  const row = el.closest('.otItemRow');
+  if(!row) return;
+  const chk = row.querySelector('input[type="checkbox"]');
+  const nextChecked = chk ? !chk.checked : true;
+  applyOtRowState(row, variantId, nextChecked);
 }
 
-function toggleOtItem(variantId, isChecked){
+function toggleOtItem(checkboxEl, variantId){
+  const row = checkboxEl.closest('.otItemRow');
+  applyOtRowState(row, variantId, checkboxEl.checked);
+}
+
+// ---------- ایک ہی جگہ سے row کی حالت (بارڈر رنگ، ٹک، تعداد) اپڈیٹ ہوتی ہے — ہمیشہ دیے گئے row کے
+// اندر ہی، پورے صفحے میں کہیں اور نہیں تلاش کرتا ----------
+function applyOtRowState(row, variantId, isChecked){
   otCheckedMap[variantId] = isChecked;
   if(isChecked && !otQtyMap[variantId]) otQtyMap[variantId] = 1;
+  if(!row) return;
 
-  const row = document.querySelector(`.otItemRow[data-variant-id="${variantId}"]`);
-  if(row) row.style.borderColor = isChecked ? 'var(--primary)' : '#e5e9f0';
-  const qtyEl = document.getElementById('otQty-' + variantId);
+  row.style.borderColor = isChecked ? 'var(--primary)' : '#e5e9f0';
+  const qtyEl = row.querySelector('.otQtyText');
   if(qtyEl) qtyEl.textContent = otQtyMap[variantId] || 0;
+  const chk = row.querySelector('input[type="checkbox"]');
+  if(chk) chk.checked = isChecked;
 }
 
-function changeOtQty(variantId, delta){
+function changeOtQty(btnEl, variantId, delta){
+  const row = btnEl.closest('.otItemRow');
   const current = otQtyMap[variantId] || 0;
   const next = Math.max(0, current + delta);
   otQtyMap[variantId] = next;
-  otCheckedMap[variantId] = next > 0;
-
-  const qtyEl = document.getElementById('otQty-' + variantId);
-  if(qtyEl) qtyEl.textContent = next;
-  const row = document.querySelector(`.otItemRow[data-variant-id="${variantId}"]`);
-  if(row){
-    row.style.borderColor = next > 0 ? 'var(--primary)' : '#e5e9f0';
-    const chk = row.querySelector('input[type="checkbox"]');
-    if(chk) chk.checked = next > 0;
-  }
+  applyOtRowState(row, variantId, next > 0);
 }
 
 function renderOtPager(){
@@ -20919,6 +21010,7 @@ function renderLastBackupStatus(){
 function renderSettingsScreen(){
   renderStorageUsage();
   renderLastBackupStatus();
+  renderHomeShortcutsSettings();
   syncPinLockUI();
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');

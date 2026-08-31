@@ -21,7 +21,7 @@
 // اور جیسے ہی نئی تاریخ شروع ہو تو سیریل واپس 01 سے شروع کریں۔ مکمل تفصیل index.html
 // میں APP_BUILD_VERSION کے اوپر والے کمنٹ میں موجود ہے۔
 
-const CACHE_VERSION = 'FM19TU01';
+const CACHE_VERSION = 'FM19TU04';
 const CACHE_NAME = `fruit-mandi-pos-${CACHE_VERSION}`;
 
 // ---------- یہ فائلیں انسٹال کے وقت ہی محفوظ کر لی جائیں گی — آف لائن پہلی بار کھلنے کے لیے ضروری ----------
@@ -33,14 +33,22 @@ const PRECACHE_URLS = [
   './icon-180.png',
   './icon-192.png',
   './icon-512.png',
-  './fonts/JameelNooriNastaleeq-Regular.ttf',
-  './fonts/JameelNooriNastaleeq-Kasheeda.ttf'
+  './JameelNooriNastaleeq-Regular.ttf',
+  './JameelNooriNastaleeq-Kasheeda.ttf',
+  './PDMS_Multan_Regular.ttf'
 ];
 
-// ---------- 📦 INSTALL: بنیادی فائلیں کیش میں رکھ دیں ----------
+// ---------- 📦 INSTALL: بنیادی فائلیں کیش میں رکھ دیں — ہر فائل الگ سے، تاکہ اگر کوئی ایک فائل
+// (مثلاً کوئی فونٹ ابھی سرور پر اپلوڈ نہ ہوئی ہو) نہ ملے تو باقی ساری کیشنگ پھر بھی چلتی رہے ----------
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
+        PRECACHE_URLS.map((url) =>
+          cache.add(url).catch((err) => console.warn('[SW] precache میں یہ فائل نہیں ملی، نظرانداز کر دی:', url, err))
+        )
+      )
+    )
   );
   // ---------- نوٹ: یہاں خود بخود skipWaiting نہیں بلاتے — index.html کا اپنا
   // "Update" ٹوسٹ سسٹم صارف کی مرضی سے (بٹن دبانے پر) نیا ورژن فعال کرتا ہے ----------
