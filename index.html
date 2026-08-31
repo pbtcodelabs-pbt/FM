@@ -2324,6 +2324,39 @@
         <div id="billingSearchSuggestions" class="billingSearchSuggestions"></div>
       </div>
 
+      <!-- ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر کسٹمر سلیکشن اب پہلے ہی صفحے پر —
+           کارٹ کھولنے کا انتظار نہیں، بل بننا شروع ہوتے ہی یہیں سے کسٹمر منتخب/ایڈ کریں (کوڈ نیچے سے یہیں
+           منتقل کیا گیا ہے، فنکشنز وہی پرانے ہیں) ---------- -->
+      <div id="cartWalkinBanner" style="display:flex; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8; font-weight:700; font-size:13.5px; align-items:center; justify-content:space-between; gap:6px;">
+        <span id="cartCustomerStatusText">🚶 Walk-in Customer <span style="font-weight:500; color:var(--muted); font-size:11.5px;">(no name on bill)</span></span>
+        <button type="button" id="cartEndCustomerBtn" onclick="endCustomerSelection()" title="Clear selected customer and go back to Walk-in"
+                style="display:none; flex:0 0 auto; border:1px solid #f3b985; background:#fff; color:#b45309; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">✖ End</button>
+      </div>
+
+      <div id="customerSelectRow" style="display:flex; flex-direction:column; gap:6px; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8;">
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="custSearchInput" placeholder="🔍 Search customer by name/phone..." onfocus="openCustomerList()" oninput="openCustomerList(); filterCustomerSelectOptions();"
+                 style="flex:1 1 auto; min-width:0; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+          <select id="custAreaFilter" onchange="filterCustomerSelectOptions()" title="Filter by City/Area"
+                  style="flex:0 0 120px; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+            <option value="">🗺️ All Areas</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <select class="custSelect" id="customerSelect" style="display:none;" onchange="onCustomerChange()">
+            <option value="">— Select Customer —</option>
+            <!-- یہ اب پوشیدہ ہے — صرف موجودہ منتخب کسٹمر کی ID رکھنے کے لیے، باقی سب کوڈ اسی سے پڑھتا ہے -->
+          </select>
+          <div id="customerTriggerBox" class="custTriggerBox" onclick="toggleCustomerList()">
+            <span class="custTriggerText">— Select Customer —</span>
+            <span class="custTriggerChevron">▾</span>
+          </div>
+          <button type="button" title="Add new customer" onclick="openQuickAddCustomer()"
+                  style="flex:0 0 44px; border:1px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer;">+</button>
+        </div>
+        <div id="customerSelectListWrap" class="custPickList"></div>
+      </div>
+
       <!-- کیٹیگری اب لیفٹ کالم کی بجائے ایک کمپیکٹ ڈراپ ڈاؤن بٹن — دبانے پر فہرست نیچے کھلتی ہے -->
       <div class="categoryDropdownWrap" id="billingCategoryDropdownWrap">
         <button type="button" class="categoryDropdownBtn" id="billingCategoryDropdownBtn" onclick="toggleBillingCategoryDropdown(event)">
@@ -2379,39 +2412,8 @@
           </div>
         </div>
 
-        <!-- ---------- بل کے سب سے اوپر — کس کسٹمر کا بل بن رہا ہے، صاف نظر آئے اور یہیں سے تبدیل بھی ہو سکے۔ Walk-in ہمیشہ ڈیفالٹ منتخب رہتا ہے، جب تک "✖ End" نہ دبائیں یا نیچے سے کوئی کسٹمر منتخب نہ کریں ---------- -->
-        <div id="cartWalkinBanner" style="display:flex; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8; font-weight:700; font-size:13.5px; align-items:center; justify-content:space-between; gap:6px;">
-          <span id="cartCustomerStatusText">🚶 Walk-in Customer <span style="font-weight:500; color:var(--muted); font-size:11.5px;">(no name on bill)</span></span>
-          <button type="button" id="cartEndCustomerBtn" onclick="endCustomerSelection()" title="Clear selected customer and go back to Walk-in"
-                  style="display:none; flex:0 0 auto; border:1px solid #f3b985; background:#fff; color:#b45309; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">✖ End</button>
-        </div>
-
-        <!-- ---------- کسٹمر لسٹ — اب ایک عام ڈراپ ڈاؤن کی طرح: بند حالت میں صرف ایک لائن جگہ لیتی ہے، ٹیپ کرنے پر ہی نیچے کھلتی ہے۔
-             Walk-in منتخب ہو تب بھی یہیں سے فوراً کسٹمر پکڑ سکتے ہیں۔ سرچ بار اور سٹی/ایریا فلٹر — ہزاروں کسٹمرز میں سے جلدی تلاش کے لیے ---------- -->
-        <div id="customerSelectRow" style="display:flex; flex-direction:column; gap:6px; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8;">
-          <div style="display:flex; gap:6px;">
-            <input type="text" id="custSearchInput" placeholder="🔍 Search customer by name/phone..." onfocus="openCustomerList()" oninput="openCustomerList(); filterCustomerSelectOptions();"
-                   style="flex:1 1 auto; min-width:0; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
-            <select id="custAreaFilter" onchange="filterCustomerSelectOptions()" title="Filter by City/Area"
-                    style="flex:0 0 120px; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
-              <option value="">🗺️ All Areas</option>
-            </select>
-          </div>
-          <div style="display:flex; gap:8px;">
-            <select class="custSelect" id="customerSelect" style="display:none;" onchange="onCustomerChange()">
-              <option value="">— Select Customer —</option>
-              <!-- یہ اب پوشیدہ ہے — صرف موجودہ منتخب کسٹمر کی ID رکھنے کے لیے، باقی سب کوڈ اسی سے پڑھتا ہے -->
-            </select>
-            <div id="customerTriggerBox" class="custTriggerBox" onclick="toggleCustomerList()">
-              <span class="custTriggerText">— Select Customer —</span>
-              <span class="custTriggerChevron">▾</span>
-            </div>
-            <button type="button" title="Add new customer" onclick="openQuickAddCustomer()"
-                    style="flex:0 0 44px; border:1px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer;">+</button>
-          </div>
-          <div id="customerSelectListWrap" class="custPickList"></div>
-        </div>
-
+        <!-- ---------- 🍇 Fruit Mandi POS: کسٹمر سلیکشن اب بلنگ اسکرین کے سب سے اوپر منتقل کر دی گئی ہے —
+             یہاں کارٹ شیٹ میں دہرانے کی ضرورت نہیں، وہی #cartWalkinBanner / #customerSelectRow اوپر سے پڑھے جاتے ہیں ---------- -->
 
         <div class="cartSheetBody">
           <div class="cartWrap">
@@ -5883,7 +5885,7 @@ function getDeveloperContact(){
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM318MO10';
+const APP_BUILD_VERSION = 'FM318MO11';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6578,7 +6580,7 @@ function finishLogin(user, rememberOverride){
     return;
   }
   document.getElementById('app').style.display = 'grid';
-  goTo('home'); // ہر role پہلے Home اسکرین پر جائے گا
+  goTo('billing'); // ---------- 🍇 صدام کی ہدایت: لاگ ان کے بعد سیدھا بلنگ/پراڈکٹ اسکرین کھلے، آئیکنوں کی منڈی نہیں ---------- 
   showRoleToast(user.role, user.name); // ---------- صاف صاف بتائیں کہ Admin کے طور پر لاگ ان ہوا یا Salesman کے طور پر ----------
   if(user.role === 'admin'){
     if(!AppState.settings.gdrivePromptShown) setTimeout(showGDriveFirstRunPrompt, 900); // ---------- پہلی بار ایپ استعمال ہو تو Google Drive اکاؤنٹ فوراً جوڑنے کی دعوت دیں ----------
@@ -6824,7 +6826,7 @@ async function submitActivationCode(){
     setTimeout(() => {
       document.getElementById('subscriptionGateScreen').style.display = 'none';
       document.getElementById('app').style.display = 'grid';
-      goTo('home');
+      goTo('billing');
       showRoleToast(AppState.currentRole, AppState.currentUser?.name || '');
     }, 1200);
   } else {
@@ -6870,7 +6872,7 @@ function tryAutoLogin(){
         return true;
       }
       document.getElementById('app').style.display = 'grid';
-      goTo('home');
+      goTo('billing');
       setTimeout(checkBackupReminder, 1800);
       return true;
     }
@@ -6894,7 +6896,7 @@ function tryAutoLogin(){
     return true;
   }
   document.getElementById('app').style.display = 'grid';
-  goTo('home');
+  goTo('billing');
   showRoleToast(user.role, user.name);
   if(user.role === 'admin') setTimeout(checkBackupReminder, 1800); // ---------- Remember-PIN والے خودکار لاگ ان میں بھی یاد دہانی چلے — پہلے یہاں سے مسنگ تھی ----------
   return true;
