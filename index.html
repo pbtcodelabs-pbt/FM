@@ -4,7 +4,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Fruit Mandi POS</title>
+<title>صدام فروٹ منڈی</title>
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -13,7 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Fruit Mandi POS">
+  <meta name="apple-mobile-web-app-title" content="صدام فروٹ منڈی">
 <!-- ---------- Google Fonts (7 پیارے انگلش فونٹس — صرف ہلکے وزن، ایپ کو بھاری نہیں کرتے) ---------- -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1818,6 +1818,44 @@
   body.nastaleeq-active .kpiLabel,
   body.nastaleeq-active .statLabel,
   body.nastaleeq-active .hLabel{ font-size:12.5px; line-height:1.9; }
+
+/* ---------- Screen-access picker — clean bordered chip grid used in Add User / Edit Screens ---------- */
+.screensPickerGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+  gap:8px;
+  max-height:260px;
+  overflow-y:auto;
+  padding:10px;
+  border:1px solid #e2e8f0;
+  border-radius:12px;
+  background:#f8fafc;
+  margin-bottom:10px;
+}
+.screenChip{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:9px 10px;
+  border:1.5px solid #dbe1ea;
+  border-radius:10px;
+  background:#fff;
+  font-size:13px;
+  font-weight:600;
+  color:#334155;
+  cursor:pointer;
+  transition:border-color .15s, background .15s, color .15s;
+  user-select:none;
+}
+.screenChip input[type="checkbox"]{
+  width:16px; height:16px; accent-color:var(--primary, #2563eb); flex-shrink:0; cursor:pointer;
+}
+.screenChip:hover{ border-color:var(--primary, #2563eb); }
+.screenChip.checked{
+  border-color:var(--primary, #2563eb);
+  background:#eff6ff;
+  color:var(--primary-dark, #1d4ed8);
+}
 </style>
   <!-- ---------- یہ الگ style ٹیگ خاص طور پر پرنٹ کے وقت اصل کاغذ کی چوڑائی (58mm/80mm) بتانے کے لیے ہے —
        بغیر اس کے، پرنٹ سسٹم صفحے کا سائز A4/Letter سمجھ کر رسید کو چھوٹا کر کے سکیڑ دیتا تھا،
@@ -2105,7 +2143,7 @@
   <div id="mobileTopbar">
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <button id="topbarSettingsBtn" onclick="toggleHomeSettingsPanel(event)" title="Settings">⚙️</button>
-    <span id="mobileBrandText" class="mobileBrand" style="display:inline;">🧾 Fruit Mandi POS</span>
+    <span id="mobileBrandText" class="mobileBrand" style="display:inline;">صدام فروٹ منڈی</span>
     <!-- ---------- 🧪 صرف ٹیسٹ فائل میں: یہ لیبل "Fruit Mandi POS" کی بالکل اسی جگہ، اسی بڑے سائز میں کھڑا ہو کر اسے ڈھانپ لیتا ہے —
          آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے۔
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
@@ -2148,7 +2186,7 @@
 
   <!-- ---------- SIDEBAR NAV ---------- -->
   <div id="sidebar">
-    <div class="brand">🧾 Fruit Mandi POS</div>
+    <div class="brand">صدام فروٹ منڈی</div>
 
     <div class="navItem" data-screen="home" onclick="goTo('home')">🏠 Home</div>
     <div class="navItem" data-screen="billing" onclick="goTo('billing')">🛒 Billing</div>
@@ -2195,7 +2233,7 @@
             <span id="hbcLogoPlaceholder">🏪</span>
           </div>
           <div class="hbcInfo" onclick="triggerBusinessLogoUpload()">
-            <div class="hbcBusinessName" id="hbcBusinessName">Fruit Mandi POS</div>
+            <div class="hbcBusinessName" id="hbcBusinessName">صدام فروٹ منڈی</div>
             <div class="hbcOwnerName" id="hbcOwnerName"></div>
             <div class="hbcPhone" id="hbcPhone"></div>
           </div>
@@ -3427,8 +3465,8 @@
           <option value="admin">👑 Admin (full access)</option>
         </select>
         <div id="nuScreensBox" style="margin-bottom:10px;">
-          <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">🖥️ اس ملازم کو کون سی اسکرینز نظر آئیں:</div>
-          <div id="nuScreensCheckboxes" style="max-height:180px; overflow-y:auto; border:1px solid #dbe1ea; border-radius:8px; padding:8px;"></div>
+          <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:6px;">🖥️ Screens this staff member can access:</div>
+          <div id="nuScreensCheckboxes" class="screensPickerGrid"></div>
         </div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewUserModal()">Cancel</button>
@@ -3440,8 +3478,9 @@
     <!-- EDIT PERMISSIONS MODAL (کسی موجودہ ملازم کی اسکرینز بدلنے کے لیے) -->
     <div class="modalOverlay" id="editPermsModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
-        <h3>🖥️ Screens for <span id="editPermsUserName"></span></h3>
-        <div id="editPermsCheckboxes" style="max-height:220px; overflow-y:auto; border:1px solid #dbe1ea; border-radius:8px; padding:8px; margin-bottom:10px;"></div>
+        <h3>🖥️ Screen Access — <span id="editPermsUserName"></span></h3>
+        <div style="font-size:12.5px; color:var(--muted); margin:-4px 0 10px;">Choose which screens this staff member is allowed to open. Unchecked screens stay hidden for them.</div>
+        <div id="editPermsCheckboxes" class="screensPickerGrid"></div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeEditPermissionsModal()">Cancel</button>
           <button class="saveBtn" onclick="saveEditPermissions()">Save</button>
@@ -4407,7 +4446,7 @@
         </div>
         <label style="display:flex; align-items:center; gap:10px; padding:8px 0;">
           <input type="checkbox" id="printShowBrandingChk" onchange="updatePrintToggle('printShowBranding', this.checked)" style="width:18px; height:18px; margin:0;">
-          <span style="font-size:13px;">Show small "Powered by Fruit Mandi POS" line in footer</span>
+          <span style="font-size:13px;">Show small "Powered by Saddam Fruit Mandi" line in footer</span>
         </label>
       </div>
 
@@ -5928,7 +5967,7 @@ function getOrCreateDeviceUID(){
   AppState.settings.deviceUID = uid;
   if(!AppState.settings.subscriptionExpiry && !AppState.settings.freeTrialGranted){
     const trialEnd = new Date();
-    trialEnd.setDate(trialEnd.getDate() + 30);
+    trialEnd.setDate(trialEnd.getDate() + 7);
     AppState.settings.subscriptionExpiry = trialEnd.toISOString().slice(0,10);
     AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
     AppState.settings.freeTrialGranted = true;
@@ -6222,7 +6261,7 @@ function renderHomeIconGrid(){
 
 function renderHomeBusinessCard(){
   const s = AppState.settings;
-  document.getElementById('hbcBusinessName').textContent = s.businessName || 'Fruit Mandi POS';
+  document.getElementById('hbcBusinessName').textContent = s.businessName || 'صدام فروٹ منڈی';
   document.getElementById('hbcOwnerName').textContent = s.ownerName || '';
   document.getElementById('hbcPhone').textContent = s.businessPhone || '';
   document.getElementById('hbcOwnerName').style.display = s.ownerName ? 'block' : 'none';
@@ -17555,11 +17594,14 @@ function openEditPermissionsModal(userId){
   if(!u || u.role === 'admin') return;
   editPermsTargetId = userId;
   const box = document.getElementById('editPermsCheckboxes');
-  box.innerHTML = ASSIGNABLE_SCREENS.map(s => `
-    <label style="display:flex; align-items:center; gap:8px; padding:6px 0; font-size:14px;">
-      <input type="checkbox" value="${s.key}" ${u.screens.includes(s.key) ? 'checked' : ''}> ${s.label}
+  box.innerHTML = ASSIGNABLE_SCREENS.map(s => {
+    const isChecked = u.screens.includes(s.key);
+    return `
+    <label class="screenChip${isChecked ? ' checked' : ''}" onclick="setTimeout(()=>this.classList.toggle('checked', this.querySelector('input').checked),0)">
+      <input type="checkbox" value="${s.key}" ${isChecked ? 'checked' : ''}> ${s.label}
     </label>
-  `).join('');
+  `;
+  }).join('');
   document.getElementById('editPermsUserName').textContent = u.name;
   document.getElementById('editPermsModal').classList.add('show');
 }
@@ -17649,7 +17691,7 @@ function toggleNewUserScreensBox(){
 function renderNewUserScreenCheckboxes(){
   const box = document.getElementById('nuScreensCheckboxes');
   box.innerHTML = ASSIGNABLE_SCREENS.map(s => `
-    <label style="display:flex; align-items:center; gap:8px; padding:5px 0; font-size:14px;">
+    <label class="screenChip" onclick="setTimeout(()=>this.classList.toggle('checked', this.querySelector('input').checked),0)">
       <input type="checkbox" value="${s.key}"> ${s.label}
     </label>
   `).join('');
@@ -18663,7 +18705,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     y += 18;
     ctx.font = F('10px');
     ctx.fillStyle = '#888';
-    ctx.fillText('Powered by Fruit Mandi POS', pxWidth/2, y);
+    ctx.fillText('Powered by Saddam Fruit Mandi', pxWidth/2, y);
   }
 }
 
