@@ -6167,7 +6167,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU10';
+const APP_BUILD_VERSION = 'FM19TU11';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -25400,31 +25400,36 @@ document.addEventListener('DOMContentLoaded', () => {
   dpInitPicker('empResetDobInput');
 
   // ---------- Login اسکرین کی حالت (Trial بینر + PIN یا Quick Enter) ہمیشہ پہلے تیار کر لیں ----------
-  setupLoginScreen();
+  // ---------- 🛡️ حفاظتی try/catch — اگر کسی پرانی ڈیوائس کے محفوظ شدہ ڈیٹا کی وجہ سے کوئی فنکشن
+  // یہاں Error دے تو پوری اسکرپٹ نہیں رکے گی (ورنہ نیچے موجود ہمبرگر مینو/لاگ آؤٹ بٹن کا کلک لسنر
+  // بھی کبھی attach ہی نہ ہو پاتا، اور اسکرین "جام" لگنے لگتی) ----------
+  try{ setupLoginScreen(); }catch(e){ console.error('setupLoginScreen failed', e); }
 
   // ---------- اگر اس ڈیوائس پر پن پہلے سے یاد رکھا ہوا ہے تو لاگ ان اسکرین چھوڑ کر سیدھا ایپ میں لے جائیں ----------
-  tryAutoLogin();
+  try{ tryAutoLogin(); }catch(e){ console.error('tryAutoLogin failed', e); }
 
   // ---------- 📡 انٹرنیٹ ملتے ہی خاموشی سے: (1) ٹرائل کا Firestore لاک چیک/محفوظ کریں (2) ادائیگی شدہ
   // سبسکرپشن دور سے منسوخ تو نہیں ہوئی — یوزر کو کوئی لوڈنگ نظر نہیں آئے گی، بیک گراؤنڈ میں ہوتا ہے ----------
   setTimeout(() => {
-    checkAndLockTrialOnline();
-    resyncLicenseOnline();
+    try{ checkAndLockTrialOnline(); }catch(e){ console.error('checkAndLockTrialOnline failed', e); }
+    try{ resyncLicenseOnline(); }catch(e){ console.error('resyncLicenseOnline failed', e); }
   }, 2000);
 
-  renderProductList();
-  populateCustomerDropdown();
-  renderBillingCategoryRail();
-  renderBillingProductGrid();
-  renderAutoPaymentNote();
-  initCardDragHandlers();
+  try{ renderProductList(); }catch(e){ console.error('renderProductList failed', e); }
+  try{ populateCustomerDropdown(); }catch(e){ console.error('populateCustomerDropdown failed', e); }
+  try{ renderBillingCategoryRail(); }catch(e){ console.error('renderBillingCategoryRail failed', e); }
+  try{ renderBillingProductGrid(); }catch(e){ console.error('renderBillingProductGrid failed', e); }
+  try{ renderAutoPaymentNote(); }catch(e){ console.error('renderAutoPaymentNote failed', e); }
+  try{ initCardDragHandlers(); }catch(e){ console.error('initCardDragHandlers failed', e); }
 
   // ---------- ہر پاپ اپ کو باہر (dark حصے پر) ٹیپ کرنے سے بند کرنے کی سہولت — پوری ایپ میں یکساں ----------
-  document.querySelectorAll('.modalOverlay').forEach(overlay => {
-    overlay.addEventListener('click', (e) => {
-      if(e.target === overlay) overlay.classList.remove('show');
+  try{
+    document.querySelectorAll('.modalOverlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if(e.target === overlay) overlay.classList.remove('show');
+      });
     });
-  });
+  }catch(e){ console.error('modalOverlay click-close setup failed', e); }
 });
 </script>
 
