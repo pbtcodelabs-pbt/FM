@@ -1643,6 +1643,10 @@
       background:rgba(255,255,255,.15); border:none; color:#fff; font-size:20px;
       width:36px; height:36px; border-radius:8px; cursor:pointer;
     }
+    #topbarSettingsBtn{
+      background:rgba(255,255,255,.15); border:none; color:#fff; font-size:18px;
+      width:36px; height:36px; border-radius:8px; cursor:pointer; flex:0 0 auto;
+    }
 
     /* --- 🔎 App Search — ہمیشہ نظر آنے والی پٹی، Topbar کے بالکل نیچے، ہر سکرین پر ایک جیسی —
          روشن نیلا پس منظر + سفید، صاف نظر آنے والی چمکتی لکھائی (صارف کی پسند کے مطابق،
@@ -1837,7 +1841,7 @@
     <h2 id="loginHeading">🔐 Login</h2>
 
     <!-- ---------- 🎉 خوش آمدید بینر — بیٹا ٹیسٹنگ کی صاف وضاحت، پہلی نظر میں ---------- -->
-    <div class="welcomeTrialBanner">
+    <div class="welcomeTrialBanner" style="display:none;">
       <div class="wtbHeadline">🎉 Best Billing App — Try it FREE for 30 Days!</div>
       <div class="wtbSubline">Your 30-Day Free Trial starts now.</div>
       <div class="wtbUrduNote">This app is currently in Beta (testing) version. Please don't forget to take daily backups, and keep running your old method alongside it too. If you notice any issue — big or small — please report it to the developer right away, so this app can become the best it can be for you.</div>
@@ -2018,19 +2022,20 @@
   <!-- ---------- MOBILE TOPBAR (صرف چھوٹی اسکرین پر نظر آتی ہے) ---------- -->
   <div id="mobileTopbar">
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
-    <span id="mobileBrandText" class="mobileBrand" style="display:none;">🧾 Fruit Mandi POS</span>
+    <button id="topbarSettingsBtn" onclick="toggleHomeSettingsPanel(event)" title="Settings">⚙️</button>
+    <span id="mobileBrandText" class="mobileBrand" style="display:inline;">🧾 Fruit Mandi POS</span>
     <!-- ---------- 🧪 صرف ٹیسٹ فائل میں: یہ لیبل "Fruit Mandi POS" کی بالکل اسی جگہ، اسی بڑے سائز میں کھڑا ہو کر اسے ڈھانپ لیتا ہے —
          آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے۔
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">Fruit Mandi POS</span>
-      <span class="nastaleeqSparkle">جاگدے رہـنا۔۔۔۔ساڈے تے نہ رہـنا</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:none;">Fruit Mandi POS</span>
+      <span class="nastaleeqSparkle" style="display:none;">جاگدے رہـنا۔۔۔۔ساڈے تے نہ رہـنا</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIODR288FR01</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; display:none;">AIODR288FR01</span>
     </div>
   </div>
 
@@ -2097,8 +2102,8 @@
         <button onclick="openActivatePinLockModal()" style="background:#92400e; color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap;">Activate</button>
       </div>
 
-      <!-- ---------- 🏪 HOME BUSINESS CARD ---------- -->
-      <div class="homeBusinessCard">
+      <!-- ---------- 🏪 HOME BUSINESS CARD — Fruit Mandi POS پر ہائیڈ کر دیا گیا؛ Settings بٹن اوپر Topbar میں شفٹ کر دیا گیا ہے (کوڈ محفوظ ہے) ---------- -->
+      <div class="homeBusinessCard" style="display:none;">
         <button class="hbcEditBtn admin-only" onclick="goTo('myaccount')" title="Edit Business Card / Logo">✏️</button>
         <div class="hbcTopRow">
           <div class="hbcLogoWrap" onclick="triggerBusinessLogoUpload()" title="Change Logo">
@@ -2541,7 +2546,7 @@
             <input type="text" id="productSearchInput" placeholder="🔍 Search products..." oninput="renderProductList(this.value)">
             <button onclick="openNewProductModal()">+ New Product</button>
           </div>
-          <div class="csvImportBar">
+          <div class="csvImportBar" style="display:none;">
             <button class="csvTemplateBtn" onclick="downloadProductCsvTemplate()">📄 Download Excel/CSV Template</button>
             <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import Products</button>
             <input type="file" id="productCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handleProductCsvFileSelect(event)">
@@ -2607,7 +2612,7 @@
         <input type="text" id="partySearchInput" placeholder="🔍 Search by name or phone..." oninput="renderPartyList(this.value)">
         <button onclick="openNewPartyModal()">+ Add New</button>
       </div>
-      <div class="csvImportBar">
+      <div class="csvImportBar" style="display:none;">
         <button class="csvTemplateBtn" onclick="downloadPartyCsvTemplate()">📄 Download Excel/CSV Template</button>
         <button class="csvImportBtn" id="partyImportBtn" onclick="document.getElementById('partyCsvInput').click()">📥 Import <span id="partyImportBtnLabel">Customers</span></button>
         <input type="file" id="partyCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handlePartyCsvFileSelect(event)">
@@ -4100,7 +4105,7 @@
         <!-- --- 🏷️ Build Version — ہر نئی فائل کے ساتھ یہ نمبر بدلتا ہے، سپورٹ کے وقت پتا چلتا ہے کہ کسٹمر کون سا ورژن چلا رہا ہے --- -->
         <div class="settingsCard" style="background:#f4f1ea;">
           <h3 style="font-size:12.5px; color:var(--muted); font-weight:700;">🏷️ Build Version</h3>
-          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;">FM308SU02</div>
+          <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;">FM318MO02</div>
         </div>
 
         <!-- --- 💾 اسٹوریج کا استعمال — تاکہ صارف کو ہمیشہ پتا رہے کتنی جگہ بچی ہے، اچانک خاموشی سے ڈیٹا ضائع نہ ہو --- -->
@@ -4210,7 +4215,7 @@
             <input type="text" id="devEmailInput" placeholder="e.g. you@gmail.com" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">App Share Link</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Paste your live GitHub Pages link here. The 📤 Share button on the Login and Home screens will send this link on WhatsApp/etc — update it anytime the link changes, and it updates everywhere automatically.</div>
-            <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/AIO/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
+            <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/FruitMandiPOS/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Write your own message here (e.g. "Our app is very good, please use it") — it will be sent along with the link above when the 📤 Share button is pressed.</div>
             <textarea id="appShareMessageInput" placeholder="e.g. Try our Fruit Mandi POS App — it's fast, reliable and free to try!" rows="3" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveAdminControl()"></textarea>
             <div class="settingsSubLabel">Accounts to Receive Your Payments</div>
@@ -4787,7 +4792,7 @@
     <div class="backupConfirmIconWrap"><span>☁️</span></div>
     <h3>Connect Google Drive Backup?</h3>
     <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;">
-      To keep your bills, products, and customer data safe, connect your Google account now. All backups will automatically go into one folder in your Drive called <b>"AIO Backup - Direct"</b> — nothing will be scattered around.
+      To keep your bills, products, and customer data safe, connect your Google account now. All backups will automatically go into one folder in your Drive called <b>"Fruit Mandi POS Backup"</b> — nothing will be scattered around.
     </p>
     <button class="backupConfirmCloseBtn" style="background:linear-gradient(155deg,#1a73e8,#0d47a1); margin-top:14px;" onclick="connectGDriveFromFirstRunPrompt()">☁️ Connect Now</button>
     <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="dismissGDriveFirstRunPrompt()">Maybe Later</button>
@@ -5067,8 +5072,10 @@ setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خو
 // ---------- بیک اپ فائل کا نام — ہمیشہ تازہ ترین تاریخ/وقت کے مطابق خودکار بنتا ہے ----------
 // فارمیٹ: AIO(Dmonyy DAY HHMMhrs).JSON — مثال: 10 جولائی 2026 جمعہ 06:13 → AIO(10jul26FR0613hrs).JSON
 // ---------- بیک اپ فائل کا نام — یہ Fruit Mandi POS فائل ہے، اس لیے نام بالکل اسی ورژن سٹرنگ کے فارمیٹ میں بنتا ہے
-// جیسا خود ایپ کا ورژن ہے — BKDR{دن}{مہینہ}{دن کا نام}{وقت}{AM/PM}.json — تاکہ Play Store اور Direct کے بیک اپ
+// جیسا خود ایپ کا ورژن ہے — BKFM{دن}{مہینہ}{دن کا نام}{وقت}{AM/PM}.JSON
 // کبھی آپس میں گڈمڈ نہ ہوں، صاف پتا چلے کہ یہ فائل کس ورژن سے آئی ----------
+// ---------- بیک اپ فائل کا نام — یہ Fruit Mandi POS فائل ہے، اس لیے نام بالکل اسی ورژن سٹرنگ کے فارمیٹ میں بنتا ہے
+// جیسا خود ایپ کا ورژن ہے — BKFM{دن}{مہینہ}{دن کا نام}{وقت}{AM/PM}.JSON — مثال: BKFM318MO0507AM.JSON ----------
 function generateBackupFileName(){
   const now = new Date();
   const dayNames = ['SU','MO','TU','WE','TH','FR','SA'];
@@ -5080,7 +5087,7 @@ function generateBackupFileName(){
   hh = hh % 12; if(hh === 0) hh = 12;
   const hhStr = String(hh).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
-  return `BKDR${date}${month}${dayCode}${hhStr}${mm}${ampm}.json`;
+  return `BKFM${date}${month}${dayCode}${hhStr}${mm}${ampm}.JSON`;
 }
 
 function buildBackupObject(){
@@ -5142,7 +5149,7 @@ const GOOGLE_DRIVE_CLIENT_ID = '751661674362-49d5habgkr9h6t1sb8a9err7e6r1b975.ap
 const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 let gDriveTokenClient = null;
 let gDriveAccessToken = null;
-const GDRIVE_BACKUP_FOLDER_NAME = 'AIO Backup - Direct';
+const GDRIVE_BACKUP_FOLDER_NAME = 'Fruit Mandi POS Backup';
 
 // ---------- Google Drive میں "AIO Backup" فولڈر تلاش کریں، نہ ملے تو نئی بنا دیں — تاکہ ہر بار وہی ایک فولڈر
 // دوبارہ استعمال ہو، فائلیں پوری Drive میں بکھری نہ رہیں۔ فولڈر کی ID ایک بار مل جائے تو محفوظ کر لیتے ہیں ----------
@@ -5333,7 +5340,7 @@ async function restoreFromGoogleDrive(){
       const listRes = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } });
       if(!listRes.ok) throw new Error('List failed: ' + listRes.status);
       const listData = await listRes.json();
-      const files = (listData.files || []).filter(f => f.name.startsWith('BKDR'));
+      const files = (listData.files || []).filter(f => f.name.startsWith('BKFM'));
       renderGDriveFileList(files);
       document.getElementById('gdriveRestoreModal').classList.add('show');
     }catch(err){
@@ -5533,14 +5540,14 @@ function showBackupConfirmModal(type, fileName, info){
     body.innerHTML = isDrive ? `
       <div class="backupFileChip">📄 ${cleanFileName}</div>
       ${info.accountEmail ? `<p style="font-weight:700; color:var(--primary-dark);">✅ Backup Successful!</p><p>Google Drive account: <b>${info.accountEmail}</b></p>` : `<p style="font-weight:700; color:var(--primary-dark);">✅ Backup Successful!</p>`}
-      <p>Saved in Google Drive → folder <b>"AIO Backup - Direct"</b> → file <b>${cleanFileName}</b></p>
+      <p>Saved in Google Drive → folder <b>"Fruit Mandi POS Backup"</b> → file <b>${cleanFileName}</b></p>
       <p>${info.products} products • ${info.customers} customers • ${info.invoices} invoices</p>
       <p class="backupHintText">Next time, tap "Restore from Google Drive" — this file (and every future one) will always be right there.</p>
     ` : `
       <div class="backupFileChip">📄 ${fileName}</div>
       <p>Saved to your <b>Downloads</b> folder.</p>
       <p>${info.products} products • ${info.customers} customers • ${info.invoices} invoices</p>
-      <p class="backupHintText">Next time, tap "Import Backup" and look for a file starting with <b>"BKDR"</b> in your Downloads.</p>
+      <p class="backupHintText">Next time, tap "Import Backup" and look for a file starting with <b>"BKFM"</b> in your Downloads.</p>
     `;
   } else if(type === 'import'){
     icon.textContent = '✅';
@@ -5734,7 +5741,7 @@ function getDeveloperContact(){
    ===================================================================== */
 // ---------- 🏷️ BUILD VERSION — ہر نئی فائل بھیجنے سے پہلے یہ نمبر بدلیں (اور یہی نمبر sw.js کے
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے ----------
-const APP_BUILD_VERSION = 'FM308SU03';
+const APP_BUILD_VERSION = 'FM318MO02';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6048,7 +6055,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   ]},
   { section: '📦 Inventory', tiles: [
     {icon:'📦', label:'Products', screen:'products'},
-    {icon:'🏷️', label:'Categories', screen:'categories'},
+    // ---------- 🍇 Fruit Mandi POS: "Categories" ٹائل ہوم پیج سے ہائیڈ کر دی گئی ہے (فیچر/اسکرین کوڈ میں محفوظ ہے، صرف سامنے نہیں دکھائی جا رہی) ----------
     {icon:'🧮', label:'Stock Adjustment', screen:'stockadjustment'},
   ]},
   { section: '🧑‍🤝‍🧑 Parties', tiles: [
@@ -9403,7 +9410,7 @@ function downloadProductCsvTemplate(){
     'Lipton Tea,Beverages,500g,8964000112,360,450,410,40,10,,Aisle 4',
     'Sugar,Grocery,Default,8964000200,140,160,150,100,20,,Warehouse-1',
   ];
-  downloadCsvFile(rows.join('\n'), 'AIO_Product_Import_Template.csv');
+  downloadCsvFile(rows.join('\n'), 'FM_Product_Import_Template.csv');
 }
 
 let pendingProductImportRows = [];
@@ -9516,7 +9523,7 @@ function downloadPartyCsvTemplate(){
   const rows = isCustomer
     ? ['Name,Phone,Address,Area', 'Aslam Bhai,03001234567,Main Bazaar,Lahore', 'Fatima Traders,03211234567,Shop 12 Anarkali,Lahore']
     : ['Name,Phone,Address,Area', 'Khalid Suppliers,03331234567,Warehouse Road,Karachi', 'Al-Madina Traders,03451234567,Wholesale Market,Faisalabad'];
-  downloadCsvFile(rows.join('\n'), (isCustomer ? 'AIO_Customer_Import_Template.csv' : 'AIO_Supplier_Import_Template.csv'));
+  downloadCsvFile(rows.join('\n'), (isCustomer ? 'FM_Customer_Import_Template.csv' : 'FM_Supplier_Import_Template.csv'));
 }
 
 // ---------- کسٹمر/سپلائر امپورٹ فائل میں مختلف ناموں کے کالم بھی خودکار پہچانے جائیں (Name/Client Name، Phone/Mobile وغیرہ) ----------
