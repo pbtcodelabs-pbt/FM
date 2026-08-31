@@ -2159,6 +2159,10 @@
 <!-- ===================== APP SHELL ===================== -->
 <div id="app">
 
+  <!-- ---------- 🚪 ہمیشہ نظر آنے والا LOGOUT بٹن — سکرین کے اوپری کونے میں فکس، موبائل/ڈیسک ٹاپ دونوں پر ہر حال میں نظر آئے
+       (پہلے یہ صرف mobileTopbar کے اندر تھا جو بڑی اسکرین پر display:none ہو جاتا تھا، اس لیے نظر نہیں آ رہا تھا) ---------- -->
+  <button id="globalLogoutBtn" onclick="logout()" title="Logout" style="position:fixed; top:10px; inset-inline-end:10px; z-index:9999; background:var(--danger,#dc2626); border:none; color:#fff; width:42px; height:42px; border-radius:12px; font-size:19px; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center;">🚪</button>
+
   <!-- ---------- ◀ Back / 🏠 Home / ▶ Forward — ہر صفحے پر (Home کے علاوہ)، نیچے وسط میں کمپیکٹ بار ---------- -->
   <div class="navArrowBar" id="navArrowBar">
     <button id="navBackBtn" onclick="goBack()" title="Back">◀</button>
@@ -4004,7 +4008,7 @@
          ===================================================================== -->
     <div class="screen" id="screen-advOrderPicker">
       <div class="advOrderBanner">
-        <span>📝 ADVANCE ORDER MODE — Approximate Pricing (this is not a real bill)</span>
+        <span>📝 ADVANCE ORDER MODE</span>
         <button type="button" class="advOrderBannerBackBtn" onclick="backFromAdvOrderPicker()">◀ Back</button>
       </div>
 
@@ -4065,18 +4069,17 @@
             <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
           </div>
         </div>
-        <div id="otItemsList" style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;"></div>
+        <div id="otItemsList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
         <div id="otPager" style="position:sticky; bottom:8px; display:flex; align-items:center; gap:10px; padding-top:6px; margin-bottom:6px;"></div>
       </div>
 
-      <!-- STEP 3: ریویو — صرف اشیاء اور تعداد (رقم/ریٹ نہیں)، ایڈمن کو بھیجنے کے لیے تیار -->
+      <!-- STEP 3: ریویو — اب اصل "Advance Order" بل کینوس کی شکل میں (وہی فارمیٹ جو ایڈمن کو نظر آئے گا)،
+           صرف تعداد کے ساتھ (رقم/ریٹ ایڈمن خود لگائے گا) — ایڈمن کو بھیجنے کے لیے تیار ---------- -->
       <div id="otStepReview" style="display:none;">
-        <div style="text-align:center; margin-bottom:12px; background:#fff; border:2px solid var(--primary); border-radius:14px; padding:12px;">
-          <div style="font-size:18px; font-weight:800;" id="otReviewCustName"></div>
-          <div style="font-size:13px; color:var(--muted);" id="otReviewCustArea"></div>
+        <div style="background:#fff; border:1px solid #e5e9f0; border-radius:14px; padding:10px; margin-bottom:12px; display:flex; justify-content:center;">
+          <canvas id="otReviewCanvas" style="width:100%; max-width:340px; display:block;"></canvas>
         </div>
-        <div id="otReviewItemsList" style="display:flex; flex-direction:column; gap:6px; margin-bottom:70px;"></div>
-        <div style="position:sticky; bottom:8px; display:flex; gap:8px; padding-top:6px;">
+        <div style="position:sticky; bottom:8px; display:flex; gap:8px; padding-top:6px; padding-bottom:8px;">
           <button type="button" onclick="backToOtItems()" style="flex:1; padding:15px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:14px; font-size:15px; font-weight:800; cursor:pointer;">◀ ترمیم کریں</button>
           <button type="button" onclick="postOtOrderToAdmin()" style="flex:2; padding:15px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">📤 ایڈمن کو بھیجیں</button>
         </div>
@@ -4184,10 +4187,7 @@
         <div class="emptyCart" id="advEmptyMsg" style="padding:20px 0;">No items added yet — tap "➕ Add More Items" to pick from the catalog</div>
 
         <div class="totalsBox" id="advTotalsBox" style="margin-top:6px;">
-          <div class="grand"><span>Approx. Subtotal</span><span id="advGrandTotal">Rs. 0</span></div>
-        </div>
-        <div style="background:#fff7ed; color:#c2410c; padding:8px 10px; border-radius:8px; font-size:11.5px; margin-top:6px; font-weight:600;">
-          ⚠️ These are approximate prices only. Final rates will be confirmed at the time of delivery and may go up or down. Tap the Qty or Price of any item below to adjust it.
+          <div class="grand"><span>Subtotal</span><span id="advGrandTotal">Rs. 0</span></div>
         </div>
 
         <textarea id="advOrderNote" placeholder="Order note (optional, e.g. 'wants delivery Friday')" style="width:100%; padding:9px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; min-height:44px;"></textarea>
@@ -4203,12 +4203,17 @@
     <div class="modalOverlay" id="advOrderPreviewModal" onclick="if(event.target===this) closeAdvOrderPreview()">
       <div class="invoicePreviewBox">
         <div class="previewHeader">
-          <strong>📝 Advance Order — Approximate Pricing</strong>
+          <strong>📝 Advance Order</strong>
           <span style="cursor:pointer;" onclick="closeAdvOrderPreview()">✖</span>
         </div>
 
-        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — بالکل بل جیسے، Alignment/Decimals ہمیشہ نظر آئیں، باقی "More" کے نیچے ---------- -->
+        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — فونٹ سلیکشن اب ہمیشہ نظر آنے والی صف میں (پہلے "More" کے نیچے چھپی ہوئی تھی) ---------- -->
         <div class="previewStyleControls compactPsc">
+          <div class="pscCompactRow pscEssentialRow">
+            <select id="aopscFontFamilySelect" onchange="setAdvOrderFontFamily(this.value)" class="pscDropdown" style="flex:1 1 auto; min-width:0;"></select>
+            <button id="aopscBoldBtn" class="pscToggleBtn" onclick="setAdvOrderBold(true)">𝐁 Bold</button>
+            <button id="aopscThinBtn" class="pscToggleBtn" onclick="setAdvOrderBold(false)">Thin</button>
+          </div>
           <div class="pscCompactRow pscEssentialRow">
             <button id="aopscAlignLeftBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('left')">⬅</button>
             <button id="aopscAlignCenterBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('center')">↔</button>
@@ -4237,15 +4242,6 @@
               </div>
             </div>
             <div class="pscCompactRow">
-              <button id="aopscBoldBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">𝐁</button>
-              <button id="aopscThinBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">Thin</button>
-              <select id="aopscFontFamilySelect" onchange="setAdvOrderFontFamily(this.value)" class="pscDropdown"></select>
-            </div>
-            <div class="pscCompactRow">
-              <span class="pscLabel">🎨</span>
-              <div id="aopscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
-            </div>
-            <div class="pscCompactRow">
               <label class="pscCheckLabel">
                 <input type="checkbox" id="aopscA4Chk" onchange="toggleAdvOrderPaperStyle(this.checked)"> 🖨️ Print A4
               </label>
@@ -4256,6 +4252,12 @@
               <button type="button" id="aopscOrientLandscapeBtn" onclick="setAdvOrderOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
             </div>
           </div>
+        </div>
+
+        <!-- ---------- 🏷️ ریٹ لگانے کے بٹن — اب یہیں بل کے اوپر، ایک ٹیپ سے ریٹ لگتے ہی بل مکمل ہو جاتا ہے ---------- -->
+        <div id="aopRateApplyRow" style="display:none; gap:8px; padding:10px 14px 0;">
+          <button onclick="applyRateInPreview('retail')" style="flex:1; background:#f1f5f9; color:#0f172a; border:1.5px solid #0f172a; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">🏷️ Islamabad Rate</button>
+          <button onclick="applyRateInPreview('wholesale')" style="flex:1; background:#f1f5f9; color:#0f172a; border:1.5px solid #0f172a; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">📦 Rawalpindi Rate</button>
         </div>
 
         <div class="invoicePreviewScrollArea">
@@ -6088,7 +6090,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU04';
+const APP_BUILD_VERSION = 'FM19TU05';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -15011,7 +15013,7 @@ let otCheckedMap = {};      // {variant_id: true/false}
 let otFlatCache = [];       // موجودہ سکرین کے لیے آئٹمز کی فہرست (ایک بار سورٹ کر کے محفوظ)
 let otPage = 0;             // موجودہ صفحہ نمبر (0 سے شروع)
 let otReviewItems = [];     // ریویو سکرین کے لیے منتخب شدہ آئٹمز
-const OT_PAGE_SIZE = 24;    // ہر صفحے پر کتنے آئٹمز دکھائیں
+const OT_PAGE_SIZE = 60;    // ہر صفحے پر کتنے آئٹمز دکھائیں — کمپیکٹ رو کی وجہ سے اب زیادہ آئٹمز ایک ہی صفحے پر آ جاتے ہیں
 
 function renderOrderTakingScreen(){
   otCustomer = null;
@@ -15100,13 +15102,13 @@ function renderOtItemsPage(){
     const checked = !!otCheckedMap[v.variant_id];
     const qty = otQtyMap[v.variant_id] || 0;
     return `
-    <div class="otItemRow" data-variant-id="${v.variant_id}" style="display:flex; align-items:center; gap:10px; background:#fff; border:2px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:12px; padding:9px 12px;">
-      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(this, ${v.variant_id})" style="width:22px; height:22px; margin:0; flex:0 0 auto; cursor:pointer;">
-      <div style="font-size:16px; font-weight:700; flex:1; min-width:0; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
-      <div style="display:flex; align-items:center; gap:8px; flex:0 0 auto;">
-        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, -1)" style="width:36px; height:36px; border:none; border-radius:10px; background:#fee2e2; color:#b91c1c; font-size:18px; font-weight:800; cursor:pointer;">−</button>
-        <span class="otQtyText" style="min-width:26px; text-align:center; font-size:16px; font-weight:800;">${qty}</span>
-        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:36px; height:36px; border:none; border-radius:10px; background:#dcfce7; color:#15803d; font-size:18px; font-weight:800; cursor:pointer;">+</button>
+    <div class="otItemRow" data-variant-id="${v.variant_id}" style="display:flex; align-items:center; gap:6px; background:#fff; border:1.5px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:9px; padding:5px 7px; max-width:100%; overflow:hidden;">
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(this, ${v.variant_id})" style="width:18px; height:18px; margin:0; flex:0 0 auto; cursor:pointer;">
+      <div style="font-size:13px; font-weight:700; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
+      <div style="display:flex; align-items:center; gap:4px; flex:0 0 auto;">
+        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, -1)" style="width:26px; height:26px; border:none; border-radius:7px; background:#fee2e2; color:#b91c1c; font-size:15px; font-weight:800; cursor:pointer; padding:0;">−</button>
+        <span class="otQtyText" style="min-width:18px; text-align:center; font-size:13px; font-weight:800;">${qty}</span>
+        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:26px; height:26px; border:none; border-radius:7px; background:#dcfce7; color:#15803d; font-size:15px; font-weight:800; cursor:pointer; padding:0;">+</button>
       </div>
     </div>`;
   }).join('');
@@ -15114,18 +15116,21 @@ function renderOtItemsPage(){
   renderOtPager();
 }
 
-// ---------- نام والی جگہ پر ٹیپ کریں تو بھی ٹک لگ/ہٹ جائے — ہمیشہ اسی row کے اندر ہی رہتے ہوئے ----------
+// ---------- نام والی جگہ پر ٹیپ کریں تو بھی ٹک لگ/ہٹ جائے — variant_id ہمیشہ خود اسی row کے data-variant-id سے پڑھا جاتا ہے (حفاظتی: کبھی بھی غلط/دوسرے آئٹم پر اثر نہیں پڑ سکتا) ----------
 function toggleOtItemFromRow(el, variantId){
   const row = el.closest('.otItemRow');
   if(!row) return;
+  const vid = Number(row.dataset.variantId);
   const chk = row.querySelector('input[type="checkbox"]');
   const nextChecked = chk ? !chk.checked : true;
-  applyOtRowState(row, variantId, nextChecked);
+  applyOtRowState(row, vid, nextChecked);
 }
 
 function toggleOtItem(checkboxEl, variantId){
   const row = checkboxEl.closest('.otItemRow');
-  applyOtRowState(row, variantId, checkboxEl.checked);
+  if(!row) return;
+  const vid = Number(row.dataset.variantId);
+  applyOtRowState(row, vid, checkboxEl.checked);
 }
 
 // ---------- ایک ہی جگہ سے row کی حالت (بارڈر رنگ، ٹک، تعداد) اپڈیٹ ہوتی ہے — ہمیشہ دیے گئے row کے
@@ -15142,12 +15147,16 @@ function applyOtRowState(row, variantId, isChecked){
   if(chk) chk.checked = isChecked;
 }
 
+// ---------- + / − بٹن — variant_id ہمیشہ خود اسی row کے data-variant-id سے پڑھا جاتا ہے، کبھی بھی
+// غلطی سے کسی اور (اوپر/نیچے والے) آئٹم کی تعداد تبدیل نہیں ہو سکتی ----------
 function changeOtQty(btnEl, variantId, delta){
   const row = btnEl.closest('.otItemRow');
-  const current = otQtyMap[variantId] || 0;
+  if(!row) return;
+  const vid = Number(row.dataset.variantId);
+  const current = otQtyMap[vid] || 0;
   const next = Math.max(0, current + delta);
-  otQtyMap[variantId] = next;
-  applyOtRowState(row, variantId, next > 0);
+  otQtyMap[vid] = next;
+  applyOtRowState(row, vid, next > 0);
 }
 
 function renderOtPager(){
@@ -15167,30 +15176,37 @@ function goOtPage(delta){
   renderOtItemsPage();
 }
 
-// ---------- STEP 3: ریویو — صرف دکاندار کا نام، ایریا اور منتخب اشیاء (رقم/ریٹ ابھی نہیں) ----------
-function openOtReview(){
+// ---------- STEP 3: ریویو — اب اصل "Advance Order" بل کینوس کی شکل میں، صرف تعداد کے ساتھ (رقم/ریٹ ابھی نہیں) ----------
+async function openOtReview(){
   if(!otCustomer){ alert('پہلے کسٹمر منتخب کریں'); return; }
 
   const items = Object.keys(otCheckedMap)
     .filter(id => otCheckedMap[id] && (otQtyMap[id] || 0) > 0)
     .map(id => {
       const v = otFlatCache.find(f => f.variant_id === Number(id));
-      return {variant_id: Number(id), name: v ? v.name : '', label: v ? (v.label || '') : '', qty: otQtyMap[id]};
+      return {variant_id: Number(id), name: v ? v.name : '', label: v ? (v.label || '') : '', qty: otQtyMap[id], unitPrice: 0};
     });
 
   if(items.length === 0){ alert('کم از کم ایک چیز کو ٹک کر کے تعداد لگائیں'); return; }
   otReviewItems = items;
 
-  document.getElementById('otReviewCustName').textContent = '🧑 ' + otCustomer.name;
-  document.getElementById('otReviewCustArea').textContent = otCustomer.area ? '🗺️ ' + otCustomer.area : '';
-  document.getElementById('otReviewItemsList').innerHTML = items.map(i => `
-    <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:11px 14px;">
-      <div style="font-weight:700; font-size:15px;">${i.name}</div>
-      <div style="font-weight:800; color:var(--primary); font-size:15px;">${i.qty} عدد</div>
-    </div>`).join('');
-
   document.getElementById('otStepItems').style.display = 'none';
   document.getElementById('otStepReview').style.display = '';
+
+  // ---------- اصل ایڈوانس آرڈر بل جیسا ہی عارضی (ابھی تک محفوظ نہیں کیا گیا) آرڈر بنا کر کینوس پر دکھائیں ----------
+  const previewOrder = {
+    id: 0,
+    customerName: otCustomer.name,
+    customerPhone: '',
+    customerArea: otCustomer.area || '',
+    note: '',
+    items,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    fulfilledAt: null
+  };
+  await new Promise(r => setTimeout(r, 50));
+  await renderAdvOrderToCanvas(previewOrder, document.getElementById('otReviewCanvas'));
 }
 
 function backToOtItems(){
@@ -15427,7 +15443,7 @@ function fulfillAdvanceOrder(orderId){
   syncCartModeControls();
   renderCart();
 
-  let msg = `✅ Loaded into Billing cart for ${order.customerName}.\n\n⚠️ Reminder: these were approximate rates — please confirm today's actual prices before finalizing the bill.`;
+  let msg = `✅ Loaded into Billing cart for ${order.customerName}.`;
   if(skippedCustom.length > 0){
     msg += `\n\n⚠️ ${skippedCustom.length} custom/rough item(s) were not in inventory and were skipped — add them manually: ${skippedCustom.map(i=>i.name).join(', ')}`;
   }
@@ -15442,7 +15458,7 @@ function renderAdvanceOrdersScreen(){
   const totalItems = filtered.reduce((s,o) => s + o.items.reduce((a,i)=>a+i.qty,0), 0);
   const totalAmount = filtered.reduce((s,o) => s + advOrderTotal(o), 0);
   document.getElementById('advOrderSummaryBar').innerHTML =
-    `<span>Advance Orders</span><span>${filtered.length} order(s) • ${totalItems} item(s) • Approx. Rs. ${totalAmount.toLocaleString()}</span>`;
+    `<span>Advance Orders</span><span>${filtered.length} order(s) • ${totalItems} item(s) • Rs. ${totalAmount.toLocaleString()}</span>`;
 
   const wrap = document.getElementById('advOrderListWrap');
   if(filtered.length === 0){
@@ -15452,25 +15468,43 @@ function renderAdvanceOrdersScreen(){
 
   wrap.innerHTML = filtered.map(o => {
     const isPending = o.status !== 'fulfilled';
-    const statusTag = isPending
-      ? `<span class="pendingStatusTag pending">⏳ PENDING BILL</span>`
-      : `<span class="pendingStatusTag approved">✅ FULFILLED</span>`;
+    // ---------- ملازم کی طرف سے آیا ہوا آرڈر جس پر ابھی تک ریٹ نہیں لگا — ایڈمن کو صرف ایک ٹیپ سے ریٹ لگانے کا موقع دیں ----------
+    const hasRate = o.items.some(i => i.unitPrice > 0);
+    const statusTag = !isPending
+      ? `<span class="pendingStatusTag approved">✅ FULFILLED</span>`
+      : (hasRate ? `<span class="pendingStatusTag approved">✅ BILL READY</span>` : `<span class="pendingStatusTag pending">⏳ RATE PENDING</span>`);
     const when = new Date(o.createdAt).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
     const orderTotal = advOrderTotal(o);
     return `
       <div class="billCard">
         <div>
           <div class="bNo">🧑 ${o.customerName} ${statusTag}</div>
-          <div class="bMeta">${when} — Approx. Rs. ${orderTotal.toLocaleString()}</div>
+          <div class="bMeta">${when} — Rs. ${orderTotal.toLocaleString()}</div>
         </div>
         <div class="billActions">
           ${isPending ? `<button class="btnReceiveShipment" onclick="fulfillAdvanceOrder(${o.id})">✅ Fulfill & Bill</button>` : ''}
-          <button class="btnPrint" onclick="openAdvOrderPreview(${o.id})">🧾 Preview Bill</button>
+          <button class="btnPrint" onclick="openAdvOrderPreview(${o.id})">🧾 ${hasRate || !isPending ? 'Preview &amp; Print' : 'Rate لگائیں / Preview'}</button>
           <button class="btnHistory" onclick="openAdvanceOrderModal(${o.id})">✏️ Edit</button>
           <button class="removeBtn" onclick="deleteAdvanceOrder(${o.id})" style="padding:8px 12px;">🗑️</button>
         </div>
       </div>`;
   }).join('');
+}
+
+// ---------- ایڈمن ایک ٹیپ سے پورے آرڈر پر ریٹ لگائے — تعداد پہلے سے موجود ہے، صرف قیمت لگتے ہی بل مکمل ----------
+function applyRateToAdvanceOrder(orderId, mode){
+  const order = advanceOrdersData.find(o => o.id === orderId);
+  if(!order) return;
+  const flat = getFlatVariants();
+  order.items.forEach(item => {
+    if(item.variant_id == null) return; // ---------- کسٹم/رف آئٹم کا کوئی ویریئنٹ نہیں، ریٹ دستی لگانا ہوگا (Edit سے) ----------
+    const v = flat.find(f => f.variant_id === item.variant_id);
+    if(!v) return;
+    item.unitPrice = mode === 'wholesale' ? v.wholesale : v.retail;
+  });
+  order.rateApplied = mode;
+  persistAllData();
+  renderAdvanceOrdersScreen();
 }
 
 /* =====================================================================
@@ -15486,12 +15520,31 @@ async function openAdvOrderPreview(orderId){
   currentPreviewAdvOrderId = orderId;
   document.getElementById('advOrderPreviewModal').classList.add('show');
   syncAdvOrderStyleControls();
+  syncAdvOrderRateRow(order);
   await new Promise(r => setTimeout(r, 100)); // ---------- modal کے نظر آنے کے بعد canvas ڈرائنگ (کچھ WebViews کے لیے ضروری) ----------
   await renderAdvOrderToCanvas(order);
 }
 function closeAdvOrderPreview(){
   document.getElementById('advOrderPreviewModal').classList.remove('show');
   currentPreviewAdvOrderId = null;
+}
+
+// ---------- ریٹ بٹن صرف اسی وقت دکھائیں جب ابھی تک ریٹ نہ لگا ہو — لگتے ہی خودکار غائب ---------- 
+function syncAdvOrderRateRow(order){
+  const row = document.getElementById('aopRateApplyRow');
+  if(!row) return;
+  const hasRate = order.items.some(i => i.unitPrice > 0);
+  row.style.display = (!hasRate && order.status !== 'fulfilled') ? 'flex' : 'none';
+}
+
+// ---------- پریویو کے اندر سے ہی ایک ٹیپ میں ریٹ لگائیں — بل فوراً مکمل ہو کر پرنٹ/شیئر کے لیے تیار ---------- 
+function applyRateInPreview(mode){
+  if(!currentPreviewAdvOrderId) return;
+  applyRateToAdvanceOrder(currentPreviewAdvOrderId, mode);
+  const order = advanceOrdersData.find(o => o.id === currentPreviewAdvOrderId);
+  if(!order) return;
+  syncAdvOrderRateRow(order);
+  renderAdvOrderToCanvas(order);
 }
 
 // ---------- Advance Order پریویو کو موجودہ سیٹنگز کے مطابق دوبارہ کھینچیں — بالکل بل/رپورٹ کی طرح ----------
@@ -15566,8 +15619,8 @@ function adjustAdvOrderStyle(settingKey, delta, min, max){
   syncAdvOrderStyleControls();
   rerenderAdvOrderPreview();
 }
-function toggleAdvOrderBold(){
-  AppState.settings.advOrderBoldItems = !(AppState.settings.advOrderBoldItems !== false);
+function setAdvOrderBold(isBold){
+  AppState.settings.advOrderBoldItems = isBold;
   persistAllData();
   syncAdvOrderStyleControls();
   rerenderAdvOrderPreview();
@@ -15640,11 +15693,11 @@ async function shareAdvOrderPdf(){
   }
 }
 
-async function renderAdvOrderToCanvas(order){
+async function renderAdvOrderToCanvas(order, canvasEl){
   const useA4 = AppState.settings.advOrderPrintStyle === 'a4';
   const paperWidthMM = AppState.settings.paperWidth || 80;
   const pxWidth = useA4 ? 850 : (paperWidthMM === 80 ? 576 : 384);
-  const canvas = document.getElementById('advOrderCanvas');
+  const canvas = canvasEl || document.getElementById('advOrderCanvas');
   const baseScale = pxWidth / 576;
 
   // ---------- بل/رپورٹ کی طرح یہاں بھی Zoom/Row/Decimals/Bold/Align/Font/Theme سب لاگو ہوتے ہیں ----------
@@ -15654,7 +15707,6 @@ async function renderAdvOrderToCanvas(order){
   const align = AppState.settings.advOrderAlign || 'left';
   const decimals = AppState.settings.advOrderPriceDecimals ?? 0;
   const scale = baseScale * fscale;
-  const rc = getReceiptColor();
 
   const noW = Math.round(28 * scale), variantW = Math.round(56 * scale * Math.max(1, fscale)), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
   const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
@@ -15682,24 +15734,6 @@ async function renderAdvOrderToCanvas(order){
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, pxWidth, canvas.height);
 
-  // ---------- 🖨️ ڈائیگنل واٹر مارک — "APPROXIMATE PRICING" پورے بل پر ہلکا سا، بار بار، بغیر پڑھنے میں رکاوٹ کے —
-  // یہ سب سے پہلے (سب سے نیچے کی تہہ میں) بنایا جا رہا ہے تاکہ باقی سارا متن اس کے اوپر صاف نظر آئے ----------
-  ctx.save();
-  ctx.globalAlpha = 0.09;
-  ctx.fillStyle = '#000000';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = `bold ${Math.round(24 * scale)}px ${canvasFontFamily}`;
-  const wmSpacing = Math.round(120 * scale);
-  for(let wy = wmSpacing / 2; wy < canvas.height + wmSpacing; wy += wmSpacing){
-    ctx.save();
-    ctx.translate(pxWidth / 2, wy);
-    ctx.rotate(-Math.PI / 7); // ---------- ہلکا سا ترچھا (diagonal) زاویہ ----------
-    ctx.fillText('APPROXIMATE PRICING', 0, 0);
-    ctx.restore();
-  }
-  ctx.restore();
-
   try{
     await document.fonts.load(`bold 26px ${canvasFontFamily}`);
     await document.fonts.load(`16px ${canvasFontFamily}`);
@@ -15718,19 +15752,15 @@ async function renderAdvOrderToCanvas(order){
     if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += 16 * scale; }
   }
 
-  // ---------- بڑا واضح بینر — ADVANCE ORDER / APPROXIMATE PRICING — اب بل/رپورٹ کے منتخب تھیم رنگ سے ہم آہنگ ----------
+  // ---------- بڑا واضح بینر — صرف "ADVANCE ORDER" — خالص بلیک اینڈ وائٹ (صدام کی ہدایت پر تھیم کلر ہٹا دیا گیا) ----------
   y += 6 * scale;
-  const bannerTop = y, bannerH = 48 * scale;
-  ctx.fillStyle = rc.bg;
-  ctx.fillRect(tableLeft, bannerTop, tableRight - tableLeft, bannerH);
-  ctx.strokeStyle = rc.border;
+  const bannerTop = y, bannerH = 34 * scale;
+  ctx.strokeStyle = '#000';
   ctx.lineWidth = 2;
   ctx.strokeRect(tableLeft + 1, bannerTop + 1, tableRight - tableLeft - 2, bannerH - 2);
-  ctx.fillStyle = rc.border;
-  ctx.font = F('bold 18px');
-  ctx.fillText('📝 ADVANCE ORDER', pxWidth/2, bannerTop + 22 * scale);
-  ctx.font = F('bold 13px');
-  ctx.fillText('⚠️ APPROXIMATE PRICING', pxWidth/2, bannerTop + 40 * scale);
+  ctx.fillStyle = '#000';
+  ctx.font = F('bold 19px');
+  ctx.fillText('📝 ADVANCE ORDER', pxWidth/2, bannerTop + bannerH/2 + 7 * scale);
   y = bannerTop + bannerH + 16 * scale;
   ctx.fillStyle = '#000';
 
@@ -15766,7 +15796,7 @@ async function renderAdvOrderToCanvas(order){
   const advColCenterX = (a, b) => align === 'center' ? (a + b) / 2 : (align === 'right' ? b - 4 : a + 4);
   ctx.textAlign = align;
   ctx.fillText('Qty', advColCenterX(colX[3], colX[4]), headerBaseline);
-  ctx.fillText('Approx.', advColCenterX(colX[4], colX[5]), headerBaseline);
+  ctx.fillText('Rate', advColCenterX(colX[4], colX[5]), headerBaseline);
   ctx.fillText('Total', advColCenterX(colX[5], colX[6]), headerBaseline);
   hLineY += headerH;
   drawTableHLine(hLineY);
@@ -15825,7 +15855,7 @@ async function renderAdvOrderToCanvas(order){
   ctx.textAlign = 'left';
   ctx.font = F('bold 20px');
   const grandTotal = advOrderTotal(order);
-  ctx.fillText('Approx. Total: Rs. ' + fmt(grandTotal), 10*scale, y);
+  ctx.fillText('Total: Rs. ' + fmt(grandTotal), 10*scale, y);
   y += 30 * scale;
 
   if(order.note){
@@ -15883,7 +15913,7 @@ function shareAdvOrderWhatsapp(){
     return;
   }
   const digits = formatPhoneForWhatsApp(order.customerPhone);
-  const text = `Advance Order #${order.id} — ${order.customerName} — Approx. Total: Rs. ${advOrderTotal(order).toLocaleString()} (approximate pricing, subject to change at delivery)`;
+  const text = `Advance Order #${order.id} — ${order.customerName} — Total: Rs. ${advOrderTotal(order).toLocaleString()}`;
   window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
 }
 
@@ -15900,7 +15930,7 @@ function shareAdvOrderUniversal(){
         await navigator.share({
           files:[file],
           title: `Advance Order #${order.id}`,
-          text: `${order.customerName} — Approx. Total: Rs. ${advOrderTotal(order).toLocaleString()} (approximate pricing, subject to change at delivery)`
+          text: `${order.customerName} — Total: Rs. ${advOrderTotal(order).toLocaleString()}`
         });
       } catch(err){ /* یوزر نے شیئر منسوخ کیا */ }
     } else {
@@ -16382,7 +16412,7 @@ function printAdvanceOrdersList(){
     <div style="border-top:1px dashed #94a3b8; margin:10px 0; padding-top:8px;">
       <div style="font-weight:800; font-size:14px;">${o.customerName}${o.customerPhone ? ' — '+o.customerPhone : ''}</div>
       ${o.items.map(i => `<div style="font-size:12.5px; display:flex; justify-content:space-between;"><span>• ${i.name} x${i.qty}</span><span>Rs. ${(i.qty*i.unitPrice).toLocaleString()}</span></div>`).join('')}
-      <div style="font-size:12.5px; font-weight:700; text-align:right; margin-top:2px;">Order Approx. Total: Rs. ${advOrderTotal(o).toLocaleString()}</div>
+      <div style="font-size:12.5px; font-weight:700; text-align:right; margin-top:2px;">Order Total: Rs. ${advOrderTotal(o).toLocaleString()}</div>
       ${o.note ? `<div style="font-size:11.5px; font-style:italic; color:#64748b;">Note: ${o.note}</div>` : ''}
     </div>`).join('');
 
@@ -16405,16 +16435,12 @@ function printAdvanceOrdersList(){
     <div class="aolWrap">
       <div style="background:${rc.bg}; border:2px solid ${rc.border}; border-radius:10px; padding:14px;">
         <div style="text-align:center; font-weight:800; font-size:17px; color:${rc.border};">📝 ADVANCE ORDERS</div>
-        <div style="text-align:center; font-weight:700; font-size:12px; color:${rc.border};">⚠️ APPROXIMATE PRICING — NOT FINAL</div>
         <div style="text-align:center; font-size:12px; margin-top:4px;">${new Date().toLocaleString()}</div>
         <div style="text-align:center; font-size:12px;">${pending.length} pending order(s)</div>
         ${customerBlocks}
         <div style="border-top:2px solid #111; margin:10px 0 6px; font-weight:800; font-size:14px;">TOTAL TO PREPARE</div>
         ${totalsBlock}
-        <div style="border-top:1px solid #111; margin:8px 0 4px; padding-top:4px; font-weight:800; font-size:15px; display:flex; justify-content:space-between;"><span>GRAND TOTAL (approx.)</span><span>Rs. ${grandTotal.toLocaleString()}</span></div>
-        <div style="border-top:1px dashed #94a3b8; margin-top:10px; padding-top:8px; font-size:11px; text-align:center; color:#c2410c;">
-          These are approximate prices only. Final rates will be confirmed at time of delivery and may go up or down.
-        </div>
+        <div style="border-top:1px solid #111; margin:8px 0 4px; padding-top:4px; font-weight:800; font-size:15px; display:flex; justify-content:space-between;"><span>GRAND TOTAL</span><span>Rs. ${grandTotal.toLocaleString()}</span></div>
       </div>
     </div>
   </body></html>`;
@@ -20370,7 +20396,6 @@ function buildAdvOrderPlainText(order){
   lines.push(centerMono(`Advance Order #${order.id} — ${dd}/${mm}/${yy}`, cols));
   lines.push(centerMono('Customer: ' + (order.customerName || 'Walk-in'), cols));
   if(order.customerPhone) lines.push(centerMono(order.customerPhone, cols));
-  lines.push(centerMono('(Approximate Pricing — Not a Real Bill)', cols));
   lines.push('-'.repeat(cols));
   const qtyW = 4, totalW = 9, nameW = cols - qtyW - totalW;
   lines.push(padRightMono('Item', nameW) + padLeftMono('Qty', qtyW) + padLeftMono('Total', totalW));
@@ -20387,7 +20412,7 @@ function buildAdvOrderPlainText(order){
   });
   lines.push('-'.repeat(cols));
   const grandTotal = (order.items || []).reduce((s,i) => s + (i.qty*i.unitPrice), 0);
-  lines.push(padRightMono('Approx. Total', cols - totalW) + padLeftMono('Rs.' + grandTotal.toFixed(decimals), totalW));
+  lines.push(padRightMono('Total', cols - totalW) + padLeftMono('Rs.' + grandTotal.toFixed(decimals), totalW));
   if(order.note) lines.push('', 'Note: ' + order.note);
   lines.push('', '', '');
   return lines.join('\n');
