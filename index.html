@@ -1781,18 +1781,48 @@
     body.billing-active #globalUiZoomBar{ padding:3px 12px; }
 
     #sidebar{
-      position:fixed; top:calc(56px + 54px); right:10px; bottom:auto; width:230px; max-height:calc(100vh - 76px - 54px);
-      z-index:800; border-radius:14px; overflow-y:auto;
+      /* ---------- صدام کی ہدایت (FM19TU28): پہلے چوڑائی 230px تھی، دائیں طرف بہت زیادہ خالی جگہ چھوڑتی تھی —
+           اب تنگ کر دی گئی ہے تاکہ باکس دائیں کنارے کے قریب سمٹ جائے (مزید خالی جگہ نظر نہ آئے) اور قطاریں
+           بھی کمپیکٹ کی گئی ہیں تاکہ تمام آئٹمز ایک ہی سکرین پر (بغیر سکرول کے) نظر آ سکیں ---------- */
+      position:fixed; top:calc(56px + 54px); right:8px; bottom:auto; width:172px; max-height:calc(100vh - 76px - 54px);
+      z-index:800; border-radius:12px; overflow-y:auto;
       opacity:0; transform:translateY(-8px) scale(.97); pointer-events:none;
       transition:opacity .18s ease, transform .18s ease;
       box-shadow:0 10px 30px rgba(0,0,0,.35);
     }
     #sidebar.open{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
+    /* ---------- کمپیکٹ نیویگیشن قطاریں (صرف موبائل ڈرار) — پہلے 14px 20px پیڈنگ + 15px فونٹ کی وجہ سے
+         ہر آئٹم بہت اونچا تھا اور پوری فہرست دو سکرینوں جتنی جگہ لیتی تھی ---------- */
+    #sidebar .brand{padding:0 10px 8px; font-size:13.5px; margin-bottom:4px;}
+    #sidebar .navItem{padding:7px 10px; font-size:11.5px; gap:6px; line-height:1.25;}
+    #sidebar .navItem:hover, #sidebar .navItem.active{border-right-width:3px;}
+    #sidebar .userTag{padding:8px 10px; font-size:10.5px;}
+    #sidebar .logoutBtn{margin:6px 10px; padding:6px; font-size:12px;}
 
     #sidebarOverlay{
       position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:700;
     }
     #sidebarOverlay.show{display:block;}
+
+    /* ---------- 🔤 A→Z / Z→A سورٹ بٹن — سائیڈبار کے اوپر، برانڈ کے نیچے (صدام کی ہدایت FM19TU28) ---------- */
+    .navSortRow{display:flex; gap:6px; padding:0 10px 8px;}
+    .navSortBtn{
+      flex:1 1 0; padding:5px 4px; font-size:10.5px; font-weight:800; letter-spacing:.3px;
+      background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.25);
+      border-radius:7px; cursor:pointer;
+    }
+    .navSortBtn:active{background:rgba(255,255,255,.25);}
+
+    /* ---------- ✋ ڈریگ ہینڈل — ہر آئٹم کے دائیں کنارے پر، پکڑ کر اپنی مرضی سے ترتیب دیں (صدام کی ہدایت FM19TU28) ---------- */
+    #sidebar .navItem[data-navkey]{justify-content:space-between;}
+    .navDragHandle{
+      flex:0 0 auto; margin-inline-start:auto; padding:2px 6px; font-size:14px; opacity:.55;
+      cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none;
+    }
+    .navDragHandle:active{opacity:1; cursor:grabbing;}
+    #sidebar .navItem.navDragging{
+      opacity:.55; background:rgba(255,255,255,.18); border-right:3px solid #fff;
+    }
 
     #mainArea{grid-column:1; grid-row:4; padding:14px; overflow-x:hidden;}
 
@@ -2266,15 +2296,22 @@
   <div id="sidebar">
     <div class="brand">صدام فروٹ منڈی</div>
 
+    <!-- ---------- 🔤↕️ صدام کی ہدایت (FM19TU28): A→Z / Z→A سورٹ بٹن + ہر آئٹم پر ✋ ڈریگ ہینڈل —
+         اپنی مرضی سے ترتیب دیں، یہ ترتیب اسی ڈیوائس پر ہمیشہ کے لیے محفوظ رہتی ہے (initSidebarNavCustomize دیکھیں) ---------- -->
+    <div class="navSortRow">
+      <button type="button" class="navSortBtn" onclick="sortSidebarNav('asc')">A→Z ⬇️</button>
+      <button type="button" class="navSortBtn" onclick="sortSidebarNav('desc')">Z→A ⬆️</button>
+    </div>
+
     <!-- ---------- 🔤 صدام کی ہدایت پر تمام مینیو آئٹمز (اوپر کی سیٹنگز) الفابیٹیکلی (A-Z) ترتیب دیے گئے ہیں —
          نیچے Change My PIN / Admin ٹیگ / Logout کو جان بوجھ کر الگ رکھا گیا ہے (اس ترتیب میں شامل نہیں) ---------- -->
     <!-- ---------- 🧹 صدام کی ہدایت: کسٹمر، سپلائر اور My Diary تینوں کو ایک ہی "Customer/Supplier Record"
          مینیو آئٹم میں ضم کر دیا گیا ہے — یہ سب سے اوپر رکھا گیا ہے۔ اندر تین ٹیبز (Customers/Suppliers/Diary)
          سے سوئچ ہوگا۔ نیچے پرانے تینوں الگ الگ آئٹمز چھپا دیے گئے ہیں (کوڈ محفوظ ہے، ڈیلیٹ نہیں ہوا) ---------- -->
-    <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customer/Supplier Record</div>
-    <div class="navItem" data-screen="advanceorders" onclick="goTo('advanceorders')">📝 Advance Orders</div>
-    <div class="navItem admin-only" data-screen="billsettings" onclick="goTo('billsettings')">🖨️ Bill & Print Settings</div>
-    <div class="navItem" data-screen="billhistory" onclick="goTo('billhistory')">🧾 Bill History</div>
+    <div class="navItem admin-only" data-screen="customers" data-navkey="customers" data-navlabel="Customer/Supplier Record" onclick="goTo('customers')">🧑‍🤝‍🧑 Customer/Supplier Record<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="advanceorders" data-navkey="advanceorders" data-navlabel="Advance Orders" onclick="goTo('advanceorders')">📝 Advance Orders<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="billsettings" data-navkey="billsettings" data-navlabel="Bill & Print Settings" onclick="goTo('billsettings')">🖨️ Bill & Print Settings<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="billhistory" data-navkey="billhistory" data-navlabel="Bill History" onclick="goTo('billhistory')">🧾 Bill History<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Billing/پراڈکٹ گرڈ اب سائیڈ مینو سے مکمل ہٹا دی گئی ہے — نہ ایڈمن کو
          ضرورت ہے (وہ Pending Orders/Customers/Suppliers استعمال کرتے ہیں)، نہ ملازم کو (وہ Order Taking استعمال
          کرتا ہے)۔ کوڈ محفوظ ہے، اسکرین اب بھی اندرونی طور پر (Fulfill & Bill کے ذریعے) کام کرتی ہے ---------- -->
@@ -2284,28 +2321,28 @@
     <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')" style="display:none;">🧑‍🤝‍🧑 Customers</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Dashboard مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')" style="display:none;">📊 Dashboard</div>
-    <div class="navItem admin-only" data-screen="expenditure" onclick="goTo('expenditure')">💸 Expenditure</div>
-    <div class="navItem" data-screen="home" onclick="goTo('home')">🏠 Home</div>
-    <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
+    <div class="navItem admin-only" data-screen="expenditure" data-navkey="expenditure" data-navlabel="Expenditure" onclick="goTo('expenditure')">💸 Expenditure<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="home" data-navkey="home" data-navlabel="Home" onclick="goTo('home')">🏠 Home<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="myaccount" data-navkey="myaccount" data-navlabel="My Account" onclick="goTo('myaccount')">🏦 My Account<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="mydiary" onclick="goTo('mydiary')" style="display:none;">📔 My Diary</div>
-    <div class="navItem" data-screen="orderTaking" onclick="goTo('orderTaking')">🧾 Order Taking</div>
-    <div class="navItem admin-only" data-screen="payments" onclick="goTo('payments')">💳 Payments</div>
-    <div class="navItem admin-only" data-screen="products" onclick="goTo('products')">📦 Products</div>
+    <div class="navItem" data-screen="orderTaking" data-navkey="orderTaking" data-navlabel="Order Taking" onclick="goTo('orderTaking')">🧾 Order Taking<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="payments" data-navkey="payments" data-navlabel="Payments" onclick="goTo('payments')">💳 Payments<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="products" data-navkey="products" data-navlabel="Products" onclick="goTo('products')">📦 Products<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Purchase Orders مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="purchaseorders" onclick="goTo('purchaseorders')" style="display:none;">📦 Purchase Orders</div>
-    <div class="navItem" data-screen="recoveryList" onclick="goTo('recoveryList')">💰 Recovery List</div>
-    <div class="navItem admin-only" data-screen="" onclick="closeSidebar(); openReportCenterModal();">📑 Reports</div>
-    <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
+    <div class="navItem" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')">💰 Recovery List<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="" data-navkey="reports" data-navlabel="Reports" onclick="closeSidebar(); openReportCenterModal();">📑 Reports<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="settings" data-navkey="settings" data-navlabel="Settings" onclick="goTo('settings')">⚙️ Settings<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Stock Adjustment مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')" style="display:none;">🧮 Stock Adjustment</div>
     <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')" style="display:none;">🚚 Suppliers</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Trends مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')" style="display:none;">📈 Trends</div>
-    <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
+    <div class="navItem admin-only" data-screen="users" data-navkey="users" data-navlabel="Users" onclick="goTo('users')">🔑 Users<span class="navDragHandle">⠿</span></div>
 
     <!-- ---------- نیچے کی چیزیں (PIN تبدیل کرنا / Admin ٹیگ / Logout) جان بوجھ کر الفابیٹیکل ترتیب سے الگ —
          باریک لائن سے واضح جدائی ---------- -->
-    <div style="border-top:1px solid rgba(255,255,255,.14); margin:10px 14px 6px;"></div>
+    <div id="navDivider" style="border-top:1px solid rgba(255,255,255,.14); margin:10px 14px 6px;"></div>
     <div class="navItem" data-screen="" onclick="openMyPinChangeModal()">🔑 Change My PIN</div>
 
     <div class="userTag" id="userTag">—</div>
@@ -6228,7 +6265,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU27';
+const APP_BUILD_VERSION = 'FM19TU28';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -7662,6 +7699,116 @@ function closeSidebar(){
     console.error('closeSidebar failed', e);
     alert('⚠️ Menu Error: ' + e.message);
   }
+}
+
+// =========================================================================
+// 🔤↕️ Sidebar Nav: A→Z / Z→A سورٹ + ہاتھ سے ڈریگ کر کے ترتیب دینا (صدام کی ہدایت — FM19TU28)
+// ترتیب اسی ڈیوائس کے localStorage میں ہمیشہ کے لیے محفوظ رہتی ہے (loadFromStorage/saveToStorage استعمال ہوتے ہیں)
+// =========================================================================
+const SIDEBAR_NAV_ORDER_KEY = 'sidebarNavOrder';
+
+function getSidebarNavDivider(){
+  return document.getElementById('navDivider');
+}
+function getSortableNavItems(){
+  // ---------- صرف وہ آئٹمز جن پر data-navkey لگا ہے (مستقل طور پر چھپائے گئے پرانے/legacy آئٹمز شامل نہیں) ----------
+  return Array.from(document.querySelectorAll('#sidebar .navItem[data-navkey]'));
+}
+function saveSidebarNavOrder(){
+  try{
+    const order = getSortableNavItems().map(el => el.getAttribute('data-navkey'));
+    saveToStorage(SIDEBAR_NAV_ORDER_KEY, order);
+  }catch(e){ console.warn('saveSidebarNavOrder failed', e); }
+}
+function applySidebarNavOrder(){
+  try{
+    const divider = getSidebarNavDivider();
+    if(!divider) return;
+    const items = getSortableNavItems();
+    const map = {};
+    items.forEach(el => { map[el.getAttribute('data-navkey')] = el; });
+    const savedOrder = loadFromStorage(SIDEBAR_NAV_ORDER_KEY, []) || [];
+    const finalOrder = [];
+    savedOrder.forEach(key => {
+      if(map[key]){ finalOrder.push(map[key]); delete map[key]; }
+    });
+    // ---------- کوئی نیا آئٹم جو محفوظ شدہ ترتیب میں نہیں (بعد میں شامل ہوا فیچر) وہ اپنی اصل جگہ آخر میں رہے ----------
+    items.forEach(el => { if(map[el.getAttribute('data-navkey')]) finalOrder.push(el); });
+    finalOrder.forEach(el => divider.parentNode.insertBefore(el, divider));
+  }catch(e){ console.warn('applySidebarNavOrder failed', e); }
+}
+function sortSidebarNav(direction){
+  try{
+    const divider = getSidebarNavDivider();
+    if(!divider) return;
+    const items = getSortableNavItems();
+    items.sort((a, b) => {
+      const la = (a.getAttribute('data-navlabel') || '').toLowerCase();
+      const lb = (b.getAttribute('data-navlabel') || '').toLowerCase();
+      return direction === 'desc' ? lb.localeCompare(la) : la.localeCompare(lb);
+    });
+    items.forEach(el => divider.parentNode.insertBefore(el, divider));
+    saveSidebarNavOrder();
+  }catch(e){ console.warn('sortSidebarNav failed', e); }
+}
+
+// ---------- ✋ ہینڈل پر پکڑ کر ترتیب بدلنا — Pointer Events استعمال ہوتے ہیں تاکہ ٹچ (موبائل) اور ماؤس دونوں پر یکساں کام کرے ----------
+let sidebarDragState = null;
+function initSidebarDragReorder(){
+  try{
+    document.querySelectorAll('#sidebar .navDragHandle').forEach(handle => {
+      // ---------- ہینڈل پر ہونے والا کلک اوپر والے navItem تک نہ پہنچے، ورنہ ہر بار غلطی سے صفحہ کھل جائے گا ----------
+      handle.addEventListener('click', e => e.stopPropagation());
+      handle.addEventListener('pointerdown', onSidebarDragStart);
+    });
+  }catch(e){ console.warn('initSidebarDragReorder failed', e); }
+}
+function onSidebarDragStart(e){
+  try{
+    const item = e.target.closest('.navItem[data-navkey]');
+    const divider = getSidebarNavDivider();
+    if(!item || !divider) return;
+    e.preventDefault();
+    sidebarDragState = { item, divider };
+    item.classList.add('navDragging');
+    try{ e.target.setPointerCapture(e.pointerId); }catch(err){}
+    document.addEventListener('pointermove', onSidebarDragMove);
+    document.addEventListener('pointerup', onSidebarDragEnd);
+    document.addEventListener('pointercancel', onSidebarDragEnd);
+  }catch(err){ console.warn('onSidebarDragStart failed', err); }
+}
+function onSidebarDragMove(e){
+  if(!sidebarDragState) return;
+  try{
+    const { item, divider } = sidebarDragState;
+    const y = e.clientY;
+    const others = getSortableNavItems().filter(el => el !== item);
+    for(const other of others){
+      const rect = other.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if(y < mid){
+        other.parentNode.insertBefore(item, other);
+        return;
+      }
+    }
+    // ---------- سب سے نیچے تک لے جائیں تو فہرست کے آخر میں (divider سے فوراً پہلے) رکھ دیں ----------
+    divider.parentNode.insertBefore(item, divider);
+  }catch(err){ console.warn('onSidebarDragMove failed', err); }
+}
+function onSidebarDragEnd(){
+  if(!sidebarDragState) return;
+  try{
+    sidebarDragState.item.classList.remove('navDragging');
+    saveSidebarNavOrder();
+  }catch(err){ console.warn('onSidebarDragEnd failed', err); }
+  document.removeEventListener('pointermove', onSidebarDragMove);
+  document.removeEventListener('pointerup', onSidebarDragEnd);
+  document.removeEventListener('pointercancel', onSidebarDragEnd);
+  sidebarDragState = null;
+}
+function initSidebarNavCustomize(){
+  applySidebarNavOrder();
+  initSidebarDragReorder();
 }
 
 // =====================================================================
@@ -25771,6 +25918,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('loginVersionBadge').textContent = '🏷️ ' + APP_BUILD_VERSION;
 
   applyTheme(AppState.settings.themeId);
+  // ---------- 🔤↕️ سائیڈبار مینیو: صدام کی پہلے سے محفوظ شدہ ترتیب لاگو کریں + ڈریگ ہینڈلز فعال کریں
+  // (FM19TU28) — localStorage میں محفوظ شدہ ترتیب اسی ڈیوائس پر ہمیشہ کے لیے یاد رہتی ہے ----------
+  try{ initSidebarNavCustomize(); }catch(e){ console.error('initSidebarNavCustomize failed', e); }
   // ---------- 🥬 سبزیوں کی 63 آئٹمز ایک بار خودکار شامل کریں — یہ یہاں (DOMContentLoaded کے اندر) ہی چلنی چاہیے،
   // کیونکہ اس فنکشن کے اندر persistAllData() کسٹمرز/انوائسز جیسے arrays استعمال کرتا ہے جو اسکرپٹ میں نیچے
   // declare ہوتے ہیں — اوپر top-level پر کال کرنے سے وہ ابھی initialize نہیں ہوئے ہوتے (ReferenceError آتا
