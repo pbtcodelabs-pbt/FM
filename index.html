@@ -1781,7 +1781,7 @@
     body.billing-active #globalUiZoomBar{ padding:3px 12px; }
 
     #sidebar{
-      /* ---------- صدام کی ہدایت (FM19TU28): پہلے چوڑائی 230px تھی، دائیں طرف بہت زیادہ خالی جگہ چھوڑتی تھی —
+      /* ---------- صدام کی ہدایت (FM19TU29): پہلے چوڑائی 230px تھی، دائیں طرف بہت زیادہ خالی جگہ چھوڑتی تھی —
            اب تنگ کر دی گئی ہے تاکہ باکس دائیں کنارے کے قریب سمٹ جائے (مزید خالی جگہ نظر نہ آئے) اور قطاریں
            بھی کمپیکٹ کی گئی ہیں تاکہ تمام آئٹمز ایک ہی سکرین پر (بغیر سکرول کے) نظر آ سکیں ---------- */
       position:fixed; top:calc(56px + 54px); right:8px; bottom:auto; width:172px; max-height:calc(100vh - 76px - 54px);
@@ -1804,7 +1804,7 @@
     }
     #sidebarOverlay.show{display:block;}
 
-    /* ---------- 🔤 A→Z / Z→A سورٹ بٹن — سائیڈبار کے اوپر، برانڈ کے نیچے (صدام کی ہدایت FM19TU28) ---------- */
+    /* ---------- 🔤 A→Z / Z→A سورٹ بٹن — سائیڈبار کے اوپر، برانڈ کے نیچے (صدام کی ہدایت FM19TU29) ---------- */
     .navSortRow{display:flex; gap:6px; padding:0 10px 8px;}
     .navSortBtn{
       flex:1 1 0; padding:5px 4px; font-size:10.5px; font-weight:800; letter-spacing:.3px;
@@ -1813,7 +1813,7 @@
     }
     .navSortBtn:active{background:rgba(255,255,255,.25);}
 
-    /* ---------- ✋ ڈریگ ہینڈل — ہر آئٹم کے دائیں کنارے پر، پکڑ کر اپنی مرضی سے ترتیب دیں (صدام کی ہدایت FM19TU28) ---------- */
+    /* ---------- ✋ ڈریگ ہینڈل — ہر آئٹم کے دائیں کنارے پر، پکڑ کر اپنی مرضی سے ترتیب دیں (صدام کی ہدایت FM19TU29) ---------- */
     #sidebar .navItem[data-navkey]{justify-content:space-between;}
     .navDragHandle{
       flex:0 0 auto; margin-inline-start:auto; padding:2px 6px; font-size:14px; opacity:.55;
@@ -2296,7 +2296,7 @@
   <div id="sidebar">
     <div class="brand">صدام فروٹ منڈی</div>
 
-    <!-- ---------- 🔤↕️ صدام کی ہدایت (FM19TU28): A→Z / Z→A سورٹ بٹن + ہر آئٹم پر ✋ ڈریگ ہینڈل —
+    <!-- ---------- 🔤↕️ صدام کی ہدایت (FM19TU29): A→Z / Z→A سورٹ بٹن + ہر آئٹم پر ✋ ڈریگ ہینڈل —
          اپنی مرضی سے ترتیب دیں، یہ ترتیب اسی ڈیوائس پر ہمیشہ کے لیے محفوظ رہتی ہے (initSidebarNavCustomize دیکھیں) ---------- -->
     <div class="navSortRow">
       <button type="button" class="navSortBtn" onclick="sortSidebarNav('asc')">A→Z ⬇️</button>
@@ -2988,6 +2988,13 @@
           <option value="retail">🏷️ Islamabad Rate</option>
           <option value="wholesale">📦 Rawalpindi Rate</option>
         </select>
+        <!-- ---------- 💼 سابقہ بقایہ (Opening Balance) — صرف کسٹمرز کے لیے، پرانے کاغذی رجسٹر سے منتقل کیا گیا بیلنس
+             (صدام کی ہدایت FM19TU29): یہ خانہ صرف ریکارڈ/حوالے کے لیے الگ محفوظ رہتا ہے، اور نئے کسٹمر کے لیے
+             فوراً Current Balance (total_receivable) میں بھی شمار ہو جاتا ہے تاکہ ایپ کا حساب کتاب پہلے دن سے درست ہو ---------- -->
+        <div id="npOpeningBalanceWrap" style="margin-top:2px;">
+          <label style="display:block; font-size:11.5px; font-weight:700; color:var(--muted); margin-bottom:3px;">💼 Opening Balance — سابقہ بقایہ (Rs.)</label>
+          <input type="number" id="npOpeningBalance" placeholder="0" step="any">
+        </div>
         <input type="text" id="npPartyKeywords" placeholder="Nickname / Keyword for search (e.g. Jago, Peshawar)" style="display:none;">
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewPartyModal()">Cancel</button>
@@ -6265,7 +6272,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU28';
+const APP_BUILD_VERSION = 'FM19TU29';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -7702,7 +7709,7 @@ function closeSidebar(){
 }
 
 // =========================================================================
-// 🔤↕️ Sidebar Nav: A→Z / Z→A سورٹ + ہاتھ سے ڈریگ کر کے ترتیب دینا (صدام کی ہدایت — FM19TU28)
+// 🔤↕️ Sidebar Nav: A→Z / Z→A سورٹ + ہاتھ سے ڈریگ کر کے ترتیب دینا (صدام کی ہدایت — FM19TU29)
 // ترتیب اسی ڈیوائس کے localStorage میں ہمیشہ کے لیے محفوظ رہتی ہے (loadFromStorage/saveToStorage استعمال ہوتے ہیں)
 // =========================================================================
 const SIDEBAR_NAV_ORDER_KEY = 'sidebarNavOrder';
@@ -10231,6 +10238,211 @@ function seedVegetableProductsOnce(){
   if(!AppState.settings.productCardNameFont) AppState.settings.productCardNameFont = 'jameelnastaleeqkasheeda';
   AppState.settings.vegProductsSeededV1 = true;
   saveProductsLight();
+  persistAllData();
+}
+// =====================================================================
+// 💼 پرانے کاغذی رجسٹر سے 166 کسٹمرز کا "سابقہ بقایہ" ایک بار خودکار شامل کریں (صدام کی ہدایت — FM19TU29)
+// نمبر (ledgerNo) وہی اصل رجسٹر کا سیریل نمبر ہے، صرف حوالے کے لیے — ایپ میں کہیں نظر نہیں آتا۔
+// ہر کسٹمر کا Opening Balance ہی شروع میں اس کا Current Balance (total_receivable) بھی بن جاتا ہے،
+// تاکہ نئے سسٹم کے پہلے دن سے حساب کتاب بالکل درست ہو۔
+// =====================================================================
+const LEDGER_CUSTOMERS_SEED_V1 = [
+  {ledgerNo:1, name:'حامد بہائی', openingBalance:751687},
+  {ledgerNo:2, name:'جاوید کنگ', openingBalance:55864},
+  {ledgerNo:3, name:'جاوید سکیم', openingBalance:46379},
+  {ledgerNo:4, name:'مہران کنگ عرف مانی', openingBalance:5780},
+  {ledgerNo:5, name:'چکری روڈ مہران', openingBalance:200829},
+  {ledgerNo:6, name:'سوہل مستقیم', openingBalance:430287},
+  {ledgerNo:7, name:'راحیل کنگ وحید', openingBalance:775719},
+  {ledgerNo:8, name:'وسیم کنگ', openingBalance:52533},
+  {ledgerNo:9, name:'زکریا', openingBalance:126508},
+  {ledgerNo:10, name:'کار چوک', openingBalance:379146},
+  {ledgerNo:11, name:'جناب ریاست صاحب', openingBalance:176128},
+  {ledgerNo:12, name:'عدنان وہاب', openingBalance:122864},
+  {ledgerNo:13, name:'عرفان سیالموڑ', openingBalance:340047},
+  {ledgerNo:14, name:'تجمل صاحب', openingBalance:19726},
+  {ledgerNo:15, name:'چاکرہ', openingBalance:60229},
+  {ledgerNo:16, name:'اسد علی برف', openingBalance:33751},
+  {ledgerNo:17, name:'شفیق گرجا روڈ', openingBalance:21416},
+  {ledgerNo:18, name:'خاور صاحب', openingBalance:142248},
+  {ledgerNo:19, name:'مصور صاحب', openingBalance:61807},
+  {ledgerNo:20, name:'عبدالرحمن سابقہ', openingBalance:159285},
+  {ledgerNo:21, name:'ندیم ڈھوک کالاخان', openingBalance:66088},
+  {ledgerNo:22, name:'ندیم صاحب', openingBalance:319848},
+  {ledgerNo:23, name:'شادا ماما', openingBalance:127574},
+  {ledgerNo:24, name:'ساجد گلزار قائد', openingBalance:65914},
+  {ledgerNo:25, name:'نزر گوندل', openingBalance:112905},
+  {ledgerNo:26, name:'گل اختیار', openingBalance:312319},
+  {ledgerNo:27, name:'آصف رانجھا چوک', openingBalance:571835},
+  {ledgerNo:28, name:'اشرف این پی کے', openingBalance:1131067},
+  {ledgerNo:29, name:'حارث', openingBalance:450085},
+  {ledgerNo:30, name:'عرفان این پی کے', openingBalance:239723},
+  {ledgerNo:31, name:'خیابان', openingBalance:-54900},
+  {ledgerNo:32, name:'حسنات احمد', openingBalance:54761},
+  {ledgerNo:33, name:'اصغر مال روڈ', openingBalance:-3244},
+  {ledgerNo:36, name:'فرید بریانی', openingBalance:50000},
+  {ledgerNo:37, name:'طارق کارپارکنگ', openingBalance:6000},
+  {ledgerNo:38, name:'عرفان سیال موڑ', openingBalance:240000},
+  {ledgerNo:39, name:'ساجد دیگ', openingBalance:5000},
+  {ledgerNo:40, name:'عبد الاحد', openingBalance:498637},
+  {ledgerNo:41, name:'وحید دھوبی', openingBalance:176800},
+  {ledgerNo:42, name:'اشرف درزی', openingBalance:155000},
+  {ledgerNo:44, name:'پاچا خان', openingBalance:2500},
+  {ledgerNo:45, name:'سوان گارڈن', openingBalance:8500},
+  {ledgerNo:46, name:'اصغر این پی کے', openingBalance:10001},
+  {ledgerNo:47, name:'روف پراپرٹی', openingBalance:20001},
+  {ledgerNo:48, name:'عرفان دودھ', openingBalance:32510},
+  {ledgerNo:49, name:'دوکان مالک برف خانہ', openingBalance:25000},
+  {ledgerNo:50, name:'گلزار قائد', openingBalance:358076},
+  {ledgerNo:51, name:'پٹھان مطیع والا', openingBalance:9769},
+  {ledgerNo:53, name:'میر عالم ڈرائیور', openingBalance:12300},
+  {ledgerNo:54, name:'ریاض دودھ', openingBalance:2200},
+  {ledgerNo:56, name:'شینا بہارہ کیو', openingBalance:18900},
+  {ledgerNo:57, name:'اکرم سکیم', openingBalance:33987},
+  {ledgerNo:58, name:'اسامہ کانی', openingBalance:117085},
+  {ledgerNo:59, name:'نصر', openingBalance:61812},
+  {ledgerNo:60, name:'ارشد این پی کے', openingBalance:115833},
+  {ledgerNo:61, name:'مرتضی انصر', openingBalance:80000},
+  {ledgerNo:62, name:'انصر این پی کے', openingBalance:10000},
+  {ledgerNo:63, name:'بلال گولڑہ موڑ', openingBalance:659098},
+  {ledgerNo:64, name:'جہانگیر بہارہ کیو', openingBalance:191501},
+  {ledgerNo:65, name:'اسلم آلو پیاز شیخ', openingBalance:9500},
+  {ledgerNo:66, name:'نامعلوم', openingBalance:0},
+  {ledgerNo:67, name:'عدیل مسلم شیخ', openingBalance:25000},
+  {ledgerNo:70, name:'رانا آفتاب', openingBalance:4839},
+  {ledgerNo:71, name:'وہاب پرچی', openingBalance:56},
+  {ledgerNo:77, name:'سیف اللہ ثمر', openingBalance:29500},
+  {ledgerNo:79, name:'راشد ثمر', openingBalance:5800},
+  {ledgerNo:80, name:'اصغر مال روڈ', openingBalance:99130},
+  {ledgerNo:81, name:'میتھل پیاز', openingBalance:168333},
+  {ledgerNo:90, name:'ثاقب کنگ', openingBalance:306815},
+  {ledgerNo:100, name:'ارمان ملک', openingBalance:76769},
+  {ledgerNo:101, name:'قاری گوہیثی', openingBalance:20176},
+  {ledgerNo:110, name:'حضرت گل', openingBalance:18916},
+  {ledgerNo:117, name:'حارث اڈوانس', openingBalance:56174},
+  {ledgerNo:119, name:'مجتبی کمیٹی', openingBalance:1456500},
+  {ledgerNo:128, name:'طیب ثمر شیخ', openingBalance:161732},
+  {ledgerNo:132, name:'اکرم مسریال', openingBalance:124532},
+  {ledgerNo:134, name:'حامد نوید', openingBalance:296390},
+  {ledgerNo:140, name:'مزدور ریری', openingBalance:556},
+  {ledgerNo:143, name:'اکرام', openingBalance:0},
+  {ledgerNo:145, name:'بشارت گولڑہ', openingBalance:20000},
+  {ledgerNo:146, name:'جمال پالک', openingBalance:800},
+  {ledgerNo:148, name:'سردار طورا', openingBalance:0},
+  {ledgerNo:153, name:'مطیع اللہ', openingBalance:573206},
+  {ledgerNo:155, name:'دابر پان والا', openingBalance:44621},
+  {ledgerNo:158, name:'علی عامر', openingBalance:0},
+  {ledgerNo:160, name:'دابر الگ روزانہ', openingBalance:81},
+  {ledgerNo:169, name:'عرفان', openingBalance:252906},
+  {ledgerNo:170, name:'بگا مذ رانجا', openingBalance:176},
+  {ledgerNo:171, name:'رضوان', openingBalance:1318005},
+  {ledgerNo:172, name:'ارسلان', openingBalance:56749},
+  {ledgerNo:173, name:'حسن گرجا', openingBalance:57484},
+  {ledgerNo:174, name:'رانا مکرجی', openingBalance:126646},
+  {ledgerNo:175, name:'عنصر مذدور', openingBalance:8000},
+  {ledgerNo:177, name:'وحید حا', openingBalance:222000},
+  {ledgerNo:180, name:'سلطان', openingBalance:2999},
+  {ledgerNo:182, name:'عمر', openingBalance:24458},
+  {ledgerNo:183, name:'فرید الگ', openingBalance:77749},
+  {ledgerNo:184, name:'مستقیم شفیق', openingBalance:-100000},
+  {ledgerNo:185, name:'راشد الگ', openingBalance:3501},
+  {ledgerNo:186, name:'الاہ آباد ہمزہ', openingBalance:54000},
+  {ledgerNo:187, name:'آصف', openingBalance:90000},
+  {ledgerNo:188, name:'صدام نقد', openingBalance:7751228},
+  {ledgerNo:189, name:'چاکرا الگ حامد', openingBalance:108870},
+  {ledgerNo:190, name:'رانا ناصر', openingBalance:196367},
+  {ledgerNo:191, name:'ہمزہ', openingBalance:-38549},
+  {ledgerNo:193, name:'وقاص من', openingBalance:52000},
+  {ledgerNo:194, name:'طارق الگ چاکرا', openingBalance:100000},
+  {ledgerNo:195, name:'راحیل چاکرا', openingBalance:56574},
+  {ledgerNo:196, name:'شعیب', openingBalance:350000},
+  {ledgerNo:197, name:'راشید الگ', openingBalance:136327},
+  {ledgerNo:198, name:'عمیر زوارشاہ', openingBalance:81076},
+  {ledgerNo:199, name:'حامد لوہار گلی', openingBalance:62150},
+  {ledgerNo:200, name:'جنگی مطیع', openingBalance:312962},
+  {ledgerNo:201, name:'فوجی سعید', openingBalance:80001},
+  {ledgerNo:202, name:'کوہ نور مل الگ', openingBalance:128933},
+  {ledgerNo:203, name:'باسط فوجی', openingBalance:170001},
+  {ledgerNo:204, name:'شاہ الگ', openingBalance:44672},
+  {ledgerNo:205, name:'اعجاز اسلم', openingBalance:100342},
+  {ledgerNo:206, name:'جادو گرچا چا', openingBalance:43615},
+  {ledgerNo:207, name:'آصف جانی', openingBalance:12582},
+  {ledgerNo:208, name:'صلاح الدین', openingBalance:127000},
+  {ledgerNo:209, name:'ندیم نمبر 22', openingBalance:56393},
+  {ledgerNo:210, name:'دانش برف خانہ', openingBalance:16801},
+  {ledgerNo:211, name:'شہباز کارچوک', openingBalance:58358},
+  {ledgerNo:212, name:'سنٹر', openingBalance:66415},
+  {ledgerNo:215, name:'آفتاب پیپل کالونی', openingBalance:2808},
+  {ledgerNo:216, name:'شفیق سکیم 3 والی دھکان کے', openingBalance:223287},
+  {ledgerNo:217, name:'مشریال', openingBalance:95006},
+  {ledgerNo:218, name:'شادا ماما بارہ کیو', openingBalance:266466},
+  {ledgerNo:219, name:'اسامہ کانی الگ', openingBalance:24002},
+  {ledgerNo:220, name:'نواز قصائی', openingBalance:131858},
+  {ledgerNo:221, name:'ابرار 135', openingBalance:34627},
+  {ledgerNo:222, name:'محترم عدنان صاحب', openingBalance:2},
+  {ledgerNo:223, name:'عرفان مرزا', openingBalance:129798},
+  {ledgerNo:224, name:'راحیل صاحب', openingBalance:332031},
+  {ledgerNo:225, name:'وحید الگ', openingBalance:356267},
+  {ledgerNo:226, name:'عمیر اصغر مال روڈ', openingBalance:32700},
+  {ledgerNo:227, name:'تیمثیشن آی 8 مرکز', openingBalance:632117},
+  {ledgerNo:228, name:'برما بابر', openingBalance:23251},
+  {ledgerNo:229, name:'صفدر کار چوک 10 نمبر', openingBalance:303617},
+  {ledgerNo:230, name:'محترم اسامہ ای 8 مرکز ہیث بوکس', openingBalance:139531},
+  {ledgerNo:231, name:'جوس والی 131', openingBalance:47164},
+  {ledgerNo:232, name:'اورینج روڈ', openingBalance:38114},
+  {ledgerNo:233, name:'مہران بہائی الگ', openingBalance:687561},
+  {ledgerNo:234, name:'کمرشل', openingBalance:90574},
+  {ledgerNo:235, name:'مجاہد راشد', openingBalance:184424},
+  {ledgerNo:236, name:'بلال کار چوک', openingBalance:155001},
+  {ledgerNo:237, name:'ثاقب فروٹ', openingBalance:8430},
+  {ledgerNo:239, name:'محمد مہد', openingBalance:31797},
+  {ledgerNo:240, name:'اعجازکیانی روڈ', openingBalance:13676},
+  {ledgerNo:241, name:'مغل اعظم', openingBalance:14303},
+  {ledgerNo:242, name:'صدام بہائی', openingBalance:4926},
+  {ledgerNo:243, name:'کراچی دربار موثر و', openingBalance:46252},
+  {ledgerNo:244, name:'بلال دوکان', openingBalance:2291428},
+  {ledgerNo:245, name:'سعد احمد', openingBalance:78070},
+  {ledgerNo:246, name:'بلال ائی 8', openingBalance:151573},
+  {ledgerNo:247, name:'بلال صاحب', openingBalance:343492},
+  {ledgerNo:248, name:'عمران خان', openingBalance:79315},
+  {ledgerNo:249, name:'عادل', openingBalance:31312},
+  {ledgerNo:250, name:'بلال بہائی', openingBalance:111560},
+  {ledgerNo:251, name:'مرتضی', openingBalance:61837},
+  {ledgerNo:252, name:'ذلفقار فوجی', openingBalance:123704},
+  {ledgerNo:253, name:'عمیر کمرشل', openingBalance:420},
+  {ledgerNo:254, name:'عبید میس', openingBalance:98663},
+  {ledgerNo:255, name:'کشمیری', openingBalance:6728},
+  {ledgerNo:256, name:'عچا', openingBalance:715357},
+];
+function seedInitialLedgerCustomersOnce(){
+  if(AppState.settings.ledgerCustomersSeededV1) return;
+  // ---------- ڈیمو/ٹیسٹنگ کے لیے پہلے سے موجود 3 فرضی کسٹمرز (Muhammad Usman/Fatima Store/Walk-in Customer)
+  // — اگر بالکل ویسے ہی موجود ہوں (کبھی ایڈٹ نہ کیے گئے ہوں) تو حذف کر دیں، تاکہ اصل فہرست صاف رہے ---------- -->
+  customersData = customersData.filter(c => !(
+    (c.name === 'Muhammad Usman' && c.phone === '923001234567') ||
+    (c.name === 'Fatima Store' && c.phone === '923214567890') ||
+    (c.name === 'Walk-in Customer — Ali' && !c.phone)
+  ));
+  LEDGER_CUSTOMERS_SEED_V1.forEach(row => {
+    customersData.push({
+      customer_id: nextCustomerId++,
+      name: row.name,
+      phone: '', address: '', area: '', keywords: '',
+      rateArea: '',
+      photo: null,
+      wallet_balance: 0,
+      openingBalance: row.openingBalance,
+      total_receivable: row.openingBalance,
+      ledgerNo: row.ledgerNo,
+      walletHistory: [{
+        type: 'opening_balance', amount: Math.abs(row.openingBalance),
+        direction: row.openingBalance >= 0 ? 'add' : 'reduce',
+        note: `پرانے رجسٹر سے منتقل (سیریل #${row.ledgerNo})`,
+        date: '2026-09-01'
+      }]
+    });
+  });
+  AppState.settings.ledgerCustomersSeededV1 = true;
   persistAllData();
 }
 // ---------- خالی/نئی کیٹیگریز جو ابھی کسی پراڈکٹ پر لاگو نہیں ہوئیں — Categories ڈراپ ڈاؤن کے "➕ Add New" سے شامل ہوں گی ----------
@@ -13847,6 +14059,7 @@ function openCustomerProfile(customerId){
          رہے گا۔ نیچے کموٹنٹ لائن اصل کوڈ کی یاد دہانی کے لیے چھوڑی گئی ہے، ڈیلیٹ نہیں کی۔
          یہ خانہ اب دبانے سے سیدھا Collect Payment کھلے گا ---------- -->
     <!-- <div class="pfBox"><div class="pfLabel">💳 Wallet Balance</div><div class="pfValue wallet">Rs. ${c.wallet_balance.toLocaleString()}</div></div> -->
+    ${typeof c.openingBalance !== 'undefined' ? `<div class="pfBox"><div class="pfLabel">💼 سابقہ بقایہ (Opening)</div><div class="pfValue" style="color:var(--muted);">Rs. ${c.openingBalance.toLocaleString()}</div></div>` : ''}
     <div class="pfBox"><div class="pfLabel">📥 Total بقایہ (Receivable)</div><div class="pfValue receivable" onclick="openCollectModal(${c.customer_id})" style="cursor:pointer;">Rs. ${c.total_receivable.toLocaleString()}</div></div>
   `;
 
@@ -17742,7 +17955,7 @@ let editingPartyId = null;   // null = نیا پارٹی، ورنہ اسی ID و
 let npPhotoDataUrl = null;   // ابھی منتخب کی گئی تصویر (Save پر محفوظ ہوگی)
 
 function resetNewPartyForm(){
-  ['npPartyName','npPartyPhone','npPartyAddress','npPartyArea','npPartyKeywords','npPartyRateArea'].forEach(id => document.getElementById(id).value = '');
+  ['npPartyName','npPartyPhone','npPartyAddress','npPartyArea','npPartyKeywords','npPartyRateArea','npOpeningBalance'].forEach(id => document.getElementById(id).value = '');
   npPhotoDataUrl = null;
   renderAvatarInto('npPhotoPreview', null, '👤');
   closePartyFormDropdowns();
@@ -17755,6 +17968,9 @@ function openNewPartyModal(){
   editingPartyId = null;
   resetNewPartyForm();
   document.getElementById('newPartyTitle').textContent = currentPartyTab === 'customers' ? '🧑‍🤝‍🧑 New Customer' : '🚚 New Supplier';
+  // ---------- Opening Balance خانہ صرف کسٹمرز کے لیے — سپلائرز کے لیے یہ concept لاگو نہیں ہوتا ----------
+  const obWrap = document.getElementById('npOpeningBalanceWrap');
+  if(obWrap) obWrap.style.display = currentPartyTab === 'customers' ? 'block' : 'none';
   document.getElementById('newPartyModal').classList.add('show');
 }
 
@@ -17777,6 +17993,9 @@ function openEditPartyModal(){
   document.getElementById('npPartyArea').value = p.area || '';
   document.getElementById('npPartyKeywords').value = p.keywords || '';
   document.getElementById('npPartyRateArea').value = p.rateArea || '';
+  document.getElementById('npOpeningBalance').value = isCustomer ? (p.openingBalance || '') : '';
+  const obWrap = document.getElementById('npOpeningBalanceWrap');
+  if(obWrap) obWrap.style.display = isCustomer ? 'block' : 'none';
   npPhotoDataUrl = p.photo || null;
   renderAvatarInto('npPhotoPreview', p.photo, isCustomer ? '👤' : '🏭');
   closePartyFormDropdowns();
@@ -17910,6 +18129,9 @@ function saveNewParty(){
   const area = document.getElementById('npPartyArea').value.trim();
   const keywords = document.getElementById('npPartyKeywords').value.trim();
   const rateArea = document.getElementById('npPartyRateArea').value; // ---------- 🏷️ اسلام آباد/راولپنڈی ریٹ — بلنگ میں اسی کسٹمر پر خودکار لاگو ہوگا ----------
+  // ---------- 💼 سابقہ بقایہ — صرف کسٹمر ٹیب پر معنی رکھتا ہے ----------
+  const openingBalanceInput = document.getElementById('npOpeningBalance').value;
+  const openingBalance = openingBalanceInput === '' ? 0 : (parseFloat(openingBalanceInput) || 0);
 
   if(!name){
     alert('Please enter a name.');
@@ -17929,7 +18151,13 @@ function saveNewParty(){
     if(currentPartyTab === 'customers'){
       const c = customersData.find(x => x.customer_id === editingPartyId);
       if(c){
+        // ---------- Opening Balance بدلنے پر Current Balance (total_receivable) کو بھی اسی فرق سے ایڈجسٹ کریں،
+        // تاکہ پرانی رقم پر ہونے والی نئی خرید و فروخت (جو Opening Balance کے اوپر جمع ہو چکی ہے) ضائع نہ ہو ---------- -->
+        const oldOpening = c.openingBalance || 0;
+        const diff = openingBalance - oldOpening;
         c.name = name; c.phone = phone; c.address = address; c.area = area; c.keywords = keywords; c.rateArea = rateArea;
+        c.openingBalance = openingBalance;
+        c.total_receivable = (c.total_receivable || 0) + diff;
         if(npPhotoDataUrl !== null) c.photo = npPhotoDataUrl; // TODO: customers.photo UPDATE
       }
     } else {
@@ -17941,7 +18169,7 @@ function saveNewParty(){
     }
   } else if(currentPartyTab === 'customers'){
     // TODO: یہ customers table میں INSERT ہوگا
-    customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, rateArea, photo: npPhotoDataUrl, wallet_balance:0, total_receivable:0, walletHistory:[]});
+    customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, rateArea, photo: npPhotoDataUrl, wallet_balance:0, openingBalance, total_receivable: openingBalance, walletHistory:[]});
   } else {
     // TODO: یہ suppliers table میں INSERT ہوگا
     suppliersData.push({supplier_id: nextSupplierId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, total_payable:0});
@@ -25919,13 +26147,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   applyTheme(AppState.settings.themeId);
   // ---------- 🔤↕️ سائیڈبار مینیو: صدام کی پہلے سے محفوظ شدہ ترتیب لاگو کریں + ڈریگ ہینڈلز فعال کریں
-  // (FM19TU28) — localStorage میں محفوظ شدہ ترتیب اسی ڈیوائس پر ہمیشہ کے لیے یاد رہتی ہے ----------
+  // (FM19TU29) — localStorage میں محفوظ شدہ ترتیب اسی ڈیوائس پر ہمیشہ کے لیے یاد رہتی ہے ----------
   try{ initSidebarNavCustomize(); }catch(e){ console.error('initSidebarNavCustomize failed', e); }
   // ---------- 🥬 سبزیوں کی 63 آئٹمز ایک بار خودکار شامل کریں — یہ یہاں (DOMContentLoaded کے اندر) ہی چلنی چاہیے،
   // کیونکہ اس فنکشن کے اندر persistAllData() کسٹمرز/انوائسز جیسے arrays استعمال کرتا ہے جو اسکرپٹ میں نیچے
   // declare ہوتے ہیں — اوپر top-level پر کال کرنے سے وہ ابھی initialize نہیں ہوئے ہوتے (ReferenceError آتا
   // ہے اور پوری اسکرپٹ رک جاتی ہے، جس سے لاگ ان اسکرین آگے نہیں بڑھتی) ----------
   try{ seedVegetableProductsOnce(); }catch(e){ console.error('seedVegetableProductsOnce failed', e); }
+  // ---------- 💼 صدام کے پرانے کاغذی رجسٹر سے 166 کسٹمرز کا سابقہ بقایہ ایک بار خودکار شامل کریں (FM19TU29) ----------
+  try{ seedInitialLedgerCustomersOnce(); }catch(e){ console.error('seedInitialLedgerCustomersOnce failed', e); }
   // ---------- 🖤 صدام کی ہدایت پر — بل/رپورٹ کے سبز رنگین تھیم کو ایک بار خودکار خالص بلیک اینڈ وائٹ پر بدل دیں
   // (موجودہ انسٹالیشنز پر بھی، نہ صرف نئی — ورنہ پرانی محفوظ شدہ سیٹنگ 'green' ہی رہ جاتی) ----------
   try{
