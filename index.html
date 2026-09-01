@@ -1682,17 +1682,16 @@
       font-size:16px; font-weight:700; flex:1 1 auto; min-width:0;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
-    /* ---------- لاگ ان یوزر کا نام — اب بڑا، موٹا اور واضح (پہلے 13px تھا اور سبز بیک گراؤنڈ پر مدھم نظر آتا تھا) ---------- */
-    #mobileTopbar .mobileBrand.nastaleeqSparkle{
-      font-size:20px !important; line-height:1.5 !important;
-      filter:drop-shadow(0 1px 3px rgba(0,0,0,.55));
-    }
     #connStatusBadge{
       flex:0 0 auto; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:20px;
       letter-spacing:.2px; transition:background-color .25s ease, color .25s ease;
     }
     #connStatusBadge.online{background:#dbeafe; color:#1d4ed8;}
     #connStatusBadge.offline{background:#fee2e2; color:#b91c1c;}
+    #hamburgerBtn{
+      background:rgba(255,255,255,.15); border:none; color:#fff; font-size:20px;
+      width:36px; height:36px; border-radius:8px; cursor:pointer;
+    }
     #topbarSettingsBtn{
       background:rgba(255,255,255,.15); border:none; color:#fff; font-size:18px;
       width:36px; height:36px; border-radius:8px; cursor:pointer; flex:0 0 auto;
@@ -1704,21 +1703,6 @@
       width:28px; height:28px; border-radius:7px; cursor:pointer; flex:0 0 auto;
       display:flex; align-items:center; justify-content:center;
     }
-
-    /* --- ☰ مینیو / 🚪 لاگ آؤٹ کی نئی پٹی — پہلے App Search اسی جگہ (grid-row:2) تھی، اب یہ دونوں بٹن یہاں،
-         کھلی جگہ کے ساتھ، تاکہ ٹاپ بار پر بھیڑ نہ ہو --- */
-    #utilityBar{
-      display:flex; align-items:center; gap:8px; padding:8px 12px;
-      background:var(--primary-dark); grid-column:1; grid-row:2;
-      position:sticky; top:56px; z-index:590;
-      border-top:1px solid rgba(255,255,255,.15);
-    }
-    #utilityBarSpacer{flex:1 1 auto;}
-    #hamburgerBtn, #quickLogoutBtn{
-      flex:0 0 auto; background:rgba(255,255,255,.16); border:none; color:#fff;
-      padding:9px 14px; border-radius:10px; font-size:14px; font-weight:800; cursor:pointer;
-    }
-    #quickLogoutBtn{background:var(--danger,#dc2626);}
 
     /* --- 🔎 App Search — ہمیشہ نظر آنے والی پٹی، Topbar کے بالکل نیچے، ہر سکرین پر ایک جیسی —
          روشن نیلا پس منظر + سفید، صاف نظر آنے والی چمکتی لکھائی (صارف کی پسند کے مطابق،
@@ -1775,7 +1759,7 @@
     body.billing-active #globalUiZoomBar{ padding:3px 12px; }
 
     #sidebar{
-      position:fixed; top:calc(56px + 54px); right:10px; bottom:auto; width:230px; max-height:calc(100vh - 76px - 54px);
+      position:fixed; top:60px; right:10px; bottom:auto; width:230px; max-height:calc(100vh - 76px);
       z-index:800; border-radius:14px; overflow-y:auto;
       opacity:0; transform:translateY(-8px) scale(.97); pointer-events:none;
       transition:opacity .18s ease, transform .18s ease;
@@ -2203,8 +2187,7 @@
     <button id="navForwardBtn" onclick="goForward()" title="Forward">▶</button>
   </div>
 
-  <!-- ---------- MOBILE TOPBAR (صرف چھوٹی اسکرین پر نظر آتی ہے) — اب صرف 🎨/⚙️ اور لاگ ان یوزر کا موٹا/صاف نام،
-       بھیڑ کم کرنے کے لیے ☰ مینیو اور 🚪 لاگ آؤٹ نیچے والی پٹی میں منتقل کر دیے گئے ہیں ---------- -->
+  <!-- ---------- MOBILE TOPBAR (صرف چھوٹی اسکرین پر نظر آتی ہے) ---------- -->
   <div id="mobileTopbar">
     <button id="topbarPaintBtn" onclick="openFontPaintPanel(event)" title="Font / اردو فونٹ">🎨</button>
     <button id="topbarSettingsBtn" onclick="toggleHomeSettingsPanel(event)" title="Settings">⚙️</button>
@@ -2222,18 +2205,18 @@
       <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں ---------- -->
       <span id="topbarVersionBadge" onclick="handleVersionBadgeTap()" style="font-size:11px; color:#fff; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.18); padding:2px 8px; border-radius:8px; cursor:pointer;"></span>
     </div>
+    <!-- ---------- ☰ مینیو بٹن — صدام کی ہدایت پر دائیں کونے میں شفٹ کر دیا گیا، تاکہ مینیو اسی کے بالکل
+         نیچے، دائیں کونے میں کھلے (نیچے CSS میں #sidebar بھی اسی مطابق ایک چھوٹے dropdown پینل کی طرح
+         Topbar کے نیچے دائیں کونے میں کھلتا ہے، پوری اسکرین کا drawer اب نہیں رہا) ---------- -->
+    <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
+    <!-- ---------- 🚪 QUICK LOGOUT — صدام کی ہدایت پر: سائیڈ مینیو میں نیچے سکرول کر کے ڈھونڈنے کی بجائے،
+         یہ بٹن ہمیشہ سامنے، ہر سکرین پر (Topbar میں ہی) موجود رہے گا — ایک ٹیپ سے فوری لاگ آؤٹ ----------- -->
+    <button id="quickLogoutBtn" onclick="logout()" title="Logout" style="background:rgba(255,255,255,.16); border:none; color:#fff; width:38px; height:38px; border-radius:10px; font-size:17px; cursor:pointer; margin-inline-start:6px; flex:0 0 auto;">🚪</button>
   </div>
 
-  <!-- ---------- ☰ مینیو / 🚪 لاگ آؤٹ — اب اپنی الگ، کھلی پٹی میں (پہلے App Search بار یہاں تھی، اب چھپا دی گئی)،
-       تاکہ ٹاپ بار پر بھیڑ نہ ہو اور لاگ ان یوزر کا نام صاف نظر آئے ---------- -->
-  <div id="utilityBar">
-    <span id="utilityBarSpacer"></span>
-    <button id="hamburgerBtn" onclick="toggleSidebar()">☰ Menu</button>
-    <button id="quickLogoutBtn" onclick="logout()" title="Logout">🚪 Logout</button>
-  </div>
-
-  <!-- ---------- 🔎 App Search — صدام کی ہدایت پر چھپا دی گئی (کوڈ محفوظ ہے) ---------- -->
-  <div id="globalSearchBar" style="display:none;">
+  <!-- ---------- 🔎 App Search — یونیورسل سرچ، ہمیشہ نظر آنے والی، ہر سکرین پر ایک ہی جگہ —
+       پراڈکٹ سرچ باکسز سے بالکل الگ (رنگ/جگہ دونوں مختلف) تاکہ کبھی مکس نہ ہو ---------- -->
+  <div id="globalSearchBar">
     <span class="gsbIcon" aria-hidden="true" onclick="toggleGlobalSearchBar()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="7"></circle>
@@ -2265,10 +2248,7 @@
     <div class="navItem" data-screen="advanceorders" onclick="goTo('advanceorders')">📝 Advance Orders</div>
     <div class="navItem admin-only" data-screen="billsettings" onclick="goTo('billsettings')">🖨️ Bill & Print Settings</div>
     <div class="navItem" data-screen="billhistory" onclick="goTo('billhistory')">🧾 Bill History</div>
-    <!-- ---------- 🍇 صدام کی ہدایت پر: Billing/پراڈکٹ گرڈ اب سائیڈ مینو سے مکمل ہٹا دی گئی ہے — نہ ایڈمن کو
-         ضرورت ہے (وہ Pending Orders/Customers/Suppliers استعمال کرتے ہیں)، نہ ملازم کو (وہ Order Taking استعمال
-         کرتا ہے)۔ کوڈ محفوظ ہے، اسکرین اب بھی اندرونی طور پر (Fulfill & Bill کے ذریعے) کام کرتی ہے ---------- -->
-    <div class="navItem" data-screen="billing" onclick="goTo('billing')" style="display:none;">🛒 Billing</div>
+    <div class="navItem" data-screen="billing" onclick="goTo('billing')">🛒 Billing</div>
     <div class="navItem admin-only" data-screen="categories" onclick="goTo('categories')">🏷️ Categories</div>
     <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customers</div>
     <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')">📊 Dashboard</div>
@@ -2306,24 +2286,9 @@
     <!-- ===================== 🏠 HOME SCREEN — اصل مین پیج، لاگ ان کے فوراً بعد یہی کھلتا ہے ===================== -->
     <div class="screen" id="screen-home">
 
-      <!-- ---------- 🔓 PIN Lock بند ہو تو یاد دہانی — دوبارہ آن کرنا ایک ٹیپ کی دوری پر ---------- -->
-      <div id="homePinLockOffBanner" class="admin-only" style="display:none; background:#fef3c7; color:#92400e; border-radius:12px; padding:10px 14px; margin-bottom:10px; align-items:center; justify-content:space-between; gap:8px;">
-        <span style="font-size:12.5px; font-weight:700;">🔓 PIN Lock is OFF — anyone can open this app</span>
-        <button onclick="openActivatePinLockModal()" style="background:#92400e; color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap;">Activate</button>
-      </div>
-
-      <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں (صرف Admin کو نظر آئیں) ---------- -->
-      <div class="subBoxRow admin-only" id="subBoxRow" style="display:none;">
-        <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
-        <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
-        <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
-      </div>
-
-      <!-- ---------- 🎁 روزانہ ایک بار، ہلکا سا چمکتا/حرکت کرتا یاد دہانی Toast — کوئی بٹن نہیں، خود بخود 4.5 سیکنڈ میں غائب ---------- -->
-      <div id="trialReminderToast" class="admin-only" style="display:none;">
-        <span class="trtIcon">🎁</span>
-        <span class="trtText" id="trialReminderToastText"></span>
-      </div>
+      <!-- ---------- 🍇 Fruit Mandi POS: PIN Lock banner, Subscription boxes اور Trial toast اب یہاں سے
+           screen-billing کے اوپر منتقل کر دیے گئے ہیں — کیونکہ Admin کے لیے اب Billing ہی Home ہے
+           (کوڈ نیچے موجود ہے، صرف یہاں سے ہٹایا گیا) ---------- -->
 
       <!-- ---------- 🏪 HOME BUSINESS CARD — Fruit Mandi POS پر ہائیڈ کر دیا گیا؛ Settings بٹن اوپر Topbar میں شفٹ کر دیا گیا ہے (کوڈ محفوظ ہے) ---------- -->
       <div class="homeBusinessCard" style="display:none;">
@@ -2351,15 +2316,37 @@
       <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
       <div id="homeUnfinishedCartCard" style="display:none;"></div>
 
-      <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — Admin کے لیے اب انہی کی منتخب کردہ Shortcut اسکرینیں،
-           Salesman کے لیے اسے Assign کی گئی اسکرینیں ---------- -->
+      <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — ہر بڑے سیکشن کا دروازہ (Admin کے لیے اب خالی، Salesman کے لیے بدستور فعال) ---------- -->
       <div class="homeIconGrid" id="homeIconGrid"></div>
     </div>
 
     <div class="screen" id="screen-billing">
 
+      <!-- ---------- 🔓 PIN Lock بند ہو تو یاد دہانی — دوبارہ آن کرنا ایک ٹیپ کی دوری پر (اب یہاں، Admin کا Home یہی صفحہ ہے) ---------- -->
+      <div id="homePinLockOffBanner" class="admin-only" style="display:none; background:#fef3c7; color:#92400e; border-radius:12px; padding:10px 14px; margin-bottom:10px; align-items:center; justify-content:space-between; gap:8px;">
+        <span style="font-size:12.5px; font-weight:700;">🔓 PIN Lock is OFF — anyone can open this app</span>
+        <button onclick="openActivatePinLockModal()" style="background:#92400e; color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap;">Activate</button>
+      </div>
+
+      <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں (صرف Admin کو نظر آئیں) ---------- -->
+      <div class="subBoxRow admin-only" id="subBoxRow" style="display:none;">
+        <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
+        <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
+        <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
+      </div>
+
+      <!-- ---------- 🎁 روزانہ ایک بار، ہلکا سا چمکتا/حرکت کرتا یاد دہانی Toast — کوئی بٹن نہیں، خود بخود 4.5 سیکنڈ میں غائب ---------- -->
+      <div id="trialReminderToast" class="admin-only" style="display:none;">
+        <span class="trtIcon">🎁</span>
+        <span class="trtText" id="trialReminderToastText"></span>
+      </div>
+
       <div class="pageTitle billingPageTitle">🛒 Billing Screen</div>
       <div id="rejectionNotice"></div>
+
+      <!-- ---------- 🏠 HOME SHORTCUT CARDS — صدام کی خود کی منتخب کردہ 3 سکرینیں (Settings میں طے شدہ)،
+           ہمیشہ سب سے اوپر نظر آئیں — Pending Orders پر پینڈنگ گنتی کا بیج بھی ---------- -->
+      <div id="homeShortcutCards" class="admin-only" style="display:flex; gap:8px; margin-bottom:12px;"></div>
 
       <div class="billingTopBar">
         <div class="modeToggleRow">
@@ -6167,7 +6154,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU12';
+const APP_BUILD_VERSION = 'FM19TU09';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6426,9 +6413,9 @@ function renderSubscriptionBanner(){
   const row = document.getElementById('subBoxRow');
   if(!row) return;
 
-  // ---------- صرف Home صفحے پر نظر آئے — باقی صفحات پر چھپی رہے (اب یہ ایلیمنٹ سیدھا screen-home کے اندر ہی رہتا ہے) ----------
+  // ---------- صرف Home صفحے پر نظر آئے (Admin کے لیے اب یہ Billing اسکرین ہی ہے) — باقی صفحات پر چھپی رہے ----------
   const activeScreen = document.querySelector('.screen.active');
-  const isHomePage = activeScreen && activeScreen.id === 'screen-home';
+  const isHomePage = activeScreen && (activeScreen.id === 'screen-home' || (activeScreen.id === 'screen-billing' && AppState.currentRole === 'admin'));
   if(!isHomePage || !isSubscriptionActive()){ row.style.display = 'none'; return; }
 
   const daysLeft = daysLeftInSubscription();
@@ -6519,7 +6506,7 @@ const HOME_TILE_GROUPS_ADMIN = [
 // ---------- پرانی سیدھی فہرست اب بھی موجود ہے — Quick Access Dock وغیرہ کہیں اور اسے استعمال کرتے ہیں ----------
 const HOME_TILES_ADMIN = HOME_TILE_GROUPS_ADMIN.flatMap(g => g.tiles);
 const HOME_TILES_SALESMAN = [
-  {icon:'🧾', label:'Order Taking', screen:'orderTaking'},
+  {icon:'🛒', label:'Billing', screen:'billing'},
   {icon:'🧾', label:'Bill History', screen:'billhistory'},
   {icon:'📝', label:'Advance Orders', screen:'advanceorders'},
 ];
@@ -6546,8 +6533,8 @@ function renderHomeUnfinishedCartCard(){
     </div>`;
 }
 
-// ---------- 🏠 HOME SHORTCUT SCREENS — صدام کی خود کی منتخب کردہ (جتنی بھی چاہیں) اسکرینیں،
-// اب یہی اسکرینیں سیدھا Home پیج کا بڑا آئیکن گرڈ بنتی ہیں (پہلے صرف چھوٹی پٹی تھی، Billing کے اندر) ----------
+// ---------- 🏠 HOME SHORTCUT CARDS — صدام کی خود کی منتخب کردہ (زیادہ سے زیادہ 3) سکرینیں،
+// Billing/Home پر سب سے اوپر کارڈز کی شکل میں۔ Pending Orders پر پینڈنگ گنتی کا بیج بھی۔ ----------
 const HOME_SHORTCUT_OPTIONS = [
   {key:'advanceorders', icon:'📝', label:'Pending Orders', screen:'advanceorders'},
   {key:'customers',     icon:'👥', label:'Customers',      screen:'customers'},
@@ -6557,17 +6544,8 @@ const HOME_SHORTCUT_OPTIONS = [
   {key:'stockadjustment', icon:'🧮', label:'Stock Adjustment', screen:'stockadjustment'},
   {key:'billhistory',   icon:'🧾', label:'Bill History',   screen:'billhistory'},
   {key:'expenditure',   icon:'💸', label:'Expenditure',    screen:'expenditure'},
-  {key:'products',      icon:'📦', label:'Products',       screen:'products'},
-  {key:'categories',    icon:'🏷️', label:'Categories',     screen:'categories'},
-  {key:'purchaseorders',icon:'📦', label:'Purchase Orders',screen:'purchaseorders'},
-  {key:'payments',      icon:'💳', label:'Payments',       screen:'payments'},
-  {key:'trends',        icon:'📈', label:'Trends',         screen:'trends'},
-  {key:'myaccount',     icon:'🏦', label:'My Account',     screen:'myaccount'},
-  {key:'mydiary',       icon:'📔', label:'My Diary',       screen:'mydiary'},
-  {key:'users',         icon:'🔑', label:'Users',          screen:'users'},
-  {key:'settings',      icon:'⚙️', label:'Settings',       screen:'settings'},
-  {key:'billsettings',  icon:'🖨️', label:'Bill & Print Settings', screen:'billsettings'},
 ];
+const HOME_SHORTCUT_MAX = 3;
 
 function renderHomeShortcutsSettings(){
   const wrap = document.getElementById('homeShortcutsPicker');
@@ -6587,14 +6565,19 @@ function renderHomeShortcutsSettings(){
 function toggleHomeShortcut(key, isChecked){
   let selected = AppState.settings.homeShortcuts || [];
   if(isChecked){
-    selected = [...selected, key]; // ---------- اب زیادہ سے زیادہ کی کوئی حد نہیں — صدام جتنی چاہیں سکرینیں منتخب کر سکتے ہیں ----------
+    if(selected.length >= HOME_SHORTCUT_MAX){
+      alert(`زیادہ سے زیادہ ${HOME_SHORTCUT_MAX} سکرینیں منتخب کی جا سکتی ہیں — پہلے کوئی ایک ہٹائیں۔`);
+      renderHomeShortcutsSettings();
+      return;
+    }
+    selected = [...selected, key];
   } else {
     selected = selected.filter(k => k !== key);
   }
   AppState.settings.homeShortcuts = selected;
   persistAllData();
   renderHomeShortcutsSettings();
-  renderHomeIconGrid(); // ---------- اب یہی شارٹ کٹس ہوم پیج کا اصل آئیکن گرڈ بناتے ہیں ----------
+  renderHomeShortcutCards();
 }
 
 function renderHomeShortcutCards(){
@@ -6628,21 +6611,13 @@ function renderHomeIconGrid(){
     </button>`;
 
   if(AppState.currentRole === 'admin'){
-    // ---------- 🍇 صدام کی نئی ہدایت پر: ایڈمن کا ہوم پیج اب انہی کی منتخب کردہ Shortcut اسکرینوں کا بڑا آئیکن گرڈ ہے —
-    // Billing/پراڈکٹ گرڈ کبھی بھی ڈیفالٹ کے طور پر نظر نہیں آئے گا۔ Settings > Home Shortcuts سے جتنی چاہیں
-    // اسکرینیں منتخب کریں، وہ سب یہیں گرڈ میں کھڑی ہو جائیں گی (پہلے صرف 3 کی حد تھی، اب کوئی حد نہیں) ---------- -->
-    const selected = AppState.settings.homeShortcuts || [];
-    const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending').length : 0;
-    let adminTiles = selected.map(key => HOME_SHORTCUT_OPTIONS.find(o => o.key === key)).filter(Boolean);
-    if(adminTiles.length === 0) adminTiles = [HOME_SHORTCUT_OPTIONS.find(o => o.key === 'advanceorders')].filter(Boolean); // ---------- کچھ بھی منتخب نہ ہو تو کم از کم Pending Orders نظر آئے ----------
-    const adminTileHtml = (t) => `
-      <button class="homeIconTile" style="position:relative;" onclick="goTo('${t.screen}')">
-        ${t.key === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:6px; right:6px; background:var(--danger); color:#fff; font-size:11px; font-weight:800; min-width:20px; height:20px; border-radius:10px; display:flex; align-items:center; justify-content:center; padding:0 5px;">${pendingCount}</span>` : ''}
-        <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span></span>
-        <span class="hitLabel">${t.label}</span>
-      </button>`;
-    grid.innerHTML = adminTiles.map(adminTileHtml).join('');
-    const otherTiles = HOME_TILES_ADMIN.filter(t => t.screen !== 'billing' && !selected.includes(t.screen)).sort((a, b) => a.label.localeCompare(b.label));
+    // ---------- 🍇 صدام کی نئی ہدایت پر: اب Home پر کوئی بڑا Billing/Products بٹن کھڑا نہیں رہے گا —
+    // Billing خود ہی اب Home ہے (پورا پراڈکٹ گرڈ سیدھا سامنے)، اس لیے Billing کہیں بھی الگ بٹن کی صورت میں
+    // نظر نہیں آئے گا (نہ یہاں، نہ "دیگر فیچرز" میں)۔ Products اپنی جگہ "دیگر فیچرز" ڈراپ ڈاؤن کے اندر
+    // چھپا رہے گا — پراڈکٹ کیٹلاگ کا انتظام (شامل/ترمیم/حذف) الگ کام ہے، بیچنے سے مختلف ---------- -->
+    const mainTiles = [];
+    const otherTiles = HOME_TILES_ADMIN.filter(t => t.screen !== 'billing').sort((a, b) => a.label.localeCompare(b.label));
+    grid.innerHTML = '';
     renderOtherFeaturesDrop(otherTiles);
   } else {
     document.getElementById('otherFeaturesDropWrap').style.display = 'none';
@@ -6663,8 +6638,8 @@ function renderHomeIconGrid(){
         return {icon, label, screen:key};
       }).filter(Boolean);
     }
-    // ---------- اگر صدام نے ابھی تک کوئی اسکرین assign نہ کی ہو تو پرانی ڈیفالٹ فہرست دکھائیں —
-    // تاکہ نیا ملازم خالی ہوم پیج نہ دیکھے (Billing اب اس فہرست میں شامل نہیں) ----------
+    // ---------- اگر صدام نے ابھی تک کوئی اسکرین assign نہ کی ہو تو پرانی ڈیفالٹ فہرست (Billing/Bill
+    // History/Advance Orders) دکھائیں — تاکہ نیا ملازم خالی ہوم پیج نہ دیکھے ----------
     if(!salesmanTiles || salesmanTiles.length === 0) salesmanTiles = HOME_TILES_SALESMAN;
     grid.innerHTML = salesmanTiles.map(tileHtml).join('');
   }
@@ -6923,35 +6898,30 @@ function quickEnterApp(){
 }
 
 async function login(){
-  try{
-    const pin = document.getElementById('pinInput').value.trim();
-    if(pin.length < 4){
-      alert('Please enter your PIN (at least 4 digits).');
-      return;
-    }
-
-    // ---------- PIN کبھی پلین ٹیکسٹ میں compare نہیں ہوتا — پہلے hash بنائیں پھر محفوظ شدہ hash سے موازنہ کریں ----------
-    // ---------- 🍇 Fruit Mandi POS: یہ Admin Login پینل ہے، اس لیے صرف admin رول والے یوزر میں تلاش کریں ----------
-    const enteredHash = await hashPin(pin);
-    const user = usersData.find(u => u.pin === enteredHash && u.role === 'admin');
-
-    if(!user){
-      alert('Incorrect PIN. Please try again, or contact Admin if you forgot it.');
-      document.getElementById('pinInput').value = '';
-      return;
-    }
-    if(!user.is_active){
-      alert('This account has been deactivated. Please contact Admin.');
-      document.getElementById('pinInput').value = '';
-      return;
-    }
-
-    // ---------- Remember PIN: اگر چیک باکس آن ہے تو اس ڈیوائس پر سیشن یاد رکھ لیں (localStorage) تاکہ فائل دوبارہ کھلنے پر پن نہ مانگے ----------
-    finishLogin(user);
-  }catch(e){
-    console.error('login failed', e);
-    alert('⚠️ Login Error: ' + e.message);
+  const pin = document.getElementById('pinInput').value.trim();
+  if(pin.length < 4){
+    alert('Please enter your PIN (at least 4 digits).');
+    return;
   }
+
+  // ---------- PIN کبھی پلین ٹیکسٹ میں compare نہیں ہوتا — پہلے hash بنائیں پھر محفوظ شدہ hash سے موازنہ کریں ----------
+  // ---------- 🍇 Fruit Mandi POS: یہ Admin Login پینل ہے، اس لیے صرف admin رول والے یوزر میں تلاش کریں ----------
+  const enteredHash = await hashPin(pin);
+  const user = usersData.find(u => u.pin === enteredHash && u.role === 'admin');
+
+  if(!user){
+    alert('Incorrect PIN. Please try again, or contact Admin if you forgot it.');
+    document.getElementById('pinInput').value = '';
+    return;
+  }
+  if(!user.is_active){
+    alert('This account has been deactivated. Please contact Admin.');
+    document.getElementById('pinInput').value = '';
+    return;
+  }
+
+  // ---------- Remember PIN: اگر چیک باکس آن ہے تو اس ڈیوائس پر سیشن یاد رکھ لیں (localStorage) تاکہ فائل دوبارہ کھلنے پر پن نہ مانگے ----------
+  finishLogin(user);
 }
 
 // ---------- لاگ ان مکمل کرنے کا مشترکہ حصہ (Admin اور Employee دونوں لاگ ان یہیں سے گزرتے ہیں) ----------
@@ -6978,10 +6948,12 @@ function finishLogin(user, rememberOverride){
     return;
   }
   document.getElementById('app').style.display = 'grid';
-  // ---------- 🍇 صدام کی حتمی ہدایت: لاگ ان کے بعد کبھی بھی Billing/پراڈکٹ گرڈ نہ کھلے۔ Admin کے لیے سیدھا
-  // Home (اپنی منتخب کردہ Shortcut اسکرینوں کا آئیکن گرڈ) کھلے، اور جس ملازم کو صرف ایک ہی اسکرین Assign
-  // ہو (مثلاً عبدالوہاب کو صرف Order Taking) اسے سیدھا اسی ایک اسکرین پر لے جائیں ---------- -->
-  if(window.__singleAssignedScreen){
+  // ---------- 🍇 صدام کی نئی ہدایت: لاگ ان کے بعد اب سیدھا "پراڈکٹ منڈی" (Billing) نہیں کھلتی —
+  // Admin کے لیے سیدھا Pending Orders کھلے گا، اور جس ملازم کو صرف ایک ہی اسکرین Assign ہو (مثلاً
+  // عبدالوہاب کو صرف Order Taking) اسے سیدھا اسی ایک اسکرین پر لے جائیں، Home یا کوئی اور اسکرین نہیں ---------- -->
+  if(user.role === 'admin'){
+    goTo('advanceorders');
+  } else if(window.__singleAssignedScreen){
     goTo(window.__singleAssignedScreen);
   } else {
     goTo('home');
@@ -7025,32 +6997,27 @@ function renderEmployeeLoginDropdown(){
 }
 
 async function employeeLogin(){
-  try{
-    const userId = parseInt(document.getElementById('employeeLoginSelect').value, 10);
-    const pin = document.getElementById('employeePinInput').value.trim();
-    if(!userId){ alert('Please select your name.'); return; }
-    if(pin.length < 4){
-      alert('Please enter your PIN (at least 4 digits).');
-      return;
-    }
-    const user = usersData.find(u => u.user_id === userId && u.role === 'salesman');
-    if(!user){ alert('Employee account not found.'); return; }
-    if(!user.is_active){
-      alert('This account has been deactivated. Please contact Admin.');
-      return;
-    }
-    const enteredHash = await hashPin(pin);
-    if(user.pin !== enteredHash){
-      alert('Incorrect PIN. Please try again, or use "Forgot your PIN?" below.');
-      document.getElementById('employeePinInput').value = '';
-      return;
-    }
-    const remember = document.getElementById('employeeRememberChk')?.checked ?? true;
-    finishLogin(user, remember);
-  }catch(e){
-    console.error('employeeLogin failed', e);
-    alert('⚠️ Employee Login Error: ' + e.message);
+  const userId = parseInt(document.getElementById('employeeLoginSelect').value, 10);
+  const pin = document.getElementById('employeePinInput').value.trim();
+  if(!userId){ alert('Please select your name.'); return; }
+  if(pin.length < 4){
+    alert('Please enter your PIN (at least 4 digits).');
+    return;
   }
+  const user = usersData.find(u => u.user_id === userId && u.role === 'salesman');
+  if(!user){ alert('Employee account not found.'); return; }
+  if(!user.is_active){
+    alert('This account has been deactivated. Please contact Admin.');
+    return;
+  }
+  const enteredHash = await hashPin(pin);
+  if(user.pin !== enteredHash){
+    alert('Incorrect PIN. Please try again, or use "Forgot your PIN?" below.');
+    document.getElementById('employeePinInput').value = '';
+    return;
+  }
+  const remember = document.getElementById('employeeRememberChk')?.checked ?? true;
+  finishLogin(user, remember);
 }
 
 /* =====================================================================
@@ -7282,7 +7249,7 @@ function tryAutoLogin(){
         return true;
       }
       document.getElementById('app').style.display = 'grid';
-      goTo('home'); // ---------- صدام کی حتمی ہدایت پر: ایڈمن کا ہوم اب Home اسکرین ہے (شارٹ کٹ گرڈ)، Billing کبھی نہیں ----------
+      goTo('advanceorders'); // ---------- صدام کی ہدایت پر: ایڈمن کا ہوم اب Pending Orders ہے، پراڈکٹ گرڈ نہیں ----------
       setTimeout(checkBackupReminder, 1800);
       return true;
     }
@@ -7306,10 +7273,12 @@ function tryAutoLogin(){
     return true;
   }
   document.getElementById('app').style.display = 'grid';
-  // ---------- 🍇 صدام کی حتمی ہدایت: صفحہ ری فریش/دوبارہ کھلنے پر بھی وہی منطق چلے جو نئے لاگ ان پر چلتی ہے —
-  // Billing/پراڈکٹ گرڈ کبھی خودکار نہیں کھلتی۔ Admin سیدھا Home (شارٹ کٹ گرڈ) پر جائے، اور جس ملازم کو صرف
-  // ایک ہی اسکرین Assign ہو (مثلاً عبدالوہاب کو صرف Order Taking) وہ ہمیشہ سیدھا اسی ایک اسکرین پر رہے ---------- -->
-  if(window.__singleAssignedScreen){
+  // ---------- 🍇 صدام کی ہدایت: صفحہ ری فریش/دوبارہ کھلنے پر بھی وہی منطق چلے جو نئے لاگ ان پر چلتی ہے —
+  // Admin سیدھا Pending Orders پر جائے، اور جس ملازم کو صرف ایک ہی اسکرین Assign ہو (مثلاً عبدالوہاب کو صرف
+  // Order Taking) وہ ہمیشہ سیدھا اسی ایک اسکرین پر رہے، کبھی بھی پراڈکٹ گرڈ (Billing) پر نہ جائے ---------- -->
+  if(user.role === 'admin'){
+    goTo('advanceorders');
+  } else if(window.__singleAssignedScreen){
     goTo(window.__singleAssignedScreen);
   } else {
     goTo('home');
@@ -7359,7 +7328,7 @@ function applyUserScreenPermissions(name){
   const u = usersData.find(x => x.name === name && x.role === 'salesman');
   let assignedKeys = (u && Array.isArray(u.screens)) ? u.screens.slice() : [];
   // ---------- ابھی تک کوئی اسکرین Assign نہ ہوئی ہو تو نیا ملازم خالی مینو نہ دیکھے — پرانی ڈیفالٹ فہرست ----------
-  if(assignedKeys.length === 0) assignedKeys = ['orderTaking', 'billhistory', 'advanceorders']; // ---------- Billing اب ڈیفالٹ فہرست میں شامل نہیں ----------
+  if(assignedKeys.length === 0) assignedKeys = ['billing', 'billhistory', 'advanceorders'];
 
   assignedKeys.forEach(key => {
     document.querySelectorAll(`[data-screen="${key}"]`).forEach(el => el.classList.add('perm-allowed'));
@@ -7387,18 +7356,12 @@ function renderTodaysBillBadge(){
 }
 
 function logout(){
-  // ---------- 🛡️ تشخیصی try/catch — اگر یہاں کوئی Error آئے تو صارف کو صاف نظر آئے (پہلے خاموشی سے رک جاتا تھا، بٹن "کچھ نہیں کرتا" لگتا تھا) ----------
-  try{
-    AppState.currentUser = null;
-    AppState.currentRole = null;
-    document.getElementById('pinInput').value = '';
-    saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
-  }catch(e){
-    console.error('logout failed', e);
-    alert('⚠️ Logout Error: ' + e.message);
-  }
+  AppState.currentUser = null;
+  AppState.currentRole = null;
+  document.getElementById('pinInput').value = '';
+  saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
 }
 
 // ---------- NAVIGATION LOGIC ----------
@@ -7435,9 +7398,11 @@ let navBackStack = [];
 let navForwardStack = [];
 
 function goTo(screenName, _isHistoryNav){
-  // ---------- 🍇 Fruit Mandi POS: صدام کی حتمی ہدایت پر — Admin کا Home اب ایک عام Home اسکرین ہے (بالکل
-  // Salesman کی طرح)، اپنی منتخب کردہ Shortcut اسکرینوں کے آئیکن گرڈ کے ساتھ۔ Billing/پراڈکٹ گرڈ کبھی بھی
-  // خودکار طور پر نہیں کھلتی — نہ لاگ ان پر، نہ ری فریش پر، نہ Home بٹن دبانے پر ---------- -->
+  // ---------- 🍇 Fruit Mandi POS: صدام کی نئی ہدایت پر — Admin کے لیے اب "Home" کا مطلب پراڈکٹ گرڈ (Billing) نہیں،
+  // بلکہ سیدھا "Pending Orders" (Advance Orders اسکرین، ایڈمن ورژن) ہے — یہی وہ کام ہے جو صدام سب سے پہلے
+  // دیکھنا چاہتے ہیں۔ Billing اپنی جگہ سائیڈ مینیو سے اب بھی کھل سکتی ہے جب واقعی نیا بل/آئٹم شامل کرنا ہو۔
+  // Salesman کے لیے کوئی تبدیلی نہیں — ان کا Home صفحہ پہلے کی طرح آئیکن ٹائلز کے ساتھ ہی رہے گا ---------- -->
+  if(AppState.currentRole === 'admin' && screenName === 'home') screenName = 'advanceorders';
 
   // ---------- Customers/Suppliers الگ الگ نیویگیشن اندراج ہیں مگر اندرونی طور پر ایک ہی DOM اسکرین (screen-parties) شیئر کرتے ہیں تاکہ غلطی سے غلط موڈ پر پارٹی/بل نہ بن جائے ----------
   const actualScreenId = (screenName === 'customers' || screenName === 'suppliers') ? 'parties' : screenName;
@@ -7484,6 +7449,8 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'home') { renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI(); }
   if(screenName === 'billing') {
     renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn();
+    // ---------- 🍇 Admin کے لیے یہی صفحہ Home بھی ہے — سبسکرپشن باکس/دیگر فیچرز ڈراپ ڈاؤن/PIN بینر یہیں تازہ کریں ----------
+    if(AppState.currentRole === 'admin'){ renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); renderHomeShortcutCards(); syncPinLockUI(); }
   }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
@@ -7566,22 +7533,12 @@ function acknowledgeRejection(pendingId){
 
 // ---------- موبائل Sidebar Drawer کھولنا/بند کرنا ----------
 function toggleSidebar(){
-  try{
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
-  }catch(e){
-    console.error('toggleSidebar failed', e);
-    alert('⚠️ Menu Error: ' + e.message);
-  }
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 function closeSidebar(){
-  try{
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('sidebarOverlay').classList.remove('show');
-  }catch(e){
-    console.error('closeSidebar failed', e);
-    alert('⚠️ Menu Error: ' + e.message);
-  }
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
 }
 
 // =====================================================================
@@ -25426,36 +25383,31 @@ document.addEventListener('DOMContentLoaded', () => {
   dpInitPicker('empResetDobInput');
 
   // ---------- Login اسکرین کی حالت (Trial بینر + PIN یا Quick Enter) ہمیشہ پہلے تیار کر لیں ----------
-  // ---------- 🛡️ حفاظتی try/catch — اگر کسی پرانی ڈیوائس کے محفوظ شدہ ڈیٹا کی وجہ سے کوئی فنکشن
-  // یہاں Error دے تو پوری اسکرپٹ نہیں رکے گی (ورنہ نیچے موجود ہمبرگر مینو/لاگ آؤٹ بٹن کا کلک لسنر
-  // بھی کبھی attach ہی نہ ہو پاتا، اور اسکرین "جام" لگنے لگتی) ----------
-  try{ setupLoginScreen(); }catch(e){ console.error('setupLoginScreen failed', e); }
+  setupLoginScreen();
 
   // ---------- اگر اس ڈیوائس پر پن پہلے سے یاد رکھا ہوا ہے تو لاگ ان اسکرین چھوڑ کر سیدھا ایپ میں لے جائیں ----------
-  try{ tryAutoLogin(); }catch(e){ console.error('tryAutoLogin failed', e); }
+  tryAutoLogin();
 
   // ---------- 📡 انٹرنیٹ ملتے ہی خاموشی سے: (1) ٹرائل کا Firestore لاک چیک/محفوظ کریں (2) ادائیگی شدہ
   // سبسکرپشن دور سے منسوخ تو نہیں ہوئی — یوزر کو کوئی لوڈنگ نظر نہیں آئے گی، بیک گراؤنڈ میں ہوتا ہے ----------
   setTimeout(() => {
-    try{ checkAndLockTrialOnline(); }catch(e){ console.error('checkAndLockTrialOnline failed', e); }
-    try{ resyncLicenseOnline(); }catch(e){ console.error('resyncLicenseOnline failed', e); }
+    checkAndLockTrialOnline();
+    resyncLicenseOnline();
   }, 2000);
 
-  try{ renderProductList(); }catch(e){ console.error('renderProductList failed', e); }
-  try{ populateCustomerDropdown(); }catch(e){ console.error('populateCustomerDropdown failed', e); }
-  try{ renderBillingCategoryRail(); }catch(e){ console.error('renderBillingCategoryRail failed', e); }
-  try{ renderBillingProductGrid(); }catch(e){ console.error('renderBillingProductGrid failed', e); }
-  try{ renderAutoPaymentNote(); }catch(e){ console.error('renderAutoPaymentNote failed', e); }
-  try{ initCardDragHandlers(); }catch(e){ console.error('initCardDragHandlers failed', e); }
+  renderProductList();
+  populateCustomerDropdown();
+  renderBillingCategoryRail();
+  renderBillingProductGrid();
+  renderAutoPaymentNote();
+  initCardDragHandlers();
 
   // ---------- ہر پاپ اپ کو باہر (dark حصے پر) ٹیپ کرنے سے بند کرنے کی سہولت — پوری ایپ میں یکساں ----------
-  try{
-    document.querySelectorAll('.modalOverlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if(e.target === overlay) overlay.classList.remove('show');
-      });
+  document.querySelectorAll('.modalOverlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if(e.target === overlay) overlay.classList.remove('show');
     });
-  }catch(e){ console.error('modalOverlay click-close setup failed', e); }
+  });
 });
 </script>
 
