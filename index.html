@@ -6167,7 +6167,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU11';
+const APP_BUILD_VERSION = 'FM19TU12';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6923,30 +6923,35 @@ function quickEnterApp(){
 }
 
 async function login(){
-  const pin = document.getElementById('pinInput').value.trim();
-  if(pin.length < 4){
-    alert('Please enter your PIN (at least 4 digits).');
-    return;
-  }
+  try{
+    const pin = document.getElementById('pinInput').value.trim();
+    if(pin.length < 4){
+      alert('Please enter your PIN (at least 4 digits).');
+      return;
+    }
 
-  // ---------- PIN کبھی پلین ٹیکسٹ میں compare نہیں ہوتا — پہلے hash بنائیں پھر محفوظ شدہ hash سے موازنہ کریں ----------
-  // ---------- 🍇 Fruit Mandi POS: یہ Admin Login پینل ہے، اس لیے صرف admin رول والے یوزر میں تلاش کریں ----------
-  const enteredHash = await hashPin(pin);
-  const user = usersData.find(u => u.pin === enteredHash && u.role === 'admin');
+    // ---------- PIN کبھی پلین ٹیکسٹ میں compare نہیں ہوتا — پہلے hash بنائیں پھر محفوظ شدہ hash سے موازنہ کریں ----------
+    // ---------- 🍇 Fruit Mandi POS: یہ Admin Login پینل ہے، اس لیے صرف admin رول والے یوزر میں تلاش کریں ----------
+    const enteredHash = await hashPin(pin);
+    const user = usersData.find(u => u.pin === enteredHash && u.role === 'admin');
 
-  if(!user){
-    alert('Incorrect PIN. Please try again, or contact Admin if you forgot it.');
-    document.getElementById('pinInput').value = '';
-    return;
-  }
-  if(!user.is_active){
-    alert('This account has been deactivated. Please contact Admin.');
-    document.getElementById('pinInput').value = '';
-    return;
-  }
+    if(!user){
+      alert('Incorrect PIN. Please try again, or contact Admin if you forgot it.');
+      document.getElementById('pinInput').value = '';
+      return;
+    }
+    if(!user.is_active){
+      alert('This account has been deactivated. Please contact Admin.');
+      document.getElementById('pinInput').value = '';
+      return;
+    }
 
-  // ---------- Remember PIN: اگر چیک باکس آن ہے تو اس ڈیوائس پر سیشن یاد رکھ لیں (localStorage) تاکہ فائل دوبارہ کھلنے پر پن نہ مانگے ----------
-  finishLogin(user);
+    // ---------- Remember PIN: اگر چیک باکس آن ہے تو اس ڈیوائس پر سیشن یاد رکھ لیں (localStorage) تاکہ فائل دوبارہ کھلنے پر پن نہ مانگے ----------
+    finishLogin(user);
+  }catch(e){
+    console.error('login failed', e);
+    alert('⚠️ Login Error: ' + e.message);
+  }
 }
 
 // ---------- لاگ ان مکمل کرنے کا مشترکہ حصہ (Admin اور Employee دونوں لاگ ان یہیں سے گزرتے ہیں) ----------
@@ -7020,27 +7025,32 @@ function renderEmployeeLoginDropdown(){
 }
 
 async function employeeLogin(){
-  const userId = parseInt(document.getElementById('employeeLoginSelect').value, 10);
-  const pin = document.getElementById('employeePinInput').value.trim();
-  if(!userId){ alert('Please select your name.'); return; }
-  if(pin.length < 4){
-    alert('Please enter your PIN (at least 4 digits).');
-    return;
+  try{
+    const userId = parseInt(document.getElementById('employeeLoginSelect').value, 10);
+    const pin = document.getElementById('employeePinInput').value.trim();
+    if(!userId){ alert('Please select your name.'); return; }
+    if(pin.length < 4){
+      alert('Please enter your PIN (at least 4 digits).');
+      return;
+    }
+    const user = usersData.find(u => u.user_id === userId && u.role === 'salesman');
+    if(!user){ alert('Employee account not found.'); return; }
+    if(!user.is_active){
+      alert('This account has been deactivated. Please contact Admin.');
+      return;
+    }
+    const enteredHash = await hashPin(pin);
+    if(user.pin !== enteredHash){
+      alert('Incorrect PIN. Please try again, or use "Forgot your PIN?" below.');
+      document.getElementById('employeePinInput').value = '';
+      return;
+    }
+    const remember = document.getElementById('employeeRememberChk')?.checked ?? true;
+    finishLogin(user, remember);
+  }catch(e){
+    console.error('employeeLogin failed', e);
+    alert('⚠️ Employee Login Error: ' + e.message);
   }
-  const user = usersData.find(u => u.user_id === userId && u.role === 'salesman');
-  if(!user){ alert('Employee account not found.'); return; }
-  if(!user.is_active){
-    alert('This account has been deactivated. Please contact Admin.');
-    return;
-  }
-  const enteredHash = await hashPin(pin);
-  if(user.pin !== enteredHash){
-    alert('Incorrect PIN. Please try again, or use "Forgot your PIN?" below.');
-    document.getElementById('employeePinInput').value = '';
-    return;
-  }
-  const remember = document.getElementById('employeeRememberChk')?.checked ?? true;
-  finishLogin(user, remember);
 }
 
 /* =====================================================================
@@ -7377,12 +7387,18 @@ function renderTodaysBillBadge(){
 }
 
 function logout(){
-  AppState.currentUser = null;
-  AppState.currentRole = null;
-  document.getElementById('pinInput').value = '';
-  saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
+  // ---------- 🛡️ تشخیصی try/catch — اگر یہاں کوئی Error آئے تو صارف کو صاف نظر آئے (پہلے خاموشی سے رک جاتا تھا، بٹن "کچھ نہیں کرتا" لگتا تھا) ----------
+  try{
+    AppState.currentUser = null;
+    AppState.currentRole = null;
+    document.getElementById('pinInput').value = '';
+    saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  }catch(e){
+    console.error('logout failed', e);
+    alert('⚠️ Logout Error: ' + e.message);
+  }
 }
 
 // ---------- NAVIGATION LOGIC ----------
@@ -7550,12 +7566,22 @@ function acknowledgeRejection(pendingId){
 
 // ---------- موبائل Sidebar Drawer کھولنا/بند کرنا ----------
 function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('show');
+  try{
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+  }catch(e){
+    console.error('toggleSidebar failed', e);
+    alert('⚠️ Menu Error: ' + e.message);
+  }
 }
 function closeSidebar(){
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
+  try{
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  }catch(e){
+    console.error('closeSidebar failed', e);
+    alert('⚠️ Menu Error: ' + e.message);
+  }
 }
 
 // =====================================================================
