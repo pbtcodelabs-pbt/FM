@@ -228,7 +228,13 @@
       linear-gradient(180deg, #f2ede2 0%, var(--bg) 260px);
     border-radius:20px; margin:-6px; padding:6px 10px 18px;
   }
-  .homeIconGrid{display:flex; flex-direction:column; gap:1px; margin-top:2px;}
+  /* ---------- 🍇 صدام کی ہدایت پر: ہوم پیج پر لمبی عمودی لائن کی بجائے اب صرف 3 باریک آئٹم ایک ہی
+       قطار میں (Pending Orders / Customers / Suppliers) — باقی مین ایریا خالی رہتا ہے ---------- */
+  .homeIconGrid{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:2px;}
+  .homeIconGrid .homeIconTile{padding:11px 4px 9px; border-radius:14px;}
+  .homeIconGrid .hitIconWrap{width:38px; height:38px; border-radius:11px;}
+  .homeIconGrid .hitIcon{font-size:19px;}
+  .homeIconGrid .hitLabel{font-size:10px;}
   /* ---------- 📂 "دیگر فیچرز" ڈراپ ڈاؤن — Products اور Billing کے علاوہ باقی سب سیٹنگز/فیچرز یہاں ایک لائن فہرست میں، آئیکنز کا ڈھیر نہیں ---------- */
   .otherFeaturesDropWrap{position:relative; margin-top:10px;}
   .otherFeaturesBtn{width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:13px 16px; border-radius:12px; border:1.5px solid rgba(15,118,110,.18); background:var(--card); color:var(--text); font-size:14px; font-weight:800; cursor:pointer;}
@@ -2269,9 +2275,11 @@
          ضرورت ہے (وہ Pending Orders/Customers/Suppliers استعمال کرتے ہیں)، نہ ملازم کو (وہ Order Taking استعمال
          کرتا ہے)۔ کوڈ محفوظ ہے، اسکرین اب بھی اندرونی طور پر (Fulfill & Bill کے ذریعے) کام کرتی ہے ---------- -->
     <div class="navItem" data-screen="billing" onclick="goTo('billing')" style="display:none;">🛒 Billing</div>
-    <div class="navItem admin-only" data-screen="categories" onclick="goTo('categories')">🏷️ Categories</div>
+    <!-- ---------- 🍇 صدام کی ہدایت پر: Categories مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
+    <div class="navItem admin-only" data-screen="categories" onclick="goTo('categories')" style="display:none;">🏷️ Categories</div>
     <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customers</div>
-    <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')">📊 Dashboard</div>
+    <!-- ---------- 🍇 صدام کی ہدایت پر: Dashboard مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
+    <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')" style="display:none;">📊 Dashboard</div>
     <div class="navItem admin-only" data-screen="expenditure" onclick="goTo('expenditure')">💸 Expenditure</div>
     <div class="navItem" data-screen="home" onclick="goTo('home')">🏠 Home</div>
     <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
@@ -2279,13 +2287,16 @@
     <div class="navItem" data-screen="orderTaking" onclick="goTo('orderTaking')">🧾 Order Taking</div>
     <div class="navItem admin-only" data-screen="payments" onclick="goTo('payments')">💳 Payments</div>
     <div class="navItem admin-only" data-screen="products" onclick="goTo('products')">📦 Products</div>
-    <div class="navItem admin-only" data-screen="purchaseorders" onclick="goTo('purchaseorders')">📦 Purchase Orders</div>
+    <!-- ---------- 🍇 صدام کی ہدایت پر: Purchase Orders مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
+    <div class="navItem admin-only" data-screen="purchaseorders" onclick="goTo('purchaseorders')" style="display:none;">📦 Purchase Orders</div>
     <div class="navItem" data-screen="recoveryList" onclick="goTo('recoveryList')">💰 Recovery List</div>
     <div class="navItem admin-only" data-screen="" onclick="closeSidebar(); openReportCenterModal();">📑 Reports</div>
     <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
-    <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')">🧮 Stock Adjustment</div>
+    <!-- ---------- 🍇 صدام کی ہدایت پر: Stock Adjustment مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
+    <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')" style="display:none;">🧮 Stock Adjustment</div>
     <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')">🚚 Suppliers</div>
-    <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')">📈 Trends</div>
+    <!-- ---------- 🍇 صدام کی ہدایت پر: Trends مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
+    <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')" style="display:none;">📈 Trends</div>
     <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
 
     <!-- ---------- نیچے کی چیزیں (PIN تبدیل کرنا / Admin ٹیگ / Logout) جان بوجھ کر الفابیٹیکل ترتیب سے الگ —
@@ -6498,8 +6509,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   ]},
   { section: '📦 Inventory', tiles: [
     {icon:'📦', label:'Products', screen:'products'},
-    // ---------- 🍇 Fruit Mandi POS: "Categories" ٹائل ہوم پیج سے ہائیڈ کر دی گئی ہے (فیچر/اسکرین کوڈ میں محفوظ ہے، صرف سامنے نہیں دکھائی جا رہی) ----------
-    {icon:'🧮', label:'Stock Adjustment', screen:'stockadjustment'},
+    // ---------- 🍇 Fruit Mandi POS: "Categories" اور "Stock Adjustment" ٹائلز ہوم پیج/مینیو سے مکمل ہائیڈ کر دی گئی ہیں (فیچر/اسکرین کوڈ میں محفوظ ہے، صرف سامنے نہیں دکھائی جا رہی) ----------
   ]},
   { section: '🧑‍🤝‍🧑 Parties', tiles: [
     {icon:'👥', label:'Customers', screen:'customers'},
@@ -6508,9 +6518,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '💳 Payments', tiles: [
     {icon:'💳', label:'Payments Record', screen:'payments'},
   ]},
-  { section: '📊 Insights', tiles: [
-    {icon:'📊', label:'Dashboard', screen:'dashboard'},
-  ]},
+  // ---------- 🍇 Fruit Mandi POS: "Dashboard" (Insights section) ہوم پیج/مینیو سے مکمل ہائیڈ کر دی گئی ہے (کوڈ محفوظ ہے) ----------
   { section: '🖨️ Reports', tiles: [
     {icon:'🖨️', label:'Reports', action:'openReportCenterModal'},
   ]},
@@ -6564,15 +6572,12 @@ const HOME_SHORTCUT_OPTIONS = [
   {key:'customers',     icon:'👥', label:'Customers',      screen:'customers'},
   {key:'suppliers',     icon:'🚚', label:'Suppliers',      screen:'suppliers'},
   {key:'recoveryList',  icon:'💰', label:'Recovery List',  screen:'recoveryList'},
-  {key:'dashboard',     icon:'📊', label:'Dashboard',      screen:'dashboard'},
-  {key:'stockadjustment', icon:'🧮', label:'Stock Adjustment', screen:'stockadjustment'},
+  // ---------- 🍇 صدام کی ہدایت پر: Dashboard, Categories, Purchase Orders, Stock Adjustment, Trends —
+  // یہ پانچوں ہوم شارٹ کٹ آپشنز سے مکمل ہٹا دیے گئے ہیں (کوڈ/فیچر محفوظ ہے، صرف سامنے نہیں دکھائے جا رہے) ----------
   {key:'billhistory',   icon:'🧾', label:'Bill History',   screen:'billhistory'},
   {key:'expenditure',   icon:'💸', label:'Expenditure',    screen:'expenditure'},
   {key:'products',      icon:'📦', label:'Products',       screen:'products'},
-  {key:'categories',    icon:'🏷️', label:'Categories',     screen:'categories'},
-  {key:'purchaseorders',icon:'📦', label:'Purchase Orders',screen:'purchaseorders'},
   {key:'payments',      icon:'💳', label:'Payments',       screen:'payments'},
-  {key:'trends',        icon:'📈', label:'Trends',         screen:'trends'},
   {key:'myaccount',     icon:'🏦', label:'My Account',     screen:'myaccount'},
   {key:'mydiary',       icon:'📔', label:'My Diary',       screen:'mydiary'},
   {key:'users',         icon:'🔑', label:'Users',          screen:'users'},
@@ -6639,22 +6644,20 @@ function renderHomeIconGrid(){
     </button>`;
 
   if(AppState.currentRole === 'admin'){
-    // ---------- 🍇 صدام کی نئی ہدایت پر: ایڈمن کا ہوم پیج اب انہی کی منتخب کردہ Shortcut اسکرینوں کا بڑا آئیکن گرڈ ہے —
-    // Billing/پراڈکٹ گرڈ کبھی بھی ڈیفالٹ کے طور پر نظر نہیں آئے گا۔ Settings > Home Shortcuts سے جتنی چاہیں
-    // اسکرینیں منتخب کریں، وہ سب یہیں گرڈ میں کھڑی ہو جائیں گی (پہلے صرف 3 کی حد تھی، اب کوئی حد نہیں) ---------- -->
-    const selected = AppState.settings.homeShortcuts || [];
+    // ---------- 🍇 صدام کی ہدایت پر: ایڈمن کے ہوم پیج پر اب صرف 3 مقررہ باریک آئٹم — Pending Orders,
+    // Customers, Suppliers — ایک ہی قطار میں (پہلے کی طویل عمودی فہرست کی جگہ)۔ باقی سب مین ایریا خالی
+    // رہتا ہے۔ Settings > Home Shortcuts والا انتخاب اب یہاں استعمال نہیں ہوتا (کوڈ محفوظ ہے) ---------- -->
+    const fixedKeys = ['advanceorders', 'customers', 'suppliers'];
     const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending').length : 0;
-    let adminTiles = selected.map(key => HOME_SHORTCUT_OPTIONS.find(o => o.key === key)).filter(Boolean);
-    if(adminTiles.length === 0) adminTiles = [HOME_SHORTCUT_OPTIONS.find(o => o.key === 'advanceorders')].filter(Boolean); // ---------- کچھ بھی منتخب نہ ہو تو کم از کم Pending Orders نظر آئے ----------
+    const adminTiles = fixedKeys.map(key => HOME_SHORTCUT_OPTIONS.find(o => o.key === key)).filter(Boolean);
     const adminTileHtml = (t) => `
       <button class="homeIconTile" style="position:relative;" onclick="goTo('${t.screen}')">
-        ${t.key === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:6px; right:6px; background:var(--danger); color:#fff; font-size:11px; font-weight:800; min-width:20px; height:20px; border-radius:10px; display:flex; align-items:center; justify-content:center; padding:0 5px;">${pendingCount}</span>` : ''}
+        ${t.key === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingCount}</span>` : ''}
         <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span></span>
         <span class="hitLabel">${t.label}</span>
       </button>`;
     grid.innerHTML = adminTiles.map(adminTileHtml).join('');
-    const otherTiles = HOME_TILES_ADMIN.filter(t => t.screen !== 'billing' && !selected.includes(t.screen)).sort((a, b) => a.label.localeCompare(b.label));
-    renderOtherFeaturesDrop(otherTiles);
+    document.getElementById('otherFeaturesDropWrap').style.display = 'none';
   } else {
     document.getElementById('otherFeaturesDropWrap').style.display = 'none';
     // ---------- 🔧 فکس: پہلے یہاں ہمیشہ ایک fixed فہرست (Billing/Bill History/Advance Orders) دکھائی جاتی
@@ -7627,15 +7630,12 @@ const APP_SEARCH_INDEX = [
   {label:'Billing / New Sale', path:'Billing', screen:'billing', keywords:'billing sale invoice cart new bill sell checkout retail wholesale walk-in'},
   {label:'Bill History', path:'Bill History', screen:'billhistory', keywords:'bill history invoices past sales voided returns return item pending clear delete'},
   {label:'Expenditure', path:'Expenditure', screen:'expenditure', keywords:'expenditure expense expenses spending daily cost new expense'},
-  {label:'Dashboard & Reports', path:'Dashboard', screen:'dashboard', keywords:'dashboard reports sales summary profit loss financial health stock value cash net position admin'},
+  // ---------- 🍇 صدام کی ہدایت پر: Dashboard, Categories, Stock Adjustment, Purchase Orders کے تمام سرچ انڈیکس اندراجات
+  // ہٹا دیے گئے ہیں — یہ اسکرینیں اب کہیں بھی سرچ کر کے نہیں کھل سکتیں (کوڈ محفوظ ہے) ----------
   {label:'Products & Variants', path:'Products', screen:'products', keywords:'products variants items stock price barcode add new product edit'},
-  {label:'Categories', path:'Categories', screen:'categories', keywords:'categories category product grouping rename uncategorize delete add move'},
-  {label:'Stock Adjustment', path:'Stock Adjustment', screen:'stockadjustment', keywords:'stock adjustment adjust manual negative low stock reset quantity'},
-  {label:'Track Inventory (On/Off)', path:'Stock Adjustment / Settings', screen:'stockadjustment', keywords:'track inventory toggle negative stock block sale out of stock'},
   {label:'Expiry Batches (Multiple Boxes)', path:'Products', screen:'products', keywords:'expiry batch batches multiple boxes different dates lot fefo medicine medical'},
   {label:'Customers', path:'Customers', screen:'customers', keywords:'customers wallet receivable phone contact reminder walk-in add new import csv'},
   {label:'Suppliers', path:'Suppliers', screen:'suppliers', keywords:'suppliers vendor payable bank account pay supplier add new import csv'},
-  {label:'Purchase Orders', path:'Purchase Orders', screen:'purchaseorders', keywords:'purchase order po restock get from low stock receive'},
   {label:'Payments', path:'Payments', screen:'payments', keywords:'payments record customer supplier receipt paid received total'},
   {label:'Advance Orders', path:'Advance Orders', screen:'advanceorders', keywords:'advance order preorder booking pending fulfilled print list'},
   {label:'Reports Center', path:'Reports', action:'openReportCenterModal', keywords:'reports price list inventory profit purchase sale category print whatsapp broadcast todays sale'},
@@ -13907,7 +13907,7 @@ function openSupplierProfile(supplierId){
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم؛ Transactions سب سے نیچے ---
   document.getElementById('profileQuickActions').innerHTML = `
-    <button style="background:linear-gradient(155deg,#3b82f6,#1e3a8a);" onclick="closeProfileModal(); openPoModal(${s.supplier_id});"><span class="sideIcon">📦</span><span class="sideLabel">New PO</span></button>
+    <!-- ---------- 🍇 صدام کی ہدایت پر: Purchase Orders مکمل ہٹا دیے گئے ہیں — "New PO" بٹن یہاں سے بھی ہائیڈ (کوڈ محفوظ ہے) ---------- -->
     <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id});"><span class="sideIcon">💵</span><span class="sideLabel">Pay Supplier</span></button>
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
@@ -18675,15 +18675,12 @@ const ASSIGNABLE_SCREENS = [
   {key:'recoveryList', label:'💰 Recovery List'},
   {key:'billhistory', label:'🧾 Bill History'},
   {key:'payments', label:'💳 Payments'},
-  {key:'dashboard', label:'📊 Dashboard'},
+  // ---------- 🍇 صدام کی ہدایت پر: Dashboard, Categories, Purchase Orders, Stock Adjustment, Trends —
+  // یہ پانچوں ملازم کو Assign کرنے کی فہرست سے مکمل ہٹا دیے گئے ہیں (کوڈ محفوظ ہے) ----------
   {key:'products', label:'📦 Products'},
-  {key:'categories', label:'🏷️ Categories'},
   {key:'customers', label:'🧑‍🤝‍🧑 Customers'},
   {key:'suppliers', label:'🚚 Suppliers'},
-  {key:'purchaseorders', label:'📦 Purchase Orders'},
-  {key:'stockadjustment', label:'🧮 Stock Adjustment'},
   {key:'expenditure', label:'💸 Expenditure'},
-  {key:'trends', label:'📈 Trends'},
   {key:'myaccount', label:'🏦 My Account'},
   {key:'mydiary', label:'📔 My Diary'},
   {key:'billsettings', label:'🖨️ Bill & Print Settings'},
