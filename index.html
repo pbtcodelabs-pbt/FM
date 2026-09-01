@@ -2930,10 +2930,12 @@
           <div id="npPartyPhoneListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:81;"></div>
         </div>
         <div id="npPartyPhoneWarning" style="display:none; background:#fef2f2; color:var(--danger); font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:8px; margin-top:-6px; margin-bottom:8px;"></div>
-        <input type="text" id="npPartyAddress" placeholder="Address (optional)">
-        <div style="position:relative;">
+        <!-- ---------- 🧹 صدام کی ہدایت پر Address اور Area/City/Route کے خانے فارم سے ہٹا دیے گئے —
+             صرف نیچے Rate Area (Islamabad/Rawalpindi) رہے گا۔ فیلڈز کو مکمل حذف کرنے کی بجائے
+             چھپایا گیا ہے تاکہ باقی کوڈ (رپورٹس وغیرہ) بغیر ٹوٹے کام کرتا رہے ---------- -->
+        <input type="text" id="npPartyAddress" placeholder="Address (optional)" style="display:none;">
+        <div style="position:relative; display:none;">
           <input type="text" id="npPartyArea" placeholder="🗺️ Area / City / Route (e.g. Gulberg, Lahore)" autocomplete="off" oninput="filterPartyAreaOptions()" onfocus="filterPartyAreaOptions()">
-          <!-- ---------- پہلے سے موجود ایریا/سٹی ناموں کی فہرست — ڈپلیکیٹ (FP, F.P, FP2 وغیرہ) بننے سے بچانے کے لیے ---------- -->
           <div id="npPartyAreaListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:80;"></div>
         </div>
         <!-- ---------- 🏷️ ریٹ ایریا — یہ کسٹمر اسلام آباد ریٹ پر ہے یا راولپنڈی ریٹ پر — بلنگ/ایڈوانس آرڈر میں
@@ -4492,10 +4494,11 @@
           <div class="settingsHint" id="appBuildVersionText" style="font-weight:800; color:var(--primary-dark); font-size:13px;"></div>
         </div>
 
-        <!-- ---------- 🏠 HOME SHORTCUTS — صدام کی ہدایت پر: ایڈمن اپنی مرضی کی 3 (زیادہ سے زیادہ) سکرینیں
-             منتخب کر سکے، وہی سکرینیں کارڈز کی شکل میں سب سے اوپر Home/Billing پر نظر آئیں (مثلاً Pending
-             Orders — جس پر کتنے آرڈر پینڈنگ ہیں اس کی گنتی کا بیج بھی ہو) ---------- -->
-        <div class="settingsCard" id="settingsCardHomeShortcuts">
+        <!-- ---------- 🏠 پرانا "Home Screen Shortcuts" کارڈ یہاں سے ہٹا دیا گیا ہے — یہ دراصل کچھ کام نہیں کر
+             رہا تھا کیونکہ renderHomeIconGrid() ایڈمن کے لیے اب اسے پڑھتا ہی نہیں (کوڈ محفوظ ہے، فنکشنز اب بھی
+             موجود ہیں)۔ اب ایڈمن کی ہوم اسکرین وہی نظام استعمال کرتی ہے جو ملازم کے لیے پہلے سے تھا: Users →
+             اپنے نام کے سامنے 🖥️ Screens بٹن سے اپنی مرضی کی جتنی چاہیں اسکرینیں منتخب کریں ---------- -->
+        <div class="settingsCard" id="settingsCardHomeShortcuts" style="display:none !important;">
           <h3>🏠 Home Screen Shortcuts <span style="font-weight:600; color:var(--muted); font-size:11.5px;">(زیادہ سے زیادہ 3 منتخب کریں)</span></h3>
           <div id="homeShortcutsPicker" style="display:flex; flex-direction:column; gap:6px; margin-top:8px;"></div>
         </div>
@@ -5923,6 +5926,10 @@ function proceedWithImport(){
       nextProductId = backup.nextProductId || nextProductId;
       nextVariantId = backup.nextVariantId || nextVariantId;
       nextCustomerId = backup.nextCustomerId || nextCustomerId;
+      // ---------- 🛡️ بحالی (restore) کے فوراً بعد بھی کاؤنٹرز کو محفوظ حد پر لائیں اور کوئی ٹکراؤ صاف کریں —
+      // ورنہ پرانی بیک اپ فائل کا کم نمبر والا کاؤنٹر بحال ہونے پر نئی چیزیں بنتے وقت پرانی id دوبارہ مل سکتی
+      // تھی (یہی وہ اصل وجہ تھی جس سے دو مختلف آئٹمز کی مقدار آپس میں ٹکرا جاتی تھی) ----------
+      try{ recalcIdCounters(); dedupeVariantIds(); }catch(e){}
       nextSupplierId = backup.nextSupplierId || nextSupplierId;
       nextUserId = backup.nextUserId || nextUserId;
       nextRequestId = backup.nextRequestId || nextRequestId;
@@ -6154,6 +6161,21 @@ if(AppState.settings.packagePlansMigratedV2 !== true){
   saveToStorage('settings', AppState.settings);
 }
 
+// ---------- 🛡️ Developer Password ری سیٹ — صرف اس مخصوص، خفیہ URL ٹوکن سے (کسی Admin PIN سے نہیں،
+// کیونکہ ہر دکاندار/ایڈمن کو اپنا PIN تو ویسے ہی معلوم ہوتا ہے — یہاں صرف وہی شخص کر سکتا ہے جسے یہ
+// بالکل صحیح لفظ بہ لفظ ٹوکن معلوم ہو)۔ استعمال کے بعد فوراً نیا پاسورڈ سیٹ کر لیں، اور یہ ٹوکن کبھی کسی
+// اور کو نہ بتائیں ---------- -->
+(function(){
+  try{
+    const p = new URLSearchParams(window.location.search);
+    if(p.get('devpwreset') === 'saddamFM19reset'){
+      AppState.settings.devPanelPasswordHash = '';
+      saveToStorage('settings', AppState.settings);
+      setTimeout(() => alert('✅ Developer Password ڈیفالٹ پر ری سیٹ ہو گیا۔\n\nDefault Password: SHNuV2apB6\n\nابھی اندر جا کر فوراً نیا، مختلف پاسورڈ سیٹ کر لیں — پھر یہ لنک/ٹوکن دوبارہ کبھی استعمال نہ کریں۔'), 400);
+    }
+  }catch(e){}
+})();
+
 // ---------- LOGIN LOGIC: PIN کو usersData کے خلاف تصدیق کریں، role خودکار متعین ہوگا ----------
 /* =====================================================================
    📞 ڈویلپر کی رابطہ معلومات — تمام "Chat with Developer" بلبلوں میں استعمال ہوں گی
@@ -6189,7 +6211,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU17';
+const APP_BUILD_VERSION = 'FM19TU22';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6643,45 +6665,38 @@ function renderHomeIconGrid(){
       <span class="hitLabel">${t.label}</span>
     </button>`;
 
-  if(AppState.currentRole === 'admin'){
-    // ---------- 🍇 صدام کی ہدایت پر: ایڈمن کے ہوم پیج پر اب صرف 3 مقررہ باریک آئٹم — Pending Orders,
-    // Customers, Suppliers — ایک ہی قطار میں (پہلے کی طویل عمودی فہرست کی جگہ)۔ باقی سب مین ایریا خالی
-    // رہتا ہے۔ Settings > Home Shortcuts والا انتخاب اب یہاں استعمال نہیں ہوتا (کوڈ محفوظ ہے) ---------- -->
-    const fixedKeys = ['advanceorders', 'customers', 'suppliers'];
-    const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending').length : 0;
-    const adminTiles = fixedKeys.map(key => HOME_SHORTCUT_OPTIONS.find(o => o.key === key)).filter(Boolean);
-    const adminTileHtml = (t) => `
-      <button class="homeIconTile" style="position:relative;" onclick="goTo('${t.screen}')">
-        ${t.key === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingCount}</span>` : ''}
-        <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span></span>
-        <span class="hitLabel">${t.label}</span>
-      </button>`;
-    grid.innerHTML = adminTiles.map(adminTileHtml).join('');
-    document.getElementById('otherFeaturesDropWrap').style.display = 'none';
-  } else {
-    document.getElementById('otherFeaturesDropWrap').style.display = 'none';
-    // ---------- 🔧 فکس: پہلے یہاں ہمیشہ ایک fixed فہرست (Billing/Bill History/Advance Orders) دکھائی جاتی
-    // تھی — چاہے صدام نے Users اسکرین میں ملازم کو کوئی بھی اور اسکرینز assign کی ہوں۔ اب اسی ملازم کی
-    // اپنی assigned screens (u.screens, ASSIGNABLE_SCREENS سے) کے مطابق ہوم پیج کے آئیکن بنائے جاتے ہیں —
-    // تاکہ صدام جسے جو اسکرین دے، اسی ملازم کو ہوم پیج پر وہی نظر آئے ----------
-    const currentUser = usersData.find(x => x.name === AppState.currentUser?.name && x.role === 'salesman');
-    const assignedKeys = (currentUser && Array.isArray(currentUser.screens)) ? currentUser.screens : [];
-    let salesmanTiles;
-    if(assignedKeys.length > 0){
-      salesmanTiles = assignedKeys.map(key => {
-        const def = ASSIGNABLE_SCREENS.find(s => s.key === key);
-        if(!def) return null;
-        const spaceIdx = def.label.indexOf(' ');
-        const icon = spaceIdx > -1 ? def.label.slice(0, spaceIdx) : '📄';
-        const label = spaceIdx > -1 ? def.label.slice(spaceIdx + 1) : def.label;
-        return {icon, label, screen:key};
-      }).filter(Boolean);
-    }
-    // ---------- اگر صدام نے ابھی تک کوئی اسکرین assign نہ کی ہو تو پرانی ڈیفالٹ فہرست دکھائیں —
-    // تاکہ نیا ملازم خالی ہوم پیج نہ دیکھے (Billing اب اس فہرست میں شامل نہیں) ----------
-    if(!salesmanTiles || salesmanTiles.length === 0) salesmanTiles = HOME_TILES_SALESMAN;
-    grid.innerHTML = salesmanTiles.map(tileHtml).join('');
+  // ---------- 🖥️ اب ایڈمن اور ملازم دونوں کے لیے ہوم پیج ایک ہی نظام استعمال کرتا ہے: Users اسکرین میں
+  // ہر یوزر کے سامنے 🖥️ Screens بٹن سے منتخب کی گئی اپنی u.screens فہرست۔ کوئی ہارڈ کوڈ فکسڈ فہرست نہیں،
+  // اور کوئی خاموش ڈیفالٹ بھی نہیں — اگر خالی ہو (پرانا ڈیٹا) تو صاف پیغام دکھایا جاتا ہے، Users میں جا کر
+  // ٹھیک کرنے کی ہدایت کے ساتھ ---------- -->
+  const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending').length : 0;
+  const currentUser = usersData.find(x => x.name === AppState.currentUser?.name && x.role === AppState.currentRole);
+  const assignedKeys = (currentUser && Array.isArray(currentUser.screens)) ? currentUser.screens : [];
+  const myTiles = assignedKeys.map(key => {
+    const def = ASSIGNABLE_SCREENS.find(s => s.key === key);
+    if(!def) return null;
+    const spaceIdx = def.label.indexOf(' ');
+    const icon = spaceIdx > -1 ? def.label.slice(0, spaceIdx) : '📄';
+    const label = spaceIdx > -1 ? def.label.slice(spaceIdx + 1) : def.label;
+    return {icon, label, screen:key};
+  }).filter(Boolean);
+
+  document.getElementById('otherFeaturesDropWrap').style.display = 'none';
+
+  if(myTiles.length === 0){
+    grid.innerHTML = `<div class="placeholder" style="grid-column:1/-1; padding:20px 10px; text-align:center; font-size:13px; color:var(--muted);">
+      ⚠️ ابھی تک آپ کے لیے کوئی اسکرین منتخب نہیں — ${AppState.currentRole === 'admin' ? 'Users' : 'Users (Admin سے کہیں)'} میں جا کر 🖥️ Screens بٹن سے منتخب کریں۔
+    </div>`;
+    return;
   }
+
+  const myTileHtml = (t) => `
+    <button class="homeIconTile" style="position:relative;" onclick="goTo('${t.screen}')">
+      ${t.screen === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingCount}</span>` : ''}
+      <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span></span>
+      <span class="hitLabel">${t.label}</span>
+    </button>`;
+  grid.innerHTML = myTiles.map(myTileHtml).join('');
 }
 
 // ---------- 📂 "دیگر فیچرز" ڈراپ ڈاؤن بھریں — ہر چیز ایک لائن میں، ٹیپ کرنے پر سیدھا وہی اسکرین کھلے ----------
@@ -7373,8 +7388,9 @@ function applyUserScreenPermissions(name){
 
   const u = usersData.find(x => x.name === name && x.role === 'salesman');
   let assignedKeys = (u && Array.isArray(u.screens)) ? u.screens.slice() : [];
-  // ---------- ابھی تک کوئی اسکرین Assign نہ ہوئی ہو تو نیا ملازم خالی مینو نہ دیکھے — پرانی ڈیفالٹ فہرست ----------
-  if(assignedKeys.length === 0) assignedKeys = ['orderTaking', 'billhistory', 'advanceorders']; // ---------- Billing اب ڈیفالٹ فہرست میں شامل نہیں ----------
+  // ---------- 🛡️ صدام کی ہدایت پر: اب کوئی خاموش ڈیفالٹ فہرست نہیں دی جاتی — اگر کسی پرانے/نامکمل ڈیٹا کی
+  // وجہ سے کسی ملازم کی کوئی اسکرین Assign نہ ہو تو اسے کوئی بھی اسکرین نظر نہیں آئے گی (Home پر صاف پیغام:
+  // "Admin سے رابطہ کریں")، بجائے اس کے کہ خاموشی سے 3 مقررہ اسکرینیں مل جائیں ----------
 
   assignedKeys.forEach(key => {
     document.querySelectorAll(`[data-screen="${key}"]`).forEach(el => el.classList.add('perm-allowed'));
@@ -9984,6 +10000,29 @@ function dedupeVariantIds(){
     console.warn(`⚠️ ${fixedCount} ٹکرانے والی variant_id مل کر خودکار ٹھیک کی گئیں۔`);
   }
   return fixedCount;
+}
+
+// ---------- 🛡️ اصل جڑ کی حفاظت — nextVariantId/nextProductId کبھی بھی موجودہ ڈیٹا میں پہلے سے
+// استعمال شدہ کسی id سے چھوٹا نہ ہو (یہی وہ اصل وجہ تھی جس سے دو مختلف آئٹمز کی quantity آپس میں
+// ٹکراتی/اوورلیپ ہوتی تھیں: مثلاً Backup Restore کے بعد، یا کسی پرانے ڈیٹا کی وجہ سے، شمار کرنے والا
+// نمبر (counter) اصل زیادہ سے زیادہ id سے پیچھے رہ جاتا تھا، اور نیا آئٹم بنتے وقت وہی id دوبارہ استعمال
+// ہو جاتی تھی جو پہلے سے کسی اور آئٹم کے پاس موجود تھی) — یہ فنکشن ہر بار کاؤنٹرز کو خودکار محفوظ حد
+// پر لے آتا ہے، پھر بھی dedupeVariantIds() اوپر موجود ٹکراؤ کو صاف کرتا ہے ----------
+function recalcIdCounters(){
+  let maxVariantId = 0, maxProductId = 0;
+  productsData.forEach(p => {
+    if(typeof p.product_id === 'number' && p.product_id > maxProductId) maxProductId = p.product_id;
+    (p.variants || []).forEach(v => {
+      if(typeof v.variant_id === 'number' && v.variant_id > maxVariantId) maxVariantId = v.variant_id;
+    });
+  });
+  if(typeof nextVariantId !== 'undefined' && nextVariantId <= maxVariantId) nextVariantId = maxVariantId + 1;
+  if(typeof nextProductId !== 'undefined' && nextProductId <= maxProductId) nextProductId = maxProductId + 1;
+  if(typeof customersData !== 'undefined' && typeof nextCustomerId !== 'undefined'){
+    let maxCustId = 0;
+    customersData.forEach(c => { if(typeof c.customer_id === 'number' && c.customer_id > maxCustId) maxCustId = c.customer_id; });
+    if(nextCustomerId <= maxCustId) nextCustomerId = maxCustId + 1;
+  }
 }
 
 /* =====================================================================
@@ -18959,16 +18998,16 @@ function renderUserList(){
       <div>
         <div class="uName">${u.name} <span class="statusDot ${u.is_active ? 'on':'off'}"></span></div>
         <div class="uMeta">@${u.username} — ${u.is_active ? 'Active' : 'Inactive'}</div>
-        ${u.role !== 'admin' ? `<div class="uMeta" style="margin-top:4px;">
+        <div class="uMeta" style="margin-top:4px;">
           ${(u.screens && u.screens.length) ? u.screens.map(s => {
             const found = ASSIGNABLE_SCREENS.find(a => a.key === s);
             return `<span style="display:inline-block; background:#eef2ff; color:#3730a3; font-size:11px; padding:2px 8px; border-radius:10px; margin:2px 3px 0 0;">${found ? found.label : s}</span>`;
-          }).join('') : '<span style="color:var(--danger); font-size:12px;">⚠️ کوئی اسکرین تفویض نہیں</span>'}
-        </div>` : ''}
+          }).join('') : '<span style="color:var(--danger); font-size:12px;">⚠️ کوئی اسکرین تفویض نہیں — ہوم پیج خالی نظر آئے گا</span>'}
+        </div>
       </div>
       <div class="userActions">
         <span class="roleTag ${u.role}">${u.role === 'admin' ? '👑 Admin' : '🧑‍💼 Salesman'}</span>
-        ${u.role !== 'admin' ? `<button class="btnResetPin" onclick="openEditPermissionsModal(${u.user_id})">🖥️ Screens</button>` : ''}
+        <button class="btnResetPin" onclick="openEditPermissionsModal(${u.user_id})">🖥️ Screens</button>
         <button class="btnResetPin" onclick="setCustomUserPin(${u.user_id})">✏️ Set Custom PIN</button>
         <button class="btnToggleActive" onclick="toggleUserActive(${u.user_id})">${u.is_active ? '⏸️ Deactivate' : '▶️ Activate'}</button>
         <button class="btnResetPin" onclick="requestRoleChangeAuth(${u.user_id})">🔄 Change Role</button>
@@ -18989,7 +19028,7 @@ function toggleUserActive(userId){
 let editPermsTargetId = null;
 function openEditPermissionsModal(userId){
   const u = usersData.find(x => x.user_id === userId);
-  if(!u || u.role === 'admin') return;
+  if(!u) return;
   editPermsTargetId = userId;
   const box = document.getElementById('editPermsCheckboxes');
   box.innerHTML = ASSIGNABLE_SCREENS.map(s => {
@@ -19011,10 +19050,18 @@ function saveEditPermissions(){
   const u = usersData.find(x => x.user_id === editPermsTargetId);
   if(!u){ closeEditPermissionsModal(); return; }
   const checked = Array.from(document.querySelectorAll('#editPermsCheckboxes input[type="checkbox"]:checked')).map(cb => cb.value);
+  // ---------- 🛡️ کم از کم ایک اسکرین ضرور منتخب ہو — ورنہ اس یوزر (چاہے ایڈمن ہو یا ملازم) کا ہوم پیج
+  // بالکل خالی نظر آئے گا اور کوئی راستہ ہی نہیں رہے گا۔ ڈیفالٹ فہرست خودکار نہیں دی جاتی — صاف ایرر دکھا کر
+  // روکا جاتا ہے ---------- */
+  if(checked.length === 0){
+    alert('⚠️ کم از کم ایک اسکرین ضرور منتخب کریں۔');
+    return;
+  }
   u.screens = checked;
   pushUsersToCloud();
   closeEditPermissionsModal();
   renderUserList();
+  try{ renderHomeIconGrid(); }catch(e){}
 }
 
 // ---------- کسی یوزر کا Role بدلنا (Salesman ⇄ Admin) — صرف موجودہ لاگ ان Admin اپنا PIN دوبارہ ڈال کر ہی کر سکتا ہے۔
@@ -25690,6 +25737,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------- 🛡️ حفاظتی try/catch — اگر کسی پرانی ڈیوائس کے محفوظ شدہ ڈیٹا کی وجہ سے کوئی فنکشن
   // یہاں Error دے تو پوری اسکرپٹ نہیں رکے گی (ورنہ نیچے موجود ہمبرگر مینو/لاگ آؤٹ بٹن کا کلک لسنر
   // بھی کبھی attach ہی نہ ہو پاتا، اور اسکرین "جام" لگنے لگتی) ----------
+  // ---------- 🛡️ ہر بار ایپ کھلتے ہی id کاؤنٹرز محفوظ حد پر لائیں اور کوئی ٹکرانے والی variant_id ہو تو
+  // فوراً صاف کریں — پہلے یہ صرف Order Taking کھولنے پر ہوتا تھا، اب ایپ کے شروع میں ہی، تاکہ کوئی بھی
+  // سکرین (Billing, Order Taking, وغیرہ) کبھی ٹکرائی ہوئی id کے ساتھ کام نہ کرے ----------
+  try{ recalcIdCounters(); dedupeVariantIds(); }catch(e){ console.error('recalcIdCounters/dedupeVariantIds failed', e); }
+
   try{ setupLoginScreen(); }catch(e){ console.error('setupLoginScreen failed', e); }
 
   // ---------- اگر اس ڈیوائس پر پن پہلے سے یاد رکھا ہوا ہے تو لاگ ان اسکرین چھوڑ کر سیدھا ایپ میں لے جائیں ----------
