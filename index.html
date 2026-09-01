@@ -6222,7 +6222,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU25';
+const APP_BUILD_VERSION = 'FM19TU26';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -7407,6 +7407,16 @@ function applyUserScreenPermissions(name){
     document.querySelectorAll(`[data-screen="${key}"]`).forEach(el => el.classList.add('perm-allowed'));
     const screenEl = document.getElementById('screen-' + key);
     if(screenEl) screenEl.classList.add('perm-allowed');
+    // ---------- 🧹 صدام کی ہدایت: 'customers' اب Customers+Suppliers+My Diary تینوں پر مشتمل ایک مشترکہ
+    // اجازت ہے (Screen Access موڈل میں اب صرف ایک ہی اندراج نظر آتا ہے)۔ اصل میں یہ تین چیزیں دو الگ DOM
+    // اسکرینز پر مشتمل ہیں: screen-parties (Customers/Suppliers ٹیبز) اور screen-mydiary (Diary ٹیب) —
+    // اس لیے 'customers' اجازت ملتے ہی دونوں کو کھول دیں، ورنہ Diary/Suppliers ٹیب دبانے پر "admin-only" کا
+    // پیغام آ جاتا (چونکہ 'screen-' + 'customers' سے 'screen-parties' یا 'screen-mydiary' نہیں ملتا) ----------
+    if(key === 'customers'){
+      document.querySelectorAll('[data-screen="suppliers"], [data-screen="mydiary"]').forEach(el => el.classList.add('perm-allowed'));
+      document.getElementById('screen-parties')?.classList.add('perm-allowed');
+      document.getElementById('screen-mydiary')?.classList.add('perm-allowed');
+    }
   });
 
   const singleScreenMode = assignedKeys.length === 1;
@@ -18783,6 +18793,17 @@ if(!Array.isArray(usersData) || !usersData.some(u => u.role === 'admin' && u.is_
 }
 // ---------- پرانے ڈیوائسز پر محفوظ شدہ یوزرز میں screens فیلڈ نہ ہو تو خالی array لگا دیں (ٹوٹنے سے بچاؤ) ----------
 usersData.forEach(u => { if(!Array.isArray(u.screens)) u.screens = []; });
+// ---------- 🧹 صدام کی ہدایت: Customers/Suppliers/My Diary اب Screen Access فہرست میں ایک ہی مشترکہ
+// اندراج ('customers') ہیں (بالکل اسی طرح جیسے سائیڈ مینیو میں "Customer/Supplier Record" ایک ہی آئٹم ہے) —
+// پرانے محفوظ شدہ ڈیٹا میں اگر کسی یوزر کے پاس علیحدہ 'suppliers' یا 'mydiary' اندراجات ہوں تو انہیں یہاں
+// خودکار طور پر 'customers' میں ضم کر دیں (dedupe کے ساتھ) تاکہ Screen Access موڈل میں دوبارہ الگ الگ نظر نہ آئیں ----------
+usersData.forEach(u => {
+  if(u.screens.includes('suppliers') || u.screens.includes('mydiary')){
+    const merged = u.screens.filter(s => s !== 'suppliers' && s !== 'mydiary');
+    if(!merged.includes('customers')) merged.push('customers');
+    u.screens = merged;
+  }
+});
 // ---------- 🍇 Fruit Mandi POS: اگر اس ڈیوائس پر پرانے سیڈ کے نام (Aslam Bhai/Bilal) پہلے سے محفوظ ہیں تو نئے ناموں پر
 // خودکار منتقل کریں (صرف نام/is_active — ان کا اپنا سیٹ کیا ہوا PIN بالکل نہیں چھیڑا جائے گا)، اور dobHash فیلڈ نہ ہو تو خالی رکھیں ----------
 usersData.forEach(u => {
@@ -18804,11 +18825,14 @@ const ASSIGNABLE_SCREENS = [
   // ---------- 🍇 صدام کی ہدایت پر: Dashboard, Categories, Purchase Orders, Stock Adjustment, Trends —
   // یہ پانچوں ملازم کو Assign کرنے کی فہرست سے مکمل ہٹا دیے گئے ہیں (کوڈ محفوظ ہے) ----------
   {key:'products', label:'📦 Products'},
-  {key:'customers', label:'🧑‍🤝‍🧑 Customers'},
-  {key:'suppliers', label:'🚚 Suppliers'},
+  // ---------- 🧹 صدام کی ہدایت: Customers + Suppliers + My Diary اب یہاں ایک ہی مشترکہ اندراج ہیں —
+  // بالکل اسی سکرین کا لنک جو سائیڈ مینیو میں "🧑‍🤝‍🧑 Customer/Supplier Record" کے نام سے تینوں کو ایک صفحے
+  // (ٹیبز کے ساتھ) میں ضم کر کے دکھاتی ہے۔ اسے اجازت دینے سے صارف کو تینوں ٹیب (Customers/Suppliers/Diary)
+  // خودکار مل جاتے ہیں — علیحدہ علیحدہ اندراجات جان بوجھ کر ہٹا دیے گئے ہیں (کوڈ نیچے applyUserScreenPermissions
+  // میں 'customers' اجازت کو خودکار طور پر screen-parties اور screen-mydiary دونوں پر لاگو کرتا ہے) ----------
+  {key:'customers', label:'🧑‍🤝‍🧑 Customer/Supplier Record'},
   {key:'expenditure', label:'💸 Expenditure'},
   {key:'myaccount', label:'🏦 My Account'},
-  {key:'mydiary', label:'📔 My Diary'},
   {key:'billsettings', label:'🖨️ Bill & Print Settings'},
   {key:'settings', label:'⚙️ Settings'},
   {key:'users', label:'🔑 Users'},
