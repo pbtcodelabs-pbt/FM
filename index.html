@@ -2925,7 +2925,14 @@
           <!-- ---------- پہلے سے موجود ایریا/سٹی ناموں کی فہرست — ڈپلیکیٹ (FP, F.P, FP2 وغیرہ) بننے سے بچانے کے لیے ---------- -->
           <div id="npPartyAreaListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:80;"></div>
         </div>
-        <input type="text" id="npPartyKeywords" placeholder="Nickname / Keyword for search (e.g. Jago, Peshawar)">
+        <!-- ---------- 🏷️ ریٹ ایریا — یہ کسٹمر اسلام آباد ریٹ پر ہے یا راولپنڈی ریٹ پر — بلنگ/ایڈوانس آرڈر میں
+             اسی کسٹمر کو منتخب کرتے ہی خودکار وہی ریٹ لگ جائے گا، ہر بار دستی انتخاب کی ضرورت نہیں ---------- -->
+        <select id="npPartyRateArea" style="margin-top:2px;">
+          <option value="">🏷️ Rate Area — منتخب کریں (اختیاری)</option>
+          <option value="retail">🏷️ Islamabad Rate</option>
+          <option value="wholesale">📦 Rawalpindi Rate</option>
+        </select>
+        <input type="text" id="npPartyKeywords" placeholder="Nickname / Keyword for search (e.g. Jago, Peshawar)" style="display:none;">
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewPartyModal()">Cancel</button>
           <button class="saveBtn" onclick="saveNewParty()">Save</button>
@@ -4134,12 +4141,16 @@
       <!-- STEP 3: ریویو — اب اصل "Advance Order" بل کینوس کی شکل میں (وہی فارمیٹ جو ایڈمن کو نظر آئے گا)،
            صرف تعداد کے ساتھ (رقم/ریٹ ایڈمن خود لگائے گا) — ایڈمن کو بھیجنے کے لیے تیار ---------- -->
       <div id="otStepReview" style="display:none;">
+        <!-- ---------- ✅ آرڈر خودکار محفوظ ہو چکا ہے — یہاں صرف تصدیقی پیغام اور بل کی جھلک ---------- -->
+        <div style="background:#dcfce7; color:#15803d; border-radius:12px; padding:10px 14px; margin-bottom:10px; text-align:center; font-weight:800; font-size:14px;">
+          ✅ Order Saved &amp; Shared with Admin
+        </div>
         <div style="background:#fff; border:1px solid #e5e9f0; border-radius:14px; padding:10px; margin-bottom:12px; display:flex; justify-content:center;">
           <canvas id="otReviewCanvas" style="width:100%; max-width:340px; display:block;"></canvas>
         </div>
         <div style="position:sticky; bottom:8px; display:flex; gap:8px; padding-top:6px; padding-bottom:8px;">
           <button type="button" onclick="backToOtItems()" style="flex:1; padding:15px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:14px; font-size:15px; font-weight:800; cursor:pointer;">◀ ترمیم کریں</button>
-          <button type="button" onclick="postOtOrderToAdmin()" style="flex:2; padding:15px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">📤 ایڈمن کو بھیجیں</button>
+          <button type="button" onclick="startNextOtCustomer()" style="flex:2; padding:15px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">➡️ اگلا کسٹمر</button>
         </div>
       </div>
     </div>
@@ -6167,7 +6178,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU13';
+const APP_BUILD_VERSION = 'FM19TU16';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -7482,7 +7493,11 @@ function goTo(screenName, _isHistoryNav){
   requestAnimationFrame(() => { window.fixMainAreaHeight && window.fixMainAreaHeight(); resetScrollNow(); });
 
   if(screenName === 'dashboard') renderDashboard();
-  if(screenName === 'home') { renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI(); }
+  if(screenName === 'home') {
+    renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI();
+    // ---------- ☁️ Home پر پہنچتے ہی خاموشی سے تازہ ترین Pending Orders منگوا لیں — تاکہ گنتی کا بیج (🔴) درست ہو ----------
+    if(AppState.currentRole === 'admin') fetchAdvanceOrdersFromCloud(true).then(added => { if(added) renderHomeIconGrid(); });
+  }
   if(screenName === 'billing') {
     renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn();
   }
@@ -7500,10 +7515,28 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'expenditure') renderExpenditureScreen();
   if(screenName === 'stockadjustment') renderStockAdjustmentScreen();
   if(screenName === 'purchaseorders') renderPurchaseOrdersScreen();
-  if(screenName === 'advanceorders') renderAdvanceOrdersScreen();
+
+  // ---------- ☁️ Order Taking / Pending Orders / Recovery List — کلاؤڈ سے تازہ ترین ڈیٹا منگوائیں اور جب تک
+  // اسی سکرین پر رہیں، ہر 12 سیکنڈ بعد خودکار fetch ہوتا رہے (تقریباً real-time کا تجربہ)۔
+  // دوسری کسی سکرین پر جائیں تو polling خودکار بند — فالتو Firestore reads نہ ہوں ---------- -->
+  stopAdvanceOrdersPolling();
+  stopRecoveryListPolling();
+  if(screenName === 'advanceorders'){
+    renderAdvanceOrdersScreen();
+    fetchAdvanceOrdersFromCloud(false);
+    startAdvanceOrdersPolling();
+  }
   if(screenName === 'advOrderPicker') renderAdvOrderPickerScreen();
-  if(screenName === 'orderTaking') renderOrderTakingScreen();
-  if(screenName === 'recoveryList') renderRecoveryListScreen();
+  if(screenName === 'orderTaking'){
+    renderOrderTakingScreen();
+    fetchAdvanceOrdersFromCloud(true);
+    startAdvanceOrdersPolling();
+  }
+  if(screenName === 'recoveryList'){
+    renderRecoveryListScreen();
+    fetchRecoveryListFromCloud(false);
+    startRecoveryListPolling();
+  }
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
   if(screenName === 'myaccount') renderMyAccountScreen();
@@ -9156,6 +9189,11 @@ function onCustomerChange(){
     hint.classList.add('show');
   } else {
     hint.classList.remove('show');
+  }
+  // ---------- 🏷️ کسٹمر کا اپنا محفوظ شدہ ریٹ ایریا (اسلام آباد/راولپنڈی) ہو تو خودکار وہی ریٹ لگا دیں —
+  // ہر بار دستی طور پر ٹوگل کرنے کی ضرورت نہیں ----------
+  if(customer && customer.rateArea && (customer.rateArea === 'retail' || customer.rateArea === 'wholesale')){
+    setSaleMode(customer.rateArea);
   }
   syncCartModeControls();
   renderAutoPaymentNote();
@@ -15265,6 +15303,7 @@ let otCheckedMap = {};      // {variant_id: true/false}
 let otFlatCache = [];       // موجودہ سکرین کے لیے آئٹمز کی فہرست (ایک بار سورٹ کر کے محفوظ)
 let otPage = 0;             // موجودہ صفحہ نمبر (0 سے شروع)
 let otReviewItems = [];     // ریویو سکرین کے لیے منتخب شدہ آئٹمز
+let otSavedOrderId = null;  // موجودہ کسٹمر کا آرڈر ایک بار خودکار محفوظ ہونے کے بعد اس کی id — دوبارہ ترمیم پر نئی انٹری نہیں بنتی، یہی اپڈیٹ ہوتی ہے
 const OT_PAGE_SIZE = 60;    // ہر صفحے پر کتنے آئٹمز دکھائیں — کمپیکٹ رو کی وجہ سے اب زیادہ آئٹمز ایک ہی صفحے پر آ جاتے ہیں
 
 function renderOrderTakingScreen(){
@@ -15318,6 +15357,7 @@ function selectOtCustomer(customerId){
   otQtyMap = {};
   otCheckedMap = {};
   otPage = 0;
+  otSavedOrderId = null; // ---------- نیا کسٹمر — پرانا سیو شدہ آرڈر آئی ڈی بھول جائیں ----------
 
   const nameEl = document.getElementById('otTopCustName');
   const areaEl = document.getElementById('otTopCustArea');
@@ -15388,8 +15428,10 @@ function toggleOtItem(checkboxEl, variantId){
 // ---------- ایک ہی جگہ سے row کی حالت (بارڈر رنگ، ٹک، تعداد) اپڈیٹ ہوتی ہے — ہمیشہ دیے گئے row کے
 // اندر ہی، پورے صفحے میں کہیں اور نہیں تلاش کرتا ----------
 function applyOtRowState(row, variantId, isChecked){
+  const wasChecked = !!otCheckedMap[variantId];
   otCheckedMap[variantId] = isChecked;
-  if(isChecked && !otQtyMap[variantId]) otQtyMap[variantId] = 1;
+  // ---------- نیا ٹک ہمیشہ 1 سے شروع ہو — پرانی/باقی رہ جانے والی (کسی اور وقت کی) تعداد کبھی نظر نہ آئے ----------
+  if(isChecked && !wasChecked) otQtyMap[variantId] = 1;
   if(!row) return;
 
   row.style.borderColor = isChecked ? 'var(--primary)' : '#e5e9f0';
@@ -15442,23 +15484,57 @@ async function openOtReview(){
   if(items.length === 0){ alert('کم از کم ایک چیز کو ٹک کر کے تعداد لگائیں'); return; }
   otReviewItems = items;
 
+  // ---------- 🍇 صدام کی ہدایت پر: اب یہاں "ایڈمن کو بھیجیں" کا الگ بٹن دبانے کی ضرورت نہیں —
+  // آرڈر مکمل دباتے ہی یہیں خودکار محفوظ ہو جاتا ہے اور اسی وقت ایڈمن کی سکرین پر پہنچ جاتا ہے۔
+  // اگر بندہ ◀ ترمیم کریں سے واپس جا کر تعداد بدلے اور دوبارہ آرڈر مکمل دبائے تو نئی انٹری نہیں بنتی،
+  // وہی پہلے سے محفوظ آرڈر اپڈیٹ ہو جاتا ہے (otSavedOrderId کی مدد سے) ----------
+  const itemsForSave = items.map(i => ({variant_id: i.variant_id, name: i.name, label: i.label, qty: i.qty, unitPrice: 0}));
+  if(otSavedOrderId){
+    const existing = advanceOrdersData.find(o => o.id === otSavedOrderId);
+    if(existing) existing.items = itemsForSave;
+  } else {
+    const newOrder = {
+      id: nextAdvOrderId++,
+      customerName: otCustomer.name,
+      customerPhone: '',
+      customerArea: otCustomer.area || '',
+      note: '',
+      items: itemsForSave,
+      status: 'pending',
+      employeeName: AppState.currentUser?.name || 'Unknown', // ---------- کس ملازم نے بھیجا — ایڈمن کی سکرین پر ملازم کے نام سے گروپ بندی کے لیے ----------
+      extraCharges: [], // ---------- ایڈمن یہاں بعد میں فریٹ/شپنگ وغیرہ اضافی خرچے شامل کر سکتا ہے ----------
+      createdAt: new Date().toISOString(),
+      fulfilledAt: null
+    };
+    advanceOrdersData.unshift(newOrder);
+    otSavedOrderId = newOrder.id;
+  }
+  persistAllData();
+  pushAdvanceOrdersToCloud(); // ---------- ⚡ فوراً کلاؤڈ پر بھیجیں (بیک گراؤنڈ میں) — ایڈمن کے فون پر اگلے 12 سیکنڈ میں خودکار نظر آ جائے گا ----------
+
   document.getElementById('otStepItems').style.display = 'none';
   document.getElementById('otStepReview').style.display = '';
 
-  // ---------- اصل ایڈوانس آرڈر بل جیسا ہی عارضی (ابھی تک محفوظ نہیں کیا گیا) آرڈر بنا کر کینوس پر دکھائیں ----------
-  const previewOrder = {
-    id: 0,
-    customerName: otCustomer.name,
-    customerPhone: '',
-    customerArea: otCustomer.area || '',
-    note: '',
-    items,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-    fulfilledAt: null
-  };
+  const savedOrder = advanceOrdersData.find(o => o.id === otSavedOrderId);
   await new Promise(r => setTimeout(r, 50));
-  await renderAdvOrderToCanvas(previewOrder, document.getElementById('otReviewCanvas'));
+  await renderAdvOrderToCanvas(savedOrder, document.getElementById('otReviewCanvas'));
+}
+
+// ---------- اگلا کسٹمر — موجودہ آرڈر پہلے ہی محفوظ ہو چکا، بس فہرست صاف کر کے واپس کسٹمر منتخب کرنے پر لے جائیں ----------
+function startNextOtCustomer(){
+  otCustomer = null;
+  otQtyMap = {};
+  otCheckedMap = {};
+  otReviewItems = [];
+  otSavedOrderId = null;
+  otPage = 0;
+
+  document.getElementById('otStepReview').style.display = 'none';
+  document.getElementById('otStepItems').style.display = 'none';
+  document.getElementById('otStepCustomer').style.display = '';
+  const search = document.getElementById('otCustSearch');
+  if(search) search.value = '';
+  renderOtCustomerList();
 }
 
 function backToOtItems(){
@@ -15466,34 +15542,10 @@ function backToOtItems(){
   document.getElementById('otStepItems').style.display = '';
 }
 
-// ---------- "ایڈمن کو بھیجیں" — نیا Advance Order (status: pending) بنے گا، ایڈمن کی Advance Orders
-// سکرین میں خودبخود نظر آئے گا، جہاں سے ایڈمن ریٹ لگا کر فائنل کر کے کسٹمر کو بھیج سکتا ہے ----------
+// ---------- ⚠️ پرانا "ایڈمن کو بھیجیں" فنکشن اب استعمال نہیں ہوتا — openOtReview() اب خودکار محفوظ کرتا ہے
+// (فنکشن حذف نہیں کیا، صرف غیر فعال چھوڑا گیا ہے تاکہ کہیں پرانا onclick بچا ہو تو ایپ نہ ٹوٹے) ----------
 function postOtOrderToAdmin(){
-  if(!otCustomer || !otReviewItems || otReviewItems.length === 0) return;
-
-  advanceOrdersData.unshift({
-    id: nextAdvOrderId++,
-    customerName: otCustomer.name,
-    customerPhone: '',
-    customerArea: otCustomer.area || '',
-    note: '',
-    items: otReviewItems.map(i => ({variant_id: i.variant_id, name: i.name, label: i.label, qty: i.qty, unitPrice: 0})),
-    status: 'pending',
-    employeeName: AppState.currentUser?.name || 'Unknown', // ---------- کس ملازم نے بھیجا — ایڈمن کی سکرین پر ملازم کے نام سے گروپ بندی کے لیے ----------
-    extraCharges: [], // ---------- ایڈمن یہاں بعد میں فریٹ/شپنگ وغیرہ اضافی خرچے شامل کر سکتا ہے ----------
-    createdAt: new Date().toISOString(),
-    fulfilledAt: null
-  });
-  persistAllData();
-
-  otCustomer = null;
-  otQtyMap = {};
-  otCheckedMap = {};
-  otReviewItems = [];
-  otPage = 0;
-
-  alert('✅ آرڈر ایڈمن کو بھیج دیا گیا — ایڈمن ریٹ لگا کر فائنل کرے گا۔');
-  goTo('home');
+  startNextOtCustomer();
 }
 
 /* =====================================================================
@@ -15579,6 +15631,7 @@ function submitRecoveryList(){
     });
   });
   persistAllData();
+  pushRecoveryListToCloud(); // ---------- ⚡ فوراً کلاؤڈ پر بھیجیں — ایڈمن کے فون پر خودکار نظر آ جائے گا ----------
 
   rlAmountMap = {};
   rlMethodMap = {};
@@ -15644,6 +15697,7 @@ function confirmRecoveryEntry(entryId){
   entry.status = 'confirmed';
   entry.confirmedAt = new Date().toISOString();
   persistAllData();
+  pushRecoveryListToCloud(); // ---------- کلاؤڈ پر بھی "confirmed" حالت اپڈیٹ ہو جائے ----------
   renderRecoveryListAdminView();
 }
 
@@ -15657,6 +15711,7 @@ function deleteAdvanceOrder(orderId){
   if(!confirm('Delete this advance order? This cannot be undone.')) return;
   advanceOrdersData = advanceOrdersData.filter(o => o.id !== orderId);
   persistAllData();
+  pushAdvanceOrdersToCloud(); // ---------- کلاؤڈ پر بھی خودکار اپڈیٹ ----------
   renderAdvanceOrdersScreen();
 }
 
@@ -15687,6 +15742,7 @@ function fulfillAdvanceOrder(orderId){
   order.status = 'fulfilled';
   order.fulfilledAt = new Date().toISOString();
   persistAllData();
+  pushAdvanceOrdersToCloud();
   renderAdvanceOrdersScreen();
   if(typeof closeAdvOrderPreview === 'function') closeAdvOrderPreview(); // ---------- پریویو کے اندر سے فُل فِل کیا ہو تو موڈل بھی بند ہو جائے ----------
 
@@ -15697,6 +15753,7 @@ function fulfillAdvanceOrder(orderId){
   const custSel = document.getElementById('customerSelect');
   if(custSel){ custSel.value = matchedCustomer ? matchedCustomer.customer_id : ''; }
   Billing.counterSale = !matchedCustomer;
+  onCustomerChange(); // ---------- کسٹمر کا اپنا محفوظ شدہ ریٹ ایریا (اسلام آباد/راولپنڈی) ہو تو خودکار لگ جائے ----------
   syncCartModeControls();
   renderCart();
 
@@ -15783,10 +15840,15 @@ function renderAdminPendingOrdersScreen(){
         ? `<span class="pendingStatusTag approved">✅ BILL READY</span>`
         : `<span class="pendingStatusTag pending">⏳ RATE PENDING</span>`;
       const when = new Date(o.createdAt).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+      // ---------- 🏷️ کسٹمر کا محفوظ شدہ ریٹ ایریا — نام کے ساتھ ہی نظر آ جائے، ایڈمن کو ٹیپ کرنے سے پہلے ہی پتا چل جائے ----------
+      const matchedCust = customersData.find(c => c.name.toLowerCase() === o.customerName.toLowerCase());
+      const areaBadge = matchedCust && matchedCust.rateArea
+        ? (matchedCust.rateArea === 'wholesale' ? `<span style="font-size:10.5px; font-weight:800; background:#ede9fe; color:#5b21b6; padding:2px 7px; border-radius:8px; margin-inline-start:5px;">📦 Rawalpindi</span>` : `<span style="font-size:10.5px; font-weight:800; background:#d1fae5; color:#065f46; padding:2px 7px; border-radius:8px; margin-inline-start:5px;">🏷️ Islamabad</span>`)
+        : '';
       return `
-        <div class="billCard" onclick="openAdvOrderPreview(${o.id})" style="cursor:pointer; padding:8px 12px; margin-bottom:5px;">
+        <div class="billCard" onclick="fulfillAdvanceOrder(${o.id})" style="cursor:pointer; padding:8px 12px; margin-bottom:5px;">
           <div>
-            <div class="bNo" style="font-size:13.5px;">🧑 ${o.customerName} ${statusTag}</div>
+            <div class="bNo" style="font-size:13.5px;">🧑 ${o.customerName}${areaBadge} ${statusTag}</div>
             <div class="bMeta" style="font-size:11.5px;">${when} — ${itemCount} item(s)${hasRate ? ' — Rs. ' + advOrderTotal(o).toLocaleString() : ''}</div>
           </div>
         </div>`;
@@ -15881,6 +15943,7 @@ function addAdvOrderExtraCharge(){
   labelEl.value = '';
   amountEl.value = '';
   persistAllData();
+  pushAdvanceOrdersToCloud();
   renderAdvOrderExtraCharges(order);
   renderAdvOrderToCanvas(order);
 }
@@ -15891,6 +15954,7 @@ function removeAdvOrderExtraCharge(idx){
   if(!order || !order.extraCharges) return;
   order.extraCharges.splice(idx, 1);
   persistAllData();
+  pushAdvanceOrdersToCloud();
   renderAdvOrderExtraCharges(order);
   renderAdvOrderToCanvas(order);
 }
@@ -15909,6 +15973,7 @@ function applyRateInPreview(mode){
   if(!order) return;
   syncAdvOrderRateRow(order);
   renderAdvOrderToCanvas(order);
+  setTimeout(() => { persistAllData(); pushAdvanceOrdersToCloud(); }, 0); // ---------- بھاری سیو + کلاؤڈ اپڈیٹ بعد میں، بیک گراؤنڈ میں ----------
 }
 
 // ---------- Advance Order پریویو کو موجودہ سیٹنگز کے مطابق دوبارہ کھینچیں — بالکل بل/رپورٹ کی طرح ----------
@@ -17422,7 +17487,7 @@ let editingPartyId = null;   // null = نیا پارٹی، ورنہ اسی ID و
 let npPhotoDataUrl = null;   // ابھی منتخب کی گئی تصویر (Save پر محفوظ ہوگی)
 
 function resetNewPartyForm(){
-  ['npPartyName','npPartyPhone','npPartyAddress','npPartyArea','npPartyKeywords'].forEach(id => document.getElementById(id).value = '');
+  ['npPartyName','npPartyPhone','npPartyAddress','npPartyArea','npPartyKeywords','npPartyRateArea'].forEach(id => document.getElementById(id).value = '');
   npPhotoDataUrl = null;
   renderAvatarInto('npPhotoPreview', null, '👤');
   closePartyFormDropdowns();
@@ -17456,6 +17521,7 @@ function openEditPartyModal(){
   document.getElementById('npPartyAddress').value = p.address || '';
   document.getElementById('npPartyArea').value = p.area || '';
   document.getElementById('npPartyKeywords').value = p.keywords || '';
+  document.getElementById('npPartyRateArea').value = p.rateArea || '';
   npPhotoDataUrl = p.photo || null;
   renderAvatarInto('npPhotoPreview', p.photo, isCustomer ? '👤' : '🏭');
   closePartyFormDropdowns();
@@ -17588,6 +17654,7 @@ function saveNewParty(){
   const address = document.getElementById('npPartyAddress').value.trim();
   const area = document.getElementById('npPartyArea').value.trim();
   const keywords = document.getElementById('npPartyKeywords').value.trim();
+  const rateArea = document.getElementById('npPartyRateArea').value; // ---------- 🏷️ اسلام آباد/راولپنڈی ریٹ — بلنگ میں اسی کسٹمر پر خودکار لاگو ہوگا ----------
 
   if(!name){
     alert('Please enter a name.');
@@ -17607,7 +17674,7 @@ function saveNewParty(){
     if(currentPartyTab === 'customers'){
       const c = customersData.find(x => x.customer_id === editingPartyId);
       if(c){
-        c.name = name; c.phone = phone; c.address = address; c.area = area; c.keywords = keywords;
+        c.name = name; c.phone = phone; c.address = address; c.area = area; c.keywords = keywords; c.rateArea = rateArea;
         if(npPhotoDataUrl !== null) c.photo = npPhotoDataUrl; // TODO: customers.photo UPDATE
       }
     } else {
@@ -17619,7 +17686,7 @@ function saveNewParty(){
     }
   } else if(currentPartyTab === 'customers'){
     // TODO: یہ customers table میں INSERT ہوگا
-    customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, wallet_balance:0, total_receivable:0, walletHistory:[]});
+    customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, rateArea, photo: npPhotoDataUrl, wallet_balance:0, total_receivable:0, walletHistory:[]});
   } else {
     // TODO: یہ suppliers table میں INSERT ہوگا
     suppliersData.push({supplier_id: nextSupplierId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, total_payable:0});
@@ -18677,6 +18744,167 @@ async function fetchUsersFromCloud(silent){
   }catch(e){
     return false; // ---------- آف لائن — موجودہ (localStorage والی) فہرست پر ہی کام چلے گا ----------
   }
+}
+
+/* =====================================================================
+   ☁️ ORDER TAKING / PENDING ORDERS — Firestore Sync (ملٹی موبائل: عبدالوہاب
+   جو آرڈر اپنے فون پر ٹک کر کے محفوظ کرے، وہ خودکار صدام کے فون پر بھی نظر آ جائے —
+   REST API سے، ہر آرڈر محفوظ ہونے پر فوری push، اور Pending Orders/Order Taking
+   سکرین کھلی ہو تو ہر چند سیکنڈ بعد خودکار fetch (تقریباً real-time کا تجربہ) ----------
+   ===================================================================== */
+const ADVANCE_ORDERS_DOC_PATH = 'shopData/advanceOrders';
+let advanceOrdersPollTimer = null;
+
+async function pushAdvanceOrdersToCloud(){
+  saveToStorage('advanceOrders', advanceOrdersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextAdvOrderId', nextAdvOrderId);
+  try{
+    await authFirestoreFetch(`${ADVANCE_ORDERS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(advanceOrdersData) },
+          nextAdvOrderId: { integerValue: String(nextAdvOrderId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+  }catch(e){
+    // ---------- آف لائن — کوئی مسئلہ نہیں، ڈیٹا localStorage میں محفوظ ہو چکا ہے، اگلی بار انٹرنیٹ ملتے ہی sync ہو جائے گا ----------
+  }
+}
+
+// ---------- کلاؤڈ سے آرڈرز منگوائیں اور مقامی فہرست کے ساتھ محفوظ طریقے سے ملائیں —
+// موجودہ (مقامی) آرڈرز کبھی اووررائٹ نہیں ہوتے (کہیں ایڈمن کی ابھی لگائی گئی ریٹ ضائع نہ ہو جائے)،
+// صرف وہ نئے آرڈرز شامل کیے جاتے ہیں جو کلاؤڈ پر ہیں مگر مقامی طور پر ابھی موجود نہیں ----------
+async function fetchAdvanceOrdersFromCloud(silent){
+  try{
+    const res = await authFirestoreFetch(`${ADVANCE_ORDERS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false;
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudOrders = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudOrders)) return false;
+
+    const localIds = new Set(advanceOrdersData.map(o => o.id));
+    let addedAny = false;
+    cloudOrders.forEach(co => {
+      if(!localIds.has(co.id)){
+        advanceOrdersData.push(co);
+        addedAny = true;
+      }
+    });
+    if(addedAny) advanceOrdersData.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const cloudNextId = parseInt(doc.fields?.nextAdvOrderId?.integerValue || '0');
+    if(cloudNextId > nextAdvOrderId) nextAdvOrderId = cloudNextId;
+
+    saveToStorage('advanceOrders', advanceOrdersData);
+    saveToStorage('nextAdvOrderId', nextAdvOrderId);
+
+    if(addedAny && !silent && typeof renderAdvanceOrdersScreen === 'function' && document.getElementById('advOrderListWrap')){
+      renderAdvanceOrdersScreen(); // ---------- نیا آرڈر آیا ہو تو سکرین فوراً تازہ کریں ----------
+    }
+    return addedAny;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Order Taking / Pending Orders سکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار fetch —
+// تقریباً real-time کا تجربہ (سکرین سے ہٹتے ہی خودکار بند ہو جاتا ہے، فالتو reads نہیں ہوتیں) ----------
+function startAdvanceOrdersPolling(){
+  stopAdvanceOrdersPolling();
+  advanceOrdersPollTimer = setInterval(() => {
+    fetchAdvanceOrdersFromCloud(false);
+  }, 12000);
+}
+function stopAdvanceOrdersPolling(){
+  if(advanceOrdersPollTimer){ clearInterval(advanceOrdersPollTimer); advanceOrdersPollTimer = null; }
+}
+
+/* =====================================================================
+   ☁️ RECOVERY LIST — Firestore Sync (ملٹی موبائل: ملازم جو وصولی اپنے فون پر
+   درج کرے، وہ خودکار صدام کے فون پر Pending Confirmation میں نظر آ جائے) ----------
+   ===================================================================== */
+const RECOVERY_LIST_DOC_PATH = 'shopData/recoveryList';
+let recoveryListPollTimer = null;
+
+async function pushRecoveryListToCloud(){
+  saveToStorage('recoveryList', recoveryListData);
+  saveToStorage('nextRecoveryId', nextRecoveryId);
+  try{
+    await authFirestoreFetch(`${RECOVERY_LIST_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(recoveryListData) },
+          nextRecoveryId: { integerValue: String(nextRecoveryId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+  }catch(e){
+    // ---------- آف لائن — اگلی بار انٹرنیٹ ملتے ہی sync ہو جائے گا ----------
+  }
+}
+
+async function fetchRecoveryListFromCloud(silent){
+  try{
+    const res = await authFirestoreFetch(`${RECOVERY_LIST_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false;
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudList = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudList)) return false;
+
+    const localIds = new Set(recoveryListData.map(r => r.id));
+    let addedAny = false;
+    cloudList.forEach(cr => {
+      if(!localIds.has(cr.id)){
+        recoveryListData.push(cr);
+        addedAny = true;
+      } else {
+        // ---------- اگر یہ انٹری کلاؤڈ پر "confirmed" ہو چکی ہو (کسی اور فون سے) تو مقامی حالت بھی اپڈیٹ کر لیں ----------
+        const local = recoveryListData.find(r => r.id === cr.id);
+        if(local && local.status === 'pending' && cr.status === 'confirmed'){
+          local.status = 'confirmed';
+          local.confirmedAt = cr.confirmedAt;
+          addedAny = true;
+        }
+      }
+    });
+    if(addedAny) recoveryListData.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const cloudNextId = parseInt(doc.fields?.nextRecoveryId?.integerValue || '0');
+    if(cloudNextId > nextRecoveryId) nextRecoveryId = cloudNextId;
+
+    saveToStorage('recoveryList', recoveryListData);
+    saveToStorage('nextRecoveryId', nextRecoveryId);
+
+    if(addedAny && !silent && typeof renderRecoveryListScreen === 'function' && document.getElementById('rlAdminSummary')){
+      renderRecoveryListScreen();
+    }
+    return addedAny;
+  }catch(e){
+    return false;
+  }
+}
+
+function startRecoveryListPolling(){
+  stopRecoveryListPolling();
+  recoveryListPollTimer = setInterval(() => {
+    fetchRecoveryListFromCloud(false);
+  }, 12000);
+}
+function stopRecoveryListPolling(){
+  if(recoveryListPollTimer){ clearInterval(recoveryListPollTimer); recoveryListPollTimer = null; }
 }
 
 // ---------- Dummy Approval Requests (بعد میں Salesman خود Billing اسکرین سے یہ بھیجے گا) ----------
