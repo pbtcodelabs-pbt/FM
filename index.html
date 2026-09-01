@@ -6161,6 +6161,12 @@ const AppState = {
   settings: {...DEFAULT_SETTINGS, ...loadFromStorage('settings', DEFAULT_SETTINGS)},
 };
 
+// ---------- 🏷️ صدام کی ہدایت پر: بزنس کا نام اور موبائل نمبر ہارڈ کوڈ — جہاں بھی بل پرنٹ ہو (تھرمل/A4/سکرین/
+// WhatsApp شیئر)، ہمیشہ یہی نام اور نمبر چھپے، چاہے Settings میں محفوظ شدہ پرانی/خالی ویلیو کچھ بھی ہو —
+// اسی لیے یہ سیٹنگز لوڈ ہونے کے فوراً بعد زبردستی اوور رائٹ کی جاتی ہے ----------
+AppState.settings.businessName = 'صدام حسین فروٹ منڈی';
+AppState.settings.businessPhone = '03425556364';
+
 // ---------- 🩹 ون-ٹائم مائیگریشن (ورژن کی بنیاد پر) — پرانی ٹیسٹنگ کے دوران کوئی بھی rate/plans
 // پہلے سے محفوظ ہو چکے ہوں (چاہے 0 نہ ہوں)، پھر بھی یہ نئی 4 پلانز (1mo/3mo/6mo/1yr) ایک بار
 // ضرور بھر دے گی — flag لگ جانے کے بعد دوبارہ نہیں چلے گی، تاکہ بعد میں Admin خود پلانز
@@ -6222,7 +6228,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU26';
+const APP_BUILD_VERSION = 'FM19TU27';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -16470,15 +16476,9 @@ async function printAdvOrderPreview(){
 
 // ---------- سیدھا کسٹمر کے محفوظ شدہ نمبر کی WhatsApp چیٹ کھولیں — بالکل بل کی طرح ----------
 function shareAdvOrderWhatsapp(){
-  const order = advanceOrdersData.find(o => o.id === currentPreviewAdvOrderId);
-  if(!order) return;
-  if(!order.customerPhone){
-    alert("This customer's phone number isn't saved. Use 'Share More' to pick any app to send this to.");
-    return;
-  }
-  const digits = formatPhoneForWhatsApp(order.customerPhone);
-  const text = `Advance Order #${order.id} — ${order.customerName} — Total: Rs. ${advOrderTotal(order).toLocaleString()}`;
-  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
+  // ---------- 🍇 صدام کی ہدایت پر: اب یہ بٹن اصل بل کی تصویر کے ساتھ یونیورسل شیئر پینل کھولتا ہے،
+  // صرف ٹیکسٹ ہندسے نہیں — نیچے WhatsApp منتخب کر کے شیئر کر لیں ----------
+  shareAdvOrderUniversal();
 }
 
 // ---------- WhatsApp/دیگر ایپس کو اصل بل کی تصویر بھیجیں — ٹیکسٹ میسج نہیں، Web Share API کے ذریعے اصل پرنٹ ایبل بل ----------
@@ -16920,16 +16920,9 @@ async function printPoPreview(){
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 function sharePoWhatsapp(){
-  const ref = getCurrentPreviewPo();
-  if(!ref) return;
-  const {s, po} = ref;
-  if(!s.phone){
-    alert("This supplier's phone number isn't saved. Use 'Share More' to pick any app to send this to.");
-    return;
-  }
-  const digits = formatPhoneForWhatsApp(s.phone);
-  const text = `${po.status === 'received' ? 'Goods Received' : 'Purchase Order'} — ${s.name} — Total: Rs. ${po.total.toLocaleString()}`;
-  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
+  // ---------- 🍇 صدام کی ہدایت پر: اب یہ بٹن اصل بل کی تصویر کے ساتھ یونیورسل شیئر پینل کھولتا ہے،
+  // صرف ٹیکسٹ ہندسے نہیں — نیچے WhatsApp منتخب کر کے شیئر کر لیں ----------
+  sharePoUniversal();
 }
 function sharePoUniversal(){
   const ref = getCurrentPreviewPo();
@@ -21236,20 +21229,10 @@ async function printPoFastText(){
 }
 
 function shareInvoiceWhatsapp(){
-  const inv = invoicesData.find(i => i.invoice_id === currentPreviewInvoiceId);
-  if(!inv) return;
-
-  if(!inv.customer_phone){
-    alert("This customer's phone number isn't saved. Use 'Share More' to pick any app to send this to.");
-    return;
-  }
-
-  // ---------- سیدھا اسی محفوظ شدہ نمبر کی WhatsApp چیٹ کھولیں ----------
-  // نوٹ: کوئی بھی ویب لنک تصویر خودکار منسلک نہیں کر سکتا (یہ WhatsApp کی اپنی حفاظتی پابندی ہے) —
-  // اسی لیے یہاں سے صرف صحیح چیٹ کھلے گی، تصویر خود Print/Share بٹن سے لے کر یہاں بھیجیں۔
-  const digits = formatPhoneForWhatsApp(inv.customer_phone);
-  const text = `${inv.invoice_no} — Grand Total: Rs. ${inv.grand_total.toLocaleString()}`;
-  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
+  // ---------- 🍇 صدام کی ہدایت پر: یہ بٹن اب سیدھا wa.me ٹیکسٹ لنک نہیں کھولتا (وہ صرف ٹوٹل کے
+  // ہندسے بھیجتا تھا، بل کی تصویر نہیں)۔ اب یہ فون کا اصل یونیورسل شیئر پینل کھولتا ہے جس میں اصل
+  // بل کی تصویر شامل ہوتی ہے — نیچے WhatsApp، WhatsApp Business، یا کوئی بھی ایپ منتخب کی جا سکتی ہے ----------
+  shareInvoiceUniversal();
 }
 
 // ---------- یونیورسل شیئر (Web Share API — واٹس ایپ کے علاوہ کسی بھی ایپ کو bills کی تصویر بھیجیں) ----------
