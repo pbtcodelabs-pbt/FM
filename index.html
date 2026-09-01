@@ -2268,6 +2268,10 @@
 
     <!-- ---------- 🔤 صدام کی ہدایت پر تمام مینیو آئٹمز (اوپر کی سیٹنگز) الفابیٹیکلی (A-Z) ترتیب دیے گئے ہیں —
          نیچے Change My PIN / Admin ٹیگ / Logout کو جان بوجھ کر الگ رکھا گیا ہے (اس ترتیب میں شامل نہیں) ---------- -->
+    <!-- ---------- 🧹 صدام کی ہدایت: کسٹمر، سپلائر اور My Diary تینوں کو ایک ہی "Customer/Supplier Record"
+         مینیو آئٹم میں ضم کر دیا گیا ہے — یہ سب سے اوپر رکھا گیا ہے۔ اندر تین ٹیبز (Customers/Suppliers/Diary)
+         سے سوئچ ہوگا۔ نیچے پرانے تینوں الگ الگ آئٹمز چھپا دیے گئے ہیں (کوڈ محفوظ ہے، ڈیلیٹ نہیں ہوا) ---------- -->
+    <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customer/Supplier Record</div>
     <div class="navItem" data-screen="advanceorders" onclick="goTo('advanceorders')">📝 Advance Orders</div>
     <div class="navItem admin-only" data-screen="billsettings" onclick="goTo('billsettings')">🖨️ Bill & Print Settings</div>
     <div class="navItem" data-screen="billhistory" onclick="goTo('billhistory')">🧾 Bill History</div>
@@ -2277,13 +2281,13 @@
     <div class="navItem" data-screen="billing" onclick="goTo('billing')" style="display:none;">🛒 Billing</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Categories مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="categories" onclick="goTo('categories')" style="display:none;">🏷️ Categories</div>
-    <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customers</div>
+    <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')" style="display:none;">🧑‍🤝‍🧑 Customers</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Dashboard مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')" style="display:none;">📊 Dashboard</div>
     <div class="navItem admin-only" data-screen="expenditure" onclick="goTo('expenditure')">💸 Expenditure</div>
     <div class="navItem" data-screen="home" onclick="goTo('home')">🏠 Home</div>
     <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
-    <div class="navItem admin-only" data-screen="mydiary" onclick="goTo('mydiary')">📔 My Diary</div>
+    <div class="navItem admin-only" data-screen="mydiary" onclick="goTo('mydiary')" style="display:none;">📔 My Diary</div>
     <div class="navItem" data-screen="orderTaking" onclick="goTo('orderTaking')">🧾 Order Taking</div>
     <div class="navItem admin-only" data-screen="payments" onclick="goTo('payments')">💳 Payments</div>
     <div class="navItem admin-only" data-screen="products" onclick="goTo('products')">📦 Products</div>
@@ -2294,7 +2298,7 @@
     <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Stock Adjustment مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')" style="display:none;">🧮 Stock Adjustment</div>
-    <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')">🚚 Suppliers</div>
+    <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')" style="display:none;">🚚 Suppliers</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Trends مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')" style="display:none;">📈 Trends</div>
     <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
@@ -2873,6 +2877,8 @@
     <!-- PARTIES (Admin only) -->
     <div class="screen admin-only" id="screen-parties">
       <div class="pageTitle" id="partyPageTitle">🧑‍🤝‍🧑 Customers</div>
+      <!-- ---------- 🧹 صدام کی ہدایت: Customers/Suppliers/Diary تینوں ایک ہی صفحے کی طرح محسوس ہوں — یہ ٹیب بار ---------- -->
+      <div id="hubTabsBarParties"></div>
 
       <div class="partyToolbar">
         <input type="text" id="partySearchInput" placeholder="🔍 Search by name or phone..." oninput="renderPartyList(this.value)">
@@ -3126,7 +3132,10 @@
           <span class="closeBtn" onclick="closeProfileModal()">✖</span>
         </div>
         <div class="profileBodyFlex">
-          <div class="profileSidebar" id="profileQuickActions"></div>
+          <!-- ---------- 🧹 صدام کی ہدایت پر بائیں طرف کے چھوٹے آئیکن بٹن (New Bill, Collect, Wallet,
+               Opening Bal., Profile, Transactions) چھپا دیے گئے ہیں — کوڈ ڈیلیٹ نہیں کیا، صرف display:none
+               لگایا ہے تاکہ ضرورت پڑنے پر واپس دکھایا جا سکے ---------- -->
+          <div class="profileSidebar" id="profileQuickActions" style="display:none;"></div>
           <div class="profileMain">
             <div id="profileEmailRow" style="display:none; align-items:center; gap:6px; margin-bottom:10px;"></div>
             <div class="profileFigures" id="profileFigures"></div>
@@ -3747,6 +3756,8 @@
          ===================================================================== -->
     <div class="screen admin-only" id="screen-mydiary">
       <div class="pageTitle">📔 My Diary</div>
+      <!-- ---------- 🧹 صدام کی ہدایت: یہاں بھی وہی ٹیب بار — Customers/Suppliers/Diary کے درمیان فوری سوئچ ---------- -->
+      <div id="hubTabsBarDiary"></div>
 
       <div class="diaryTotalsBar">
         <div class="diaryTotalCard diaryTotalGreen">
@@ -6211,7 +6222,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU22';
+const APP_BUILD_VERSION = 'FM19TU25';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -12376,7 +12387,25 @@ function fmtDiaryAmount(n){
   return 'Rs. ' + Math.abs(Math.round(n)).toLocaleString('en-US');
 }
 
+// ---------- 🧹 صدام کی ہدایت: Customers/Suppliers/Diary کو ایک "Customer/Supplier Record" کے احساس میں ضم کرنے
+// والا مشترکہ ٹیب بار — دونوں سکرینوں (parties اور mydiary) کے اوپر ایک جیسا نظر آئے گا ---------- -->
+function renderHubTabsBar(activeKey){
+  const tabs = [
+    ['customers', '🧑‍🤝‍🧑 Customers'],
+    ['suppliers', '🚚 Suppliers'],
+    ['diary', '📔 Diary'],
+  ];
+  const html = `<div class="partyTabs" style="margin-bottom:12px;">` +
+    tabs.map(([key,label]) => `<button class="${activeKey===key?'active':''}" onclick="goTo('${key==='diary'?'mydiary':key}')">${label}</button>`).join('') +
+    `</div>`;
+  const p1 = document.getElementById('hubTabsBarParties');
+  const p2 = document.getElementById('hubTabsBarDiary');
+  if(p1) p1.innerHTML = html;
+  if(p2) p2.innerHTML = html;
+}
+
 function renderMyDiaryScreen(){
+  renderHubTabsBar('diary');
   renderMyDiaryList();
 }
 
@@ -13358,6 +13387,7 @@ function openBulkReminderCenter(){
 // ---------- Customers/Suppliers اب الگ الگ صفحات ہیں — یہ فنکشن نیویگیشن کے وقت صحیح موڈ سیٹ کرتا ہے (goTo کے ذریعے کال ہوتا ہے) ----------
 function enterPartyPage(tab){
   currentPartyTab = tab;
+  renderHubTabsBar(tab);
   document.getElementById('partyPageTitle').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 Customers' : '🚚 Suppliers';
   const partyImportBtnLabel = document.getElementById('partyImportBtnLabel');
   if(partyImportBtnLabel) partyImportBtnLabel.textContent = tab === 'customers' ? 'Customers' : 'Suppliers';
@@ -13650,8 +13680,11 @@ function openCustomerProfile(customerId){
   const figuresEl = document.getElementById('profileFigures');
   figuresEl.className = 'profileFigures';
   figuresEl.innerHTML = `
-    <div class="pfBox"><div class="pfLabel">💳 Wallet Balance</div><div class="pfValue wallet">Rs. ${c.wallet_balance.toLocaleString()}</div></div>
-    <div class="pfBox"><div class="pfLabel">📥 Receivable (Credit)</div><div class="pfValue receivable">Rs. ${c.total_receivable.toLocaleString()}</div></div>
+    <!-- ---------- 🧹 صدام کی ہدایت پر Wallet Balance کا خانہ ہٹا دیا گیا — صرف Total بقایہ (Receivable)
+         رہے گا۔ نیچے کموٹنٹ لائن اصل کوڈ کی یاد دہانی کے لیے چھوڑی گئی ہے، ڈیلیٹ نہیں کی۔
+         یہ خانہ اب دبانے سے سیدھا Collect Payment کھلے گا ---------- -->
+    <!-- <div class="pfBox"><div class="pfLabel">💳 Wallet Balance</div><div class="pfValue wallet">Rs. ${c.wallet_balance.toLocaleString()}</div></div> -->
+    <div class="pfBox"><div class="pfLabel">📥 Total بقایہ (Receivable)</div><div class="pfValue receivable" onclick="openCollectModal(${c.customer_id})" style="cursor:pointer;">Rs. ${c.total_receivable.toLocaleString()}</div></div>
   `;
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم (New Bill سب سے اوپر — سب سے زیادہ استعمال ہونے والا عمل)؛ Transactions سب سے نیچے ---
@@ -13711,29 +13744,32 @@ function renderCustomerBillsSection(customerId){
     : allBills.map(row => {
         if(row.kind === 'invoice'){
           const inv = row.inv;
-          const isPending = getInvoiceAmountDue(inv) > 0;
-          const itemsDesc = inv.items.slice(0,2).map(i => i.name).join(', ') + (inv.items.length > 2 ? ` +${inv.items.length-2} more` : '');
+          const amountDue = getInvoiceAmountDue(inv);
+          const isPending = amountDue > 0;
           const statusTag = inv.status === 'voided' ? ' · VOIDED' : inv.status === 'edited' ? ' · EDITED' : '';
+          // ---------- 🧹 صدام کی ہدایت: سامان کی تفصیل نہیں دکھانی — صرف تاریخ + Preview + بقایہ/کلیئر اسٹیٹس ----------
+          const amountHtml = isPending
+            ? `<div class="brAmount" style="background:#fef2f2; color:#b91c1c; padding:4px 10px; border-radius:8px; font-weight:800; font-size:12px; white-space:nowrap;">Rs. ${amountDue.toLocaleString()}<br><span style="font-size:9.5px; font-weight:700;">Pending</span></div>`
+            : `<div class="brAmount" style="color:#15803d; font-weight:800; font-size:20px;">✅</div>`;
           return `
             <div class="billRow ${isPending?'pending':''}" onclick="closeProfileModal(); openInvoicePreview(${inv.invoice_id});">
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(inv.created_at).toLocaleDateString('en-GB')} · ${inv.invoice_no}${statusTag}</div>
-                <div class="brDesc">${itemsDesc}</div>
+                <div class="brDesc" style="color:var(--primary-dark); font-weight:700;">🔍 Preview کریں</div>
               </div>
-              <div class="brAmount">Rs. ${inv.grand_total.toLocaleString()}</div>
+              ${amountHtml}
             </div>`;
         } else {
           const p = row.p;
           const total = p.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
-          const itemsDesc = p.items.slice(0,2).map(i => i.name).join(', ') + (p.items.length > 2 ? ` +${p.items.length-2} more` : '');
           const tag = p.status === 'pending' ? 'Awaiting approval' : 'Rejected';
           return `
             <div class="billRow pending" onclick="closeProfileModal(); openPendingReview(${p.pending_id});">
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(p.submitted_at).toLocaleDateString('en-GB')} · ${tag} · via ${p.salesman_name}</div>
-                <div class="brDesc">${itemsDesc}</div>
+                <div class="brDesc" style="color:var(--primary-dark); font-weight:700;">🔍 Preview کریں</div>
               </div>
-              <div class="brAmount">Rs. ${total.toLocaleString()}</div>
+              <div class="brAmount" style="background:#fef2f2; color:#b91c1c; padding:4px 10px; border-radius:8px; font-weight:800; font-size:12px; white-space:nowrap;">Rs. ${total.toLocaleString()}<br><span style="font-size:9.5px; font-weight:700;">Pending</span></div>
             </div>`;
         }
       }).join('');
@@ -13742,7 +13778,7 @@ function renderCustomerBillsSection(customerId){
     [['all','All'],['pending','Pending'],['cleared','Cleared']], profileBillFilter, 'applyCustomerBillFilter');
 
   document.getElementById('profileSections').innerHTML = `
-    <div class="profileSectionTitle"><span>🧾 All Bills</span><span class="cnt">${allBills.length} bills</span></div>
+    <div class="profileSectionTitle"><span>📦 Orders</span><span class="cnt">${allBills.length} orders</span></div>
     ${filterBarHtml}
     <div id="profileBillsListWrap">${billsHtml}</div>
   `;
@@ -17950,6 +17986,20 @@ function saveCollectReceivable(){
   const balanceBefore = c.total_receivable;
   c.total_receivable -= amount;
 
+  // ---------- 🧹 صدام کی ہدایت: وصول شدہ رقم پرانے (oldest) بلوں پر پہلے لگے گی — جتنے بل مکمل صاف ہو سکیں ہو
+  // جائیں، بچی ہوئی رقم اگلے (نئے) بل پر جزوی طور پر لگے، تاکہ ہر بل کا اپنا صحیح بقایہ نظر آئے ---------- -->
+  let remainingToApply = amount;
+  const customerBillsOldestFirst = invoicesData
+    .filter(inv => inv.customer_id === c.customer_id && (getInvoiceAmountDue(inv) > 0) && inv.status !== 'voided')
+    .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+  for(const inv of customerBillsOldestFirst){
+    if(remainingToApply <= 0) break;
+    const dueOnThis = getInvoiceAmountDue(inv);
+    const applyNow = Math.min(dueOnThis, remainingToApply);
+    inv.amount_due = dueOnThis - applyNow;
+    remainingToApply -= applyNow;
+  }
+
   if(activeCollectMode === 'wallet'){
     c.wallet_balance -= amount; // TODO: customers.wallet_balance UPDATE
   } else {
@@ -17981,6 +18031,13 @@ function saveCollectReceivable(){
   closeCollectModal();
   renderPartyList(document.getElementById('partySearchInput').value);
   sharePaymentReceiptImage(savedPayment.payment_id);
+
+  // ---------- اگر پروفائل موڈل اسی کسٹمر کے لیے کھلا ہے تو بقایہ خانہ اور آرڈرز لسٹ فوراً تازہ کریں ----------
+  if(currentProfileType === 'customers' && currentProfileId === c.customer_id && document.getElementById('profileModal').classList.contains('show')){
+    const figuresEl = document.getElementById('profileFigures');
+    if(figuresEl) figuresEl.innerHTML = `<div class="pfBox"><div class="pfLabel">📥 Total بقایہ (Receivable)</div><div class="pfValue receivable" onclick="openCollectModal(${c.customer_id})" style="cursor:pointer;">Rs. ${c.total_receivable.toLocaleString()}</div></div>`;
+    renderCustomerMainContent(c.customer_id);
+  }
 }
 
 // ---------- Billing کے کسٹمر ڈراپ ڈاؤن کو customersData سے پُر کریں — ساتھ ساتھ City/Area فلٹر ڈراپ ڈاؤن بھی تازہ کریں ----------
