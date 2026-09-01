@@ -6189,7 +6189,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM19TU16';
+const APP_BUILD_VERSION = 'FM19TU17';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -9960,6 +9960,31 @@ let productsData = loadFromStorage('products', PRODUCTS_SEED_DATA);
 let productVariantTypes = loadFromStorage('productVariantTypes', ['فی کلو', 'ٹوکری', 'شاپر', 'کارٹن', 'دھڑی', 'پیکٹ']);
 let nextProductId = loadFromStorage('nextProductId', 10);
 let nextVariantId = loadFromStorage('nextVariantId', 28);
+
+// ---------- 🛠️ خرابی کی اصل جڑ کی مرمت: کبھی کبھار دو الگ الگ آئٹمز کی variant_id آپس میں ٹکرا جاتی تھی
+// (ایک ہی نمبر دو مختلف چیزوں کو مل جاتا تھا)۔ چونکہ Order Taking، Billing وغیرہ ہر جگہ آئٹم کو اسی
+// variant_id سے پہچانا جاتا ہے، اس ٹکراؤ کی وجہ سے ایک آئٹم کو ٹک/تعداد دینے پر وہی تعداد دوسرے
+// (ٹکرانے والے) آئٹم میں بھی "مرج" ہو کر نظر آتی تھی — یہی وہ اصل بگ تھا۔ یہ فنکشن ایپ کھلتے ہی
+// خودکار طور پر پوری پراڈکٹ لسٹ چیک کرتا ہے، اگر کوئی دو variant_id ایک جیسی ملیں تو بعد والی کو
+// فوراً نیا منفرد نمبر دے کر ہمیشہ کے لیے الگ کر دیتا ہے، اور فوراً محفوظ کر دیتا ہے ----------
+function dedupeVariantIds(){
+  const seen = new Set();
+  let fixedCount = 0;
+  productsData.forEach(p => {
+    (p.variants || []).forEach(v => {
+      if(seen.has(v.variant_id)){
+        v.variant_id = nextVariantId++;
+        fixedCount++;
+      }
+      seen.add(v.variant_id);
+    });
+  });
+  if(fixedCount > 0){
+    try{ persistAllData(); }catch(e){}
+    console.warn(`⚠️ ${fixedCount} ٹکرانے والی variant_id مل کر خودکار ٹھیک کی گئیں۔`);
+  }
+  return fixedCount;
+}
 
 /* =====================================================================
    🥬 سبزیوں کی فہرست — صدام کی فراہم کردہ 63 آئٹمز، ایک بار خودکار پراڈکٹ کے
@@ -15366,6 +15391,11 @@ function selectOtCustomer(customerId){
 
   document.getElementById('otStepCustomer').style.display = 'none';
   document.getElementById('otStepItems').style.display = '';
+
+  // ---------- 🛠️ Order Taking کھلنے پر ہر بار دوبارہ چیک کریں کہ کوئی variant_id ٹکرائی ہوئی تو نہیں —
+  // اگر ٹکرائی ہو تو یہاں بھی خودکار الگ کر دیں (ایک آئٹم کی تعداد دوسرے میں مرج ہونے سے بچانے کی
+  // دوسری/آخری تہہ حفاظت) ----------
+  try{ dedupeVariantIds(); }catch(e){}
 
   otFlatCache = getFlatVariants().sort((a, b) => a.name.localeCompare(b.name, 'ur'));
   renderOtItemsPage();
@@ -25573,6 +25603,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // پہلے یہ صرف لاگ ان فنکشنز کے اندر چلتا تھا — اگر کہیں لاگ ان کا راستہ جلدی نہ چلے تو ٹرائل تاخیر کا شکار ہو سکتا تھا۔
   // اب یہ ایپ کھلتے ہی، سب سے پہلے، براہ راست چلتا ہے ----------
   try{ getOrCreateDeviceUID(); }catch(e){}
+
+  // ---------- 🛠️ ایپ کھلتے ہی سب سے پہلے چیک کریں کہ کوئی دو آئٹمز کی اندرونی شناخت (variant_id)
+  // آپس میں تو نہیں ٹکرائی — اگر ٹکرائی ہو تو خودکار الگ الگ کر دیں (Order Taking میں "ایک آئٹم کی
+  // تعداد دوسرے میں مرج ہونے" والے بگ کی اصل جڑ یہی تھی) ----------
+  try{ dedupeVariantIds(); }catch(e){}
 
   // ---------- ☁️ اسٹاف یوزرز (نام/PIN/اسکرین اجازتیں) کو Firestore سے تازہ منگوائیں — تاکہ صدام کے
   // ایڈمن فون پر بنایا/بدلا گیا کوئی بھی یوزر باقی موبائلز پر بھی فوراً کام کرے۔ fire-and-forget:
