@@ -4257,12 +4257,27 @@
         <div style="background:#dcfce7; color:#15803d; border-radius:12px; padding:10px 14px; margin-bottom:10px; text-align:center; font-weight:800; font-size:14px;">
           ✅ Order Saved &amp; Shared with Admin
         </div>
+        <!-- ---------- 🔍 صدام کی ہدایت (FM2SEPWE01): سائز (زوم) کنٹرول — تحریر باریک لگے تو موٹی/بڑی کی جا سکے،
+             بس یہی ایک کنٹرول، مزید کچھ نہیں (ملازم کے لیے سادہ رکھا گیا) ---------- -->
+        <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px;">
+          <span style="font-size:12.5px; font-weight:700; color:var(--muted);">🔍 سائز</span>
+          <button type="button" onclick="adjustOtReviewZoom(-10)" style="width:34px; height:34px; border-radius:9px; border:1.5px solid var(--primary); background:#fff; color:var(--primary); font-size:17px; font-weight:800; cursor:pointer;">−</button>
+          <span id="otReviewZoomVal" style="font-size:13px; font-weight:800; min-width:44px; text-align:center;">100%</span>
+          <button type="button" onclick="adjustOtReviewZoom(10)" style="width:34px; height:34px; border-radius:9px; border:1.5px solid var(--primary); background:#fff; color:var(--primary); font-size:17px; font-weight:800; cursor:pointer;">+</button>
+        </div>
         <div style="background:#fff; border:1px solid #e5e9f0; border-radius:14px; padding:10px; margin-bottom:12px; display:flex; justify-content:center;">
           <canvas id="otReviewCanvas" style="width:100%; max-width:340px; display:block;"></canvas>
         </div>
-        <div style="position:sticky; bottom:8px; display:flex; gap:8px; padding-top:6px; padding-bottom:8px;">
-          <button type="button" onclick="backToOtItems()" style="flex:1; padding:15px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:14px; font-size:15px; font-weight:800; cursor:pointer;">◀ ترمیم کریں</button>
-          <button type="button" onclick="startNextOtCustomer()" style="flex:2; padding:15px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">➡️ اگلا کسٹمر</button>
+        <!-- ---------- 🧑‍💼 صدام کی ہدایت (FM2SEPWE01): ترمیم / صدام کو بھیجیں / ہوم / اگلا کسٹمر — چار واضح، بڑے، نستعلیق بٹن ---------- -->
+        <div style="position:sticky; bottom:8px; display:flex; flex-direction:column; gap:8px; padding-top:6px; padding-bottom:8px;">
+          <div style="display:flex; gap:8px;">
+            <button type="button" onclick="backToOtItems()" style="flex:1; padding:14px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">✏️ ترمیم کریں</button>
+            <button type="button" onclick="sendOtOrderToSaddam()" style="flex:1; padding:14px; background:#25D366; border:none; color:#fff; border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">📤 صدام کو بھیجیں</button>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button type="button" onclick="goTo('home')" style="flex:1; padding:14px; background:#fff; border:2px solid #94a3b8; color:#475569; border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">🏠 ہوم پیج</button>
+            <button type="button" onclick="startNextOtCustomer()" style="flex:1; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2); font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">➡️ اگلا کسٹمر</button>
+          </div>
         </div>
       </div>
     </div>
@@ -6362,19 +6377,24 @@ function getDeveloperContact(){
 // CACHE_VERSION میں بھی ڈالیں) — اسی ایک تبدیلی سے کیش/اپڈیٹ کا مسئلہ خود بخود حل ہو جاتا ہے
 //
 // 📌 VERSIONING RULE (صدام کی مستقل ہدایت — ہر نئی چیٹ میں بھی یہی فالو کریں، دوبارہ پوچھنے کی ضرورت نہیں):
-// فارمیٹ: FM{date}{month}{dayCode}{seq}
-//   - date, month  = آج کی تاریخ/مہینہ (بغیر leading zero — جیسے 31 اگست = "318")
-//   - dayCode      = SU/MO/TU/WE/TH/FR/SA (ہفتے کے دن کے پہلے دو حروف، انگریزی میں)
-//   - seq          = اسی دن کے اندر بھیجی گئی فائلوں کا سیریل نمبر، 2 ہندسوں میں (01, 02 ... 12, 13...)
+// ⚠️ 2 ستمبر 2026 سے سٹائل تبدیل: مہینہ اب ہندسے کی بجائے 3 حروف کے انگریزی نام سے لکھا جائے گا
+// (JAN/FEB/MAR/APR/MAY/JUN/JUL/AUG/SEP/OCT/NOV/DEC) — کیونکہ ستمبر (9واں مہینہ) میں تاریخ کا
+// ہندسہ اور مہینے کا ہندسہ دونوں "9" بن سکتے تھے اور آپس میں گڈمڈ ہو جاتے تھے۔ اب یہ مسئلہ ختم۔
+// فارمیٹ: FM{date}{monthCode}{dayCode}{seq}
+//   - date       = آج کی تاریخ (بغیر leading zero — جیسے 2 ستمبر = "2")
+//   - monthCode  = JAN/FEB/MAR/APR/MAY/JUN/JUL/AUG/SEP/OCT/NOV/DEC (مہینے کے پہلے تین حروف، انگریزی میں)
+//   - dayCode    = SU/MO/TU/WE/TH/FR/SA (ہفتے کے دن کے پہلے دو حروف، انگریزی میں)
+//   - seq        = اسی دن کے اندر بھیجی گئی فائلوں کا سیریل نمبر، 2 ہندسوں میں (01, 02 ... 12, 13...)
+// مثال: 2 ستمبر 2026 (بدھ) کی پہلی فائل = FM2SEPWE01، اسی دن کی دوسری فائل = FM2SEPWE02، وغیرہ۔
 // اصول:
 //   1) جب بھی کوئی نئی فائل (کوئی بھی تبدیلی، چھوٹی ہو یا بڑی) بھیجی جائے تو seq ایک نمبر آگے بڑھائیں —
-//      اگر آج کی آخری فائل FM318MO12 تھی تو اگلی FM318MO13 ہوگی، پھر FM318MO14، وغیرہ۔
-//   2) جیسے ہی تاریخ بدل جائے (نیا دن شروع ہو) تو seq دوبارہ 01 سے شروع کریں — مثلاً 1 ستمبر کی پہلی فائل FM319TU01 ہوگی۔
+//      اگر آج کی آخری فائل FM2SEPWE01 تھی تو اگلی FM2SEPWE02 ہوگی، پھر FM2SEPWE03، وغیرہ۔
+//   2) جیسے ہی تاریخ بدل جائے (نیا دن شروع ہو) تو seq دوبارہ 01 سے شروع کریں — مثلاً 3 ستمبر کی پہلی فائل FM3SEPTH01 ہوگی۔
 //   3) یہی نمبر تین جگہ ایک ساتھ اپڈیٹ کریں: (الف) یہاں APP_BUILD_VERSION، (ب) sw.js کا CACHE_VERSION،
-//      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
+//      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM2SEPWE01.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM29WE04';
+const APP_BUILD_VERSION = 'FM2SEPWE01';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -15981,17 +16001,20 @@ function renderOtItemsPage(){
     const checked = !!otCheckedMap[v.variant_id];
     const qty = otQtyMap[v.variant_id] || 0;
     return `
-    <div class="otItemRow" data-variant-id="${v.variant_id}" dir="rtl" style="display:flex; flex-direction:column; gap:6px; background:#fff; border:1.5px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:10px; padding:8px 8px; max-width:100%; overflow:hidden;">
-      <div style="display:flex; align-items:flex-start; gap:7px;">
-        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(this, ${v.variant_id})" style="width:19px; height:19px; margin:2px 0 0; flex:0 0 auto; cursor:pointer;">
-        <!-- ---------- 🧹 صدام کی ہدایت (FM29WE04): پورا نام نظر آئے، کبھی کٹے نہیں — ellipsis ہٹا کر 2 لائنوں تک wrap ---------- -->
-        <div style="font-size:13px; font-weight:700; flex:1 1 auto; min-width:0; overflow:visible; white-space:normal; word-break:break-word; text-align:right; line-height:1.35; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
-      </div>
-      <!-- ---------- ➕➖ بٹن بڑے اور فاصلہ زیادہ — غلطی سے پڑوسی بٹن نہ دبے (صدام کی ہدایت) ---------- -->
-      <div style="display:flex; align-items:center; justify-content:center; gap:18px;">
-        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, -1)" style="width:38px; height:38px; border:none; border-radius:9px; background:#fee2e2; color:#b91c1c; font-size:19px; font-weight:800; cursor:pointer; padding:0;">−</button>
-        <span class="otQtyText" style="min-width:26px; text-align:center; font-size:16px; font-weight:800;">${qty}</span>
-        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:38px; height:38px; border:none; border-radius:9px; background:#dcfce7; color:#15803d; font-size:19px; font-weight:800; cursor:pointer; padding:0;">+</button>
+    <div class="otItemRow" data-variant-id="${v.variant_id}" dir="rtl" style="display:flex; flex-direction:column; gap:7px; background:#fff; border:1.5px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:10px; padding:8px 8px; max-width:100%; overflow:hidden;">
+      <!-- ---------- 🥬 صدام کی ہدایت (FM2SEPWE01): نام اب اپنی الگ، پوری چوڑائی کی لائن میں —
+           نستعلیق کشیدہ فونٹ میں، بڑا اور واضح — تاکہ ویرینٹ (ٹوکری/گٹو/شاپر وغیرہ) بھی صاف نظر آئے
+           چونکہ ویرینٹ پہلے سے نام کے اندر شامل ہے ---------- -->
+      <div style="width:100%; font-size:16px; font-weight:800; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; line-height:1.9; text-align:right; white-space:normal; word-break:break-word; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:7px;">
+        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(this, ${v.variant_id})" style="width:20px; height:20px; flex:0 0 auto; cursor:pointer;">
+        <!-- ---------- ➕➖ صدام کی ہدایت (FM2SEPWE01): سیدھے ہاتھ (دائیں) پر ➕ اور بائیں طرف ➖ —
+             کنٹینر dir="rtl" ہونے کی وجہ سے پہلے آنے والا بٹن دائیں جانب نظر آتا ہے، اسی لیے ➕ پہلے لکھا گیا ---------- -->
+        <div style="display:flex; align-items:center; justify-content:center; gap:18px;">
+          <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:38px; height:38px; border:none; border-radius:9px; background:#dcfce7; color:#15803d; font-size:19px; font-weight:800; cursor:pointer; padding:0;">+</button>
+          <span class="otQtyText" style="min-width:26px; text-align:center; font-size:16px; font-weight:800;">${qty}</span>
+          <button type="button" onclick="changeOtQty(this, ${v.variant_id}, -1)" style="width:38px; height:38px; border:none; border-radius:9px; background:#fee2e2; color:#b91c1c; font-size:19px; font-weight:800; cursor:pointer; padding:0;">−</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -16106,9 +16129,54 @@ async function openOtReview(){
   document.getElementById('otStepItems').style.display = 'none';
   document.getElementById('otStepReview').style.display = '';
 
+  syncOtReviewZoomLabel();
   const savedOrder = advanceOrdersData.find(o => o.id === otSavedOrderId);
   await new Promise(r => setTimeout(r, 50));
   await renderAdvOrderToCanvas(savedOrder, document.getElementById('otReviewCanvas'));
+}
+
+// ---------- 🔍 صدام کی ہدایت (FM2SEPWE01): ریویو بل کا سائز (فونٹ زوم) — وہی مشترکہ سیٹنگ جو
+// ایڈوانس آرڈر پریویو استعمال کرتا ہے (advOrderFontScale) تاکہ بل واقعی موٹا/بڑا پرنٹ ہو، نہ صرف سکرین پر ---------- */
+function syncOtReviewZoomLabel(){
+  const val = document.getElementById('otReviewZoomVal');
+  if(val) val.textContent = (AppState.settings.advOrderFontScale || 100) + '%';
+}
+async function adjustOtReviewZoom(delta){
+  const current = AppState.settings.advOrderFontScale || 100;
+  const next = Math.max(70, Math.min(260, current + delta));
+  AppState.settings.advOrderFontScale = next;
+  syncOtReviewZoomLabel();
+  persistAllData();
+  const savedOrder = advanceOrdersData.find(o => o.id === otSavedOrderId);
+  if(savedOrder) await renderAdvOrderToCanvas(savedOrder, document.getElementById('otReviewCanvas'));
+}
+
+// ---------- 📤 صدام کو بھیجیں — آرڈر پہلے ہی خودکار محفوظ/کلاؤڈ پر بھیجا جا چکا ہوتا ہے، یہ بٹن
+// دوبارہ یقینی طور پر کلاؤڈ پر بھیج کر اصل بل کی تصویر بھی صدام کو WhatsApp/شیئر شیٹ سے بھیج دیتا ہے ---------- */
+function sendOtOrderToSaddam(){
+  if(!otSavedOrderId){ alert('پہلے آرڈر مکمل کریں'); return; }
+  pushAdvanceOrdersToCloud();
+  const order = advanceOrdersData.find(o => o.id === otSavedOrderId);
+  const canvas = document.getElementById('otReviewCanvas');
+  if(!order || !canvas) return;
+  canvas.toBlob(async (blob) => {
+    if(!blob){ alert('بل کی تصویر بنانے میں مسئلہ ہوا — دوبارہ کوشش کریں۔'); return; }
+    const file = new File([blob], `Order-${order.id}.png`, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({
+          files:[file],
+          title: `Order #${order.id}`,
+          text: `${order.customerName} — صدام حسین فروٹ منڈی`
+        });
+      } catch(err){ /* یوزر نے شیئر منسوخ کیا */ }
+    } else {
+      const dataUrl = canvas.toDataURL('image/png');
+      const win = window.open();
+      if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
+      else alert('شیئر سپورٹ نہیں ہو رہا — سکرین شاٹ لے کر صدام کو بھیج دیں۔');
+    }
+  }, 'image/png');
 }
 
 // ---------- اگلا کسٹمر — موجودہ آرڈر پہلے ہی محفوظ ہو چکا، بس فہرست صاف کر کے واپس کسٹمر منتخب کرنے پر لے جائیں ----------
