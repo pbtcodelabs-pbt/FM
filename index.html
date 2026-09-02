@@ -1748,7 +1748,14 @@
     #utilityBar{
       display:flex; align-items:center; gap:8px; padding:8px 12px;
       background:var(--primary-dark); grid-column:1; grid-row:2;
-      position:sticky; top:56px; z-index:590;
+      /* ---------- 🍇 صدام کی ہدایت (FM2SEPWE03) — بگ فکس: پہلے یہاں "top:56px" ہارڈ کوڈ تھا، جو یہ فرض کرتا
+           تھا کہ اوپر والا #mobileTopbar ہمیشہ ٹھیک 56px اونچا رہے گا۔ جب لاگ ان یوزر کا نام لمبا ہو کر
+           موونگ پٹی (marquee) نیچے ایک نئی لائن پر چلی جاتی (flex-wrap) تو #mobileTopbar کی اصل اونچائی
+           56px سے بڑھ جاتی — مگر یہ بار پھر بھی وہیں 56px پر چپکی رہتی، جس سے یہ اوپر والے بار کے نیچے
+           چھپ جاتی اور اس کے بٹن (☰ Menu, 🚪 Logout, 🎨, ⚙️) کبھی دبتے کبھی نہیں دبتے تھے۔ اب top ایک
+           متغیر (--mobileTopbarH) سے آتا ہے جسے JS ہر بار اصل اونچائی کے مطابق خود بخود اپڈیٹ کرتا ہے
+           (دیکھیں syncMobileTopbarHeight فنکشن) ---------- */
+      position:sticky; top:var(--mobileTopbarH, 56px); z-index:590;
       border-top:1px solid rgba(255,255,255,.15);
     }
     #utilityBarSpacer{flex:1 1 auto;}
@@ -2377,7 +2384,7 @@
     <div class="navItem" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')">💰 Recovery List<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="" data-navkey="reports" data-navlabel="Reports" onclick="closeSidebar(); openReportCenterModal();">📑 Reports<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="settings" data-navkey="settings" data-navlabel="Settings" onclick="goTo('settings')">⚙️ Settings<span class="navDragHandle">⠿</span></div>
-    <!-- ---------- 🍇 صدام کی ہدایت (FM2SEPWE02): Stock Adjustment دوبارہ مینیو میں فعال — پہلے چھپائی گئی تھی ---------- -->
+    <!-- ---------- 🍇 صدام کی ہدایت (FM2SEPWE03): Stock Adjustment دوبارہ مینیو میں فعال — پہلے چھپائی گئی تھی ---------- -->
     <div class="navItem admin-only" data-screen="stockadjustment" data-navkey="stockadjustment" data-navlabel="Stock Adjustment" onclick="goTo('stockadjustment')">🧮 Stock Adjustment<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')" style="display:none;">🚚 Suppliers</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Trends مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
@@ -2446,6 +2453,10 @@
 
       <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
       <div id="homeUnfinishedCartCard" style="display:none;"></div>
+
+      <!-- ---------- 🆕 تازہ ترین آرڈرز / تازہ ترین ریکوری — صدام کی ہدایت (FM2SEPWE): ایڈمن کو نئی سرگرمی
+           فوراً نظر آئے — ٹچ کرنے پر متعلقہ سکرین پر لے جائے ---------- -->
+      <div id="homeLatestActivity" class="admin-only" dir="rtl" style="display:none; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;"></div>
 
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — Admin کے لیے اب انہی کی منتخب کردہ Shortcut اسکرینیں،
            Salesman کے لیے اسے Assign کی گئی اسکرینیں ---------- -->
@@ -2737,7 +2748,7 @@
           <button type="button" onclick="openManageVariantTypesModal()" title="ویرینٹ کی فہرست ترتیب دیں" style="flex:0 0 auto; background:#eef2ff; color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; padding:0 14px; font-weight:800; cursor:pointer;">⚙️</button>
         </div>
         <input type="number" id="npPurchase" placeholder="💰 Purchase Price (خرید)" style="margin-top:8px;">
-        <!-- ---------- 🏷️📦 صدام کی ہدایت (FM2SEPWE02): Islamabad/Rawalpindi ریٹ کے اوپر پکا/مستقل کیپشن —
+        <!-- ---------- 🏷️📦 صدام کی ہدایت (FM2SEPWE03): Islamabad/Rawalpindi ریٹ کے اوپر پکا/مستقل کیپشن —
              پہلے صرف placeholder تھا جو ایڈٹ موڈ میں ویلیو بھرتے ہی غائب ہو جاتا تھا۔ اب ہمیشہ نظر آئے گا،
              دونوں کا رنگ الگ (سبز = اسلام آباد، جامنی = راولپنڈی) تاکہ فرق واضح نظر آئے ---------- -->
         <div style="font-size:12px; font-weight:800; color:#065f46; background:#d1fae5; display:inline-block; padding:3px 10px; border-radius:7px; margin-top:10px;">🏷️ Islamabad Rate</div>
@@ -3026,10 +3037,13 @@
              صرف نیچے Rate Area (Islamabad/Rawalpindi) رہے گا۔ فیلڈز کو مکمل حذف کرنے کی بجائے
              چھپایا گیا ہے تاکہ باقی کوڈ (رپورٹس وغیرہ) بغیر ٹوٹے کام کرتا رہے ---------- -->
         <input type="text" id="npPartyAddress" placeholder="Address (optional)" style="display:none;">
-        <div style="position:relative; display:none;">
-          <input type="text" id="npPartyArea" placeholder="🗺️ Area / City / Route (e.g. Gulberg, Lahore)" autocomplete="off" oninput="filterPartyAreaOptions()" onfocus="filterPartyAreaOptions()">
-          <div id="npPartyAreaListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:80;"></div>
-        </div>
+        <!-- ---------- 🗺️ علاقہ — صدام کی ہدایت (ریکوری لسٹ کو علاقے کے حساب سے فلٹر کرنے کے لیے) — صرف تین مقررہ کیٹگریز ---------- -->
+        <select id="npPartyArea" dir="rtl" style="margin-top:2px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif; font-size:14px;">
+          <option value="">🗺️ علاقہ — منتخب کریں (اختیاری)</option>
+          <option value="اسلام آباد">🏙️ اسلام آباد</option>
+          <option value="راولپنڈی">🏙️ راولپنڈی</option>
+          <option value="مضافات">🌾 مضافات</option>
+        </select>
         <!-- ---------- 🏷️ ریٹ ایریا — یہ کسٹمر اسلام آباد ریٹ پر ہے یا راولپنڈی ریٹ پر — بلنگ/ایڈوانس آرڈر میں
              اسی کسٹمر کو منتخب کرتے ہی خودکار وہی ریٹ لگ جائے گا، ہر بار دستی انتخاب کی ضرورت نہیں ---------- -->
         <select id="npPartyRateArea" style="margin-top:2px;">
@@ -4292,21 +4306,23 @@
          کھاتہ (Ledger) سکرین دیکھے۔ ایڈمن کے لیے: تمام ملازمین کی جمع کرائی گئی وصولی، طریقہ ادائیگی کے
          حساب سے ٹوٹل، اور ہر انٹری کو اصل کھاتے میں درج کرنے کے بعد "Confirm" کرنا — تب ہی customer کا بقایہ کم ہوتا ہے۔
          ===================================================================== -->
-    <div class="screen" id="screen-recoveryList">
-      <div class="pageTitle">💰 Recovery List — وصولی لسٹ</div>
+    <div class="screen" id="screen-recoveryList" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+      <div class="pageTitle" style="text-align:right;">💰 وصولی لسٹ</div>
 
       <!-- ---------- ملازم کا منظر: صرف بقایہ والے کسٹمرز، ہر ایک کے آگے وصولی کی رقم + طریقہ ادائیگی ---------- -->
       <div id="rlEmployeeView" class="admin-hide-only">
-        <div id="rlEmployeeList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:70px;"></div>
+        <!-- ---------- 🧭 فلٹر پٹی — صدام کی ہدایت: علاقہ + زیادہ/کم بقایہ + آج کے خریدار ---------- -->
+        <div id="rlFilterBar" style="display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px;"></div>
+        <div id="rlEmployeeList" style="display:flex; flex-direction:column; gap:10px; margin-bottom:70px;"></div>
         <div style="position:sticky; bottom:8px; padding-top:6px;">
-          <button type="button" onclick="submitRecoveryList()" style="width:100%; padding:16px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">✅ آج کی وصولی جمع کریں</button>
+          <button type="button" onclick="submitRecoveryList()" style="width:100%; padding:16px; background:linear-gradient(180deg, var(--primary), var(--primary-dark)); color:#fff; border:none; border-radius:14px; font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.25);">✅ آج کی وصولی جمع کریں</button>
         </div>
       </div>
 
       <!-- ---------- ایڈمن کا منظر: ٹوٹل + طریقہ ادائیگی کے حساب سے بریک ڈاؤن + ہر انٹری کنفرم کرنے کا بٹن ---------- -->
       <div id="rlAdminView" class="admin-only">
-        <div id="rlAdminSummary" style="background:#eef2ff; border-radius:12px; padding:12px 14px; margin-bottom:12px;"></div>
-        <div id="rlAdminList" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div id="rlAdminSummary" style="background:linear-gradient(135deg,#eef2ff,#f5f7ff); border:1px solid #dbe1ea; border-radius:14px; padding:14px 16px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,.05);"></div>
+        <div id="rlAdminList" style="display:flex; flex-direction:column; gap:10px;"></div>
       </div>
     </div>
 
@@ -6399,7 +6415,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM2SEPWE01.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM2SEPWE02';
+const APP_BUILD_VERSION = 'FM2SEPWE04';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6887,6 +6903,74 @@ function renderHomeIconGrid(){
   grid.innerHTML = myTiles.map(myTileHtml).join('');
 }
 
+// ---------- 🆕 صدام کی ہدایت (FM2SEPWE): ہوم پیج پر "تازہ ترین آرڈرز" اور "تازہ ترین ریکوری" —
+// دونوں صرف ایڈمن کو نظر آئیں، ٹچ کرنے پر متعلقہ سکرین کھلے جہاں پیمنٹ/آرڈر کھاتے میں درج کیا جا سکے ----------
+function homeTimeAgo(iso){
+  if(!iso) return '';
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if(mins < 1) return 'ابھی ابھی';
+  if(mins < 60) return mins + ' منٹ پہلے';
+  const hrs = Math.floor(mins / 60);
+  if(hrs < 24) return hrs + ' گھنٹے پہلے';
+  const days = Math.floor(hrs / 24);
+  return days + ' دن پہلے';
+}
+
+function renderHomeLatestActivity(){
+  const wrap = document.getElementById('homeLatestActivity');
+  if(!wrap || AppState.currentRole !== 'admin') { if(wrap) wrap.style.display = 'none'; return; }
+
+  const latestOrders = (typeof advanceOrdersData !== 'undefined' ? advanceOrdersData : [])
+    .filter(o => o.status === 'pending').slice(0, 3);
+  const latestRecovery = (typeof recoveryListData !== 'undefined' ? recoveryListData : [])
+    .filter(r => r.status === 'pending').slice(0, 3);
+
+  if(latestOrders.length === 0 && latestRecovery.length === 0){ wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+
+  let html = '';
+
+  if(latestOrders.length > 0){
+    html += `
+    <div style="margin-bottom:10px;">
+      <div style="font-size:14px; font-weight:800; color:var(--primary-dark); margin-bottom:6px; text-align:right;">📦 تازہ ترین آرڈرز</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${latestOrders.map(o => {
+          const itemCount = (o.items || []).reduce((s,i) => s + (i.qty || 0), 0);
+          return `
+          <div onclick="goTo('advanceorders')" style="cursor:pointer; background:#fff; border:1px solid #e5e9f0; border-right:4px solid var(--primary); border-radius:12px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:13.5px; font-weight:800;">${o.customerName || 'کسٹمر'}</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">بھیجا از: ${o.employeeName || '—'} • ${itemCount} آئٹمز • ${homeTimeAgo(o.createdAt)}</div>
+            </div>
+            <span style="font-size:18px;">›</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  if(latestRecovery.length > 0){
+    html += `
+    <div style="margin-bottom:14px;">
+      <div style="font-size:14px; font-weight:800; color:var(--primary-dark); margin-bottom:6px; text-align:right;">💰 تازہ ترین ریکوری</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${latestRecovery.map(r => `
+          <div onclick="goTo('recoveryList')" style="cursor:pointer; background:#fff; border:1px solid #e5e9f0; border-right:4px solid var(--success); border-radius:12px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:13.5px; font-weight:800;">${r.customerName} نے Rs. ${r.amount.toLocaleString()} دیے</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">بھیجا از: ${r.employeeName || '—'} • ${RECOVERY_METHODS[r.method] || r.method} • ${homeTimeAgo(r.createdAt)}</div>
+            </div>
+            <span style="font-size:18px;">›</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  wrap.innerHTML = html;
+}
+
 // ---------- 📂 "دیگر فیچرز" ڈراپ ڈاؤن بھریں — ہر چیز ایک لائن میں، ٹیپ کرنے پر سیدھا وہی اسکرین کھلے ----------
 function renderOtherFeaturesDrop(tiles){
   const wrap = document.getElementById('otherFeaturesDropWrap');
@@ -7196,6 +7280,7 @@ function finishLogin(user, rememberOverride){
     return;
   }
   document.getElementById('app').style.display = 'grid';
+  setTimeout(syncMobileTopbarHeight, 50); // ---------- ٹاپ بار اب نظر آ چکی ہے، اصل اونچائی ناپ کر نیچے یوٹیلیٹی بار کو ٹھیک جگہ پر چپکائیں ----------
   // ---------- 🍇 صدام کی حتمی ہدایت: لاگ ان کے بعد کبھی بھی Billing/پراڈکٹ گرڈ نہ کھلے۔ Admin کے لیے سیدھا
   // Home (اپنی منتخب کردہ Shortcut اسکرینوں کا آئیکن گرڈ) کھلے، اور جس ملازم کو صرف ایک ہی اسکرین Assign
   // ہو (مثلاً عبدالوہاب کو صرف Order Taking) اسے سیدھا اسی ایک اسکرین پر لے جائیں ---------- -->
@@ -7503,6 +7588,7 @@ function tryAutoLogin(){
         return true;
       }
       document.getElementById('app').style.display = 'grid';
+      setTimeout(syncMobileTopbarHeight, 50);
       goTo('home'); // ---------- صدام کی حتمی ہدایت پر: ایڈمن کا ہوم اب Home اسکرین ہے (شارٹ کٹ گرڈ)، Billing کبھی نہیں ----------
       setTimeout(checkBackupReminder, 1800);
       return true;
@@ -7527,6 +7613,7 @@ function tryAutoLogin(){
     return true;
   }
   document.getElementById('app').style.display = 'grid';
+  setTimeout(syncMobileTopbarHeight, 50);
   // ---------- 🍇 صدام کی حتمی ہدایت: صفحہ ری فریش/دوبارہ کھلنے پر بھی وہی منطق چلے جو نئے لاگ ان پر چلتی ہے —
   // Billing/پراڈکٹ گرڈ کبھی خودکار نہیں کھلتی۔ Admin سیدھا Home (شارٹ کٹ گرڈ) پر جائے، اور جس ملازم کو صرف
   // ایک ہی اسکرین Assign ہو (مثلاً عبدالوہاب کو صرف Order Taking) وہ ہمیشہ سیدھا اسی ایک اسکرین پر رہے ---------- -->
@@ -7562,7 +7649,19 @@ function updateTopbarUserBadge(){
   if(!el || !AppState.currentUser) return;
   const icon = AppState.currentRole === 'admin' ? '👑' : '🧑‍💼';
   el.textContent = `${icon} ${AppState.currentUser.name} لاگ ان`;
+  syncMobileTopbarHeight(); // ---------- نام بدلنے سے پٹی کی لمبائی/لائنیں بدل سکتی ہیں، اونچائی فوراً دوبارہ ناپیں ----------
 }
+
+// ---------- 🍇 صدام کی ہدایت (FM2SEPWE03): #mobileTopbar کی اصلی، موجودہ اونچائی ہمیشہ --mobileTopbarH
+// میں محفوظ رکھیں — تاکہ نیچے والا #utilityBar (☰ Menu, 🚪 Logout, 🎨, ⚙️) ہمیشہ اسی کے بالکل نیچے چپکے،
+// چاہے لاگ ان یوزر کا نام لمبا ہو کر مووِنگ پٹی نیچے نئی لائن پر چلی جائے اور ٹاپ بار کی اونچائی بڑھ جائے ----------
+function syncMobileTopbarHeight(){
+  const bar = document.getElementById('mobileTopbar');
+  if(!bar) return;
+  document.documentElement.style.setProperty('--mobileTopbarH', bar.offsetHeight + 'px');
+}
+window.addEventListener('resize', syncMobileTopbarHeight);
+window.addEventListener('load', syncMobileTopbarHeight);
 
 // ---------- لاگ ان کرنے والے سیلزمین کی مخصوص اجازت شدہ اسکرینز پر .perm-allowed کلاس لگائیں —
 // اب یہ نہ صرف admin-only اسکرینز کھولتا ہے بلکہ عام (پہلے سب کو نظر آنے والی) اسکرینز کو بھی چھپاتا ہے
@@ -7713,9 +7812,10 @@ function goTo(screenName, _isHistoryNav){
 
   if(screenName === 'dashboard') renderDashboard();
   if(screenName === 'home') {
-    renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI();
+    renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); renderHomeLatestActivity(); syncPinLockUI();
     // ---------- ☁️ Home پر پہنچتے ہی خاموشی سے تازہ ترین Pending Orders منگوا لیں — تاکہ گنتی کا بیج (🔴) درست ہو ----------
-    if(AppState.currentRole === 'admin') fetchAdvanceOrdersFromCloud(true).then(added => { if(added) renderHomeIconGrid(); });
+    if(AppState.currentRole === 'admin') fetchAdvanceOrdersFromCloud(true).then(added => { if(added){ renderHomeIconGrid(); renderHomeLatestActivity(); } });
+    if(AppState.currentRole === 'admin' && typeof fetchRecoveryListFromCloud === 'function') fetchRecoveryListFromCloud(true).then(added => { if(added) renderHomeLatestActivity(); });
   }
   if(screenName === 'billing') {
     renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn();
@@ -16225,41 +16325,100 @@ const RECOVERY_METHODS = {
 let rlAmountMap = {};  // {customer_id: amount} — ملازم کی سکرین پر عارضی
 let rlMethodMap = {};  // {customer_id: method}
 
-function renderRecoveryListScreen(){
-  const isAdmin = document.body.classList.contains('role-admin');
-  if(isAdmin) renderRecoveryListAdminView();
-  else renderRecoveryListEmployeeView();
+// ---------- 🧭 صدام کی ہدایت (FM2SEPWE): ریکوری لسٹ فلٹرز — علاقہ + زیادہ/کم بقایہ + آج کے خریدار ----------
+const RL_AREAS = ['اسلام آباد', 'راولپنڈی', 'مضافات'];
+let rlAreaFilter = '';      // '' = تمام علاقے، ورنہ RL_AREAS میں سے ایک
+let rlSortMode = 'none';    // 'none' | 'highest' | 'lowest'
+let rlTodayOnly = false;    // صرف وہ کسٹمر جنہوں نے آج خریداری کی
+
+function setRlAreaFilter(area){
+  rlAreaFilter = (rlAreaFilter === area) ? '' : area;
+  renderRecoveryListEmployeeView();
+}
+function setRlSortMode(mode){
+  rlSortMode = (rlSortMode === mode) ? 'none' : mode;
+  renderRecoveryListEmployeeView();
+}
+function toggleRlTodayOnly(){
+  rlTodayOnly = !rlTodayOnly;
+  renderRecoveryListEmployeeView();
+}
+// ---------- کیا اس کسٹمر نے آج کوئی خریداری (بل) کی؟ ایک روپے کی بھی ہو تو شمار ہوگی ----------
+function rlCustomerBoughtToday(customerId){
+  const todayStr = todayDateKey();
+  return (typeof invoicesData !== 'undefined') && invoicesData.some(inv =>
+    inv.customer_id === customerId && (inv.created_at || '').split('T')[0] === todayStr);
+}
+
+function renderRlFilterBar(){
+  const bar = document.getElementById('rlFilterBar');
+  if(!bar) return;
+  const chip = (label, active, onclick, color) => `
+    <button type="button" onclick="${onclick}" style="padding:8px 14px; border-radius:20px; border:1.5px solid ${active ? color : '#dbe1ea'};
+      background:${active ? color : '#fff'}; color:${active ? '#fff' : 'var(--text)'}; font-size:12.5px; font-weight:800; cursor:pointer;
+      box-shadow:${active ? '0 2px 6px rgba(0,0,0,.15)' : 'none'}; transition:.15s;">${label}</button>`;
+
+  bar.innerHTML = `
+    <div style="display:flex; flex-wrap:wrap; gap:6px; width:100%;">
+      ${chip('🏙️ اسلام آباد', rlAreaFilter === 'اسلام آباد', `setRlAreaFilter('اسلام آباد')`, 'var(--primary-dark)')}
+      ${chip('🏙️ راولپنڈی', rlAreaFilter === 'راولپنڈی', `setRlAreaFilter('راولپنڈی')`, 'var(--primary-dark)')}
+      ${chip('🌾 مضافات', rlAreaFilter === 'مضافات', `setRlAreaFilter('مضافات')`, 'var(--primary-dark)')}
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:6px; width:100%; margin-top:2px;">
+      ${chip('📈 زیادہ بقایا', rlSortMode === 'highest', `setRlSortMode('highest')`, 'var(--danger)')}
+      ${chip('📉 کم بقایہ', rlSortMode === 'lowest', `setRlSortMode('lowest')`, 'var(--warning)')}
+      ${chip('🛒 آج کے خریدار', rlTodayOnly, `toggleRlTodayOnly()`, 'var(--success)')}
+    </div>`;
 }
 
 // ---------- ملازم کا منظر ----------
 function renderRecoveryListEmployeeView(){
   rlAmountMap = {};
   rlMethodMap = {};
-  const owing = customersData.filter(c => c.total_receivable > 0).sort((a,b) => a.name.localeCompare(b.name, 'ur'));
+  renderRlFilterBar();
+
+  let owing = customersData.filter(c => c.total_receivable > 0);
+
+  // ---------- 🗺️ علاقہ فلٹر ----------
+  if(rlAreaFilter) owing = owing.filter(c => (c.area || '').trim() === rlAreaFilter);
+  // ---------- 🛒 صرف آج کے خریدار ----------
+  if(rlTodayOnly) owing = owing.filter(c => rlCustomerBoughtToday(c.customer_id));
+
+  // ---------- ترتیب: بقایہ زیادہ/کم، ورنہ نام کے حساب سے ----------
+  if(rlSortMode === 'highest') owing.sort((a,b) => b.total_receivable - a.total_receivable);
+  else if(rlSortMode === 'lowest') owing.sort((a,b) => a.total_receivable - b.total_receivable);
+  else owing.sort((a,b) => a.name.localeCompare(b.name, 'ur'));
+
   const list = document.getElementById('rlEmployeeList');
   if(!list) return;
 
   if(owing.length === 0){
-    list.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">فی الحال کسی کسٹمر کا بقایہ نہیں</div>`;
+    list.innerHTML = `<div class="placeholder" style="padding:24px 0; text-align:center; font-size:13.5px;">🔍 اس فلٹر سے کوئی کسٹمر نہیں ملا</div>`;
     return;
   }
 
   list.innerHTML = owing.map(c => {
     rlMethodMap[c.customer_id] = 'cash';
+    const areaBadge = c.area ? `<span style="background:#eef2ff; color:var(--primary-dark); font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; margin-right:6px;">🗺️ ${c.area}</span>` : '';
+    const boughtToday = rlCustomerBoughtToday(c.customer_id)
+      ? `<span style="background:#dcfce7; color:var(--success); font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px;">🛒 آج کا خریدار</span>` : '';
     return `
-    <div class="rlEmpRow" style="background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <div style="font-size:16px; font-weight:800;">${c.name}</div>
-        <div style="font-size:13px; color:var(--danger); font-weight:800;">بقایہ: Rs. ${c.total_receivable.toLocaleString()}</div>
+    <div class="rlEmpRow" style="background:#fff; border:1px solid #e5e9f0; border-radius:14px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,.06);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+        <div>
+          <div style="font-size:17px; font-weight:800; color:var(--primary-dark);">${c.name}</div>
+          <div style="margin-top:4px;">${areaBadge}${boughtToday}</div>
+        </div>
+        <div style="font-size:14px; color:var(--danger); font-weight:900; white-space:nowrap;">بقایہ<br>Rs. ${c.total_receivable.toLocaleString()}</div>
       </div>
-      <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+      <div style="display:flex; gap:8px; align-items:center; margin:10px 0 6px;">
         <input type="number" min="0" placeholder="وصولی کی رقم" oninput="updateRlAmount(${c.customer_id}, this.value, ${c.total_receivable})"
-               style="flex:1; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; text-align:center;">
-        <select onchange="rlMethodMap[${c.customer_id}] = this.value;" style="flex:0 0 120px; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+               style="flex:1; padding:11px; border:1.5px solid #dbe1ea; border-radius:10px; font-size:15px; text-align:center; font-weight:700;">
+        <select onchange="rlMethodMap[${c.customer_id}] = this.value;" style="flex:0 0 125px; padding:11px 6px; border:1.5px solid #dbe1ea; border-radius:10px; font-size:12.5px; font-weight:700;">
           ${Object.keys(RECOVERY_METHODS).map(k => `<option value="${k}">${RECOVERY_METHODS[k]}</option>`).join('')}
         </select>
       </div>
-      <div id="rlRemain-${c.customer_id}" style="font-size:12px; color:var(--muted);">باقی بقیہ: Rs. ${c.total_receivable.toLocaleString()}</div>
+      <div id="rlRemain-${c.customer_id}" style="font-size:12.5px; color:var(--muted); font-weight:600;">باقی بقیہ: Rs. ${c.total_receivable.toLocaleString()}</div>
     </div>`;
   }).join('');
 }
@@ -16316,26 +16475,26 @@ function renderRecoveryListAdminView(){
   pending.forEach(r => { byMethod[r.method] = (byMethod[r.method] || 0) + r.amount; });
 
   summaryEl.innerHTML = `
-    <div style="font-size:20px; font-weight:900; color:var(--primary-dark); margin-bottom:8px;">ٹوٹل وصولی: Rs. ${total.toLocaleString()}</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12.5px;">
-      ${Object.keys(RECOVERY_METHODS).map(k => `<div>${RECOVERY_METHODS[k]}: <b>Rs. ${byMethod[k].toLocaleString()}</b></div>`).join('')}
+    <div style="font-size:22px; font-weight:900; color:var(--primary-dark); margin-bottom:10px;">💰 ٹوٹل وصولی: Rs. ${total.toLocaleString()}</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12.5px;">
+      ${Object.keys(RECOVERY_METHODS).map(k => `<div style="background:#fff; border-radius:8px; padding:6px 10px; border:1px solid #e5e9f0;">${RECOVERY_METHODS[k]}: <b>Rs. ${byMethod[k].toLocaleString()}</b></div>`).join('')}
     </div>`;
 
   if(pending.length === 0){
-    listEl.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">تصدیق کے لیے کوئی وصولی موجود نہیں</div>`;
+    listEl.innerHTML = `<div class="placeholder" style="padding:24px 0; text-align:center; font-size:13.5px;">✅ تصدیق کے لیے کوئی وصولی موجود نہیں</div>`;
     return;
   }
 
   listEl.innerHTML = pending.map(r => `
-    <div class="rlAdminRow" style="background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div class="rlAdminRow" style="background:#fff; border:1px solid #e5e9f0; border-radius:14px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,.06);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
         <div>
-          <div style="font-size:15px; font-weight:800;">${r.customerName}</div>
-          <div style="font-size:11.5px; color:var(--muted);">${RECOVERY_METHODS[r.method] || r.method} — بھیجا از: ${r.employeeName}</div>
+          <div style="font-size:16px; font-weight:800; color:var(--primary-dark);">${r.customerName}</div>
+          <div style="font-size:11.5px; color:var(--muted); margin-top:3px; font-weight:600;">${RECOVERY_METHODS[r.method] || r.method} — بھیجا از: ${r.employeeName}</div>
         </div>
-        <div style="font-size:16px; font-weight:900; color:var(--success);">Rs. ${r.amount.toLocaleString()}</div>
+        <div style="font-size:18px; font-weight:900; color:var(--success); white-space:nowrap;">Rs. ${r.amount.toLocaleString()}</div>
       </div>
-      <button type="button" onclick="confirmRecoveryEntry(${r.id})" style="width:100%; margin-top:8px; padding:9px; background:#dcfce7; color:#15803d; border:1px solid #15803d; border-radius:8px; font-weight:800; font-size:12.5px; cursor:pointer;">✅ کھاتے میں درج کر دیا — Confirm</button>
+      <button type="button" onclick="confirmRecoveryEntry(${r.id})" style="width:100%; margin-top:10px; padding:11px; background:linear-gradient(180deg,#dcfce7,#bbf7d0); color:#15803d; border:1.5px solid #15803d; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">✅ کھاتے میں درج کر دیا — تصدیق کریں</button>
     </div>`).join('');
 }
 
@@ -22084,6 +22243,7 @@ function applyUiZoom(pct){
   AppState.settings.uiZoom = clamped;
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = clamped + '%');
   document.querySelectorAll('.uiZoomSlider').forEach(el => { if(Number(el.value) !== clamped) el.value = clamped; });
+  setTimeout(syncMobileTopbarHeight, 50); // ---------- زوم بدلنے سے ٹاپ بار کی اونچائی بھی بدلتی ہے، نیچے والی یوٹیلیٹی بار کو دوبارہ ٹھیک جگہ پر چپکائیں ----------
 }
 
 // ---------- بل بناتے وقت (Cart) کی لکھائی کا سائز/موٹاپن/لائن اسپیسنگ — یہ صرف بلنگ کی ٹیبل پر لاگو ہوتا ہے،
