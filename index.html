@@ -2377,8 +2377,8 @@
     <div class="navItem" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')">💰 Recovery List<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="" data-navkey="reports" data-navlabel="Reports" onclick="closeSidebar(); openReportCenterModal();">📑 Reports<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="settings" data-navkey="settings" data-navlabel="Settings" onclick="goTo('settings')">⚙️ Settings<span class="navDragHandle">⠿</span></div>
-    <!-- ---------- 🍇 صدام کی ہدایت پر: Stock Adjustment مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
-    <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')" style="display:none;">🧮 Stock Adjustment</div>
+    <!-- ---------- 🍇 صدام کی ہدایت (FM2SEPWE02): Stock Adjustment دوبارہ مینیو میں فعال — پہلے چھپائی گئی تھی ---------- -->
+    <div class="navItem admin-only" data-screen="stockadjustment" data-navkey="stockadjustment" data-navlabel="Stock Adjustment" onclick="goTo('stockadjustment')">🧮 Stock Adjustment<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')" style="display:none;">🚚 Suppliers</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Trends مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')" style="display:none;">📈 Trends</div>
@@ -2737,8 +2737,13 @@
           <button type="button" onclick="openManageVariantTypesModal()" title="ویرینٹ کی فہرست ترتیب دیں" style="flex:0 0 auto; background:#eef2ff; color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; padding:0 14px; font-weight:800; cursor:pointer;">⚙️</button>
         </div>
         <input type="number" id="npPurchase" placeholder="💰 Purchase Price (خرید)" style="margin-top:8px;">
-        <input type="number" id="npRetail" placeholder="🏷️ Islamabad Rate (فروخت)" style="margin-top:8px;">
-        <input type="number" id="npWholesale" placeholder="📦 Rawalpindi Rate (فروخت)" style="margin-top:8px;">
+        <!-- ---------- 🏷️📦 صدام کی ہدایت (FM2SEPWE02): Islamabad/Rawalpindi ریٹ کے اوپر پکا/مستقل کیپشن —
+             پہلے صرف placeholder تھا جو ایڈٹ موڈ میں ویلیو بھرتے ہی غائب ہو جاتا تھا۔ اب ہمیشہ نظر آئے گا،
+             دونوں کا رنگ الگ (سبز = اسلام آباد، جامنی = راولپنڈی) تاکہ فرق واضح نظر آئے ---------- -->
+        <div style="font-size:12px; font-weight:800; color:#065f46; background:#d1fae5; display:inline-block; padding:3px 10px; border-radius:7px; margin-top:10px;">🏷️ Islamabad Rate</div>
+        <input type="number" id="npRetail" placeholder="اسلام آباد ریٹ (فروخت)" style="margin-top:5px;">
+        <div style="font-size:12px; font-weight:800; color:#5b21b6; background:#ede9fe; display:inline-block; padding:3px 10px; border-radius:7px; margin-top:10px;">📦 Rawalpindi Rate</div>
+        <input type="number" id="npWholesale" placeholder="راولپنڈی ریٹ (فروخت)" style="margin-top:5px;">
         <input type="number" id="npStock" placeholder="📦 Stock (optional — خالی چھوڑ سکتے ہیں)" style="margin-top:8px;">
         <!-- ---------- کیٹیگری/بارکوڈ/تصویر — کوڈ محفوظ ہے، صرف چھپایا گیا ہے ---------- -->
         <input type="text" id="npCategory" placeholder="Category (optional)" list="categoryDatalist" autocomplete="off" style="display:none;">
@@ -6394,7 +6399,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM2SEPWE01.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM2SEPWE01';
+const APP_BUILD_VERSION = 'FM2SEPWE02';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
