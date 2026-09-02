@@ -5156,10 +5156,11 @@
       </div>
 
       <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7; color:#b91c1c;">🔑 Change Developer Panel Password</div>
-      <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">یہاں سے آپ خود، کبھی بھی، یہ پاسورڈ بدل سکتے ہیں — کسی دکاندار یا ایڈمن کو یہ کبھی معلوم نہیں ہو سکے گا۔ خالی چھوڑیں تو پرانا پاسورڈ ہی چلتا رہے گا۔</div>
+      <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">یہاں سے آپ خود، کبھی بھی، یہ پاسورڈ بدل سکتے ہیں — کسی دکاندار یا ایڈمن کو یہ کبھی معلوم نہیں ہو سکے گا۔ خالی چھوڑیں تو پرانا پاسورڈ ہی چلتا رہے گا۔ ⚠️ پاسورڈ بدلنے پر بیک اپ فائل خودکار ڈاؤن لوڈ ہو گی — وہ فائل ضرور محفوظ رکھیں (WhatsApp/Drive وغیرہ میں)، ورنہ براؤزر ڈیٹا صاف ہونے پر نیا پاسورڈ ضائع ہو سکتا ہے۔</div>
       <input type="password" id="devSecretNewPasswordInput" placeholder="New Developer Password (leave blank to keep current)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
 
       <button class="testPrintBtn" onclick="saveDevSecretPanel()">💾 Save</button>
+      <button class="testPrintBtn" style="background:#e0f2fe; color:#0369a1; margin-top:6px;" onclick="exportBackupData()">📥 Save Backup File Now</button>
       <div id="devSecretSaveMsg" style="color:var(--success); font-size:12px; margin-top:6px; text-align:center;"></div>
     </div>
   </div>
@@ -23876,14 +23877,26 @@ async function saveDevSecretPanel(){
   AppState.settings.perDayRate = parseFloat(document.getElementById('perDayRateInput').value) || 0;
 
   const newPw = document.getElementById('devSecretNewPasswordInput').value;
+  let passwordChanged = false;
   if(newPw && newPw.trim()){
     AppState.settings.devPanelPasswordHash = await hashPin(newPw.trim());
     document.getElementById('devSecretNewPasswordInput').value = '';
+    passwordChanged = true;
   }
 
   persistAllData();
-  document.getElementById('devSecretSaveMsg').textContent = '✅ Saved!';
-  setTimeout(() => { document.getElementById('devSecretSaveMsg').textContent = ''; }, 2000);
+
+  // ---------- پاسورڈ بدلنے پر صرف localStorage میں سیو کافی نہیں — براؤزر ڈیٹا کلیئر ہونے پر یہ ضائع ہو جاتا ہے۔
+  // اس لیے پاسورڈ بدلتے ہی ایک بیک اپ فائل خودکار ڈاؤن لوڈ ہو جاتی ہے جس میں نیا پاسورڈ بھی شامل ہوتا ہے —
+  // یہی فائل دوبارہ Import کر کے پاسورڈ واپس لایا جا سکتا ہے چاہے براؤزر ڈیٹا صاف ہو جائے ----------
+  if(passwordChanged){
+    exportBackupData();
+    document.getElementById('devSecretSaveMsg').textContent = '✅ Saved! بیک اپ فائل بھی ڈاؤن لوڈ ہو گئی — اسے محفوظ رکھیں۔';
+    setTimeout(() => { document.getElementById('devSecretSaveMsg').textContent = ''; }, 4000);
+  } else {
+    document.getElementById('devSecretSaveMsg').textContent = '✅ Saved!';
+    setTimeout(() => { document.getElementById('devSecretSaveMsg').textContent = ''; }, 2000);
+  }
 }
 
 // ---------- نک نیم کو محفوظ شکل میں رکھنے کے لیے ایک جیسا فارمیٹ بنائیں (چھوٹے/بڑے حروف، خالی جگہ کا فرق نہ ہو) پھر hash کریں ----------
