@@ -132,9 +132,16 @@
     border-top:1px solid rgba(250,204,21,.55); border-bottom:1px solid rgba(250,204,21,.55);
     border-left:1px solid rgba(250,204,21,.3); border-right:1px solid rgba(250,204,21,.3);
     border-radius:16px;
-    display:flex; align-items:center; box-shadow:0 0 12px rgba(250,204,21,.15);
+    display:block; position:relative; box-shadow:0 0 12px rgba(250,204,21,.15);
   }
-  .loginMarqueeInner{ display:inline-block; white-space:nowrap; animation:loginMarqueeScroll 9s linear infinite; }
+  /* ---------- ✨ صدام کی ہدایت (FM29WE29 فالو اپ): پہلے یہ پٹی translateX(%) سے سرکتی تھی جو خود اپنی
+       (چھوٹی) چوڑائی کے حساب سے حرکت کرتا ہے — اس لیے لمبی/چوڑی پٹی میں نام تھوڑا سا ہل کر تقریباً ایک
+       ہی جگہ پر رک جاتا تھا۔ اب position:absolute + left(%) پوری پٹی کی چوڑائی کے حساب سے حرکت کرتا ہے،
+       تاکہ نام دائیں کونے سے مکمل طور پر داخل ہو کر بائیں کونے سے مکمل طور پر باہر نکل جائے ---------- */
+  .loginMarqueeInner{
+    position:absolute; top:0; height:100%; display:flex; align-items:center;
+    white-space:nowrap; left:100%; animation:loginMarqueeScroll 9s linear infinite;
+  }
   .loginMarqueeText{
     font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif;
     font-size:15px; font-weight:700; line-height:32px;
@@ -145,8 +152,8 @@
     filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));
   }
   @keyframes loginMarqueeScroll{
-    0%{ transform:translateX(100%); }
-    100%{ transform:translateX(-100%); }
+    0%{ left:100%; }
+    100%{ left:-100%; }
   }
   /* --- 🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن، پرانا کیلنڈر باکس ہٹا کر (دور کے سال تک بار بار کلک کرنے کی زحمت ختم) --- */
   .dobPicker{display:flex; gap:6px; align-items:center; margin:8px 0;}
@@ -6515,7 +6522,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM29WE29';
+const APP_BUILD_VERSION = 'FM2SEPWE01';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
