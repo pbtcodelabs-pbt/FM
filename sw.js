@@ -84,8 +84,11 @@ self.addEventListener('fetch', (event) => {
   if(isHTML){
     // ---------- Network First: آن لائن ہو تو تازہ index.html لائیں اور کیش بھی اپڈیٹ کر دیں؛
     // آف لائن ہو تو کیش سے دکھا دیں (ایپ بند نہیں ہوگی) ----------
+    // ---------- 🐛 فکس: پہلے یہاں عام fetch(req) تھا — یہ خود براؤزر کے اپنے HTTP کیش کو بھی دیکھ سکتا تھا
+    // اور کبھی کبھار پرانی، کیش شدہ HTML واپس دے دیتا تھا (چاہے سرور پر نئی فائل اپلوڈ ہو چکی ہو)۔
+    // {cache:'no-store'} لگانے سے اب یہ ہمیشہ سیدھا نیٹ ورک/سرور سے ہی تازہ فائل مانگے گا، براؤزر کیش کو مکمل نظرانداز کر کے ----------
     event.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-store' })
         .then((res) => {
           const resClone = res.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
