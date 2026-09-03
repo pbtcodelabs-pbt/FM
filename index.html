@@ -2365,13 +2365,13 @@
     </div>
     <!-- ---------- 🔤 شاپ کا نام (چھوٹا، ثانوی) — کوڈ محفوظ، بس چھپا ہوا ---------- -->
     <span id="mobileBrandText" class="mobileBrand" style="display:none;">صدام فروٹ منڈی</span>
-    <!-- ---------- ✨ چمکتی ہوئی، دائیں سے بائیں سرکتی مووِنگ پٹی — "کون لاگ ان ہے" (updateTopbarUserBadge اسی کو بھرتا ہے)
-         صدام کی ہدایت (FM3SEPTH23): بار بار CSS/JS طریقے ناکام رہے (کبھی رکی رہتی، کبھی صفحے کے غلط حصے میں چلی جاتی) —
-         اب براؤزر کا اپنا بلٹ ان <marquee> استعمال کیا ہے، جو کبھی اپنے خانے سے باہر نہیں جا سکتا، ہمیشہ اسی مقررہ
-         جگہ (تصویر کے نیچے، بٹنوں کی پٹی کے بالکل ساتھ) قائم رہتا ہے، اور behavior="alternate" سے خود بخود
-         دائیں سے بائیں جا کر واپس بائیں سے دائیں لوٹتا ہے (مکمل باہر نکل کر) ---------- -->
+    <!-- ---------- ✨ چمکتی ہوئی، مکمل طور پر باہر نکل کر لوٹتی ہوئی پٹی — "کون لاگ ان ہے" (updateTopbarUserBadge اسی کو بھرتا ہے)
+         صدام کی ہدایت (FM4SEPFR02): پہلے behavior="alternate" استعمال ہوتا تھا جو صرف دونوں کناروں کے بیچ اچھلتی تھی،
+         کبھی مکمل باہر نہیں جاتی تھی۔ اب ہر ایک پھیرے کے بعد (loop=1 + onfinish) خود بخود سمت الٹ جاتی ہے —
+         پہلے دائیں سے بائیں مکمل باہر نکل جاتی ہے، پھر بائیں سے دائیں مکمل باہر نکل جاتی ہے، یوں ہمیشہ کے لیے،
+         آہستہ رفتار (scrollamount=3) کے ساتھ ---------- -->
     <div id="loginMarqueeWrap">
-      <marquee id="loginMarqueeText" class="loginMarqueeText" behavior="alternate" direction="left" scrollamount="4"></marquee>
+      <marquee id="loginMarqueeText" class="loginMarqueeText" behavior="scroll" direction="left" scrollamount="3" loop="1" onfinish="bounceLoginMarquee(this)"></marquee>
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px; flex:0 0 auto; width:100%; display:none;">
       <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:none;">Fruit Mandi POS</span>
@@ -6724,7 +6724,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR01';
+const APP_BUILD_VERSION = 'FM4SEPFR02';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -7982,6 +7982,17 @@ function applyRole(role, name){
 
 // ---------- ٹاپ بار پر ہمیشہ نظر آنے والا، چمکتا ہوا (glitter) دائیں سے بائیں سرکتا لاگ ان یوزر کا نام —
 // تاکہ ایک نظر میں پتا چل جائے کہ اس وقت صدام حسین لاگ ان ہیں یا کوئی مخصوص ملازم (مثلاً عبدالوہاب) (FM3SEPTH10) ---------- -->
+// ---------- ✨ صدام کی ہدایت (FM4SEPFR02): ہر پھیرے کے اختتام پر (onfinish) سمت الٹ کر دوبارہ شروع کریں —
+// یوں پٹی ہمیشہ مکمل طور پر ایک طرف باہر نکل کر، پھر دوسری طرف سے مکمل باہر نکل کر لوٹتی رہتی ہے،
+// کبھی بیچ میں اچھل کر واپس نہیں مڑتی (پرانے behavior="alternate" کا مسئلہ یہی تھا) ---------- -->
+function bounceLoginMarquee(el){
+  if(!el) return;
+  const next = (el.getAttribute('direction') === 'left') ? 'right' : 'left';
+  el.setAttribute('direction', next);
+  try{ el.direction = next; }catch(e){}
+  try{ el.start(); }catch(e){ /* کچھ پرانے WebViews میں start() دستیاب نہ ہو تو خاموشی سے نظرانداز ---------- */ }
+}
+
 function updateTopbarUserBadge(){
   const el = document.getElementById('loginMarqueeText');
   if(!el || !AppState.currentUser) return;
