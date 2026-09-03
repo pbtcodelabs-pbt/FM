@@ -4251,6 +4251,14 @@
                 <input type="checkbox" id="pscA4Chk" onchange="toggleInvoicePaperStyle(this.checked)"> 🖨️ Print A4
               </label>
             </div>
+            <!-- ---------- 🐛 صدام کی ہدایت (FM3SEPTH26): پرنٹ کرنے سے پہلے یہیں چھوٹا سا 58mm/80mm بٹن —
+            تاکہ غلطی سے 58mm پرنٹر پر 80mm کی پرنٹنگ (یا اس کے برعکس) نہ چلی جائے۔ صرف تھرمل موڈ میں نظر
+            آتا ہے (Print A4 آن ہو تو چھپ جاتا ہے، کیونکہ A4 پر کاغذ کی چوڑائی غیر متعلقہ ہے) ---------- -->
+            <div id="pscPaperWidthRow" class="pscCompactRow">
+              <span class="pscLabel">📄</span>
+              <button type="button" id="pscPW58Btn" onclick="setPreviewPaperWidth(58)" class="pscToggleBtn">58mm</button>
+              <button type="button" id="pscPW80Btn" onclick="setPreviewPaperWidth(80)" class="pscToggleBtn">80mm</button>
+            </div>
             <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
             <div id="pscOrientRow" class="pscCompactRow" style="display:none;">
               <button type="button" id="pscOrientPortraitBtn" onclick="setInvoiceOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
@@ -6626,7 +6634,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH26';
+const APP_BUILD_VERSION = 'FM3SEPTH27';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -21870,14 +21878,16 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const qtyW = Math.max(Math.round(32 * fscale), ctx.measureText(maxQtyStr).width + colPad);
   const priceW = Math.max(Math.round(38 * fscale), ctx.measureText(maxPriceStr).width + colPad);
   const totalW = Math.max(Math.round(42 * fscale), ctx.measureText(maxTotalStr).width + colPad);
-  // ---------- نام اشیاء کالم — سب سے لمبے نام جتنا چوڑا (نہ کہ باقی تمام جگہ) ---------- -->
+  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH26): پہلے نام اشیاء کالم صرف سب سے لمبے نام جتنا چوڑا رہتا تھا اور
+  // بچ جانے والی خالی جگہ بائیں کنارے پر خالی رہ جاتی تھی — اصل پرنٹ پر یہ ایک طرف خالی، دوسری طرف بھرا
+  // ہوا، غیر متناسب/غیر خوبصورت نظر آتا تھا۔ اب نام کا کالم ہمیشہ بقیہ پوری جگہ (remainderW) لیتا ہے
+  // تاکہ ٹیبل ہمیشہ کاغذ کی پوری چوڑائی (دونوں کناروں پر برابر 8px مارجن) تک پھیلے، بالکل درمیان میں،
+  // پیشہ ورانہ اور خوبصورت طریقے سے — نہ کوئی کالم غیر ضروری تنگ، نہ کوئی خالی جگہ ---------- -->
   ctx.font = `bold ${Math.round(18*fscale)}px ${canvasFontFamily}`;
-  let maxItemNameW = 0;
-  invoice.items.forEach(it => { const w = ctx.measureText(it.name).width; if(w > maxItemNameW) maxItemNameW = w; });
   const itemPad = Math.round(16 * fscale);
   const remainderW = (tableRight - tableLeft0) - noW - qtyW - priceW - totalW;
-  const itemW = Math.max(Math.round(60*fscale), Math.min(remainderW, maxItemNameW + itemPad));
-  // ---------- بچ جانے والی خالی جگہ بائیں کنارے پر — دائیں کنارہ (تازہ ترین کالم) ہمیشہ فکس رہتا ہے ---------- -->
+  const itemW = Math.max(Math.round(60*fscale), remainderW);
+  // ---------- نام کالم بقیہ پوری جگہ لیتا ہے، اس لیے ٹیبل ہمیشہ tableLeft0 سے tableRight تک پورا پھیلا رہتا ہے ---------- -->
   const tableLeft = tableRight - (noW + itemW + qtyW + priceW + totalW);
   const colX = [
     tableLeft,                                     // 0: ٹوٹل شروع (سب سے بائیں)
@@ -22701,6 +22711,9 @@ function syncPreviewStyleControls(){
   document.getElementById('pscA4Chk').checked = AppState.settings.invoicePrintStyle === 'a4';
   const iOrientRow = document.getElementById('pscOrientRow');
   if(iOrientRow) iOrientRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'flex' : 'none';
+  const iPwRow = document.getElementById('pscPaperWidthRow');
+  if(iPwRow) iPwRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'none' : 'flex';
+  syncPreviewPaperWidthButtons();
   const iBtRow = document.getElementById('pscBtPrintRow');
   if(iBtRow) iBtRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'none' : 'flex';
   const iShareRow = document.getElementById('pscA4ShareRow');
@@ -26318,6 +26331,8 @@ function toggleInvoicePaperStyle(checked){
   persistAllData();
   const orientRow = document.getElementById('pscOrientRow');
   if(orientRow) orientRow.style.display = checked ? 'flex' : 'none';
+  const pwRow = document.getElementById('pscPaperWidthRow');
+  if(pwRow) pwRow.style.display = checked ? 'none' : 'flex';
   const btRow = document.getElementById('pscBtPrintRow');
   if(btRow) btRow.style.display = checked ? 'none' : 'flex';
   const shareRow = document.getElementById('pscA4ShareRow');
@@ -27943,9 +27958,24 @@ function applyPrintPageSize(mm){
 function setPaperWidth(mm){
   AppState.settings.paperWidth = mm;
   applyPrintPageSize(mm);
+  persistAllData();
   document.querySelectorAll('#paperWidthGrid button').forEach(b => {
     b.classList.toggle('active', Number(b.dataset.width) === mm);
   });
+  syncPreviewPaperWidthButtons();
+}
+
+// ---------- 🐛 صدام کی ہدایت (FM3SEPTH26): پرنٹ پریویو کے اندر ہی چھوٹا 58mm/80mm بٹن — یہیں سے فوری تبدیل
+// کر کے، صحیح سائز کا انتخاب یقینی بنا کر پرنٹ کریں، غلطی سے غلط کاغذ سائز پر پرنٹ جانے سے بچاؤ ---------- -->
+function setPreviewPaperWidth(mm){
+  setPaperWidth(mm); // ---------- ایپ کی اصل سیٹنگ اور Settings سکرین والا بٹن بھی ساتھ ساتھ اپڈیٹ ہو جاتا ہے ----------
+  if(document.getElementById('invoicePreviewModal')?.classList.contains('show')) rerenderInvoicePreview();
+}
+function syncPreviewPaperWidthButtons(){
+  const mm = AppState.settings.paperWidth || 80;
+  const b58 = document.getElementById('pscPW58Btn'), b80 = document.getElementById('pscPW80Btn');
+  if(b58) b58.classList.toggle('active', mm === 58);
+  if(b80) b80.classList.toggle('active', mm === 80);
 }
 
 // ---------- Receipt Content ٹوگلز — سادہ آن/آف، فوری محفوظ ----------
