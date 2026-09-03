@@ -117,12 +117,14 @@
     0%, 100%{ filter:drop-shadow(0 0 1px rgba(255,255,255,.4)); opacity:.92; }
     50%{ filter:drop-shadow(0 0 5px rgba(255,255,255,.9)); opacity:1; }
   }
-  /* ---------- ✨ صدام کی ہدایت (FM3SEPTH23): بار بار CSS/JS طریقے ناکام رہے (کبھی رکی رہتی، کبھی صفحے کے غلط
-       حصے میں چلی جاتی) — اب براؤزر کا اپنا بلٹ ان <marquee> استعمال کیا ہے، جو کبھی اپنے خانے سے باہر نہیں جا
-       سکتا۔ یہ خانہ صرف اس کا فریم/بیک گراؤنڈ ہے: نیلا پس منظر، سنہری باریک بارڈر، بالکل پٹی کے سائز کا
-       (نہ اوپر تصویر کو چھوئے، نہ نیچے بٹنوں کی پٹی کو) ---------- -->
+  /* ---------- ✨ صدام کی ہدایت (FM4SEPFR04): پرانا بلٹ ان <marquee> ٹیگ صدام کی اصل ڈیوائس کے
+       WebView میں بالکل ساکت رہتا تھا (کبھی حرکت نہیں کرتا تھا) — اس لیے اب خالص CSS animation
+       (transform: translateX) والا طریقہ استعمال کیا ہے، جو ہر براؤزر/WebView میں قابلِ بھروسہ چلتا ہے۔
+       یہ خانہ (wrap) صرف فریم/بیک گراؤنڈ ہے: نیلا پس منظر، سنہری باریک بارڈر — بٹنوں والی utilityBar پٹی
+       سے بالکل الگ، اسی کے اوپر — utilityBar کو ہاتھ نہیں لگایا گیا ---------- -->
   #loginMarqueeWrap{
     width:100%; height:32px; overflow:hidden; order:9; margin:8px 0 6px;
+    position:relative;
     background:linear-gradient(90deg, #1e3a8a, #2563eb, #1e3a8a);
     border-top:1.5px solid #facc15; border-bottom:1.5px solid #facc15;
     border-left:1px solid rgba(250,204,21,.4); border-right:1px solid rgba(250,204,21,.4);
@@ -130,15 +132,22 @@
     box-shadow:0 0 12px rgba(250,204,21,.2);
   }
   .loginMarqueeText{
-    width:100%; height:32px; line-height:32px;
+    position:absolute; top:0; left:0; height:32px; line-height:32px;
+    white-space:nowrap; will-change:transform;
     font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif;
     font-size:15px; font-weight:700;
     /* ---------- 🌟 صدام کی ہدایت: خالص سنہری (golden) رنگ جو شیڈ بدلتا رہے ---------- -->
     background:linear-gradient(90deg, #fde047, #f59e0b, #fbbf24, #fef08a, #eab308, #fde047);
     background-size:300% auto;
     -webkit-background-clip:text; background-clip:text; color:transparent !important;
-    animation:testShimmer 3.5s linear infinite, sparklePulse 1.6s ease-in-out infinite;
+    animation:loginMarqueeSlide 16s linear infinite, testShimmer 3.5s linear infinite, sparklePulse 1.6s ease-in-out infinite;
     filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));
+  }
+  /* ---------- بائیں سے دائیں، مکمل طور پر ایک طرف سے باہر نکل کر دوسری طرف سے دوبارہ داخل ہو — ہمیشہ
+       ایک ہی سمت میں، آہستہ رفتار کے ساتھ، بغیر رکے لوپ چلتا رہے ---------- -->
+  @keyframes loginMarqueeSlide{
+    0%{ transform:translateX(-100vw); }
+    100%{ transform:translateX(100vw); }
   }
   /* --- 🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن، پرانا کیلنڈر باکس ہٹا کر (دور کے سال تک بار بار کلک کرنے کی زحمت ختم) --- */
   /* ---------- 🔎 صدام کی ہدایت (FM3SEPTH10): جاری کردہ کوڈز کی فہرست — حالت فلٹر بٹن ---------- */
@@ -2371,7 +2380,7 @@
          پہلے دائیں سے بائیں مکمل باہر نکل جاتی ہے، پھر بائیں سے دائیں مکمل باہر نکل جاتی ہے، یوں ہمیشہ کے لیے،
          آہستہ رفتار (scrollamount=3) کے ساتھ ---------- -->
     <div id="loginMarqueeWrap">
-      <marquee id="loginMarqueeText" class="loginMarqueeText" behavior="scroll" direction="left" scrollamount="3" loop="1" onfinish="bounceLoginMarquee(this)"></marquee>
+      <span id="loginMarqueeText" class="loginMarqueeText"></span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px; flex:0 0 auto; width:100%; display:none;">
       <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:none;">Fruit Mandi POS</span>
@@ -6724,7 +6733,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR02';
+const APP_BUILD_VERSION = 'FM4SEPFR04';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -7980,18 +7989,10 @@ function applyRole(role, name){
   applyUserScreenPermissions(name);
 }
 
-// ---------- ٹاپ بار پر ہمیشہ نظر آنے والا، چمکتا ہوا (glitter) دائیں سے بائیں سرکتا لاگ ان یوزر کا نام —
+// ---------- ٹاپ بار پر ہمیشہ نظر آنے والا، چمکتا ہوا (glitter) بائیں سے دائیں سرکتا لاگ ان یوزر کا نام —
 // تاکہ ایک نظر میں پتا چل جائے کہ اس وقت صدام حسین لاگ ان ہیں یا کوئی مخصوص ملازم (مثلاً عبدالوہاب) (FM3SEPTH10) ---------- -->
-// ---------- ✨ صدام کی ہدایت (FM4SEPFR02): ہر پھیرے کے اختتام پر (onfinish) سمت الٹ کر دوبارہ شروع کریں —
-// یوں پٹی ہمیشہ مکمل طور پر ایک طرف باہر نکل کر، پھر دوسری طرف سے مکمل باہر نکل کر لوٹتی رہتی ہے،
-// کبھی بیچ میں اچھل کر واپس نہیں مڑتی (پرانے behavior="alternate" کا مسئلہ یہی تھا) ---------- -->
-function bounceLoginMarquee(el){
-  if(!el) return;
-  const next = (el.getAttribute('direction') === 'left') ? 'right' : 'left';
-  el.setAttribute('direction', next);
-  try{ el.direction = next; }catch(e){}
-  try{ el.start(); }catch(e){ /* کچھ پرانے WebViews میں start() دستیاب نہ ہو تو خاموشی سے نظرانداز ---------- */ }
-}
+// ---------- ✨ صدام کی ہدایت (FM4SEPFR04): پرانا <marquee> ٹیگ ڈیوائس کے WebView میں بالکل ساکت رہتا تھا —
+// اب خالص CSS animation (loginMarqueeSlide keyframes) حرکت دیتی ہے، اس لیے یہاں کوئی JS پوزیشننگ کوڈ درکار نہیں ---------- -->
 
 function updateTopbarUserBadge(){
   const el = document.getElementById('loginMarqueeText');
