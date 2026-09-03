@@ -4264,6 +4264,15 @@
               <button type="button" id="pscOrientPortraitBtn" onclick="setInvoiceOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
               <button type="button" id="pscOrientLandscapeBtn" onclick="setInvoiceOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
             </div>
+            <!-- ---------- 🐛 صدام کی ہدایت (FM3SEPTH27): "Fast Print" خام ASCII متن کی صورت میں پرنٹر کو
+            بھیجتا ہے — یہ اردو حروف کو بالکل صحیح پرنٹ نہیں کر سکتا (صرف انگریزی/لاطینی حروف کے لیے ہے)۔
+            پہلے یہ اصل "🖨️ Print" بٹن کے بالکل ساتھ نظر آتا تھا جس سے اردو میں کام کرنے والا صارف غلطی سے
+            دبا سکتا تھا اور خراب پرنٹ نکل سکتا تھا۔ اب یہ "More ▾" کے اندر، الگ اور صاف وارننگ کے ساتھ ہے
+            تاکہ غلطی سے نہ دبے، صرف جان بوجھ کر انگریزی پرنٹ درکار ہو تو استعمال ہو ---------- -->
+            <div class="pscCompactRow" style="flex-direction:column; align-items:stretch; gap:4px; margin-top:2px; padding-top:8px; border-top:1px dashed #e2e8f0;">
+              <button style="background:#fef9c3; color:#854d0e; border:1px solid #fde68a; border-radius:8px; padding:8px 10px; font-weight:700; font-size:12.5px; cursor:pointer;" onclick="printInvoiceFastText()">⚡ Fast Print — English Only</button>
+              <span style="font-size:11px; color:#b45309; text-align:center; font-weight:600;">⚠️ صرف انگریزی رائٹنگ کے لیے — یہ اردو بل صحیح پرنٹ نہیں کرے گا، اردو بل کے لیے استعمال نہ کریں</span>
+            </div>
           </div>
         </div>
 
@@ -4277,9 +4286,6 @@
         </div>
         <div class="previewActions" id="pscBtPrintRow" style="padding-top:0;">
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('invoiceCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
-        </div>
-        <div class="previewActions" style="padding-top:0;">
-          <button style="background:#fef9c3; color:#854d0e; flex:1;" onclick="printInvoiceFastText()">⚡ Fast Print (Simple Text — No Fonts/Images)</button>
         </div>
         <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
         <div class="previewActions" id="pscA4ShareRow" style="padding-top:0; display:none;">
@@ -6634,7 +6640,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH27';
+const APP_BUILD_VERSION = 'FM3SEPTH28';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -22898,9 +22904,17 @@ function canvasToGrayscale(sourceCanvas){
   gctx.drawImage(sourceCanvas, 0, 0);
   const imgData = gctx.getImageData(0, 0, gray.width, gray.height);
   const d = imgData.data;
+  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH27): اصل کاغذ پر لکھائی باریک/دھندلی کیوں آ رہی تھی — سکرین پر بولڈ
+  // نظر آنے کے باوجود، فونٹ کے کناروں کے ہلکے سرمئی (anti-aliased) پکسل پہلے پلین grayscale میں بھی ہلکے
+  // ہی رہتے تھے۔ جب یہ ہلکے سرمئی پکسل تھرمل پرنٹر کی اپنی dithering سے گزرتے ہیں تو بکھر کر باریک/ٹوٹی
+  // ہوئی لکھائی بنا دیتے ہیں۔ حل: یہاں خود ہی سخت threshold لگا دیا — ہلکے سرمئی کنارے بھی مکمل سیاہ ہو
+  // جائیں، صرف بہت ہلکا (تقریباً سفید) پس منظر ہی سفید رہے۔ نتیجہ: ہر لکھائی/لائن گہری، موٹی اور صاف
+  // پرنٹ ہو گی — فونٹ سائز یا Row Spacing بڑھانے کی ضرورت نہیں ---------- -->
+  const THRESHOLD = 200;
   for(let i = 0; i < d.length; i += 4){
-    const lum = Math.round(0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]);
-    d[i] = d[i+1] = d[i+2] = lum;
+    const lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+    const v = lum < THRESHOLD ? 0 : 255;
+    d[i] = d[i+1] = d[i+2] = v;
   }
   gctx.putImageData(imgData, 0, 0);
   return gray;
