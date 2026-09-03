@@ -6626,7 +6626,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH25';
+const APP_BUILD_VERSION = 'FM3SEPTH26';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -18226,7 +18226,6 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   const paperWidthMM = AppState.settings.paperWidth || 80;
   const pxWidth = useA4 ? 850 : (paperWidthMM === 80 ? 576 : 384);
   const canvas = canvasEl || document.getElementById('advOrderCanvas');
-  const baseScale = pxWidth / 576;
   const ctx = canvas.getContext('2d'); // ---------- 🔁 صدام کی ہدایت (FM3SEPTH23): کالم چوڑائی ناپنے کے لیے ctx جلدی چاہیے، اسی لیے اوپر لے آئے ----------
 
   // ---------- بل/رپورٹ کی طرح یہاں بھی Zoom/Row/Decimals/Bold/Align/Font/Theme سب لاگو ہوتے ہیں ----------
@@ -18235,7 +18234,10 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   const bold = AppState.settings.advOrderBoldItems !== false;
   const align = AppState.settings.advOrderAlign || 'left';
   const decimals = AppState.settings.advOrderPriceDecimals ?? 0;
-  const scale = baseScale * fscale;
+  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH26): پہلے یہاں فونٹ سائز کاغذ کی چوڑائی کے تناسب (baseScale) سے بھی
+  // ضرب ہو رہا تھا — یعنی 58mm پر پوری سلپ کی لکھائی خودکار 33% چھوٹی ہو جاتی تھی۔ اب فونٹ صرف صارف کے
+  // اپنے "Text Size" سلائیڈر (fscale) سے بدلے گا — 58mm اور 80mm دونوں پر لکھائی کا فزیکل سائز ایک جیسا رہے گا ---------- -->
+  const scale = fscale;
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.advOrderFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
   const canvasFontFamily = selectedFontPreset.family;
 
@@ -21858,20 +21860,23 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   });
   // ---------- 🔤 صدام کی ہدایت (FM3SEPTH23): نمبر/تعداد/قیمت/ٹوٹل — چاروں کا فونٹ سائز اب یکساں (ایک جیسا موٹا) —
   // پہلے ہر کالم اپنی الگ (اکثر تنگ) چوڑائی میں آزادانہ سکڑتا تھا، اس لیے تعداد باقیوں سے باریک لگتی تھی ---------- -->
-  const numFontPx0 = Math.round(16 * scale);
+  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH26): پہلے یہ نمبر/آئٹم فونٹ پیپر کی چوڑائی کے تناسب (scale) سے سکڑتے تھے —
+  // یعنی 58mm پر یہ خودکار 33% چھوٹے ہو جاتے تھے اور پڑھنا مشکل ہو جاتا تھا۔ اب صرف صارف کے "Print Text Size"
+  // سلائیڈر (fscale) سے سائز بدلے گا — فونٹ کا اصل (فزیکل) سائز 58mm اور 80mm پر یکساں رہے گا ---------- -->
+  const numFontPx0 = Math.round(16 * fscale);
   ctx.font = `bold ${numFontPx0}px ${canvasFontFamily}`;
-  const colPad = Math.round(18 * scale);
-  const noW = Math.max(Math.round(22 * scale), ctx.measureText(String(invoice.items.length)).width + colPad);
-  const qtyW = Math.max(Math.round(32 * scale), ctx.measureText(maxQtyStr).width + colPad);
-  const priceW = Math.max(Math.round(38 * scale), ctx.measureText(maxPriceStr).width + colPad);
-  const totalW = Math.max(Math.round(42 * scale), ctx.measureText(maxTotalStr).width + colPad);
+  const colPad = Math.round(18 * fscale);
+  const noW = Math.max(Math.round(22 * fscale), ctx.measureText(String(invoice.items.length)).width + colPad);
+  const qtyW = Math.max(Math.round(32 * fscale), ctx.measureText(maxQtyStr).width + colPad);
+  const priceW = Math.max(Math.round(38 * fscale), ctx.measureText(maxPriceStr).width + colPad);
+  const totalW = Math.max(Math.round(42 * fscale), ctx.measureText(maxTotalStr).width + colPad);
   // ---------- نام اشیاء کالم — سب سے لمبے نام جتنا چوڑا (نہ کہ باقی تمام جگہ) ---------- -->
-  ctx.font = `bold ${Math.round(18*scale)}px ${canvasFontFamily}`;
+  ctx.font = `bold ${Math.round(18*fscale)}px ${canvasFontFamily}`;
   let maxItemNameW = 0;
   invoice.items.forEach(it => { const w = ctx.measureText(it.name).width; if(w > maxItemNameW) maxItemNameW = w; });
-  const itemPad = Math.round(16 * scale);
+  const itemPad = Math.round(16 * fscale);
   const remainderW = (tableRight - tableLeft0) - noW - qtyW - priceW - totalW;
-  const itemW = Math.max(Math.round(60*scale), Math.min(remainderW, maxItemNameW + itemPad));
+  const itemW = Math.max(Math.round(60*fscale), Math.min(remainderW, maxItemNameW + itemPad));
   // ---------- بچ جانے والی خالی جگہ بائیں کنارے پر — دائیں کنارہ (تازہ ترین کالم) ہمیشہ فکس رہتا ہے ---------- -->
   const tableLeft = tableRight - (noW + itemW + qtyW + priceW + totalW);
   const colX = [
