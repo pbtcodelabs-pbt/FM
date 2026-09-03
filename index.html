@@ -6640,7 +6640,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH29';
+const APP_BUILD_VERSION = 'FM3SEPTH30';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -14805,6 +14805,7 @@ function openCustomerProfile(customerId){
     <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
     ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareCustomerProfile(${c.customer_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
+    <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
   `;
 
   renderCustomerMainContent(c.customer_id);
@@ -14819,9 +14820,13 @@ function toggleProfileMainMode(){
 }
 
 function renderCustomerMainContent(customerId){
-  // ---------- 🧹 صدام کی ہدایت (FM3SEPTH10): "Orders" (بلوں کا فلٹر سسٹم — All/Pending/Cleared/All Time) مکمل ہٹا دیا گیا،
-  // الجھن پیدا کرتا تھا۔ اب ہمیشہ سیدھا صاف Transactions (Khatabook طرز) ویو ہی نظر آئے گا۔ کوڈ نیچے محفوظ ہے ---------- -->
-  renderCustomerTransactionsSection(customerId);
+  // ---------- 🔄 صدام کی ہدایت (FM3SEPTH30): پہلے (FM3SEPTH10 سے) یہاں ہمیشہ Transaction History ہی خودکار
+  // کھلی رہتی تھی — اب واپس سپلائر پروفائل جیسا Bills ↔ Transactions ٹوگل: بل ہسٹری ڈیفالٹ نظر آئے، Transaction
+  // History صرف 📜 Transactions بٹن دبانے پر ہی کھلے ---------- -->
+  const btn = document.getElementById('profileModeBtn');
+  if(btn) btn.classList.toggle('active', profileMainMode === 'transactions');
+  if(profileMainMode === 'bills') renderCustomerBillsSection(customerId);
+  else renderCustomerTransactionsSection(customerId);
 }
 
 // ---------- کسٹمر کے Bills سیکشن کا صرف وہی حصہ بنائیں/دوبارہ بنائیں جو فلٹر سے متاثر ہوتا ہے (ڈیفالٹ ویو — صرف بل) ----------
@@ -17588,6 +17593,19 @@ async function generateTodayRecoveryReport(){
 
 // ---------- 📤 واٹس ایپ پوسٹر — صاف ستھرا، پورٹریٹ کارڈ (زیادہ ایموجی/آئیکن نہیں)، کسٹمر کی تصویر سمیت (صدام کی ہدایت FM29WE19) ----------
 async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
+  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH30): FM3SEPTH29 میں window.open() کینوس بننے کے بعد (کئی await کے
+  // بعد) کال ہو رہا تھا — زیادہ تر Android WebView/براؤزر صرف اُسی وقت window.open() کو اصل بٹن کلک مانتے ہیں
+  // جب وہ فوری، بغیر کسی await کے چلے؛ ورنہ اسے پاپ اپ سمجھ کر خاموشی سے بلاک کر دیتے ہیں — یہی وجہ تھی کہ
+  // پرنٹ اب بھی کچھ نہیں کر رہا تھا۔ حل: پرنٹ ونڈو سب سے پہلے، کسی await سے پہلے ہی کھول لیں (خالی "تیار ہو
+  // رہی ہے" پیغام کے ساتھ)، پھر رسید تیار ہونے پر اسی ونڈو میں لکھ دیں ---------- -->
+  let printWin = null;
+  if(printMode){
+    printWin = window.open('', '_blank');
+    if(printWin){
+      printWin.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:40px;font-family:sans-serif;text-align:center;color:#666;">⏳ رسید تیار ہو رہی ہے…</body></html>');
+      printWin.document.close();
+    }
+  }
   try{
     const todayGoods = invoicesData
       .filter(inv => inv.customer_id === c.customer_id && (inv.created_at || '').split('T')[0] === todayDateKey())
@@ -17768,12 +17786,12 @@ async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
         </div>
         <div class="rcptWrap"><img src="${dataUrl}"></div>
       </body></html>`;
-      const printWin = window.open('', '_blank');
       if(printWin){
+        printWin.document.open();
         printWin.document.write(pageHtml);
         printWin.document.close();
       } else {
-        alert('⚠️ پرنٹ ونڈو نہیں کھل سکی — براؤزر کی پاپ اپ بلاکر سیٹنگ چیک کریں');
+        alert('⚠️ پرنٹ ونڈو نہیں کھل سکی — براؤزر کی پاپ اپ بلاکر سیٹنگ چیک کریں (Settings → Site settings → Pop-ups میں اجازت دیں)');
       }
       return;
     }
@@ -17794,6 +17812,13 @@ async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
   }catch(e){
     console.error('shareRecoveryReceiptWhatsapp failed', e);
     alert('⚠️ رسید بنانے میں مسئلہ ہوا: ' + e.message);
+    if(printWin){
+      try{
+        printWin.document.open();
+        printWin.document.write('<body style="margin:0;padding:40px;font-family:sans-serif;text-align:center;color:#b91c1c;">⚠️ رسید نہیں بن سکی، یہ ونڈو بند کر دیں</body>');
+        printWin.document.close();
+      }catch(e2){}
+    }
   }
 }
 
