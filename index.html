@@ -6458,7 +6458,7 @@ const DEFAULT_SETTINGS = {
   fontWeight: 400,
   // ---------- 🏠 ہوم پیج شارٹ کٹ کارڈز — ایڈمن Settings سے بدل سکتا ہے (زیادہ سے زیادہ 3) ----------
   homeShortcuts: ['advanceorders', 'customers', 'suppliers'],
-  paperWidth: 80,         // 58 | 80 (mm) — Print خود Android کے Print Service سسٹم سے چلتا ہے، الگ کنکشن سیٹنگ کی ضرورت نہیں
+  paperWidth: 58,         // 58 | 80 (mm) — صدام کا اصل پرنٹر (Bluetooth 58mm تھرمل) — Print خود Android کے Print Service سسٹم سے چلتا ہے، الگ کنکشن سیٹنگ کی ضرورت نہیں
   // ---------- ٹیکس — پاکستان میں عام دکانوں کے کاؤنٹر بل پر لاگو نہیں ہوتا، اس لیے ڈیفالٹ بند ہے۔
   // جن کاروباروں کو ضرورت ہو (رجسٹرڈ/فارمل بزنس) وہ Settings سے آن کر کے فیصد لگا سکتے ہیں ----------
   taxEnabled: false,
@@ -6640,7 +6640,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH28';
+const APP_BUILD_VERSION = 'FM3SEPTH29';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -17746,20 +17746,35 @@ async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
       // ---------- 🐛 صدام کی ہدایت (FM3SEPTH24): "بلیک اینڈ وائٹ پرنٹ کرو" — باقی بلوں کی طرح
       // یہاں بھی سیاہ/سفید کینوس (canvasToGrayscale) استعمال کریں، رنگین کینوس براہِ راست نہیں ---------- -->
       const printCanvas = canvasToGrayscale(canvas);
-      applyPrintPageSize(AppState.settings.paperWidth || 80);
-      const area = document.getElementById('printReceiptArea');
-      enterPrintMode();
-      const img = document.createElement('img');
-      img.style.width = '100%';
-      let printed = false;
-      const doPrint = () => { if(printed) return; printed = true; triggerPrint(); };
-      img.addEventListener('load', doPrint, {once:true});
-      img.addEventListener('error', doPrint, {once:true});
-      // ---------- 🐛 حفاظتی فال بیک — کسی وجہ سے load/error ایونٹ نہ چلے تو بھی پرنٹ خاموشی سے رکی نہ رہے ---------- -->
-      setTimeout(doPrint, 1500);
-      area.innerHTML = '';
-      area.appendChild(img);
-      img.src = printCanvas.toDataURL('image/png');
+      // ---------- 🐛 صدام کی ہدایت (FM3SEPTH29): پرانی same-page print-mode ٹرک (#printReceiptArea +
+      // enterPrintMode + triggerPrint) یہاں خالی/اٹکا ہوا Print Preview دے رہی تھی — یہی ٹرک پہلے دوسری
+      // جگہوں (Advance Orders، Purchase Order وغیرہ) پر بھی گڑبڑ کر چکا تھا، اسی لیے وہاں پہلے ہی چھوڑ دیا
+      // گیا تھا (دیکھیں printAdvanceOrdersList)۔ یہاں بھی وہی زیادہ قابلِ اعتماد طریقہ اپنا لیا: ایک بالکل
+      // الگ، صاف صفحہ کھولیں جس میں صرف رسید کی تصویر اور اپنا ایک 🖨️ Print بٹن ہو — یہ #app کے چھپنے/موڈل
+      // کے پیچھے رہ جانے یا خالی پرنٹ کیپچر ہونے جیسے مسائل سے مکمل طور پر بچا لیتا ہے ---------- -->
+      const mm = AppState.settings.paperWidth || 80;
+      const dataUrl = printCanvas.toDataURL('image/png');
+      const pageHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>رسید — ${c.name}</title>
+      <style>
+        @page{ size: ${mm}mm auto; margin:0; }
+        @media print{ #rcptPrintBtnWrap{ display:none !important; } body{ margin:0; } }
+        body{ margin:0; padding:14px; background:#eef1f6; font-family:Arial, Helvetica, sans-serif; }
+        .rcptWrap{ max-width:420px; margin:0 auto; }
+        .rcptWrap img{ width:100%; display:block; }
+      </style></head>
+      <body>
+        <div id="rcptPrintBtnWrap" style="max-width:420px; margin:0 auto 12px;">
+          <button onclick="window.print()" style="width:100%; padding:13px; border:none; border-radius:10px; background:${accentColor}; color:#fff; font-weight:700; font-size:15px; cursor:pointer;">🖨️ Print</button>
+        </div>
+        <div class="rcptWrap"><img src="${dataUrl}"></div>
+      </body></html>`;
+      const printWin = window.open('', '_blank');
+      if(printWin){
+        printWin.document.write(pageHtml);
+        printWin.document.close();
+      } else {
+        alert('⚠️ پرنٹ ونڈو نہیں کھل سکی — براؤزر کی پاپ اپ بلاکر سیٹنگ چیک کریں');
+      }
       return;
     }
 
