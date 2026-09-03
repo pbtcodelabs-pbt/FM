@@ -2115,9 +2115,12 @@
 
     <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share This App</button>
 
-    <!-- ---------- سیدھا Login سکرین سے ہی Activation Code لگانے کا آپشن — PIN سے پہلے، تاکہ کنفیوژن نہ ہو ---------- -->
-    <div class="loginHint" style="margin-top:10px;">
-      <a href="javascript:void(0)" onclick="toggleLoginActivationBox()" style="color:var(--primary); font-weight:700; text-decoration:none;">🔑 Have an activation code? Tap here.</a>
+    <!-- ---------- 🍇 صدام کی ہدایت (فائل 30): پہلے یہاں ہر وقت نظر آنے والا "Have an activation code?" لنک تھا —
+    عام ملازم بھی اسے دیکھ کر کنفیوژ ہوتے تھے۔ اب اس کی جگہ ایک خاموش/غیر نمایاں 🔒 آئیکن ہے — اس پر
+    مسلسل 7 دفعہ (3 سیکنڈ کے اندر) ٹیپ کرنے سے ہی Activation Code کا خانہ کھلتا ہے، تاکہ صرف صدام
+    (یا جسے پتا ہو) ہی اسے استعمال کر سکے، بغیر پوری ایپ کھولے ---------- -->
+    <div style="margin-top:10px; text-align:center;">
+      <span onclick="handleLoginLockTap()" title="" style="display:inline-block; font-size:15px; opacity:.35; cursor:pointer; padding:6px 10px; user-select:none;">🔒</span>
     </div>
     <div id="loginActivationBox" style="display:none; margin-top:10px; text-align:left;">
       <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">Activation code (from your developer)</label>
@@ -6637,7 +6640,14 @@ function getOrCreateDeviceUID(){
 // اگر یہی Device ID پہلے سے Firestore میں "trials" میں موجود ہو (یعنی Data Clear کر کے دوبارہ ٹرائل لینے
 // کی کوشش کی گئی) تو مقامی ٹرائل فوراً منسوخ کر دیا جاتا ہے۔ اگر نیا ہو تو مستقل ریکارڈ بنا دیا جاتا ہے ----------
 async function checkAndLockTrialOnline(){
-  if(!AppState.settings.freeTrialGranted || AppState.settings.trialLockConfirmedOnline) return;
+  // ---------- 🐛 صدام کی ہدایت پر فکس (30 نمبر فائل کا بگ): پہلے یہاں صرف freeTrialGranted چیک ہوتا تھا —
+  // ایک دفعہ Trial لاک ہونے کے بعد بھی، اور یہاں تک کہ کوڈ سے Activate کر کے پیڈ سبسکرپشن بن جانے کے بعد بھی،
+  // یہ فنکشن ہر بار ایپ کھلنے پر دوبارہ چلتا رہتا تھا (کیونکہ نیچے 200 والی شاخ میں کبھی trialLockConfirmedOnline
+  // سیٹ نہیں ہوتی تھی) اور ہر بار subscriptionExpiry کو null کر کے صارف کو دوبارہ Package Plan/Subscription
+  // Gate پر بھیج دیتا تھا — یہی وجہ تھی کہ لاگ ان/پن بار بار "بھول" جاتا محسوس ہوتا۔ اب: (1) پیڈ سبسکرپشن
+  // والے یوزر کو یہ فنکشن بالکل نہیں چھوئے گا، (2) 200 ملنے پر بھی trialLockConfirmedOnline ہمیشہ سیٹ ہوگا
+  // تاکہ یہ چیک صرف ایک ہی بار چلے، بار بار نہیں ----------
+  if(!AppState.settings.freeTrialGranted || !AppState.settings.isOnFreeTrial || AppState.settings.trialLockConfirmedOnline) return;
   const uid = AppState.settings.deviceUID;
   if(!uid) return;
   try{
@@ -6646,6 +6656,7 @@ async function checkAndLockTrialOnline(){
       // ---------- پہلے سے موجود ریکارڈ ملا — یعنی اس ڈیوائس پر ٹرائل پہلے استعمال ہو چکا، دوبارہ نہیں ملے گا ----------
       AppState.settings.subscriptionExpiry = null;
       AppState.settings.isOnFreeTrial = false;
+      AppState.settings.trialLockConfirmedOnline = true; // ---------- 🐛 فکس: پہلے یہ لائن یہاں موجود نہیں تھی، اسی لیے چیک بار بار دہرایا جاتا تھا ----------
       persistAllData();
       if(typeof setupLoginScreen === 'function') setupLoginScreen();
       return;
@@ -7592,6 +7603,22 @@ async function submitActivationCode(){
 function toggleLoginActivationBox(){
   const box = document.getElementById('loginActivationBox');
   if(box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+// ---------- 🔒 لاگ ان سکرین کے خاموش لاک آئیکن پر 7 دفعہ (3 سیکنڈ کے اندر) ٹیپ کرنے پر Activation Code
+// کا خانہ کھل جائے — عام صارف کو کبھی نظر نہیں آئے گا، صرف جسے یہ ترکیب معلوم ہو ---------- ----------
+let __loginLockTapCount = 0;
+let __loginLockTapTimer = null;
+function handleLoginLockTap(){
+  __loginLockTapCount++;
+  clearTimeout(__loginLockTapTimer);
+  __loginLockTapTimer = setTimeout(() => { __loginLockTapCount = 0; }, 3000); // ---------- 3 سیکنڈ کے اندر 7 ٹیپ نہ ہوں تو گنتی صفر ----------
+  if(__loginLockTapCount >= 7){
+    __loginLockTapCount = 0;
+    clearTimeout(__loginLockTapTimer);
+    const box = document.getElementById('loginActivationBox');
+    if(box) box.style.display = 'block';
+  }
 }
 
 // ---------- PIN درج کیے بغیر ہی، سیدھا Login سکرین سے کوڈ لگا کر ٹرائل/سبسکرپشن فعال کریں ----------
