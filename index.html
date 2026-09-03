@@ -117,7 +117,7 @@
     0%, 100%{ filter:drop-shadow(0 0 1px rgba(255,255,255,.4)); opacity:.92; }
     50%{ filter:drop-shadow(0 0 5px rgba(255,255,255,.9)); opacity:1; }
   }
-  /* ---------- ✨ صدام کی ہدایت (FM3SEPTH20): بار بار CSS/JS طریقے ناکام رہے (کبھی رکی رہتی، کبھی صفحے کے غلط
+  /* ---------- ✨ صدام کی ہدایت (FM3SEPTH22): بار بار CSS/JS طریقے ناکام رہے (کبھی رکی رہتی، کبھی صفحے کے غلط
        حصے میں چلی جاتی) — اب براؤزر کا اپنا بلٹ ان <marquee> استعمال کیا ہے، جو کبھی اپنے خانے سے باہر نہیں جا
        سکتا۔ یہ خانہ صرف اس کا فریم/بیک گراؤنڈ ہے: نیلا پس منظر، سنہری باریک بارڈر، بالکل پٹی کے سائز کا
        (نہ اوپر تصویر کو چھوئے، نہ نیچے بٹنوں کی پٹی کو) ---------- -->
@@ -2093,12 +2093,15 @@
 
       <!-- ---------- ایڈمن لاگ ان ---------- -->
       <div id="adminLoginPanel">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1; min-width:0;" onkeydown="if(event.key==='Enter') login()">
+        <!-- ---------- 🐛 صدام کی ہدایت (FM3SEPTH22): اصل خرابی ملی — .loginBox input/button پر عالمی طور پر
+             width:100% لگا ہوا تھا، جو نیچے دیے گئے flex پر حاوی ہو کر آنکھ کے بٹن کو بہت بڑا اور PIN خانے کو
+             چھوٹا بنا دیتا تھا۔ اب !important کے ساتھ درست کر دیا، اور خوبصورت، پیشہ ورانہ ڈبہ بنایا ---------- -->
+        <div style="display:flex; align-items:center; gap:2px; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:10px; padding:2px 6px 2px 2px; box-shadow:inset 0 1px 3px rgba(0,0,0,.05);">
+          <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" onkeydown="if(event.key==='Enter') login()">
           <button type="button"
             onmousedown="showPinWhilePressed('pinInput')" onmouseup="hidePinAfterRelease('pinInput')" onmouseleave="hidePinAfterRelease('pinInput')"
             ontouchstart="showPinWhilePressed('pinInput')" ontouchend="hidePinAfterRelease('pinInput')" ontouchcancel="hidePinAfterRelease('pinInput')"
-            style="flex:0 0 auto; background:#f1f5f9; border:1px solid #dbe1ea; border-radius:8px; font-size:17px; cursor:pointer; padding:9px 12px; color:var(--muted);" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+            style="flex:0 0 auto !important; width:34px !important; height:34px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:16px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
         </div>
         <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
           <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
@@ -2113,12 +2116,12 @@
       <!-- ---------- ملازم (Employee) لاگ ان — نام اوپر والی مشترکہ ڈراپ ڈاؤن سے طے ہوتا ہے، یہاں صرف PIN ڈالیں ---------- -->
       <div id="employeeLoginPanel" style="display:none;">
         <select id="employeeLoginSelect" style="display:none;"></select>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <input type="password" id="employeePinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1; min-width:0;" onkeydown="if(event.key==='Enter') employeeLogin()">
+        <div style="display:flex; align-items:center; gap:2px; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:10px; padding:2px 6px 2px 2px; box-shadow:inset 0 1px 3px rgba(0,0,0,.05);">
+          <input type="password" id="employeePinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" onkeydown="if(event.key==='Enter') employeeLogin()">
           <button type="button"
             onmousedown="showPinWhilePressed('employeePinInput')" onmouseup="hidePinAfterRelease('employeePinInput')" onmouseleave="hidePinAfterRelease('employeePinInput')"
             ontouchstart="showPinWhilePressed('employeePinInput')" ontouchend="hidePinAfterRelease('employeePinInput')" ontouchcancel="hidePinAfterRelease('employeePinInput')"
-            style="flex:0 0 auto; background:#f1f5f9; border:1px solid #dbe1ea; border-radius:8px; font-size:17px; cursor:pointer; padding:9px 12px; color:var(--muted);" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+            style="flex:0 0 auto !important; width:34px !important; height:34px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:16px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
         </div>
         <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
           <input type="checkbox" id="employeeRememberChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
@@ -2362,7 +2365,7 @@
     <!-- ---------- 🔤 شاپ کا نام (چھوٹا، ثانوی) — کوڈ محفوظ، بس چھپا ہوا ---------- -->
     <span id="mobileBrandText" class="mobileBrand" style="display:none;">صدام فروٹ منڈی</span>
     <!-- ---------- ✨ چمکتی ہوئی، دائیں سے بائیں سرکتی مووِنگ پٹی — "کون لاگ ان ہے" (updateTopbarUserBadge اسی کو بھرتا ہے)
-         صدام کی ہدایت (FM3SEPTH20): بار بار CSS/JS طریقے ناکام رہے (کبھی رکی رہتی، کبھی صفحے کے غلط حصے میں چلی جاتی) —
+         صدام کی ہدایت (FM3SEPTH22): بار بار CSS/JS طریقے ناکام رہے (کبھی رکی رہتی، کبھی صفحے کے غلط حصے میں چلی جاتی) —
          اب براؤزر کا اپنا بلٹ ان <marquee> استعمال کیا ہے، جو کبھی اپنے خانے سے باہر نہیں جا سکتا، ہمیشہ اسی مقررہ
          جگہ (تصویر کے نیچے، بٹنوں کی پٹی کے بالکل ساتھ) قائم رہتا ہے، اور behavior="alternate" سے خود بخود
          دائیں سے بائیں جا کر واپس بائیں سے دائیں لوٹتا ہے (مکمل باہر نکل کر) ---------- -->
@@ -3067,7 +3070,7 @@
 
       <div class="partyToolbar">
         <input type="text" id="partySearchInput" placeholder="🔍 Search by name or phone..." oninput="renderPartyList(this.value)">
-        <button onclick="openNewPartyModal()">+ Add New</button>
+        <button onclick="openNewPartyModal()">+ نیا شامل کریں</button>
       </div>
       <!-- ---------- 🗂️ کسٹمر کیٹگرائزیشن — صدام کی ہدایت (FM3SEPTH10): علاقہ/بقایہ/آج کی خریداری فلٹر +
            حاضر موجود / کھوہ کھاتے ٹیب۔ انتخاب اسی ڈیوائس پر ہمیشہ محفوظ رہتا ہے (دوبارہ کھولنے پر ری سیٹ نہیں ہوتا) ---------- -->
@@ -6622,7 +6625,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH20';
+const APP_BUILD_VERSION = 'FM3SEPTH22';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -7513,7 +7516,7 @@ function onUnifiedLoginSelectChange(){
 }
 
 // ---------- 👁️ PIN خانے میں چھوٹی سی آنکھ — دبانے پر لگا ہوا PIN نظر آ جائے ----------
-// ---------- 👁️ صدام کی ہدایت (FM3SEPTH20): پہلے یہ بٹن دبانے پر "لاک" ہو جاتا تھا (دوبارہ دبائیں تو بند ہو) —
+// ---------- 👁️ صدام کی ہدایت (FM3SEPTH22): پہلے یہ بٹن دبانے پر "لاک" ہو جاتا تھا (دوبارہ دبائیں تو بند ہو) —
 // اب صرف اسی وقت تک نظر آئے گا جب تک بندہ آنکھ کو دبائے رکھے، چھوڑتے ہی فوراً واپس چھپ جائے گا،
 // اور یہ آنکھ اب خانے کے اندر نہیں بلکہ اس کے ساتھ الگ، باہر کی طرف ہے ---------- -->
 function showPinWhilePressed(inputId){
@@ -7871,7 +7874,7 @@ function updateTopbarUserBadge(){
   // ---------- 🐛 صدام کی ہدایت (FM3SEPTH10): ٹاپ بار کی اصل اونچائی ناپ کر نیچے والی utilityBar پٹی کو
   // بتائیں کہاں سے چپکنا ہے — ورنہ بڑی تصویر/نام/چمکتی پٹی کی وجہ سے وہ اوپر آ کر اوورلیپ کر دیتی تھی ---------- -->
   requestAnimationFrame(syncMobileTopbarHeight);
-  // ---------- ✨ صدام کی ہدایت (FM3SEPTH20): اب حرکت خود native <marquee> ٹیگ دیتا ہے — کوئی JS/CSS
+  // ---------- ✨ صدام کی ہدایت (FM3SEPTH22): اب حرکت خود native <marquee> ٹیگ دیتا ہے — کوئی JS/CSS
   // پوزیشننگ کا کوڈ درکار نہیں، اس لیے یہاں کچھ اور نہیں کرنا ---------- -->
 }
 
@@ -14347,13 +14350,21 @@ function openBulkReminderCenter(){
 function enterPartyPage(tab){
   currentPartyTab = tab;
   renderHubTabsBar(tab);
-  document.getElementById('partyPageTitle').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 Customers' : '🚚 Suppliers';
+  document.getElementById('partyPageTitle').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 کسٹمرز' : '🚚 سپلائرز';
   const partyImportBtnLabel = document.getElementById('partyImportBtnLabel');
-  if(partyImportBtnLabel) partyImportBtnLabel.textContent = tab === 'customers' ? 'Customers' : 'Suppliers';
-  document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 Search customers by name or phone...' : '🔍 Search suppliers by name or phone...';
+  if(partyImportBtnLabel) partyImportBtnLabel.textContent = tab === 'customers' ? 'کسٹمرز' : 'سپلائرز';
+  document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 نام یا فون نمبر سے تلاش کریں...' : '🔍 سپلائر کا نام یا فون نمبر تلاش کریں...';
   document.getElementById('partySearchInput').value = '';
   document.getElementById('bulkReminderBtn').style.display = tab === 'customers' ? 'block' : 'none';
   renderPartyList();
+}
+
+// ---------- 🔎 صدام کی ہدایت (FM3SEPTH22): سپلائرز کے لیے بھی کسٹمرز جیسا فلٹر — کم بقایہ/زیادہ بقایہ ----------
+let supplierSortMode = loadFromStorage('supplierSortMode', 'name'); // 'name' | 'highest' | 'lowest'
+function setSupplierSortMode(mode){
+  supplierSortMode = mode;
+  saveToStorage('supplierSortMode', mode);
+  renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
 
 // ---------- Render List (Customers یا Suppliers، tab کے مطابق) ----------
@@ -14531,17 +14542,26 @@ function renderPartyList(query = ''){
       </div>
     `).join('');
   } else {
-    const filtered = suppliersData.filter(s => partyMatchesQuery(s, query));
+    let filtered = suppliersData.filter(s => partyMatchesQuery(s, query));
+    // ---------- 🔎 صدام کی ہدایت (FM3SEPTH22): کم/زیادہ بقایہ کی ترتیب ----------
+    if(supplierSortMode === 'highest') filtered.sort((a,b) => (b.total_payable||0) - (a.total_payable||0));
+    else if(supplierSortMode === 'lowest') filtered.sort((a,b) => (a.total_payable||0) - (b.total_payable||0));
+    else filtered.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ur'));
+
+    // ---------- فلٹر بار — دائیں سے بائیں (RTL) ---------- -->
+    const sortBtn = (val, label) => `<button onclick="setSupplierSortMode('${val}')" style="flex:1; padding:8px 4px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer; background:${supplierSortMode===val?'var(--primary)':'#f1f5f9'}; color:${supplierSortMode===val?'#fff':'var(--text)'};">${label}</button>`;
+    const filterBarHtml = `<div dir="rtl" style="display:flex; gap:6px; margin-bottom:12px;">${sortBtn('name','🔤 نام')}${sortBtn('highest','📈 زیادہ بقایہ پہلے')}${sortBtn('lowest','📉 کم بقایہ پہلے')}</div>`;
+
     if(filtered.length === 0){
-      wrap.innerHTML = `<div class="placeholder">No supplier found</div>`;
+      wrap.innerHTML = filterBarHtml + `<div class="placeholder">کوئی سپلائر نہیں ملا</div>`;
       return;
     }
-    wrap.innerHTML = filtered.map(s => `
-      <div class="partyRow">
+    wrap.innerHTML = filterBarHtml + filtered.map(s => `
+      <div class="partyRow" dir="rtl">
         <div class="prAvatar">${s.photo ? `<img src="${s.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🏭'}</div>
         <div class="prMain" onclick="openSupplierProfile(${s.supplier_id})">
           <div class="prName">${s.name}${s.keywords ? ` <span style="font-size:10px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 6px;">${s.keywords}</span>` : ''}</div>
-          <div class="prPhone">${s.phone || 'No phone'}</div>
+          <div class="prPhone">${s.phone || 'نمبر درج نہیں'}</div>
         </div>
         <div class="prBalance ${s.total_payable > 0 ? 'payable' : 'zero'}">
           ${s.total_payable > 0 ? 'Rs. ' + s.total_payable.toLocaleString() : '—'}
@@ -14549,7 +14569,7 @@ function renderPartyList(query = ''){
         <div class="prContacts">
           ${buildQuickContactIcons(s.phone, s.name, s.total_payable, 'payable')}
         </div>
-        <button class="prDeleteBtn" onclick="event.stopPropagation(); deleteSupplier(${s.supplier_id})" title="Delete Supplier">🗑️</button>
+        <button class="prDeleteBtn" onclick="event.stopPropagation(); deleteSupplier(${s.supplier_id})" title="سپلائر ڈیلیٹ کریں">🗑️</button>
       </div>
     `).join('');
   }
@@ -17299,11 +17319,19 @@ async function generateTodayOrderMatrixReport(){
 
   // ---------- ایک صفحے کا کینوس بنائے (صرف اسی صفحے کے کسٹمر کالم کے ساتھ، مگر ٹوٹل ہمیشہ گرینڈ ٹوٹل) ----------
   function buildPageCanvas(pageCustomers, pageNum, totalPages){
-    // ---------- 🔧 صدام کی ہدایت (FM3SEPTH20): پہلے کسٹمر کا کھڑا (rotated) نام صرف rowH (44px) کی جگہ میں
-    // ناپا جا رہا تھا جبکہ ہیڈر باکس بھی اتنا ہی اونچا تھا — نام لمبا ہونے پر باہر نکل جاتا تھا۔
-    // اب ہیڈر کی اپنی الگ، کافی اونچی جگہ (custHeaderRowH) ہے، خاص اسی کھڑے نام کے لیے —
-    // ڈیٹا کی قطاریں (سبزیوں کی تعداد) اب بھی چھوٹی/تنگ ہی رہیں گی تاکہ 40+ سبزیاں آسانی سے ایک صفحے میں آ جائیں ---------- -->
-    const nameColW = 190, custColW = 40, totalColW = 56, rowH = 36, headerH = 90, custHeaderRowH = 210, radius = 18;
+    // ---------- 🔧 صدام کی ہدایت (FM3SEPTH22): "نام اشیاء" کالم اب سب سے لمبے آئٹم نام جتنا ہی چوڑا —
+    // پہلے فکسڈ 190px تھا، فالتو خالی جگہ چھوڑ دیتا تھا۔ کسٹمر کا کھڑا (rotated) نام اپنی الگ، کافی اونچی
+    // جگہ (custHeaderRowH) میں پورا فٹ ہوتا ہے — ڈیٹا کی قطاریں چھوٹی/تنگ رہتی ہیں (40+ سبزیاں ایک صفحے میں) ---------- -->
+    const custColW = 40, totalColW = 56, rowH = 36, headerH = 90, custHeaderRowH = 210, radius = 18;
+
+    // ---------- پہلے ایک عارضی کینوس سے صرف پیمائش کے لیے ctx بنائیں (نام اشیاء کالم کی چوڑائی معلوم کرنے کو) ---------- -->
+    const measureCanvas = document.createElement('canvas');
+    const mctx = measureCanvas.getContext('2d');
+    mctx.font = `bold 15px "${fontName}"`;
+    let maxItemNameW = 60;
+    items.forEach(itemName => { const w = mctx.measureText(itemName).width; if(w > maxItemNameW) maxItemNameW = w; });
+    const nameColW = Math.round(maxItemNameW) + 24; // ---------- تھوڑی سی پیڈنگ کے ساتھ ----------
+
     const W = nameColW + (pageCustomers.length * custColW) + totalColW + 30;
     const H = headerH + custHeaderRowH + (items.length * rowH) + 50;
 
@@ -17345,7 +17373,7 @@ async function generateTodayOrderMatrixReport(){
       ctx.fillStyle = '#134e2c'; ctx.fillRect(x, y, custColW, custHeaderRowH);
       ctx.fillStyle = '#fff';
       // ---------- 🔤 کسٹمر کا نام کھڑا (rotated 90°) — اب اپنی مخصوص اونچی جگہ (custHeaderRowH) میں پورا فٹ،
-      // موٹا فونٹ، حقیقی دستیاب اونچائی کے مطابق ہی ناپ (fit) ہوتا ہے (صدام کی ہدایت FM3SEPTH20) ---------- -->
+      // موٹا فونٹ، حقیقی دستیاب اونچائی کے مطابق ہی ناپ (fit) ہوتا ہے (صدام کی ہدایت FM3SEPTH22) ---------- -->
       let cname = cust;
       let fpx = 15;
       ctx.font = `bold ${fpx}px "${fontName}"`;
@@ -17704,10 +17732,17 @@ async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
     }
 
     canvas.toBlob((blob) => {
-      openReportImagePreview(canvas, {
-        title: '🧾 ادائیگی کی رسید — ' + c.name,
-        blob, fileName: `receipt-${c.name}.png`, mime: 'image/png'
-      });
+      try{
+        openReportImagePreview(canvas, {
+          title: '🧾 ادائیگی کی رسید — ' + c.name,
+          blob, fileName: `receipt-${c.name}.png`, mime: 'image/png'
+        });
+      }catch(err2){
+        // ---------- 🛡️ صدام کی ہدایت (FM3SEPTH22): toBlob کے اندر کی خرابی پہلے خاموشی سے گم ہو جاتی تھی
+        // (try/catch اس callback کو نہیں پکڑتا) — اب یہاں الگ سے پکڑ کر صاف پیغام دکھایا جائے گا ---------- -->
+        console.error('openReportImagePreview failed', err2);
+        alert('⚠️ پوسٹر پریویو نہیں کھل سکا: ' + (err2.message || err2));
+      }
     }, 'image/png');
   }catch(e){
     console.error('shareRecoveryReceiptWhatsapp failed', e);
@@ -17907,7 +17942,7 @@ async function openAdvOrderPreview(orderId){
   currentPreviewAdvOrderId = orderId;
   document.getElementById('advOrderPreviewModal').classList.add('show');
   syncAdvOrderStyleControls();
-  // ---------- 🚀 صدام کی ہدایت (FM3SEPTH20): بل کھلتے ہی زیرو زیرو دکھانے اور بٹن دبانے کا انتظار کرنے کے بجائے —
+  // ---------- 🚀 صدام کی ہدایت (FM3SEPTH22): بل کھلتے ہی زیرو زیرو دکھانے اور بٹن دبانے کا انتظار کرنے کے بجائے —
   // اگر یہ آرڈر کسی ایسے محفوظ شدہ کسٹمر کا ہے جس کا ریٹ ایریا (اسلام آباد/راولپنڈی) پہلے سے سیٹ ہے، تو وہ ریٹ
   // یہیں خودکار لگا دیں — بل پہلی ہی نظر میں صحیح قیمتوں کے ساتھ کھلے گا، اور غلطی سے زیرو پرنٹ نہیں ہوگا۔
   // نیا/انجان کسٹمر ہو (رٹ ایریا محفوظ نہ ہو) تو پہلے کی طرح دونوں بٹن نظر آتے رہیں گے تاکہ ایڈمن خود چن سکے ---------- -->
@@ -18154,7 +18189,7 @@ async function renderAdvOrderToCanvas(order, canvasEl){
   try{
     return await _renderAdvOrderToCanvasInner(order, canvasEl);
   }catch(err){
-    // ---------- 🛡️ صدام کی ہدایت (FM3SEPTH20): اگر ڈرائنگ میں کوئی خرابی آئے تو کینوس اب خالی نہیں رہے گا —
+    // ---------- 🛡️ صدام کی ہدایت (FM3SEPTH22): اگر ڈرائنگ میں کوئی خرابی آئے تو کینوس اب خالی نہیں رہے گا —
     // صاف سرخ پیغام میں اصل خرابی دکھائے گا، تاکہ فوراً پتا چل جائے کیا غلط ہوا (اسکرین شاٹ سے تشخیص آسان) ---------- -->
     console.error('renderAdvOrderToCanvas failed:', err);
     if(canvas0){
@@ -18174,7 +18209,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   const pxWidth = useA4 ? 850 : (paperWidthMM === 80 ? 576 : 384);
   const canvas = canvasEl || document.getElementById('advOrderCanvas');
   const baseScale = pxWidth / 576;
-  const ctx = canvas.getContext('2d'); // ---------- 🔁 صدام کی ہدایت (FM3SEPTH20): کالم چوڑائی ناپنے کے لیے ctx جلدی چاہیے، اسی لیے اوپر لے آئے ----------
+  const ctx = canvas.getContext('2d'); // ---------- 🔁 صدام کی ہدایت (FM3SEPTH22): کالم چوڑائی ناپنے کے لیے ctx جلدی چاہیے، اسی لیے اوپر لے آئے ----------
 
   // ---------- بل/رپورٹ کی طرح یہاں بھی Zoom/Row/Decimals/Bold/Align/Font/Theme سب لاگو ہوتے ہیں ----------
   const fscale = (AppState.settings.advOrderFontScale || 100) / 100;
@@ -18186,7 +18221,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.advOrderFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
   const canvasFontFamily = selectedFontPreset.family;
 
-  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH20): مکمل RTL + خودکار (auto-width) کالم — بالکل جیسے Invoice میں کیا تھا:
+  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH22): مکمل RTL + خودکار (auto-width) کالم — بالکل جیسے Invoice میں کیا تھا:
   // دائیں سے بائیں: نمبر → نام اشیاء (سب سے چوڑا) → تعداد → نرخ → ٹوٹل۔ ہر تنگ کالم اپنے اندر موجود
   // سب سے لمبے ہندسے جتنا ہی چوڑا ہے، باقی جگہ نام اشیاء کو مل جاتی ہے ---------- -->
   const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
@@ -18292,7 +18327,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
 
   ctx.font = F('bold 13px');
   const headerBaseline = tableTop + headerH - 7 * scale;
-  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH20): مکمل RTL — دائیں سے بائیں: نمبر → نام اشیاء(چوڑا) → تعداد → نرخ → ٹوٹل ---------- -->
+  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH22): مکمل RTL — دائیں سے بائیں: نمبر → نام اشیاء(چوڑا) → تعداد → نرخ → ٹوٹل ---------- -->
   ctx.textAlign = 'center'; ctx.fillText('نمبر', (colX[4]+colX[5])/2, headerBaseline);
   // ---------- Item کا نام ہمیشہ Left رہے گا — الائنمنٹ سیٹنگ صرف Qty/Approx/Total پر لاگو ہوگی ----------
   ctx.textAlign = 'left'; ctx.fillText('نام اشیاء', colX[3]+4, headerBaseline);
@@ -18313,7 +18348,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0,-1); }
     if(displayName !== item.name) displayName = displayName.trim() + '…';
 
-    // ---------- 🔁 صدام کی ہدایت (FM3SEPTH20): مکمل RTL — نمبر دائیں (colX[4]-5)، نام اشیاء اس سے پہلے (colX[3]-4) ---------- -->
+    // ---------- 🔁 صدام کی ہدایت (FM3SEPTH22): مکمل RTL — نمبر دائیں (colX[4]-5)، نام اشیاء اس سے پہلے (colX[3]-4) ---------- -->
     ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[4]+colX[5])/2, rowBaseline);
     ctx.textAlign = 'left';
     ctx.save();
@@ -21742,7 +21777,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   try{
     return await _renderInvoiceToCanvasInner(invoice, paperWidthMM, highlightMatchKey);
   }catch(err){
-    // ---------- 🛡️ صدام کی ہدایت (FM3SEPTH20): خرابی کبھی خاموش نہ رہے — سرخ پیغام میں دکھائیں ---------- -->
+    // ---------- 🛡️ صدام کی ہدایت (FM3SEPTH22): خرابی کبھی خاموش نہ رہے — سرخ پیغام میں دکھائیں ---------- -->
     console.error('renderInvoiceToCanvas failed:', err);
     if(canvas0){
       canvas0.width = 500; canvas0.height = 120;
@@ -21778,7 +21813,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // (کالمز کی چوڑائی حساب کرنے سے پہلے یہاں لے آئے، تاکہ Variant جیسے تنگ کالم بھی اسی تناسب سے چوڑے ہو سکیں) ---------- -->
   const fscale = (AppState.settings.printFontScale || 100) / 100;
 
-  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH20): ctx/فونٹ کی تعریف یہاں اوپر لے آئے — نیچے کالم چوڑائی ناپنے کے لیے
+  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH22): ctx/فونٹ کی تعریف یہاں اوپر لے آئے — نیچے کالم چوڑائی ناپنے کے لیے
   // ctx.measureText فوراً چاہیے تھا، پہلے یہ نیچے تعریف ہوتا تھا جس سے "ctx is not defined" کی خرابی سے پوری
   // فنکشن رک جاتی تھی اور بل کا پریویو بالکل خالی رہ جاتا تھا ---------- -->
   const ctx = canvas.getContext('2d');
@@ -21786,7 +21821,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const canvasFontFamily = selectedFontPreset.family;
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${canvasFontFamily}`;
 
-  // ---------- ٹیبل کالمز کی چوڑائی — اب مکمل RTL ترتیب اور خودکار (auto-width) سائز، صدام کی ہدایت (FM3SEPTH20):
+  // ---------- ٹیبل کالمز کی چوڑائی — اب مکمل RTL ترتیب اور خودکار (auto-width) سائز، صدام کی ہدایت (FM3SEPTH22):
   // دائیں سے بائیں پڑھنے کی صحیح ترتیب: نمبر → نام اشیاء → تعداد → قیمت → ٹوٹل
   // ہر تنگ کالم (نمبر/تعداد/قیمت/ٹوٹل) اسی قدر چوڑا ہے جتنا اس میں موجود سب سے لمبے ہندسے کو چاہیے —
   // نام اشیاء کا کالم بھی اب "باقی تمام جگہ" نہیں لیتا بلکہ صرف سب سے لمبے نام جتنا چوڑا ہے، کالم کی لکیر
@@ -21801,7 +21836,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     if(pS.length > maxPriceStr.length) maxPriceStr = pS;
     if(tS.length > maxTotalStr.length) maxTotalStr = tS;
   });
-  // ---------- 🔤 صدام کی ہدایت (FM3SEPTH20): نمبر/تعداد/قیمت/ٹوٹل — چاروں کا فونٹ سائز اب یکساں (ایک جیسا موٹا) —
+  // ---------- 🔤 صدام کی ہدایت (FM3SEPTH22): نمبر/تعداد/قیمت/ٹوٹل — چاروں کا فونٹ سائز اب یکساں (ایک جیسا موٹا) —
   // پہلے ہر کالم اپنی الگ (اکثر تنگ) چوڑائی میں آزادانہ سکڑتا تھا، اس لیے تعداد باقیوں سے باریک لگتی تھی ---------- -->
   const numFontPx0 = Math.round(16 * scale);
   ctx.font = `bold ${numFontPx0}px ${canvasFontFamily}`;
@@ -21932,11 +21967,11 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const drawTableHLine = (ly) => { ctx.beginPath(); ctx.moveTo(tableLeft, Math.floor(ly) + 0.5); ctx.lineTo(tableRight, Math.floor(ly) + 0.5); ctx.stroke(); };
   drawTableHLine(hLineY); // اوپر کی باؤنڈری
 
-  // ---------- ہیڈر لائن — Item کا نام اب اردو کے لیے Right رہتا ہے (صدام کی ہدایت FM3SEPTH20)،
+  // ---------- ہیڈر لائن — Item کا نام اب اردو کے لیے Right رہتا ہے (صدام کی ہدایت FM3SEPTH22)،
   // صرف Qty/Price/Total پر منتخب شدہ الائنمنٹ (Left/Center/Right) لاگو ہوتی ہے ----------
   const headerItemAlign = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
   const colCenterX = (a, b) => headerItemAlign === 'center' ? (a + b) / 2 : (headerItemAlign === 'right' ? b - 6 : a + 6);
-  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH20): بل اردو کی طرح رائٹ سے لیفٹ (RTL) — نام اشیاء اب اپنے ہی کالم میں دائیں طرف ---------- -->
+  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH22): بل اردو کی طرح رائٹ سے لیفٹ (RTL) — نام اشیاء اب اپنے ہی کالم میں دائیں طرف ---------- -->
   const headerItemNameX = colX[4] - 6; // ---------- Item کا نام اپنے کالم کے دائیں کنارے سے شروع (right-aligned) ----------
   const headerQtyX = colCenterX(colX[2], colX[3]);
   const headerPriceX = colCenterX(colX[1], colX[2]);
@@ -21978,7 +22013,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
 
   // ---------- ہر آئٹم کی لائن — سیریل نمبر کے ساتھ ----------
   const itemFontWeight = AppState.settings.printBoldItems === false ? '' : 'bold ';
-  const itemAlign = 'right'; // ---------- 🔁 صدام کی ہدایت (FM3SEPTH20): اردو نام اب دائیں طرف الائن ----------
+  const itemAlign = 'right'; // ---------- 🔁 صدام کی ہدایت (FM3SEPTH22): اردو نام اب دائیں طرف الائن ----------
   const itemNameX = headerItemNameX;
   // ---------- Center/Right منتخب ہو تو مقدار/قیمت/ٹوٹل کالمز بھی اپنے اپنے کالم میں اسی طرف آئیں ----------
   const qtyX = headerQtyX;
@@ -21987,7 +22022,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   ctx.font = F(itemFontWeight + '18px');
   const maxItemWidth = itemW - 8;
   const rowFontPx = Math.round(18 * fscale);
-  // ---------- 🔤 صدام کی ہدایت (FM3SEPTH20): نمبر/تعداد/قیمت/ٹوٹل — چاروں ایک ہی، یکساں موٹے فونٹ سائز میں —
+  // ---------- 🔤 صدام کی ہدایت (FM3SEPTH22): نمبر/تعداد/قیمت/ٹوٹل — چاروں ایک ہی، یکساں موٹے فونٹ سائز میں —
   // کالم کی چوڑائی پہلے ہی اسی سائز کے مطابق ناپی جا چکی ہے، اس لیے عام طور پر سکڑنے کی ضرورت نہیں پڑے گی —
   // پھر بھی حفاظتی طور پر fitBodyFont موجود ہے، مگر اب سب کے لیے ایک ہی ابتدائی سائز سے شروع ہوتا ہے ---------- -->
   const numRowFontPx = numFontPx0;
@@ -22110,7 +22145,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   let summaryBottom = y, accountBottom = y, summaryBlockHForCentering = 0;
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    // ---------- 🔁 FM3SEPTH20: RTL کے بعد Qty+Price+Total کالمز اب بائیں طرف ہیں، اس لیے Payment Summary باکس بھی بائیں طرف ----------
+    // ---------- 🔁 FM3SEPTH22: RTL کے بعد Qty+Price+Total کالمز اب بائیں طرف ہیں، اس لیے Payment Summary باکس بھی بائیں طرف ----------
     const sumLeft = colX[0];
     const sumRight = colX[3];
     const sumBoxW = sumRight - sumLeft;
@@ -22137,7 +22172,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
       let fpx = isFinal ? 13 : 11; // ---------- خانہ اب تنگ ہے، اسی مناسبت سے فونٹ بھی تھوڑا چھوٹا ----------
       ctx.font = F(`bold ${fpx}px`);
       ctx.fillStyle = '#000';
-      // ---------- 🐛 صدام کی ہدایت (FM3SEPTH20): لمبا اردو لیبل (جیسے "حتمی بقایہ رقم") پہلے قیمت کے اوپر چڑھ جاتا تھا —
+      // ---------- 🐛 صدام کی ہدایت (FM3SEPTH22): لمبا اردو لیبل (جیسے "حتمی بقایہ رقم") پہلے قیمت کے اوپر چڑھ جاتا تھا —
       // اب لیبل کا فونٹ خودکار سکڑ کر اپنے آدھے خانے میں فٹ ہو جاتا ہے، کبھی رقم سے اوورلیپ نہیں کرے گا ---------- -->
       const labelMaxW = sumLabelW - 10;
       while(ctx.measureText(label).width > labelMaxW && fpx > 7){
@@ -22162,7 +22197,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
 
   // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع، عمودی طور پر درمیان میں ----------
   if(receiptAccounts.length){
-    // ---------- 🔁 FM3SEPTH20: RTL کے بعد نمبر+نام کالمز اب دائیں طرف ہیں، اس لیے QR/اکاؤنٹ بلاک بھی دائیں طرف ----------
+    // ---------- 🔁 FM3SEPTH22: RTL کے بعد نمبر+نام کالمز اب دائیں طرف ہیں، اس لیے QR/اکاؤنٹ بلاک بھی دائیں طرف ----------
     const leftCx = (colX[4] + tableRight) / 2;
     const lineH = 16;
     const qrSize = Math.min(130, (tableRight - colX[4]) - 16);
@@ -23326,12 +23361,12 @@ function setRecoveryPosterColor(colorId){
   });
 }
 function generateAndShareRecoveryPoster(){
-  if(!rpCurrentCustomer || !rpCurrentEntry) return;
+  if(!rpCurrentCustomer || !rpCurrentEntry){ alert('⚠️ کسٹمر/انٹری کی معلومات نہیں مل سکیں — دوبارہ کوشش کریں'); return; }
   closeRecoveryPosterModal();
   shareRecoveryReceiptWhatsapp(rpCurrentCustomer, rpCurrentEntry, false);
 }
 function generateAndPrintRecoveryPoster(){
-  if(!rpCurrentCustomer || !rpCurrentEntry) return;
+  if(!rpCurrentCustomer || !rpCurrentEntry){ alert('⚠️ کسٹمر/انٹری کی معلومات نہیں مل سکیں — دوبارہ کوشش کریں'); return; }
   closeRecoveryPosterModal();
   shareRecoveryReceiptWhatsapp(rpCurrentCustomer, rpCurrentEntry, true);
 }
