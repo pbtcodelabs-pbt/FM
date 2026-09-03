@@ -128,23 +128,50 @@
     background:linear-gradient(90deg, #1e3a8a, #2563eb, #1e3a8a);
     border-top:1.5px solid #facc15; border-bottom:1.5px solid #facc15;
     border-left:1px solid rgba(250,204,21,.4); border-right:1px solid rgba(250,204,21,.4);
-    border-radius:16px;
+    /* ---------- 📺 صدام کی ہدایت (FM4SEPFR05): راؤنڈ کارنر مکمل ختم — اب بالکل TV بریکنگ نیوز پٹی کی طرح
+         سیدھی، کونوں کے بغیر، پوری چوڑائی تک ---------- */
+    border-radius:0;
     box-shadow:0 0 12px rgba(250,204,21,.2);
   }
+  /* ---------- 🔀 صدام کی ہدایت (FM4SEPFR06): علیحدہ سبسکرپشن پٹی ختم — اب لاگ ان کا نام اور سبسکرپشن یاد دہانی
+       دونوں اسی ایک پٹی/بیک گراؤنڈ کے اندر ایک ہی متن کے طور پر اکٹھے چلتے ہیں (loginMarqueeText صرف
+       پوزیشن/حرکت کا خانہ ہے، رنگ اندر موجود دو الگ span پر لگتا ہے) ---------- */
   .loginMarqueeText{
     position:absolute; top:0; left:0; height:32px; line-height:32px;
     white-space:nowrap; will-change:transform;
     font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif;
     font-size:15px; font-weight:700;
-    /* ---------- 🌟 صدام کی ہدایت: خالص سنہری (golden) رنگ جو شیڈ بدلتا رہے */
-    background:linear-gradient(90deg, #fde047, #f59e0b, #fbbf24, #fef08a, #eab308, #fde047);
+    /* ---------- 🔁 صدام کی ہدایت (FM4SEPFR06): پہلے صرف ایک ہی سمت میں لوپ چلتا تھا — اب alternate کی وجہ سے
+         ایک چکر بائیں سے دائیں مکمل باہر نکلتا ہے، اگلا چکر خودکار دائیں سے بائیں مکمل باہر نکلتا ہے،
+         ہمیشہ اسی ترتیب سے، بغیر رکے ---------- */
+    animation:loginMarqueeSlide 12s linear infinite, testShimmer 2.4s linear infinite, sparklePulse 1.3s ease-in-out infinite;
+    animation-direction: alternate, normal, normal;
+  }
+  .mqPartLogin{
+    /* ---------- 🌟 صدام کی ہدایت (FM4SEPFR05): پہلے سے زیادہ چمکتا، روشن سنہری (bright shiny gold) رنگ —
+         ہلکے سنہری کے بجائے سفید-سنہری چمک اور گہرے سنہری کا ملاپ، ساتھ سنہری چمک کا glow ---------- */
+    background:linear-gradient(90deg, #fffde7, #ffd700, #fff9c4, #ffb300, #fff59d, #ffd700, #fffde7);
     background-size:300% auto;
     -webkit-background-clip:text; background-clip:text; color:transparent !important;
-    animation:loginMarqueeSlide 16s linear infinite, testShimmer 3.5s linear infinite, sparklePulse 1.6s ease-in-out infinite;
-    filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));
+    filter:drop-shadow(0 1px 3px rgba(0,0,0,.65)) drop-shadow(0 0 6px rgba(255,215,0,.55));
   }
-  /* ---------- بائیں سے دائیں، مکمل طور پر ایک طرف سے باہر نکل کر دوسری طرف سے دوبارہ داخل ہو — ہمیشہ
-       ایک ہی سمت میں، آہستہ رفتار کے ساتھ، بغیر رکے لوپ چلتا رہے */
+  /* ---------- 🔔 صدام کی ہدایت (FM4SEPFR06): سبسکرپشن یاد دہانی والا حصہ — لاگ ان والے سنہری رنگ سے
+       تھوڑا مختلف (نارنجی-سنہری)، سات دن یا اس سے کم رہ جانے پر خودکار سرخ ہو جائے (mqUrgent کلاس) ---------- */
+  .mqPartSub{
+    background:linear-gradient(90deg, #fff7ed, #fb923c, #fde68a, #f59e0b, #fff7ed);
+    background-size:300% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent !important;
+    filter:drop-shadow(0 1px 3px rgba(0,0,0,.65)) drop-shadow(0 0 6px rgba(251,146,60,.55));
+  }
+  .mqPartSub.mqUrgent{
+    background:linear-gradient(90deg, #fee2e2, #ef4444, #fecaca, #dc2626, #fee2e2);
+    background-size:300% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent !important;
+    filter:drop-shadow(0 1px 3px rgba(0,0,0,.65)) drop-shadow(0 0 6px rgba(239,68,68,.65));
+  }
+  /* ---------- بائیں سے دائیں، مکمل طور پر ایک طرف سے باہر نکل کر دوسری طرف سے دوبارہ داخل ہو —
+       FM4SEPFR06: animation-direction:alternate کی وجہ سے اگلا چکر خودکار الٹی سمت (دائیں سے بائیں) میں چلتا ہے،
+       تھوڑی تیز رفتار کے ساتھ (FM4SEPFR05: پہلے سے تھوڑا تیز)، بغیر رکے لوپ چلتا رہے */
   @keyframes loginMarqueeSlide{
     0%{ transform:translateX(-100vw); }
     100%{ transform:translateX(100vw); }
@@ -2379,8 +2406,11 @@
          کبھی مکمل باہر نہیں جاتی تھی۔ اب ہر ایک پھیرے کے بعد (loop=1 + onfinish) خود بخود سمت الٹ جاتی ہے —
          پہلے دائیں سے بائیں مکمل باہر نکل جاتی ہے، پھر بائیں سے دائیں مکمل باہر نکل جاتی ہے، یوں ہمیشہ کے لیے،
          آہستہ رفتار (scrollamount=3) کے ساتھ ---------- -->
+    <!-- ---------- 🔀 صدام کی ہدایت (FM4SEPFR06): علیحدہ سبسکرپشن پٹی ختم — لاگ ان کا نام (mqLoginPart) اور
+         سبسکرپشن یاد دہانی (mqSubPart) دونوں اسی ایک پٹی کے اندر ایک ہی متن کے طور پر اکٹھے چلتے ہیں،
+         الگ الگ رنگ کے ساتھ (updateTopbarUserBadge / updateSubMarqueeBanner دیکھیں) ---------- -->
     <div id="loginMarqueeWrap">
-      <span id="loginMarqueeText" class="loginMarqueeText"></span>
+      <span id="loginMarqueeText" class="loginMarqueeText"><span id="mqLoginPart" class="mqPartLogin"></span><span id="mqSubPart" class="mqPartSub" style="display:none;"></span></span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px; flex:0 0 auto; width:100%; display:none;">
       <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:none;">Fruit Mandi POS</span>
@@ -6733,7 +6763,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR05';
+const APP_BUILD_VERSION = 'FM4SEPFR07';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -7995,15 +8025,44 @@ function applyRole(role, name){
 // اب خالص CSS animation (loginMarqueeSlide keyframes) حرکت دیتی ہے، اس لیے یہاں کوئی JS پوزیشننگ کوڈ درکار نہیں ---------- -->
 
 function updateTopbarUserBadge(){
-  const el = document.getElementById('loginMarqueeText');
-  if(!el || !AppState.currentUser) return;
+  const loginPart = document.getElementById('mqLoginPart');
+  if(!loginPart || !AppState.currentUser) return;
   const icon = AppState.currentRole === 'admin' ? '👑' : '🧑‍💼';
-  el.textContent = `${icon} ${AppState.currentUser.name} لاگ ان`;
+  loginPart.textContent = `${icon} ${AppState.currentUser.name} لاگ ان`;
   // ---------- 🐛 صدام کی ہدایت (FM3SEPTH10): ٹاپ بار کی اصل اونچائی ناپ کر نیچے والی utilityBar پٹی کو
   // بتائیں کہاں سے چپکنا ہے — ورنہ بڑی تصویر/نام/چمکتی پٹی کی وجہ سے وہ اوپر آ کر اوورلیپ کر دیتی تھی ---------- -->
   requestAnimationFrame(syncMobileTopbarHeight);
   // ---------- ✨ صدام کی ہدایت (FM3SEPTH23): اب حرکت خود native <marquee> ٹیگ دیتا ہے — کوئی JS/CSS
   // پوزیشننگ کا کوڈ درکار نہیں، اس لیے یہاں کچھ اور نہیں کرنا ---------- -->
+  updateSubMarqueeBanner(); // ---------- سبسکرپشن یاد دہانی والا حصہ بھی اسی پٹی کے اندر تازہ کریں ----------
+}
+
+// ---------- 🔔 صدام کی ہدایت (FM4SEPFR06): اسی لاگ ان پٹی کے اندر سبسکرپشن یاد دہانی کا حصہ — صرف Admin کو نظر آئے —
+// ⚠️ فی الحال ٹیسٹ کے لیے تھریشولڈ بہت بڑا (999) رکھا گیا ہے تاکہ چاہے 29 دن باقی ہوں پھر بھی نظر آئے۔
+// صدام کی تصدیق کے بعد اسے 7 کر دیا جائے گا (صرف سات دن یا اس سے کم باقی رہ جانے پر نظر آئے گا) ---------- -->
+const SUB_MARQUEE_THRESHOLD_DAYS = 999; // ---------- 🧪 ٹیسٹ موڈ — بعد میں 7 کر دیں ----------
+function updateSubMarqueeBanner(){
+  const subPart = document.getElementById('mqSubPart');
+  if(!subPart) return;
+
+  if(AppState.currentRole !== 'admin' || !isSubscriptionActive()){
+    subPart.style.display = 'none'; subPart.textContent = '';
+    requestAnimationFrame(syncMobileTopbarHeight);
+    return;
+  }
+
+  const daysLeft = daysLeftInSubscription();
+  if(daysLeft > SUB_MARQUEE_THRESHOLD_DAYS){
+    subPart.style.display = 'none'; subPart.textContent = '';
+    requestAnimationFrame(syncMobileTopbarHeight);
+    return;
+  }
+
+  // ---------- 🔴 سات دن یا اس سے کم باقی ہوں تو یہ حصہ سرخ رنگ میں بدل جائے (mqUrgent کلاس) ----------
+  subPart.classList.toggle('mqUrgent', daysLeft < 7);
+  subPart.textContent = `   ⭐   آپ کی سبسکرپشن کے ${daysLeft} دن باقی رہ گئے ہیں۔۔`;
+  subPart.style.display = 'inline';
+  requestAnimationFrame(syncMobileTopbarHeight);
 }
 
 function syncMobileTopbarHeight(){
