@@ -6619,7 +6619,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH13';
+const APP_BUILD_VERSION = 'FM3SEPTH14';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -17921,7 +17921,7 @@ async function openAdvOrderPreview(orderId){
   currentPreviewAdvOrderId = orderId;
   document.getElementById('advOrderPreviewModal').classList.add('show');
   syncAdvOrderStyleControls();
-  // ---------- 🚀 صدام کی ہدایت (FM3SEPTH13): بل کھلتے ہی زیرو زیرو دکھانے اور بٹن دبانے کا انتظار کرنے کے بجائے —
+  // ---------- 🚀 صدام کی ہدایت (FM3SEPTH14): بل کھلتے ہی زیرو زیرو دکھانے اور بٹن دبانے کا انتظار کرنے کے بجائے —
   // اگر یہ آرڈر کسی ایسے محفوظ شدہ کسٹمر کا ہے جس کا ریٹ ایریا (اسلام آباد/راولپنڈی) پہلے سے سیٹ ہے، تو وہ ریٹ
   // یہیں خودکار لگا دیں — بل پہلی ہی نظر میں صحیح قیمتوں کے ساتھ کھلے گا، اور غلطی سے زیرو پرنٹ نہیں ہوگا۔
   // نیا/انجان کسٹمر ہو (رٹ ایریا محفوظ نہ ہو) تو پہلے کی طرح دونوں بٹن نظر آتے رہیں گے تاکہ ایڈمن خود چن سکے ---------- -->
@@ -21737,24 +21737,34 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // (کالمز کی چوڑائی حساب کرنے سے پہلے یہاں لے آئے، تاکہ Variant جیسے تنگ کالم بھی اسی تناسب سے چوڑے ہو سکیں) ---------- -->
   const fscale = (AppState.settings.printFontScale || 100) / 100;
 
-  // ---------- ٹیبل کالمز کی چوڑائی — پیپر سائز کے تناسب سے، تاکہ 58mm اور 80mm دونوں پر صحیح فٹ ہوں
-  // کالمز کی ترتیب: #  |  Item  |  Variant  |  Qty  |  Price  |  Total
-  // ⚠️ Variant کالم کو fscale سے بھی جوڑا گیا ہے — ورنہ فونٹ سائز بڑھانے پر بھی یہ تنگ کالم میں فٹ ہونے کے لیے
-  // خودکار سکڑ کر ہمیشہ باریک ہی رہ جاتا تھا، چاہے باقی سارا بل موٹا/بڑا ہو جائے ---------- -->
-  // ---------- 🧹 صدام کی ہدایت (FM3SEPTH10): Variant کالم مکمل ہٹا دیا گیا — پیکنگ پہلے سے پراڈکٹ کے نام کا حصہ ہے
-  // (جیسے "ٹماٹر ٹوکری")، الگ کالم فالتو تھا۔ چوڑائی 0 رکھی گئی ہے تاکہ باقی تمام کالمز کی نمبرنگ/انڈیکسنگ ویسی
-  // ہی رہے (کوڈ میں کہیں اور ٹوٹ نہ جائے) — خالی جگہ خودکار Item کالم میں چلی جاتی ہے ---------- -->
-  const noW = Math.round(28 * scale), variantW = 0, qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
+  // ---------- ٹیبل کالمز کی چوڑائی — اب مکمل RTL ترتیب اور خودکار (auto-width) سائز، صدام کی ہدایت (FM3SEPTH14):
+  // دائیں سے بائیں پڑھنے کی صحیح ترتیب: نمبر → نام اشیاء (سب سے چوڑا) → تعداد → قیمت → ٹوٹل
+  // ہر تنگ کالم (نمبر/تعداد/قیمت/ٹوٹل) اسی قدر چوڑا ہے جتنا اس میں موجود سب سے لمبے ہندسے کو چاہیے —
+  // باقی تمام بچی ہوئی جگہ نام اشیاء کو مل جاتی ہے (چونکہ اردو نام لمبے ہوتے ہیں) ---------- -->
   const tableLeft = 8, tableRight = pxWidth - 8;
-  const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - priceW - totalW;
+  const decimals = AppState.settings.priceDecimals ?? 0; // ---------- کریانہ/میڈیکل جیسے کاروبار کے لیے قیمتوں کے بعد ڈیسیمل پوائنٹس ----------
+  let maxQtyStr = '0', maxPriceStr = '0', maxTotalStr = '0';
+  invoice.items.forEach(it => {
+    const remQ = Math.max(0, it.qty - (it.returnQty || 0));
+    const qS = String(remQ), pS = it.unitPrice.toFixed(decimals), tS = (remQ*it.unitPrice).toFixed(decimals);
+    if(qS.length > maxQtyStr.length) maxQtyStr = qS;
+    if(pS.length > maxPriceStr.length) maxPriceStr = pS;
+    if(tS.length > maxTotalStr.length) maxTotalStr = tS;
+  });
+  ctx.font = F('bold 16px');
+  const colPad = Math.round(18 * scale);
+  const noW = Math.max(Math.round(22 * scale), ctx.measureText(String(invoice.items.length)).width + colPad);
+  const qtyW = Math.max(Math.round(32 * scale), ctx.measureText(maxQtyStr).width + colPad);
+  const priceW = Math.max(Math.round(38 * scale), ctx.measureText(maxPriceStr).width + colPad);
+  const totalW = Math.max(Math.round(42 * scale), ctx.measureText(maxTotalStr).width + colPad);
+  const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW; // ---------- باقی تمام جگہ نام اشیاء کی ہے ----------
   const colX = [
-    tableLeft,
-    tableLeft + noW,
-    tableLeft + noW + itemW,
-    tableLeft + noW + itemW + variantW,
-    tableLeft + noW + itemW + variantW + qtyW,
-    tableLeft + noW + itemW + variantW + qtyW + priceW,
-    tableRight
+    tableLeft,                                     // 0: ٹوٹل شروع (سب سے بائیں)
+    tableLeft + totalW,                            // 1: قیمت شروع
+    tableLeft + totalW + priceW,                   // 2: تعداد شروع
+    tableLeft + totalW + priceW + qtyW,             // 3: نام اشیاء شروع (چوڑا)
+    tableLeft + totalW + priceW + qtyW + itemW,     // 4: نمبر شروع (سب سے دائیں)
+    tableRight                                      // 5: دائیں کنارہ
   ];
   const rowScale = (AppState.settings.printRowScale || 100) / 100; // ---------- پرنٹ پریویو میں لائیو ↕ Row کنٹرول سے ----------
   const rowH = Math.round(24 * rowScale), headerH = Math.round(22 * rowScale);
@@ -21869,10 +21879,9 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // ---------- ہیڈر لائن — Item ہمیشہ Left رہتا ہے، صرف Qty/Price/Total پر منتخب شدہ الائنمنٹ (Left/Center/Right) لاگو ہوتی ہے ----------
   const headerItemAlign = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
   const colCenterX = (a, b) => headerItemAlign === 'center' ? (a + b) / 2 : (headerItemAlign === 'right' ? b - 6 : a + 6);
-  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH13): بل اردو کی طرح رائٹ سے لیفٹ (RTL) — کالمز کی جسمانی ترتیب اب
-  // دائیں سے بائیں: نمبر، نام اشیاء، تعداد، قیمت، ٹوٹل۔ اندرونی حساب اب بھی وہی colX رہتا ہے، بس ہر کالم کا
-  // مطلوبہ خانہ اب آئینے کی طرح الٹ (mirror) لیا جاتا ہے — یعنی جو پہلے colX[k] پر تھا اب colX[6-k] پر ہے ---------- -->
-  const headerItemNameX = colX[4] + 6; // ---------- Item کا نام اپنے (اب دائیں طرف والے) کالم کے بائیں کنارے سے شروع ----------
+  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH14): بل اردو کی طرح رائٹ سے لیفٹ (RTL) — اب صحیح، صاف 5-کالم ترتیب:
+  // دائیں سے بائیں: نمبر → نام اشیاء (چوڑا) → تعداد → قیمت → ٹوٹل ---------- -->
+  const headerItemNameX = colX[3] + 6; // ---------- Item کا نام اپنے کالم کے بائیں کنارے سے شروع ----------
   const headerQtyX = colCenterX(colX[2], colX[3]);
   const headerPriceX = colCenterX(colX[1], colX[2]);
   const headerTotalX = colCenterX(colX[0], colX[1]);
@@ -21900,11 +21909,10 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   ctx.fillStyle = rc.text; // ---------- منتخب رنگ کے مطابق گہرا متن ----------
   // ---------- نوٹ: پہلے یہاں ہلکا shadowBlur گلو تھا — صارف کو یہ "دھندلا/مدھم" محسوس ہوا، اسی لیے ہٹا دیا۔
   // اب کیپشن بالکل صاف، ٹھوس اور روشن (بغیر کسی دھندلاہٹ کے) ----------
-  // ---------- 🔤 صدام کی ہدایت (FM3SEPTH10): کالم کیپشن اردو میں — پوزیشن/ترتیب بالکل ویسی ہی، صرف الفاظ بدلے ---------- -->
   ctx.textAlign = 'center';
-  fitHeaderFont('نمبر', colX[6]-colX[5]-6);
-  ctx.fillText('نمبر', (colX[5]+colX[6])/2, headerBaseline);
-  drawClippedHeaderCaption('نام اشیاء', colX[4], colX[5], headerItemNameX, 'left');
+  fitHeaderFont('نمبر', colX[5]-colX[4]-6);
+  ctx.fillText('نمبر', (colX[4]+colX[5])/2, headerBaseline);
+  drawClippedHeaderCaption('نام اشیاء', colX[3], colX[4], headerItemNameX, 'left');
   drawClippedHeaderCaption('تعداد', colX[2], colX[3], headerQtyX, headerItemAlign);
   drawClippedHeaderCaption('قیمت', colX[1], colX[2], headerPriceX, headerItemAlign);
   drawClippedHeaderCaption('ٹوٹل', colX[0], colX[1], headerTotalX, headerItemAlign);
@@ -21916,14 +21924,12 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const itemFontWeight = AppState.settings.printBoldItems === false ? '' : 'bold ';
   const itemAlign = 'left'; // ---------- Item کا نام ہمیشہ Left ہی رہے گا ----------
   const itemNameX = headerItemNameX;
-  const decimals = AppState.settings.priceDecimals ?? 0; // ---------- کریانہ/میڈیکل جیسے کاروبار کے لیے قیمتوں کے بعد ڈیسیمل پوائنٹس ----------
   // ---------- Center/Right منتخب ہو تو مقدار/قیمت/ٹوٹل کالمز بھی اپنے اپنے کالم میں اسی طرف آئیں ----------
   const qtyX = headerQtyX;
   const priceX = headerPriceX;
   const totalX = headerTotalX;
   ctx.font = F(itemFontWeight + '18px');
   const maxItemWidth = itemW - 8;
-  const maxVariantWidth = variantW - 6;
   const rowFontPx = Math.round(18 * fscale);
   // ---------- Qty/Price/Total کا فونٹ بھی اپنے کالم میں فٹ ہونے تک خود بخود چھوٹا ہو — زوم جتنا بڑا ہو، کبھی کالم سے باہر نہ نکلے ----------
   const fitBodyFont = (text, maxWidth) => {
@@ -21962,20 +21968,18 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
     ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`;
-    ctx.fillText(String(idx + 1), (colX[5]+colX[6])/2, rowBaseline);
+    ctx.fillText(String(idx + 1), (colX[4]+colX[5])/2, rowBaseline);
     ctx.textAlign = itemAlign;
     // ---------- سخت کلپنگ — item کا نام کبھی بھی اپنے کالم کی حد سے ایک پکسل بھی باہر نہ چھپے،
     // چاہے measureText میں کہیں معمولی فرق ہی کیوں نہ ہو (خاص طور پر Bold وزن میں) ----------
     ctx.save();
     ctx.beginPath();
-    ctx.rect(colX[4], hLineY, colX[5] - colX[4], rowH);
+    ctx.rect(colX[3], hLineY, colX[4] - colX[3], rowH);
     ctx.clip();
     ctx.fillText(displayName, itemNameX, rowBaseline);
     ctx.restore();
-    // ---------- 🧹 Variant/Packing کالم — صدام کی ہدایت (FM3SEPTH10) پر مکمل ہٹا دیا گیا (چوڑائی 0، یہاں کچھ نہیں کھینچا جاتا) ---------- -->
     const qtyText = String(remainingQty), priceText = item.unitPrice.toFixed(decimals), totalText = (remainingQty*item.unitPrice).toFixed(decimals);
-    // ---------- سخت کلپنگ کے ساتھ لکھیں — پہلے یہاں textAlign کبھی واپس سیٹ نہیں ہوتا تھا (Variant کے 'center' پر ہی اٹکا رہتا تھا)،
-    // جس کی وجہ سے Right/Center منتخب کرنے پر نمبر کالم سے باہر نکل جاتے تھے۔ اب ہر کالم کی اپنی حد کے اندر مقفل ہے ----------
+    // ---------- سخت کلپنگ کے ساتھ لکھیں — ہر کالم کی اپنی حد کے اندر مقفل ----------
     const drawClippedNum = (text, x1, x2, textX) => {
       ctx.textAlign = headerItemAlign;
       fitBodyFont(text, (x2 - x1) - 8);
@@ -21998,7 +22002,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.font = F('11px');
       ctx.fillStyle = '#9ca3af';
       ctx.textAlign = 'left';
-      ctx.fillText(`↩ ${returnedQty} Returned`, colX[4] + 4, hLineY + 10);
+      ctx.fillText(`↩ ${returnedQty} Returned`, colX[3] + 4, hLineY + 10);
       ctx.fillStyle = '#000';
       ctx.font = F(itemFontWeight + '18px');
       hLineY += returnedNoteExtra;
@@ -22015,12 +22019,12 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     if(invoice.discount && invoice.discount > 0){
       const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(decimals), 10, y); y += 20;
-      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(decimals), 10, y); y += 24;
+      ctx.fillText('ذیلی ٹوٹل: Rs. ' + subtotalAmt.toFixed(decimals), 10, y); y += 20;
+      ctx.fillText('رعایت: Rs. ' + invoice.discount.toFixed(decimals), 10, y); y += 24;
     }
     if(invoice.tax_amount && invoice.tax_amount > 0){
       ctx.font = F('14px');
-      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(decimals), 10, y); y += 20;
+      ctx.fillText(`ٹیکس (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(decimals), 10, y); y += 20;
     }
   }
 
@@ -22030,15 +22034,15 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     if(!alreadyShowedSubtotal){
       const originalSubtotal = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + originalSubtotal.toFixed(decimals), 10, y); y += 20;
+      ctx.fillText('ذیلی ٹوٹل: Rs. ' + originalSubtotal.toFixed(decimals), 10, y); y += 20;
     }
     ctx.fillStyle = '#dc2626';
-    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmt.toFixed(decimals), 10, y); y += 24;
+    ctx.fillText('↩ واپسی: −Rs. ' + totalReturnedAmt.toFixed(decimals), 10, y); y += 24;
     ctx.fillStyle = '#000';
   }
 
   ctx.font = F('bold 20px');
-  ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(decimals), 10, y);
+  ctx.fillText('گرینڈ ٹوٹل: Rs. ' + invoice.grand_total.toFixed(decimals), 10, y);
   y += 34;
 
   // ---------- بل کی مکمل ادائیگی تفصیل — اب دائیں طرف، صرف Qty+Price+Total کالمز جتنی چوڑائی میں —
@@ -22047,7 +22051,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   let summaryBottom = y, accountBottom = y, summaryBlockHForCentering = 0;
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    // ---------- 🔁 FM3SEPTH13: RTL کے بعد Qty+Price+Total کالمز اب بائیں طرف ہیں، اس لیے Payment Summary باکس بھی بائیں طرف ----------
+    // ---------- 🔁 FM3SEPTH14: RTL کے بعد Qty+Price+Total کالمز اب بائیں طرف ہیں، اس لیے Payment Summary باکس بھی بائیں طرف ----------
     const sumLeft = colX[0];
     const sumRight = colX[3];
     const sumBoxW = sumRight - sumLeft;
@@ -22063,8 +22067,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.font = F('bold 12px');
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000';
-    ctx.fillText('Payment Summary', sumLeft + sumBoxW/2, ty);
-
+    ctx.fillText('ادائیگی کی تفصیل', sumLeft + sumBoxW/2, ty);
     let rowTop = boxTop + titleH;
     ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
@@ -22091,7 +22094,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
   // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع، عمودی طور پر درمیان میں ----------
   if(receiptAccounts.length){
-    // ---------- 🔁 FM3SEPTH13: RTL کے بعد نمبر+نام کالمز اب دائیں طرف ہیں، اس لیے QR/اکاؤنٹ بلاک بھی دائیں طرف ----------
+    // ---------- 🔁 FM3SEPTH14: RTL کے بعد نمبر+نام کالمز اب دائیں طرف ہیں، اس لیے QR/اکاؤنٹ بلاک بھی دائیں طرف ----------
     const leftCx = (colX[4] + tableRight) / 2;
     const lineH = 16;
     const qrSize = Math.min(130, (tableRight - colX[4]) - 16);
@@ -22442,7 +22445,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.font = F('bold 15px');
     ctx.textAlign = 'center';
     ctx.fillStyle = '#1a1a1a';
-    ctx.fillText('Payment Summary', pxWidth/2, y); y += 10;
+    ctx.fillText('ادائیگی کی تفصیل', pxWidth/2, y); y += 10;
 
     let rowTop = boxTop + titleH;
     ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
