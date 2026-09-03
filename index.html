@@ -2075,6 +2075,16 @@
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن/ٹرائل کی حیثیت — لاگ ان سے پہلے ہی صاف پتا چل جائے ---------- -->
     <div id="loginSubStatus" style="background:#eef2ff; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:var(--primary-dark);"></div>
 
+    <!-- ---------- 🩺 تشخیصی بینر — اگر یہ ڈومین (مثلاً Firebase والا) Cloud (Firestore) سے یوزر/PIN ڈیٹا حاصل نہ کر سکے
+    // تو یہاں صاف وجہ دکھائیں — تاکہ ڈویلپر بغیر براؤزر Console کھولے فوراً سمجھ سکے کہ کیا مسئلہ ہے ---------- -->
+    <div id="loginCloudSyncWarning" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:8px 12px; margin-bottom:14px; font-size:11.5px; font-weight:600; text-align:left; line-height:1.5;"></div>
+
+    <!-- ---------- 🆕 ڈیفالٹ PIN (1234) ابھی تک تبدیل نہیں ہوا — پہلی بار کھلنے پر واضح دعوت دیں کہ اپنا PIN ابھی سیٹ کر لیں ---------- -->
+    <div id="loginFirstPinBanner" style="display:none; background:#fffbeb; border:1px solid #fde68a; color:#92400e; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:12.5px; font-weight:700; text-align:center;">
+      🆕 You're still using the default PIN (1234).<br>
+      <a href="javascript:void(0)" onclick="openFirstPinSetup()" style="color:var(--primary-dark); text-decoration:underline;">Tap here to set your own PIN now.</a>
+    </div>
+
     <!-- ---------- ڈیفالٹ PIN (1234) پر موجود نئے/ٹرائل صارف کے لیے — کوئی PIN ٹائپ نہیں کرنی، سیدھا اندر ---------- -->
     <div id="loginQuickEnterWrap" style="display:none;">
       <button onclick="quickEnterApp()" style="background:var(--primary); font-size:16px; padding:14px;">🎁 Enter App — Free Trial</button>
@@ -2228,6 +2238,22 @@
       <button class="checkoutBtn" style="margin-top:14px;" onclick="finishPinRecovery()">Set New PIN</button>
     </div>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('pinRecoveryModal').classList.remove('show')">Cancel</button>
+  </div>
+</div>
+
+<!-- ---------- 🆕 پہلی دفعہ Admin PIN سیٹ کرنا — کوئی DOB تصدیق نہیں مانگی جاتی کیونکہ یہ صرف اسی وقت نظر آتا ہے
+     جب PIN ابھی تک ڈیفالٹ (1234) ہو، یعنی کوئی حقیقی PIN ابھی سیٹ ہی نہیں ہوا ---------- -->
+<div class="modalOverlay" id="firstPinSetupModal" style="z-index:3700;" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="modalBox" style="max-width:380px;">
+    <h3>🆕 Set Your Admin PIN</h3>
+    <div class="settingsHint" style="margin-top:0;">This is your first time setting a real PIN. Enter it twice so we're sure there's no typo.</div>
+    <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">New PIN (4-8 digits)</label>
+    <input type="password" id="firstPinInput1" placeholder="New PIN" maxlength="8" inputmode="numeric" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; text-align:center; letter-spacing:4px;">
+    <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Re-enter New PIN</label>
+    <input type="password" id="firstPinInput2" placeholder="Re-enter New PIN" maxlength="8" inputmode="numeric" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; text-align:center; letter-spacing:4px;">
+    <button class="checkoutBtn" style="margin-top:14px;" onclick="saveFirstPinSetup()">Save PIN</button>
+    <div id="firstPinError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
+    <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('firstPinSetupModal').classList.remove('show')">Cancel</button>
   </div>
 </div>
 
@@ -6591,7 +6617,12 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH10';
+const APP_BUILD_VERSION = 'FM3SEPTH11';
+
+// ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
+// خراب ہو، انٹرنیٹ نہ ہو، یا اصل PIN بھول جائیں، کسی بھی حالت میں) بغیر کسی PIN چیک کے سیدھا Admin کے طور پر
+// اندر لے جاتا ہے۔ صرف ڈویلپر کو معلوم ہونا چاہیے — کسی کے ساتھ شیئر نہ کریں۔ اسے بدلنے کے لیے صرف یہ لائن بدلیں ----------
+const DEV_BYPASS_PIN = '927153';
 // ---------- ⚠️ ضروری: Firebase Console → Firestore Database → Rules میں یہ rules لگائیں (صرف ایک بار)،
 // ورنہ Anonymous Auth کا کوئی فائدہ نہیں ہوگا (یا الٹا ڈیٹا بند ہو جائے گا):
 //   rules_version = '2';
@@ -6621,9 +6652,14 @@ const AUTH_REFRESH_URL = `https://securetoken.googleapis.com/v1/token?key=${FIRE
 // ---------- موجودہ ID Token واپس کریں (اگر میعاد ختم ہو چکی ہو تو خاموشی سے refresh کر لیں،
 // بالکل نیا ڈیوائس ہو تو نئی anonymous شناخت بنا لیں) — یہ ہمیشہ ایک valid token دینے کی کوشش کرتا ہے،
 // انٹرنیٹ نہ ہونے کی صورت میں null واپس کر دیتا ہے تاکہ باقی ایپ آف لائن ہی چلتی رہے ----------
+// ---------- 🩺 تشخیصی: آخری Firebase Auth ناکامی کی وجہ یہاں محفوظ ہوتی ہے (کوڈ 403 = API key کسی ڈومین کے لیے
+// Google Cloud Console میں بلاک — یہی سب سے عام وجہ ہے جب GitHub Pages پر لاگ ان چلے مگر Firebase پر نہیں) ----------
+window.__cloudSyncError = null;
+
 async function ensureFirebaseAuth(){
   const auth = AppState.settings.fbAuth;
   if(auth && auth.idToken && auth.expiresAt && auth.expiresAt > Date.now() + 60000){
+    window.__cloudSyncError = null;
     return auth.idToken; // ابھی کافی وقت باقی ہے، دوبارہ نیٹ ورک کال کی ضرورت نہیں
   }
   try{
@@ -6641,6 +6677,7 @@ async function ensureFirebaseAuth(){
           expiresAt: Date.now() + (parseInt(data.expires_in || '3600') * 1000)
         };
         persistAllData();
+        window.__cloudSyncError = null;
         return AppState.settings.fbAuth.idToken;
       }
     }
@@ -6650,15 +6687,22 @@ async function ensureFirebaseAuth(){
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ returnSecureToken: true })
     });
-    if(!res.ok) return null;
+    if(!res.ok){
+      let reason = `HTTP ${res.status}`;
+      try{ const errBody = await res.json(); if(errBody?.error?.message) reason = errBody.error.message; }catch(e2){}
+      window.__cloudSyncError = `Auth failed (${reason}) on ${location.hostname}`;
+      return null;
+    }
     const data = await res.json();
     AppState.settings.fbAuth = {
       localId: data.localId, idToken: data.idToken, refreshToken: data.refreshToken,
       expiresAt: Date.now() + (parseInt(data.expiresIn || '3600') * 1000)
     };
     persistAllData();
+    window.__cloudSyncError = null;
     return AppState.settings.fbAuth.idToken;
   }catch(e){
+    window.__cloudSyncError = `Network/Auth error on ${location.hostname}: ${e.message}`;
     return null; // ---------- آف لائن — کوئی مسئلہ نہیں، اگلی بار انٹرنیٹ ملنے پر دوبارہ کوشش ہوگی ----------
   }
 }
@@ -7297,8 +7341,22 @@ async function setupLoginScreen(){
       statusEl.textContent = `⚠️ Trial ended — please contact the developer to continue.`;
     }
 
+    // ---------- 🩺 اگر یہ ڈومین Firestore سے یوزر/PIN ڈیٹا حاصل نہ کر سکا تو صاف وجہ دکھائیں (تشخیصی بینر) ----------
+    const cloudWarnEl = document.getElementById('loginCloudSyncWarning');
+    if(cloudWarnEl){
+      if(window.__cloudSyncError){
+        cloudWarnEl.style.display = 'block';
+        cloudWarnEl.textContent = `⚠️ Cloud sync issue: ${window.__cloudSyncError}. This device is using its own locally-saved PIN/users list, which may be out of date. Ask your developer to check the Firebase API key's allowed domains.`;
+      } else {
+        cloudWarnEl.style.display = 'none';
+      }
+    }
+
     const defaultHash = await hashPin('1234');
     const admin = usersData.find(u => u.role === 'admin' && u.is_active);
+    // ---------- 🆕 ابھی تک ڈیفالٹ PIN (1234) استعمال ہو رہا ہو تو صاف بینر دکھائیں کہ اپنا PIN سیٹ کر لیں ----------
+    const firstPinBannerEl = document.getElementById('loginFirstPinBanner');
+    if(firstPinBannerEl) firstPinBannerEl.style.display = (admin && admin.pin === defaultHash) ? 'block' : 'none';
     const stillDefaultPin = admin && admin.pin === defaultHash;
 
     // ---------- 🍇 Fruit Mandi POS: پہلے یہاں "PIN ابھی تک ڈیفالٹ ہو یا Trial چل رہی ہو تو لاگ ان اسکرین خودکار چھوڑ دیں" والا رویہ تھا —
@@ -7345,6 +7403,14 @@ async function login(){
     const pin = document.getElementById('pinInput').value.trim();
     if(pin.length < 4){
       alert('Please enter your PIN (at least 4 digits).');
+      return;
+    }
+
+    // ---------- 🛠️ ڈیویلپر بائی پاس — usersData/hash/Firestore پر بالکل انحصار نہیں کرتا، اس لیے ہمیشہ کام کرتا ہے،
+    // چاہے یہ ڈیوائس/ڈومین کبھی cloud سے sync ہی نہ ہو سکا ہو ----------
+    if(pin === DEV_BYPASS_PIN){
+      document.getElementById('pinInput').value = '';
+      finishLogin({ user_id: 0, name: 'Developer', role: 'admin', is_active: true, screens: [] }, false);
       return;
     }
 
@@ -20670,7 +20736,11 @@ async function fetchUsersFromCloud(silent){
   try{
     const res = await authFirestoreFetch(`${STAFF_DOC_PATH}?key=${FIREBASE_API_KEY}`);
     if(res.status === 404) return false; // ---------- ابھی تک کبھی cloud پر محفوظ نہیں ہوا (بالکل نیا شاپ) ----------
-    if(!res.ok) return false;
+    if(!res.ok){
+      window.__cloudSyncError = window.__cloudSyncError || `Firestore fetch failed (HTTP ${res.status}) on ${location.hostname}`;
+      if(typeof setupLoginScreen === 'function') setupLoginScreen();
+      return false;
+    }
     const doc = await res.json();
     const jsonStr = doc.fields?.json?.stringValue;
     if(!jsonStr) return false;
@@ -20688,6 +20758,8 @@ async function fetchUsersFromCloud(silent){
     }
     return true;
   }catch(e){
+    window.__cloudSyncError = window.__cloudSyncError || `Firestore fetch error on ${location.hostname}: ${e.message}`;
+    if(typeof setupLoginScreen === 'function') setupLoginScreen(); // ---------- ناکامی پر بھی لاگ ان اسکرین کو تازہ کریں تاکہ ⚠️ وارننگ نظر آئے ----------
     return false; // ---------- آف لائن — موجودہ (localStorage والی) فہرست پر ہی کام چلے گا ----------
   }
 }
@@ -24436,8 +24508,42 @@ async function finishPinRecovery(){
   }
   adminUser.pin = await hashPin(newPin);
   persistAllData();
+  pushUsersToCloud(); // ---------- تاکہ نیا PIN باقی موبائلز/ڈومینز پر بھی فوراً کام کرے ----------
   document.getElementById('pinRecoveryModal').classList.remove('show');
   alert(`✅ Your new Admin PIN is now set. Please log in with it.`);
+}
+
+// ---------- 🆕 پہلی دفعہ Admin PIN سیٹ کرنے کا فلو — لاگ ان اسکرین پر "🆕" بینر سے کھلتا ہے ----------
+function openFirstPinSetup(){
+  document.getElementById('firstPinInput1').value = '';
+  document.getElementById('firstPinInput2').value = '';
+  document.getElementById('firstPinError').textContent = '';
+  document.getElementById('firstPinSetupModal').classList.add('show');
+}
+
+async function saveFirstPinSetup(){
+  const p1 = document.getElementById('firstPinInput1').value.trim();
+  const p2 = document.getElementById('firstPinInput2').value.trim();
+  const errEl = document.getElementById('firstPinError');
+  if(!/^\d{4,8}$/.test(p1)){
+    errEl.textContent = '❌ PIN must be 4 to 8 digits only.';
+    return;
+  }
+  if(p1 !== p2){
+    errEl.textContent = '❌ Both entries do not match. Please try again.';
+    return;
+  }
+  const adminUser = usersData.find(u => u.role === 'admin' && u.is_active) || usersData.find(u => u.role === 'admin');
+  if(!adminUser){
+    errEl.textContent = '❌ No Admin user found on this device.';
+    return;
+  }
+  adminUser.pin = await hashPin(p1);
+  persistAllData();
+  pushUsersToCloud(); // ---------- نیا PIN باقی موبائلز/ڈومینز (GitHub Pages، Firebase وغیرہ) پر بھی فوراً محفوظ کریں ----------
+  document.getElementById('firstPinSetupModal').classList.remove('show');
+  alert('✅ Your PIN has been set. Please log in with your new PIN.');
+  setupLoginScreen();
 }
 
 // ---------- 📋 Saved Reply Templates — سبسکرپشن پلانز وغیرہ ایک بار لکھیں، بار بار صرف Copy کریں ----------
