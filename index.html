@@ -3546,7 +3546,7 @@
         <div id="rpColorSwatchWrap" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;"></div>
         <button class="testPrintBtn" style="background:#dcfce7; color:#15803d; margin-bottom:8px;" onclick="generateAndShareRecoveryPoster()">📤 واٹس ایپ پر بھیجیں</button>
         <button class="testPrintBtn" style="background:#eef2ff; color:var(--primary-dark); margin-bottom:8px;" onclick="generateAndPrintRecoveryPoster()">🖨️ پرنٹ کریں</button>
-        <!-- ---------- 🔵 صدام کی ہدایت (FM3SEPTH31): براہ راست بلوٹوتھ پرنٹ — کسٹمر کو RawBT جیسی الگ ایپ
+        <!-- ---------- 🔵 صدام کی ہدایت (FM3SEPTH32): براہ راست بلوٹوتھ پرنٹ — کسٹمر کو RawBT جیسی الگ ایپ
         انسٹال کروانے کی ضرورت نہیں پڑتی؛ اگر پرنٹر BLE سپورٹ کرتا ہے (زیادہ تر نئے/iOS والے پرنٹرز کرتے ہیں)
         تو یہ سیدھا براؤزر سے ہی پرنٹر کو ڈیٹا بھیج دیتا ہے ---------- -->
         <button class="testPrintBtn" style="background:#e0f2fe; color:#075985; margin-bottom:8px;" onclick="generateAndBluetoothPrintRecoveryPoster()">🔵 براہ راست بلوٹوتھ پرنٹ (کوئی ایپ درکار نہیں)</button>
@@ -6644,7 +6644,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH31';
+const APP_BUILD_VERSION = 'FM3SEPTH32';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -17260,6 +17260,7 @@ function confirmRecoveryEntry(entryId){
 // خودکار واٹس ایپ/شیئر شیٹ پر نہیں جانی چاہیے۔ صرف manual 📤/🖨️ بٹن دبانے پر ہی آگے جائے۔
 // =========================================================================
 let _reportPreviewState = { blob:null, fileName:'report.png', mime:'image/png', title:'' };
+let _reportPreviewBluetoothCanvas = null;
 function openReportImagePreview(canvases, opts){
   const list = Array.isArray(canvases) ? canvases : [canvases];
   document.getElementById('reportImagePreviewTitle').textContent = opts.title || '📊 رپورٹ تیار';
@@ -17267,13 +17268,21 @@ function openReportImagePreview(canvases, opts){
   imgsWrap.innerHTML = list.map(c => `<img src="${c.toDataURL('image/png')}" style="width:100%; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.15); display:block;">`).join('');
 
   _reportPreviewState = { blob: opts.blob, fileName: opts.fileName || 'report.png', mime: opts.mime || 'image/png', title: opts.title || '' };
+  // ---------- 🔵 صدام کی ہدایت (FM3SEPTH32): بلوٹوتھ پرنٹ بھی اب پہلے یہیں پریویو میں نظر آئے گا،
+  // خودکار پرنٹ نہیں ہوگا — بندہ دیکھ کر خود بٹن دبائے گا ---------- -->
+  _reportPreviewBluetoothCanvas = opts.bluetoothCanvas || null;
 
   const actionsWrap = document.getElementById('reportImagePreviewActions');
   actionsWrap.innerHTML = `
     <button type="button" onclick="printReportImagePreview()" style="flex:1; padding:12px; background:#eef2ff; color:var(--primary-dark); border:none; border-radius:10px; font-weight:800; font-size:13.5px; cursor:pointer;">🖨️ پرنٹ کریں</button>
+    ${_reportPreviewBluetoothCanvas ? `<button type="button" onclick="printReportImagePreviewViaBluetooth()" style="flex:1; padding:12px; background:#e0f2fe; color:#075985; border:none; border-radius:10px; font-weight:800; font-size:13.5px; cursor:pointer;">🔵 بلوٹوتھ پرنٹ</button>` : ''}
     <button type="button" onclick="shareReportImagePreview()" style="flex:1; padding:12px; background:#dcfce7; color:#15803d; border:none; border-radius:10px; font-weight:800; font-size:13.5px; cursor:pointer;">📤 شیئر/واٹس ایپ</button>
   `;
   document.getElementById('reportImagePreviewModal').classList.add('show');
+}
+function printReportImagePreviewViaBluetooth(){
+  if(!_reportPreviewBluetoothCanvas) return;
+  printViaWebBluetooth(_reportPreviewBluetoothCanvas);
 }
 function closeReportImagePreview(){
   document.getElementById('reportImagePreviewModal').classList.remove('show');
@@ -17669,17 +17678,34 @@ async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
     roundRectPath(16, 16, W-32, H-32, radius);
     ctx.clip();
 
+    // ---------- 🖨️ صدام کی ہدایت (FM3SEPTH32): پرنٹ (بلوٹوتھ یا عام) کے لیے سیاہی کم استعمال ہو —
+    // بڑے گہرے بھرے ہوئے باکس تھرمل پرنٹر پر بہت زیادہ سیاہی کھینچتے ہیں اور دھندلا/غیر واضح پرنٹ آتا ہے۔
+    // WhatsApp کے لیے رنگین/بھرا ہوا ڈیزائن ویسا ہی رہے گا، مگر پرنٹ کے لیے صرف ہلکا بیک گراؤنڈ + باریک بارڈر ---------- -->
+    const wantsLightPrint = (printMode === 'bluetooth' || printMode === true);
     // ---------- ہیڈر ---------- -->
-    ctx.fillStyle = headColor; ctx.fillRect(16, 16, W-32, 150);
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#fff';
-    ctx.font = `bold 34px "${fontName}"`;
-    ctx.fillText('صدام فروٹ منڈی', W/2, 78);
-    ctx.font = `18px "${fontName}"`;
-    ctx.fillText('📞 03425556364', W/2, 112);
-    ctx.font = `bold 20px "${fontName}"`;
-    ctx.fillStyle = '#d1fae5';
-    ctx.fillText('✓ ادائیگی موصول ہو گئی', W/2, 145);
+    if(wantsLightPrint){
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(16, 16, W-32, 150);
+      ctx.strokeStyle = accentColor; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(16, 166); ctx.lineTo(W-16, 166); ctx.stroke();
+      ctx.textAlign = 'center'; ctx.fillStyle = '#000';
+      ctx.font = `bold 34px "${fontName}"`;
+      ctx.fillText('صدام فروٹ منڈی', W/2, 78);
+      ctx.font = `18px "${fontName}"`; ctx.fillStyle = '#374151';
+      ctx.fillText('📞 03425556364', W/2, 112);
+      ctx.font = `bold 20px "${fontName}"`; ctx.fillStyle = '#000';
+      ctx.fillText('✓ ادائیگی موصول ہو گئی', W/2, 145);
+    } else {
+      ctx.fillStyle = headColor; ctx.fillRect(16, 16, W-32, 150);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold 34px "${fontName}"`;
+      ctx.fillText('صدام فروٹ منڈی', W/2, 78);
+      ctx.font = `18px "${fontName}"`;
+      ctx.fillText('📞 03425556364', W/2, 112);
+      ctx.font = `bold 20px "${fontName}"`;
+      ctx.fillStyle = '#d1fae5';
+      ctx.fillText('✓ ادائیگی موصول ہو گئی', W/2, 145);
+    }
 
     // ---------- کسٹمر کی گول تصویر (ہو تو)، ورنہ سادہ آئیکن دائرہ ---------- -->
     const avatarY = 185, avatarR = 62;
@@ -17739,18 +17765,28 @@ async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
       y += rowH;
     });
 
-    // ---------- تازہ ترین ٹوٹل بقایہ — نمایاں، گہرا، ابھرا ہوا باکس ---------- -->
+    // ---------- تازہ ترین ٹوٹل بقایہ — WhatsApp کے لیے نمایاں گہرا باکس، پرنٹ کے لیے ہلکا/کم سیاہی ---------- -->
     y += 8;
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 4;
-    roundRectPath(60, y, W-120, 76, 14);
-    ctx.fillStyle = headColor;
-    ctx.fill();
-    ctx.restore();
-    ctx.textAlign = 'right'; ctx.fillStyle = '#d1fae5'; ctx.font = `bold 20px "${fontName}"`;
-    ctx.fillText('تازہ ترین ٹوٹل بقایہ', W-85, y+45);
-    ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.font = `bold 28px "${fontName}"`;
-    ctx.fillText('Rs. ' + finalBalance.toLocaleString(), 85, y+45);
+    if(wantsLightPrint){
+      ctx.strokeStyle = accentColor; ctx.lineWidth = 3;
+      roundRectPath(60, y, W-120, 76, 14);
+      ctx.stroke();
+      ctx.textAlign = 'right'; ctx.fillStyle = '#000'; ctx.font = `bold 20px "${fontName}"`;
+      ctx.fillText('تازہ ترین ٹوٹل بقایہ', W-85, y+45);
+      ctx.textAlign = 'left'; ctx.fillStyle = '#000'; ctx.font = `bold 28px "${fontName}"`;
+      ctx.fillText('Rs. ' + finalBalance.toLocaleString(), 85, y+45);
+    } else {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 4;
+      roundRectPath(60, y, W-120, 76, 14);
+      ctx.fillStyle = headColor;
+      ctx.fill();
+      ctx.restore();
+      ctx.textAlign = 'right'; ctx.fillStyle = '#d1fae5'; ctx.font = `bold 20px "${fontName}"`;
+      ctx.fillText('تازہ ترین ٹوٹل بقایہ', W-85, y+45);
+      ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.font = `bold 28px "${fontName}"`;
+      ctx.fillText('Rs. ' + finalBalance.toLocaleString(), 85, y+45);
+    }
     y += 106;
 
     // ---------- طریقہ + وصول کنندہ + تاریخ ---------- -->
@@ -17765,10 +17801,13 @@ async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
     ctx.restore(); // ---------- کلپ ختم ---------- -->
 
     if(printMode === 'bluetooth'){
-      // ---------- 🔵 صدام کی ہدایت (FM3SEPTH31): براہ راست Web Bluetooth — RawBT/Print Service کی ضرورت نہیں،
-      // اگر پرنٹر BLE سپورٹ کرتا ہو ---------- -->
+      // ---------- 🔵 صدام کی ہدایت (FM3SEPTH32): پہلے پوسٹر یہیں دکھائیں، خودکار پرنٹ نہیں —
+      // بندہ دیکھ کر خود "🔵 بلوٹوتھ پرنٹ" بٹن دبائے گا ---------- -->
       const printCanvas = canvasToGrayscale(canvas);
-      printViaWebBluetooth(printCanvas);
+      openReportImagePreview(canvas, {
+        title: '🧾 ادائیگی کی رسید — ' + c.name,
+        bluetoothCanvas: printCanvas
+      });
       return;
     }
 
@@ -23155,7 +23194,7 @@ async function printViaWebBluetooth(canvasOrId){
 }
 
 // ---------- کینوس کو ESC/POS "raster image" کمانڈز میں بدلیں (GS v 0) — تھرمل پرنٹر کی زبان ----------
-// ---------- 🔵 صدام کی ہدایت (FM3SEPTH31): پہلے یہ فرض کرتا تھا کہ آنے والا کینوس پہلے سے ہی صحیح
+// ---------- 🔵 صدام کی ہدایت (FM3SEPTH32): پہلے یہ فرض کرتا تھا کہ آنے والا کینوس پہلے سے ہی صحیح
 // چوڑائی (384/576 dots) کا ہے — ریکوری رسید کا کینوس اپنی اصل (760px) چوڑائی پر بنتا ہے، اس لیے یہاں
 // خودکار طور پر صحیح پرنٹر چوڑائی پر (تناسب برقرار رکھتے ہوئے) پہلے سکیل کر لیتے ہیں، چاہے ماخذ کینوس کسی
 // بھی سائز کا ہو ---------- -->
@@ -23495,7 +23534,7 @@ function generateAndPrintRecoveryPoster(){
   closeRecoveryPosterModal();
   shareRecoveryReceiptWhatsapp(rpCurrentCustomer, rpCurrentEntry, true);
 }
-// ---------- 🔵 صدام کی ہدایت (FM3SEPTH31): "کوئی ایپ نہیں" والا سیدھا راستہ — Web Bluetooth کے ذریعے
+// ---------- 🔵 صدام کی ہدایت (FM3SEPTH32): "کوئی ایپ نہیں" والا سیدھا راستہ — Web Bluetooth کے ذریعے
 // براہ راست پرنٹر کو ڈیٹا بھیجیں، Android کے Print Service/RawBT سے مکمل آزاد ---------- -->
 function generateAndBluetoothPrintRecoveryPoster(){
   if(!rpCurrentCustomer || !rpCurrentEntry){ alert('⚠️ کسٹمر/انٹری کی معلومات نہیں مل سکیں — دوبارہ کوشش کریں'); return; }
