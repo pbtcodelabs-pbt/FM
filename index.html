@@ -6619,7 +6619,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH14';
+const APP_BUILD_VERSION = 'FM3SEPTH18';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -17326,12 +17326,13 @@ async function generateTodayOrderMatrixReport(){
 
   // ---------- ایک صفحے کا کینوس بنائے (صرف اسی صفحے کے کسٹمر کالم کے ساتھ، مگر ٹوٹل ہمیشہ گرینڈ ٹوٹل) ----------
   function buildPageCanvas(pageCustomers, pageNum, totalPages){
-    // ---------- 🧹 صدام کی ہدایت (FM3SEPTH10): کالم اب تنگ (صرف 1-2 ہندسے جتنے)، کسٹمر نام کھڑے (rotated) —
-    // تاکہ 20 کسٹمر تک ایک صفحے پر آ جائیں۔ ہر خانے کے گرد باریک لکیر (گرڈ)، گول کنارے، ہیڈر/ٹوٹل کالم
-    // بالکل برابر سائز میں (پہلے 3px کا فرق تھا جو تھوڑا سا ٹیڑھا نظر آتا تھا) ---------- -->
-    const nameColW = 190, custColW = 44, totalColW = 60, rowH = 44, headerH = 150, radius = 18;
+    // ---------- 🔧 صدام کی ہدایت (FM3SEPTH18): پہلے کسٹمر کا کھڑا (rotated) نام صرف rowH (44px) کی جگہ میں
+    // ناپا جا رہا تھا جبکہ ہیڈر باکس بھی اتنا ہی اونچا تھا — نام لمبا ہونے پر باہر نکل جاتا تھا۔
+    // اب ہیڈر کی اپنی الگ، کافی اونچی جگہ (custHeaderRowH) ہے، خاص اسی کھڑے نام کے لیے —
+    // ڈیٹا کی قطاریں (سبزیوں کی تعداد) اب بھی چھوٹی/تنگ ہی رہیں گی تاکہ 40+ سبزیاں آسانی سے ایک صفحے میں آ جائیں ---------- -->
+    const nameColW = 190, custColW = 40, totalColW = 56, rowH = 36, headerH = 90, custHeaderRowH = 210, radius = 18;
     const W = nameColW + (pageCustomers.length * custColW) + totalColW + 30;
-    const H = headerH + ((items.length + 1) * rowH) + 50;
+    const H = headerH + custHeaderRowH + (items.length * rowH) + 50;
 
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
@@ -17354,38 +17355,46 @@ async function generateTodayOrderMatrixReport(){
     ctx.clip();
 
     ctx.fillStyle = '#0b4a45'; ctx.fillRect(8, 8, W-16, headerH-8);
-    ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.font = `bold 24px "${fontName}"`;
-    ctx.fillText('صدام فروٹ منڈی — آج کی مکمل آرڈر رپورٹ', W/2, 50);
-    ctx.font = `14px "${fontName}"`; ctx.fillStyle = '#d1fae5';
+    ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.font = `bold 22px "${fontName}"`;
+    ctx.fillText('صدام فروٹ منڈی — آج کی مکمل آرڈر رپورٹ', W/2, 40);
+    ctx.font = `13px "${fontName}"`; ctx.fillStyle = '#d1fae5';
     const pageTag = totalPages > 1 ? `  •  صفحہ ${pageNum}/${totalPages}` : '';
-    ctx.fillText(`${new Date().toLocaleDateString('en-GB')}  •  ${customers.length} کسٹمرز  •  ${items.length} آئٹمز${pageTag}`, W/2, 76);
+    ctx.fillText(`${new Date().toLocaleDateString('en-GB')}  •  ${customers.length} کسٹمرز  •  ${items.length} آئٹمز${pageTag}`, W/2, 64);
 
     let x = W - 15;
     let y = headerH;
     x -= nameColW;
-    ctx.fillStyle = '#134e2c'; ctx.fillRect(x, y, nameColW, rowH);
-    ctx.textAlign = 'center'; ctx.font = `bold 15px "${fontName}"`;
-    ctx.fillStyle = '#fff'; ctx.fillText('نام اشیاء', x + nameColW/2, y + rowH/2 + 6);
+    ctx.fillStyle = '#134e2c'; ctx.fillRect(x, y, nameColW, custHeaderRowH);
+    ctx.textAlign = 'center'; ctx.font = `bold 16px "${fontName}"`;
+    ctx.fillStyle = '#fff'; ctx.fillText('نام اشیاء', x + nameColW/2, y + custHeaderRowH/2 + 6);
     pageCustomers.forEach(cust => {
       x -= custColW;
-      ctx.fillStyle = '#134e2c'; ctx.fillRect(x, y, custColW, rowH);
+      ctx.fillStyle = '#134e2c'; ctx.fillRect(x, y, custColW, custHeaderRowH);
       ctx.fillStyle = '#fff';
-      // ---------- 🔤 کسٹمر کا نام کھڑا (rotated 90°) — تنگ کالم میں پورا نام صاف نظر آئے ---------- -->
+      // ---------- 🔤 کسٹمر کا نام کھڑا (rotated 90°) — اب اپنی مخصوص اونچی جگہ (custHeaderRowH) میں پورا فٹ،
+      // موٹا فونٹ، حقیقی دستیاب اونچائی کے مطابق ہی ناپ (fit) ہوتا ہے (صدام کی ہدایت FM3SEPTH18) ---------- -->
       let cname = cust;
-      ctx.font = `bold 13px "${fontName}"`;
-      while(ctx.measureText(cname).width > headerH - 30 && cname.length > 2){ cname = cname.slice(0, -1); }
+      let fpx = 15;
+      ctx.font = `bold ${fpx}px "${fontName}"`;
+      while(ctx.measureText(cname).width > custHeaderRowH - 24 && fpx > 9){ fpx -= 1; ctx.font = `bold ${fpx}px "${fontName}"`; }
+      while(ctx.measureText(cname).width > custHeaderRowH - 24 && cname.length > 2){ cname = cname.slice(0, -1); }
       ctx.save();
-      ctx.translate(x + custColW/2, y + rowH - 4);
+      ctx.translate(x + custColW/2, y + custHeaderRowH - 6);
       ctx.rotate(-Math.PI/2);
       ctx.textAlign = 'left';
       ctx.fillText(cname, 0, 4);
       ctx.restore();
     });
     x -= totalColW;
-    ctx.fillStyle = '#78350f'; ctx.fillRect(x, y, totalColW, rowH);
-    ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.font = `bold 13px "${fontName}"`;
-    ctx.fillText('ٹوٹل', x + totalColW/2, y + rowH/2 + 5);
-    y += rowH;
+    ctx.fillStyle = '#78350f'; ctx.fillRect(x, y, totalColW, custHeaderRowH);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.font = `bold 14px "${fontName}"`;
+    ctx.save();
+    ctx.translate(x + totalColW/2, y + custHeaderRowH - 6);
+    ctx.rotate(-Math.PI/2);
+    ctx.textAlign = 'left';
+    ctx.fillText('ٹوٹل', 0, 4);
+    ctx.restore();
+    y += custHeaderRowH;
 
     const gridLeft = W - 15 - nameColW - (pageCustomers.length * custColW) - totalColW;
     const gridTop = headerH;
@@ -17403,25 +17412,29 @@ async function generateTodayOrderMatrixReport(){
         x -= custColW;
         ctx.fillStyle = shade; ctx.fillRect(x, y, custColW, rowH);
         const qty = matrix[itemName][cust];
-        ctx.textAlign = 'center'; ctx.font = `bold 16px "${fontName}"`;
+        ctx.textAlign = 'center'; ctx.font = `bold 15px "${fontName}"`;
         ctx.fillStyle = qty ? '#134e2c' : '#cbd5e1';
-        ctx.fillText(qty ? String(qty) : '—', x + custColW/2, y + rowH/2 + 6);
+        ctx.fillText(qty ? String(qty) : '—', x + custColW/2, y + rowH/2 + 5);
       });
 
       x -= totalColW;
       ctx.fillStyle = '#fef3c7'; ctx.fillRect(x, y, totalColW, rowH);
-      ctx.fillStyle = '#78350f'; ctx.textAlign = 'center'; ctx.font = `bold 17px "${fontName}"`;
-      ctx.fillText(String(itemTotals[itemName]), x + totalColW/2, y + rowH/2 + 6);
+      ctx.fillStyle = '#78350f'; ctx.textAlign = 'center'; ctx.font = `bold 15px "${fontName}"`;
+      ctx.fillText(String(itemTotals[itemName]), x + totalColW/2, y + rowH/2 + 5);
 
       y += rowH;
     });
 
     // ---------- 🔲 مکمل گرڈ لکیریں — ہر خانے کے گرد باریک بارڈر (صدام کی ہدایت) ---------- -->
     ctx.strokeStyle = '#c7ced9'; ctx.lineWidth = 1;
-    const gridRight = W - 15, gridBottom = headerH + (items.length + 1) * rowH;
-    for(let r = 0; r <= items.length + 1; r++){
-      const ly = gridTop + r * rowH;
-      ctx.beginPath(); ctx.moveTo(gridLeft, ly); ctx.lineTo(gridRight, ly); ctx.stroke();
+    const gridRight = gridLeft + nameColW + (pageCustomers.length*custColW) + totalColW;
+    const gridBottom = headerH + custHeaderRowH + (items.length * rowH);
+    // ---------- افقی لکیریں — ہیڈر کی جدا اونچائی کا خیال رکھتے ہوئے ----------
+    ctx.beginPath(); ctx.moveTo(gridLeft, gridTop); ctx.lineTo(gridRight, gridTop); ctx.stroke();
+    let hy = gridTop + custHeaderRowH;
+    for(let r = 0; r <= items.length; r++){
+      ctx.beginPath(); ctx.moveTo(gridLeft, hy); ctx.lineTo(gridRight, hy); ctx.stroke();
+      hy += rowH;
     }
     let vx = gridRight;
     ctx.beginPath(); ctx.moveTo(vx, gridTop); ctx.lineTo(vx, gridBottom); ctx.stroke();
@@ -17921,7 +17934,7 @@ async function openAdvOrderPreview(orderId){
   currentPreviewAdvOrderId = orderId;
   document.getElementById('advOrderPreviewModal').classList.add('show');
   syncAdvOrderStyleControls();
-  // ---------- 🚀 صدام کی ہدایت (FM3SEPTH14): بل کھلتے ہی زیرو زیرو دکھانے اور بٹن دبانے کا انتظار کرنے کے بجائے —
+  // ---------- 🚀 صدام کی ہدایت (FM3SEPTH18): بل کھلتے ہی زیرو زیرو دکھانے اور بٹن دبانے کا انتظار کرنے کے بجائے —
   // اگر یہ آرڈر کسی ایسے محفوظ شدہ کسٹمر کا ہے جس کا ریٹ ایریا (اسلام آباد/راولپنڈی) پہلے سے سیٹ ہے، تو وہ ریٹ
   // یہیں خودکار لگا دیں — بل پہلی ہی نظر میں صحیح قیمتوں کے ساتھ کھلے گا، اور غلطی سے زیرو پرنٹ نہیں ہوگا۔
   // نیا/انجان کسٹمر ہو (رٹ ایریا محفوظ نہ ہو) تو پہلے کی طرح دونوں بٹن نظر آتے رہیں گے تاکہ ایڈمن خود چن سکے ---------- -->
@@ -18164,11 +18177,31 @@ async function shareAdvOrderPdf(){
 }
 
 async function renderAdvOrderToCanvas(order, canvasEl){
+  const canvas0 = canvasEl || document.getElementById('advOrderCanvas');
+  try{
+    return await _renderAdvOrderToCanvasInner(order, canvasEl);
+  }catch(err){
+    // ---------- 🛡️ صدام کی ہدایت (FM3SEPTH18): اگر ڈرائنگ میں کوئی خرابی آئے تو کینوس اب خالی نہیں رہے گا —
+    // صاف سرخ پیغام میں اصل خرابی دکھائے گا، تاکہ فوراً پتا چل جائے کیا غلط ہوا (اسکرین شاٹ سے تشخیص آسان) ---------- -->
+    console.error('renderAdvOrderToCanvas failed:', err);
+    if(canvas0){
+      canvas0.width = 500; canvas0.height = 120;
+      const c = canvas0.getContext('2d');
+      c.fillStyle = '#fee2e2'; c.fillRect(0,0,500,120);
+      c.fillStyle = '#b91c1c'; c.font = 'bold 14px sans-serif'; c.textAlign = 'center';
+      c.fillText('⚠️ ڈرائنگ میں خرابی — یہ پیغام اسکرین شاٹ کر کے بھیجیں:', 250, 40);
+      c.font = '12px sans-serif';
+      c.fillText(String(err.message || err).slice(0, 60), 250, 65);
+    }
+  }
+}
+async function _renderAdvOrderToCanvasInner(order, canvasEl){
   const useA4 = AppState.settings.advOrderPrintStyle === 'a4';
   const paperWidthMM = AppState.settings.paperWidth || 80;
   const pxWidth = useA4 ? 850 : (paperWidthMM === 80 ? 576 : 384);
   const canvas = canvasEl || document.getElementById('advOrderCanvas');
   const baseScale = pxWidth / 576;
+  const ctx = canvas.getContext('2d'); // ---------- 🔁 صدام کی ہدایت (FM3SEPTH18): کالم چوڑائی ناپنے کے لیے ctx جلدی چاہیے، اسی لیے اوپر لے آئے ----------
 
   // ---------- بل/رپورٹ کی طرح یہاں بھی Zoom/Row/Decimals/Bold/Align/Font/Theme سب لاگو ہوتے ہیں ----------
   const fscale = (AppState.settings.advOrderFontScale || 100) / 100;
@@ -18177,18 +18210,38 @@ async function renderAdvOrderToCanvas(order, canvasEl){
   const align = AppState.settings.advOrderAlign || 'left';
   const decimals = AppState.settings.advOrderPriceDecimals ?? 0;
   const scale = baseScale * fscale;
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.advOrderFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
+  const canvasFontFamily = selectedFontPreset.family;
 
-  // ---------- 🧹 صدام کی ہدایت (FM3SEPTH10): Variant کالم یہاں سے بھی ہٹا دیا گیا (چوڑائی 0) — وہی وجہ جو Invoice میں ---------- -->
-  const noW = Math.round(28 * scale), variantW = 0, qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
+  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH18): مکمل RTL + خودکار (auto-width) کالم — بالکل جیسے Invoice میں کیا تھا:
+  // دائیں سے بائیں: نمبر → نام اشیاء (سب سے چوڑا) → تعداد → نرخ → ٹوٹل۔ ہر تنگ کالم اپنے اندر موجود
+  // سب سے لمبے ہندسے جتنا ہی چوڑا ہے، باقی جگہ نام اشیاء کو مل جاتی ہے ---------- -->
   const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
-  const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - priceW - totalW;
-  // ---------- کالمز: #, Item, Variant, Qty, Approx., Total — بالکل نارمل بل کی طرح ----------
-  const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + variantW, tableLeft + noW + itemW + variantW + qtyW, tableLeft + noW + itemW + variantW + qtyW + priceW, tableRight];
+  let maxQtyStr = '0', maxPriceStr = '0', maxTotalStr = '0';
+  order.items.forEach(it => {
+    const qS = String(it.qty), pS = (it.unitPrice||0).toFixed(decimals), tS = ((it.qty||0)*(it.unitPrice||0)).toFixed(decimals);
+    if(qS.length > maxQtyStr.length) maxQtyStr = qS;
+    if(pS.length > maxPriceStr.length) maxPriceStr = pS;
+    if(tS.length > maxTotalStr.length) maxTotalStr = tS;
+  });
+  ctx.font = `bold ${Math.round(16*scale)}px ${canvasFontFamily}`;
+  const colPad = Math.round(18 * scale);
+  const noW = Math.max(Math.round(22 * scale), ctx.measureText(String(order.items.length)).width + colPad);
+  const qtyW = Math.max(Math.round(32 * scale), ctx.measureText(maxQtyStr).width + colPad);
+  const priceW = Math.max(Math.round(38 * scale), ctx.measureText(maxPriceStr).width + colPad);
+  const totalW = Math.max(Math.round(42 * scale), ctx.measureText(maxTotalStr).width + colPad);
+  const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
+  const colX = [
+    tableLeft,                                     // 0: ٹوٹل شروع
+    tableLeft + totalW,                            // 1: نرخ شروع
+    tableLeft + totalW + priceW,                   // 2: تعداد شروع
+    tableLeft + totalW + priceW + qtyW,             // 3: نام اشیاء شروع (چوڑا)
+    tableLeft + totalW + priceW + qtyW + itemW,     // 4: نمبر شروع
+    tableRight                                      // 5: دائیں کنارہ
+  ];
   const rowH = Math.round(24 * scale * rowScaleSetting), headerH = Math.round(22 * scale * rowScaleSetting);
   const tableH = headerH + (order.items.length * rowH);
 
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.advOrderFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0]; // ---------- صدام کی ہدایت (FM3SEPTH10): ڈیفالٹ فونٹ اب نستعلیق کشیدہ ----------
-  const canvasFontFamily = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: بلوں/رپورٹس میں نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی — اب منتخب شدہ فونٹ ہی پرنٹ/رپورٹ کینوس پر حقیقتاً لاگو ہوتا ہے ----------
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
   const fmt = (n) => (Number(n)||0).toFixed(decimals);
   const m = useA4 ? 1.6 : 1; // ---------- A4 پر اضافی مارجن/سپیسنگ ----------
@@ -18203,7 +18256,6 @@ async function renderAdvOrderToCanvas(order, canvasEl){
 
   canvas.width = pxWidth;
   canvas.height = Math.round(estimatedHeight);
-  const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, pxWidth, canvas.height);
 
@@ -18235,7 +18287,7 @@ async function renderAdvOrderToCanvas(order, canvasEl){
     ctx.strokeRect(tableLeft + 1, bannerTop + 1, tableRight - tableLeft - 2, bannerH - 2);
     ctx.fillStyle = '#000';
     ctx.font = F('bold 19px');
-    ctx.fillText('📝 ADVANCE ORDER', pxWidth/2, bannerTop + bannerH/2 + 7 * scale);
+    ctx.fillText('📝 ایڈوانس آرڈر', pxWidth/2, bannerTop + bannerH/2 + 7 * scale);
     y = bannerTop + bannerH + 16 * scale;
     ctx.fillStyle = '#000';
   } else {
@@ -18245,10 +18297,10 @@ async function renderAdvOrderToCanvas(order, canvasEl){
   ctx.font = F('bold 15px');
   const dateObj = new Date(order.createdAt);
   const dd = String(dateObj.getDate()).padStart(2,'0'), mm2 = String(dateObj.getMonth()+1).padStart(2,'0'), yy = String(dateObj.getFullYear()).slice(-2);
-  ctx.fillText(`${hasRate ? 'Bill' : 'Advance Order'} #${order.id} — ${dd}/${mm2}/${yy}`, pxWidth/2, y); y += 22 * scale;
+  ctx.fillText(`${hasRate ? 'بل' : 'ایڈوانس آرڈر'} #${order.id} — ${dd}/${mm2}/${yy}`, pxWidth/2, y); y += 22 * scale;
 
   ctx.font = F('16px');
-  ctx.fillText('Customer: ' + order.customerName, pxWidth/2, y); y += 20 * scale;
+  ctx.fillText('کسٹمر: ' + order.customerName, pxWidth/2, y); y += 20 * scale;
   if(order.customerPhone){
     ctx.font = F('13px');
     ctx.fillText(order.customerPhone, pxWidth/2, y); y += 20 * scale;
@@ -18267,15 +18319,15 @@ async function renderAdvOrderToCanvas(order, canvasEl){
 
   ctx.font = F('bold 13px');
   const headerBaseline = tableTop + headerH - 7 * scale;
-  // ---------- 🔤 صدام کی ہدایت (FM3SEPTH10): اردو کیپشن، Variant کالم ہٹا دیا (پوزیشن ویسی ہی رہی) ---------- -->
-  ctx.textAlign = 'center'; ctx.fillText('نمبر', (colX[0]+colX[1])/2, headerBaseline);
+  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH18): مکمل RTL — دائیں سے بائیں: نمبر → نام اشیاء(چوڑا) → تعداد → نرخ → ٹوٹل ---------- -->
+  ctx.textAlign = 'center'; ctx.fillText('نمبر', (colX[4]+colX[5])/2, headerBaseline);
   // ---------- Item کا نام ہمیشہ Left رہے گا — الائنمنٹ سیٹنگ صرف Qty/Approx/Total پر لاگو ہوگی ----------
-  ctx.textAlign = 'left'; ctx.fillText('نام اشیاء', colX[1]+4, headerBaseline);
+  ctx.textAlign = 'left'; ctx.fillText('نام اشیاء', colX[3]+4, headerBaseline);
   const advColCenterX = (a, b) => align === 'center' ? (a + b) / 2 : (align === 'right' ? b - 4 : a + 4);
   ctx.textAlign = align;
-  ctx.fillText('تعداد', advColCenterX(colX[3], colX[4]), headerBaseline);
-  ctx.fillText('نرخ', advColCenterX(colX[4], colX[5]), headerBaseline);
-  ctx.fillText('ٹوٹل', advColCenterX(colX[5], colX[6]), headerBaseline);
+  ctx.fillText('تعداد', advColCenterX(colX[2], colX[3]), headerBaseline);
+  ctx.fillText('نرخ', advColCenterX(colX[1], colX[2]), headerBaseline);
+  ctx.fillText('ٹوٹل', advColCenterX(colX[0], colX[1]), headerBaseline);
   hLineY += headerH;
   drawTableHLine(hLineY);
 
@@ -18283,22 +18335,20 @@ async function renderAdvOrderToCanvas(order, canvasEl){
   const maxItemWidth = itemW - 8;
   order.items.forEach((item, idx) => {
     const rowBaseline = hLineY + rowH - 7 * scale;
-    // ---------- 🧹 صدام کی ہدایت (FM3SEPTH10): اب ویریئنٹ الگ نہیں کاٹا جاتا — پورا نام (پراڈکٹ+ویریئنٹ) جوں کا توں دکھایا جاتا ہے ---------- -->
     let displayName = item.name;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0,-1); }
     if(displayName !== item.name) displayName = displayName.trim() + '…';
 
-    ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
-    // ---------- Item کا نام یہاں بھی ہمیشہ Left، سخت کلپنگ کے ساتھ کالم سے باہر نہ نکلے ----------
+    // ---------- 🔁 صدام کی ہدایت (FM3SEPTH18): مکمل RTL — نمبر دائیں (colX[4]-5)، نام اشیاء اس سے پہلے (colX[3]-4) ---------- -->
+    ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[4]+colX[5])/2, rowBaseline);
     ctx.textAlign = 'left';
     ctx.save();
     ctx.beginPath();
-    ctx.rect(colX[1], hLineY, colX[2] - colX[1], rowH);
+    ctx.rect(colX[3], hLineY, colX[4] - colX[3], rowH);
     ctx.clip();
-    ctx.fillText(displayName, colX[1]+4, rowBaseline);
+    ctx.fillText(displayName, colX[3]+4, rowBaseline);
     ctx.restore();
-    // ---------- Qty/Approx/Total اب منتخب الائنمنٹ (Left/Center/Right) اپناتے ہیں، اور سخت کلپنگ سے کبھی کالم سے باہر نہیں نکلیں گے ----------
     const drawAdvClippedNum = (text, x1, x2, textX) => {
       ctx.textAlign = align;
       ctx.save();
@@ -18308,9 +18358,9 @@ async function renderAdvOrderToCanvas(order, canvasEl){
       ctx.fillText(text, textX, rowBaseline);
       ctx.restore();
     };
-    drawAdvClippedNum(String(item.qty), colX[3], colX[4], advColCenterX(colX[3], colX[4]));
-    drawAdvClippedNum(fmt(item.unitPrice), colX[4], colX[5], advColCenterX(colX[4], colX[5]));
-    drawAdvClippedNum(fmt(item.qty*item.unitPrice), colX[5], colX[6], advColCenterX(colX[5], colX[6]));
+    drawAdvClippedNum(String(item.qty), colX[2], colX[3], advColCenterX(colX[2], colX[3]));
+    drawAdvClippedNum(fmt(item.unitPrice), colX[1], colX[2], advColCenterX(colX[1], colX[2]));
+    drawAdvClippedNum(fmt(item.qty*item.unitPrice), colX[0], colX[1], advColCenterX(colX[0], colX[1]));
 
     hLineY += rowH;
     drawTableHLine(hLineY);
@@ -18334,7 +18384,7 @@ async function renderAdvOrderToCanvas(order, canvasEl){
   ctx.textAlign = 'left';
   ctx.font = F('bold 20px');
   const grandTotal = advOrderTotal(order);
-  ctx.fillText('Total: Rs. ' + fmt(grandTotal), 10*scale, y);
+  ctx.fillText('ٹوٹل: Rs. ' + fmt(grandTotal), 10*scale, y);
   y += 30 * scale;
 
   if(order.note){
@@ -21715,6 +21765,24 @@ function getBillSummaryRows(invoice){
 }
 
 async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchKey = null){
+  const canvas0 = document.getElementById('invoiceCanvas');
+  try{
+    return await _renderInvoiceToCanvasInner(invoice, paperWidthMM, highlightMatchKey);
+  }catch(err){
+    // ---------- 🛡️ صدام کی ہدایت (FM3SEPTH18): خرابی کبھی خاموش نہ رہے — سرخ پیغام میں دکھائیں ---------- -->
+    console.error('renderInvoiceToCanvas failed:', err);
+    if(canvas0){
+      canvas0.width = 500; canvas0.height = 120;
+      const c = canvas0.getContext('2d');
+      c.fillStyle = '#fee2e2'; c.fillRect(0,0,500,120);
+      c.fillStyle = '#b91c1c'; c.font = 'bold 14px sans-serif'; c.textAlign = 'center';
+      c.fillText('⚠️ ڈرائنگ میں خرابی — یہ پیغام اسکرین شاٹ کر کے بھیجیں:', 250, 40);
+      c.font = '12px sans-serif';
+      c.fillText(String(err.message || err).slice(0, 60), 250, 65);
+    }
+  }
+}
+async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlightMatchKey = null){
   const pxWidth = paperWidthMM === 80 ? 576 : 384;
   const canvas = document.getElementById('invoiceCanvas');
   const scale = pxWidth / 576;
@@ -21737,7 +21805,15 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // (کالمز کی چوڑائی حساب کرنے سے پہلے یہاں لے آئے، تاکہ Variant جیسے تنگ کالم بھی اسی تناسب سے چوڑے ہو سکیں) ---------- -->
   const fscale = (AppState.settings.printFontScale || 100) / 100;
 
-  // ---------- ٹیبل کالمز کی چوڑائی — اب مکمل RTL ترتیب اور خودکار (auto-width) سائز، صدام کی ہدایت (FM3SEPTH14):
+  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH18): ctx/فونٹ کی تعریف یہاں اوپر لے آئے — نیچے کالم چوڑائی ناپنے کے لیے
+  // ctx.measureText فوراً چاہیے تھا، پہلے یہ نیچے تعریف ہوتا تھا جس سے "ctx is not defined" کی خرابی سے پوری
+  // فنکشن رک جاتی تھی اور بل کا پریویو بالکل خالی رہ جاتا تھا ---------- -->
+  const ctx = canvas.getContext('2d');
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.printFontId) || FONT_PRESETS[0];
+  const canvasFontFamily = selectedFontPreset.family;
+  const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${canvasFontFamily}`;
+
+  // ---------- ٹیبل کالمز کی چوڑائی — اب مکمل RTL ترتیب اور خودکار (auto-width) سائز، صدام کی ہدایت (FM3SEPTH18):
   // دائیں سے بائیں پڑھنے کی صحیح ترتیب: نمبر → نام اشیاء (سب سے چوڑا) → تعداد → قیمت → ٹوٹل
   // ہر تنگ کالم (نمبر/تعداد/قیمت/ٹوٹل) اسی قدر چوڑا ہے جتنا اس میں موجود سب سے لمبے ہندسے کو چاہیے —
   // باقی تمام بچی ہوئی جگہ نام اشیاء کو مل جاتی ہے (چونکہ اردو نام لمبے ہوتے ہیں) ---------- -->
@@ -21800,8 +21876,6 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   canvas.width = pxWidth;
   canvas.height = estimatedHeight;
 
-  const ctx = canvas.getContext('2d');
-
   // ---------- سفید پس منظر پہلے سے بھر دیں — کچھ WebView compositors سادہ/شفاف canvas کو صحیح پینٹ نہیں کرتے ----------
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, pxWidth, estimatedHeight);
@@ -21813,9 +21887,6 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // وہ صرف پکسلز چھاپتا ہے، بالکل ویسے ہی جیسے اسکرین پر نظر آتے ہیں۔
   // صرف نستعلیق کا استثناء ہے: اس کا پیچیدہ عمودی اسٹرکچر چھوٹے تھرمل ڈاٹس پر دھندلا سکتا ہے، اس لیے
   // نستعلیق منتخب ہونے پر پرنٹ خودکار طور پر صاف Arial پر چلا جاتا ہے (باقی سب فونٹ جوں کے توں پرنٹ ہوں گے)۔
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.printFontId) || FONT_PRESETS[0];
-  const canvasFontFamily = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: بلوں/رپورٹس میں نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی — اب منتخب شدہ فونٹ ہی پرنٹ/رپورٹ کینوس پر حقیقتاً لاگو ہوتا ہے ----------
-  const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${canvasFontFamily}`;
 
   // ---------- ڈرائنگ سے پہلے یقینی بنائیں کہ منتخب فونٹ مکمل لوڈ ہو چکا ہے (خصوصاً پہلی بار Google Font کے لیے) ----------
   try{
@@ -21848,11 +21919,11 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   ctx.fillText(billLine, pxWidth/2, y); y += 22;
 
   ctx.font = F('16px');
-  ctx.fillText('Customer: ' + invoice.customer_name, pxWidth/2, y); y += 28;
+  ctx.fillText('کسٹمر: ' + invoice.customer_name, pxWidth/2, y); y += 28;
 
   if(AppState.settings.printShowSalesman && invoice.sold_by){
     ctx.font = F('13px');
-    ctx.fillText('Sold by: ' + invoice.sold_by, pxWidth/2, y); y += 16;
+    ctx.fillText('فروخت کنندہ: ' + invoice.sold_by, pxWidth/2, y); y += 16;
   }
 
   drawSolidLine(ctx, y, pxWidth); y += 16;
@@ -21879,7 +21950,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // ---------- ہیڈر لائن — Item ہمیشہ Left رہتا ہے، صرف Qty/Price/Total پر منتخب شدہ الائنمنٹ (Left/Center/Right) لاگو ہوتی ہے ----------
   const headerItemAlign = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
   const colCenterX = (a, b) => headerItemAlign === 'center' ? (a + b) / 2 : (headerItemAlign === 'right' ? b - 6 : a + 6);
-  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH14): بل اردو کی طرح رائٹ سے لیفٹ (RTL) — اب صحیح، صاف 5-کالم ترتیب:
+  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH18): بل اردو کی طرح رائٹ سے لیفٹ (RTL) — اب صحیح، صاف 5-کالم ترتیب:
   // دائیں سے بائیں: نمبر → نام اشیاء (چوڑا) → تعداد → قیمت → ٹوٹل ---------- -->
   const headerItemNameX = colX[3] + 6; // ---------- Item کا نام اپنے کالم کے بائیں کنارے سے شروع ----------
   const headerQtyX = colCenterX(colX[2], colX[3]);
@@ -22051,7 +22122,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   let summaryBottom = y, accountBottom = y, summaryBlockHForCentering = 0;
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    // ---------- 🔁 FM3SEPTH14: RTL کے بعد Qty+Price+Total کالمز اب بائیں طرف ہیں، اس لیے Payment Summary باکس بھی بائیں طرف ----------
+    // ---------- 🔁 FM3SEPTH18: RTL کے بعد Qty+Price+Total کالمز اب بائیں طرف ہیں، اس لیے Payment Summary باکس بھی بائیں طرف ----------
     const sumLeft = colX[0];
     const sumRight = colX[3];
     const sumBoxW = sumRight - sumLeft;
@@ -22094,7 +22165,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
   // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع، عمودی طور پر درمیان میں ----------
   if(receiptAccounts.length){
-    // ---------- 🔁 FM3SEPTH14: RTL کے بعد نمبر+نام کالمز اب دائیں طرف ہیں، اس لیے QR/اکاؤنٹ بلاک بھی دائیں طرف ----------
+    // ---------- 🔁 FM3SEPTH18: RTL کے بعد نمبر+نام کالمز اب دائیں طرف ہیں، اس لیے QR/اکاؤنٹ بلاک بھی دائیں طرف ----------
     const leftCx = (colX[4] + tableRight) / 2;
     const lineH = 16;
     const qrSize = Math.min(130, (tableRight - colX[4]) - 16);
@@ -22143,13 +22214,13 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
   ctx.textAlign = 'center';
   ctx.font = F('13px');
-  ctx.fillText('Thank you for your purchase!', pxWidth/2, y);
+  ctx.fillText('خریداری کا شکریہ!', pxWidth/2, y);
 
   if(AppState.settings.printShowBranding){
     y += 18;
     ctx.font = F('10px');
     ctx.fillStyle = '#888';
-    ctx.fillText('Powered by Saddam Fruit Mandi', pxWidth/2, y);
+    ctx.fillText('صدام فروٹ منڈی', pxWidth/2, y);
   }
 }
 
