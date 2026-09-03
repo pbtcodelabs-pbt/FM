@@ -85,13 +85,8 @@
   .loginBox h2{margin-bottom:20px; color:var(--primary-dark);}
   .loginBox input{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; text-align:center;}
   .loginBox button{width:100%; padding:12px; margin-top:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;}
-  /* ---------- 🍇 Fruit Mandi POS: لاگ ان ٹیب/بٹن — سینٹرلائزڈ، دونوں ہمیشہ اپنے اپنے رنگ میں (خالی/غائب نہیں)، کمپیکٹ سائز ---------- */
-  .loginTabWrap{display:flex; justify-content:center; gap:10px; margin-bottom:14px;}
-  .loginTabBtn{flex:0 1 130px; padding:8px 6px; border:none; border-radius:10px; font-weight:800; font-size:11.5px; line-height:1.35; cursor:pointer; transition:all .15s ease; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;}
-  .loginTabBtn.tabAdmin.tabActive{background:linear-gradient(180deg,#3b5b8c,#1e3a5f); color:#fff; box-shadow:0 3px 6px rgba(30,58,95,.4), inset 0 1px 0 rgba(255,255,255,.15);}
-  .loginTabBtn.tabAdmin.tabInactive{background:linear-gradient(180deg,#c3cee0,#a9b8d1); color:#33425c; box-shadow:inset 0 1px 2px rgba(0,0,0,.08);}
-  .loginTabBtn.tabEmployee.tabActive{background:linear-gradient(180deg,#14b8a6,#0f766e); color:#fff; box-shadow:0 3px 6px rgba(15,118,110,.4), inset 0 1px 0 rgba(255,255,255,.15);}
-  .loginTabBtn.tabEmployee.tabInactive{background:linear-gradient(180deg,#a8e6dd,#6fc9bb); color:#0a4a42; box-shadow:inset 0 1px 2px rgba(0,0,0,.08);}
+  /* ---------- 🍇 Fruit Mandi POS (FM3SEPTH12): پرانے الگ الگ Admin/Employee ٹیب بٹن ہٹا دیے گئے —
+       اب ایک ہی مشترکہ نام ڈراپ ڈاؤن استعمال ہوتی ہے، اس لیے ٹیب بٹن کا CSS بھی ہٹا دیا ---------- */
   .loginBtn3d{background:linear-gradient(180deg,#3b5b8c,#1e3a5f) !important; box-shadow:0 4px 8px rgba(30,58,95,.35), inset 0 1px 0 rgba(255,255,255,.2) !important; border:1px solid #16304f !important;}
   .loginHint{margin-top:14px; font-size:12px; color:var(--muted);}
   /* --- 🧪 Test Build لیبل — "Fruit Mandi POS" کی جگہ، اسی بڑے سائز میں، خوبصورت رنگین چمک (صرف aiotestXX.html فائلوں میں نظر آتا ہے)
@@ -2060,7 +2055,7 @@
 <!-- ===================== LOGIN SCREEN ===================== -->
 <div id="loginScreen">
   <div class="loginBox">
-    <h2 id="loginHeading">🔐 Login</h2>
+    <h2 id="loginHeading" onclick="handleVersionBadgeTap()" style="cursor:pointer;" title="🔒">🔐 Login</h2>
 
     <!-- ---------- 🏷️ لاگ ان اسکرین پر موٹا/نمایاں ورژن بیج — ایپ کھلنے سے پہلے ہی پتا چل جائے کہ تازہ ترین ورژن اپلوڈ ہوا ہے یا نہیں (خودکار APP_BUILD_VERSION سے بھرتا ہے) ---------- -->
     <div id="loginVersionBadge" onclick="handleVersionBadgeTap()" style="display:inline-block; font-size:13px; font-weight:800; letter-spacing:.3px; color:var(--primary-dark); background:#eef2ff; padding:4px 12px; border-radius:20px; margin-bottom:14px; cursor:pointer;"></div>
@@ -2090,35 +2085,42 @@
       <button onclick="quickEnterApp()" style="background:var(--primary); font-size:16px; padding:14px;">🎁 Enter App — Free Trial</button>
     </div>
 
-    <!-- ---------- 🍇 Fruit Mandi POS: Admin/Employee لاگ ان دو الگ حصوں میں — اوپر ٹیب سے چنیں ---------- -->
+    <!-- ---------- 🍇 Fruit Mandi POS (FM3SEPTH12، صدام کی ہدایت): سادہ، ایک ہی لاگ ان — الگ الگ Admin/Employee باکس
+         ہٹا دیے گئے، اب صرف ایک نام کی ڈراپ ڈاؤن (Admin + تمام فعال ملازمین اسی میں) اور نیچے ایک PIN خانہ ---------- -->
     <div id="loginPinWrap" style="display:none;">
-      <div class="loginTabWrap">
-        <button type="button" id="loginTabAdminBtn" class="loginTabBtn tabAdmin tabActive" onclick="switchLoginTab('admin')">🔑 Admin<br>Saddam Hussain</button>
-        <button type="button" id="loginTabEmployeeBtn" class="loginTabBtn tabEmployee tabInactive" onclick="switchLoginTab('employee')">👤 Employee<br>Login</button>
-      </div>
+      <label style="display:block; font-size:12px; color:var(--muted); margin:0 0 4px; text-align:left;">Select your name</label>
+      <select id="unifiedLoginSelect" onchange="onUnifiedLoginSelectChange()" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; margin-bottom:12px;"></select>
 
       <!-- ---------- ایڈمن لاگ ان ---------- -->
       <div id="adminLoginPanel">
-        <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
+        <div style="position:relative;">
+          <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="padding-right:40px;" onkeydown="if(event.key==='Enter') login()">
+          <button type="button" onclick="togglePinVisibility('pinInput', this)" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:17px; cursor:pointer; padding:4px; color:var(--muted);" title="Show/Hide PIN">👁️</button>
+        </div>
         <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
           <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
           🔒 Remember me on this device
         </label>
         <button class="loginBtn3d" onclick="login()">Enter</button>
+        <div class="loginHint" style="margin-top:8px;">
+          <a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover with your Year of Birth.</a>
+        </div>
       </div>
 
-      <!-- ---------- ملازم (Employee) لاگ ان — نام ڈراپ ڈاؤن سے چنیں، پھر اپنا PIN ڈالیں ---------- -->
+      <!-- ---------- ملازم (Employee) لاگ ان — نام اوپر والی مشترکہ ڈراپ ڈاؤن سے طے ہوتا ہے، یہاں صرف PIN ڈالیں ---------- -->
       <div id="employeeLoginPanel" style="display:none;">
-        <label style="display:block; font-size:12px; color:var(--muted); margin:0 0 4px; text-align:left;">Select your name</label>
-        <select id="employeeLoginSelect" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; margin-bottom:8px;"></select>
-        <input type="password" id="employeePinInput" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') employeeLogin()">
+        <select id="employeeLoginSelect" style="display:none;"></select>
+        <div style="position:relative;">
+          <input type="password" id="employeePinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="padding-right:40px;" onkeydown="if(event.key==='Enter') employeeLogin()">
+          <button type="button" onclick="togglePinVisibility('employeePinInput', this)" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:17px; cursor:pointer; padding:4px; color:var(--muted);" title="Show/Hide PIN">👁️</button>
+        </div>
         <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
           <input type="checkbox" id="employeeRememberChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
           🔒 Remember me on this device
         </label>
         <button style="background:linear-gradient(180deg,#14b8a6,#0f766e) !important; box-shadow:0 4px 8px rgba(15,118,110,.35), inset 0 1px 0 rgba(255,255,255,.2); border:1px solid #0a5049 !important;" onclick="employeeLogin()">Enter</button>
         <div class="loginHint" style="margin-top:8px;">
-          <a href="javascript:void(0)" onclick="openEmployeePinResetModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Change it with your Date of Birth.</a>
+          <a href="javascript:void(0)" onclick="openEmployeePinResetModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover with your Year of Birth.</a>
         </div>
       </div>
     </div>
@@ -2160,7 +2162,7 @@
     <div style="background:#fef2f2; color:#b91c1c; border-radius:10px; padding:12px; font-size:13px; line-height:1.6; margin:10px 0;">
       If you turn this off, <b>anyone who picks up this phone</b> — a customer, a family member, anyone — will be able to open this app straight to your business data: bills, sales history, customer I Gave/I Got records, everything. No PIN will be asked.
       <br><br>
-      This is temporary — you can turn it back on any time from Home, using your date of birth. Only turn it off if you are the sole user of this phone.
+      This is temporary — you can turn it back on any time from Home, using your year of birth. Only turn it off if you are the sole user of this phone.
     </div>
     <label style="display:flex; align-items:flex-start; gap:8px; font-size:12.5px; font-weight:700; color:var(--text); margin:12px 0; cursor:pointer;">
       <input type="checkbox" id="pinLockWarningAck" style="width:17px; height:17px; margin-top:1px;" onchange="document.getElementById('pinLockConfirmBtn').disabled = !this.checked;">
@@ -2177,9 +2179,8 @@
     <h3>🔓 Activate PIN Lock</h3>
 
     <div id="apinStepDob">
+      <label style="display:block; font-size:12px; color:var(--muted); margin:0 0 4px;">Your Year of Birth</label>
       <div class="dobPicker">
-        <select id="apinDobInput_day" onchange="dpOnChange('apinDobInput')"></select>
-        <select id="apinDobInput_month" onchange="dpOnMonthChange('apinDobInput')"></select>
         <span class="dpYearWrap" id="apinDobInput_yearWrap">
           <select id="apinDobInput_year" onchange="dpOnChange('apinDobInput')"></select>
           <input type="text" id="apinDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('apinDobInput')">
@@ -2217,10 +2218,8 @@
   <div class="modalBox" style="max-width:380px;">
     <h3>🆘 Recover Admin PIN</h3>
     <div id="recoveryStep1">
-      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Date of Birth</label>
+      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Year of Birth</label>
       <div class="dobPicker">
-        <select id="recoveryDobInput_day" onchange="dpOnChange('recoveryDobInput')"></select>
-        <select id="recoveryDobInput_month" onchange="dpOnMonthChange('recoveryDobInput')"></select>
         <span class="dpYearWrap" id="recoveryDobInput_yearWrap">
           <select id="recoveryDobInput_year" onchange="dpOnChange('recoveryDobInput')"></select>
           <input type="text" id="recoveryDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('recoveryDobInput')">
@@ -2266,10 +2265,8 @@
     <!-- Step A: پہلی بار ہو تو DOB سیٹ کریں؛ پہلے سے موجود ہو تو تصدیق کے لیے مانگیں -->
     <div id="empResetStepDob">
       <div id="empResetDobHint" style="font-size:12.5px; color:var(--muted); margin-bottom:6px;"></div>
-      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Date of Birth</label>
+      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Year of Birth</label>
       <div class="dobPicker">
-        <select id="empResetDobInput_day" onchange="dpOnChange('empResetDobInput')"></select>
-        <select id="empResetDobInput_month" onchange="dpOnMonthChange('empResetDobInput')"></select>
         <span class="dpYearWrap" id="empResetDobInput_yearWrap">
           <select id="empResetDobInput_year" onchange="dpOnChange('empResetDobInput')"></select>
           <input type="text" id="empResetDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('empResetDobInput')">
@@ -4913,10 +4910,8 @@
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This panel now unlocks with your app login PIN — no separate PIN to remember. To change it, go to <b>Home → Users</b>, tap the Admin user's <b>✏️ Set Custom PIN</b> button, and enter your new PIN there.</div>
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen using your date of birth. No typing, no risk of a typo — just pick it from the calendar. (For security, this box always shows blank when you reopen this screen — that does NOT mean it wasn't saved.)</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen using just your year of birth. Simple, and nothing to forget. (For security, this box always shows blank when you reopen this screen — that does NOT mean it wasn't saved.)</div>
             <div class="dobPicker" style="margin-bottom:8px;">
-              <select id="securityDobInput_day" onchange="dpOnChange('securityDobInput'); saveAdminControl();"></select>
-              <select id="securityDobInput_month" onchange="dpOnMonthChange('securityDobInput'); saveAdminControl();"></select>
               <span class="dpYearWrap" id="securityDobInput_yearWrap">
                 <select id="securityDobInput_year" onchange="dpOnChange('securityDobInput'); saveAdminControl();"></select>
                 <input type="text" id="securityDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('securityDobInput'); saveAdminControl();">
@@ -5142,6 +5137,8 @@
     </div>
 
     <div id="devSecretUnlocked" style="display:none; max-height:70vh; overflow-y:auto;">
+      <div id="devCloudSyncStatus" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:8px 12px; margin-bottom:12px; font-size:11.5px; font-weight:600; text-align:left; line-height:1.5;"></div>
+      <button class="testPrintBtn" style="margin-bottom:14px; background:#eef2ff; color:var(--primary-dark);" onclick="devEnterAppDirectly()">🚀 Enter App Now (skip PIN / activation code)</button>
       <div class="settingsSubLabel">Developer WhatsApp Number</div>
       <input type="text" id="devWhatsappInput" placeholder="e.g. 923206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveDevSecretPanel()">
       <div class="settingsSubLabel">Developer SMS Number</div>
@@ -6577,7 +6574,7 @@ if(AppState.settings.packagePlansMigratedV2 !== true){
     if(p.get('devpwreset') === 'saddamFM19reset'){
       AppState.settings.devPanelPasswordHash = '';
       saveToStorage('settings', AppState.settings);
-      setTimeout(() => alert('✅ Developer Password ڈیفالٹ پر ری سیٹ ہو گیا۔\n\nDefault Password: SHNuV2apB6\n\nابھی اندر جا کر فوراً نیا، مختلف پاسورڈ سیٹ کر لیں — پھر یہ لنک/ٹوکن دوبارہ کبھی استعمال نہ کریں۔'), 400);
+      setTimeout(() => alert('✅ Developer Password ڈیفالٹ پر ری سیٹ ہو گیا۔\n\nDefault Password: 857766\n\nابھی اندر جا کر فوراً نیا، مختلف پاسورڈ سیٹ کر لیں — پھر یہ لنک/ٹوکن دوبارہ کبھی استعمال نہ کریں۔'), 400);
     }
   }catch(e){}
 })();
@@ -6617,7 +6614,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH11';
+const APP_BUILD_VERSION = 'FM3SEPTH12';
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
 // خراب ہو، انٹرنیٹ نہ ہو، یا اصل PIN بھول جائیں، کسی بھی حالت میں) بغیر کسی PIN چیک کے سیدھا Admin کے طور پر
@@ -7341,16 +7338,11 @@ async function setupLoginScreen(){
       statusEl.textContent = `⚠️ Trial ended — please contact the developer to continue.`;
     }
 
-    // ---------- 🩺 اگر یہ ڈومین Firestore سے یوزر/PIN ڈیٹا حاصل نہ کر سکا تو صاف وجہ دکھائیں (تشخیصی بینر) ----------
+    // ---------- 🍇 صدام کی ہدایت (FM3SEPTH12): یہ تشخیصی بینر کسٹمر کو خوفزدہ/پریشان کرتا تھا، اس لیے لاگ ان
+    // اسکرین پر اب کبھی نظر نہیں آئے گا۔ خرابی خاموشی سے یاد رکھی جاتی ہے — صرف Developer Panel کے اندر،
+    // تالے پر 7 دفعہ ٹیپ کر کے، جا کر دیکھی جا سکتی ہے (نیچے openDevSecretPanel میں) ---------- */
     const cloudWarnEl = document.getElementById('loginCloudSyncWarning');
-    if(cloudWarnEl){
-      if(window.__cloudSyncError){
-        cloudWarnEl.style.display = 'block';
-        cloudWarnEl.textContent = `⚠️ Cloud sync issue: ${window.__cloudSyncError}. This device is using its own locally-saved PIN/users list, which may be out of date. Ask your developer to check the Firebase API key's allowed domains.`;
-      } else {
-        cloudWarnEl.style.display = 'none';
-      }
-    }
+    if(cloudWarnEl) cloudWarnEl.style.display = 'none';
 
     const defaultHash = await hashPin('1234');
     const admin = usersData.find(u => u.role === 'admin' && u.is_active);
@@ -7365,7 +7357,7 @@ async function setupLoginScreen(){
     const skipPin = false;
     document.getElementById('loginQuickEnterWrap').style.display = skipPin ? 'block' : 'none';
     document.getElementById('loginPinWrap').style.display = skipPin ? 'none' : 'block';
-    if(!skipPin) switchLoginTab('admin');
+    if(!skipPin){ populateUnifiedLoginDropdown(); switchLoginTab('admin'); }
 
     // ---------- ٹرائل کے دوران "Login" کا لفظ خود بھی کنفیوژن پیدا کرتا ہے — چھپا دیں، صرف ٹرائل ختم ہونے پر واپس نظر آئے ----------
     const heading = document.getElementById('loginHeading');
@@ -7479,18 +7471,51 @@ function finishLogin(user, rememberOverride){
 }
 
 /* =====================================================================
-   🍇 Fruit Mandi POS: Admin / Employee لاگ ان ٹیب اور ملازم کا لاگ ان
-   ===================================================================== */
+   🍇 Fruit Mandi POS (FM3SEPTH12): ایک ہی مشترکہ نام ڈراپ ڈاؤن — Admin اور تمام فعال
+   ملازمین اسی ایک فہرست میں۔ منتخب نام کے مطابق پیچھے صحیح پینل (Admin/Employee) اور
+   منطق خودکار جُڑ جاتی ہے — صارف کو الگ الگ ٹیب نظر ہی نہیں آتے ---------- */
+function populateUnifiedLoginDropdown(){
+  const sel = document.getElementById('unifiedLoginSelect');
+  if(!sel) return;
+  const prevValue = sel.value;
+  const admins = usersData.filter(u => u.role === 'admin' && u.is_active);
+  const employees = usersData.filter(u => u.role === 'salesman' && u.is_active);
+  const all = [...admins, ...employees];
+  if(all.length === 0){
+    sel.innerHTML = '<option value="">No accounts yet</option>';
+    return;
+  }
+  sel.innerHTML = admins.map(u => `<option value="${u.user_id}" data-role="admin">🔑 ${u.name}</option>`).join('')
+    + employees.map(u => `<option value="${u.user_id}" data-role="employee">👤 ${u.name}</option>`).join('');
+  if(prevValue && all.some(u => String(u.user_id) === prevValue)) sel.value = prevValue;
+  onUnifiedLoginSelectChange();
+}
+
+function onUnifiedLoginSelectChange(){
+  const sel = document.getElementById('unifiedLoginSelect');
+  if(!sel || !sel.options.length) return;
+  const opt = sel.options[sel.selectedIndex];
+  const role = opt ? opt.getAttribute('data-role') : 'admin';
+  switchLoginTab(role === 'employee' ? 'employee' : 'admin');
+  if(role === 'employee'){
+    const empSel = document.getElementById('employeeLoginSelect');
+    if(empSel) empSel.value = sel.value;
+  }
+}
+
+// ---------- 👁️ PIN خانے میں چھوٹی سی آنکھ — دبانے پر لگا ہوا PIN نظر آ جائے ----------
+function togglePinVisibility(inputId, btn){
+  const el = document.getElementById(inputId);
+  if(!el) return;
+  const showing = el.type === 'text';
+  el.type = showing ? 'password' : 'text';
+  if(btn) btn.textContent = showing ? '👁️' : '🙈';
+}
+
 function switchLoginTab(tab){
   const isAdmin = tab === 'admin';
   document.getElementById('adminLoginPanel').style.display = isAdmin ? 'block' : 'none';
   document.getElementById('employeeLoginPanel').style.display = isAdmin ? 'none' : 'block';
-  const adminBtn = document.getElementById('loginTabAdminBtn');
-  const empBtn = document.getElementById('loginTabEmployeeBtn');
-  adminBtn.classList.toggle('tabActive', isAdmin);
-  adminBtn.classList.toggle('tabInactive', !isAdmin);
-  empBtn.classList.toggle('tabActive', !isAdmin);
-  empBtn.classList.toggle('tabInactive', isAdmin);
   if(!isAdmin) renderEmployeeLoginDropdown();
 }
 
@@ -7557,9 +7582,9 @@ function openEmployeePinResetModal(){
 
   const hint = document.getElementById('empResetDobHint');
   if(!user.dobHash){
-    hint.textContent = 'ℹ️ No date of birth on file yet — enter it now to set it up. Remember this date, you\'ll need it next time you forget your PIN.';
+    hint.textContent = 'ℹ️ No year of birth on file yet — enter it now to set it up. Remember it, you\'ll need it next time you forget your PIN.';
   } else {
-    hint.textContent = 'Enter your date of birth to verify it\'s you.';
+    hint.textContent = 'Enter your year of birth to verify it\'s you.';
   }
   document.getElementById('employeePinResetModal').classList.add('show');
 }
@@ -7569,7 +7594,7 @@ async function submitEmployeeDobStep(){
   if(!user) return;
   const dob = document.getElementById('empResetDobInput').value;
   if(!dob){
-    document.getElementById('empResetError').textContent = '❌ Please select your date of birth.';
+    document.getElementById('empResetError').textContent = '❌ Please select your year of birth.';
     return;
   }
   const dobHash = await hashPin(dob);
@@ -23961,7 +23986,7 @@ async function saveAdminControl(){
 // ورژن بیج پر 7 بار ٹیپ کرنے سے کھلتا ہے۔ نیچے والا ہیش ڈیفالٹ پاسورڈ کا SHA-256 ہے —
 // پینل کے اندر سے ہی نیا پاسورڈ سیٹ کیا جا سکتا ہے (AppState.settings.devPanelPasswordHash میں محفوظ ہوتا ہے)۔
 // =====================================================================
-const DEFAULT_DEV_PANEL_PASSWORD_HASH = 'ecb3e082ae464a263b408b7d3a7792e9a5a88c88786e4e62a76144d9e1687f97'; // ڈیفالٹ پاسورڈ: SHNuV2apB6 — پہلی بار کھول کر فوراً بدل لیں
+const DEFAULT_DEV_PANEL_PASSWORD_HASH = '8b5a43764420e5af43f7c4623ad3a6699a628be06269051d38f494f9f4b22a9a'; // ڈیفالٹ پاسورڈ: 857766 — صدام کی ہدایت FM3SEPTH12
 
 // ---------- 🎁 صدام کی ہدایت (FM3SEPTH10): فری/مفت ایڈمن گفٹ کوڈ جنریٹر — Firestore کے licenses/{code} میں نیا ریکارڈ لکھتا ہے ----------
 let lastGeneratedGiftCode = '';
@@ -24161,6 +24186,14 @@ function closeDevSecretPanel(){
   document.getElementById('devSecretModal').classList.remove('show');
 }
 
+// ---------- 🍇 صدام کی ہدایت (FM3SEPTH12): ڈویلپر پینل کے اندر سے سیدھا ایپ میں داخل ہونے کا بٹن —
+// نہ کوئی PIN ٹائپ کرنی پڑے، نہ کوئی ایکٹیویشن کوڈ بنانا پڑے۔ یہی وہی محفوظ Developer بائی پاس ہے
+// جو لاگ ان اسکرین پر خفیہ PIN ٹائپ کرنے سے ملتا ہے (DEV_BYPASS_PIN) — صرف یہاں سے، ایک ٹیپ میں ---------- */
+function devEnterAppDirectly(){
+  closeDevSecretPanel();
+  finishLogin({ user_id: 0, name: 'Developer', role: 'admin', is_active: true, screens: [] }, false);
+}
+
 async function unlockDevSecretPanel(){
   const entered = document.getElementById('devSecretPasswordInput').value;
   const enteredHash = await hashPin(entered);
@@ -24173,6 +24206,17 @@ async function unlockDevSecretPanel(){
   document.getElementById('devSecretPasswordInput').value = '';
   document.getElementById('devSecretLocked').style.display = 'none';
   document.getElementById('devSecretUnlocked').style.display = 'block';
+
+  // ---------- 🩺 کلاؤڈ سنک کی خرابی اب کسٹمر کو نظر نہیں آتی — صرف یہاں، ڈویلپر پینل کے اندر ----------
+  const cloudStatusEl = document.getElementById('devCloudSyncStatus');
+  if(cloudStatusEl){
+    if(window.__cloudSyncError){
+      cloudStatusEl.style.display = 'block';
+      cloudStatusEl.textContent = `⚠️ Cloud sync issue: ${window.__cloudSyncError}. This device is using its own locally-saved PIN/users list, which may be out of date. Check the Firebase API key's allowed domains.`;
+    } else {
+      cloudStatusEl.style.display = 'none';
+    }
+  }
 
   document.getElementById('devWhatsappInput').value = AppState.settings.devWhatsapp || '';
   document.getElementById('devSmsInput').value = AppState.settings.devSms || '';
@@ -24274,72 +24318,41 @@ function syncPinLockUI(){
 }
 
 /* =====================================================================
-   🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن (پرانے کیلنڈر باکس کی جگہ)۔
-   دور کے سال (مثلاً 1976) تک پہنچنے کے لیے مہینوں پر بار بار کلک کرنے کی ضرورت نہیں —
-   ہر ایک الگ ڈراپ ڈاؤن ہے، اور سال کو چاہیں تو "✍️ Type" دبا کر سیدھا ٹائپ بھی کیا جا سکتا ہے۔
+   🎂 Year-of-Birth Picker (FM3SEPTH12، صدام کی ہدایت) — صرف ایک سال کی ڈراپ ڈاؤن،
+   دن/مہینہ اب بالکل نہیں مانگے جاتے۔ سال کو چاہیں تو "✍️ Type" دبا کر سیدھا ٹائپ بھی کیا جا سکتا ہے۔
    ===================================================================== */
-const DP_MONTHS = [['01','Jan'],['02','Feb'],['03','Mar'],['04','Apr'],['05','May'],['06','Jun'],['07','Jul'],['08','Aug'],['09','Sep'],['10','Oct'],['11','Nov'],['12','Dec']];
-
 function dpEls(id){
   return {
-    day: document.getElementById(id+'_day'),
-    month: document.getElementById(id+'_month'),
     year: document.getElementById(id+'_year'),
     yearManual: document.getElementById(id+'_yearManual'),
     hidden: document.getElementById(id)
   };
 }
 
-function dpDaysInMonth(month, year){
-  if(!month) return 31;
-  const y = year && /^\d{4}$/.test(year) ? parseInt(year,10) : 2000; // سال معلوم نہ ہو تو فروری کے لیے leap year فرض کر لیں (زیادہ محفوظ)
-  return new Date(y, parseInt(month,10), 0).getDate();
-}
-
-function dpBuildDayOptions(sel, maxDay, keepVal){
-  const cur = keepVal !== undefined ? keepVal : sel.value;
-  let html = '<option value="">Day</option>';
-  for(let i=1;i<=maxDay;i++){
-    const v = String(i).padStart(2,'0');
-    html += `<option value="${v}">${i}</option>`;
-  }
-  sel.innerHTML = html;
-  sel.value = (cur && parseInt(cur,10) <= maxDay) ? cur : '';
-}
-
+// ---------- 🍇 صدام کی ہدایت (FM3SEPTH12): سیکیورٹی تصدیق اب صرف "سال پیدائش" سے ہوتی ہے —
+// پہلے پورا Date of Birth (دن/مہینہ/سال) مانگا جاتا تھا جو کسٹمرز کے لیے پریشان کن تھا۔
+// نیچے دن/مہینہ کی منطق مکمل ہٹا دی گئی ہے، صرف سال محفوظ/تصدیق ہوتا ہے ---------- */
 function dpInitPicker(id){
   const el = dpEls(id);
-  if(!el.day) return; // یہ ودجٹ اس صفحے پر موجود نہیں — خاموشی سے چھوڑ دیں
-  el.month.innerHTML = '<option value="">Month</option>' + DP_MONTHS.map(m=>`<option value="${m[0]}">${m[1]}</option>`).join('');
-  dpBuildDayOptions(el.day, 31, '');
+  if(!el.year) return; // یہ ودجٹ اس صفحے پر موجود نہیں — خاموشی سے چھوڑ دیں
   const nowYear = new Date().getFullYear();
   let yearHtml = '<option value="">Year</option>';
   for(let y=nowYear; y>=nowYear-100; y--){ yearHtml += `<option value="${y}">${y}</option>`; }
   el.year.innerHTML = yearHtml;
 }
 
-function dpOnMonthChange(id){
-  const el = dpEls(id);
-  const yearVal = (el.yearManual && el.yearManual.style.display !== 'none') ? el.yearManual.value.trim() : el.year.value;
-  dpBuildDayOptions(el.day, dpDaysInMonth(el.month.value, yearVal));
-  dpUpdateHidden(id);
-}
+function dpOnMonthChange(id){ dpOnChange(id); } // ---------- پرانے کوڈ میں کہیں رہ گیا ہو تو بھی خاموشی سے کام کرے ----------
 
 function dpOnChange(id){
-  // ---------- سال بدلنے پر بھی دن کی فہرست (فروری 28/29) دوبارہ درست کریں ----------
-  const el = dpEls(id);
-  const yearVal = (el.yearManual && el.yearManual.style.display !== 'none') ? el.yearManual.value.trim() : el.year.value;
-  if(el.month.value) dpBuildDayOptions(el.day, dpDaysInMonth(el.month.value, yearVal), el.day.value);
   dpUpdateHidden(id);
 }
 
 function dpUpdateHidden(id){
   const el = dpEls(id);
-  const day = el.day.value;
-  const month = el.month.value;
+  if(!el.year) return;
   const manualActive = el.yearManual && el.yearManual.style.display !== 'none';
   const yearVal = manualActive ? el.yearManual.value.trim() : el.year.value;
-  el.hidden.value = (day && month && /^\d{4}$/.test(yearVal||'')) ? `${yearVal}-${month}-${day}` : '';
+  el.hidden.value = /^\d{4}$/.test(yearVal||'') ? yearVal : '';
 }
 
 // ---------- "✍️ Type" بٹن — سال کا ڈراپ ڈاؤن ہٹا کر سیدھا ٹائپنگ باکس دکھائیں (اور واپس بھی جا سکیں) ----------
@@ -24364,9 +24377,7 @@ function dpToggleYearMode(id){
 // ---------- ودجٹ کو بالکل خالی حالت پر واپس لے جائیں (ماڈل دوبارہ کھلنے پر) ----------
 function dpReset(id){
   const el = dpEls(id);
-  if(!el.day) return;
-  el.month.value = '';
-  dpBuildDayOptions(el.day, 31, '');
+  if(!el.year) return;
   el.year.value = '';
   if(el.yearManual){ el.yearManual.value=''; el.yearManual.style.display='none'; }
   el.year.style.display = '';
@@ -24391,7 +24402,7 @@ function openActivatePinLockModal(){
 
   if(!AppState.settings.securityDobHash){
     // ---------- DOB کبھی سیٹ ہی نہیں ہوئی — پہلے یہیں سیٹ کر کے آگے بڑھیں ----------
-    document.getElementById('apinDobError').textContent = 'ℹ️ No date of birth on file yet — enter it now to set it up.';
+    document.getElementById('apinDobError').textContent = 'ℹ️ No year of birth on file yet — enter it now to set it up.';
   }
   document.getElementById('apinStepDob').style.display = 'block';
   document.getElementById('activatePinLockModal').classList.add('show');
@@ -24400,7 +24411,7 @@ function openActivatePinLockModal(){
 async function verifyDobForPinActivation(){
   const dob = document.getElementById('apinDobInput').value;
   if(!dob){
-    document.getElementById('apinDobError').textContent = '❌ Please select your date of birth.';
+    document.getElementById('apinDobError').textContent = '❌ Please select your year of birth.';
     return;
   }
   const dobHash = await hashPin(dob);
@@ -24481,7 +24492,7 @@ function openPinRecoveryModal(){
 async function verifyPinRecovery(){
   const dob = document.getElementById('recoveryDobInput').value;
   if(!dob){
-    document.getElementById('recoveryError').textContent = '❌ Please select your date of birth.';
+    document.getElementById('recoveryError').textContent = '❌ Please select your year of birth.';
     return;
   }
   const dobHash = await hashPin(dob);
