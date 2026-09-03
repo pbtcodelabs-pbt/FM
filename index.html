@@ -3545,7 +3545,11 @@
         <div class="settingsSubLabel">🎨 رنگ تھیم</div>
         <div id="rpColorSwatchWrap" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;"></div>
         <button class="testPrintBtn" style="background:#dcfce7; color:#15803d; margin-bottom:8px;" onclick="generateAndShareRecoveryPoster()">📤 واٹس ایپ پر بھیجیں</button>
-        <button class="testPrintBtn" style="background:#eef2ff; color:var(--primary-dark);" onclick="generateAndPrintRecoveryPoster()">🖨️ پرنٹ کریں</button>
+        <button class="testPrintBtn" style="background:#eef2ff; color:var(--primary-dark); margin-bottom:8px;" onclick="generateAndPrintRecoveryPoster()">🖨️ پرنٹ کریں</button>
+        <!-- ---------- 🔵 صدام کی ہدایت (FM3SEPTH31): براہ راست بلوٹوتھ پرنٹ — کسٹمر کو RawBT جیسی الگ ایپ
+        انسٹال کروانے کی ضرورت نہیں پڑتی؛ اگر پرنٹر BLE سپورٹ کرتا ہے (زیادہ تر نئے/iOS والے پرنٹرز کرتے ہیں)
+        تو یہ سیدھا براؤزر سے ہی پرنٹر کو ڈیٹا بھیج دیتا ہے ---------- -->
+        <button class="testPrintBtn" style="background:#e0f2fe; color:#075985; margin-bottom:8px;" onclick="generateAndBluetoothPrintRecoveryPoster()">🔵 براہ راست بلوٹوتھ پرنٹ (کوئی ایپ درکار نہیں)</button>
         <button class="cancelBtn" style="width:100%; margin-top:8px;" onclick="closeRecoveryPosterModal()">بند کریں</button>
       </div>
     </div>
@@ -6640,7 +6644,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH30';
+const APP_BUILD_VERSION = 'FM3SEPTH31';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -17599,7 +17603,7 @@ async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
   // پرنٹ اب بھی کچھ نہیں کر رہا تھا۔ حل: پرنٹ ونڈو سب سے پہلے، کسی await سے پہلے ہی کھول لیں (خالی "تیار ہو
   // رہی ہے" پیغام کے ساتھ)، پھر رسید تیار ہونے پر اسی ونڈو میں لکھ دیں ---------- -->
   let printWin = null;
-  if(printMode){
+  if(printMode === true){
     printWin = window.open('', '_blank');
     if(printWin){
       printWin.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:40px;font-family:sans-serif;text-align:center;color:#666;">⏳ رسید تیار ہو رہی ہے…</body></html>');
@@ -17760,7 +17764,15 @@ async function shareRecoveryReceiptWhatsapp(c, entry, printMode){
 
     ctx.restore(); // ---------- کلپ ختم ---------- -->
 
-    if(printMode){
+    if(printMode === 'bluetooth'){
+      // ---------- 🔵 صدام کی ہدایت (FM3SEPTH31): براہ راست Web Bluetooth — RawBT/Print Service کی ضرورت نہیں،
+      // اگر پرنٹر BLE سپورٹ کرتا ہو ---------- -->
+      const printCanvas = canvasToGrayscale(canvas);
+      printViaWebBluetooth(printCanvas);
+      return;
+    }
+
+    if(printMode === true){
       // ---------- 🐛 صدام کی ہدایت (FM3SEPTH24): "بلیک اینڈ وائٹ پرنٹ کرو" — باقی بلوں کی طرح
       // یہاں بھی سیاہ/سفید کینوس (canvasToGrayscale) استعمال کریں، رنگین کینوس براہِ راست نہیں ---------- -->
       const printCanvas = canvasToGrayscale(canvas);
@@ -23086,8 +23098,8 @@ window.addEventListener('afterprint', () => {
 // اکثر سستے تھرمل پرنٹرز صرف Classic Bluetooth (SPP) استعمال کرتے ہیں — براؤزر کی سیکیورٹی پابندیوں کی وجہ سے
 // کوئی بھی ویب سائٹ (ہماری ایپ سمیت) Classic Bluetooth تک براہ راست نہیں پہنچ سکتی، صرف BLE تک پہنچ سکتی ہے۔
 // اگر یہ ناکام ہو تو نیچے دیا گیا پیغام صاف بتا دے گا کہ عام "Print" بٹن (RawBT/Thermer کے ذریعے) استعمال کریں۔
-async function printViaWebBluetooth(canvasId){
-  canvasId = canvasId || 'invoiceCanvas';
+async function printViaWebBluetooth(canvasOrId){
+  canvasOrId = canvasOrId || 'invoiceCanvas';
   if(!navigator.bluetooth){
     alert('❌ This browser/device does not support direct Bluetooth printing (Web Bluetooth API not available). Please use the regular 🖨️ Print button instead (via RawBT or Thermer).');
     return;
@@ -23124,7 +23136,7 @@ async function printViaWebBluetooth(canvasId){
       return;
     }
 
-    const canvas = document.getElementById(canvasId);
+    const canvas = (canvasOrId instanceof HTMLCanvasElement) ? canvasOrId : document.getElementById(canvasOrId);
     const bytes = canvasToEscPosRaster(canvas, AppState.settings.paperWidth);
 
     // ---------- BLE میں ایک وقت میں محدود ڈیٹا ہی بھیجا جا سکتا ہے، اس لیے چھوٹے ٹکڑوں میں بھیجیں ----------
@@ -23143,10 +23155,24 @@ async function printViaWebBluetooth(canvasId){
 }
 
 // ---------- کینوس کو ESC/POS "raster image" کمانڈز میں بدلیں (GS v 0) — تھرمل پرنٹر کی زبان ----------
+// ---------- 🔵 صدام کی ہدایت (FM3SEPTH31): پہلے یہ فرض کرتا تھا کہ آنے والا کینوس پہلے سے ہی صحیح
+// چوڑائی (384/576 dots) کا ہے — ریکوری رسید کا کینوس اپنی اصل (760px) چوڑائی پر بنتا ہے، اس لیے یہاں
+// خودکار طور پر صحیح پرنٹر چوڑائی پر (تناسب برقرار رکھتے ہوئے) پہلے سکیل کر لیتے ہیں، چاہے ماخذ کینوس کسی
+// بھی سائز کا ہو ---------- -->
 function canvasToEscPosRaster(canvas, paperWidthMM){
   const widthDots = paperWidthMM === 80 ? 576 : 384;
-  const heightDots = canvas.height;
-  const ctx = canvas.getContext('2d');
+  let srcCanvas = canvas;
+  if(canvas.width !== widthDots){
+    const scaled = document.createElement('canvas');
+    scaled.width = widthDots;
+    scaled.height = Math.round(canvas.height * (widthDots / canvas.width));
+    const sctx = scaled.getContext('2d');
+    sctx.fillStyle = '#fff'; sctx.fillRect(0, 0, scaled.width, scaled.height);
+    sctx.drawImage(canvas, 0, 0, scaled.width, scaled.height);
+    srcCanvas = scaled;
+  }
+  const heightDots = srcCanvas.height;
+  const ctx = srcCanvas.getContext('2d');
   const imgData = ctx.getImageData(0, 0, widthDots, heightDots).data;
   const widthBytes = Math.ceil(widthDots / 8);
   const raster = new Uint8Array(widthBytes * heightDots);
@@ -23468,6 +23494,13 @@ function generateAndPrintRecoveryPoster(){
   if(!rpCurrentCustomer || !rpCurrentEntry){ alert('⚠️ کسٹمر/انٹری کی معلومات نہیں مل سکیں — دوبارہ کوشش کریں'); return; }
   closeRecoveryPosterModal();
   shareRecoveryReceiptWhatsapp(rpCurrentCustomer, rpCurrentEntry, true);
+}
+// ---------- 🔵 صدام کی ہدایت (FM3SEPTH31): "کوئی ایپ نہیں" والا سیدھا راستہ — Web Bluetooth کے ذریعے
+// براہ راست پرنٹر کو ڈیٹا بھیجیں، Android کے Print Service/RawBT سے مکمل آزاد ---------- -->
+function generateAndBluetoothPrintRecoveryPoster(){
+  if(!rpCurrentCustomer || !rpCurrentEntry){ alert('⚠️ کسٹمر/انٹری کی معلومات نہیں مل سکیں — دوبارہ کوشش کریں'); return; }
+  closeRecoveryPosterModal();
+  shareRecoveryReceiptWhatsapp(rpCurrentCustomer, rpCurrentEntry, 'bluetooth');
 }
 
 const THEME_PRESETS = [
