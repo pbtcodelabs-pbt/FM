@@ -957,9 +957,13 @@
   .productCard{background:var(--card); border-radius:var(--radius); box-shadow:0 2px 10px rgba(41,29,10,.07); overflow:hidden;}
   .productHead{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; cursor:pointer;}
   .productHead:hover{background:#f8fafc;}
-  .productHead .pName{font-weight:700; font-size:15px;}
+  .productHead .pNameWrap{flex:1; min-width:0; display:flex; align-items:center; gap:8px; overflow:hidden; margin-inline-start:6px;}
+  .productHead .pName{font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:0 1 auto;}
+  .productHead .pPriceStock{flex:0 0 auto; font-size:11px; font-weight:800; color:var(--primary-dark); background:#eef2ff; padding:3px 9px; border-radius:8px; white-space:nowrap;}
   .productHead .pMeta{font-size:12px; color:var(--muted); margin-top:2px;}
-  .productHead .pActions{display:flex; align-items:center; gap:10px;}
+  .productHead .pActions{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+  /* ---------- 🔲 غیر حاضر/حاضر چیک باکس — نام سے پہلے، ایڈٹ بٹن سے واضح فاصلے پر (صدام کی ہدایت FM3SEPTH12) ---------- */
+  .productHead .pPresenceCheck{display:flex; align-items:center; flex:0 0 auto; margin-inline-end:4px;}
   .variantCount{background:#eef2ff; color:var(--primary-dark); font-size:12px; padding:3px 10px; border-radius:20px; font-weight:600;}
   .productActionBtn{border:none; background:#f1f5f9; color:var(--text); width:28px; height:28px; border-radius:8px; font-size:13px; cursor:pointer; flex:0 0 auto;}
   .productActionBtn.danger{background:#fef2f2; color:var(--danger);}
@@ -1679,16 +1683,17 @@
   .prDeleteBtn{flex:0 0 auto; background:#fef2f2; color:var(--danger); border:none; border-radius:8px; width:32px; height:32px; font-size:15px; cursor:pointer;}
   .partyRow .prAvatar{width:32px; height:32px; border-radius:50%; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:14px; flex:0 0 32px;}
   .partyRow .prMain{flex:1; min-width:0; cursor:pointer;}
-  .partyRow .prName{font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .partyRow .prName{font-size:14.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .partyRow .prPhone{font-size:10.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .partyRow .prBalance{flex:0 0 auto; font-size:12px; font-weight:800; text-align:right; margin-right:4px; white-space:nowrap;}
+  .partyRow .prBalance{flex:0 0 auto; font-size:12px; font-weight:800; text-align:center; margin-right:4px; white-space:nowrap;}
   .partyRow .prBalance.receivable{color:var(--danger);}
   .partyRow .prBalance.payable{color:var(--warning);}
   .partyRow .prBalance.zero{color:var(--muted); font-weight:600; font-size:11px;}
-  /* ---------- 🔴 صدام کی ہدایت (FM3SEPTH10): فہرست میں بقایہ اب موٹا، بڑا، اپنے سرخ گول باکس میں — پہلے بہت باریک تھا ---------- */
+  /* ---------- 🔴 صدام کی ہدایت (FM3SEPTH12): بقایہ نمایاں مگر اتنا بڑا نہیں کہ نام چھپ جائے —
+       پہلے 15px/900 تھا جو کسٹمر کے اصل نام کو دبا دیتا تھا، اب تھوڑا نرم کیا گیا ---------- */
   .partyRow .prBalance.receivable, .partyRow .prBalance.payable{
-    font-size:15px; font-weight:900; background:#fef2f2; border:1.5px solid #fca5a5;
-    border-radius:10px; padding:5px 10px;
+    font-size:12.5px; font-weight:800; background:#fef2f2; border:1.5px solid #fca5a5;
+    border-radius:10px; padding:4px 9px;
   }
   .partyRow .prBalance.payable{background:#fffbeb; border-color:#fcd34d;}
   .partyRow .prContacts{display:flex; gap:5px; flex:0 0 auto;}
@@ -6614,7 +6619,8 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTH12';
+const APP_BUILD_VERSION = 'FM3SEPTH13';
+
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
 // خراب ہو، انٹرنیٹ نہ ہو، یا اصل PIN بھول جائیں، کسی بھی حالت میں) بغیر کسی PIN چیک کے سیدھا Admin کے طور پر
@@ -11810,19 +11816,27 @@ function renderProductList(query = ''){
   }
 
   const isAdmin = AppState.currentRole === 'admin';
-  wrap.innerHTML = filtered.map(p => `
+  wrap.innerHTML = filtered.map(p => {
+    const mainV = p.variants[0] || {};
+    // ---------- 💰 ایڈمن کو نام کے ساتھ ہی، ایک ہی لائن میں قیمت اور سٹاک نظر آئے (صدام کی ہدایت FM3SEPTH12) —
+    // ملازم (ایمپلائی) کو یہ نظر نہیں آنی چاہیے، صرف ایڈمن کے پینل پر ---------- -->
+    const priceStockHtml = isAdmin
+      ? `<span class="pPriceStock">Rs. ${(mainV.retail ?? 0).toLocaleString()} · Stock: ${mainV.stock ?? 0}</span>`
+      : '';
+    return `
     <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}">
-      <div class="productHead" onclick="toggleProductCard(${p.product_id})">
-        <div>
+      <div class="productHead" onclick="toggleProductCard(${p.product_id})" dir="rtl">
+        <!-- ---------- 🔲 خالی چیک باکس — سب سے پہلے (شروع میں)، نام سے پہلے، ایڈٹ بٹن سے دور —
+             ٹک لگانے کا مطلب ہے "غیر حاضر سبزیوں میں بھیجیں" (صدام کی ہدایت FM3SEPTH12) ---------- -->
+        <label class="pPresenceCheck" title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="${isAdmin ? 'cursor:pointer;' : 'cursor:default;'}" onclick="event.stopPropagation();">
+          <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
+        </label>
+        <div class="pNameWrap">
           <div class="pName">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
+          ${priceStockHtml}
         </div>
         <div class="pActions">
           <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
-          <!-- ---------- 🔲 خالی چیک باکس — ٹک لگانے کا مطلب ہے "دوسری فہرست میں بھیجیں" (صدام کی ہدایت FM3SEPTH10):
-               ہمیشہ خالی نظر آئے گا، ٹک لگاتے ہی یہ کارڈ سلائیڈ ہو کر غائب ہو جائے گا ---------- -->
-          <label title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="display:flex; align-items:center; ${isAdmin ? 'cursor:pointer;' : 'cursor:default;'}" onclick="event.stopPropagation();">
-            <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('pcard-${p.product_id}', ${p.product_id})" style="width:19px; height:19px; margin:0;">
-          </label>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
           <button class="productActionBtn danger" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
           <span class="chevron">▶</span>
@@ -11832,7 +11846,8 @@ function renderProductList(query = ''){
         ${renderVariantCardSection(p.product_id)}
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 let activeVariantIndexByProduct = new Map();
@@ -14371,11 +14386,11 @@ function enterPartyPage(tab){
 // ---------- Render List (Customers یا Suppliers، tab کے مطابق) ----------
 // ---------- کمپیکٹ لسٹ رو کے لیے فون آئیکنز — بقایہ رقم ہو تو پیغام خودکار پہلے سے لکھا ہوا ہو ----------
 function buildQuickContactIcons(phone, name, dueAmount, dueType){
+  // ---------- صدام کی ہدایت: صرف واٹس ایپ اور کال کے آئیکن رکھیں، باقی (SMS/Gmail) ہٹا دیں ----------
   if(!phone){
     return `
-      <span class="prIconBtn cDisabled">📞</span>
-      <span class="prIconBtn cDisabled">💬</span>
-      <span class="prIconBtn cDisabled">✉️</span>`;
+      <span class="prIconBtn cCall cDisabled">📞</span>
+      <span class="prIconBtn cWhatsapp cDisabled">💬</span>`;
   }
   const digits = formatPhoneForWhatsApp(phone);
   let msg = `Hello ${name}, this is a message from Fruit Mandi POS.`;
@@ -14386,9 +14401,8 @@ function buildQuickContactIcons(phone, name, dueAmount, dueType){
   }
   const encodedMsg = encodeURIComponent(msg);
   return `
-    <a class="prIconBtn cCall" href="tel:+${digits}" title="Call">📞</a>
     <a class="prIconBtn cWhatsapp" href="https://wa.me/${digits}?text=${encodedMsg}" target="_blank" rel="noopener" title="WhatsApp">💬</a>
-    <a class="prIconBtn cSms" href="sms:+${digits}?body=${encodedMsg}" title="SMS">✉️</a>`;
+    <a class="prIconBtn cCall" href="tel:+${digits}" title="Call">📞</a>`;
 }
 
 // ---------- سرچ ہیلپر: نام + موبائل نمبر (کسی بھی حصے سے، خاص طور پر آخری 4 ہندسے) + کسٹم کی ورڈ/نک نیم ----------
@@ -14519,7 +14533,12 @@ function renderPartyList(query = ''){
     }
     const isAdmin = AppState.currentRole === 'admin';
     wrap.innerHTML = filtered.map(c => `
-      <div class="partyRow" id="prow-${c.customer_id}">
+      <div class="partyRow" id="prow-${c.customer_id}" dir="rtl">
+        <!-- ---------- 🔲 خالی چیک باکس — سب سے پہلے (شروع میں)، نام سے پہلے — ٹک لگانے کا مطلب ہے "دوسری فہرست میں بھیجیں"
+             (صدام کی ہدایت FM3SEPTH12): ایڈٹ/کانٹیکٹ بٹنوں سے دور، تاکہ غلطی سے مکس ہو کر ٹچ نہ ہو ---------- -->
+        <label title="${c.isDormant ? 'ٹک لگائیں — واپس حاضر موجود کریں' : 'ٹک لگائیں — کھوہ کھاتے میں بھیجیں'}" style="display:flex; align-items:center; ${isAdmin ? 'cursor:pointer;' : 'cursor:default;'} flex:0 0 auto; margin-inline-end:2px;">
+          <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="event.stopPropagation(); animateAndToggleCustomer(${c.customer_id})" style="width:20px; height:20px; margin:0;">
+        </label>
         <div class="prAvatar">${c.photo ? `<img src="${c.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '👤'}</div>
         <div class="prMain" onclick="openCustomerProfile(${c.customer_id})">
           <div class="prName">${c.name}
@@ -14532,11 +14551,6 @@ function renderPartyList(query = ''){
         <div class="prBalance ${c.total_receivable > 0 ? 'receivable' : 'zero'}">
           ${c.total_receivable > 0 ? 'Rs. ' + c.total_receivable.toLocaleString() : '—'}
         </div>
-        <!-- ---------- 🔲 خالی چیک باکس — ٹک لگانے کا مطلب ہے "دوسری فہرست میں بھیجیں" (صدام کی ہدایت FM3SEPTH10):
-             ہمیشہ خالی نظر آئے گا، ٹک لگاتے ہی یہ قطار سلائیڈ ہو کر غائب ہو جائے گی ---------- -->
-        <label title="${c.isDormant ? 'ٹک لگائیں — واپس حاضر موجود کریں' : 'ٹک لگائیں — کھوہ کھاتے میں بھیجیں'}" style="display:flex; align-items:center; ${isAdmin ? 'cursor:pointer;' : 'cursor:default;'} flex:0 0 auto;">
-          <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="event.stopPropagation(); animateAndToggleCustomer(${c.customer_id})" style="width:19px; height:19px; margin:0;">
-        </label>
         <div class="prContacts">
           ${buildQuickContactIcons(c.phone, c.name, c.total_receivable, 'receivable')}
         </div>
@@ -17907,6 +17921,19 @@ async function openAdvOrderPreview(orderId){
   currentPreviewAdvOrderId = orderId;
   document.getElementById('advOrderPreviewModal').classList.add('show');
   syncAdvOrderStyleControls();
+  // ---------- 🚀 صدام کی ہدایت (FM3SEPTH13): بل کھلتے ہی زیرو زیرو دکھانے اور بٹن دبانے کا انتظار کرنے کے بجائے —
+  // اگر یہ آرڈر کسی ایسے محفوظ شدہ کسٹمر کا ہے جس کا ریٹ ایریا (اسلام آباد/راولپنڈی) پہلے سے سیٹ ہے، تو وہ ریٹ
+  // یہیں خودکار لگا دیں — بل پہلی ہی نظر میں صحیح قیمتوں کے ساتھ کھلے گا، اور غلطی سے زیرو پرنٹ نہیں ہوگا۔
+  // نیا/انجان کسٹمر ہو (رٹ ایریا محفوظ نہ ہو) تو پہلے کی طرح دونوں بٹن نظر آتے رہیں گے تاکہ ایڈمن خود چن سکے ---------- -->
+  if(!order.items.some(i => i.unitPrice > 0) && order.status !== 'fulfilled'){
+    const orderPhoneDigits = normalizeDigits(order.customerPhone || '');
+    const matchedCustomer = (orderPhoneDigits && customersData.find(c => normalizeDigits(c.phone) === orderPhoneDigits))
+      || customersData.find(c => (c.name || '').trim().toLowerCase() === (order.customerName || '').trim().toLowerCase());
+    if(matchedCustomer && (matchedCustomer.rateArea === 'retail' || matchedCustomer.rateArea === 'wholesale')){
+      applyRateToAdvanceOrder(orderId, matchedCustomer.rateArea);
+      setTimeout(() => { persistAllData(); pushAdvanceOrdersToCloud(); }, 0); // ---------- بھاری سیو بیک گراؤنڈ میں، بل دکھنے میں تاخیر نہ ہو ----------
+    }
+  }
   syncAdvOrderRateRow(order);
   await new Promise(r => setTimeout(r, 100)); // ---------- modal کے نظر آنے کے بعد canvas ڈرائنگ (کچھ WebViews کے لیے ضروری) ----------
   await renderAdvOrderToCanvas(order);
@@ -21842,10 +21869,13 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // ---------- ہیڈر لائن — Item ہمیشہ Left رہتا ہے، صرف Qty/Price/Total پر منتخب شدہ الائنمنٹ (Left/Center/Right) لاگو ہوتی ہے ----------
   const headerItemAlign = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
   const colCenterX = (a, b) => headerItemAlign === 'center' ? (a + b) / 2 : (headerItemAlign === 'right' ? b - 6 : a + 6);
-  const headerItemNameX = colX[1] + 6; // ---------- Item کا نام ہمیشہ اپنے کالم کے بائیں کنارے سے شروع ہو، سیٹنگ سے بے اثر ----------
-  const headerQtyX = colCenterX(colX[3], colX[4]);
-  const headerPriceX = colCenterX(colX[4], colX[5]);
-  const headerTotalX = colCenterX(colX[5], colX[6]);
+  // ---------- 🔁 صدام کی ہدایت (FM3SEPTH13): بل اردو کی طرح رائٹ سے لیفٹ (RTL) — کالمز کی جسمانی ترتیب اب
+  // دائیں سے بائیں: نمبر، نام اشیاء، تعداد، قیمت، ٹوٹل۔ اندرونی حساب اب بھی وہی colX رہتا ہے، بس ہر کالم کا
+  // مطلوبہ خانہ اب آئینے کی طرح الٹ (mirror) لیا جاتا ہے — یعنی جو پہلے colX[k] پر تھا اب colX[6-k] پر ہے ---------- -->
+  const headerItemNameX = colX[4] + 6; // ---------- Item کا نام اپنے (اب دائیں طرف والے) کالم کے بائیں کنارے سے شروع ----------
+  const headerQtyX = colCenterX(colX[2], colX[3]);
+  const headerPriceX = colCenterX(colX[1], colX[2]);
+  const headerTotalX = colCenterX(colX[0], colX[1]);
   const headerBaseline = tableTop + headerH - Math.round(7 * rowScale);
   // ---------- ہر کیپشن کا فونٹ اس کے اپنے کالم کی چوڑائی میں فٹ ہونے تک خود بخود چھوٹا ہوتا ہے — زوم جتنا بھی بڑا ہو، کبھی کالم سے باہر نہیں نکلے گا ----------
   const fitHeaderFont = (text, maxWidth) => {
@@ -21872,12 +21902,12 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // اب کیپشن بالکل صاف، ٹھوس اور روشن (بغیر کسی دھندلاہٹ کے) ----------
   // ---------- 🔤 صدام کی ہدایت (FM3SEPTH10): کالم کیپشن اردو میں — پوزیشن/ترتیب بالکل ویسی ہی، صرف الفاظ بدلے ---------- -->
   ctx.textAlign = 'center';
-  fitHeaderFont('نمبر', colX[1]-colX[0]-6);
-  ctx.fillText('نمبر', (colX[0]+colX[1])/2, headerBaseline);
-  drawClippedHeaderCaption('نام اشیاء', colX[1], colX[2], headerItemNameX, 'left');
-  drawClippedHeaderCaption('تعداد', colX[3], colX[4], headerQtyX, headerItemAlign);
-  drawClippedHeaderCaption('نرخ', colX[4], colX[5], headerPriceX, headerItemAlign);
-  drawClippedHeaderCaption('ٹوٹل', colX[5], colX[6], headerTotalX, headerItemAlign);
+  fitHeaderFont('نمبر', colX[6]-colX[5]-6);
+  ctx.fillText('نمبر', (colX[5]+colX[6])/2, headerBaseline);
+  drawClippedHeaderCaption('نام اشیاء', colX[4], colX[5], headerItemNameX, 'left');
+  drawClippedHeaderCaption('تعداد', colX[2], colX[3], headerQtyX, headerItemAlign);
+  drawClippedHeaderCaption('قیمت', colX[1], colX[2], headerPriceX, headerItemAlign);
+  drawClippedHeaderCaption('ٹوٹل', colX[0], colX[1], headerTotalX, headerItemAlign);
 
   hLineY += headerH;
   drawTableHLine(hLineY);
@@ -21932,13 +21962,13 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
     ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`;
-    ctx.fillText(String(idx + 1), (colX[0]+colX[1])/2, rowBaseline);
+    ctx.fillText(String(idx + 1), (colX[5]+colX[6])/2, rowBaseline);
     ctx.textAlign = itemAlign;
     // ---------- سخت کلپنگ — item کا نام کبھی بھی اپنے کالم کی حد سے ایک پکسل بھی باہر نہ چھپے،
     // چاہے measureText میں کہیں معمولی فرق ہی کیوں نہ ہو (خاص طور پر Bold وزن میں) ----------
     ctx.save();
     ctx.beginPath();
-    ctx.rect(colX[1], hLineY, colX[2] - colX[1], rowH);
+    ctx.rect(colX[4], hLineY, colX[5] - colX[4], rowH);
     ctx.clip();
     ctx.fillText(displayName, itemNameX, rowBaseline);
     ctx.restore();
@@ -21956,9 +21986,9 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.fillText(text, textX, rowBaseline);
       ctx.restore();
     };
-    drawClippedNum(qtyText, colX[3], colX[4], qtyX);
-    drawClippedNum(priceText, colX[4], colX[5], priceX);
-    drawClippedNum(totalText, colX[5], colX[6], totalX);
+    drawClippedNum(qtyText, colX[2], colX[3], qtyX);
+    drawClippedNum(priceText, colX[1], colX[2], priceX);
+    drawClippedNum(totalText, colX[0], colX[1], totalX);
     ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`; // ---------- اگلی لائن کے لیے بنیادی فونٹ واپس بحال ----------
     ctx.fillStyle = '#000';
 
@@ -21968,7 +21998,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.font = F('11px');
       ctx.fillStyle = '#9ca3af';
       ctx.textAlign = 'left';
-      ctx.fillText(`↩ ${returnedQty} Returned`, colX[1] + 4, hLineY + 10);
+      ctx.fillText(`↩ ${returnedQty} Returned`, colX[4] + 4, hLineY + 10);
       ctx.fillStyle = '#000';
       ctx.font = F(itemFontWeight + '18px');
       hLineY += returnedNoteExtra;
@@ -22017,8 +22047,9 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   let summaryBottom = y, accountBottom = y, summaryBlockHForCentering = 0;
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    const sumLeft = colX[3]; // ---------- Qty کالم کے شروع سے — یعنی اوپر Qty+Price+Total جتنی ہی چوڑائی (Variant کالم شامل ہونے کے بعد اب انڈیکس 3) ----------
-    const sumRight = tableRight;
+    // ---------- 🔁 FM3SEPTH13: RTL کے بعد Qty+Price+Total کالمز اب بائیں طرف ہیں، اس لیے Payment Summary باکس بھی بائیں طرف ----------
+    const sumLeft = colX[0];
+    const sumRight = colX[3];
     const sumBoxW = sumRight - sumLeft;
     const sumLabelW = Math.round(sumBoxW * 0.5);
     const sumValueX = sumLeft + sumLabelW;
@@ -22060,9 +22091,10 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
   // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع، عمودی طور پر درمیان میں ----------
   if(receiptAccounts.length){
-    const leftCx = (tableLeft + colX[2]) / 2;
+    // ---------- 🔁 FM3SEPTH13: RTL کے بعد نمبر+نام کالمز اب دائیں طرف ہیں، اس لیے QR/اکاؤنٹ بلاک بھی دائیں طرف ----------
+    const leftCx = (colX[4] + tableRight) / 2;
     const lineH = 16;
-    const qrSize = Math.min(130, (colX[2] - tableLeft) - 16);
+    const qrSize = Math.min(130, (tableRight - colX[4]) - 16);
     // ---------- پہلے پورے بلاک کی اونچائی معلوم کر لیں تاکہ اسے دستیاب جگہ میں عمودی طور پر درمیان میں رکھ سکیں ----------
     let blockH = 0;
     receiptAccounts.forEach(acc => {
