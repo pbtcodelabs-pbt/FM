@@ -2143,7 +2143,7 @@
     </div>
     <div id="loginActivationBox" style="display:none; margin-top:10px; text-align:left; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:12px; padding:14px;">
       <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:700;">Activation code (from your developer)</label>
-      <input type="text" id="loginActivationCodeInput" placeholder="6-digit code" style="width:100% !important; border-radius:9px !important; border:1.5px solid #dbe1ea !important;">
+      <input type="text" id="loginActivationCodeInput" placeholder="Enter activation code" style="width:100% !important; border-radius:9px !important; border:1.5px solid #dbe1ea !important;">
       <button onclick="activateFromLoginScreen()" style="margin-top:10px; border-radius:9px !important;">✅ Activate</button>
       <div id="loginActivationMsg" style="margin-top:8px; font-size:13px; font-weight:700;"></div>
     </div>
@@ -5676,7 +5676,24 @@
 // اصل مسئلہ: پہلے پورا ایپ صرف رن ٹائم میموری میں چلتا تھا — نئی پراڈکٹس، کسٹمرز، انوائسز وغیرہ
 // ایپ بند ہوتے ہی ضائع ہو جاتے تھے اور صرف شروعاتی Demo ڈیٹا (Lipton, Sugar) واپس آتا تھا۔
 // اب یہ سب localStorage میں مستقل محفوظ ہوتا ہے — بند/دوبارہ کھولنے پر بھی موجود رہے گا۔
-const STORAGE_PREFIX = 'aioPos_';
+const STORAGE_PREFIX = 'fmPos_';
+const OLD_STORAGE_PREFIX = 'aioPos_'; // ---------- 🍇 صدام کی ہدایت (FM4SEPTF01): پرانا prefix — صرف ایک بار ڈیٹا کاپی کرنے کے لیے رکھا گیا، خود کبھی نہیں لکھا جائے گا ----------
+// ---------- 🍇 صدام کی ہدایت (FM4SEPTF01): ایپ کا نام/شناخت اب مکمل طور پر "Fruit Mandi POS" — پرانے AIOPOS ٹیمپلیٹ کا کوئی حوالہ باقی نہیں رہنا چاہیے۔
+// یہ صرف ایک بار چلے گا: اگر پرانے prefix والا ڈیٹا موجود ہے اور نئے prefix میں ابھی کچھ محفوظ نہیں ہوا، تو خاموشی سے کاپی کر دیں —
+// تاکہ صارف کا پہلے سے محفوظ شدہ ڈیٹا (پراڈکٹس، کسٹمرز، بلز) ضائع نہ ہو ---------- -->
+(function migrateOldStoragePrefix(){
+  try{
+    const hasNew = Object.keys(localStorage).some(k => k.startsWith(STORAGE_PREFIX));
+    if(hasNew) return; // نیا ڈیٹا پہلے سے موجود ہے، کچھ کرنے کی ضرورت نہیں
+    const oldKeys = Object.keys(localStorage).filter(k => k.startsWith(OLD_STORAGE_PREFIX));
+    if(!oldKeys.length) return;
+    oldKeys.forEach(k => {
+      const newKey = STORAGE_PREFIX + k.slice(OLD_STORAGE_PREFIX.length);
+      localStorage.setItem(newKey, localStorage.getItem(k));
+    });
+    console.log('✅ پرانا محفوظ شدہ ڈیٹا نئے prefix میں کاپی ہو گیا:', oldKeys.length, 'keys');
+  }catch(e){ console.warn('Storage prefix migration failed:', e); }
+})();
 
 // ================= PIN Hashing (SHA-256) — عارضی حفاظت جب تک Firebase Auth نہیں آتا =================
 // نوٹ: یہ localStorage میں پلین ٹیکسٹ PIN رکھنے سے بہتر ہے، لیکن حتمی حل نہیں —
@@ -5715,12 +5732,55 @@ async function hashPin(pin){
 // بغیر کسی تبدیلی کے ویسے ہی کام کرتے ہیں) — صرف localStorage میں SAVE کرتے وقت تصویر الگ کر کے
 // IndexedDB میں بھیجی جاتی ہے، اور شروع میں LOAD کے بعد واپس میموری میں جوڑ دی جاتی ہے۔
 // =====================================================================
-const AIO_IMG_DB_NAME = 'aiopos_images_v1';
+const AIO_IMG_DB_NAME = 'fmPos_images_v1';
+const OLD_AIO_IMG_DB_NAME = 'aiopos_images_v1'; // ---------- پرانا نام — صرف ایک بار موجودہ تصویریں نئے ڈیٹا بیس میں کاپی کرنے کے لیے ----------
 const AIO_IMG_STORE = 'images';
 let aioImgDbPromise = null;
+// ---------- 🍇 صدام کی ہدایت (FM4SEPTF01): پرانے IndexedDB (aiopos_images_v1) سے تمام محفوظ شدہ تصویریں
+// نئے ڈیٹا بیس (fmPos_images_v1) میں ایک بار خاموشی سے کاپی کر دیں — تاکہ پہلے سے محفوظ پراڈکٹ/کسٹمر
+// تصویریں غائب نہ ہوں۔ اگر پرانا ڈیٹا بیس موجود ہی نہ ہو تو یہ فوراً بغیر کچھ کیے مکمل ہو جاتا ہے ---------- -->
+function migrateOldImageDb(){
+  return new Promise((resolve) => {
+    if(!window.indexedDB){ resolve(); return; }
+    let handled = false;
+    const finish = () => { if(!handled){ handled = true; resolve(); } };
+    let openOldReq;
+    try{ openOldReq = indexedDB.open(OLD_AIO_IMG_DB_NAME); }catch(e){ finish(); return; }
+    openOldReq.onupgradeneeded = () => { try{ openOldReq.transaction.abort(); }catch(e){} finish(); }; // ---------- پرانا db سرے سے موجود نہیں تھا ----------
+    openOldReq.onerror = () => finish();
+    openOldReq.onsuccess = () => {
+      const oldDb = openOldReq.result;
+      if(!oldDb.objectStoreNames.contains(AIO_IMG_STORE)){ oldDb.close(); finish(); return; }
+      const oldTx = oldDb.transaction(AIO_IMG_STORE, 'readonly');
+      const getAllKeys = oldTx.objectStore(AIO_IMG_STORE).getAllKeys();
+      const getAllVals = oldTx.objectStore(AIO_IMG_STORE).getAll();
+      oldTx.oncomplete = () => {
+        oldDb.close();
+        const keys = getAllKeys.result || [], vals = getAllVals.result || [];
+        if(!keys.length){ finish(); return; }
+        const newReq = indexedDB.open(AIO_IMG_DB_NAME, 1);
+        newReq.onupgradeneeded = () => {
+          const db = newReq.result;
+          if(!db.objectStoreNames.contains(AIO_IMG_STORE)) db.createObjectStore(AIO_IMG_STORE);
+        };
+        newReq.onsuccess = () => {
+          const newDb = newReq.result;
+          const newTx = newDb.transaction(AIO_IMG_STORE, 'readwrite');
+          const store = newTx.objectStore(AIO_IMG_STORE);
+          keys.forEach((k, i) => store.put(vals[i], k));
+          newTx.oncomplete = () => { console.log('✅ پرانی تصویریں نئے ڈیٹا بیس میں کاپی ہو گئیں:', keys.length); finish(); };
+          newTx.onerror = () => finish();
+        };
+        newReq.onerror = () => finish();
+      };
+      oldTx.onerror = () => { oldDb.close(); finish(); };
+    };
+    setTimeout(finish, 4000); // ---------- حفاظتی ٹائم آؤٹ — کبھی بھی ایپ اسی پر رکی نہ رہے ----------
+  });
+}
 function openImgDb(){
   if(aioImgDbPromise) return aioImgDbPromise;
-  aioImgDbPromise = new Promise((resolve, reject) => {
+  aioImgDbPromise = migrateOldImageDb().then(() => new Promise((resolve, reject) => {
     if(!window.indexedDB){ reject(new Error('IndexedDB not supported')); return; }
     const req = indexedDB.open(AIO_IMG_DB_NAME, 1);
     req.onupgradeneeded = () => {
@@ -5729,7 +5789,7 @@ function openImgDb(){
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
-  });
+  }));
   return aioImgDbPromise;
 }
 async function idbSetImage(key, dataUrl){
@@ -6105,7 +6165,7 @@ async function backupToGoogleDrive(){
       const fileContent = JSON.stringify(backup);
 
       const metadata = { name: fileName, mimeType: 'application/json', parents: [folderId] };
-      const boundary = '-------aiopos' + Date.now();
+      const boundary = '-------fmpos' + Date.now();
       const multipartBody =
         `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
         `--${boundary}\r\nContent-Type: application/json\r\n\r\n${fileContent}\r\n` +
@@ -6664,7 +6724,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM3SEPTTH37';
+const APP_BUILD_VERSION = 'FM4SEPFR01';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -22322,10 +22382,13 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
 
   // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع، عمودی طور پر درمیان میں ----------
   if(receiptAccounts.length){
-    // ---------- 🔁 FM3SEPTH23: RTL کے بعد نمبر+نام کالمز اب دائیں طرف ہیں، اس لیے QR/اکاؤنٹ بلاک بھی دائیں طرف ----------
-    const leftCx = (colX[4] + tableRight) / 2;
+    // ---------- 🐛 صدام کی ہدایت (FM4SEPTF01): پہلے یہ بلاک صرف تنگ "نمبر" کالم کی چوڑائی میں سکڑا ہوا تھا (colX[4] سے tableRight)
+    // جو کہ QR کوڈ کے لیے بہت کم جگہ تھی اور لے آؤٹ ٹوٹا ہوا/اوورلیپ نظر آتا تھا۔ اب یہ "نام اشیاء" + "نمبر" دونوں
+    // کالمز کی مشترکہ چوڑائی (colX[3] سے tableRight) استعمال کرتا ہے — بالکل اسی چوڑائی کے برابر جتنی "ادائیگی کی تفصیل"
+    // باکس دوسری طرف لیتا ہے، تاکہ QR کوڈ صاف، بڑا اور بغیر اوورلیپ کے نظر آئے ---------- -->
+    const leftCx = (colX[3] + tableRight) / 2;
     const lineH = 16;
-    const qrSize = Math.min(130, (tableRight - colX[4]) - 16);
+    const qrSize = Math.min(150, (tableRight - colX[3]) - 16);
     // ---------- پہلے پورے بلاک کی اونچائی معلوم کر لیں تاکہ اسے دستیاب جگہ میں عمودی طور پر درمیان میں رکھ سکیں ----------
     let blockH = 0;
     receiptAccounts.forEach(acc => {
