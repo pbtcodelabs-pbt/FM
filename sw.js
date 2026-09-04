@@ -21,7 +21,7 @@
 // حرف بہ حرف ایک جیسا رکھیں (نہ چھوٹا کریں نہ فارمیٹ بدلیں)۔ مکمل تفصیل index.html میں
 // APP_BUILD_VERSION کے اوپر والے کمنٹ میں موجود ہے۔
 
-const CACHE_VERSION = 'FMہفتہ5ستمبرصبح4بجکر23منٹ';
+const CACHE_VERSION = 'FMہفتہ5ستمبرصبح4بجکر46منٹ';
 const CACHE_NAME = `fruit-mandi-pos-${CACHE_VERSION}`;
 
 // ---------- یہ فائلیں انسٹال کے وقت ہی محفوظ کر لی جائیں گی — آف لائن پہلی بار کھلنے کے لیے ضروری ----------
@@ -35,7 +35,11 @@ const PRECACHE_URLS = [
   './icon-512.png',
   './JameelNooriNastaleeq-Regular.ttf',
   './JameelNooriNastaleeq-Kasheeda.ttf',
-  './PDMS_Multan_Regular.ttf'
+  './PDMS_Multan_Regular.ttf',
+  // ---------- 🐛 صدام کی ہدایت (5 ستمبر) اہم فکس: سٹاک رپورٹ/انوائس کا "🖨️ پرنٹ (A4)" بٹن انٹرنیٹ نہ ہونے
+  // پر کام نہیں کر رہا تھا — کیونکہ jsPDF لائبریری CDN سے ہر بار تازہ لوڈ ہوتی تھی، کبھی کیش نہیں ہوتی تھی۔
+  // اب اسے بھی پہلی بار (انٹرنیٹ کے ساتھ) کھلتے ہی محفوظ کر لیا جائے گا، تاکہ بعد میں آف لائن بھی پرنٹ چلے ---------- -->
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
 // ---------- 📦 INSTALL: بنیادی فائلیں کیش میں رکھ دیں — ہر فائل الگ سے، تاکہ اگر کوئی ایک فائل
@@ -74,8 +78,25 @@ self.addEventListener('fetch', (event) => {
   if(req.method !== 'GET') return; // ---------- POST/PUT وغیرہ (جیسے Firestore کالز) کبھی کیش نہ ہوں ----------
 
   const url = new URL(req.url);
-  // ---------- صرف اسی اوریجن کی فائلیں ہینڈل کریں — Firestore/گوگل فونٹس وغیرہ باہر جانے دیں (نیٹ ورک پر ہی چھوڑ دیں) ----------
+  // ---------- 🐛 صدام کی ہدایت (5 ستمبر) اہم فکس: پہلے یہاں کوئی بھی دوسری ویب سائٹ (CDN وغیرہ) کی فائل
+  // بالکل کیش نہیں ہوتی تھی — چاہے وہ پہلے کیش میں موجود بھی ہو، آف لائن ہونے پر فوراً ناکام ہو جاتی تھی۔
+  // اسی وجہ سے "پرنٹ (A4)" بٹن انٹرنیٹ نہ ہونے پر کام نہیں کرتا تھا (jsPDF لائبریری CDN سے آتی ہے)۔
+  // اب مخصوص، محفوظ CDN فائلیں (jsPDF، گوگل فونٹس) بھی کیش ہوں گی — Firestore وغیرہ اب بھی براہ راست نیٹ ورک پر ہی رہیں گی ---------- -->
+  const CACHEABLE_CROSS_ORIGIN_HOSTS = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
   if(url.origin !== self.location.origin){
+    if(CACHEABLE_CROSS_ORIGIN_HOSTS.includes(url.hostname)){
+      event.respondWith(
+        caches.match(req).then((cached) => {
+          if(cached) return cached;
+          return fetch(req).then((res) => {
+            const resClone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+            return res;
+          }).catch(() => cached);
+        })
+      );
+    }
+    // ---------- باقی سب (Firestore کالز وغیرہ) — ہمیشہ کی طرح براہ راست نیٹ ورک پر ہی چھوڑ دیں ----------
     return;
   }
 
