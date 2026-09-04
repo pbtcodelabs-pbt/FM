@@ -146,29 +146,35 @@
     transform:translateX(100vw);
     animation:testShimmer 2.4s linear infinite, sparklePulse 1.3s ease-in-out infinite;
   }
-  /* ---------- ➡️ صدام کی ہدایت (FM4SEPFR10): پہلا پیغام (وہاب/لاگ ان) دائیں سے بائیں (RTL) — پہلے جیسا ہی ---------- */
+  /* ---------- ➡️⬅️ صدام کی ہدایت (FM4SEPFR13): تینوں پیغامات (لاگ ان، سبسکرپشن، اسکرین شاٹ) اب بالکل ایک ہی
+       رفتار/وقت پر چلتے ہیں (سنکرونائزڈ) — نہ زیادہ تیز نہ زیادہ آہستہ — تاکہ ایک پیغام نکلتے ہی فوراً اگلا آ جائے،
+       خالی سکرین زیادہ دیر نظر نہ آئے۔ سمت پہلے جیسی ہی رہی: پہلا پیغام دائیں سے (RTL)، باقی دو بائیں سے (LTR) ---------- */
   .loginMarqueeText.mqPlayRTL{
     animation-name: loginMarqueeSlideRTL, testShimmer, sparklePulse;
-    animation-duration: 28s, 2.4s, 1.3s;
+    animation-duration: 18s, 2.4s, 1.3s;
     animation-timing-function: linear, linear, ease-in-out;
     animation-iteration-count: 1, infinite, infinite;
     animation-fill-mode: forwards, none, none;
   }
-  /* ---------- ⬅️ صدام کی ہدایت (FM4SEPFR10): باقی دو اردو پیغامات (سبسکرپشن، اسکرین شاٹ) بائیں سے داخل ہو کر
-       دائیں طرف باہر نکلیں (LTR) — رفتار بھی پہلے سے تھوڑی مزید آہستہ ---------- */
   .loginMarqueeText.mqPlayLTR{
     animation-name: loginMarqueeSlideLTR, testShimmer, sparklePulse;
-    animation-duration: 28s, 2.4s, 1.3s;
+    animation-duration: 18s, 2.4s, 1.3s;
     animation-timing-function: linear, linear, ease-in-out;
     animation-iteration-count: 1, infinite, infinite;
     animation-fill-mode: forwards, none, none;
   }
-  /* ---------- 🤍 صدام کی ہدایت (FM4SEPFR11): سبسکرپشن اور مسئلہ/مدد والے دو پیغامات کو سادہ سفید رنگ میں،
-       بغیر گلو کے، اور تھوڑی تیز رفتار سے چلانے کے لیے علیحدہ کلاسیں — لاگ ان والا پیغام (mqPartLogin) بالکل
-       اپنی اصل رفتار اور سنہری چمک کے ساتھ رہے، اس کو ہاتھ نہیں لگایا ---------- */
-  .loginMarqueeText.mqPlayLTR.mqFast{
+  /* ---------- 🤍 صدام کی ہدایت (FM4SEPFR11): سبسکرپشن اور مسئلہ/مدد والے دو پیغامات پر گلو (چمکتا ہالہ) نہیں
+       ہونا چاہیے (سادہ سفید رنگ کے ساتھ گلو برا لگتا ہے) — رفتار وہی مشترکہ 18s، صرف sparklePulse ہٹا دیا گیا ---------- */
+  .loginMarqueeText.mqPlayRTL.mqNoGlow{
+    animation-name: loginMarqueeSlideRTL, testShimmer;
+    animation-duration: 18s, 2.4s;
+    animation-timing-function: linear, linear;
+    animation-iteration-count: 1, infinite;
+    animation-fill-mode: forwards, none;
+  }
+  .loginMarqueeText.mqPlayLTR.mqNoGlow{
     animation-name: loginMarqueeSlideLTR, testShimmer;
-    animation-duration: 14s, 2.4s;
+    animation-duration: 18s, 2.4s;
     animation-timing-function: linear, linear;
     animation-iteration-count: 1, infinite;
     animation-fill-mode: forwards, none;
@@ -3069,7 +3075,7 @@
         <!-- MAIN: Search + full product list -->
         <div class="productMain">
           <div class="productToolbar">
-            <input type="text" id="productSearchInput" placeholder="🔍 Search products..." oninput="renderProductList(this.value)">
+            <input type="text" id="productSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderProductList(this.value)">
             <button onclick="openNewProductModal()">+ New Product</button>
           </div>
           <div class="csvImportBar" style="display:none;">
@@ -3143,7 +3149,7 @@
       <div id="hubTabsBarParties"></div>
 
       <div class="partyToolbar">
-        <input type="text" id="partySearchInput" placeholder="🔍 Search by name or phone..." oninput="renderPartyList(this.value)">
+        <input type="text" id="partySearchInput" placeholder="🔍 نام، فون نمبر یا سیریل نمبر لکھیں" oninput="renderPartyList(this.value)">
         <button onclick="openNewPartyModal()">+ نیا شامل کریں</button>
       </div>
       <!-- ---------- 🗂️ کسٹمر کیٹگرائزیشن — صدام کی ہدایت (FM3SEPTH10): علاقہ/بقایہ/آج کی خریداری فلٹر +
@@ -6514,6 +6520,9 @@ function proceedWithImport(){
       // ورنہ پرانی بیک اپ فائل کا کم نمبر والا کاؤنٹر بحال ہونے پر نئی چیزیں بنتے وقت پرانی id دوبارہ مل سکتی
       // تھی (یہی وہ اصل وجہ تھی جس سے دو مختلف آئٹمز کی مقدار آپس میں ٹکرا جاتی تھی) ----------
       try{ recalcIdCounters(); dedupeVariantIds(); }catch(e){}
+      // ---------- 🔢 پرانی بیک اپ فائل میں سیریل نمبر نہ ہوں تو یہاں بھی دے دیں (نئی ترتیب سے) —
+      // اگر بیک اپ میں پہلے سے موجود ہوں تو وہ ویسے ہی رہیں گے، دوبارہ نہیں بدلیں گے ---------- -->
+      try{ assignInitialProductSerials(); backfillMissingProductSerials(); }catch(e){}
       nextSupplierId = backup.nextSupplierId || nextSupplierId;
       nextUserId = backup.nextUserId || nextUserId;
       nextRequestId = backup.nextRequestId || nextRequestId;
@@ -6801,7 +6810,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR11';
+const APP_BUILD_VERSION = 'FM4SEPFR13';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -8083,7 +8092,7 @@ function buildMarqueeQueue(){
         text: `⭐   آپ کی سبسکرپشن کے ${daysLeft} دن باقی رہ گئے ہیں۔۔`,
         cls: daysLeft < 7 ? 'mqPartSub mqUrgent' : 'mqPartSub',
         dir: 'ltr',
-        fast: true // ---------- 🤍 صدام کی ہدایت (FM4SEPFR11): سفید رنگ، بغیر گلو، تیز رفتار ---------- -->
+        noGlow: true // ---------- 🤍 صدام کی ہدایت (FM4SEPFR13): سفید رنگ، بغیر گلو، سب کی رفتار یکساں ---------- -->
       });
     }
   }
@@ -8093,7 +8102,7 @@ function buildMarqueeQueue(){
     text: '📸   پیارے بھائی، اس ایپ کے اندر جو بھی مسئلہ نظر آئے، اسی وقت اس کا اسکرین شاٹ لے کر مجھے بھیج دیا کریں',
     cls: 'mqPartNotice',
     dir: 'ltr',
-    fast: true // ---------- 🤍 صدام کی ہدایت (FM4SEPFR11): سفید رنگ، بغیر گلو، تیز رفتار ---------- -->
+    noGlow: true // ---------- 🤍 صدام کی ہدایت (FM4SEPFR13): سفید رنگ، بغیر گلو، سب کی رفتار یکساں ---------- -->
   });
   return q;
 }
@@ -8113,11 +8122,11 @@ function playNextMarqueeMessage(){
 
   // ---------- ♻️ ہر پیغام کے لیے حرکت نئے سرے سے شروع کروائیں (ری فلو کروا کر) — پہلا پیغام RTL،
   // باقی دو LTR (صدام کی ہدایت FM4SEPFR10) ---------- -->
-  wrap.classList.remove('mqPlayRTL', 'mqPlayLTR', 'mqFast');
+  wrap.classList.remove('mqPlayRTL', 'mqPlayLTR', 'mqNoGlow');
   void wrap.offsetWidth; // force reflow
-  // ---------- 🤍 صدام کی ہدایت (FM4SEPFR11): سبسکرپشن اور مدد والے پیغامات mqFast کلاس سے تھوڑی تیز رفتار
-  // اور بغیر گلو کے چلیں تاکہ ایک پیغام ختم ہونے کے فورا بعد اگلا نظر آئے، خالی سکرین زیادہ دیر نہ رہے ---------- -->
-  if(msg.fast) wrap.classList.add('mqFast');
+  // ---------- 🤍 صدام کی ہدایت (FM4SEPFR13): سبسکرپشن اور مدد والے پیغامات بغیر گلو کے چلیں —
+  // رفتار اب تینوں پیغامات کی ایک جیسی ہے (18s)، صرف گلو کا فرق ہے ---------- -->
+  if(msg.noGlow) wrap.classList.add('mqNoGlow');
   wrap.classList.add(msg.dir === 'ltr' ? 'mqPlayLTR' : 'mqPlayRTL');
 
   mqQueueIdx = (mqQueueIdx + 1) % queue.length;
@@ -10682,6 +10691,7 @@ function saveQuickAddItem(){
       purchase, retail: sale, wholesale: sale * 0.92, stock, lowStockAt:5, location:'', unit, expiryDate:'', image: qaPhotoDataUrl || null
     }]
   });
+  backfillMissingProductSerials(); // ---------- نئی سبزی کو فوراً اگلا خالی سیریل نمبر مل جائے ---------- -->
 
   // ---------- context کے مطابق صحیح جگہ شامل کریں ----------
   if(quickAddContext === 'po'){
@@ -10875,6 +10885,26 @@ let productsData = loadFromStorage('products', PRODUCTS_SEED_DATA);
 let productVariantTypes = loadFromStorage('productVariantTypes', ['فی کلو', 'ٹوکری', 'شاپر', 'کارٹن', 'دھڑی', 'پیکٹ']);
 let nextProductId = loadFromStorage('nextProductId', 10);
 let nextVariantId = loadFromStorage('nextVariantId', 28);
+
+// =====================================================================
+// 🔢 صدام کی ہدایت (FM4SEPFR12): ہر سبزی (پراڈکٹ) کو ایک مستقل، منفرد سیریل نمبر (serial_no) —
+// حاضر ہو یا غیر حاضر، فرق نہیں پڑتا، نمبر ہمیشہ اسی آئٹم کے ساتھ رہے گا، کبھی تبدیل یا دوبارہ ترتیب نہیں ہوگا۔
+// پہلی بار (ایک ہی دفعہ) موجودہ تمام سبزیوں کو نام کے اردو حروفِ تہجی کی ترتیب سے 1 سے شروع کر کے نمبر دیے
+// جاتے ہیں — چونکہ ایک ہی نام کی مختلف قسمیں (مثلاً "ٹماٹر بوری"، "ٹماٹر توری"، "ٹماٹر شاپر") نام میں مشترک
+// ابتدائی لفظ رکھتی ہیں، یہ خودکار الگورتھم انہیں ساتھ ساتھ لے آتا ہے۔ اس کے بعد بننے والی ہر نئی سبزی کو
+// اگلا خالی نمبر (زیادہ سے زیادہ موجودہ نمبر + 1) مل جاتا ہے، تاکہ پرانے نمبر کبھی نہ ہلیں ---------- -->
+function assignInitialProductSerials(){
+  if(loadFromStorage('productSerialsAssignedV1', false)) return; // پہلے ہی ہو چکا — دوبارہ نہیں کرنا
+  const sorted = [...productsData].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ur', {numeric:true, sensitivity:'base'}));
+  sorted.forEach((p, idx) => { p.serial_no = idx + 1; });
+  saveToStorage('productSerialsAssignedV1', true);
+}
+// ---------- نئی شامل ہونے والی کسی بھی سبزی کو، اگر اس کا سیریل نمبر ابھی خالی ہو، اگلا نمبر دے دیں —
+// موجودہ کسی سبزی کا نمبر کبھی نہیں بدلتا ---------- -->
+function backfillMissingProductSerials(){
+  let maxSerial = productsData.reduce((m, p) => Math.max(m, p.serial_no || 0), 0);
+  productsData.forEach(p => { if(!p.serial_no){ maxSerial++; p.serial_no = maxSerial; } });
+}
 
 // ---------- 🛠️ خرابی کی اصل جڑ کی مرمت: کبھی کبھار دو الگ الگ آئٹمز کی variant_id آپس میں ٹکرا جاتی تھی
 // (ایک ہی نمبر دو مختلف چیزوں کو مل جاتا تھا)۔ چونکہ Order Taking، Billing وغیرہ ہر جگہ آئٹم کو اسی
@@ -11493,6 +11523,7 @@ function confirmProductCsvImport(){
     });
   });
 
+  backfillMissingProductSerials(); // ---------- امپورٹ کی گئی نئی سبزیوں کو بھی سیریل نمبر مل جائے ---------- -->
   document.getElementById('productImportPreviewModal').classList.remove('show');
   pendingProductImportRows = [];
   refreshAllScreens();
@@ -12043,11 +12074,21 @@ function renderProductList(query = ''){
     absentBtn.style.color = !isPresent ? '#fff' : 'var(--text)';
   }
 
-  let filtered = productsData.filter(p => p.name.toLowerCase().includes(query));
+  // ---------- 🔢 صدام کی ہدایت (FM4SEPFR12): سرچ بار خود بخود پہچان لے — اگر صرف ہندسے لکھے گئے ہیں
+  // تو سیریل نمبر سے ملاؤ (بالکل وہی ایک نمبر، جیسے "25" لکھیں تو صرف نمبر 25 والی سبزی آئے)،
+  // ورنہ نام سے تلاش کریں (پہلے کی طرح) ---------- -->
+  const queryIsNumeric = query !== '' && /^\d+$/.test(query);
+  let filtered = productsData.filter(p => {
+    if(queryIsNumeric) return String(p.serial_no || '') === query;
+    return p.name.toLowerCase().includes(query);
+  });
   filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
   if(activeProductCategory !== 'all'){
     filtered = filtered.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activeProductCategory);
   }
+  // ---------- فہرست ہمیشہ سیریل نمبر کی ترتیب سے دکھائیں (1، 2، 3...) — نمبر خود کبھی نہیں بدلتا،
+  // بس دکھانے کی ترتیب اسی کے مطابق رہتی ہے ---------- -->
+  filtered.sort((a, b) => (a.serial_no || 0) - (b.serial_no || 0));
 
   renderCategoryRail();
 
@@ -12073,7 +12114,7 @@ function renderProductList(query = ''){
           <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
         </label>
         <div class="pNameWrap">
-          <div class="pName">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
+          <div class="pName"><span style="display:inline-block; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border-radius:6px; padding:1px 6px; margin-inline-end:5px; direction:ltr;">#${p.serial_no ?? '?'}</span>${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
           ${priceStockHtml}
         </div>
         <div class="pActions">
@@ -13278,6 +13319,7 @@ function saveNewProduct(){
     ]
   };
   productsData.push(newProduct);
+  backfillMissingProductSerials(); // ---------- نئی سبزی کو فوراً اگلا خالی سیریل نمبر مل جائے، پرانوں کے نمبر نہیں ہلتے ---------- -->
   persistAllData();
 
   closeNewProductModal();
@@ -14618,7 +14660,7 @@ function enterPartyPage(tab){
   document.getElementById('partyPageTitle').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 کسٹمرز' : '🚚 سپلائرز';
   const partyImportBtnLabel = document.getElementById('partyImportBtnLabel');
   if(partyImportBtnLabel) partyImportBtnLabel.textContent = tab === 'customers' ? 'کسٹمرز' : 'سپلائرز';
-  document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 نام یا فون نمبر سے تلاش کریں...' : '🔍 سپلائر کا نام یا فون نمبر تلاش کریں...';
+  document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 نام، فون نمبر یا سیریل نمبر لکھیں' : '🔍 سپلائر کا نام یا فون نمبر تلاش کریں...';
   document.getElementById('partySearchInput').value = '';
   document.getElementById('bulkReminderBtn').style.display = tab === 'customers' ? 'block' : 'none';
   renderPartyList();
@@ -14661,6 +14703,10 @@ function normalizeDigits(str){
 function partyMatchesQuery(party, rawQuery){
   const query = rawQuery.trim().toLowerCase();
   if(!query) return true;
+
+  // ---------- 🔢 صدام کی ہدایت (FM4SEPFR12): صرف ہندسے لکھیں تو سیدھا اسی سیریل نمبر والا کسٹمر آ جائے —
+  // یہ کسٹمر کا مستقل، منفرد customer_id ہے (کبھی نہیں بدلتا) ---------- -->
+  if(/^\d+$/.test(query) && typeof party.customer_id === 'number' && String(party.customer_id) === query) return true;
 
   if((party.name || '').toLowerCase().includes(query)) return true;
 
@@ -14790,7 +14836,7 @@ function renderPartyList(query = ''){
         </label>
         <div class="prAvatar">${c.photo ? `<img src="${c.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '👤'}</div>
         <div class="prMain" onclick="openCustomerProfile(${c.customer_id})">
-          <div class="prName">${c.name}
+          <div class="prName"><span style="display:inline-block; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border-radius:6px; padding:1px 6px; margin-inline-end:5px; direction:ltr;">#${c.customer_id}</span>${c.name}
             ${c.rateArea ? `<span style="font-size:9.5px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px; margin-inline-start:3px;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}
             ${customerBoughtToday(c.customer_id) ? `<span style="font-size:9.5px; font-weight:700; color:#15803d; background:#dcfce7; border-radius:6px; padding:1px 5px; margin-inline-start:3px;">🔥 آج</span>` : ''}
             ${c.keywords ? ` <span style="font-size:10px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 6px;">${c.keywords}</span>` : ''}
@@ -28574,6 +28620,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // declare ہوتے ہیں — اوپر top-level پر کال کرنے سے وہ ابھی initialize نہیں ہوئے ہوتے (ReferenceError آتا
   // ہے اور پوری اسکرپٹ رک جاتی ہے، جس سے لاگ ان اسکرین آگے نہیں بڑھتی) ----------
   try{ seedVegetableProductsOnce(); }catch(e){ console.error('seedVegetableProductsOnce failed', e); }
+  // ---------- 🔢 صدام کی ہدایت (FM4SEPFR12): سبزیوں کو مستقل سیریل نمبر دیں — پہلی بار نام کی ترتیب سے،
+  // اس کے بعد صرف نئے آئٹمز کو خالی نمبر بھریں، پرانے کبھی نہیں بدلتے ---------- -->
+  try{ assignInitialProductSerials(); backfillMissingProductSerials(); saveProductsLight(); }catch(e){ console.error('product serial assignment failed', e); }
   // ---------- 💼 صدام کے پرانے کاغذی رجسٹر سے 166 کسٹمرز کا سابقہ بقایہ ایک بار خودکار شامل کریں (FM3SEPTH10) ----------
   try{ seedInitialLedgerCustomersOnce(); }catch(e){ console.error('seedInitialLedgerCustomersOnce failed', e); }
   // ---------- 💼 صدام کے پرانے کاغذی رجسٹر سے 14 سپلائرز کا سابقہ بقایہ ایک بار خودکار شامل کریں (FM3SEPTH10) ----------
