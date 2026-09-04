@@ -705,6 +705,9 @@
   #modeRetail.active, #cartModeRetail.active{      background:linear-gradient(180deg, #ef4444, #b91c1c); border-color:#7f1d1d; }
   #modeWholesale.active, #cartModeWholesale.active{   background:linear-gradient(180deg, #22c55e, #15803d); border-color:#14532d; }
 
+  /* ---------- 🔄 صدام کی ہدایت (FM4SEPFR26): بلنگ سکرین کا کمپیکٹ ایریا/ریٹ ڈراپ ڈاؤن — پہلے کے دو بڑے بٹنوں سے چھوٹا ---------- */
+  .billModeSelect{padding:9px 8px; border:1.5px solid #dbe1ea; border-radius:10px; font-size:12.5px; font-weight:800; background:#fff; color:var(--text); cursor:pointer;}
+
   .custSelect{width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:10px; margin-bottom:14px; font-size:14px;}
 
   .totalsBox{border-top:1px dashed #dbe1ea; padding-top:8px; margin-top:auto; font-size:12px;}
@@ -755,7 +758,11 @@
   .productToolbar input{flex:1; padding:11px 14px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;}
   .productToolbar button{padding:0 18px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-weight:600; cursor:pointer;}
 
-  .productList{display:flex; flex-direction:column; gap:10px;}
+  /* ---------- 🔄 صدام کی ہدایت (FM4SEPFR26): سٹاک ایڈجسٹمنٹ/پراڈکٹس فہرست اب سٹاک ٹیکنگ ایپس کی طرح
+       دو کالموں میں (اوپر سے نیچے) — پورا صفحہ استعمال ہو، ایک طرف خالی جگہ نہ بچے ---------- */
+  .productList{display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start;}
+  .productCard.open{grid-column:1 / -1;}
+  @media (max-width:380px){ .productList{grid-template-columns:1fr;} }
 
   /* --- Products screen: full list on the main side + thin category rail on the right --- */
   .productsLayout{display:flex; gap:12px; align-items:flex-start;}
@@ -1039,31 +1046,40 @@
   .hsChip{ border:1.5px solid #dbe1ea; background:#fff; color:var(--text); padding:5px 9px; border-radius:18px; font-size:11px; font-weight:700; cursor:pointer; }
   .hsChip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
 
-  .productCard{background:var(--card); border-radius:var(--radius); box-shadow:0 2px 10px rgba(41,29,10,.07); overflow:hidden;}
-  .productHead{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; cursor:pointer;}
+  .productCard{background:var(--card); border-radius:var(--radius); box-shadow:0 2px 10px rgba(41,29,10,.07); overflow:hidden; width:100%; box-sizing:border-box;}
+  /* ---------- 🔄 صدام کی ہدایت (FM4SEPFR26): پہلے یہ flex:1 پر انحصار کرتا تھا جو بعض موبائل WebViews پر
+       صحیح چوڑائی نہیں لیتا تھا (سارا مواد دائیں طرف سمٹ جاتا، بائیں طرف خالی جگہ بچ جاتی)۔ اب واضح CSS Grid —
+       تین کالم: [چیک باکس] [نام+قیمتیں — باقی ساری جگہ] [ایکشن آئیکنز] — ہر براؤزر/WebView میں یقینی طور پر
+       پوری چوڑائی استعمال ہوگی ---------- */
+  .productHead{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:8px; padding:12px 10px; cursor:pointer; width:100%; box-sizing:border-box;}
   .productHead:hover{background:#f8fafc;}
-  .productHead .pNameWrap{flex:1; min-width:0; display:flex; flex-direction:column; align-items:stretch; gap:5px; overflow:hidden; margin-inline-start:6px;}
-  .productHead .pName{font-weight:700; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;}
+  .productHead .pNameWrap{min-width:0; width:100%; display:flex; flex-direction:column; align-items:stretch; gap:6px; overflow:hidden;}
+  /* ---------- 🟩 نام کے پیچھے ہلکا بیک گراؤنڈ + چوڑا پیڈنگ (صدام کی ہدایت FM4SEPFR26) ---------- */
+  .productHead .pName{font-weight:800; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; background:#f0fdf4; border:1px solid #dcfce7; border-radius:8px; padding:5px 8px; box-sizing:border-box;}
   .productHead .pPriceStock{flex:0 0 auto; font-size:11px; font-weight:800; color:var(--primary-dark); background:#eef2ff; padding:3px 9px; border-radius:8px; white-space:nowrap;}
   /* ---------- 🟩🟥 صدام کی ہدایت (FM4SEPFR25): راولپنڈی ریٹ ہمیشہ سبز، اسلام آباد ریٹ ہمیشہ سرخ — پوری ایپ میں
        یکساں (Stock Adjustment، Products، بلنگ، بل/رسید پرنٹ) تاکہ کبھی الجھن نہ ہو کہ کون سا ریٹ کون سا ہے۔
-       🔄 صدام کی ہدایت (FM4SEPFR25 دوسری تبدیلی): پہلے یہ بٹن اتنے بڑے تھے کہ سبزی کا نام چھپ جاتا تھا —
-       اب نام کو اوپر پوری چوڑائی ملتی ہے، اور اسلام آباد/راولپنڈی/سٹاک کی کیپشن ڈبے کے باہر اوپر، ڈبے کے
-       اندر صرف قیمت/تعداد (رنگ کے ساتھ) ---------- */
-  .rateBadgeRow{display:flex; gap:6px; width:100%;}
-  .rateBadgeCol{flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:1px;}
-  .rbCaption{font-size:9px; font-weight:700; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
-  .rateBadge{display:block; width:100%; text-align:center; font-size:12.5px; font-weight:800; padding:3px 4px; border-radius:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff;}
+       🔄 صدام کی ہدایت (FM4SEPFR26): ڈبے مزید چوڑے/بڑے — راولپنڈی+اسلام آباد ساتھ ساتھ (آدھی آدھی چوڑائی)،
+       سٹاک نیچے پوری چوڑائی میں ---------- */
+  .rateBadgeRow{display:grid; grid-template-columns:1fr 1fr; gap:6px; width:100%;}
+  .rateBadgeCol{min-width:0; display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .rateBadgeCol.rbStockCol{grid-column:1 / -1;}
+  .rbCaption{font-size:10.5px; font-weight:800; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+  .rateBadge{display:block; width:100%; text-align:center; font-size:14px; font-weight:800; padding:5px 6px; border-radius:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; box-sizing:border-box;}
   .rateBadgeRwp{background:#15803d;}
   .rateBadgeIsb{background:#b91c1c;}
   .rateBadgeStock{background:#334155;}
   .productHead .pMeta{font-size:12px; color:var(--muted); margin-top:2px;}
-  .productHead .pActions{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+  .productHead .pActions{display:flex; flex-direction:column; align-items:center; gap:6px; flex:0 0 auto;}
   /* ---------- 🔲 غیر حاضر/حاضر چیک باکس — نام سے پہلے، ایڈٹ بٹن سے واضح فاصلے پر (صدام کی ہدایت FM3SEPTH12) ---------- */
-  .productHead .pPresenceCheck{display:flex; align-items:center; flex:0 0 auto; margin-inline-end:4px;}
+  .productHead .pPresenceCheck{display:flex; align-items:center; flex:0 0 auto;}
   .variantCount{background:#eef2ff; color:var(--primary-dark); font-size:12px; padding:3px 10px; border-radius:20px; font-weight:600;}
-  .productActionBtn{border:none; background:#f1f5f9; color:var(--text); width:28px; height:28px; border-radius:8px; font-size:13px; cursor:pointer; flex:0 0 auto;}
+  .productActionBtn{border:none; background:#f1f5f9; color:var(--text); width:26px; height:26px; border-radius:8px; font-size:12px; cursor:pointer; flex:0 0 auto;}
   .productActionBtn.danger{background:#fef2f2; color:var(--danger);}
+  /* ---------- ✋ ڈریگ ہینڈل — سبزی کے کارڈ کو پکڑ کر اوپر/نیچے/دائیں/بائیں لے جانے کے لیے (صدام کی ہدایت FM4SEPFR26) ---------- */
+  .cardDragHandle{border:none; background:#f1f5f9; color:var(--muted); width:26px; height:26px; border-radius:8px; font-size:13px; cursor:grab; flex:0 0 auto; touch-action:none; display:flex; align-items:center; justify-content:center;}
+  .cardDragHandle:active{cursor:grabbing; background:#e2e8f0;}
+  .productCard.cardDragging{opacity:.55; box-shadow:0 8px 22px rgba(0,0,0,.28); position:relative; z-index:40;}
   .chevron{transition:transform .2s;}
   .productCard.open .chevron{transform:rotate(90deg);}
 
@@ -2654,10 +2670,14 @@
             <span class="switchLabel">Walk-in</span>
           </label>
 
-          <div class="billModeToggle" style="flex:1 1 auto; min-width:0;">
-            <button id="modeRetail" class="active" onclick="setSaleMode('retail')">🔴 اسلام آباد</button>
-            <button id="modeWholesale" onclick="setSaleMode('wholesale')">🟢 راولپنڈی</button>
-          </div>
+          <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR26): پہلے یہاں دو بڑے بٹن (اسلام آباد/راولپنڈی) بہت جگہ گھیرتے تھے —
+               اب ایک چھوٹا سا ڈراپ ڈاؤن، جس میں تیسرا آپشن "🌿 مضافات" بھی شامل (فی الحال راولپنڈی ریٹ پر ہی —
+               اگر مضافات کی الگ قیمت چاہیے تو بتائیں، الگ ریٹ فیلڈ بعد میں شامل کی جا سکتی ہے) ---------- -->
+          <select id="modeAreaSelect" class="billModeSelect" onchange="setSaleMode(this.value)" style="flex:1 1 auto; min-width:0;">
+            <option value="retail">🔴 اسلام آباد ریٹ</option>
+            <option value="wholesale">🟢 راولپنڈی ریٹ</option>
+            <option value="suburbs">🌿 مضافات (راولپنڈی ریٹ)</option>
+          </select>
 
           <!-- ---------- ⚙️ Settings بٹن — یہاں سے ہٹا دیا گیا (اوپر Topbar میں موجود ⚙️ بٹن ہی وہی کام
                کرتا ہے، اس لیے یہاں ڈپلیکیشن تھی — صدام کی ہدایت پر ختم کر دی گئی، کوڈ ڈیلیٹ نہیں کیا) ---------- -->
@@ -2693,7 +2713,9 @@
       </div>
 
       <div id="customerSelectRow" style="display:flex; flex-direction:column; gap:6px; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8;">
-        <div style="display:flex; gap:6px;">
+        <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR26): "All Areas" فلٹر لائن اسکرین شاٹ پر کراس لگا کر ہٹانے کو کہا —
+             خالی جگہ بچانے کے لیے چھپا دی گئی (کوڈ محفوظ ہے، صرف display:none، پرانا رواج) ---------- -->
+        <div style="display:none; gap:6px;">
           <!-- ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر نام/فون سرچ باکس چھپا دیا گیا — اب صرف Area فلٹر + Select Customer ---------- -->
           <input type="text" id="custSearchInput" placeholder="🔍 Search customer by name/phone..." onfocus="openCustomerList()" oninput="openCustomerList(); filterCustomerSelectOptions();"
                  style="display:none; flex:1 1 auto; min-width:0; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
@@ -6903,7 +6925,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR25';
+const APP_BUILD_VERSION = 'FM4SEPFR26';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -9920,12 +9942,14 @@ function removeFromCart(variantId){
 // ---------- Retail / Wholesale Toggle (فوری تمام cart Priceیں تبدیل کرے) ----------
 function setSaleMode(mode){
   Billing.saleMode = mode;
-  document.getElementById('modeRetail').classList.toggle('active', mode==='retail');
-  document.getElementById('modeWholesale').classList.toggle('active', mode==='wholesale');
-  document.getElementById('cartModeRetail').classList.toggle('active', mode==='retail');
-  document.getElementById('cartModeWholesale').classList.toggle('active', mode==='wholesale');
+  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR26): اوپر والا bilModeToggle اب ڈراپ ڈاؤن بن گیا ہے (modeAreaSelect) ---------- -->
+  const areaSel = document.getElementById('modeAreaSelect');
+  if(areaSel && areaSel.value !== mode) areaSel.value = mode;
+  document.getElementById('cartModeRetail')?.classList.toggle('active', mode==='retail');
+  document.getElementById('cartModeWholesale')?.classList.toggle('active', mode==='wholesale');
 
   // موجودہ cart میں موجود Itemز کی Priceیں بھی نئے mode کے مطابق اپڈیٹ کریں
+  // ---------- 🌿 مضافات فی الحال راولپنڈی (wholesale) ریٹ پر — کوئی الگ قیمت فیلڈ ابھی موجود نہیں ---------- -->
   Billing.cart.forEach(item => {
     const product = getFlatVariants().find(p => p.variant_id === item.variant_id);
     if(product) item.unitPrice = mode === 'retail' ? product.retail : product.wholesale;
@@ -9942,6 +9966,9 @@ function syncCartModeControls(){
   document.getElementById('cartModeCounterSale').classList.toggle('active', Billing.counterSale);
   document.getElementById('cartModeRetail').classList.toggle('active', Billing.saleMode === 'retail');
   document.getElementById('cartModeWholesale').classList.toggle('active', Billing.saleMode === 'wholesale');
+  // ---------- 🔄 FM4SEPFR26: نیا کمپیکٹ ایریا ڈراپ ڈاؤن بھی ہمیشہ درست حالت دکھائے ---------- -->
+  const areaSel = document.getElementById('modeAreaSelect');
+  if(areaSel && areaSel.value !== Billing.saleMode) areaSel.value = Billing.saleMode;
   renderCartCustomerStatus();
 }
 
@@ -12172,8 +12199,113 @@ function buildRateBadgesHtml(v, showStock){
   return `<span class="rateBadgeRow">` +
     `<span class="rateBadgeCol"><span class="rbCaption">🟢 راولپنڈی</span><span class="rateBadge rateBadgeRwp" title="راولپنڈی ریٹ">Rs. ${rwp}</span></span>` +
     `<span class="rateBadgeCol"><span class="rbCaption">🔴 اسلام آباد</span><span class="rateBadge rateBadgeIsb" title="اسلام آباد ریٹ">Rs. ${isb}</span></span>` +
-    (showStock !== false ? `<span class="rateBadgeCol"><span class="rbCaption">📦 سٹاک</span><span class="rateBadge rateBadgeStock" title="سٹاک">${stock}</span></span>` : '') +
+    (showStock !== false ? `<span class="rateBadgeCol rbStockCol"><span class="rbCaption">📦 سٹاک</span><span class="rateBadge rateBadgeStock" title="سٹاک">${stock}</span></span>` : '') +
     `</span>`;
+}
+
+// =====================================================================
+// ✋ صدام کی ہدایت (FM4SEPFR26): سبزیوں کے کارڈز کو ہاتھ سے پکڑ کر (⠿ ہینڈل) اوپر/نیچے/دائیں/بائیں
+// اپنی مرضی سے ترتیب دینا — Products اور Stock Adjustment دونوں صفحوں پر ایک ہی مشترکہ ترتیب (چونکہ
+// دونوں ایک ہی productsData دکھاتے ہیں)۔ سائیڈبار مینیو کی ترتیب بدلنے والے فیچر جیسا ہی Pointer Events
+// طریقہ استعمال ہوتا ہے (ٹچ اور ماؤس دونوں پر یکساں کام کرتا ہے)۔ کوئی دستی ترتیب نہ ہو تو ہمیشہ کی طرح
+// سیریل نمبر سے ہی ترتیب رہتی ہے — یہ فیچر صرف اضافی ہے، کچھ نہیں توڑتا ---------- -->
+const PRODUCT_MANUAL_ORDER_KEY = 'fmProductManualOrder';
+function applyManualCardOrder(list){
+  try{
+    const order = loadFromStorage(PRODUCT_MANUAL_ORDER_KEY, []) || [];
+    if(!order.length) return list;
+    const pos = new Map();
+    order.forEach((id, i) => pos.set(id, i));
+    list.sort((a, b) => {
+      const pa = pos.has(a.product_id) ? pos.get(a.product_id) : Infinity;
+      const pb = pos.has(b.product_id) ? pos.get(b.product_id) : Infinity;
+      if(pa !== pb) return pa - pb;
+      return (a.serial_no || 0) - (b.serial_no || 0);
+    });
+  }catch(e){ console.warn('applyManualCardOrder failed', e); }
+  return list;
+}
+function persistManualCardOrderFromDom(containerId){
+  try{
+    const wrap = document.getElementById(containerId);
+    if(!wrap) return;
+    const visibleIds = Array.from(wrap.querySelectorAll(':scope > .productCard[data-pid]'))
+      .map(el => parseInt(el.getAttribute('data-pid'), 10)).filter(id => !isNaN(id));
+    if(!visibleIds.length) return;
+    const prevOrder = loadFromStorage(PRODUCT_MANUAL_ORDER_KEY, []) || [];
+    const visibleSet = new Set(visibleIds);
+    const merged = [];
+    let inserted = false;
+    prevOrder.forEach(id => {
+      if(visibleSet.has(id)){
+        if(!inserted){ merged.push(...visibleIds); inserted = true; }
+      } else {
+        merged.push(id);
+      }
+    });
+    if(!inserted) merged.push(...visibleIds);
+    // ---------- کوئی بھی پراڈکٹ جو پرانی ترتیب میں کبھی شامل نہیں ہوا (نیا آئٹم) اسے آخر میں شامل کریں ---------- -->
+    productsData.forEach(p => { if(!merged.includes(p.product_id)) merged.push(p.product_id); });
+    saveToStorage(PRODUCT_MANUAL_ORDER_KEY, merged);
+  }catch(e){ console.warn('persistManualCardOrderFromDom failed', e); }
+}
+let cardDragState = null;
+function initCardDragReorder(containerId){
+  try{
+    const wrap = document.getElementById(containerId);
+    if(!wrap) return;
+    wrap.querySelectorAll('.cardDragHandle').forEach(handle => {
+      handle.addEventListener('pointerdown', (e) => onCardDragStart(e, containerId));
+    });
+  }catch(e){ console.warn('initCardDragReorder failed', e); }
+}
+function onCardDragStart(e, containerId){
+  try{
+    const card = e.target.closest('.productCard[data-pid]');
+    const wrap = document.getElementById(containerId);
+    if(!card || !wrap) return;
+    e.preventDefault();
+    cardDragState = { card, wrap };
+    card.classList.add('cardDragging');
+    try{ e.target.setPointerCapture(e.pointerId); }catch(err){}
+    document.addEventListener('pointermove', onCardDragMove);
+    document.addEventListener('pointerup', onCardDragEnd);
+    document.addEventListener('pointercancel', onCardDragEnd);
+  }catch(err){ console.warn('onCardDragStart failed', err); }
+}
+function onCardDragMove(e){
+  if(!cardDragState) return;
+  try{
+    const { card, wrap } = cardDragState;
+    const others = Array.from(wrap.querySelectorAll(':scope > .productCard[data-pid]')).filter(el => el !== card);
+    let target = null, bestDist = Infinity;
+    others.forEach(other => {
+      const r = other.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+      if(dist < bestDist){ bestDist = dist; target = other; }
+    });
+    if(target){
+      const cardIdx = Array.from(wrap.children).indexOf(card);
+      const targetIdx = Array.from(wrap.children).indexOf(target);
+      if(cardIdx < targetIdx) wrap.insertBefore(card, target.nextSibling);
+      else wrap.insertBefore(card, target);
+    }
+  }catch(err){ console.warn('onCardDragMove failed', err); }
+}
+function onCardDragEnd(){
+  if(!cardDragState) return;
+  try{
+    cardDragState.card.classList.remove('cardDragging');
+    persistManualCardOrderFromDom(cardDragState.wrap.id);
+    // ---------- دوسری سکرین (Products/Stock Adjustment) بھی فوراً نئی ترتیب سے تازہ ہو جائے ---------- -->
+    try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('productSearchInput')?.value || ''); }catch(e){}
+    try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(); }catch(e){}
+  }catch(err){ console.warn('onCardDragEnd failed', err); }
+  document.removeEventListener('pointermove', onCardDragMove);
+  document.removeEventListener('pointerup', onCardDragEnd);
+  document.removeEventListener('pointercancel', onCardDragEnd);
+  cardDragState = null;
 }
 
 function renderProductList(query = ''){
@@ -12212,6 +12344,8 @@ function renderProductList(query = ''){
   // ---------- فہرست ہمیشہ سیریل نمبر کی ترتیب سے دکھائیں (1، 2، 3...) — نمبر خود کبھی نہیں بدلتا،
   // بس دکھانے کی ترتیب اسی کے مطابق رہتی ہے ---------- -->
   filtered.sort((a, b) => (a.serial_no || 0) - (b.serial_no || 0));
+  // ---------- ✋ صدام کی ہدایت (FM4SEPFR26): اگر کسی نے ڈریگ کر کے دستی ترتیب بنائی ہو تو وہ سیریل نمبر پر غالب رہے ---------- -->
+  applyManualCardOrder(filtered);
 
   renderCategoryRail();
 
@@ -12228,7 +12362,7 @@ function renderProductList(query = ''){
     // ملازم (ایمپلائی) کو یہ نظر نہیں آنی چاہیے، صرف ایڈمن کے پینل پر ---------- -->
     const priceStockHtml = isAdmin ? buildRateBadgesHtml(mainV) : '';
     return `
-    <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}">
+    <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}" data-pid="${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id})" dir="rtl">
         <!-- ---------- 🔲 خالی چیک باکس — سب سے پہلے (شروع میں)، نام سے پہلے، ایڈٹ بٹن سے دور —
              ٹک لگانے کا مطلب ہے "غیر حاضر سبزیوں میں بھیجیں" (صدام کی ہدایت FM3SEPTH12) ---------- -->
@@ -12241,6 +12375,7 @@ function renderProductList(query = ''){
         </div>
         <div class="pActions">
           <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
+          <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
           <button class="productActionBtn danger" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
           <span class="chevron">▶</span>
@@ -12253,6 +12388,7 @@ function renderProductList(query = ''){
   `;
   }).join('');
 
+  initCardDragReorder('productListWrap');
   crossRefreshStockAdjustment();
 }
 
@@ -14723,7 +14859,7 @@ function renderStockAdjustmentScreen(query){
   else if(sortMode === 'stockLow') filtered.sort((a,b) => stockOf(a) - stockOf(b));
   else if(sortMode === 'stockHigh') filtered.sort((a,b) => stockOf(b) - stockOf(a));
   else if(sortMode === 'negFirst') filtered.sort((a,b) => stockOf(a) - stockOf(b));
-  else filtered.sort((a, b) => (a.serial_no || 0) - (b.serial_no || 0)); // ---------- 'serial' ڈیفالٹ ---------- -->
+  else { filtered.sort((a, b) => (a.serial_no || 0) - (b.serial_no || 0)); applyManualCardOrder(filtered); } // ---------- 'serial' ڈیفالٹ — ✋ FM4SEPFR26: دستی ڈریگ ترتیب بھی یہیں لاگو ---------- -->
 
   // ---------- کیٹگری ریل — Products صفحے جیسی ---------- -->
   const rail = document.getElementById('saCategoryRail');
@@ -14756,7 +14892,7 @@ function renderStockAdjustmentScreen(query){
     const mainV = p.variants[0] || {};
     const priceStockHtml = isAdmin ? buildRateBadgesHtml(mainV) : '';
     return `
-    <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="sa-pcard-${p.product_id}">
+    <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="sa-pcard-${p.product_id}" data-pid="${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id}, 'sa-pcard-${p.product_id}')" dir="rtl">
         <label class="pPresenceCheck" title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="${isAdmin ? 'cursor:pointer;' : 'cursor:default;'}" onclick="event.stopPropagation();">
           <input type="checkbox" ${p.isDormant ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('sa-pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
@@ -14766,6 +14902,7 @@ function renderStockAdjustmentScreen(query){
           ${priceStockHtml}
         </div>
         <div class="pActions">
+          <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
           <button class="productActionBtn danger" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
           <span class="chevron">▶</span>
@@ -14778,6 +14915,7 @@ function renderStockAdjustmentScreen(query){
   `;
   }).join('');
 
+  initCardDragReorder('stockAdjustmentListWrap');
   crossRefreshProductList();
 }
 
