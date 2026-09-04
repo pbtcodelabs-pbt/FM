@@ -1103,6 +1103,15 @@
   .vcFieldsArea{padding:14px 16px 4px; background:#fff;}
   .vcFieldFull{margin-bottom:12px;}
   .vcFieldGrid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;}
+  /* ---------- 📏 صدام کی ہدایت (4 ستمبر): ہر پراڈکٹ کی روزمرہ فیلڈز (خرید، مزدوری، ریٹس، سٹاک) اب
+       کارڈ کے اندر ہی، براہ راست ایک لائن میں — ▶ کھولنے کی ضرورت نہیں۔ موبائل پر جگہ کم ہو تو یہ
+       پٹی خود بخود سائیڈ سے سکرول ہو جائے گی (افقی سکرول)، لکھائی کبھی کٹے/پھٹے گی نہیں ---------- */
+  .vcInlineFieldsRow{display:flex; gap:5px; overflow-x:auto; overflow-y:hidden; padding:6px 8px 8px; -webkit-overflow-scrolling:touch; scrollbar-width:thin; direction:rtl;}
+  .vcInlineFieldsRow .vcFieldWrap{flex:0 0 auto; width:60px;}
+  .vcInlineFieldsRow .vcFieldWrap.vcWide{width:250px; background:#fffbeb; border-radius:8px; padding:4px 6px; border:1px dashed #f59e0b;}
+  .vcInlineFieldsRow .vcFieldLabel{font-size:8px; font-weight:800; color:var(--muted); text-transform:none; letter-spacing:0; margin-bottom:2px; display:block; white-space:nowrap; text-align:center;}
+  .vcInlineFieldsRow input{width:100%; padding:5px 2px; border:1px solid #dbe1ea; border-radius:7px; font-size:12px; font-weight:700; text-align:center; background:#fafbfc;}
+  .vcInlineFieldsRow .vcEffectiveRatesNote{font-size:8.5px; white-space:nowrap;}
   .vcFieldLabel{font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; margin-bottom:4px; display:block;}
   .vcFieldWrap input, .vcFieldWrap .vcInputRow{width:100%;}
   .vcFieldWrap input{padding:9px 10px; border:1px solid #dbe1ea; border-radius:9px; font-size:14px; background:#fafbfc;}
@@ -4653,7 +4662,10 @@
       <div id="rlEmployeeView" class="admin-hide-only">
         <!-- ---------- 📊 صدام کی ہدایت (FM3SEPTH10): ملازم بھی اپنی آج کی جمع کردہ وصولی کی رپورٹ خود بنا سکتا ہے —
              اپنے پاس رکھنے، چیک کرنے، یا صدام کو بھیجنے کے لیے (کوئی غلط اندراج تو نہیں ہوا) ---------- -->
-        <button type="button" onclick="generateTodayRecoveryReport()" style="width:100%; padding:12px; margin-bottom:12px; background:linear-gradient(135deg,#134e2c,#0b4a45); color:#fff; border:none; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.2);">📊 میری آج کی وصولی رپورٹ بنائیں</button>
+        <button type="button" onclick="generateTodayRecoveryReport()" style="width:100%; padding:12px; margin-bottom:8px; background:linear-gradient(135deg,#134e2c,#0b4a45); color:#fff; border:none; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.2);">📊 میری آج کی وصولی رپورٹ بنائیں</button>
+        <!-- ---------- 📋 صدام کی ہدایت (5 ستمبر): ملازم کے بھیجے گئے وصولی ریکارڈز کا مستقل ریکارڈ —
+             بھیجنے کے بعد نہ ترمیم ہو سکے نہ حذف، صرف دیکھنا/دوبارہ شیئر کرنا ---------- -->
+        <button type="button" onclick="openMyRecoveryRecords()" style="width:100%; padding:12px; margin-bottom:12px; background:linear-gradient(135deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.2);">📋 میری تمام وصولیوں کا ریکارڈ</button>
         <div id="rlEmployeeList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:70px;"></div>
         <div style="position:sticky; bottom:8px; padding-top:6px;">
           <button type="button" onclick="submitRecoveryList()" style="width:100%; padding:16px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">✅ آج کی وصولی جمع کریں</button>
@@ -4824,6 +4836,19 @@
         </div>
         <div id="mySentOrdersSummary" style="text-align:center; background:#eef2ff; color:var(--primary-dark); border-radius:10px; padding:8px; margin-bottom:10px; font-weight:800; font-size:14px;"></div>
         <div id="mySentOrdersListWrap"></div>
+      </div>
+    </div>
+
+    <!-- ---------- 📋 صدام کی ہدایت (5 ستمبر): ملازم کی بھیجی گئی وصولیوں کا مستقل ریکارڈ — صرف دیکھنے/دوبارہ
+         شیئر کرنے کے لیے، ترمیم یا حذف کا کوئی بٹن نہیں (حذف صرف ایڈمن — صدام حسین — کر سکتے ہیں) ---------- -->
+    <div class="modalOverlay" id="myRecoveryRecordsModal" onclick="if(event.target===this) closeMyRecoveryRecords()" dir="rtl">
+      <div class="modalBox" style="max-width:480px; width:94vw; max-height:85vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <h3 style="margin:0;">📋 میری تمام وصولیوں کا ریکارڈ</h3>
+          <span onclick="closeMyRecoveryRecords()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
+        </div>
+        <div id="myRecoveryRecordsSummary" style="text-align:center; background:#eef2ff; color:var(--primary-dark); border-radius:10px; padding:8px; margin-bottom:10px; font-weight:800; font-size:14px;"></div>
+        <div id="myRecoveryRecordsListWrap"></div>
       </div>
     </div>
 
@@ -6958,7 +6983,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FMجمعہ4ستمبرشام9بجکر19منٹ';
+const APP_BUILD_VERSION = 'FMہفتہ5ستمبرصبح4بجکر23منٹ';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8376,7 +8401,10 @@ function applyUserScreenPermissions(name){
   const singleScreenMode = assignedKeys.length === 1;
   if(singleScreenMode){
     window.__singleAssignedScreen = assignedKeys[0];
-    document.body.classList.add('single-screen-employee');
+    // ---------- 🏠 صدام کی ہدایت (4 ستمبر): صرف ایک اسکرین والے ملازم (مثلاً صرف Order Taking) کو بھی
+    // ہمیشہ ایک Home بٹن ملنا چاہیے — پہلے یہاں navArrowBar مکمل چھپا دیا جاتا تھا، جس سے کام کرتے کرتے
+    // واپس مرکزی صفحے پر جانے کا کوئی راستہ نہیں بچتا تھا۔ اب Home ہمیشہ نظر آئے گا ---------- -->
+    document.querySelectorAll(`[data-screen="home"]`).forEach(el => el.classList.add('perm-allowed'));
   } else {
     // ---------- ایک سے زیادہ اسکرینیں Assign ہوں تو Home آئٹم بھی نظر آئے تاکہ ملازم واپس مین پیج پر آ سکے ----------
     document.querySelectorAll(`[data-screen="home"]`).forEach(el => el.classList.add('perm-allowed'));
@@ -10983,100 +11011,11 @@ function confirmQuickCreditCustomer(){
    (Schema سے مطابقت: products table + product_variants table)
    ===================================================================== */
 
-// ---------- Dummy Products + Variants Data (صرف پہلی بار کے لیے — بعد میں localStorage سے آئے گا) ----------
-const PRODUCTS_SEED_DATA = [
-  {
-    product_id: 1,
-    name: 'Lipton Tea',
-    category: 'Beverages',
-    variants: [
-      {variant_id:1, label:'1kg',  barcode:'8964000111', purchase:700, retail:850, wholesale:780, stock:24, lowStockAt:5, location:'Aisle 4, Shelf B', expiryDate: isoDaysFromToday(45)},
-      {variant_id:2, label:'500g', barcode:'8964000112', purchase:360, retail:450, wholesale:410, stock:40, lowStockAt:10, location:'Aisle 4, Shelf B', expiryDate: isoDaysFromToday(25)},
-      {variant_id:3, label:'250g', barcode:'8964000113', purchase:190, retail:240, wholesale:215, stock:3,  lowStockAt:10, location:'Aisle 4, Shelf B', expiryDate: isoDaysFromToday(12)},
-    ]
-  },
-  {
-    product_id: 2,
-    name: 'Sugar',
-    category: 'Grocery',
-    variants: [
-      {variant_id:4, label:'1kg', barcode:'8964000200', purchase:140, retail:160, wholesale:150, stock:100, lowStockAt:20, location:'Warehouse-1', expiryDate: isoDaysFromToday(4)},
-    ]
-  },
-  // ---------- Waqas Traders کی رسید (12/07/26) سے شامل کیے گئے — Olivia اور Forvil کیٹگریز ----------
-  {
-    product_id: 3,
-    name: 'Olivia',
-    category: 'Olivia',
-    variants: [
-      {variant_id:5,  label:'Color 01', barcode:'', purchase:218, retail:240, wholesale:240, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:6,  label:'Color 02', barcode:'', purchase:225, retail:240, wholesale:240, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:7,  label:'Color 03', barcode:'', purchase:220, retail:240, wholesale:240, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:8,  label:'Color 04', barcode:'', purchase:220, retail:240, wholesale:240, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:9,  label:'Color 06', barcode:'', purchase:217, retail:240, wholesale:240, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:10, label:'Color 08', barcode:'', purchase:217, retail:240, wholesale:240, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:11, label:'Color 09', barcode:'', purchase:220, retail:240, wholesale:240, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:12, label:'Color 11', barcode:'', purchase:220, retail:240, wholesale:240, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:13, label:'Color 12', barcode:'', purchase:217, retail:240, wholesale:240, stock:0, lowStockAt:5, location:'', expiryDate:''},
-    ]
-  },
-  {
-    product_id: 4,
-    name: 'Olivia Lotion',
-    category: 'Olivia',
-    variants: [
-      {variant_id:14, label:'L', barcode:'', purchase:225, retail:250, wholesale:250, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:15, label:'S', barcode:'', purchase:157, retail:170, wholesale:170, stock:0, lowStockAt:5, location:'', expiryDate:''},
-    ]
-  },
-  {
-    product_id: 5,
-    name: 'Bio Amla Oil',
-    category: 'Forvil',
-    variants: [
-      {variant_id:16, label:'100ml', barcode:'', purchase:150, retail:220, wholesale:220, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:17, label:'200ml', barcode:'', purchase:251, retail:320, wholesale:320, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:18, label:'50ml',  barcode:'', purchase:100, retail:120, wholesale:120, stock:0, lowStockAt:5, location:'', expiryDate:''},
-    ]
-  },
-  {
-    product_id: 6,
-    name: 'Bio Amla Shampoo',
-    category: 'Forvil',
-    variants: [
-      {variant_id:19, label:'100ml', barcode:'', purchase:71,  retail:90,  wholesale:90,  stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:20, label:'130ml', barcode:'', purchase:82,  retail:110, wholesale:110, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:21, label:'280ml', barcode:'', purchase:180, retail:230, wholesale:230, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:22, label:'470ml', barcode:'', purchase:226, retail:330, wholesale:330, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:23, label:'720ml', barcode:'', purchase:340, retail:440, wholesale:440, stock:0, lowStockAt:5, location:'', expiryDate:''},
-    ]
-  },
-  {
-    product_id: 7,
-    name: 'Bio Amla Shampoo+Conditioner',
-    category: 'Forvil',
-    variants: [
-      {variant_id:24, label:'825ml', barcode:'', purchase:850, retail:950, wholesale:950, stock:0, lowStockAt:5, location:'', expiryDate:''},
-    ]
-  },
-  {
-    product_id: 8,
-    name: 'Bio Tonic Oil',
-    category: 'Forvil',
-    variants: [
-      {variant_id:25, label:'Default', barcode:'', purchase:130, retail:140, wholesale:140, stock:0, lowStockAt:5, location:'', expiryDate:''},
-    ]
-  },
-  {
-    product_id: 9,
-    name: 'Praima',
-    category: 'Forvil',
-    variants: [
-      {variant_id:26, label:'43', barcode:'', purchase:36, retail:50, wholesale:50, stock:0, lowStockAt:5, location:'', expiryDate:''},
-      {variant_id:27, label:'45', barcode:'', purchase:36, retail:50, wholesale:50, stock:0, lowStockAt:5, location:'', expiryDate:''},
-    ]
-  }
-];
+// ---------- 🧹 صدام کی ہدایت (5 ستمبر) اہم صفائی: پرانا AIUPOS/کاسمیٹکس ڈیمو ڈیٹا (Lipton Tea, Sugar, Olivia,
+// Bio Amla Oil/Shampoo, Bio Tonic Oil, Praima وغیرہ) مکمل حذف — یہ صرف اسی وقت لوڈ ہوتا تھا جب localStorage
+// میں 'products' بالکل خالی ہو (نیا/فریش انسٹال)۔ اب فریش انسٹال بالکل خالی فہرست سے شروع ہوگا — کوئی
+// پرانا/غیر متعلقہ ڈیمو آئٹم دوبارہ کبھی خودکار نظر نہیں آئے گا ---------- -->
+const PRODUCTS_SEED_DATA = [];
 // ---------- ایکسپائری کے لیے آج سے N دن بعد کی تاریخ (YYYY-MM-DD) نکالنے کی مدد گار function ----------
 // (function declaration ہونے کی وجہ سے یہ hoist ہو جاتی ہے، اس لیے اوپر PRODUCTS_SEED_DATA میں بھی استعمال ہو سکتی ہے)
 function isoDaysFromToday(n){
@@ -12448,9 +12387,16 @@ function renderProductList(query = ''){
     if(queryIsNumeric) return String(p.serial_no || '') === query;
     return p.name.toLowerCase().includes(query);
   });
-  filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
-  if(activeProductCategory !== 'all'){
-    filtered = filtered.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activeProductCategory);
+  // ---------- 🔍 صدام کی ہدایت (5 ستمبر) اہم فکس: پہلے سرچ کے باوجود بھی حاضر/غیر حاضر فلٹر لگا رہتا تھا —
+  // اگر کوئی پرانی/انگلش پراڈکٹ "غیر حاضر" میں پڑی ہو اور آپ "حاضر سبزیاں" ٹیب پر ہوں، تو نام لکھ کر سرچ
+  // کرنے کے باوجود وہ نظر نہیں آتی تھی (کہیں ملتی ہی نہیں تھی، نہ حاضر میں نہ غیر حاضر میں بیک وقت)۔
+  // اب جیسے ہی کچھ سرچ کریں، حاضر/غیر حاضر اور کیٹگری دونوں فلٹر نظرانداز ہو جاتے ہیں — تلاش کیا ہوا آئٹم
+  // ہمیشہ نظر آئے گا، چاہے وہ کہیں بھی پڑا ہو، تاکہ آپ اسے فوراً ڈھونڈ کر ڈیلیٹ/درست کر سکیں ---------- -->
+  if(query === ''){
+    filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
+    if(activeProductCategory !== 'all'){
+      filtered = filtered.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activeProductCategory);
+    }
   }
   // ---------- فہرست ہمیشہ سیریل نمبر کی ترتیب سے دکھائیں (1، 2، 3...) — نمبر خود کبھی نہیں بدلتا،
   // بس دکھانے کی ترتیب اسی کے مطابق رہتی ہے ---------- -->
@@ -12469,9 +12415,6 @@ function renderProductList(query = ''){
   const isAdmin = AppState.currentRole === 'admin';
   wrap.innerHTML = filtered.map(p => {
     const mainV = p.variants[0] || {};
-    // ---------- 💰 ایڈمن کو نام کے ساتھ ہی، ایک ہی لائن میں قیمت اور سٹاک نظر آئے (صدام کی ہدایت FM3SEPTH12) —
-    // ملازم (ایمپلائی) کو یہ نظر نہیں آنی چاہیے، صرف ایڈمن کے پینل پر ---------- -->
-    const priceStockHtml = isAdmin ? buildRateBadgesHtml(mainV) : '';
     return `
     <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}" data-pid="${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id})" dir="rtl">
@@ -12482,7 +12425,6 @@ function renderProductList(query = ''){
         </label>
         <div class="pNameWrap">
           <div class="pName"><span style="display:inline-block; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border-radius:6px; padding:1px 6px; margin-inline-end:5px; direction:ltr;">#${p.serial_no ?? '?'}</span>${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
-          ${priceStockHtml}
         </div>
         <div class="pActions">
           <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
@@ -12492,6 +12434,7 @@ function renderProductList(query = ''){
           <span class="chevron">▶</span>
         </div>
       </div>
+      ${isAdmin ? buildInlineFieldsRow(p.product_id, mainV) : ''}
       <div class="variantCardWrap" id="vcWrap-${p.product_id}">
         ${renderVariantCardSection(p.product_id, 'pcard-' + p.product_id)}
       </div>
@@ -12512,6 +12455,52 @@ function crossRefreshStockAdjustment(){
   finally{ window._refreshingProductScreens = false; }
 }
 
+// ---------- 📏 صدام کی ہدایت (4 ستمبر): روزمرہ استعمال ہونے والی 6 فیلڈز — اب ہر کارڈ میں براہ راست،
+// ایک لائن میں (▶ کھولے بغیر)۔ Products اور Stock Adjustment دونوں یہی فنکشن استعمال کرتے ہیں —
+// ایک جگہ بدلیں، ہر جگہ بدل جائے گا ---------- -->
+function buildInlineFieldsRow(productId, v){
+  const isNegative = v.stock < 0;
+  return `
+    <div class="vcInlineFieldsRow" dir="rtl">
+      <div class="vcFieldWrap">
+        <span class="vcFieldLabel">💰 خرید</span>
+        <input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value); vcRecalcTotalPurchase(this)" oninput="vcRecalcTotalPurchase(this)">
+      </div>
+      <div class="vcFieldWrap">
+        <span class="vcFieldLabel">💪 م.خرید</span>
+        <input type="number" value="${v.labor || 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'labor',this.value); vcRecalcTotalPurchase(this)" oninput="vcRecalcTotalPurchase(this)">
+      </div>
+      <div class="vcFieldWrap">
+        <span class="vcFieldLabel">🧮 ٹوٹل خرید</span>
+        <input type="text" class="vcTotalPurchaseField" value="${((v.purchase||0) + (v.labor||0)).toLocaleString()}" readonly style="background:#f1f5f9; font-weight:800; color:var(--primary-dark);">
+      </div>
+      <div class="vcFieldWrap">
+        <span class="vcFieldLabel">💪 م.فروخت</span>
+        <input type="number" value="${v.sellLabor || 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'sellLabor',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="border-color:#fcd34d; color:#b45309;">
+      </div>
+      <div class="vcFieldWrap">
+        <span class="vcFieldLabel" style="color:#b91c1c;">🔴 اسلام آباد</span>
+        <input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fef2f2; border-color:#fca5a5; color:#b91c1c;">
+      </div>
+      <div class="vcFieldWrap">
+        <span class="vcFieldLabel" style="color:#15803d;">🟢 راولپنڈی</span>
+        <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#f0fdf4; border-color:#86efac; color:#15803d;">
+      </div>
+      <div class="vcFieldWrap vcStockWrap">
+        <span class="vcFieldLabel">📦 سٹاک</span>
+        <input type="number" value="${v.stock}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value,this)">
+        <div class="vcStockTag vcLowStockTagCls" style="display:${(!isNegative && v.stock <= v.lowStockAt) ? 'block' : 'none'}; color:#b45309; font-size:7px;">⚠️ کم</div>
+        <div class="vcStockTag vcNegStockTagCls" style="display:${isNegative ? 'block' : 'none'}; color:var(--danger); font-size:7px;">❌ منفی</div>
+      </div>
+      <div class="vcFieldWrap vcWide">
+        <span class="vcFieldLabel" style="color:#78716c;">🧮 مؤثر ریٹ (مزدوری سمیت)</span>
+        <div class="vcEffectiveRatesNote" style="font-weight:700; color:#78716c; text-align:center;">
+          🔴<span class="vcEffIsb">${(Number(v.retail||0) + Number(v.sellLabor||0)).toLocaleString()}</span> · 🟢<span class="vcEffRwp">${(Number(v.wholesale||0) + Number(v.sellLabor||0)).toLocaleString()}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
 let activeVariantIndexByProduct = new Map();
 
 function renderVariantCardSection(productId, cardId){
@@ -12522,12 +12511,13 @@ function renderVariantCardSection(productId, cardId){
   idx = Math.max(0, Math.min(p.variants.length - 1, idx));
   activeVariantIndexByProduct.set(productId, idx);
   const v = p.variants[idx];
-  const isLow = v.stock <= v.lowStockAt && v.stock >= 0;
-  const isNegative = v.stock < 0;
   const expiryTier = getExpiryTier(v.expiryDate);
 
+  // ---------- 📏 صدام کی ہدایت (4 ستمبر): روزمرہ فیلڈز (خرید/مزدوری/ریٹس/سٹاک) اب اوپر مین لائن میں ہی
+  // نظر آتی ہیں (buildInlineFieldsRow سے) — یہاں صرف وہ فیلڈز ہیں جو کبھی کبھار درکار ہوں (Barcode, Expiry,
+  // Location, Batches, Variant کا نام/سائز، اور ایک سے زیادہ variants کے درمیان سوئچ کرنا) ---------- -->
   return `
-    <div class="vcNavBar" style="display:none;">
+    <div class="vcNavBar" style="display:${p.variants.length > 1 ? 'flex' : 'none'};">
       <div class="vcNavTitle">
         ${idx === 0 ? `<span class="vcMainBadge">MAIN</span>` : ''}
         <span>Variant ${idx + 1} of ${p.variants.length}</span>
@@ -12538,11 +12528,6 @@ function renderVariantCardSection(productId, cardId){
       </div>
     </div>
     <div class="vcCard">
-      <div class="vcPhotoArea" style="display:none;">
-        <div class="vcPhotoBox" onclick="triggerImageUpload(${productId},${v.variant_id})" title="Tap to add/change photo">
-          ${v.image ? `<img src="${v.image}">` : `<span class="vcPhotoIcon">📷</span>`}
-        </div>
-      </div>
       <div class="vcFieldsArea">
         <div class="vcFieldWrap vcFieldFull vcNameField" style="display:none;">
           <span class="vcFieldLabel">Variant Name / Size</span>
@@ -12556,50 +12541,12 @@ function renderVariantCardSection(productId, cardId){
           </div>
         </div>
         <div class="vcFieldGrid">
-          <div class="vcFieldWrap">
-            <span class="vcFieldLabel">💰 خرید قیمت</span>
-            <input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value); vcRecalcTotalPurchase(this)" oninput="vcRecalcTotalPurchase(this)">
-          </div>
-          <!-- ---------- 💪 مزدوری خرید — منڈی سے خریدتے وقت جو مزدوری لگتی ہے (صدام کی ہدایت FM3SEPTH10) ---------- -->
-          <div class="vcFieldWrap">
-            <span class="vcFieldLabel">💪 مزدوری خرید</span>
-            <input type="number" value="${v.labor || 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'labor',this.value); vcRecalcTotalPurchase(this)" oninput="vcRecalcTotalPurchase(this)">
-          </div>
-          <!-- ---------- 🧮 ٹوٹل قیمتِ خرید — خودکار (خرید + مزدوری)، صرف ڈسپلے، محفوظ نہیں ہوتا ---------- -->
-          <div class="vcFieldWrap" style="grid-column:1 / -1;">
-            <span class="vcFieldLabel">🧮 ٹوٹل قیمتِ خرید (خودکار)</span>
-            <input type="text" class="vcTotalPurchaseField" value="${((v.purchase||0) + (v.labor||0)).toLocaleString()}" readonly style="background:#f1f5f9; font-weight:800; color:var(--primary-dark);">
-          </div>
-          <!-- ---------- 💪 صدام کی ہدایت (FM4SEPFR30): مزدوری فروخت — کسٹمر کو بیچتے وقت ہر یونٹ پر جو مزدوری لی جاتی ہے،
-               یہاں ایک دفعہ لکھ دیں، بل بنتے وقت خودکار دونوں ریٹس (اسلام آباد + راولپنڈی) میں شامل ہو جائے گی —
-               کسٹمر کے پرنٹ پر الگ سے نظر نہیں آئے گی، صرف حتمی قیمت میں گھلی ہوئی ہوگی ---------- -->
-          <div class="vcFieldWrap" style="grid-column:1 / -1; background:#fffbeb; border-radius:10px; padding:8px; border:1.5px dashed #f59e0b;">
-            <span class="vcFieldLabel" style="color:#b45309;">💪 مزدوری فروخت (فی یونٹ — بل میں خودکار جمع ہوگی)</span>
-            <input type="number" value="${v.sellLabor || 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'sellLabor',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fff; border-color:#fcd34d; font-weight:800; color:#b45309;">
-            <div class="vcEffectiveRatesNote" style="font-size:11px; color:#78716c; margin-top:5px; font-weight:700;">
-              مؤثر ریٹ (مزدوری سمیت): 🔴 اسلام آباد Rs. <span class="vcEffIsb">${(Number(v.retail||0) + Number(v.sellLabor||0)).toLocaleString()}</span> · 🟢 راولپنڈی Rs. <span class="vcEffRwp">${(Number(v.wholesale||0) + Number(v.sellLabor||0)).toLocaleString()}</span>
-            </div>
-          </div>
-          <div class="vcFieldWrap">
-            <span class="vcFieldLabel" style="color:#b91c1c; font-weight:800;">🔴 اسلام آباد ریٹ</span>
-            <input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fef2f2; border-color:#fca5a5; font-weight:800; color:#b91c1c;">
-          </div>
-          <div class="vcFieldWrap">
-            <span class="vcFieldLabel" style="color:#15803d; font-weight:800;">🟢 راولپنڈی ریٹ</span>
-            <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#f0fdf4; border-color:#86efac; font-weight:800; color:#15803d;">
-          </div>
-          <div class="vcFieldWrap vcStockWrap" style="max-width:120px;">
-            <span class="vcFieldLabel">📦 سٹاک</span>
-            <input type="number" value="${v.stock}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value,this)">
-            <div class="vcStockTag vcLowStockTagCls" style="display:none; color:#b45309;">⚠️ Low Stock</div>
-            <div class="vcStockTag vcNegStockTagCls" style="display:${isNegative ? 'block' : 'none'}; color:var(--danger);">❌ Negative Stock</div>
-          </div>
           <div class="vcFieldWrap" style="display:none;">
             <span class="vcFieldLabel">Low Stock Alert At</span>
             <input type="number" value="${v.lowStockAt ?? 0}" onfocus="this.select()" title="Low Stock alert will trigger when stock reaches this number or below" onchange="updateVariantField(${productId},${v.variant_id},'lowStockAt',this.value,this)">
           </div>
-          <div class="vcFieldWrap" style="display:none;">
-            <span class="vcFieldLabel">Expiry Date</span>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">📅 Expiry Date</span>
             <input type="date" class="expiryInput ${expiryTier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)">
           </div>
         </div>
@@ -13422,9 +13369,9 @@ function saveAndCloseVariantCard(productId, cardId, btnEl){
 // دوبارہ بنائے) اپڈیٹ ہو جاتا ہے — باقی پوری اسکرین ساکن رہتی ہے، صارف بلا رکاوٹ اگلی فیلڈ میں جا سکتا ہے۔
 // ---------- 🧮 خرید قیمت + مزدوری = ٹوٹل قیمتِ خرید — inline expand میں لائیو اپڈیٹ (صدام کی ہدایت FM3SEPTH10) ----------
 function vcRecalcTotalPurchase(inputEl){
-  const card = inputEl && inputEl.closest ? inputEl.closest('.vcCard') : null;
+  const card = inputEl && inputEl.closest ? inputEl.closest('.productCard') : null;
   if(!card) return;
-  const inputs = card.querySelectorAll('.vcFieldGrid input[type="number"]');
+  const inputs = card.querySelectorAll('.vcInlineFieldsRow input[type="number"]');
   const purchase = Number(inputs[0]?.value) || 0;
   const labor = Number(inputs[1]?.value) || 0;
   const totalEl = card.querySelector('.vcTotalPurchaseField');
@@ -13432,9 +13379,9 @@ function vcRecalcTotalPurchase(inputEl){
 }
 // ---------- 💪 صدام کی ہدایت (FM4SEPFR30): مزدوری فروخت یا ریٹ بدلتے ہی نیچے "مؤثر ریٹ" فوراً تازہ دکھائیں ---------- -->
 function vcRecalcEffectiveRates(inputEl){
-  const card = inputEl && inputEl.closest ? inputEl.closest('.vcCard') : null;
+  const card = inputEl && inputEl.closest ? inputEl.closest('.productCard') : null;
   if(!card) return;
-  const inputs = card.querySelectorAll('.vcFieldGrid input[type="number"]');
+  const inputs = card.querySelectorAll('.vcInlineFieldsRow input[type="number"]');
   const sellLabor = Number(inputs[2]?.value) || 0;
   const retail = Number(inputs[3]?.value) || 0;
   const wholesale = Number(inputs[4]?.value) || 0;
@@ -13456,6 +13403,12 @@ function updateVariantField(productId, variantId, field, value, inputEl){
 
   // TODO: یہاں product_variants table میں UPDATE query چلے گی
   openProductCards.add(productId); // کارڈ کھلا رہے گا، محض حفاظتی ریکارڈ کے لیے (اب اصل رینڈر پر انحصار نہیں)
+
+  // ---------- 💾 صدام کی ہدایت (4 ستمبر) اہم فکس: پہلے یہاں سے فوری طور پر کچھ محفوظ نہیں ہوتا تھا —
+  // صرف 1.5 سیکنڈ کے خودکار وقفے پر انحصار تھا، جس کی وجہ سے "لکھ کر فوراً باہر نکل جانے" پر کبھی کبھار
+  // ڈیٹا محفوظ نہ ہونے کا احساس ہوتا تھا۔ اب ہر خانے سے نکلتے ہی (onchange پر) فوری، واضح طور پر محفوظ
+  // ہو جاتا ہے — "✅ محفوظ کریں" بٹن دبانے کا انتظار نہیں کرنا پڑتا ---------- -->
+  persistAllData();
 
   if(field === 'stock' || field === 'lowStockAt'){
     const isNegative = variant.stock < 0;
@@ -13500,7 +13453,7 @@ function updateVariantField(productId, variantId, field, value, inputEl){
     return;
   }
   // ---------- باقی فیلڈز (label, barcode, purchase, retail, wholesale, location) کا اسی کارڈ میں کوئی اور بصری اثر نہیں —
-  // اس لیے کوئی re-render درکار نہیں؛ ڈیٹا خاموشی سے محفوظ ہو چکا (persistAllData ہر 1.5 سیکنڈ بعد خودکار) ----------
+  // اس لیے کوئی re-render درکار نہیں؛ ڈیٹا اوپر ہی فوری persistAllData() سے محفوظ ہو چکا ----------
 }
 
 // ---------- جب واقعی پوری Product لسٹ دوبارہ بنانا ضروری ہو (نیا/حذف شدہ variant, نیا Product) —
@@ -15000,9 +14953,13 @@ function renderStockAdjustmentScreen(query){
     if(queryIsNumeric) return String(p.serial_no || '') === q;
     return p.name.toLowerCase().includes(q);
   });
-  filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
-  if(activeProductCategory !== 'all'){
-    filtered = filtered.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activeProductCategory);
+  // ---------- 🔍 صدام کی ہدایت (5 ستمبر) اہم فکس: سرچ کرتے وقت حاضر/غیر حاضر اور کیٹگری فلٹر نظرانداز —
+  // تلاش کیا ہوا آئٹم ہمیشہ نظر آئے، چاہے وہ کہیں بھی پڑا ہو (Products سکرین کی طرح) ---------- -->
+  if(q === ''){
+    filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
+    if(activeProductCategory !== 'all'){
+      filtered = filtered.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activeProductCategory);
+    }
   }
 
   // ---------- منتخب ترتیب کے مطابق فہرست سجائیں — صدام کی ہدایت: پرانے Stock Adjustment کے سارے فلٹر یہاں بھی ---------- -->
@@ -15043,7 +15000,6 @@ function renderStockAdjustmentScreen(query){
   const isAdmin = AppState.currentRole === 'admin';
   wrap.innerHTML = filtered.map(p => {
     const mainV = p.variants[0] || {};
-    const priceStockHtml = isAdmin ? buildRateBadgesHtml(mainV) : '';
     return `
     <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="sa-pcard-${p.product_id}" data-pid="${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id}, 'sa-pcard-${p.product_id}')" dir="rtl">
@@ -15052,7 +15008,6 @@ function renderStockAdjustmentScreen(query){
         </label>
         <div class="pNameWrap">
           <div class="pName"><span style="display:inline-block; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border-radius:6px; padding:1px 6px; margin-inline-end:5px; direction:ltr;">#${p.serial_no ?? '?'}</span>${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
-          ${priceStockHtml}
         </div>
         <div class="pActions">
           <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
@@ -15061,6 +15016,7 @@ function renderStockAdjustmentScreen(query){
           <span class="chevron">▶</span>
         </div>
       </div>
+      ${isAdmin ? buildInlineFieldsRow(p.product_id, mainV) : ''}
       <div class="variantCardWrap" id="sa-vcWrap-${p.product_id}">
         ${renderVariantCardSection(p.product_id, 'sa-pcard-' + p.product_id)}
       </div>
@@ -18102,6 +18058,76 @@ function closeMySentOrders(){
   document.getElementById('mySentOrdersModal').classList.remove('show');
 }
 
+// ---------- 📋 صدام کی ہدایت (5 ستمبر): ملازم کی بھیجی گئی وصولیوں کا مستقل ریکارڈ — نہ ترمیم، نہ حذف،
+// صرف پریویو/دوبارہ شیئر۔ صرف اسی ملازم کی اپنی جمع کردہ وصولیاں (employeeName سے ملاتے ہوئے) ---------- -->
+function openMyRecoveryRecords(){
+  const myName = AppState.currentUser?.name || '';
+  const myEntries = recoveryListData
+    .filter(r => r.employeeName === myName)
+    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const wrap = document.getElementById('myRecoveryRecordsListWrap');
+  const summary = document.getElementById('myRecoveryRecordsSummary');
+
+  const todayStr = new Date().toDateString();
+  const todaysEntries = myEntries.filter(r => new Date(r.createdAt).toDateString() === todayStr);
+  const todaysTotal = todaysEntries.reduce((s,r) => s + (r.amount||0), 0);
+  summary.textContent = `📦 آج ${todaysEntries.length} وصولیاں — Rs. ${todaysTotal.toLocaleString()} — کل ملا کر ${myEntries.length} ریکارڈ`;
+
+  if(myEntries.length === 0){
+    wrap.innerHTML = `<div style="text-align:center; color:var(--muted); padding:30px 10px;">ابھی تک آپ نے کوئی وصولی جمع نہیں کی۔</div>`;
+  } else {
+    wrap.innerHTML = myEntries.map(r => {
+      const dt = new Date(r.createdAt);
+      const dateStr = dt.toLocaleDateString('en-GB') + ' — ' + dt.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+      const statusBadge = r.status === 'confirmed'
+        ? `<span style="font-size:10.5px; color:#fff; background:#15803d; border-radius:7px; padding:2px 8px; font-weight:700;">✅ ایڈمن نے درج کر لیا</span>`
+        : `<span style="font-size:10.5px; color:#fff; background:#b45309; border-radius:7px; padding:2px 8px; font-weight:700;">⏳ ایڈمن کے پاس زیرِ التوا</span>`;
+      return `
+        <div style="background:#fff; border:1.5px solid #e5e9f0; border-radius:12px; padding:12px; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,.05);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-weight:800; font-size:15px;">🧑 ${r.customerName}</span>
+            ${statusBadge}
+          </div>
+          <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">🕐 ${dateStr}</div>
+          <div style="font-size:14px; color:#15803d; font-weight:800;">💰 وصول شدہ: Rs. ${(r.amount||0).toLocaleString()} (${RECOVERY_METHODS[r.method] || r.method})</div>
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <button onclick="reshareRecoveryEntry(${r.id})" style="flex:1; padding:7px; background:#25D366; color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">💬 دوبارہ شیئر</button>
+            <button onclick="warnEmployeeCannotDeleteRecovery()" style="flex:1; padding:7px; background:#fef2f2; color:#b91c1c; border:1px solid #fca5a5; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">🗑️ حذف کریں</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  document.getElementById('myRecoveryRecordsModal').classList.add('show');
+}
+function closeMyRecoveryRecords(){
+  document.getElementById('myRecoveryRecordsModal').classList.remove('show');
+}
+// ---------- 💬 وصولی ریکارڈ کو دوبارہ واٹس ایپ پوسٹر کی صورت میں شیئر کریں — وہی موجودہ خوبصورت پوسٹر سسٹم ---------- -->
+function reshareRecoveryEntry(entryId){
+  const entry = recoveryListData.find(r => r.id === entryId);
+  if(!entry) return;
+  const c = customersData.find(x => x.customer_id === entry.customer_id) || {customer_id: entry.customer_id, name: entry.customerName, phone:''};
+  openRecoveryPosterModal(c, entry);
+}
+// ---------- 🔒 صدام کی ہدایت (5 ستمبر): ملازم کبھی بھی بھیجی گئی وصولی حذف نہیں کر سکتا — صرف صدام حسین (ایڈمن) ---------- -->
+function warnEmployeeCannotDeleteRecovery(){
+  alert('❌ صرف صدام حسین (ایڈمن) ہی یہ وصولی کا اندراج حذف کر سکتے ہیں۔');
+}
+// ---------- ایڈمن کے لیے اصل ڈیلیٹ فنکشن — role کی سختی سے جانچ کے ساتھ ---------- -->
+function deleteRecoveryEntry(entryId){
+  if(AppState.currentRole !== 'admin'){
+    warnEmployeeCannotDeleteRecovery();
+    return;
+  }
+  if(!confirm('کیا آپ واقعی یہ وصولی کا اندراج حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔')) return;
+  recoveryListData = recoveryListData.filter(r => r.id !== entryId);
+  persistAllData();
+  pushRecoveryListToCloud();
+  if(typeof renderRecoveryListAdminView === 'function') renderRecoveryListAdminView();
+}
+
 /* =====================================================================
    💰 RECOVERY LIST — ملازم روزانہ کسٹمرز سے وصول شدہ ادھار درج کرتا ہے (اصل کھاتہ دیکھے بغیر)۔
    ایڈمن اصل کھاتے میں لکھنے کے بعد ہر انٹری Confirm کرتا ہے — تب ہی customer.total_receivable کم ہوتا ہے۔
@@ -18319,6 +18345,7 @@ function renderRecoveryListAdminView(){
            اب صاف سوالیہ انداز — دبانے پر کسٹمر کے کھاتے پر لے جائے گا، وہیں سے اصل تصدیق (OK) ہوگی —
            جب تک وہاں OK نہ دبے، پیسے کھاتے سے نہیں نکلتے، یہ ابھی صرف "کچی" (غیر تصدیق شدہ) انٹری ہے ---------- -->
       <button type="button" onclick="closeSidebar(); openCustomerProfile(${r.customer_id});" style="width:100%; margin-top:8px; padding:9px; background:#fef3c7; color:#92400e; border:1.5px solid #d97706; border-radius:8px; font-weight:800; font-size:12.5px; cursor:pointer;">❓ کھاتے میں درج کریں — کسٹمر کا ریکارڈ دیکھیں</button>
+      <button type="button" onclick="deleteRecoveryEntry(${r.id})" style="width:100%; margin-top:6px; padding:7px; background:#fef2f2; color:#b91c1c; border:1px solid #fca5a5; border-radius:8px; font-weight:700; font-size:11.5px; cursor:pointer;">🗑️ غلط اندراج — حذف کریں (صرف ایڈمن)</button>
     </div>`).join('');
 }
 
