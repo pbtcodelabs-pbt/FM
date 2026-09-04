@@ -123,29 +123,35 @@
        یہ خانہ (wrap) صرف فریم/بیک گراؤنڈ ہے: نیلا پس منظر، سنہری باریک بارڈر — بٹنوں والی utilityBar پٹی
        سے بالکل الگ، اسی کے اوپر — utilityBar کو ہاتھ نہیں لگایا گیا */
   #loginMarqueeWrap{
-    width:100%; height:32px; overflow:hidden; order:9; margin:8px 0 6px;
+    width:100%; height:32px; overflow:hidden; order:9; margin:8px 0 -6px;
     position:relative;
-    background:linear-gradient(90deg, #1e3a8a, #2563eb, #1e3a8a);
-    border-top:1.5px solid #facc15; border-bottom:1.5px solid #facc15;
-    border-left:1px solid rgba(250,204,21,.4); border-right:1px solid rgba(250,204,21,.4);
+    /* ---------- 🎨 صدام کی ہدایت (FM4SEPFR08): نیلا مدھم نہیں، خوبصورت/رچ نیلا — چمک برقرار رکھی گئی ---------- */
+    background:linear-gradient(90deg, #1e40af, #3b82f6, #1e40af);
+    /* ---------- 🥇 صدام کی ہدایت (FM4SEPFR08): پہلے سے تھوڑا زیادہ رچ/خوبصورت سنہری بارڈر ---------- */
+    border-top:2px solid #eab308; border-bottom:2px solid #eab308;
+    border-left:1px solid rgba(234,179,8,.5); border-right:1px solid rgba(234,179,8,.5);
     /* ---------- 📺 صدام کی ہدایت (FM4SEPFR05): راؤنڈ کارنر مکمل ختم — اب بالکل TV بریکنگ نیوز پٹی کی طرح
          سیدھی، کونوں کے بغیر، پوری چوڑائی تک ---------- */
     border-radius:0;
-    box-shadow:0 0 12px rgba(250,204,21,.2);
+    box-shadow:0 0 14px rgba(234,179,8,.35), inset 0 1px 0 rgba(255,255,255,.25);
   }
-  /* ---------- 🔀 صدام کی ہدایت (FM4SEPFR06): علیحدہ سبسکرپشن پٹی ختم — اب لاگ ان کا نام اور سبسکرپشن یاد دہانی
-       دونوں اسی ایک پٹی/بیک گراؤنڈ کے اندر ایک ہی متن کے طور پر اکٹھے چلتے ہیں (loginMarqueeText صرف
-       پوزیشن/حرکت کا خانہ ہے، رنگ اندر موجود دو الگ span پر لگتا ہے) ---------- */
+  /* ---------- 🔁 صدام کی ہدایت (FM4SEPFR08): اب تین پیغامات (لاگ ان، سبسکرپشن، اسکرین شاٹ یاد دہانی) اکٹھے
+       نہیں بلکہ ایک ایک کر کے، ہمیشہ دائیں سے بائیں (RTL)، بہت آہستہ رفتار سے چلتے ہیں — playNextMarqueeMessage()
+       اور buildMarqueeQueue() دیکھیں۔ .mqPlay کلاس ہر پیغام کے لیے دوبارہ لگائی جاتی ہے تاکہ حرکت نئے سرے سے شروع ہو ---------- */
   .loginMarqueeText{
     position:absolute; top:0; left:0; height:32px; line-height:32px;
     white-space:nowrap; will-change:transform;
     font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif;
     font-size:15px; font-weight:700;
-    /* ---------- 🔁 صدام کی ہدایت (FM4SEPFR06): پہلے صرف ایک ہی سمت میں لوپ چلتا تھا — اب alternate کی وجہ سے
-         ایک چکر بائیں سے دائیں مکمل باہر نکلتا ہے، اگلا چکر خودکار دائیں سے بائیں مکمل باہر نکلتا ہے،
-         ہمیشہ اسی ترتیب سے، بغیر رکے ---------- */
-    animation:loginMarqueeSlide 12s linear infinite, testShimmer 2.4s linear infinite, sparklePulse 1.3s ease-in-out infinite;
-    animation-direction: alternate, normal, normal;
+    transform:translateX(100vw);
+    animation:testShimmer 2.4s linear infinite, sparklePulse 1.3s ease-in-out infinite;
+  }
+  .loginMarqueeText.mqPlay{
+    animation-name: loginMarqueeSlideRTL, testShimmer, sparklePulse;
+    animation-duration: 20s, 2.4s, 1.3s;
+    animation-timing-function: linear, linear, ease-in-out;
+    animation-iteration-count: 1, infinite, infinite;
+    animation-fill-mode: forwards, none, none;
   }
   .mqPartLogin{
     /* ---------- 🌟 صدام کی ہدایت (FM4SEPFR05): پہلے سے زیادہ چمکتا، روشن سنہری (bright shiny gold) رنگ —
@@ -169,12 +175,19 @@
     -webkit-background-clip:text; background-clip:text; color:transparent !important;
     filter:drop-shadow(0 1px 3px rgba(0,0,0,.65)) drop-shadow(0 0 6px rgba(239,68,68,.65));
   }
-  /* ---------- بائیں سے دائیں، مکمل طور پر ایک طرف سے باہر نکل کر دوسری طرف سے دوبارہ داخل ہو —
-       FM4SEPFR06: animation-direction:alternate کی وجہ سے اگلا چکر خودکار الٹی سمت (دائیں سے بائیں) میں چلتا ہے،
-       تھوڑی تیز رفتار کے ساتھ (FM4SEPFR05: پہلے سے تھوڑا تیز)، بغیر رکے لوپ چلتا رہے */
-  @keyframes loginMarqueeSlide{
-    0%{ transform:translateX(-100vw); }
-    100%{ transform:translateX(100vw); }
+  /* ---------- 📸 صدام کی ہدایت (FM4SEPFR08): تیسرا پیغام — عبدالوہاب کو اسکرین شاٹ بھیجنے کی یاد دہانی —
+       سبز-سنہری رنگ تاکہ لاگ ان (سنہری) اور سبسکرپشن (نارنجی/سرخ) سے واضح الگ نظر آئے ---------- */
+  .mqPartNotice{
+    background:linear-gradient(90deg, #ecfccb, #84cc16, #d9f99d, #65a30d, #ecfccb);
+    background-size:300% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent !important;
+    filter:drop-shadow(0 1px 3px rgba(0,0,0,.65)) drop-shadow(0 0 6px rgba(132,204,22,.55));
+  }
+  /* ---------- ➡️⬅️ صدام کی ہدایت (FM4SEPFR08): ہمیشہ صرف دائیں سے بائیں (RTL) — الٹرنیٹ سمت ختم —
+       ہر پیغام دائیں طرف سے مکمل داخل ہو کر بائیں طرف مکمل باہر نکل جائے، پھر اگلا پیغام شروع ہو، بہت آہستہ رفتار سے ---------- */
+  @keyframes loginMarqueeSlideRTL{
+    0%{ transform:translateX(100vw); }
+    100%{ transform:translateX(-100vw); }
   }
   /* --- 🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن، پرانا کیلنڈر باکس ہٹا کر (دور کے سال تک بار بار کلک کرنے کی زحمت ختم) --- */
   /* ---------- 🔎 صدام کی ہدایت (FM3SEPTH10): جاری کردہ کوڈز کی فہرست — حالت فلٹر بٹن ---------- */
@@ -2406,11 +2419,11 @@
          کبھی مکمل باہر نہیں جاتی تھی۔ اب ہر ایک پھیرے کے بعد (loop=1 + onfinish) خود بخود سمت الٹ جاتی ہے —
          پہلے دائیں سے بائیں مکمل باہر نکل جاتی ہے، پھر بائیں سے دائیں مکمل باہر نکل جاتی ہے، یوں ہمیشہ کے لیے،
          آہستہ رفتار (scrollamount=3) کے ساتھ ---------- -->
-    <!-- ---------- 🔀 صدام کی ہدایت (FM4SEPFR06): علیحدہ سبسکرپشن پٹی ختم — لاگ ان کا نام (mqLoginPart) اور
-         سبسکرپشن یاد دہانی (mqSubPart) دونوں اسی ایک پٹی کے اندر ایک ہی متن کے طور پر اکٹھے چلتے ہیں،
-         الگ الگ رنگ کے ساتھ (updateTopbarUserBadge / updateSubMarqueeBanner دیکھیں) ---------- -->
+    <!-- ---------- 🔁 صدام کی ہدایت (FM4SEPFR08): تین پیغامات (لاگ ان، سبسکرپشن یاد دہانی، اسکرین شاٹ یاد دہانی)
+         اب اکٹھے نہیں بلکہ ایک ایک کر کے، ہمیشہ دائیں سے بائیں، آہستہ رفتار سے چلتے ہیں —
+         ایک ہی span (mqActivePart) کا متن اور رنگ ہر بار بدلا جاتا ہے (buildMarqueeQueue / playNextMarqueeMessage دیکھیں) ---------- -->
     <div id="loginMarqueeWrap">
-      <span id="loginMarqueeText" class="loginMarqueeText"><span id="mqLoginPart" class="mqPartLogin"></span><span id="mqSubPart" class="mqPartSub" style="display:none;"></span></span>
+      <span id="loginMarqueeText" class="loginMarqueeText"><span id="mqActivePart" class="mqPartLogin"></span></span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px; flex:0 0 auto; width:100%; display:none;">
       <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:none;">Fruit Mandi POS</span>
@@ -4980,6 +4993,10 @@
           <h3>💾 Backup Your Data</h3>
           <div id="lastBackupStatus" style="background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:10px;"></div>
 
+          <!-- ---------- 📥 صدام کی ہدایت (FM4SEPFR09): سیدھا فون میں ڈاؤن لوڈ والا بیک اپ بٹن — Google اکاؤنٹ کے
+               بغیر بھی، ایک ٹیپ میں JSON فائل فون میں آ جائے (تاکہ آسانی سے کسی اور کو بھیجی جا سکے) ---------- -->
+          <button id="localBackupBtn" onclick="exportBackupData()" style="width:100%; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #16a34a, #15803d); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(22,163,74,.35); cursor:pointer; margin-bottom:8px;">📥 Download Backup to Phone</button>
+
           <button id="gdriveBackupBtn" onclick="backupToGoogleDrive()" style="width:100%; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #1a73e8, #0d47a1); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(26,115,232,.35); cursor:pointer;">☁️ Backup to Google Drive</button>
           <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px;"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 4 16.3"/><path d="M12 12v9"/><path d="M8 17l4 4 4-4"/></svg> Restore from Google Drive</button>
         </div>
@@ -6763,7 +6780,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR07';
+const APP_BUILD_VERSION = 'FM4SEPFR09';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -8024,44 +8041,75 @@ function applyRole(role, name){
 // ---------- ✨ صدام کی ہدایت (FM4SEPFR04): پرانا <marquee> ٹیگ ڈیوائس کے WebView میں بالکل ساکت رہتا تھا —
 // اب خالص CSS animation (loginMarqueeSlide keyframes) حرکت دیتی ہے، اس لیے یہاں کوئی JS پوزیشننگ کوڈ درکار نہیں ---------- -->
 
-function updateTopbarUserBadge(){
-  const loginPart = document.getElementById('mqLoginPart');
-  if(!loginPart || !AppState.currentUser) return;
-  const icon = AppState.currentRole === 'admin' ? '👑' : '🧑‍💼';
-  loginPart.textContent = `${icon} ${AppState.currentUser.name} لاگ ان`;
-  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH10): ٹاپ بار کی اصل اونچائی ناپ کر نیچے والی utilityBar پٹی کو
-  // بتائیں کہاں سے چپکنا ہے — ورنہ بڑی تصویر/نام/چمکتی پٹی کی وجہ سے وہ اوپر آ کر اوورلیپ کر دیتی تھی ---------- -->
-  requestAnimationFrame(syncMobileTopbarHeight);
-  // ---------- ✨ صدام کی ہدایت (FM3SEPTH23): اب حرکت خود native <marquee> ٹیگ دیتا ہے — کوئی JS/CSS
-  // پوزیشننگ کا کوڈ درکار نہیں، اس لیے یہاں کچھ اور نہیں کرنا ---------- -->
-  updateSubMarqueeBanner(); // ---------- سبسکرپشن یاد دہانی والا حصہ بھی اسی پٹی کے اندر تازہ کریں ----------
-}
-
-// ---------- 🔔 صدام کی ہدایت (FM4SEPFR06): اسی لاگ ان پٹی کے اندر سبسکرپشن یاد دہانی کا حصہ — صرف Admin کو نظر آئے —
+// ---------- 🔔 صدام کی ہدایت (FM4SEPFR06): سبسکرپشن یاد دہانی — صرف Admin کو نظر آئے —
 // ⚠️ فی الحال ٹیسٹ کے لیے تھریشولڈ بہت بڑا (999) رکھا گیا ہے تاکہ چاہے 29 دن باقی ہوں پھر بھی نظر آئے۔
 // صدام کی تصدیق کے بعد اسے 7 کر دیا جائے گا (صرف سات دن یا اس سے کم باقی رہ جانے پر نظر آئے گا) ---------- -->
 const SUB_MARQUEE_THRESHOLD_DAYS = 999; // ---------- 🧪 ٹیسٹ موڈ — بعد میں 7 کر دیں ----------
-function updateSubMarqueeBanner(){
-  const subPart = document.getElementById('mqSubPart');
-  if(!subPart) return;
 
-  if(AppState.currentRole !== 'admin' || !isSubscriptionActive()){
-    subPart.style.display = 'none'; subPart.textContent = '';
-    requestAnimationFrame(syncMobileTopbarHeight);
-    return;
+// ---------- 🔁 صدام کی ہدایت (FM4SEPFR08): تین پیغامات (لاگ ان، سبسکرپشن یاد دہانی، اسکرین شاٹ یاد دہانی) —
+// اب اکٹھے نظر نہیں آتے، ایک ایک کر کے باری باری، ہمیشہ دائیں سے بائیں، بہت آہستہ رفتار سے چلتے ہیں ---------- -->
+let mqQueueIdx = 0;
+function buildMarqueeQueue(){
+  const q = [];
+  if(AppState.currentUser){
+    const icon = AppState.currentRole === 'admin' ? '👑' : '🧑‍💼';
+    q.push({ text: `${icon}   لاگ ان   ${AppState.currentUser.name}`, cls: 'mqPartLogin' });
   }
-
-  const daysLeft = daysLeftInSubscription();
-  if(daysLeft > SUB_MARQUEE_THRESHOLD_DAYS){
-    subPart.style.display = 'none'; subPart.textContent = '';
-    requestAnimationFrame(syncMobileTopbarHeight);
-    return;
+  if(AppState.currentRole === 'admin' && isSubscriptionActive()){
+    const daysLeft = daysLeftInSubscription();
+    if(daysLeft <= SUB_MARQUEE_THRESHOLD_DAYS){
+      q.push({
+        text: `⭐   آپ کی سبسکرپشن کے ${daysLeft} دن باقی رہ گئے ہیں۔۔`,
+        cls: daysLeft < 7 ? 'mqPartSub mqUrgent' : 'mqPartSub'
+      });
+    }
   }
+  // ---------- 📸 صدام کی ہدایت (FM4SEPFR08): عبدالوہاب کے لیے اسکرین شاٹ بھیجنے کی مستقل یاد دہانی ---------- -->
+  q.push({
+    text: '📸   عبدالوہاب بھائی، اس ایپ کے اندر جو بھی مسئلہ نظر آئے، اسی وقت اس کا اسکرین شاٹ لے کر مجھے بھیج دیا کریں',
+    cls: 'mqPartNotice'
+  });
+  return q;
+}
 
-  // ---------- 🔴 سات دن یا اس سے کم باقی ہوں تو یہ حصہ سرخ رنگ میں بدل جائے (mqUrgent کلاس) ----------
-  subPart.classList.toggle('mqUrgent', daysLeft < 7);
-  subPart.textContent = `   ⭐   آپ کی سبسکرپشن کے ${daysLeft} دن باقی رہ گئے ہیں۔۔`;
-  subPart.style.display = 'inline';
+function playNextMarqueeMessage(){
+  const wrap = document.getElementById('loginMarqueeText');
+  const part = document.getElementById('mqActivePart');
+  if(!wrap || !part || !AppState.currentUser) return;
+
+  const queue = buildMarqueeQueue();
+  if(queue.length === 0) return;
+  if(mqQueueIdx >= queue.length) mqQueueIdx = 0;
+
+  const msg = queue[mqQueueIdx];
+  part.className = msg.cls;
+  part.textContent = msg.text;
+
+  // ---------- ♻️ ہر پیغام کے لیے حرکت (RTL) نئے سرے سے شروع کروائیں (ری فلو کروا کر) ---------- -->
+  wrap.classList.remove('mqPlay');
+  void wrap.offsetWidth; // force reflow
+  wrap.classList.add('mqPlay');
+
+  mqQueueIdx = (mqQueueIdx + 1) % queue.length;
+  requestAnimationFrame(syncMobileTopbarHeight);
+}
+
+function ensureMarqueeCycleListener(){
+  const wrap = document.getElementById('loginMarqueeText');
+  if(!wrap || wrap.dataset.mqBound) return;
+  wrap.dataset.mqBound = '1';
+  wrap.addEventListener('animationend', (e) => {
+    if(e.animationName === 'loginMarqueeSlideRTL') playNextMarqueeMessage();
+  });
+}
+
+function updateTopbarUserBadge(){
+  if(!AppState.currentUser) return;
+  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH10): ٹاپ بار کی اصل اونچائی ناپ کر نیچے والی utilityBar پٹی کو
+  // بتائیں کہاں سے چپکنا ہے — ورنہ بڑی تصویر/نام/چمکتی پٹی کی وجہ سے وہ اوپر آ کر اوورلیپ کر دیتی تھی ---------- -->
+  ensureMarqueeCycleListener();
+  mqQueueIdx = 0; // ---------- نیا لاگ ان ہونے پر لاگ ان پیغام سے دوبارہ شروع کریں ---------- -->
+  playNextMarqueeMessage();
   requestAnimationFrame(syncMobileTopbarHeight);
 }
 
