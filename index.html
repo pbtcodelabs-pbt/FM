@@ -137,7 +137,7 @@
   }
   /* ---------- 🔁 صدام کی ہدایت (FM4SEPFR08): اب تین پیغامات (لاگ ان، سبسکرپشن، اسکرین شاٹ یاد دہانی) اکٹھے
        نہیں بلکہ ایک ایک کر کے، ہمیشہ دائیں سے بائیں (RTL)، بہت آہستہ رفتار سے چلتے ہیں — playNextMarqueeMessage()
-       اور buildMarqueeQueue() دیکھیں۔ .mqPlay کلاس ہر پیغام کے لیے دوبارہ لگائی جاتی ہے تاکہ حرکت نئے سرے سے شروع ہو ---------- */
+       اور buildMarqueeQueue() دیکھیں۔ .mqPlayRTL/.mqPlayLTR کلاس ہر پیغام کے لیے دوبارہ لگائی جاتی ہے تاکہ حرکت نئے سرے سے شروع ہو ---------- */
   .loginMarqueeText{
     position:absolute; top:0; left:0; height:32px; line-height:32px;
     white-space:nowrap; will-change:transform;
@@ -146,9 +146,19 @@
     transform:translateX(100vw);
     animation:testShimmer 2.4s linear infinite, sparklePulse 1.3s ease-in-out infinite;
   }
-  .loginMarqueeText.mqPlay{
+  /* ---------- ➡️ صدام کی ہدایت (FM4SEPFR10): پہلا پیغام (وہاب/لاگ ان) دائیں سے بائیں (RTL) — پہلے جیسا ہی ---------- */
+  .loginMarqueeText.mqPlayRTL{
     animation-name: loginMarqueeSlideRTL, testShimmer, sparklePulse;
-    animation-duration: 20s, 2.4s, 1.3s;
+    animation-duration: 28s, 2.4s, 1.3s;
+    animation-timing-function: linear, linear, ease-in-out;
+    animation-iteration-count: 1, infinite, infinite;
+    animation-fill-mode: forwards, none, none;
+  }
+  /* ---------- ⬅️ صدام کی ہدایت (FM4SEPFR10): باقی دو اردو پیغامات (سبسکرپشن، اسکرین شاٹ) بائیں سے داخل ہو کر
+       دائیں طرف باہر نکلیں (LTR) — رفتار بھی پہلے سے تھوڑی مزید آہستہ ---------- */
+  .loginMarqueeText.mqPlayLTR{
+    animation-name: loginMarqueeSlideLTR, testShimmer, sparklePulse;
+    animation-duration: 28s, 2.4s, 1.3s;
     animation-timing-function: linear, linear, ease-in-out;
     animation-iteration-count: 1, infinite, infinite;
     animation-fill-mode: forwards, none, none;
@@ -183,11 +193,15 @@
     -webkit-background-clip:text; background-clip:text; color:transparent !important;
     filter:drop-shadow(0 1px 3px rgba(0,0,0,.65)) drop-shadow(0 0 6px rgba(132,204,22,.55));
   }
-  /* ---------- ➡️⬅️ صدام کی ہدایت (FM4SEPFR08): ہمیشہ صرف دائیں سے بائیں (RTL) — الٹرنیٹ سمت ختم —
-       ہر پیغام دائیں طرف سے مکمل داخل ہو کر بائیں طرف مکمل باہر نکل جائے، پھر اگلا پیغام شروع ہو، بہت آہستہ رفتار سے ---------- */
+  /* ---------- ➡️⬅️ صدام کی ہدایت (FM4SEPFR08/FM4SEPFR10): پہلا پیغام دائیں سے بائیں (RTL)، باقی دو بائیں سے دائیں
+       (LTR) — ہر پیغام مکمل داخل ہو کر مکمل باہر نکل جائے، پھر اگلا پیغام شروع ہو، بہت آہستہ رفتار سے ---------- */
   @keyframes loginMarqueeSlideRTL{
     0%{ transform:translateX(100vw); }
     100%{ transform:translateX(-100vw); }
+  }
+  @keyframes loginMarqueeSlideLTR{
+    0%{ transform:translateX(-100vw); }
+    100%{ transform:translateX(100vw); }
   }
   /* --- 🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن، پرانا کیلنڈر باکس ہٹا کر (دور کے سال تک بار بار کلک کرنے کی زحمت ختم) --- */
   /* ---------- 🔎 صدام کی ہدایت (FM3SEPTH10): جاری کردہ کوڈز کی فہرست — حالت فلٹر بٹن ---------- */
@@ -6780,7 +6794,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR09';
+const APP_BUILD_VERSION = 'FM4SEPFR10';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -8053,21 +8067,23 @@ function buildMarqueeQueue(){
   const q = [];
   if(AppState.currentUser){
     const icon = AppState.currentRole === 'admin' ? '👑' : '🧑‍💼';
-    q.push({ text: `${icon}   لاگ ان   ${AppState.currentUser.name}`, cls: 'mqPartLogin' });
+    q.push({ text: `${icon}   لاگ ان   ${AppState.currentUser.name}`, cls: 'mqPartLogin', dir: 'rtl' });
   }
   if(AppState.currentRole === 'admin' && isSubscriptionActive()){
     const daysLeft = daysLeftInSubscription();
     if(daysLeft <= SUB_MARQUEE_THRESHOLD_DAYS){
       q.push({
         text: `⭐   آپ کی سبسکرپشن کے ${daysLeft} دن باقی رہ گئے ہیں۔۔`,
-        cls: daysLeft < 7 ? 'mqPartSub mqUrgent' : 'mqPartSub'
+        cls: daysLeft < 7 ? 'mqPartSub mqUrgent' : 'mqPartSub',
+        dir: 'ltr'
       });
     }
   }
   // ---------- 📸 صدام کی ہدایت (FM4SEPFR08): عبدالوہاب کے لیے اسکرین شاٹ بھیجنے کی مستقل یاد دہانی ---------- -->
   q.push({
     text: '📸   عبدالوہاب بھائی، اس ایپ کے اندر جو بھی مسئلہ نظر آئے، اسی وقت اس کا اسکرین شاٹ لے کر مجھے بھیج دیا کریں',
-    cls: 'mqPartNotice'
+    cls: 'mqPartNotice',
+    dir: 'ltr'
   });
   return q;
 }
@@ -8085,10 +8101,11 @@ function playNextMarqueeMessage(){
   part.className = msg.cls;
   part.textContent = msg.text;
 
-  // ---------- ♻️ ہر پیغام کے لیے حرکت (RTL) نئے سرے سے شروع کروائیں (ری فلو کروا کر) ---------- -->
-  wrap.classList.remove('mqPlay');
+  // ---------- ♻️ ہر پیغام کے لیے حرکت نئے سرے سے شروع کروائیں (ری فلو کروا کر) — پہلا پیغام RTL،
+  // باقی دو LTR (صدام کی ہدایت FM4SEPFR10) ---------- -->
+  wrap.classList.remove('mqPlayRTL', 'mqPlayLTR');
   void wrap.offsetWidth; // force reflow
-  wrap.classList.add('mqPlay');
+  wrap.classList.add(msg.dir === 'ltr' ? 'mqPlayLTR' : 'mqPlayRTL');
 
   mqQueueIdx = (mqQueueIdx + 1) % queue.length;
   requestAnimationFrame(syncMobileTopbarHeight);
@@ -8099,7 +8116,7 @@ function ensureMarqueeCycleListener(){
   if(!wrap || wrap.dataset.mqBound) return;
   wrap.dataset.mqBound = '1';
   wrap.addEventListener('animationend', (e) => {
-    if(e.animationName === 'loginMarqueeSlideRTL') playNextMarqueeMessage();
+    if(e.animationName === 'loginMarqueeSlideRTL' || e.animationName === 'loginMarqueeSlideLTR') playNextMarqueeMessage();
   });
 }
 
