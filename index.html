@@ -1919,14 +1919,18 @@
     }
     #globalSearchBar #appSearchResults.show{display:block;}
 
-    /* ---------- 🔍 App Size زوم بار — سرچ بار کے بالکل نیچے، اپنی مخصوص grid row میں، سٹِکی —
-    ہر صفحے پر ہمیشہ نظر آئے، بالکل سرچ بار کی طرح ---------- */
+    /* ---------- 🔍 صدام کی ہدایت (FM4SEPFR16): یہ وہی جگہ ہے جہاں پہلے پیج زوم بار تھا — اب یہاں
+    سبزیاں/کسٹمرز سرچ بار چپکا دیا گیا ہے، اپنی مخصوص grid row میں، سٹِکی — تاکہ سکرول اپ کرنے پر یہ
+    کبھی غائب نہ ہو (صرف اُن صفحوں پر نظر آئے گا جہاں سرچ کی ضرورت ہے، JS سے display خودکار سیٹ ہوتی ہے) ---------- */
     #globalUiZoomBar{
       grid-column:1; grid-row:3;
       position:sticky; top:calc(56px + 54px); z-index:588;
     }
-    /* ---------- بلنگ سکرین پر زوم بار مزید کمپیکٹ — تاکہ زیادہ سے زیادہ پراڈکٹس نظر آئیں ---------- */
+    /* ---------- بلنگ سکرین پر مزید کمپیکٹ ---------- */
     body.billing-active #globalUiZoomBar{ padding:3px 12px; }
+    /* ---------- اصل سکرین کے اندر موجود پرانے سرچ باکس اب چھپا دیے گئے — انکی جگہ اوپر چپکا ہوا
+    globalTopSearchInput استعمال ہوتا ہے (باقی بٹن جیسے + New Product، + نیا شامل کریں، اسی جگہ نظر آتے رہیں گے) ---------- */
+    #productSearchInput, #partySearchInput{ display:none !important; }
 
     #sidebar{
       /* ---------- صدام کی ہدایت (FM3SEPTH10): پہلے چوڑائی 230px تھی، دائیں طرف بہت زیادہ خالی جگہ چھوڑتی تھی —
@@ -2467,8 +2471,8 @@
     <button id="topbarPaintBtn" onclick="openFontPaintPanel(event)" title="Font / اردو فونٹ">🎨</button>
     <button id="topbarSettingsBtn" onclick="toggleHomeSettingsPanel(event)" title="Settings">⚙️</button>
     <span id="utilityBarSpacer"></span>
-    <button id="hamburgerBtn" onclick="toggleSidebar()">☰ Menu</button>
-    <button id="quickLogoutBtn" onclick="logout()" title="Logout">🚪 Logout</button>
+    <button id="hamburgerBtn" onclick="toggleSidebar()">☰ مینیو</button>
+    <button id="quickLogoutBtn" onclick="logout()" title="لاگ آؤٹ">🚪 لاگ آؤٹ</button>
   </div>
 
   <!-- ---------- 🔎 App Search — صدام کی ہدایت پر چھپا دی گئی (کوڈ محفوظ ہے) ---------- -->
@@ -2483,13 +2487,12 @@
     <div id="appSearchResults"></div>
   </div>
 
-  <!-- ---------- 🔍 فوری App Size کنٹرول — اب ہر صفحے پر نظر آتا ہے (پہلے صرف Home پر تھا)، Settings کھولے بغیر یہیں سے سائز بدلیں ---------- -->
-  <div id="globalUiZoomBar" style="display:flex; align-items:center; gap:8px; background:var(--card); border-bottom:1px solid #e2e8f0; padding:6px 12px;">
-    <span style="font-size:13px;">🔍</span>
-    <span style="font-size:11px; color:var(--muted);">A</span>
-    <input type="range" class="uiZoomSlider" min="80" max="150" step="5" value="100" oninput="applyUiZoom(this.value)" style="flex:1;">
-    <span style="font-size:16px; color:var(--muted);">A</span>
-    <span class="uiZoomValueLabel" style="font-size:11px; font-weight:700; color:var(--primary); min-width:34px; text-align:right;">100%</span>
+  <!-- ---------- 🔍 صدام کی ہدایت (FM4SEPFR16): پیج زوم بار مکمل ختم — اسی چپکی ہوئی جگہ پر اب سبزیوں/کسٹمرز
+       کا سرچ بار چپکا دیا گیا ہے، تاکہ سکرول اپ کرنے پر سرچ بار کبھی غائب نہ ہو (زوم بار کا پرانا فنکشن
+       applyUiZoom اب بھی Settings کے صفحے پر موجود ہے، صرف یہ اوپر والی سٹکی پٹی ختم کی گئی ہے) ---------- -->
+  <div id="globalUiZoomBar" style="display:none; align-items:center; gap:8px; background:var(--card); border-bottom:1px solid #e2e8f0; padding:6px 12px;">
+    <span style="font-size:15px;">🔍</span>
+    <input type="text" id="globalTopSearchInput" placeholder="🔍 تلاش کریں..." oninput="handleGlobalTopSearchInput(this.value)" style="flex:1; padding:9px 14px; border-radius:20px; border:1.5px solid #cbd5e1; font-size:13px; font-weight:700;">
   </div>
 
   <!-- ---------- SIDEBAR OVERLAY (موبائل پر sidebar کھلنے پر پیچھے دھندلا پن) ---------- -->
@@ -2514,42 +2517,42 @@
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): Customers/Suppliers/My Diary دوبارہ تین علیحدہ علیحدہ مینیو اندراجات —
          ہر ایک کی اپنی الگ اجازت (Users میں الگ سے Assign ہو سکتی ہے)؛ 'customers' اور 'suppliers' اندر سے اب بھی
          ایک ہی DOM اسکرین (screen-parties) شیئر کرتے ہیں، صرف ٹیب بدلتا ہے ---------- -->
-    <div class="navItem admin-only" data-screen="customers" data-navkey="customers" data-navlabel="Customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customers<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="suppliers" data-navkey="suppliers" data-navlabel="Suppliers" onclick="goTo('suppliers')">🚚 Suppliers<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="mydiary" data-navkey="mydiary" data-navlabel="My Diary" onclick="goTo('mydiary')">📔 My Diary<span class="navDragHandle">⠿</span></div>
-    <div class="navItem" data-screen="advanceorders" data-navkey="advanceorders" data-navlabel="Advance Orders" onclick="goTo('advanceorders')">📝 Advance Orders<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="billsettings" data-navkey="billsettings" data-navlabel="Bill & Print Settings" onclick="goTo('billsettings')">🖨️ Bill & Print Settings<span class="navDragHandle">⠿</span></div>
-    <div class="navItem" data-screen="billhistory" data-navkey="billhistory" data-navlabel="Bill History" onclick="goTo('billhistory')">🧾 Bill History<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="customers" data-navkey="customers" data-navlabel="Customers" onclick="goTo('customers')" style="background:#FDE68A; color:#1f2937;">🧑‍🤝‍🧑 کسٹمرز<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="suppliers" data-navkey="suppliers" data-navlabel="Suppliers" onclick="goTo('suppliers')" style="background:#BAE6FD; color:#1f2937;">🚚 سپلائرز<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="mydiary" data-navkey="mydiary" data-navlabel="My Diary" onclick="goTo('mydiary')" style="background:#FBCFE8; color:#1f2937;">📔 میری ڈائری<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="advanceorders" data-navkey="advanceorders" data-navlabel="Advance Orders" onclick="goTo('advanceorders')" style="background:#A7F3D0; color:#1f2937;">📝 ایڈوانس آرڈرز<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="billsettings" data-navkey="billsettings" data-navlabel="Bill & Print Settings" onclick="goTo('billsettings')" style="background:#DDD6FE; color:#1f2937;">🖨️ بل اور پرنٹ سیٹنگز<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="billhistory" data-navkey="billhistory" data-navlabel="Bill History" onclick="goTo('billhistory')" style="background:#FED7AA; color:#1f2937;">🧾 بل ہسٹری<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "نیا بل بنائیں" ٹیب دوبارہ فعال — کسٹمر کے لیے نیا بل تیار کرنے کا پورشن ---------- -->
-    <div class="navItem" data-screen="billing" data-navkey="billing" data-navlabel="New Bill" onclick="goTo('billing')">🛒 نیا بل بنائیں<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="billing" data-navkey="billing" data-navlabel="New Bill" onclick="goTo('billing')" style="background:#99F6E4; color:#1f2937;">🛒 نیا بل بنائیں<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Categories مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="categories" onclick="goTo('categories')" style="display:none;">🏷️ Categories</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Dashboard مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')" style="display:none;">📊 Dashboard</div>
-    <div class="navItem admin-only" data-screen="expenditure" data-navkey="expenditure" data-navlabel="Expenditure" onclick="goTo('expenditure')">💸 Expenditure<span class="navDragHandle">⠿</span></div>
-    <div class="navItem" data-screen="home" data-navkey="home" data-navlabel="Home" onclick="goTo('home')">🏠 Home<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="myaccount" data-navkey="myaccount" data-navlabel="My Account" onclick="goTo('myaccount')">🏦 My Account<span class="navDragHandle">⠿</span></div>
-    <div class="navItem" data-screen="orderTaking" data-navkey="orderTaking" data-navlabel="Order Taking" onclick="goTo('orderTaking')">🧾 Order Taking<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="payments" data-navkey="payments" data-navlabel="Payments" onclick="goTo('payments')">💳 Payments<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="products" data-navkey="products" data-navlabel="Products" onclick="goTo('products')">📦 Products<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="expenditure" data-navkey="expenditure" data-navlabel="Expenditure" onclick="goTo('expenditure')" style="background:#FCA5A5; color:#1f2937;">💸 اخراجات<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="home" data-navkey="home" data-navlabel="Home" onclick="goTo('home')" style="background:#E9D5FF; color:#1f2937;">🏠 ہوم<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="myaccount" data-navkey="myaccount" data-navlabel="My Account" onclick="goTo('myaccount')" style="background:#D9F99D; color:#1f2937;">🏦 میرا اکاؤنٹ<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="orderTaking" data-navkey="orderTaking" data-navlabel="Order Taking" onclick="goTo('orderTaking')" style="background:#E0E7FF; color:#1f2937;">🧾 آرڈر لینا<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="payments" data-navkey="payments" data-navlabel="Payments" onclick="goTo('payments')" style="background:#FEF3C7; color:#1f2937;">💳 ادائیگیاں<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="products" data-navkey="products" data-navlabel="Products" onclick="goTo('products')" style="background:#FDBA74; color:#1f2937;">📦 پراڈکٹس<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "پرچیز آرڈر" ٹیب دوبارہ فعال — سپلائر سے خرید و اسٹاک وصولی ---------- -->
-    <div class="navItem admin-only" data-screen="purchaseorders" data-navkey="purchaseorders" data-navlabel="Purchase Orders" onclick="goTo('purchaseorders')">📦 پرچیز آرڈر<span class="navDragHandle">⠿</span></div>
-    <div class="navItem" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')">💰 Recovery List<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="" data-navkey="reports" data-navlabel="Reports" onclick="closeSidebar(); openReportCenterModal();">📑 Reports<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="settings" data-navkey="settings" data-navlabel="Settings" onclick="goTo('settings')">⚙️ Settings<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="purchaseorders" data-navkey="purchaseorders" data-navlabel="Purchase Orders" onclick="goTo('purchaseorders')" style="background:#F9A8D4; color:#1f2937;">📦 پرچیز آرڈر<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')" style="background:#86EFAC; color:#1f2937;">💰 ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="" data-navkey="reports" data-navlabel="Reports" onclick="closeSidebar(); openReportCenterModal();" style="background:#93C5FD; color:#1f2937;">📑 رپورٹس<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="settings" data-navkey="settings" data-navlabel="Settings" onclick="goTo('settings')" style="background:#FEF08A; color:#1f2937;">⚙️ سیٹنگز<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Stock Adjustment مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="stockadjustment" onclick="goTo('stockadjustment')" style="display:none;">🧮 Stock Adjustment</div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Trends مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')" style="display:none;">📈 Trends</div>
-    <div class="navItem admin-only" data-screen="users" data-navkey="users" data-navlabel="Users" onclick="goTo('users')">🔑 Users<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="users" data-navkey="users" data-navlabel="Users" onclick="goTo('users')" style="background:#CBD5E1; color:#1f2937;">🔑 یوزرز<span class="navDragHandle">⠿</span></div>
 
     <!-- ---------- نیچے کی چیزیں (PIN تبدیل کرنا / Admin ٹیگ / Logout) جان بوجھ کر الفابیٹیکل ترتیب سے الگ —
          باریک لائن سے واضح جدائی ---------- -->
     <div id="navDivider" style="border-top:1px solid rgba(255,255,255,.14); margin:10px 14px 6px;"></div>
-    <div class="navItem" data-screen="" onclick="openMyPinChangeModal()">🔑 Change My PIN</div>
+    <div class="navItem" data-screen="" onclick="openMyPinChangeModal()" style="background:#E2E8F0; color:#1f2937;">🔑 میرا پن تبدیل کریں</div>
 
     <div class="userTag" id="userTag">—</div>
-    <button class="logoutBtn" onclick="logout()">Logout</button>
+    <button class="logoutBtn" onclick="logout()">لاگ آؤٹ</button>
   </div>
 
   <!-- ---------- MAIN CONTENT AREA ---------- -->
@@ -6819,7 +6822,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR15';
+const APP_BUILD_VERSION = 'FM4SEPFR16';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -8068,7 +8071,7 @@ function applyRole(role, name){
   document.body.classList.add('role-' + role);
 
   document.getElementById('userTag').innerHTML =
-    (role==='admin' ? '👑 Admin: ' : '🧑‍💼 Salesman: ') + AppState.currentUser.name +
+    (role==='admin' ? '👑 ایڈمن: ' : '🧑‍💼 سیلزمین: ') + AppState.currentUser.name +
     (role==='salesman' ? renderTodaysBillBadge() : '');
 
   updateTopbarUserBadge(); // ---------- اوپر ٹاپ بار پر لاگ ان یوزر کا نام چمکتے ہوئے (Nastaleeq) دکھائیں ----------
@@ -8325,7 +8328,7 @@ function goTo(screenName, _isHistoryNav){
   }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
-      '🧑‍💼 Salesman: ' + AppState.currentUser.name + renderTodaysBillBadge();
+      '🧑‍💼 سیلزمین: ' + AppState.currentUser.name + renderTodaysBillBadge();
   }
   if(screenName === 'products') renderProductList(document.getElementById('productSearchInput').value);
   if(screenName === 'categories') renderCategoriesScreen();
@@ -8374,6 +8377,7 @@ function goTo(screenName, _isHistoryNav){
   document.body.classList.toggle('billing-active', screenName === 'billing' || screenName === 'advOrderPicker');
   document.getElementById('navArrowBar').style.display = (screenName === 'home') ? 'none' : 'flex';
   renderSubscriptionBanner(); // ---------- ہر صفحہ بدلنے پر تازہ چیک — صرف Billing (ہوم) پر نظر آئے گی ----------
+  syncGlobalTopSearchBar(screenName); // ---------- صدام کی ہدایت (FM4SEPFR16): اوپر چپکا ہوا سرچ بار نئی اسکرین کے مطابق دکھائیں/چھپائیں ----------
 }
 
 // ---------- Back/Forward بٹن — بالکل براؤزر کی طرح، ایک وقت میں ایک قدم ----------
@@ -23978,6 +23982,41 @@ function applyUiZoom(pct){
   AppState.settings.uiZoom = clamped;
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = clamped + '%');
   document.querySelectorAll('.uiZoomSlider').forEach(el => { if(Number(el.value) !== clamped) el.value = clamped; });
+}
+
+// ---------- 🔍 صدام کی ہدایت (FM4SEPFR16): پیج زوم بار کی جگہ اب یہاں سے سبزیاں/کسٹمرز سرچ ہوتی ہے —
+// یہ اوپر سٹکی پٹی میں چپکا رہتا ہے (وہی جگہ جو پہلے زوم سلائیڈر کی تھی) تاکہ سکرول کے دوران کبھی غائب نہ ہو۔
+// اصل سکرین کے اندر موجود پرانا سرچ باکس (productSearchInput/partySearchInput) چھپا دیا گیا ہے مگر اسی کی
+// value اور فنکشن یہاں سے استعمال ہوتے رہتے ہیں تاکہ باقی کوڈ (فلٹرز وغیرہ) بغیر کسی تبدیلی کے کام کرے ----------
+function handleGlobalTopSearchInput(val){
+  if(currentScreenName === 'products'){
+    const orig = document.getElementById('productSearchInput');
+    if(orig) orig.value = val;
+    renderProductList(val);
+  } else if(currentScreenName === 'customers' || currentScreenName === 'suppliers'){
+    const orig = document.getElementById('partySearchInput');
+    if(orig) orig.value = val;
+    renderPartyList(val);
+  }
+}
+
+// ---------- ہر اسکرین بدلتے وقت اوپر والا سرچ بار خودکار دکھائیں/چھپائیں + صحیح placeholder لگائیں ----------
+function syncGlobalTopSearchBar(screenName){
+  const bar = document.getElementById('globalUiZoomBar');
+  const input = document.getElementById('globalTopSearchInput');
+  if(!bar || !input) return;
+  if(screenName === 'products'){
+    bar.style.display = 'flex';
+    input.placeholder = '🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)';
+    input.value = document.getElementById('productSearchInput')?.value || '';
+  } else if(screenName === 'customers' || screenName === 'suppliers'){
+    bar.style.display = 'flex';
+    input.placeholder = document.getElementById('partySearchInput')?.placeholder || '🔍 تلاش کریں';
+    input.value = '';
+  } else {
+    bar.style.display = 'none';
+    input.value = '';
+  }
 }
 
 // ---------- بل بناتے وقت (Cart) کی لکھائی کا سائز/موٹاپن/لائن اسپیسنگ — یہ صرف بلنگ کی ٹیبل پر لاگو ہوتا ہے،

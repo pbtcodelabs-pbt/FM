@@ -21,7 +21,7 @@
 // اور جیسے ہی نئی تاریخ شروع ہو تو سیریل واپس 01 سے شروع کریں۔ مکمل تفصیل index.html
 // میں APP_BUILD_VERSION کے اوپر والے کمنٹ میں موجود ہے۔
 
-const CACHE_VERSION = 'FM4SEPFR15';
+const CACHE_VERSION = 'FM4SEPFR16';
 const CACHE_NAME = `fruit-mandi-pos-${CACHE_VERSION}`;
 
 // ---------- یہ فائلیں انسٹال کے وقت ہی محفوظ کر لی جائیں گی — آف لائن پہلی بار کھلنے کے لیے ضروری ----------
