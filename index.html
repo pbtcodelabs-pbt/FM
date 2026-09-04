@@ -425,7 +425,7 @@
   .appSearchEmpty{padding:14px; text-align:center; color:#94a3b8; font-size:12.5px;}
   #sidebar .brand{padding:0 20px 20px; font-size:18px; font-weight:700; border-bottom:1px solid rgba(255,255,255,.15); margin-bottom:10px;}
   #sidebar .navItem{padding:14px 20px; cursor:pointer; opacity:.85; font-size:15px; display:flex; align-items:center; gap:10px;}
-  /* ---------- صدام کی ہدایت (FM4SEPFR21): مینیو کی ساری لکھائی سفید + نوری نستعلیق کشیدہ میں (موٹی، رنگین پٹیوں کے اوپر واضح چمکتی نظر آئے) ---------- */
+  /* ---------- صدام کی ہدایت (FM4SEPFR23): مینیو کی ساری لکھائی سفید + نوری نستعلیق کشیدہ میں (موٹی، رنگین پٹیوں کے اوپر واضح چمکتی نظر آئے) ---------- */
   #sidebar .navItem, #sidebar .navItem *, #sidebar .userTag, #sidebar .logoutBtn, #sidebar .brand{
     color:#fff !important;
     font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', sans-serif;
@@ -696,11 +696,14 @@
     border:2px solid transparent; transition:background .1s ease, color .1s ease, box-shadow .1s ease;
   }
   .billModeToggle button.active::before{ content:'✓ '; }
-  #modeRetail:not(.active), #cartModeRetail:not(.active){      background:#f0fbf9; border-color:#7fd1c4; color:#0f766e; box-shadow:0 1px 3px rgba(41,29,10,.06); }
-  #modeWholesale:not(.active), #cartModeWholesale:not(.active){   background:#f4f4ff; border-color:#a5a8f0; color:#4338ca; box-shadow:0 1px 3px rgba(41,29,10,.06); }
+  /* ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): کارٹ شیٹ کے اندر راولپنڈی/اسلام آباد بٹن پہلے بہت موٹے تھے — کمپیکٹ کر دیے ---------- */
+  #cartModeRetail, #cartModeWholesale{ padding:7px 5px !important; font-size:11.5px !important; border-radius:9px !important; }
+  /* ---------- 🟩🟥 صدام کی ہدایت (FM4SEPFR23): اسلام آباد ریٹ = سرخ، راولپنڈی ریٹ = سبز — پوری ایپ میں یکساں ---------- */
+  #modeRetail:not(.active), #cartModeRetail:not(.active){      background:#fef2f2; border-color:#fca5a5; color:#b91c1c; box-shadow:0 1px 3px rgba(41,29,10,.06); }
+  #modeWholesale:not(.active), #cartModeWholesale:not(.active){   background:#f0fdf4; border-color:#86efac; color:#15803d; box-shadow:0 1px 3px rgba(41,29,10,.06); }
   .billModeToggle button.active{ color:#fff; box-shadow:inset 0 2px 5px rgba(0,0,0,.28); }
-  #modeRetail.active, #cartModeRetail.active{      background:linear-gradient(180deg, #14b8a6, #0f766e); border-color:#0b4a45; }
-  #modeWholesale.active, #cartModeWholesale.active{   background:linear-gradient(180deg, #6366f1, #4338ca); border-color:#312a8a; }
+  #modeRetail.active, #cartModeRetail.active{      background:linear-gradient(180deg, #ef4444, #b91c1c); border-color:#7f1d1d; }
+  #modeWholesale.active, #cartModeWholesale.active{   background:linear-gradient(180deg, #22c55e, #15803d); border-color:#14532d; }
 
   .custSelect{width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:10px; margin-bottom:14px; font-size:14px;}
 
@@ -1042,6 +1045,13 @@
   .productHead .pNameWrap{flex:1; min-width:0; display:flex; align-items:center; gap:8px; overflow:hidden; margin-inline-start:6px;}
   .productHead .pName{font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:0 1 auto;}
   .productHead .pPriceStock{flex:0 0 auto; font-size:11px; font-weight:800; color:var(--primary-dark); background:#eef2ff; padding:3px 9px; border-radius:8px; white-space:nowrap;}
+  /* ---------- 🟩🟥 صدام کی ہدایت (FM4SEPFR23): راولپنڈی ریٹ ہمیشہ سبز، اسلام آباد ریٹ ہمیشہ سرخ — پوری ایپ میں
+       یکساں (Stock Adjustment، Products، بلنگ، بل/رسید پرنٹ) تاکہ کبھی الجھن نہ ہو کہ کون سا ریٹ کون سا ہے ---------- */
+  .rateBadgeRow{display:flex; flex-wrap:wrap; gap:4px; align-items:center; flex:0 0 auto;}
+  .rateBadge{display:inline-flex; align-items:center; font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px; white-space:nowrap; color:#fff;}
+  .rateBadgeRwp{background:#15803d;}
+  .rateBadgeIsb{background:#b91c1c;}
+  .rateBadgeStock{background:#334155;}
   .productHead .pMeta{font-size:12px; color:var(--muted); margin-top:2px;}
   .productHead .pActions{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
   /* ---------- 🔲 غیر حاضر/حاضر چیک باکس — نام سے پہلے، ایڈٹ بٹن سے واضح فاصلے پر (صدام کی ہدایت FM3SEPTH12) ---------- */
@@ -1809,6 +1819,10 @@
     .productsLayout{flex-direction:column;}
     .categoryRail{flex-direction:row; overflow-x:auto; overflow-y:visible; max-height:none; flex:0 0 auto; width:100%; order:-1; margin-bottom:4px;}
     .categoryPill{flex:0 0 auto; white-space:nowrap; padding:8px 12px;}
+    /* ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): سٹاک ایڈجسٹمنٹ کی کیٹگری پٹی مزید کمپیکٹ — کم جگہ گھیرے ---------- */
+    #screen-stockadjustment .categoryRail{ padding:5px; margin-bottom:2px; }
+    #screen-stockadjustment .categoryPill{ padding:5px 10px; font-size:10px; }
+    #screen-stockadjustment .pageTitle{ font-size:15px; padding-bottom:4px; margin-bottom:4px; }
 
     /* ---------- body کا overflow-y:auto واپس بحال — اسے ہٹانے سے مواد مکمل ناقابلِ رسائی ہو گیا تھا
        (پہلے کم از کم سلائیڈ کر کے نظر آ جاتا تھا)۔ اصل وجہ ابھی حل طلب ہے، دوبارہ تحقیق ضروری ---------- */
@@ -1927,7 +1941,7 @@
     }
     #globalSearchBar #appSearchResults.show{display:block;}
 
-    /* ---------- 🔍 صدام کی ہدایت (FM4SEPFR21): یہ وہی جگہ ہے جہاں پہلے پیج زوم بار تھا — اب یہاں
+    /* ---------- 🔍 صدام کی ہدایت (FM4SEPFR23): یہ وہی جگہ ہے جہاں پہلے پیج زوم بار تھا — اب یہاں
     سبزیاں/کسٹمرز سرچ بار چپکا دیا گیا ہے، اپنی مخصوص grid row میں، سٹِکی — تاکہ سکرول اپ کرنے پر یہ
     کبھی غائب نہ ہو (صرف اُن صفحوں پر نظر آئے گا جہاں سرچ کی ضرورت ہے، JS سے display خودکار سیٹ ہوتی ہے) ---------- */
     #globalUiZoomBar{
@@ -1938,7 +1952,7 @@
     body.billing-active #globalUiZoomBar{ padding:3px 12px; }
     /* ---------- اصل سکرین کے اندر موجود پرانے سرچ باکس اب چھپا دیے گئے — انکی جگہ اوپر چپکا ہوا
     globalTopSearchInput استعمال ہوتا ہے (باقی بٹن جیسے + New Product، + نیا شامل کریں، اسی جگہ نظر آتے رہیں گے) ---------- */
-    #productSearchInput, #partySearchInput{ display:none !important; }
+    #productSearchInput, #partySearchInput, #stockAdjSearchInput{ display:none !important; }
 
     #sidebar{
       /* ---------- صدام کی ہدایت (FM3SEPTH10): پہلے چوڑائی 230px تھی، دائیں طرف بہت زیادہ خالی جگہ چھوڑتی تھی —
@@ -2189,17 +2203,18 @@
              width:100% لگا ہوا تھا، جو نیچے دیے گئے flex پر حاوی ہو کر آنکھ کے بٹن کو بہت بڑا اور PIN خانے کو
              چھوٹا بنا دیتا تھا۔ اب !important کے ساتھ درست کر دیا، اور خوبصورت، پیشہ ورانہ ڈبہ بنایا ---------- -->
         <div style="display:flex; align-items:center; gap:2px; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:10px; padding:2px 6px 2px 2px; box-shadow:inset 0 1px 3px rgba(0,0,0,.05);">
-          <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" onkeydown="if(event.key==='Enter') login()">
           <button type="button"
             onmousedown="showPinWhilePressed('pinInput')" onmouseup="hidePinAfterRelease('pinInput')" onmouseleave="hidePinAfterRelease('pinInput')"
             ontouchstart="showPinWhilePressed('pinInput')" ontouchend="hidePinAfterRelease('pinInput')" ontouchcancel="hidePinAfterRelease('pinInput')"
-            style="flex:0 0 auto !important; width:34px !important; height:34px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:16px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+            style="flex:0 0 auto !important; width:26px !important; height:26px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:13px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+          <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" onkeydown="if(event.key==='Enter') login()">
+          <!-- ---------- ⏎ صدام کی ہدایت (FM4SEPFR23): Enter بٹن اب سیدھا PIN خانے کے ساتھ ہی — کی بورڈ کے نیچے کبھی نہیں چھپے گا ---------- -->
+          <button type="button" onclick="login()" style="flex:0 0 auto !important; width:auto !important; margin:0 !important; padding:9px 14px !important; background:linear-gradient(180deg,#14b8a6,#0f766e) !important; color:#fff !important; border:none !important; border-radius:8px !important; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(15,118,110,.35);">⏎ Enter</button>
         </div>
         <label style="display:flex; align-items:center; gap:8px; margin:12px 0; padding:9px 12px; background:#f8fafc; border:1px solid #eef2f7; border-radius:9px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
           <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
           🔒 Remember me on this device
         </label>
-        <button class="loginBtn3d" onclick="login()" style="border-radius:12px !important;">Enter</button>
         <div class="loginHint" style="margin-top:10px;">
           <a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="display:block; color:var(--primary-dark); font-weight:700; text-decoration:none; background:#eef2ff; padding:9px 12px; border-radius:9px; font-size:12.5px;">Forgot your PIN? Recover with your Year of Birth.</a>
         </div>
@@ -2209,17 +2224,17 @@
       <div id="employeeLoginPanel" style="display:none;">
         <select id="employeeLoginSelect" style="display:none;"></select>
         <div style="display:flex; align-items:center; gap:2px; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:10px; padding:2px 6px 2px 2px; box-shadow:inset 0 1px 3px rgba(0,0,0,.05);">
-          <input type="password" id="employeePinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" onkeydown="if(event.key==='Enter') employeeLogin()">
           <button type="button"
             onmousedown="showPinWhilePressed('employeePinInput')" onmouseup="hidePinAfterRelease('employeePinInput')" onmouseleave="hidePinAfterRelease('employeePinInput')"
             ontouchstart="showPinWhilePressed('employeePinInput')" ontouchend="hidePinAfterRelease('employeePinInput')" ontouchcancel="hidePinAfterRelease('employeePinInput')"
-            style="flex:0 0 auto !important; width:34px !important; height:34px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:16px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+            style="flex:0 0 auto !important; width:26px !important; height:26px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:13px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+          <input type="password" id="employeePinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" onkeydown="if(event.key==='Enter') employeeLogin()">
+          <button type="button" onclick="employeeLogin()" style="flex:0 0 auto !important; width:auto !important; margin:0 !important; padding:9px 14px !important; background:linear-gradient(180deg,#14b8a6,#0f766e) !important; color:#fff !important; border:none !important; border-radius:8px !important; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(15,118,110,.35);">⏎ Enter</button>
         </div>
         <label style="display:flex; align-items:center; gap:8px; margin:12px 0; padding:9px 12px; background:#f8fafc; border:1px solid #eef2f7; border-radius:9px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
           <input type="checkbox" id="employeeRememberChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
           🔒 Remember me on this device
         </label>
-        <button style="background:linear-gradient(180deg,#14b8a6,#0f766e) !important; box-shadow:0 4px 8px rgba(15,118,110,.35), inset 0 1px 0 rgba(255,255,255,.2); border:1px solid #0a5049 !important; border-radius:12px !important;" onclick="employeeLogin()">Enter</button>
         <div class="loginHint" style="margin-top:10px;">
           <a href="javascript:void(0)" onclick="openEmployeePinResetModal()" style="display:block; color:var(--primary-dark); font-weight:700; text-decoration:none; background:#eef2ff; padding:9px 12px; border-radius:9px; font-size:12.5px;">Forgot your PIN? Recover with your Year of Birth.</a>
         </div>
@@ -2495,7 +2510,7 @@
     <div id="appSearchResults"></div>
   </div>
 
-  <!-- ---------- 🔍 صدام کی ہدایت (FM4SEPFR21): پیج زوم بار مکمل ختم — اسی چپکی ہوئی جگہ پر اب سبزیوں/کسٹمرز
+  <!-- ---------- 🔍 صدام کی ہدایت (FM4SEPFR23): پیج زوم بار مکمل ختم — اسی چپکی ہوئی جگہ پر اب سبزیوں/کسٹمرز
        کا سرچ بار چپکا دیا گیا ہے، تاکہ سکرول اپ کرنے پر سرچ بار کبھی غائب نہ ہو (زوم بار کا پرانا فنکشن
        applyUiZoom اب بھی Settings کے صفحے پر موجود ہے، صرف یہ اوپر والی سٹکی پٹی ختم کی گئی ہے) ---------- -->
   <div id="globalUiZoomBar" style="display:none; align-items:center; gap:8px; background:var(--card); border-bottom:1px solid #e2e8f0; padding:6px 12px;">
@@ -2548,7 +2563,7 @@
     <div class="navItem" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">💰 ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="" data-navkey="reports" data-navlabel="Reports" onclick="closeSidebar(); openReportCenterModal();" style="background:#2563EB; color:#fff;">📑 رپورٹس<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="settings" data-navkey="settings" data-navlabel="Settings" onclick="goTo('settings')" style="background:#CA8A04; color:#fff;">⚙️ سیٹنگز<span class="navDragHandle">⠿</span></div>
-    <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR21): Stock Adjustment دوبارہ فعال — مینیو اور یوزر اسکرین اجازت دونوں میں نظر آئے ---------- -->
+    <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): Stock Adjustment دوبارہ فعال — مینیو اور یوزر اسکرین اجازت دونوں میں نظر آئے ---------- -->
     <div class="navItem admin-only" data-screen="stockadjustment" data-navkey="stockadjustment" data-navlabel="Stock Adjustment" onclick="goTo('stockadjustment')" style="background:#E11D48; color:#fff;">🧮 سٹاک مینجمنٹ<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🍇 صدام کی ہدایت پر: Trends مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')" style="display:none;">📈 Trends</div>
@@ -2635,8 +2650,8 @@
           </label>
 
           <div class="billModeToggle" style="flex:1 1 auto; min-width:0;">
-            <button id="modeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Islamabad</button>
-            <button id="modeWholesale" onclick="setSaleMode('wholesale')">📦 Rawalpindi</button>
+            <button id="modeRetail" class="active" onclick="setSaleMode('retail')">🔴 اسلام آباد</button>
+            <button id="modeWholesale" onclick="setSaleMode('wholesale')">🟢 راولپنڈی</button>
           </div>
 
           <!-- ---------- ⚙️ Settings بٹن — یہاں سے ہٹا دیا گیا (اوپر Topbar میں موجود ⚙️ بٹن ہی وہی کام
@@ -2740,26 +2755,29 @@
           </span>
         </div>
 
+        <!-- ---------- 🧑 صدام کی ہدایت (FM4SEPFR23): کسٹمر کا نام یہاں کبھی نظر نہیں آتا تھا — اب صاف، نمایاں، اوپر ہی ---------- -->
+        <div id="cartCustomerNameBanner" dir="rtl" style="padding:7px 14px; background:#eef2ff; color:var(--primary-dark); font-weight:800; font-size:14px; text-align:center; border-bottom:1px solid #dbe1ea; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">🧑 Walk-in Customer</div>
+
         <!-- ---------- بل بناتے وقت لکھائی کا سائز/موٹاپن اور دو لائنوں کے درمیان فاصلہ — صرف اسی کارٹ کے لیے (چھوٹا سا بار، جگہ بچانے کے لیے) ---------- -->
-        <div style="display:flex; align-items:center; gap:4px; padding:3px 12px; background:#f8fafc; border-bottom:1px solid #eef1f6; flex-wrap:wrap;">
-          <span style="font-size:9.5px; color:var(--muted);">Text:</span>
-          <button type="button" onclick="adjustCartTextSetting('fontSize',-1)" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:9px; padding:0;">A−</button>
-          <button type="button" onclick="adjustCartTextSetting('fontSize',1)" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:12px; padding:0;">A+</button>
-          <button type="button" id="cartBoldToggleBtn" onclick="toggleCartTextBold()" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-weight:800; font-size:10px; padding:0;">B</button>
-          <span style="font-size:9.5px; color:var(--muted); margin-left:6px;">Spacing:</span>
-          <button type="button" onclick="adjustCartTextSetting('rowPad',-1)" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:10px; padding:0;">↕−</button>
-          <button type="button" onclick="adjustCartTextSetting('rowPad',1)" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:10px; padding:0;">↕+</button>
+        <div style="display:flex; align-items:center; gap:4px; padding:2px 12px; background:#f8fafc; border-bottom:1px solid #eef1f6; flex-wrap:wrap;">
+          <span style="font-size:9px; color:var(--muted);">Text:</span>
+          <button type="button" onclick="adjustCartTextSetting('fontSize',-1)" style="width:17px; height:17px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:8px; padding:0;">A−</button>
+          <button type="button" onclick="adjustCartTextSetting('fontSize',1)" style="width:17px; height:17px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:10px; padding:0;">A+</button>
+          <button type="button" id="cartBoldToggleBtn" onclick="toggleCartTextBold()" style="width:17px; height:17px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-weight:800; font-size:9px; padding:0;">B</button>
+          <span style="font-size:9px; color:var(--muted); margin-left:6px;">Spacing:</span>
+          <button type="button" onclick="adjustCartTextSetting('rowPad',-1)" style="width:17px; height:17px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:9px; padding:0;">↕−</button>
+          <button type="button" onclick="adjustCartTextSetting('rowPad',1)" style="width:17px; height:17px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:9px; padding:0;">↕+</button>
         </div>
 
         <!-- ---------- کارٹ کے اندر ہی Walk-in/Retail/Wholesale — تاکہ بل بناتے وقت اگر موڈ تبدیل کرنا بھول جائیں تو دوبارہ باہر جانے کی ضرورت نہ پڑے ---------- -->
-        <div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f8fafc; border-bottom:1px solid #eef1f6; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:6px; padding:5px 12px; background:#f8fafc; border-bottom:1px solid #eef1f6; flex-wrap:wrap;">
           <label class="counterSwitchWrap" title="Red = Walk-in customer (no name on bill), Gray = select a registered customer" style="display:none;">
             <span class="switchTrack active" id="cartModeCounterSale" onclick="toggleCounterSale()">🚶</span>
             <span class="switchLabel">Walk-in</span>
           </label>
           <div class="billModeToggle" style="flex:1 1 auto; min-width:0;">
-            <button id="cartModeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Islamabad</button>
-            <button id="cartModeWholesale" onclick="setSaleMode('wholesale')">📦 Rawalpindi</button>
+            <button id="cartModeRetail" class="active" onclick="setSaleMode('retail')">🔴 اسلام آباد</button>
+            <button id="cartModeWholesale" onclick="setSaleMode('wholesale')">🟢 راولپنڈی</button>
           </div>
         </div>
 
@@ -2931,11 +2949,11 @@
             <input type="text" id="npTotalPurchase" value="0" readonly style="background:#f1f5f9; font-weight:800; color:var(--primary-dark);">
           </div>
           <div class="npFieldWrap">
-            <label class="npFieldLabel">🏷️ Islamabad Rate</label>
+            <label class="npFieldLabel" style="color:#b91c1c;">🔴 اسلام آباد ریٹ</label>
             <input type="number" id="npRetail" placeholder="0">
           </div>
           <div class="npFieldWrap">
-            <label class="npFieldLabel">📦 Rawalpindi Rate</label>
+            <label class="npFieldLabel" style="color:#15803d;">🟢 راولپنڈی ریٹ</label>
             <input type="number" id="npWholesale" placeholder="0">
           </div>
           <div class="npFieldWrap npStockCompact">
@@ -3056,28 +3074,25 @@
 
     <!-- 🧮 STOCK ADJUSTMENT — manual stock/price/low-stock editing for every variant, no Purchase Order needed -->
     <div class="screen admin-only" id="screen-stockadjustment" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
-      <div class="pageTitle">🧮 سٹاک ایڈجسٹمنٹ</div>
+      <div class="pageTitle" style="margin-bottom:6px;">🧮 سٹاک ایڈجسٹمنٹ</div>
 
-      <label style="display:flex; align-items:center; gap:8px; background:#eef2ff; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:14px; font-weight:700; color:var(--primary-dark); cursor:pointer;">
-        <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:18px; height:18px; margin:0;">
-        📦 انوینٹری ٹریک کریں (سٹاک ختم ہونے پر بکری روک دیں — آف کریں تو سٹاک مائنس میں بھی جا سکتا ہے)
+      <label style="display:flex; align-items:center; gap:6px; background:#eef2ff; border-radius:8px; padding:6px 10px; margin-bottom:6px; font-size:11.5px; font-weight:700; color:var(--primary-dark); cursor:pointer; line-height:1.3;">
+        <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:16px; height:16px; margin:0; flex:0 0 auto;">
+        📦 انوینٹری ٹریک کریں (سٹاک ختم ہونے پر بکری روک دیں)
       </label>
 
-      <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR21): یہ صفحہ اب Products & Variants والے صفحے کے بالکل اسی سٹائل میں —
-           سیریل نمبر، حاضر/غیر حاضر سبزیاں، ▶ ایکسپینڈ کر کے خرید قیمت/مزدوری/اسلام آباد ریٹ/راولپنڈی ریٹ/سٹاک
-           سب کچھ ایک ہی جگہ ایڈٹ ہو۔ یہ اور Products والا صفحہ دونوں ایک ہی ڈیٹا استعمال کرتے ہیں —
-           جو یہاں بدلیں وہ Products میں بھی خودکار نظر آئے گا اور جو Products میں بدلیں وہ یہاں بھی ---------- -->
+      <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): اوپر کا حصہ مزید کمپیکٹ — کم جگہ گھیرے، فہرست جلدی نظر آئے ---------- -->
       <div class="productsLayout">
         <div class="productMain">
-          <div class="stickyFilterZone">
-          <div class="productToolbar">
+          <div class="stickyFilterZone" style="padding-top:2px;">
+          <div class="productToolbar" style="margin-bottom:6px;">
             <input type="text" id="stockAdjSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderStockAdjustmentScreen(this.value)">
           </div>
-          <div style="display:flex; gap:8px; margin-bottom:12px;">
-            <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:1; padding:9px; border-radius:9px; border:none; font-size:12.5px; font-weight:800; cursor:pointer;">🟢 حاضر سبزیاں</button>
-            <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:1; padding:9px; border-radius:9px; border:none; font-size:12.5px; font-weight:800; cursor:pointer;">🔴 غیر حاضر سبزیاں</button>
+          <div style="display:flex; gap:6px; margin-bottom:6px;">
+            <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:1; padding:6px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer;">🟢 حاضر سبزیاں</button>
+            <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:1; padding:6px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer;">🔴 غیر حاضر سبزیاں</button>
           </div>
-          <select id="stockAdjSortFilter" onchange="renderStockAdjustmentScreen()" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:9px; font-size:13px; margin-bottom:10px;">
+          <select id="stockAdjSortFilter" onchange="renderStockAdjustmentScreen()" style="width:100%; padding:6px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px; margin-bottom:6px;">
             <option value="serial">سیریل نمبر کے مطابق</option>
             <option value="negFirst">زیادہ منفی سٹاک پہلے</option>
             <option value="az">نام: الف → ی</option>
@@ -3097,6 +3112,7 @@
         </div>
       </div>
 
+      <button onclick="openStockValueReport()" style="width:100%; margin-top:10px; background:linear-gradient(180deg, var(--primary), var(--primary-dark)); color:#fff; border:none; border-radius:12px; padding:13px; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">📊 سٹاک رپورٹ بنائیں</button>
       <button id="stockAdjResetAllBtn" onclick="resetAllNegativeStockToZero()" style="display:none; width:100%; margin-top:14px; background:linear-gradient(180deg, var(--danger), #991b1b); color:#fff; border:none; border-radius:12px; padding:14px; font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">🔄 تمام منفی سٹاک صفر پر ری سیٹ کریں</button>
     </div>
 
@@ -3258,8 +3274,8 @@
              اسی کسٹمر کو منتخب کرتے ہی خودکار وہی ریٹ لگ جائے گا، ہر بار دستی انتخاب کی ضرورت نہیں ---------- -->
         <select id="npPartyRateArea" style="margin-top:2px;">
           <option value="">🏷️ Rate Area — منتخب کریں (اختیاری)</option>
-          <option value="retail">🏷️ Islamabad Rate</option>
-          <option value="wholesale">📦 Rawalpindi Rate</option>
+          <option value="retail">🔴 اسلام آباد ریٹ</option>
+          <option value="wholesale">🟢 راولپنڈی ریٹ</option>
           <option value="suburbs">🌿 مضافات (Suburbs)</option>
         </select>
         <!-- ---------- 💼 سابقہ بقایہ (Opening Balance) — اب کسٹمر اور سپلائر دونوں کے لیے (صدام کی ہدایت FM3SEPTH10)،
@@ -4560,6 +4576,12 @@
         <div style="background:#dcfce7; color:#15803d; border-radius:12px; padding:10px 14px; margin-bottom:10px; text-align:center; font-weight:800; font-size:15px;">
           ✅ آرڈر محفوظ ہو گیا — صدام کو بھیج دیا گیا
         </div>
+        <!-- ---------- 🔤 صدام کی ہدایت (FM4SEPFR23): فونٹ سلیکشن + موٹا/پتلا + پرنٹ سائز — یہیں سے، تھرمل پرنٹ کے لیے ---------- -->
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+          <select id="otReviewFontSelect" onchange="otChangeReviewFont(this.value)" style="flex:1; padding:8px; border:1.5px solid var(--primary); border-radius:9px; font-size:13px; font-weight:700; background:#fff;"></select>
+          <button type="button" id="otReviewBoldBtn" onclick="otSetReviewBold(true)" style="flex:0 0 auto; padding:8px 12px; border-radius:9px; border:1.5px solid var(--primary); background:#fff; font-weight:800; font-size:13px; cursor:pointer;">B موٹا</button>
+          <button type="button" id="otReviewThinBtn" onclick="otSetReviewBold(false)" style="flex:0 0 auto; padding:8px 12px; border-radius:9px; border:1.5px solid var(--primary); background:#fff; font-weight:500; font-size:13px; cursor:pointer;">پتلا</button>
+        </div>
         <!-- ---------- 🔍 سادہ سا سائز کنٹرول — صرف بڑا/چھوٹا، زیادہ آپشن نہیں (ملازم کے لیے کم سے کم، صدام کی ہدایت FM3SEPTH10) ---------- -->
         <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:8px;">
           <button type="button" onclick="otAdjustReviewZoom(-10)" style="width:38px; height:38px; border-radius:9px; border:2px solid var(--primary); background:#fff; color:var(--primary); font-size:15px; font-weight:800; cursor:pointer;">A−</button>
@@ -4570,6 +4592,7 @@
           <canvas id="otReviewCanvas" style="width:100%; max-width:340px; display:block;"></canvas>
         </div>
         <div style="position:sticky; bottom:8px; display:flex; flex-direction:column; gap:8px; padding-top:6px; padding-bottom:8px;">
+          <button type="button" onclick="printOtReviewOrder()" style="padding:14px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">🖨️ تھرمل پرنٹ کریں</button>
           <div style="display:flex; gap:8px;">
             <button type="button" onclick="backToOtItems()" style="flex:1; padding:15px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:14px; font-size:15px; font-weight:800; cursor:pointer;">✏️ ترمیم کریں</button>
             <button type="button" onclick="startNextOtCustomer()" style="flex:2; padding:15px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">📤 صدام کو بھیجیں</button>
@@ -4722,8 +4745,8 @@
         <div id="advRateModeRow" style="display:none; justify-content:flex-end; margin-bottom:6px; position:relative;">
           <button type="button" onclick="toggleAdvRateMenu(event)" style="background:#eef2ff; color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; padding:6px 12px; font-size:11.5px; font-weight:800; cursor:pointer;">⚙️ Rate Lagayein ▾</button>
           <div id="advRateMenu" style="display:none; position:absolute; right:0; top:calc(100% + 4px); background:#fff; border:1px solid #dbe1ea; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.18); padding:5px; z-index:60; min-width:170px;">
-            <button type="button" onclick="applyAdvOrderRateMode('retail'); closeAdvRateMenu();" style="display:block; width:100%; text-align:left; background:none; border:none; padding:9px 10px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; color:var(--text);">🏷️ Islamabad Rate</button>
-            <button type="button" onclick="applyAdvOrderRateMode('wholesale'); closeAdvRateMenu();" style="display:block; width:100%; text-align:left; background:none; border:none; padding:9px 10px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; color:var(--text);">📦 Rawalpindi Rate</button>
+            <button type="button" onclick="applyAdvOrderRateMode('retail'); closeAdvRateMenu();" style="display:block; width:100%; text-align:left; background:none; border:none; padding:9px 10px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; color:#b91c1c;">🔴 اسلام آباد ریٹ</button>
+            <button type="button" onclick="applyAdvOrderRateMode('wholesale'); closeAdvRateMenu();" style="display:block; width:100%; text-align:left; background:none; border:none; padding:9px 10px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; color:#15803d;">🟢 راولپنڈی ریٹ</button>
           </div>
         </div>
         <div id="advEmployeeRateNote" class="admin-hide-only" style="background:#eef2ff; color:var(--primary-dark); padding:8px 10px; border-radius:8px; font-size:11.5px; margin-bottom:8px; font-weight:600;">
@@ -4808,8 +4831,8 @@
 
         <!-- ---------- 🏷️ ریٹ لگانے کے بٹن — اب یہیں بل کے اوپر، ایک ٹیپ سے ریٹ لگتے ہی بل مکمل ہو جاتا ہے ---------- -->
         <div id="aopRateApplyRow" style="display:none; gap:8px; padding:10px 14px 0;">
-          <button onclick="applyRateInPreview('retail')" style="flex:1; background:#f1f5f9; color:#0f172a; border:1.5px solid #0f172a; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">🏷️ Islamabad Rate</button>
-          <button onclick="applyRateInPreview('wholesale')" style="flex:1; background:#f1f5f9; color:#0f172a; border:1.5px solid #0f172a; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">📦 Rawalpindi Rate</button>
+          <button onclick="applyRateInPreview('retail')" style="flex:1; background:#fef2f2; color:#b91c1c; border:1.5px solid #fca5a5; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">🔴 اسلام آباد ریٹ</button>
+          <button onclick="applyRateInPreview('wholesale')" style="flex:1; background:#f0fdf4; color:#15803d; border:1.5px solid #86efac; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">🟢 راولپنڈی ریٹ</button>
         </div>
 
         <!-- ---------- ➕ اضافی خرچے — فریٹ/شپنگ/لیبر وغیرہ — صرف ایڈمن کو نظر آئیں، بل مکمل ہونے کے بعد بھی لگائے جا سکتے ہیں ---------- -->
@@ -5528,6 +5551,23 @@
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeImageSharePreview()">Cancel</button>
           <button class="saveBtn" style="background:#25D366;" onclick="confirmImageShare()">💬 Share</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 📊 صدام کی ہدایت (FM4SEPFR23): سٹاک رپورٹ — آج کی تاریخ کے حساب سے کل سٹاک کی مالیت،
+         راولپنڈی/اسلام آباد ریٹ پر ممکنہ منافع، ہر آئٹم علیحدہ علیحدہ — A4 پرنٹ ایبل + واٹس ایپ شیئر ایبل ---------- -->
+    <div class="modalOverlay" id="stockReportModal" style="z-index:960;" onclick="if(event.target===this) closeStockValueReport()" dir="rtl">
+      <div class="modalBox" style="max-width:640px; width:94vw; text-align:center; max-height:90vh; overflow-y:auto;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <h3 style="margin:0; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">📊 سٹاک رپورٹ</h3>
+          <span onclick="closeStockValueReport()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
+        </div>
+        <canvas id="stockReportCanvas" style="width:100%; border-radius:10px; margin:6px 0; box-shadow:0 4px 14px rgba(0,0,0,.18); background:#fff;"></canvas>
+        <div class="modalBtns" style="flex-wrap:wrap;">
+          <button class="cancelBtn" onclick="closeStockValueReport()">بند کریں</button>
+          <button class="saveBtn" style="background:#0f766e;" onclick="printStockValueReport()">🖨️ پرنٹ (A4)</button>
+          <button class="saveBtn" style="background:#25D366;" onclick="shareStockValueReport()">💬 واٹس ایپ شیئر</button>
         </div>
       </div>
     </div>
@@ -6849,7 +6889,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR21';
+const APP_BUILD_VERSION = 'FM4SEPFR23';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -8404,7 +8444,7 @@ function goTo(screenName, _isHistoryNav){
   document.body.classList.toggle('billing-active', screenName === 'billing' || screenName === 'advOrderPicker');
   document.getElementById('navArrowBar').style.display = (screenName === 'home') ? 'none' : 'flex';
   renderSubscriptionBanner(); // ---------- ہر صفحہ بدلنے پر تازہ چیک — صرف Billing (ہوم) پر نظر آئے گی ----------
-  syncGlobalTopSearchBar(screenName); // ---------- صدام کی ہدایت (FM4SEPFR21): اوپر چپکا ہوا سرچ بار نئی اسکرین کے مطابق دکھائیں/چھپائیں ----------
+  syncGlobalTopSearchBar(screenName); // ---------- صدام کی ہدایت (FM4SEPFR23): اوپر چپکا ہوا سرچ بار نئی اسکرین کے مطابق دکھائیں/چھپائیں ----------
 }
 
 // ---------- Back/Forward بٹن — بالکل براؤزر کی طرح، ایک وقت میں ایک قدم ----------
@@ -8996,7 +9036,7 @@ function deleteBillingCartDraft(){
   const custSel = document.getElementById('customerSelect');
   if(custSel) custSel.value = '';
   const discountEl = document.getElementById('discountInput');
-  if(discountEl) discountEl.value = 170; // ---------- FM4SEPFR21: اضافی چارجز کی ڈیفالٹ رقم 170 ----------
+  if(discountEl) discountEl.value = 170; // ---------- FM4SEPFR23: اضافی چارجز کی ڈیفالٹ رقم 170 ----------
   const receivedEl = document.getElementById('amountReceivedInput');
   if(receivedEl) receivedEl.value = '';
   Billing.counterSale = true;
@@ -9466,7 +9506,7 @@ function renderBillingProductGrid(){
   } else {
     grid.style.gridTemplateColumns = '';
   }
-  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR21): پرانا تصویروں والا کارڈ سسٹم مکمل ختم — اب آرڈر ٹیکنگ جیسا
+  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): پرانا تصویروں والا کارڈ سسٹم مکمل ختم — اب آرڈر ٹیکنگ جیسا
   // سادہ فہرست (لسٹ) والا انداز، ہر آئٹم اپنی الگ لائن میں، نام + قیمت اوپر، نیچے ➕/➖ بٹن ----------
   grid.style.display = 'flex';
   grid.style.flexDirection = 'column';
@@ -9927,6 +9967,13 @@ let billingDraftCustomerRestored = false;
 function renderCart(){
   saveBillingCartDraft(); // ---------- ہر تبدیلی کے بعد خودکار محفوظ — رفریش سے کارٹ ضائع نہ ہو ----------
   renderHomeUnfinishedCartCard(); // ---------- حفاظتی: ہوم پیج کا کارڈ بھی ہمیشہ اسی وقت تازہ ہو، چاہے ہوم پیج کا اپنا رینڈر کہیں نہ چلا ہو ----------
+  // ---------- 🧑 صدام کی ہدایت (FM4SEPFR23): کارٹ کے اوپر ہمیشہ صاف نظر آنے والا کسٹمر کا نام ---------- -->
+  const custBanner = document.getElementById('cartCustomerNameBanner');
+  if(custBanner){
+    const custIdNow = document.getElementById('customerSelect')?.value;
+    const custNow = custIdNow ? customersData.find(c => c.customer_id == custIdNow) : null;
+    custBanner.textContent = custNow ? ('🧑 ' + custNow.name + (custNow.phone ? ' — 📞 ' + custNow.phone : '')) : '🚶 Walk-in Customer';
+  }
   if(!billingDraftCustomerRestored && Billing.cart.length > 0){
     billingDraftCustomerRestored = true;
     const savedCustId = loadFromStorage('billingCustomerDraft', '');
@@ -9977,7 +10024,7 @@ function renderCart(){
   }
 
   const subtotal = Billing.cart.reduce((sum, i) => sum + (i.qty * i.unitPrice), 0);
-  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR21): "Discount" ختم — اب یہ خانہ "اضافی چارجز" (منشیانہ/ریڑھی/بائیک/کوچ)
+  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): "Discount" ختم — اب یہ خانہ "اضافی چارجز" (منشیانہ/ریڑھی/بائیک/کوچ)
   // ہے، جو ٹوٹل میں سے کٹتا نہیں بلکہ جمع ہوتا ہے (اسی لیے یہاں subtotal پر کیپ نہیں لگائی) ----------
   const discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
   const taxAmount = AppState.settings.taxEnabled ? Math.round(subtotal * (AppState.settings.taxPercent || 0) / 100) : 0;
@@ -10078,7 +10125,7 @@ function renderCart(){
       const cost = v ? v.purchase : (item.costPerUnit || 0);
       return sum + ((item.unitPrice - cost) * item.qty);
     }, 0);
-    const profit = grossProfit + discount; // ---------- FM4SEPFR21: اضافی چارجز (منشیانہ/کرایہ وغیرہ) اضافی آمدنی ہے، منافع میں جمع ہوگی ----------
+    const profit = grossProfit + discount; // ---------- FM4SEPFR23: اضافی چارجز (منشیانہ/کرایہ وغیرہ) اضافی آمدنی ہے، منافع میں جمع ہوگی ----------
     if(Billing.cart.length === 0){
       profitEl.style.display = 'none';
     } else {
@@ -10213,7 +10260,7 @@ async function openBillPreviewBeforeComplete(){
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
   const subtotal = Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0);
-  // ---------- FM4SEPFR21: "Discount" کی جگہ "اضافی چارجز" — یہ ٹوٹل میں سے کٹتا نہیں بلکہ جمع ہوتا ہے،
+  // ---------- FM4SEPFR23: "Discount" کی جگہ "اضافی چارجز" — یہ ٹوٹل میں سے کٹتا نہیں بلکہ جمع ہوتا ہے،
   // اور ٹیکس صرف اصل اشیاء کی subtotal پر لگے گا، اضافی چارجز پر نہیں ----------
   const discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
   const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
@@ -10251,7 +10298,7 @@ function finalizeInvoice(){
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
   const subtotal = Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0);
-  // ---------- FM4SEPFR21: "Discount" کی جگہ "اضافی چارجز" — یہ ٹوٹل میں سے کٹتا نہیں بلکہ جمع ہوتا ہے،
+  // ---------- FM4SEPFR23: "Discount" کی جگہ "اضافی چارجز" — یہ ٹوٹل میں سے کٹتا نہیں بلکہ جمع ہوتا ہے،
   // اور ٹیکس صرف اصل اشیاء کی subtotal پر لگے گا، اضافی چارجز پر نہیں ----------
   const discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
   const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
@@ -10389,7 +10436,7 @@ function finalizeInvoice(){
   }
 
   Billing.cart = [];
-  document.getElementById('discountInput').value = 170; // ---------- FM4SEPFR21: اضافی چارجز کی ڈیفالٹ رقم 170 ----------
+  document.getElementById('discountInput').value = 170; // ---------- FM4SEPFR23: اضافی چارجز کی ڈیفالٹ رقم 170 ----------
   document.getElementById('amountReceivedInput').value = '';
   document.getElementById('changeToWalletChk').checked = false;
   renderCart();
@@ -10430,7 +10477,7 @@ function submitBillForApproval(customer, method, subtotal){
   pendingBillsData.unshift(pending);
 
   Billing.cart = [];
-  document.getElementById('discountInput').value = 170; // ---------- FM4SEPFR21: اضافی چارجز کی ڈیفالٹ رقم 170 ----------
+  document.getElementById('discountInput').value = 170; // ---------- FM4SEPFR23: اضافی چارجز کی ڈیفالٹ رقم 170 ----------
   renderCart();
   renderBillingProductGrid();
   document.getElementById('customerSelect').value = '';
@@ -12101,6 +12148,20 @@ function animateAndTogglePresence(cardId, productId){
   }, 280);
 }
 
+// ---------- 🟩🟥 صدام کی ہدایت (FM4SEPFR23): راولپنڈی/اسلام آباد ریٹ + سٹاک ہمیشہ اسی رنگ سکیم میں دکھائیں —
+// راولپنڈی = سبز ڈبہ، اسلام آباد = سرخ ڈبہ۔ یہ فنکشن Products، Stock Adjustment، Billing وغیرہ ہر جگہ استعمال ہوتا ہے
+// تاکہ رنگ سکیم پوری ایپ میں ہمیشہ ایک جیسی رہے ---------- -->
+function buildRateBadgesHtml(v, showStock){
+  const rwp = (v?.wholesale ?? 0).toLocaleString();
+  const isb = (v?.retail ?? 0).toLocaleString();
+  const stock = v?.stock ?? 0;
+  return `<span class="rateBadgeRow">` +
+    `<span class="rateBadge rateBadgeRwp" title="راولپنڈی ریٹ">راولپنڈی: Rs. ${rwp}</span>` +
+    `<span class="rateBadge rateBadgeIsb" title="اسلام آباد ریٹ">اسلام آباد: Rs. ${isb}</span>` +
+    (showStock !== false ? `<span class="rateBadge rateBadgeStock" title="سٹاک">سٹاک: ${stock}</span>` : '') +
+    `</span>`;
+}
+
 function renderProductList(query = ''){
 
   const wrap = document.getElementById('productListWrap');
@@ -12151,9 +12212,7 @@ function renderProductList(query = ''){
     const mainV = p.variants[0] || {};
     // ---------- 💰 ایڈمن کو نام کے ساتھ ہی، ایک ہی لائن میں قیمت اور سٹاک نظر آئے (صدام کی ہدایت FM3SEPTH12) —
     // ملازم (ایمپلائی) کو یہ نظر نہیں آنی چاہیے، صرف ایڈمن کے پینل پر ---------- -->
-    const priceStockHtml = isAdmin
-      ? `<span class="pPriceStock">Rs. ${(mainV.retail ?? 0).toLocaleString()} · Stock: ${mainV.stock ?? 0}</span>`
-      : '';
+    const priceStockHtml = isAdmin ? buildRateBadgesHtml(mainV) : '';
     return `
     <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id})" dir="rtl">
@@ -12183,7 +12242,7 @@ function renderProductList(query = ''){
   crossRefreshStockAdjustment();
 }
 
-// ---------- 🔄 FM4SEPFR21: Products اور Stock Adjustment ایک ہی ڈیٹا دکھاتے ہیں — یہاں کوئی تبدیلی ہو تو
+// ---------- 🔄 FM4SEPFR23: Products اور Stock Adjustment ایک ہی ڈیٹا دکھاتے ہیں — یہاں کوئی تبدیلی ہو تو
 // Stock Adjustment بھی خودکار تازہ ہو جائے (reentrancy guard سے لامتناہی لوپ نہیں بنتا) ---------- -->
 function crossRefreshStockAdjustment(){
   if(window._refreshingProductScreens) return;
@@ -12250,12 +12309,12 @@ function renderVariantCardSection(productId){
             <input type="text" class="vcTotalPurchaseField" value="${((v.purchase||0) + (v.labor||0)).toLocaleString()}" readonly style="background:#f1f5f9; font-weight:800; color:var(--primary-dark);">
           </div>
           <div class="vcFieldWrap">
-            <span class="vcFieldLabel">🏷️ Islamabad Price</span>
-            <input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
+            <span class="vcFieldLabel" style="color:#b91c1c; font-weight:800;">🔴 اسلام آباد ریٹ</span>
+            <input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)" style="background:#fef2f2; border-color:#fca5a5; font-weight:800; color:#b91c1c;">
           </div>
           <div class="vcFieldWrap">
-            <span class="vcFieldLabel">📦 Rawalpindi Price</span>
-            <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)">
+            <span class="vcFieldLabel" style="color:#15803d; font-weight:800;">🟢 راولپنڈی ریٹ</span>
+            <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)" style="background:#f0fdf4; border-color:#86efac; font-weight:800; color:#15803d;">
           </div>
           <div class="vcFieldWrap vcStockWrap" style="max-width:120px;">
             <span class="vcFieldLabel">Stock</span>
@@ -13086,7 +13145,7 @@ function updateVariantField(productId, variantId, field, value, inputEl){
   const variant = product?.variants.find(v => v.variant_id === variantId);
   if(!variant) return;
 
-  // ---------- 🛠️ FM4SEPFR21 اہم فکس: 'labor' پہلے اس فہرست میں شامل نہیں تھا — اس لیے مزدوری کی رقم
+  // ---------- 🛠️ FM4SEPFR23 اہم فکس: 'labor' پہلے اس فہرست میں شامل نہیں تھا — اس لیے مزدوری کی رقم
   // نمبر کی بجائے متن (string) کے طور پر محفوظ ہوتی تھی، جس سے خرید+مزدوری کا خودکار جمع (ٹوٹل) کبھی کبھار
   // غلط (رقموں کا جوڑ لگانے کی بجائے آپس میں جُڑ جانا، مثلاً 200+50 کی بجائے "20050") ہو سکتا تھا ---------- -->
   const numericFields = ['purchase','labor','retail','wholesale','stock','lowStockAt'];
@@ -13097,7 +13156,7 @@ function updateVariantField(productId, variantId, field, value, inputEl){
 
   if(field === 'stock' || field === 'lowStockAt'){
     const isNegative = variant.stock < 0;
-    // ---------- 🛡️ FM4SEPFR21 اہم فکس: پہلے یہاں document.getElementById سے تلاش ہوتا تھا — چونکہ اب یہی
+    // ---------- 🛡️ FM4SEPFR23 اہم فکس: پہلے یہاں document.getElementById سے تلاش ہوتا تھا — چونکہ اب یہی
     // فیلڈز Stock Adjustment اور Products دونوں سکرینز میں (بیک وقت DOM میں موجود) نظر آتے ہیں، اس لیے ID سے
     // ڈھونڈنے پر ہمیشہ صرف پہلا (ممکنہ طور پر غلط/چھپی ہوئی سکرین کا) عنصر ملتا تھا۔ اب inputEl کے اپنے
     // قریبی .vcStockWrap کے اندر ہی تلاش ہوتی ہے — ہمیشہ صحیح سکرین کا صحیح عنصر اپڈیٹ ہوگا ---------- -->
@@ -13169,7 +13228,7 @@ function deleteVariant(productId, variantId){
   idbDeleteImage('product_' + variantId); // ---------- تصویر بھی صاف کریں تاکہ IndexedDB میں بے کار ڈیٹا جمع نہ ہو ----------
   const product = productsData.find(p => p.product_id === productId);
   product.variants = product.variants.filter(v => v.variant_id !== variantId);
-  // ---------- 🛠️ FM4SEPFR21 اہم فکس: پہلے یہاں persistAllData() کبھی کال نہیں ہوتا تھا — اس لیے ڈیلیٹ کیا
+  // ---------- 🛠️ FM4SEPFR23 اہم فکس: پہلے یہاں persistAllData() کبھی کال نہیں ہوتا تھا — اس لیے ڈیلیٹ کیا
   // گیا variant صرف اسی وقت (in-memory) کے لیے غائب ہوتا تھا، ایپ دوبارہ کھلتے ہی یا کلاؤڈ سے تازہ ڈیٹا آتے ہی
   // پرانا/ڈیلیٹ شدہ variant واپس آ جاتا تھا (یہی وجہ تھی کہ Stock Adjustment میں پرانی/انگلش پراڈکٹس چپکی رہتی تھیں) ----------
   if(product.variants.length === 0){
@@ -14604,7 +14663,7 @@ function getLiveVariantList(){
   return list;
 }
 
-// ---------- 🔄 صدام کی ہدایت (FM4SEPFR21): یہ صفحہ اب Products & Variants والے صفحے کا بالکل وہی سٹائل/کارڈ
+// ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): یہ صفحہ اب Products & Variants والے صفحے کا بالکل وہی سٹائل/کارڈ
 // استعمال کرتا ہے (سیریل نمبر، حاضر/غیر حاضر، ▶ ایکسپینڈ کر کے خرید قیمت + مزدوری + ٹوٹل + اسلام آباد ریٹ +
 // راولپنڈی ریٹ + سٹاک ایک ہی جگہ)۔ ڈیٹا بالکل وہی productsData ہے — یہاں جو بدلیں وہ Products میں بھی،
 // اور Products میں جو بدلیں وہ یہاں بھی خودکار نظر آئے گا ---------- -->
@@ -14681,9 +14740,7 @@ function renderStockAdjustmentScreen(query){
   const isAdmin = AppState.currentRole === 'admin';
   wrap.innerHTML = filtered.map(p => {
     const mainV = p.variants[0] || {};
-    const priceStockHtml = isAdmin
-      ? `<span class="pPriceStock">Rs. ${(mainV.retail ?? 0).toLocaleString()} · سٹاک: ${mainV.stock ?? 0}</span>`
-      : '';
+    const priceStockHtml = isAdmin ? buildRateBadgesHtml(mainV) : '';
     return `
     <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="sa-pcard-${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id}, 'sa-pcard-${p.product_id}')" dir="rtl">
@@ -14710,7 +14767,7 @@ function renderStockAdjustmentScreen(query){
   crossRefreshProductList();
 }
 
-// ---------- 🔄 FM4SEPFR21: یہاں سے Products کی فہرست بھی خودکار تازہ کریں (reentrancy guard shared) ---------- -->
+// ---------- 🔄 FM4SEPFR23: یہاں سے Products کی فہرست بھی خودکار تازہ کریں (reentrancy guard shared) ---------- -->
 function crossRefreshProductList(){
   if(window._refreshingProductScreens) return;
   window._refreshingProductScreens = true;
@@ -14732,6 +14789,234 @@ function resetAllNegativeStockToZero(){
   negativeItems.forEach(item => { item.variant.stock = 0; });
   persistAllData();
   renderStockAdjustmentScreen();
+}
+
+/* =====================================================================
+   📊 صدام کی ہدایت (FM4SEPFR23): سٹاک رپورٹ — آج کی تاریخ کے حساب سے پورا سٹاک کتنے کا پڑا ہوا ہے،
+   ہر آئٹم علیحدہ (خرید قیمت، راولپنڈی ریٹ پر ٹوٹل + منافع، اسلام آباد ریٹ پر ٹوٹل + منافع)۔
+   اردو نستعلیق کشیدہ، RTL، A4 پرنٹ ایبل + واٹس ایپ شیئر ایبل ---------- -->
+   ===================================================================== */
+async function openStockValueReport(){
+  document.getElementById('stockReportModal')?.classList.add('show');
+  await new Promise(r => setTimeout(r, 30));
+  await renderStockValueReportToCanvas(document.getElementById('stockReportCanvas'));
+}
+function closeStockValueReport(){
+  document.getElementById('stockReportModal')?.classList.remove('show');
+}
+
+async function renderStockValueReportToCanvas(canvasEl){
+  const canvas = canvasEl || document.getElementById('stockReportCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const fontFam = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif";
+  try{
+    await document.fonts.load(`bold 20px ${fontFam}`);
+    await document.fonts.load(`12px ${fontFam}`);
+    await document.fonts.ready;
+  }catch(e){}
+
+  // ---------- ڈیٹا تیار کریں: ہر variant کی الگ لائن — خرید، راولپنڈی (منافع سمیت)، اسلام آباد (منافع سمیت) ---------- -->
+  const rows = [];
+  productsData.forEach(p => {
+    p.variants.forEach(v => {
+      const qty = v.stock || 0;
+      if(qty === 0) return; // ---------- جس چیز کا سٹاک صفر ہے اسے رپورٹ میں شامل کرنے کا کوئی فائدہ نہیں ----------
+      const purchaseUnit = (v.purchase || 0) + (v.labor || 0);
+      const totalPurchase = qty * purchaseUnit;
+      const totalRwp = qty * (v.wholesale || 0);
+      const totalIsb = qty * (v.retail || 0);
+      rows.push({
+        serial: p.serial_no || 0,
+        name: p.name + (v.label && v.label !== p.name ? ' — ' + v.label : ''),
+        qty, purchaseUnit, totalPurchase,
+        wholesale: v.wholesale || 0, totalRwp, profitRwp: totalRwp - totalPurchase,
+        retail: v.retail || 0, totalIsb, profitIsb: totalIsb - totalPurchase,
+      });
+    });
+  });
+  rows.sort((a,b) => (a.serial||0) - (b.serial||0));
+
+  const grand = rows.reduce((acc, r) => {
+    acc.qty += r.qty; acc.purchase += r.totalPurchase;
+    acc.rwp += r.totalRwp; acc.profitRwp += r.profitRwp;
+    acc.isb += r.totalIsb; acc.profitIsb += r.profitIsb;
+    return acc;
+  }, {qty:0, purchase:0, rwp:0, profitRwp:0, isb:0, profitIsb:0});
+
+  const pxWidth = 900; // A4 پورٹریٹ کے تناسب سے چوڑا کینوس، پرنٹ پر صاف نظر آئے
+  const margin = 30;
+  const tableLeft = margin, tableRight = pxWidth - margin;
+  const totalTblW = tableRight - tableLeft;
+
+  // ---------- کالمز (دائیں سے بائیں): نمبر | نام | تعداد | خرید فی یونٹ | ٹوٹل خرید | راولپنڈی ریٹ | ٹوٹل راولپنڈی | منافع راولپنڈی | اسلام آباد ریٹ | ٹوٹل اسلام آباد | منافع اسلام آباد ---------- -->
+  const colDefs = [
+    {key:'no',    label:'نمبر',        w:0.045},
+    {key:'name',  label:'نام',         w:0.155},
+    {key:'qty',   label:'تعداد',       w:0.055},
+    {key:'pu',    label:'خرید/یونٹ',   w:0.075},
+    {key:'tp',    label:'ٹوٹل خرید',   w:0.085},
+    {key:'rwp',   label:'راولپنڈی ریٹ',w:0.075, grp:'g'},
+    {key:'trwp',  label:'ٹوٹل',        w:0.085, grp:'g'},
+    {key:'prwp',  label:'منافع',       w:0.085, grp:'g'},
+    {key:'isb',   label:'اسلام آباد ریٹ',w:0.075, grp:'r'},
+    {key:'tisb',  label:'ٹوٹل',        w:0.085, grp:'r'},
+    {key:'pisb',  label:'منافع',       w:0.085, grp:'r'},
+  ];
+  let cx = tableLeft;
+  colDefs.forEach(c => { c.width = Math.round(totalTblW * c.w); c.x = cx; cx += c.width; });
+  // ---------- آخری کالم باقی بچی چوڑائی خود لے لے، تاکہ راؤنڈنگ کی وجہ سے کنارہ نہ چھوٹے ---------- -->
+  colDefs[colDefs.length-1].width += (tableRight - cx);
+
+  const fsTitle = 22, fsSub = 13, fsHeader = 11, fsRow = 11, fsFooter = 12;
+  const headerRowH = 46, rowH = 30, footerRowH = 26;
+  const tableH = headerRowH + (rows.length * rowH);
+  const estimatedHeight = 170 + tableH + (footerRowH * 7) + 60;
+
+  canvas.width = pxWidth;
+  canvas.height = estimatedHeight;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  const F = (px, boldFlag) => `${boldFlag ? 'bold ' : ''}${px}px ${fontFam}`;
+  let y = 34;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#0f172a';
+  ctx.font = F(fsTitle, true);
+  ctx.fillText(AppState.settings.businessName || 'صدام فروٹ منڈی', pxWidth/2, y); y += 28;
+
+  ctx.font = F(fsSub, true);
+  ctx.fillStyle = '#334155';
+  const todayStr = new Date().toLocaleDateString('en-GB');
+  ctx.fillText(`📊 سٹاک رپورٹ — ${todayStr}`, pxWidth/2, y); y += 26;
+
+  drawSolidLine(ctx, y, pxWidth); y += 14;
+
+  // ---------- ٹیبل ہیڈر — سبز (راولپنڈی) اور سرخ (اسلام آباد) گروپ کا پس منظر واضح رنگ سے الگ ---------- -->
+  const tableTop = y;
+  colDefs.forEach(c => {
+    if(c.grp === 'g'){ ctx.fillStyle = '#dcfce7'; ctx.fillRect(c.x, tableTop, c.width, headerRowH + rows.length*rowH); }
+    else if(c.grp === 'r'){ ctx.fillStyle = '#fee2e2'; ctx.fillRect(c.x, tableTop, c.width, headerRowH + rows.length*rowH); }
+  });
+  ctx.fillStyle = '#eef2ff';
+  colDefs.filter(c=>!c.grp).forEach(c => ctx.fillRect(c.x, tableTop, c.width, headerRowH));
+
+  ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+  colDefs.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, tableTop); ctx.lineTo(c.x+0.5, tableTop+headerRowH+rows.length*rowH); ctx.stroke(); });
+  ctx.beginPath(); ctx.moveTo(tableRight+0.5, tableTop); ctx.lineTo(tableRight+0.5, tableTop+headerRowH+rows.length*rowH); ctx.stroke();
+
+  ctx.font = F(fsHeader, true);
+  ctx.fillStyle = '#0f172a';
+  ctx.textAlign = 'center';
+  colDefs.forEach(c => {
+    const lines = c.label.split(' ');
+    if(lines.length > 1 && c.width < 90){
+      ctx.fillText(lines[0], c.x + c.width/2, tableTop + headerRowH/2 - 3);
+      ctx.fillText(lines.slice(1).join(' '), c.x + c.width/2, tableTop + headerRowH/2 + 14);
+    } else {
+      ctx.fillText(c.label, c.x + c.width/2, tableTop + headerRowH/2 + 5);
+    }
+  });
+  let hy = tableTop + headerRowH;
+  ctx.beginPath(); ctx.moveTo(tableLeft, hy+0.5); ctx.lineTo(tableRight, hy+0.5); ctx.stroke();
+
+  ctx.font = F(fsRow, false);
+  rows.forEach((r, idx) => {
+    const baseline = hy + rowH/2 + 4;
+    ctx.fillStyle = '#0f172a';
+    const cellText = (key) => {
+      switch(key){
+        case 'no': return String(idx+1);
+        case 'name': return r.name;
+        case 'qty': return String(r.qty);
+        case 'pu': return r.purchaseUnit.toLocaleString();
+        case 'tp': return r.totalPurchase.toLocaleString();
+        case 'rwp': return r.wholesale.toLocaleString();
+        case 'trwp': return r.totalRwp.toLocaleString();
+        case 'prwp': return r.profitRwp.toLocaleString();
+        case 'isb': return r.retail.toLocaleString();
+        case 'tisb': return r.totalIsb.toLocaleString();
+        case 'pisb': return r.profitIsb.toLocaleString();
+      }
+      return '';
+    };
+    colDefs.forEach(c => {
+      ctx.save();
+      ctx.beginPath(); ctx.rect(c.x, hy, c.width, rowH); ctx.clip();
+      ctx.textAlign = 'center';
+      let txt = cellText(c.key);
+      if(c.key === 'name'){
+        ctx.textAlign = 'right';
+        while(ctx.measureText(txt).width > c.width - 6 && txt.length > 3){ txt = txt.slice(0,-1); }
+        ctx.fillText(txt, c.x + c.width - 4, baseline);
+      } else {
+        if((c.key === 'prwp' || c.key === 'pisb')){
+          const val = c.key === 'prwp' ? r.profitRwp : r.profitIsb;
+          ctx.fillStyle = val < 0 ? '#b91c1c' : '#15803d';
+        }
+        ctx.fillText(txt, c.x + c.width/2, baseline);
+      }
+      ctx.restore();
+    });
+    hy += rowH;
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.beginPath(); ctx.moveTo(tableLeft, hy+0.5); ctx.lineTo(tableRight, hy+0.5); ctx.stroke();
+  });
+
+  y = hy + 26;
+  // ---------- گرینڈ ٹوٹل خلاصہ — دائیں سے بائیں، صاف نمایاں ---------- -->
+  ctx.textAlign = 'right';
+  ctx.font = F(fsFooter, true);
+  const summaryX = tableRight;
+  const drawSummaryLine = (label, val, color) => {
+    ctx.fillStyle = color || '#0f172a';
+    ctx.fillText(`${label}: ${val}`, summaryX, y);
+    y += footerRowH;
+  };
+  drawSummaryLine('📦 کل تعداد (سٹاک)', grand.qty.toLocaleString());
+  drawSummaryLine('💰 ٹوٹل خرید قیمت', 'Rs. ' + grand.purchase.toLocaleString());
+  drawSummaryLine('🟢 راولپنڈی ریٹ پر ٹوٹل مالیت', 'Rs. ' + grand.rwp.toLocaleString(), '#15803d');
+  drawSummaryLine('🟢 راولپنڈی — کل ممکنہ منافع', 'Rs. ' + grand.profitRwp.toLocaleString(), grand.profitRwp < 0 ? '#b91c1c' : '#15803d');
+  drawSummaryLine('🔴 اسلام آباد ریٹ پر ٹوٹل مالیت', 'Rs. ' + grand.isb.toLocaleString(), '#b91c1c');
+  drawSummaryLine('🔴 اسلام آباد — کل ممکنہ منافع', 'Rs. ' + grand.profitIsb.toLocaleString(), grand.profitIsb < 0 ? '#b91c1c' : '#15803d');
+  y += 10;
+
+  ctx.textAlign = 'center';
+  ctx.font = F(11, false);
+  ctx.fillStyle = '#64748b';
+  ctx.fillText(`کل ${rows.length} اقسام — رپورٹ تیار کردہ ${new Date().toLocaleString('en-GB')}`, pxWidth/2, y);
+  y += 20;
+
+  if(Math.abs(y - canvas.height) > 4){
+    const finalH = Math.round(y + 10);
+    const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
+    canvas.height = finalH;
+    ctx.putImageData(imgData, 0, 0);
+  }
+}
+
+function buildStockReportPdf(){
+  const canvas = document.getElementById('stockReportCanvas');
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = 210, pageH = 297, marginMM = 10;
+  const availW = pageW - marginMM*2, availH = pageH - marginMM*2;
+  let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
+  if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
+  const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM;
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  return pdf;
+}
+async function printStockValueReport(){
+  if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
+  await renderStockValueReportToCanvas(document.getElementById('stockReportCanvas'));
+  const pdf = buildStockReportPdf();
+  window.open(pdf.output('bloburl'), '_blank');
+}
+function shareStockValueReport(){
+  const canvas = document.getElementById('stockReportCanvas');
+  if(!canvas) return;
+  showImageSharePreview(canvas, 'Stock_Report.png', '📊 سٹاک رپورٹ', 'سٹاک رپورٹ');
 }
 
 function recordPaymentEntry(entry){
@@ -17164,6 +17449,7 @@ async function openOtReview(){
 
   const savedOrder = advanceOrdersData.find(o => o.id === otSavedOrderId);
   await new Promise(r => setTimeout(r, 50));
+  syncOtReviewStyleControls();
   await renderAdvOrderToCanvas(savedOrder, document.getElementById('otReviewCanvas'));
 }
 
@@ -17197,6 +17483,50 @@ function otAdjustReviewZoom(delta){
   persistAllData();
   const order = advanceOrdersData.find(o => o.id === otSavedOrderId);
   if(order) renderAdvOrderToCanvas(order, document.getElementById('otReviewCanvas'));
+}
+
+// ---------- 🔤 صدام کی ہدایت (FM4SEPFR23): آرڈر ٹیکنگ کی رسید کا فونٹ + موٹا/پتلا — یہی سیٹنگ (advOrderFontId /
+// advOrderBoldItems) Advance Orders کے پرنٹ میں بھی استعمال ہوتی ہے، اس لیے یہاں بدلنے کا اثر وہاں بھی نظر آئے گا ---------- -->
+function syncOtReviewStyleControls(){
+  const sel = document.getElementById('otReviewFontSelect');
+  if(sel && !sel.dataset.filled){
+    sel.innerHTML = FONT_PRESETS.map(f => `<option value="${f.id}">${f.label}</option>`).join('');
+    sel.dataset.filled = '1';
+  }
+  if(sel) sel.value = AppState.settings.advOrderFontId || 'jameelnastaleeqkasheeda';
+  const isBold = AppState.settings.advOrderBoldItems !== false;
+  const boldBtn = document.getElementById('otReviewBoldBtn');
+  const thinBtn = document.getElementById('otReviewThinBtn');
+  if(boldBtn) { boldBtn.style.background = isBold ? 'var(--primary)' : '#fff'; boldBtn.style.color = isBold ? '#fff' : 'var(--text)'; }
+  if(thinBtn) { thinBtn.style.background = !isBold ? 'var(--primary)' : '#fff'; thinBtn.style.color = !isBold ? '#fff' : 'var(--text)'; }
+}
+function otChangeReviewFont(fontId){
+  AppState.settings.advOrderFontId = fontId;
+  persistAllData();
+  const order = advanceOrdersData.find(o => o.id === otSavedOrderId);
+  if(order) renderAdvOrderToCanvas(order, document.getElementById('otReviewCanvas'));
+}
+function otSetReviewBold(isBold){
+  AppState.settings.advOrderBoldItems = isBold;
+  persistAllData();
+  syncOtReviewStyleControls();
+  const order = advanceOrdersData.find(o => o.id === otSavedOrderId);
+  if(order) renderAdvOrderToCanvas(order, document.getElementById('otReviewCanvas'));
+}
+
+// ---------- 🖨️ صدام کی ہدایت (FM4SEPFR23): آرڈر ٹیکنگ کی رسید براہ راست تھرمل پرنٹر سے پرنٹ — پہلے یہاں سے
+// پرنٹ کا کوئی راستہ ہی نہیں تھا ---------- -->
+async function printOtReviewOrder(){
+  const order = advanceOrdersData.find(o => o.id === otSavedOrderId);
+  if(!order){ alert('آرڈر نہیں ملا — پہلے آرڈر محفوظ کریں۔'); return; }
+  await renderAdvOrderToCanvas(order, document.getElementById('otReviewCanvas'));
+  const canvas = document.getElementById('otReviewCanvas');
+  if(!canvas) return;
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 
 // ---------- ⚠️ پرانا "ایڈمن کو بھیجیں" فنکشن اب استعمال نہیں ہوتا — openOtReview() اب خودکار محفوظ کرتا ہے
@@ -18706,7 +19036,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   const colPad = Math.round(20 * scale);
   const noW = Math.max(Math.round(26 * scale), ctx.measureText(String(order.items.length)).width + colPad);
   const qtyW = Math.max(Math.round(36 * scale), ctx.measureText(maxQtyStr).width + colPad);
-  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR21): جب تک ریٹ نہ لگا ہو (خالص Order Taking/Advance Order) نرخ اور
+  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): جب تک ریٹ نہ لگا ہو (خالص Order Taking/Advance Order) نرخ اور
   // ٹوٹل کالم بالکل نہ دکھائیں — صرف نمبر، نام اشیاء اور تعداد۔ ریٹ لگتے ہی (اصل بل بنتے وقت) دونوں کالم واپس آ جاتے ہیں ---------- -->
   const priceW = hasRate ? Math.max(Math.round(42 * scale), ctx.measureText(maxPriceStr).width + colPad) : 0;
   const totalW = hasRate ? Math.max(Math.round(46 * scale), ctx.measureText(maxTotalStr).width + colPad) : 0;
@@ -18864,7 +19194,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
     y += 6 * scale;
   }
 
-  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR21): ریٹ نہ لگا ہو تو گرینڈ ٹوٹل کا خانہ بالکل نہیں دکھانا —
+  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): ریٹ نہ لگا ہو تو گرینڈ ٹوٹل کا خانہ بالکل نہیں دکھانا —
   // خالص Order Taking/Advance Order میں قیمت کا کوئی مطلب نہیں، صرف تعداد اہم ہے ---------- -->
   if(hasRate){
     ctx.textAlign = 'right';
@@ -18884,7 +19214,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = F('13px');
-  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR21): ریٹ نہ لگا ہو تو انگریزی "Thank you" کی بجائے یہاں اس ملازم کا نام
+  // ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): ریٹ نہ لگا ہو تو انگریزی "Thank you" کی بجائے یہاں اس ملازم کا نام
   // چھپے جس نے یہ آرڈر تیار کیا — تاکہ پتا چلے کس نے آرڈر لیا ہے۔ ریٹ لگ چکا ہو (اصل بل) تو پرانا شکریہ پیغام رہے ---------- -->
   if(hasRate){
     ctx.fillText('Thank you — see you in our next round!', pxWidth/2, y); y += 20 * scale;
@@ -21287,7 +21617,7 @@ const ASSIGNABLE_SCREENS = [
   {key:'purchaseorders', label:'📦 Purchase Orders'},
   {key:'stockadjustment', label:'🧮 Stock Adjustment'},
   // ---------- 🍇 صدام کی ہدایت پر: Dashboard, Categories, Trends —
-  // یہ ملازم کو Assign کرنے کی فہرست سے مکمل ہٹا دیے گئے ہیں (کوڈ محفوظ ہے)۔ FM4SEPFR21: Stock Adjustment اور
+  // یہ ملازم کو Assign کرنے کی فہرست سے مکمل ہٹا دیے گئے ہیں (کوڈ محفوظ ہے)۔ FM4SEPFR23: Stock Adjustment اور
   // Home دوبارہ شامل — صدام کی ہدایت کہ مینیو کی ہر آئٹم یہاں 100% نظر آئے ----------
   {key:'products', label:'📦 Products'},
   // ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): Customers/Suppliers/My Diary اب دوبارہ تین علیحدہ اجازتیں —
@@ -24112,7 +24442,7 @@ function applyUiZoom(pct){
   document.querySelectorAll('.uiZoomSlider').forEach(el => { if(Number(el.value) !== clamped) el.value = clamped; });
 }
 
-// ---------- 🔍 صدام کی ہدایت (FM4SEPFR21): پیج زوم بار کی جگہ اب یہاں سے سبزیاں/کسٹمرز سرچ ہوتی ہے —
+// ---------- 🔍 صدام کی ہدایت (FM4SEPFR23): پیج زوم بار کی جگہ اب یہاں سے سبزیاں/کسٹمرز سرچ ہوتی ہے —
 // یہ اوپر سٹکی پٹی میں چپکا رہتا ہے (وہی جگہ جو پہلے زوم سلائیڈر کی تھی) تاکہ سکرول کے دوران کبھی غائب نہ ہو۔
 // اصل سکرین کے اندر موجود پرانا سرچ باکس (productSearchInput/partySearchInput) چھپا دیا گیا ہے مگر اسی کی
 // value اور فنکشن یہاں سے استعمال ہوتے رہتے ہیں تاکہ باقی کوڈ (فلٹرز وغیرہ) بغیر کسی تبدیلی کے کام کرے ----------
@@ -24125,6 +24455,10 @@ function handleGlobalTopSearchInput(val){
     const orig = document.getElementById('partySearchInput');
     if(orig) orig.value = val;
     renderPartyList(val);
+  } else if(currentScreenName === 'stockadjustment'){
+    const orig = document.getElementById('stockAdjSearchInput');
+    if(orig) orig.value = val;
+    renderStockAdjustmentScreen(val);
   }
 }
 
@@ -24141,6 +24475,12 @@ function syncGlobalTopSearchBar(screenName){
     bar.style.display = 'flex';
     input.placeholder = document.getElementById('partySearchInput')?.placeholder || '🔍 تلاش کریں';
     input.value = '';
+  } else if(screenName === 'stockadjustment'){
+    // ---------- 🔄 صدام کی ہدایت (FM4SEPFR23): سٹاک ایڈجسٹمنٹ کا سرچ بار بھی اب اسی مستقل چپکی ہوئی پٹی میں —
+    // سکرول کرنے پر کبھی غائب نہیں ہوگا (بالکل Products/Customers کی طرح) ---------- -->
+    bar.style.display = 'flex';
+    input.placeholder = '🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)';
+    input.value = document.getElementById('stockAdjSearchInput')?.value || '';
   } else {
     bar.style.display = 'none';
     input.value = '';
