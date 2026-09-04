@@ -732,6 +732,9 @@
 
   /* ===================== PRODUCTS & VARIANTS SCREEN ===================== */
   .productToolbar{display:flex; gap:10px; margin-bottom:14px;}
+  /* ---------- 📌 صدام کی ہدایت (FM4SEPFR14): سرچ بار + فلٹرز اسکرول کرنے پر اوپر ہی چپکے رہیں —
+       نیچے کی لسٹ سکرول ہو، اوپر کا گرڈ (سرچ/فلٹر/حاضر-غیر حاضر) اپنی جگہ نہ چھوڑے ---------- */
+  .stickyFilterZone{ position:sticky; top:-20px; z-index:6; background:var(--bg); margin:-20px -20px 12px -20px; padding:20px 20px 10px; }
   .csvImportBar{display:flex; flex-wrap:wrap; gap:9px; margin-bottom:18px;}
   .csvTemplateBtn, .csvImportBtn{
     flex:1 1 auto; min-width:130px; padding:10px 10px; border-radius:10px; font-size:11.5px; font-weight:700; cursor:pointer; border:none;
@@ -3074,6 +3077,8 @@
       <div class="productsLayout">
         <!-- MAIN: Search + full product list -->
         <div class="productMain">
+          <!-- 📌 FM4SEPFR14: سرچ + New Product + حاضر/غیر حاضر — سکرول کے دوران اوپر چپکے رہیں -->
+          <div class="stickyFilterZone">
           <div class="productToolbar">
             <input type="text" id="productSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderProductList(this.value)">
             <button onclick="openNewProductModal()">+ New Product</button>
@@ -3088,6 +3093,7 @@
           <div style="display:flex; gap:8px; margin-bottom:12px;">
             <button id="prodPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:1; padding:9px; border-radius:9px; border:none; font-size:12.5px; font-weight:800; cursor:pointer;">🟢 حاضر سبزیاں</button>
             <button id="prodPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:1; padding:9px; border-radius:9px; border:none; font-size:12.5px; font-weight:800; cursor:pointer;">🔴 غیر حاضر سبزیاں</button>
+          </div>
           </div>
 
           <div class="productList" id="productListWrap">
@@ -3145,6 +3151,8 @@
     <!-- PARTIES (Admin only) -->
     <div class="screen admin-only" id="screen-parties">
       <div class="pageTitle" id="partyPageTitle">🧑‍🤝‍🧑 Customers</div>
+      <!-- 📌 FM4SEPFR14: سرچ + فلٹرز + حاضر موجود/کھوہ کھاتے — سکرول کے دوران اوپر چپکے رہیں -->
+      <div class="stickyFilterZone">
       <!-- ---------- 🧹 صدام کی ہدایت: Customers/Suppliers/Diary تینوں ایک ہی صفحے کی طرح محسوس ہوں — یہ ٹیب بار ---------- -->
       <div id="hubTabsBarParties"></div>
 
@@ -3155,6 +3163,7 @@
       <!-- ---------- 🗂️ کسٹمر کیٹگرائزیشن — صدام کی ہدایت (FM3SEPTH10): علاقہ/بقایہ/آج کی خریداری فلٹر +
            حاضر موجود / کھوہ کھاتے ٹیب۔ انتخاب اسی ڈیوائس پر ہمیشہ محفوظ رہتا ہے (دوبارہ کھولنے پر ری سیٹ نہیں ہوتا) ---------- -->
       <div id="custFilterBar" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;"></div>
+      </div>
       <div class="csvImportBar" style="display:none;">
         <button class="csvTemplateBtn" onclick="downloadPartyCsvTemplate()">📄 Download Excel/CSV Template</button>
         <button class="csvImportBtn" id="partyImportBtn" onclick="document.getElementById('partyCsvInput').click()">📥 Import <span id="partyImportBtnLabel">Customers</span></button>
@@ -6810,7 +6819,7 @@ function getDeveloperContact(){
 //      (ج) ڈاؤن لوڈ ہونے والی فائل کا نام (مثلاً index.html کے ساتھ ساتھ FM318MO13.html بھی دیں) —
 //      تاکہ Home پیج پر اوپر نظر آنے والا بیج (topbarVersionBadge) ہمیشہ تازہ ترین نمبر دکھائے اور صدام کو
 //      فوراً پتا چل جائے کہ لیٹسٹ فائل ہی اپلوڈ ہوئی ہے۔
-const APP_BUILD_VERSION = 'FM4SEPFR13';
+const APP_BUILD_VERSION = 'FM4SEPFR14';
 
 
 // ---------- 🛠️ ڈیویلپر بائی پاس — یہ کوڈ Admin PIN فیلڈ میں ڈالنے سے، ہمیشہ (localStorage/Firestore ڈیٹا
@@ -12063,11 +12072,16 @@ function renderProductList(query = ''){
   const wrap = document.getElementById('productListWrap');
   query = query.trim().toLowerCase();
 
-  // ---------- 🟢🔴 حاضر/غیر حاضر ٹیب کی نمایاں حالت ----------
+  // ---------- 🟢🔴 حاضر/غیر حاضر ٹیب کی نمایاں حالت + کل تعداد — صدام کی ہدایت (FM4SEPFR14):
+  // بٹن پر ہی لکھا نظر آئے کتنی سبزیاں حاضر ہیں اور کتنی غیر حاضر ---------- -->
   const presentBtn = document.getElementById('prodPresenceBtnPresent');
   const absentBtn = document.getElementById('prodPresenceBtnAbsent');
   if(presentBtn && absentBtn){
     const isPresent = productPresenceFilter === 'present';
+    const presentCount = productsData.filter(p => !p.isDormant).length;
+    const absentCount = productsData.filter(p => !!p.isDormant).length;
+    presentBtn.textContent = `🟢 حاضر سبزیاں (${presentCount})`;
+    absentBtn.textContent = `🔴 غیر حاضر سبزیاں (${absentCount})`;
     presentBtn.style.background = isPresent ? '#134e2c' : '#f1f5f9';
     presentBtn.style.color = isPresent ? '#fff' : 'var(--text)';
     absentBtn.style.background = !isPresent ? '#78350f' : '#f1f5f9';
@@ -14761,6 +14775,7 @@ function renderCustFilterBar(){
     <div style="display:flex; gap:6px; align-items:center;">
       <select onchange="setCustFilter('sort', this.value)" style="flex:1; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px;">
         <option value="name" ${f.sort==='name'?'selected':''}>🔤 نام کے مطابق</option>
+        <option value="serial" ${f.sort==='serial'?'selected':''}>🔢 سیریل نمبر (1،2،3...)</option>
         <option value="highest" ${f.sort==='highest'?'selected':''}>📈 زیادہ بقایہ پہلے</option>
         <option value="lowest" ${f.sort==='lowest'?'selected':''}>📉 کم بقایہ پہلے</option>
       </select>
@@ -14769,8 +14784,8 @@ function renderCustFilterBar(){
       </label>
     </div>
     <div style="display:flex; gap:6px;">
-      <button onclick="setCustFilter('showDormant', false)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${!f.showDormant?'#134e2c':'#f1f5f9'}; color:${!f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🟢 حاضر موجود</button>
-      <button onclick="setCustFilter('showDormant', true)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${f.showDormant?'#78350f':'#f1f5f9'}; color:${f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🪦 کھوہ کھاتے</button>
+      <button onclick="setCustFilter('showDormant', false)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${!f.showDormant?'#134e2c':'#f1f5f9'}; color:${!f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🟢 حاضر موجود (${customersData.filter(c => !c.isDormant).length})</button>
+      <button onclick="setCustFilter('showDormant', true)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${f.showDormant?'#78350f':'#f1f5f9'}; color:${f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🪦 کھوہ کھاتے (${customersData.filter(c => !!c.isDormant).length})</button>
     </div>
   `;
 }
@@ -14789,6 +14804,8 @@ function applyCustomerCategorization(list){
   if(f.todayOnly) out = out.filter(c => customerBoughtToday(c.customer_id));
   if(f.sort === 'highest') out.sort((a,b) => (b.total_receivable||0) - (a.total_receivable||0));
   else if(f.sort === 'lowest') out.sort((a,b) => (a.total_receivable||0) - (b.total_receivable||0));
+  // ---------- 🔢 صدام کی ہدایت (FM4SEPFR14): سیریل نمبر کے مطابق ترتیب — بالکل 1،2،3،4... کی طرح ---------- -->
+  else if(f.sort === 'serial') out.sort((a,b) => (a.customer_id||0) - (b.customer_id||0));
   else out.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ur'));
   return out;
 }
