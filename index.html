@@ -4553,6 +4553,28 @@
               <button id="pscThinBtn" class="pscToggleBtn" onclick="setPreviewBold(false)">Thin</button>
               <select id="pscFontFamilySelect" onchange="setPreviewFontFamily(this.value)" class="pscDropdown"></select>
             </div>
+            <!-- ---------- 🔤 صدام کی ہدایت (FM5SEPTH): بل کے 4 الگ حصوں کے لیے 4 الگ فونٹ منتخب کرنے کا آپشن —
+                 اوپر والا معمول کا فونٹ ہی بنیادی رہے گا، یہاں ہر خانہ خالی ("— معمول کا فونٹ —") چھوڑ دیں
+                 تو وہی بنیادی فونٹ استعمال ہوگا؛ الگ فونٹ چاہیں تو یہاں سے منتخب کر لیں ---------- -->
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; margin:8px 0;">
+              <div style="font-size:11.5px; font-weight:800; color:#334155; margin-bottom:8px;">🔤 بل کے ہر حصے کا اپنا الگ فونٹ (اختیاری)</div>
+              <div class="pscCompactRow" style="margin-bottom:6px;">
+                <span class="pscLabel" style="min-width:110px;">🏷️ عنوان (بزنس نام)</span>
+                <select id="pscTitleFontSelect" onchange="setSectionFontFamily('printFontTitleId', this.value)" class="pscDropdown"></select>
+              </div>
+              <div class="pscCompactRow" style="margin-bottom:6px;">
+                <span class="pscLabel" style="min-width:110px;">🧾 کیپشن (کالم ہیڈر)</span>
+                <select id="pscCaptionFontSelect" onchange="setSectionFontFamily('printFontCaptionId', this.value)" class="pscDropdown"></select>
+              </div>
+              <div class="pscCompactRow" style="margin-bottom:6px;">
+                <span class="pscLabel" style="min-width:110px;">🥬 سبزیوں کے نام</span>
+                <select id="pscItemFontSelect" onchange="setSectionFontFamily('printFontItemId', this.value)" class="pscDropdown"></select>
+              </div>
+              <div class="pscCompactRow">
+                <span class="pscLabel" style="min-width:110px;">💳 پیمنٹ تفصیل</span>
+                <select id="pscPaymentFontSelect" onchange="setSectionFontFamily('printFontPaymentId', this.value)" class="pscDropdown"></select>
+              </div>
+            </div>
             <div class="pscCompactRow">
               <span class="pscLabel">🎨</span>
               <div id="pscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
@@ -5535,16 +5557,33 @@
       <button class="testPrintBtn" style="margin-bottom:14px; background:#eef2ff; color:var(--primary-dark);" onclick="devEnterAppDirectly()">🚀 Enter App Now (skip PIN / activation code)</button>
 
       <!-- ---------- 📢 صدام کی ہدایت (5 ستمبر): سلائیڈنگ پیغامات — صرف Developer Panel سے، عام Admin کے لیے نہیں —
-           ہر پیغام کا اپنا آن/آف، رنگ، رفتار (سیکنڈ)، سمت (دائیں/بائیں) الگ سے سیٹ ہو سکتا ہے ---------- -->
+           ہر پیغام کا اپنا آن/آف، رنگ، رفتار (سیکنڈ)، سمت (دائیں/بائیں)، اور اگلے پیغام تک وقفہ الگ سے سیٹ ہو سکتا ہے۔
+           💡 صدام کی ہدایت (FM5SEPTH): لائیو پریویو + پٹی کا اپنا بیک گراؤنڈ/بارڈر رنگ + چمک کنٹرول شامل کیا گیا ---------- -->
       <div style="background:#fffbeb; border:1.5px solid #fcd34d; border-radius:12px; padding:12px; margin-bottom:16px;" dir="rtl">
         <h3 style="margin:0 0 4px; font-size:14px; color:#92400e;">📢 سلائیڈنگ پیغامات (صرف ڈویلپر)</h3>
-        <p style="font-size:11.5px; color:#78716c; margin:0 0 10px;">اوپر چلنے والی پٹی کے پیغامات یہاں سے ترتیب دیں — آن/آف، رنگ، رفتار، سمت۔</p>
+        <p style="font-size:11.5px; color:#78716c; margin:0 0 10px;">اوپر چلنے والی پٹی کے پیغامات یہاں سے ترتیب دیں — آن/آف، رنگ، چمک، رفتار، سمت، وقفہ۔</p>
+
+        <!-- ---------- 👁️ لائیو پریویو — نیچے جو بھی تبدیلی کریں، یہ پٹی فوراً اسی وقت اپڈیٹ ہو جائے گی ---------- -->
+        <div style="font-size:10.5px; color:#92400e; font-weight:800; margin-bottom:4px;">👁️ لائیو پریویو:</div>
+        <div id="mqDevPreviewWrap" style="position:relative; width:100%; height:34px; overflow:hidden; margin-bottom:12px; border-radius:6px;">
+          <span id="mqDevPreviewText" style="position:absolute; top:0; right:10px; height:34px; line-height:34px; white-space:nowrap; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif; font-size:15px; font-weight:700;"></span>
+        </div>
+
+        <!-- ---------- 🎨 پوری پٹی کا اپنا بیک گراؤنڈ اور بارڈر رنگ (سب پیغامات کے لیے مشترک) ---------- -->
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
+          <label style="font-size:11px; color:#92400e; font-weight:700;">🎨 پٹی کا بیک گراؤنڈ:</label>
+          <input type="color" id="mqBarBgInput" onchange="updateMarqueeBarField('barBackground', this.value)" oninput="updateMarqueeBarField('barBackground', this.value)" style="width:40px; height:30px; padding:0; border:1px solid #dbe1ea; border-radius:6px;">
+          <label style="font-size:11px; color:#92400e; font-weight:700;">🖼️ بارڈر رنگ:</label>
+          <input type="color" id="mqBarBorderInput" onchange="updateMarqueeBarField('barBorderColor', this.value)" oninput="updateMarqueeBarField('barBorderColor', this.value)" style="width:40px; height:30px; padding:0; border:1px solid #dbe1ea; border-radius:6px;">
+        </div>
+
         <div id="mqDevListWrap"></div>
         <div style="display:flex; gap:6px; margin-top:6px;">
           <input type="text" id="mqNewMsgInput" placeholder="✍️ نیا پیغام لکھیں..." style="flex:1; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
           <button type="button" onclick="addMarqueeMsg()" style="flex:0 0 auto; padding:9px 14px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:12.5px; cursor:pointer;">+ شامل کریں</button>
         </div>
       </div>
+
 
       <div class="settingsSubLabel">Developer WhatsApp Number</div>
       <input type="text" id="devWhatsappInput" placeholder="e.g. 923206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveDevSecretPanel()">
@@ -7115,7 +7154,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ5ستمبر8:10pm';
+const APP_BUILD_VERSION = 'ہفتہ5ستمبر8:51pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9065,13 +9104,15 @@ let mqQueueIdx = 0;
 // ---------- 📢 صدام کی ہدایت (5 ستمبر): سلائیڈنگ پیغامات — رنگ، رفتار (سیکنڈ)، سمت (دائیں/بائیں) ہر پیغام کا
 // اپنا الگ سیٹ کیا جا سکتا ہے۔ صرف Developer Panel سے (عام ایڈمن کے لیے نہیں) ---------- -->
 let marqueeSettings = loadFromStorage('marqueeSettings', {
+  barBackground: '#1e40af', // ---------- 🎨 صدام کی ہدایت (FM5SEPTH): پوری پٹی کا اپنا بیک گراؤنڈ رنگ ----------
+  barBorderColor: '#eab308', // ---------- 🖼️ صدام کی ہدایت (FM5SEPTH): پٹی کا اپنا بارڈر رنگ ----------
   messages: [
-    { id:'login',        builtin:true, label:'لاگ ان پیغام (👑 نام)',          enabled:true, color:'#ffd700', direction:'rtl', speed:18 },
-    { id:'subscription', builtin:true, label:'⭐ سبسکرپشن یاد دہانی',           enabled:true, color:'#ffffff', direction:'ltr', speed:18 },
-    { id:'screenshot',   builtin:true, label:'📸 اسکرین شاٹ یاد دہانی',        enabled:true, color:'#ffffff', direction:'ltr', speed:18,
+    { id:'login',        builtin:true, label:'لاگ ان پیغام (👑 نام)',          enabled:true, color:'#ffd700', direction:'rtl', speed:18, gap:0.5, brightness:100 },
+    { id:'subscription', builtin:true, label:'⭐ سبسکرپشن یاد دہانی',           enabled:true, color:'#ffffff', direction:'ltr', speed:18, gap:0.5, brightness:100 },
+    { id:'screenshot',   builtin:true, label:'📸 اسکرین شاٹ یاد دہانی',        enabled:true, color:'#ffffff', direction:'ltr', speed:18, gap:0.5, brightness:100,
       text:'📸   پیارے بھائی، اس ایپ کے اندر جو بھی مسئلہ نظر آئے، اسی وقت اس کا اسکرین شاٹ لے کر مجھے بھیج دیا کریں' },
-    { id:'updateNotice', builtin:true, label:'🔔 نیا اپڈیٹ یاد دہانی',          enabled:true, color:'#ffffff', direction:'ltr', speed:18 }
-  ] // ---------- اپنے نئے پیغامات اسی فہرست کے آخر میں {id, builtin:false, text, enabled, color, direction, speed} کی صورت میں شامل ہوں گے ----------
+    { id:'updateNotice', builtin:true, label:'🔔 نیا اپڈیٹ یاد دہانی',          enabled:true, color:'#ffffff', direction:'ltr', speed:18, gap:0.5, brightness:100 }
+  ] // ---------- اپنے نئے پیغامات اسی فہرست کے آخر میں {id, builtin:false, text, enabled, color, direction, speed, gap, brightness} کی صورت میں شامل ہوں گے ----------
 });
 function getMarqueeMsgDef(id){ return marqueeSettings.messages.find(m => m.id === id); }
 
@@ -9094,7 +9135,7 @@ function buildMarqueeQueue(){
       text = `🔔   تازہ ترین ورژن ${APP_BUILD_VERSION} کو لوڈ ہوئے ${loadedMins} منٹ ہو چکے ہیں، براہ کرم اپنی ایپ کو اپڈیٹ کر لیں`;
     }
     if(!text || !text.trim()) return;
-    q.push({ text, color: m.color || '#ffffff', direction: m.direction || 'ltr', speed: m.speed || 18 });
+    q.push({ text, color: m.color || '#ffffff', direction: m.direction || 'ltr', speed: m.speed || 18, gap: m.gap != null ? m.gap : 0.5, brightness: m.brightness || 100 });
   });
   return q;
 }
@@ -9115,19 +9156,86 @@ function renderMarqueeDevList(){
       </div>
       ${(!m.builtin || m.id === 'screenshot') ? `
       <textarea onchange="updateMarqueeMsgField(${idx}, 'text', this.value)" rows="2" style="width:100%; padding:7px; border:1px solid #dbe1ea; border-radius:7px; font-size:12.5px; margin-bottom:6px; font-family:inherit;">${(m.text||'').replace(/</g,'&lt;')}</textarea>` : ''}
-      <div style="display:flex; gap:6px; align-items:center;">
+      <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:6px;">
         <label style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">رنگ:</label>
-        <input type="color" value="${m.color || '#ffffff'}" onchange="updateMarqueeMsgField(${idx}, 'color', this.value)" style="width:36px; height:28px; padding:0; border:1px solid #dbe1ea; border-radius:6px; flex:0 0 auto;">
+        <input type="color" value="${m.color || '#ffffff'}" onchange="updateMarqueeMsgField(${idx}, 'color', this.value)" oninput="updateMarqueeMsgField(${idx}, 'color', this.value)" style="width:36px; height:28px; padding:0; border:1px solid #dbe1ea; border-radius:6px; flex:0 0 auto;">
+        <label style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">☀️ چمک:</label>
+        <button type="button" onclick="stepMarqueeBrightness(${idx}, -10)" style="width:26px; height:26px; border:1px solid #dbe1ea; border-radius:6px; background:#fff; font-weight:900; cursor:pointer;">−</button>
+        <span style="font-size:11px; font-weight:800; min-width:32px; text-align:center;">${m.brightness || 100}%</span>
+        <button type="button" onclick="stepMarqueeBrightness(${idx}, 10)" style="width:26px; height:26px; border:1px solid #dbe1ea; border-radius:6px; background:#fff; font-weight:900; cursor:pointer;">+</button>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
         <label style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">سمت:</label>
-        <select onchange="updateMarqueeMsgField(${idx}, 'direction', this.value)" style="flex:1; padding:5px; border:1px solid #dbe1ea; border-radius:6px; font-size:11.5px;">
+        <select onchange="updateMarqueeMsgField(${idx}, 'direction', this.value)" style="flex:1; padding:5px; border:1px solid #dbe1ea; border-radius:6px; font-size:11.5px; min-width:120px;">
           <option value="rtl" ${m.direction === 'rtl' ? 'selected' : ''}>➡️ دائیں سے بائیں</option>
           <option value="ltr" ${m.direction !== 'rtl' ? 'selected' : ''}>⬅️ بائیں سے دائیں</option>
         </select>
         <label style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">رفتار:</label>
-        <input type="number" min="5" max="60" value="${m.speed || 18}" onchange="updateMarqueeMsgField(${idx}, 'speed', parseInt(this.value)||18)" style="width:50px; padding:5px; border:1px solid #dbe1ea; border-radius:6px; font-size:11.5px; text-align:center;">
+        <input type="number" min="5" max="60" value="${m.speed || 18}" onchange="updateMarqueeMsgField(${idx}, 'speed', parseInt(this.value)||18)" style="width:46px; padding:5px; border:1px solid #dbe1ea; border-radius:6px; font-size:11.5px; text-align:center;">
         <span style="font-size:10px; color:var(--muted);">سیکنڈ</span>
       </div>
+      <!-- ---------- ⏱️ صدام کی ہدایت (FM5SEPTH): یہ پیغام مکمل ہونے کے بعد اگلے پیغام کے آنے تک کتنا وقفہ ہو ---------- -->
+      <div style="display:flex; gap:6px; align-items:center; margin-top:6px;">
+        <label style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">⏱️ اگلے پیغام تک وقفہ:</label>
+        <input type="number" min="0" max="10" step="0.5" value="${m.gap != null ? m.gap : 0.5}" onchange="updateMarqueeMsgField(${idx}, 'gap', parseFloat(this.value)||0)" style="width:50px; padding:5px; border:1px solid #dbe1ea; border-radius:6px; font-size:11.5px; text-align:center;">
+        <span style="font-size:10px; color:var(--muted);">سیکنڈ (جتنا کم، اتنی جلدی اگلا پیغام آئے گا)</span>
+      </div>
     </div>`).join('');
+  // ---------- بار کے بیک گراؤنڈ/بارڈر ان پٹس کو موجودہ محفوظ شدہ رنگ سے بھریں ---------- -->
+  const bgInput = document.getElementById('mqBarBgInput');
+  const borderInput = document.getElementById('mqBarBorderInput');
+  if(bgInput) bgInput.value = marqueeSettings.barBackground || '#1e40af';
+  if(borderInput) borderInput.value = marqueeSettings.barBorderColor || '#eab308';
+  renderMqDevPreview();
+}
+// ---------- ☀️ چمک کو +/- بٹن سے 10-10% کر کے بدلیں (50% سے 150% کے درمیان) ---------- -->
+function stepMarqueeBrightness(idx, delta){
+  const m = marqueeSettings.messages[idx];
+  if(!m) return;
+  const current = m.brightness || 100;
+  const next = Math.max(50, Math.min(150, current + delta));
+  updateMarqueeMsgField(idx, 'brightness', next);
+}
+// ---------- 🎨 پوری پٹی کا بیک گراؤنڈ/بارڈر رنگ بدلیں — فوراً محفوظ اور فوراً لاگو ---------- -->
+function updateMarqueeBarField(field, value){
+  marqueeSettings[field] = value;
+  saveToStorage('marqueeSettings', marqueeSettings);
+  applyMarqueeBarStyle();
+  renderMqDevPreview();
+}
+// ---------- 🖌️ اصل، لائیو پٹی پر بیک گراؤنڈ/بارڈر رنگ لاگو کریں ---------- -->
+function applyMarqueeBarStyle(){
+  const wrap = document.getElementById('loginMarqueeWrap');
+  if(!wrap) return;
+  const bg = marqueeSettings.barBackground || '#1e40af';
+  const border = marqueeSettings.barBorderColor || '#eab308';
+  const bgLight = (typeof shiftColorLightness === 'function') ? shiftColorLightness(bg, 55) : bg;
+  wrap.style.background = `linear-gradient(90deg, ${bg}, ${bgLight}, ${bg})`;
+  wrap.style.borderTop = `2px solid ${border}`;
+  wrap.style.borderBottom = `2px solid ${border}`;
+  wrap.style.borderLeft = `1px solid ${hexToRgba(border, .5)}`;
+  wrap.style.borderRight = `1px solid ${hexToRgba(border, .5)}`;
+  wrap.style.boxShadow = `0 0 14px ${hexToRgba(border, .35)}, inset 0 1px 0 rgba(255,255,255,.25)`;
+}
+// ---------- 👁️ Developer Panel کے اندر ہی لائیو پریویو — بغیر پینل بند کیے فوراً نظر آئے ---------- -->
+function renderMqDevPreview(){
+  const wrap = document.getElementById('mqDevPreviewWrap');
+  const text = document.getElementById('mqDevPreviewText');
+  if(!wrap || !text) return;
+  const bg = marqueeSettings.barBackground || '#1e40af';
+  const border = marqueeSettings.barBorderColor || '#eab308';
+  const bgLight = (typeof shiftColorLightness === 'function') ? shiftColorLightness(bg, 55) : bg;
+  wrap.style.background = `linear-gradient(90deg, ${bg}, ${bgLight}, ${bg})`;
+  wrap.style.borderTop = `2px solid ${border}`;
+  wrap.style.borderBottom = `2px solid ${border}`;
+  wrap.style.borderLeft = `1px solid ${hexToRgba(border, .5)}`;
+  wrap.style.borderRight = `1px solid ${hexToRgba(border, .5)}`;
+  wrap.style.boxShadow = `0 0 10px ${hexToRgba(border, .35)}, inset 0 1px 0 rgba(255,255,255,.25)`;
+  const firstEnabled = marqueeSettings.messages.find(m => m.enabled) || marqueeSettings.messages[0];
+  if(!firstEnabled) return;
+  text.textContent = firstEnabled.text || firstEnabled.label || '';
+  text.style.color = firstEnabled.color || '#ffffff';
+  text.style.filter = `brightness(${firstEnabled.brightness || 100}%) drop-shadow(0 1px 3px rgba(0,0,0,.65))`;
 }
 function updateMarqueeMsgField(idx, field, value){
   if(!marqueeSettings.messages[idx]) return;
@@ -9157,6 +9265,7 @@ function addMarqueeMsg(){
 }
 
 
+let mqPendingGapMs = 500; // ---------- ⏱️ صدام کی ہدایت (FM5SEPTH): موجودہ پیغام کا وقفہ — اگلا پیغام آنے سے پہلے کتنا انتظار ہو ---------- -->
 function playNextMarqueeMessage(){
   const wrap = document.getElementById('loginMarqueeText');
   const part = document.getElementById('mqActivePart');
@@ -9175,7 +9284,8 @@ function playNextMarqueeMessage(){
   part.style.background = 'none';
   part.style.webkitBackgroundClip = 'initial';
   part.style.backgroundClip = 'initial';
-  part.style.filter = 'drop-shadow(0 1px 3px rgba(0,0,0,.65))';
+  // ---------- ☀️ صدام کی ہدایت (FM5SEPTH): اس پیغام کی اپنی چمک (brightness) بھی لاگو ہو ---------- -->
+  part.style.filter = `brightness(${msg.brightness || 100}%) drop-shadow(0 1px 3px rgba(0,0,0,.65))`;
 
   // ---------- ♻️ ہر پیغام کے لیے حرکت نئے سرے سے شروع کروائیں (ری فلو کروا کر) ---------- -->
   wrap.classList.remove('mqPlayRTL', 'mqPlayLTR');
@@ -9187,6 +9297,10 @@ function playNextMarqueeMessage(){
   wrap.style.animation = `${slideAnim} ${speed}s linear 1 forwards, testShimmer 2.4s linear infinite`;
   wrap.classList.add(dirClass);
 
+  // ---------- ⏱️ صدام کی ہدایت (FM5SEPTH): اسی پیغام کا اپنا "اگلے پیغام تک وقفہ" یاد رکھیں —
+  // animationend پر اسی وقفے کے بعد اگلا پیغام چلے گا (پہلے فوراً ہی اگلا آ جاتا تھا) ---------- -->
+  mqPendingGapMs = Math.round((msg.gap != null ? msg.gap : 0.5) * 1000);
+
   mqQueueIdx = (mqQueueIdx + 1) % queue.length;
   requestAnimationFrame(syncMobileTopbarHeight);
 }
@@ -9196,7 +9310,9 @@ function ensureMarqueeCycleListener(){
   if(!wrap || wrap.dataset.mqBound) return;
   wrap.dataset.mqBound = '1';
   wrap.addEventListener('animationend', (e) => {
-    if(e.animationName === 'loginMarqueeSlideRTL' || e.animationName === 'loginMarqueeSlideLTR') playNextMarqueeMessage();
+    if(e.animationName === 'loginMarqueeSlideRTL' || e.animationName === 'loginMarqueeSlideLTR'){
+      setTimeout(playNextMarqueeMessage, mqPendingGapMs); // ---------- ⏱️ صدام کی ہدایت (FM5SEPTH): فوراً نہیں، طے شدہ وقفے کے بعد ----------
+    }
   });
 }
 
@@ -9205,6 +9321,7 @@ function updateTopbarUserBadge(){
   // ---------- 🐛 صدام کی ہدایت (FM3SEPTH10): ٹاپ بار کی اصل اونچائی ناپ کر نیچے والی utilityBar پٹی کو
   // بتائیں کہاں سے چپکنا ہے — ورنہ بڑی تصویر/نام/چمکتی پٹی کی وجہ سے وہ اوپر آ کر اوورلیپ کر دیتی تھی ---------- -->
   ensureMarqueeCycleListener();
+  applyMarqueeBarStyle(); // ---------- 🎨 صدام کی ہدایت (FM5SEPTH): محفوظ شدہ پٹی کا بیک گراؤنڈ/بارڈر ہر لاگ ان پر خودکار لاگو ----------
   mqQueueIdx = 0; // ---------- نیا لاگ ان ہونے پر لاگ ان پیغام سے دوبارہ شروع کریں ---------- -->
   playNextMarqueeMessage();
   requestAnimationFrame(syncMobileTopbarHeight);
@@ -24361,6 +24478,21 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.printFontId) || FONT_PRESETS[0];
   const canvasFontFamily = selectedFontPreset.family;
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${canvasFontFamily}`;
+  // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): نیچے پیمنٹ/سمری سیکشن کے لیے علیحدہ فونٹ ----------
+  const FP = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${paymentFontFamily}`;
+  // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): بل کے 4 الگ حصوں کے لیے 4 الگ فونٹ — عنوان (بزنس نام)، کیپشن
+  // (کالم ہیڈر)، سبزیوں کے نام، اور نیچے پیمنٹ/سمری کی تفصیل — ہر ایک کا اپنا فونٹ منتخب کیا جا سکتا ہے
+  // (Bill & Print Settings میں)۔ کوئی الگ منتخب نہ کیا گیا ہو تو معمول کا بل فونٹ ہی استعمال ہوگا ---------- -->
+  const getFontFamily = (settingKey) => {
+    const chosenId = AppState.settings[settingKey];
+    if(!chosenId) return canvasFontFamily;
+    const preset = FONT_PRESETS.find(f => f.id === chosenId);
+    return preset ? preset.family : canvasFontFamily;
+  };
+  const titleFontFamily = getFontFamily('printFontTitleId');
+  const captionFontFamily = getFontFamily('printFontCaptionId');
+  const itemFontFamily = getFontFamily('printFontItemId');
+  const paymentFontFamily = getFontFamily('printFontPaymentId');
 
   // ---------- ٹیبل کالمز کی چوڑائی — اب مکمل RTL ترتیب اور خودکار (auto-width) سائز، صدام کی ہدایت (FM3SEPTH23):
   // دائیں سے بائیں پڑھنے کی صحیح ترتیب: نمبر → نام اشیاء → تعداد → قیمت → ٹوٹل
@@ -24470,7 +24602,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
 
   let y = 30;
   ctx.textAlign = 'center';
-  ctx.font = F('bold 26px');
+  ctx.font = `bold ${Math.round(26*fscale)}px ${titleFontFamily}`; // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): عنوان کا اپنا الگ فونٹ ----------
   ctx.fillStyle = '#1a1a1a'; // ---------- سفید پس منظر پر ہمیشہ گہرا رنگ — تھیم چاہے گہرا ہو، یہ متن ابھی تک بینر کے اوپر نہیں گیا ----------
   ctx.fillText(AppState.settings.businessName || 'Fruit Mandi POS', pxWidth/2, y); y += 26;
 
@@ -24534,10 +24666,10 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // ---------- ہر کیپشن کا فونٹ اس کے اپنے کالم کی چوڑائی میں فٹ ہونے تک خود بخود چھوٹا ہوتا ہے — زوم جتنا بھی بڑا ہو، کبھی کالم سے باہر نہیں نکلے گا ----------
   const fitHeaderFont = (text, maxWidth) => {
     let px = Math.round(17 * fscale);
-    ctx.font = `bold ${px}px ${canvasFontFamily}`;
+    ctx.font = `bold ${px}px ${captionFontFamily}`; // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): کالم کیپشن کا اپنا الگ فونٹ ----------
     while(ctx.measureText(text).width > maxWidth && px > 7){
       px -= 1;
-      ctx.font = `bold ${px}px ${canvasFontFamily}`;
+      ctx.font = `bold ${px}px ${captionFontFamily}`;
     }
   };
   // ---------- سخت کلپنگ کے ساتھ کیپشن لکھیں — fitHeaderFont کے باوجود ناپ میں معمولی فرق ہو تو بھی کالم سے باہر بالکل نہیں نکلے گا ----------
@@ -24619,7 +24751,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     ctx.font = `bold ${numRowFontPx}px ${canvasFontFamily}`;
     ctx.fillText(String(idx + 1), (colX[5]+colX[6])/2, rowBaseline);
     ctx.textAlign = itemAlign;
-    ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`;
+    ctx.font = `${itemFontWeight}${rowFontPx}px ${itemFontFamily}`; // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): سبزیوں کے نام کا اپنا الگ فونٹ ----------
     // ---------- سخت کلپنگ — item کا نام کبھی بھی اپنے کالم کی حد سے ایک پکسل بھی باہر نہ چھپے،
     // چاہے measureText میں کہیں معمولی فرق ہی کیوں نہ ہو (خاص طور پر Bold وزن میں) ----------
     ctx.save();
@@ -24648,7 +24780,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     drawClippedNum(laborText, colX[2], colX[3], laborX);
     drawClippedNum(priceText, colX[1], colX[2], priceX);
     drawClippedNum(totalText, colX[0], colX[1], totalX);
-    ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`; // ---------- اگلی لائن کے لیے بنیادی فونٹ واپس بحال ----------
+    ctx.font = `${itemFontWeight}${rowFontPx}px ${itemFontFamily}`; // ---------- اگلی لائن کے لیے بنیادی فونٹ واپس بحال ----------
     ctx.fillStyle = '#000';
 
     hLineY += rowH;
@@ -24667,16 +24799,16 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
 
   y = tableTop + tableH + 26;
 
-  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH24): Subtotal/Discount/Tax/Grand Total اب فکسڈ x=10 پر نہیں —
-  // ٹیبل کا "ٹوٹل" کالم (colX[0]→colX[1]) RTL کے بعد آٹو-چوڑائی سے کبھی بائیں کنارے سے چپکا، کبھی دور ہوتا ہے،
-  // اس لیے یہ لائنیں اب اسی کالم کے دائیں کنارے (colX[1]) سے right-align ہو کر بالکل اسی کے نیچے اپنی جگہ پر فٹ ہوں گی ---------- -->
-  const summaryColRight = colX[1] - 6;
+  // ---------- 🐛 صدام کی ہدایت (FM5SEPTH — تصحیح): پہلا طریقہ (colX[1]-6) صرف تنگ "ٹوٹل" کالم کی چوڑائی میں
+  // متن فٹ کرنے کی کوشش کرتا تھا — جیسے ہی "مزدوری ٹوٹل" جیسی لمبی لائن آئی، وہ کینوس کے بائیں کنارے سے
+  // باہر نکل کر غائب ہو گئی۔ اب پوری ٹیبل کی چوڑائی (tableRight تک) دستیاب ہے، متن کبھی باہر نہیں جائے گا ---------- -->
+  const summaryColRight = tableRight - 6;
   ctx.textAlign = 'right';
   const laborTotalForWalkIn = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
   if(!invoice.customer_id){
     if((invoice.discount && invoice.discount > 0) || laborTotalForWalkIn > 0){
       const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
-      ctx.font = F('14px');
+      ctx.font = FP('14px');
       ctx.fillText('ذیلی ٹوٹل: Rs. ' + subtotalAmt.toFixed(decimals), summaryColRight, y); y += 20;
       if(laborTotalForWalkIn > 0){
         ctx.fillText('💪 مزدوری ٹوٹل: + Rs. ' + laborTotalForWalkIn.toFixed(decimals), summaryColRight, y); y += 20;
@@ -24686,7 +24818,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
       }
     }
     if(invoice.tax_amount && invoice.tax_amount > 0){
-      ctx.font = F('14px');
+      ctx.font = FP('14px');
       ctx.fillText(`ٹیکس (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(decimals), summaryColRight, y); y += 20;
     }
   }
@@ -24696,7 +24828,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     const alreadyShowedSubtotal = !invoice.customer_id && ((invoice.discount && invoice.discount > 0) || laborTotalForWalkIn > 0);
     if(!alreadyShowedSubtotal){
       const originalSubtotal = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
-      ctx.font = F('14px');
+      ctx.font = FP('14px');
       ctx.fillText('ذیلی ٹوٹل: Rs. ' + originalSubtotal.toFixed(decimals), summaryColRight, y); y += 20;
     }
     ctx.fillStyle = '#dc2626';
@@ -24707,7 +24839,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // ---------- 🐛 صدام کی ہدایت (FM3SEPTH24): کسٹمر منتخب ہو تو نیچے "ادائیگی کی تفصیل" باکس میں پہلے سے
   // حتمی ٹوٹل موجود ہوتا ہے — یہاں الگ سے "گرینڈ ٹوٹل" دوبارہ لکھنا اسے دو جگہ، غیر منسلک دکھاتا تھا ---------- -->
   if(!invoice.customer_id){
-    ctx.font = F('bold 20px');
+    ctx.font = FP('bold 20px');
     ctx.fillText('گرینڈ ٹوٹل: Rs. ' + invoice.grand_total.toFixed(decimals), summaryColRight, y);
     y += 34;
   }
@@ -24731,7 +24863,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.strokeRect(sumLeft + 0.5, boxTop + 0.5, sumBoxW, boxH);
     let ty = boxTop + 18;
-    ctx.font = F('bold 12px');
+    ctx.font = FP('bold 12px');
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000';
     ctx.fillText('ادائیگی کی تفصیل', sumLeft + sumBoxW/2, ty);
@@ -24743,20 +24875,20 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     allSummaryRows.forEach(([label, val, isFinal], idx) => {
       if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(sumLeft+0.5, rowTop+0.5, sumBoxW-1, sumRowH); }
       let fpx = isFinal ? 13 : 11; // ---------- خانہ اب تنگ ہے، اسی مناسبت سے فونٹ بھی تھوڑا چھوٹا ----------
-      ctx.font = F(`bold ${fpx}px`);
+      ctx.font = FP(`bold ${fpx}px`);
       ctx.fillStyle = '#000';
       // ---------- 🐛 صدام کی ہدایت (FM3SEPTH23): لمبا اردو لیبل (جیسے "حتمی بقایہ رقم") پہلے قیمت کے اوپر چڑھ جاتا تھا —
       // اب لیبل کا فونٹ خودکار سکڑ کر اپنے آدھے خانے میں فٹ ہو جاتا ہے، کبھی رقم سے اوورلیپ نہیں کرے گا ---------- -->
       const labelMaxW = sumLabelW - 10;
       while(ctx.measureText(label).width > labelMaxW && fpx > 7){
         fpx -= 1;
-        ctx.font = F(`bold ${fpx}px`);
+        ctx.font = FP(`bold ${fpx}px`);
       }
       // ---------- 🐛 صدام کی ہدایت (FM3SEPTH25): اردو کی فطری RTL ترتیب کے مطابق — ٹائٹل (Grand Total/Subtotal وغیرہ)
       // اب دائیں طرف، اور پیسے/رقم اب بائیں طرف — بالکل اسی طرح جیسے اوپر آئٹمز ٹیبل میں "نام" دائیں اور "ٹوٹل" بائیں ہے ---------- -->
       ctx.textAlign = 'right';
       ctx.fillText(label, sumRight - 6, rowTop + sumRowH/2 + 4);
-      ctx.font = F(isFinal ? 'bold 13px' : 'bold 11px'); // ---------- قیمت کا فونٹ لیبل سے آزاد، اپنا مقررہ سائز ----------
+      ctx.font = FP(isFinal ? 'bold 13px' : 'bold 11px'); // ---------- قیمت کا فونٹ لیبل سے آزاد، اپنا مقررہ سائز ----------
       ctx.textAlign = 'left';
       ctx.fillText(Math.round(val).toLocaleString(), sumLeft + 6, rowTop + sumRowH/2 + 4);
       ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
@@ -24911,6 +25043,21 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.printFontId) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی ----------
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${fontFam}`; // ---------- اب ہر فونٹ سائز بھی Text سلائیڈر کے ساتھ بدلتا ہے ----------
+  // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): A4 بل میں بھی 4 الگ حصوں کے لیے 4 الگ فونٹ ----------
+  const getFontFamilyA4 = (settingKey) => {
+    const chosenId = AppState.settings[settingKey];
+    if(!chosenId) return fontFam;
+    const preset = FONT_PRESETS.find(f => f.id === chosenId);
+    return preset ? preset.family : fontFam;
+  };
+  const titleFontFamily = getFontFamilyA4('printFontTitleId');
+  const captionFontFamily = getFontFamilyA4('printFontCaptionId');
+  const itemFontFamily = getFontFamilyA4('printFontItemId');
+  const paymentFontFamily = getFontFamilyA4('printFontPaymentId');
+  const FT = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${titleFontFamily}`;
+  const FC = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${captionFontFamily}`;
+  const FI = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${itemFontFamily}`;
+  const FP = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${paymentFontFamily}`;
   try{
     await document.fonts.load(`bold 30px ${fontFam}`);
     await document.fonts.load(`16px ${fontFam}`);
@@ -24922,7 +25069,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.fillRect(0, 0, pxWidth, headerBandH);
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
-  ctx.font = F('bold 30px');
+  ctx.font = FT('bold 30px');
   ctx.fillText(AppState.settings.businessName || 'Fruit Mandi POS', pxWidth/2, Math.round(headerBandH*0.46));
   ctx.font = F('14px');
   let hy = Math.round(headerBandH*0.67);
@@ -24971,7 +25118,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.fillStyle = theme.primary;
   ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerRowH);
   ctx.fillStyle = '#ffffff';
-  ctx.font = F('bold 14px');
+  ctx.font = FC('bold 14px');
   const headerBaseline = tableTop + headerRowH/2 + Math.round(5*fscale);
   ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
   ctx.textAlign = a4Align;
@@ -25026,7 +25173,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
       baseNameA4 = baseNameA4.slice(0, baseNameA4.length - item.label.length).trim();
     }
     let displayName = (isHighlighted ? '👉 ' : '') + baseNameA4;
-    ctx.font = F('13px');
+    ctx.font = FI('13px'); // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): سبزیوں کے نام کا اپنا الگ فونٹ ----------
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0, -1); }
     if(displayName !== ((isHighlighted ? '👉 ' : '') + baseNameA4)) displayName = displayName.trim() + '…';
@@ -25081,7 +25228,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   if(!invoice.customer_id){
     if((invoice.discount && invoice.discount > 0) || laborTotalA4WalkIn > 0){
       const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
-      ctx.font = F('14px');
+      ctx.font = FP('14px');
       ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), tableLeft + 10, y); y += lineStepA4;
       if(laborTotalA4WalkIn > 0){
         ctx.fillText('💪 مزدوری ٹوٹل: + Rs. ' + laborTotalA4WalkIn.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
@@ -25091,7 +25238,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
       }
     }
     if(invoice.tax_amount && invoice.tax_amount > 0){
-      ctx.font = F('14px');
+      ctx.font = FP('14px');
       ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
     }
   }
@@ -25101,7 +25248,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     const alreadyShowedSubtotalA4 = !invoice.customer_id && ((invoice.discount && invoice.discount > 0) || laborTotalA4WalkIn > 0);
     if(!alreadyShowedSubtotalA4){
       const originalSubtotalA4 = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
-      ctx.font = F('14px');
+      ctx.font = FP('14px');
       ctx.fillText('Subtotal: Rs. ' + originalSubtotalA4.toFixed(0), tableLeft + 10, y); y += lineStepA4;
     }
     ctx.fillStyle = '#dc2626';
@@ -25135,7 +25282,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.strokeRect(sumLeft + 0.5, boxTop + 0.5, sumBoxW, boxH);
     y += 24;
-    ctx.font = F('bold 15px');
+    ctx.font = FP('bold 15px');
     ctx.textAlign = 'center';
     ctx.fillStyle = '#1a1a1a';
     ctx.fillText('ادائیگی کی تفصیل', pxWidth/2, y); y += 10;
@@ -25146,7 +25293,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 
     allSummaryRowsA4.forEach(([label, val, isFinal], idx) => {
       if(idx % 2 === 1){ ctx.fillStyle = hexToRgba(theme.primary, 0.06); ctx.fillRect(sumLeft+0.5, rowTop+0.5, sumBoxW-1, sumRowH); }
-      ctx.font = F(isFinal ? 'bold 17px' : 'bold 14px');
+      ctx.font = FP(isFinal ? 'bold 17px' : 'bold 14px');
       ctx.fillStyle = '#1a1a1a';
       if(a4Align === 'center'){
         ctx.textAlign = 'center';
@@ -25246,6 +25393,24 @@ function syncPreviewStyleControls(){
     fontSelect.value = AppState.settings.printFontId || 'segoe';
   }
 
+  // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): بل کے 4 الگ حصوں کے فونٹ ڈراپ ڈاؤن بھریں —
+  // ہر ایک میں سب سے اوپر "— معمول کا فونٹ —" کا آپشن بھی ہو (خالی ویلیو = اوپر والا بنیادی فونٹ ہی استعمال ہو) ---------- -->
+  const sectionFontMap = {
+    pscTitleFontSelect: 'printFontTitleId',
+    pscCaptionFontSelect: 'printFontCaptionId',
+    pscItemFontSelect: 'printFontItemId',
+    pscPaymentFontSelect: 'printFontPaymentId'
+  };
+  Object.keys(sectionFontMap).forEach(selId => {
+    const sel = document.getElementById(selId);
+    if(!sel) return;
+    if(!sel.dataset.filled){
+      sel.innerHTML = `<option value="">— معمول کا فونٹ —</option>` + FONT_PRESETS.map(f => `<option value="${f.id}">${f.label}</option>`).join('');
+      sel.dataset.filled = '1';
+    }
+    sel.value = AppState.settings[sectionFontMap[selId]] || '';
+  });
+
   const swatchWrap = document.getElementById('pscColorSwatches');
   if(swatchWrap){
     try{
@@ -25283,6 +25448,14 @@ function setReceiptColor(colorId){
 // ---------- پرنٹ کے لیے فونٹ سٹائل — یہ صرف رسید پر لاگو ہوتا ہے، پوری ایپ کا فونٹ نہیں بدلتا ----------
 function setPreviewFontFamily(fontId){
   AppState.settings.printFontId = fontId;
+  persistAllData();
+  rerenderInvoicePreview();
+}
+
+// ---------- 🔤 صدام کی ہدایت (FM5SEPTH): بل کے کسی ایک مخصوص حصے (عنوان/کیپشن/آئٹم نام/پیمنٹ) کا اپنا الگ فونٹ سیٹ کریں —
+// خالی منتخب کریں تو وہ حصہ واپس معمول کے بنیادی فونٹ پر چلا جائے گا ---------- -->
+function setSectionFontFamily(settingKey, fontId){
+  AppState.settings[settingKey] = fontId || null;
   persistAllData();
   rerenderInvoicePreview();
 }
