@@ -2983,7 +2983,9 @@
     <div class="modalOverlay" id="quickCreditCustomerModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
         <h3>📒 Save Customer for This Credit</h3>
-        <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">This sale is going as Pending — please save who owes this amount.</div>
+        <!-- ---------- 6 ستمبر: پہلے یہ لائن باریک/ہلکے رنگ میں تھی، صاف نظر نہیں آتی تھی —
+             اب موٹے، بڑے، سرخ حروف میں وجہ صاف بتائی جا رہی ہے کہ نام کیوں لازمی ہے ---------- -->
+        <div style="font-size:15px; font-weight:800; color:#b91c1c; background:#fef2f2; border:1.5px solid #fca5a5; border-radius:10px; padding:10px 12px; margin-bottom:12px; line-height:1.5;">⚠️ اس بل کے پیسے پینڈنگ (بقایہ) رہ رہے ہیں، اس لیے کسٹمر کا نام لکھنا ضروری ہے</div>
         <input type="text" id="qccName" placeholder="Customer Name">
         <input type="text" id="qccPhone" placeholder="Mobile Number">
         <div class="modalBtns">
@@ -3019,7 +3021,7 @@
              (مثلاً "ٹماٹر" + "ٹوکری" = کارڈ پر "ٹماٹر ٹوکری" نظر آئے گا) ---------- -->
         <div style="display:flex; gap:6px; margin-top:8px;">
           <select id="npVariant" style="flex:1 1 auto; min-width:0; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; background:#fff;"></select>
-          <button type="button" onclick="openManageVariantTypesModal()" title="ویرینٹ کی فہرست ترتیب دیں" style="flex:0 0 auto; background:#eef2ff; color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; padding:0 14px; font-weight:800; cursor:pointer;">⚙️</button>
+          <button type="button" onclick="openManageVariantTypesModal()" title="پیکنگ کی فہرست ترتیب دیں" style="flex:0 0 auto; background:#eef2ff; color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; padding:0 14px; font-weight:800; cursor:pointer;">⚙️</button>
         </div>
 
         <!-- ---------- 🧹 صدام کی ہدایت (FM3SEPTH10): ہر خانے کے اوپر واضح لیبل — پہلے صرف placeholder تھا جو
@@ -3072,10 +3074,10 @@
     <!-- ---------- ⚙️ ویرینٹ کی فہرست ترتیب دیں — ایڈ/ایڈٹ/ڈیلیٹ — یہی فہرست پراڈکٹ فارم کے ڈراپ ڈاؤن میں استعمال ہوتی ہے ---------- -->
     <div class="modalOverlay" id="manageVariantTypesModal" onclick="if(event.target===this) closeManageVariantTypesModal()">
       <div class="modalBoxWide" style="width:340px;">
-        <h3>⚙️ Manage Variant Types</h3>
+        <h3>⚙️ Manage Packing Types</h3>
         <div id="variantTypesList" style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px; max-height:280px; overflow-y:auto;"></div>
         <div style="display:flex; gap:6px;">
-          <input type="text" id="newVariantTypeInput" placeholder="نیا ویرینٹ — مثلاً 'بوری'" style="flex:1 1 auto; min-width:0; padding:10px; border:1px solid #dbe1ea; border-radius:8px;">
+          <input type="text" id="newVariantTypeInput" placeholder="نئی پیکنگ — مثلاً 'بوری'" style="flex:1 1 auto; min-width:0; padding:10px; border:1px solid #dbe1ea; border-radius:8px;">
           <button type="button" onclick="addVariantType()" style="flex:0 0 auto; background:var(--primary); color:#fff; border:none; border-radius:8px; padding:0 16px; font-weight:800; cursor:pointer;">➕</button>
         </div>
         <div class="modalBtns">
@@ -3209,7 +3211,7 @@
 
     <!-- PRODUCTS (Admin only) -->
     <div class="screen admin-only" id="screen-products">
-      <div class="pageTitle">📦 Products & Variants</div>
+      <div class="pageTitle">📦 Products & Packing</div>
 
       <div class="productsLayout">
         <!-- MAIN: Search + full product list -->
@@ -3757,8 +3759,8 @@
               <option value="added">As Ordered</option>
               <option value="qtyDesc">Qty: High → Low</option>
               <option value="qtyAsc">Qty: Low → High</option>
-              <option value="variantQtyDesc">Group by Variant, Qty High → Low</option>
-              <option value="variantQtyAsc">Group by Variant, Qty Low → High</option>
+              <option value="variantQtyDesc">Group by Packing, Qty High → Low</option>
+              <option value="variantQtyAsc">Group by Packing, Qty Low → High</option>
               <option value="nameAsc">Name: A → Z</option>
               <option value="nameDesc">Name: Z → A</option>
             </select>
@@ -3766,7 +3768,7 @@
           <div style="display:flex; align-items:center; gap:8px; padding:0 0 4px; margin-top:4px; font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; border-bottom:2px solid #e2e8f0;">
             <span style="width:20px; text-align:center;">#</span>
             <span style="flex:1;">Item</span>
-            <span style="width:52px; text-align:center;">Variant</span>
+            <span style="width:52px; text-align:center;">Packing</span>
             <span style="width:55px; text-align:center;">Qty<br>Received</span>
             <span style="width:75px; text-align:center;">Cost<br>Price</span>
             <span style="width:70px; text-align:right;">Line<br>Total</span>
@@ -3875,14 +3877,14 @@
               <option value="added">As Added</option>
               <option value="qtyDesc">Qty: High → Low</option>
               <option value="qtyAsc">Qty: Low → High</option>
-              <option value="variantQtyDesc">Group by Variant, Qty High → Low</option>
-              <option value="variantQtyAsc">Group by Variant, Qty Low → High</option>
+              <option value="variantQtyDesc">Group by Packing, Qty High → Low</option>
+              <option value="variantQtyAsc">Group by Packing, Qty Low → High</option>
               <option value="nameAsc">Name: A → Z</option>
               <option value="nameDesc">Name: Z → A</option>
             </select>
           </div>
           <table class="cartTable" style="margin-bottom:6px;">
-            <thead><tr><th style="width:22px;">#</th><th>Item</th><th style="width:52px;">Variant</th><th>Qty</th><th>Purchase Price</th><th>Total</th><th></th></tr></thead>
+            <thead><tr><th style="width:22px;">#</th><th>Item</th><th style="width:52px;">Packing</th><th>Qty</th><th>Purchase Price</th><th>Total</th><th></th></tr></thead>
             <tbody id="poItemsBody"></tbody>
           </table>
         </div>
@@ -7161,7 +7163,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر3:19am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر3:37am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11464,11 +11466,19 @@ function finalizeInvoice(){
   // (b) Walk-in موڈ میں بھی، اگر صارف نے جزوی رقم درج کی ہو جو بل سے کم ہے (نیا رویہ — ورنہ Walk-in خاموشی سے مکمل نقد ہی رہے) ----------
   const rawReceivedForCheck = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
   const isWalkInPartial = Billing.counterSale && rawReceivedForCheck > 0 && rawReceivedForCheck < grandTotal;
-  if(!customer && (!Billing.counterSale || isWalkInPartial)){
+  // ---------- 💡 صدام کی ہدایت (6 ستمبر): پہلے یہ صرف "Counter Sale" ٹوگل کی حالت دیکھ کر فیصلہ کرتا تھا —
+  // اسی وجہ سے پوری رقم وصول ہو جانے کے باوجود بھی کسٹمر کا نام مانگا جاتا رہا (کیونکہ ٹوگل کسی وجہ سے درست
+  // حالت میں نہیں تھا)۔ اب اصل بقایہ رقم دیکھ کر فیصلہ کریں — یہی حتمی سچائی ہے، ٹوگل کی پروا نہیں ---------- -->
+  const willRemainPending = rawReceivedForCheck < grandTotal;
+  if(!customer && willRemainPending){
     document.getElementById('qccName').value = '';
     document.getElementById('qccPhone').value = '';
     document.getElementById('quickCreditCustomerModal').classList.add('show');
     return;
+  }
+  if(!customer && !willRemainPending){
+    // ---------- پیمنٹ مکمل ہو چکی ہے — کسٹمر کا نام لازمی نہیں، صرف ہلکی سی تصدیق کر کے بل پرنٹ ہونے دیں ----------
+    if(!confirm('کسٹمر کا نام درج نہیں کیا گیا — لیکن پیمنٹ مکمل ہو چکی ہے۔\nاسی طرح Walk-in Customer کے نام سے بل پرنٹ کر دیا جائے؟')) return;
   }
 
   // ---------- پیمنٹ خودکار طے ہوتی ہے — بلنگ کے دوران کوئی انتخاب نہیں کرنا پڑتا ----------
@@ -14702,7 +14712,7 @@ function renderNpVariantSelect(){
   const sel = document.getElementById('npVariant');
   if(!sel) return;
   const current = sel.value;
-  sel.innerHTML = `<option value="">— کوئی ویرینٹ نہیں —</option>` +
+  sel.innerHTML = `<option value="">— کوئی پیکنگ نہیں —</option>` +
     productVariantTypes.map(t => `<option value="${t.replace(/"/g,'&quot;')}">${t}</option>`).join('');
   sel.value = current; // ---------- اگر پہلے سے کوئی منتخب تھا تو وہی برقرار رکھیں ----------
 }
@@ -14720,7 +14730,7 @@ function renderVariantTypesList(){
   const wrap = document.getElementById('variantTypesList');
   if(!wrap) return;
   if(productVariantTypes.length === 0){
-    wrap.innerHTML = `<div class="placeholder" style="padding:14px 0;">کوئی ویرینٹ موجود نہیں</div>`;
+    wrap.innerHTML = `<div class="placeholder" style="padding:14px 0;">کوئی پیکنگ موجود نہیں</div>`;
     return;
   }
   wrap.innerHTML = productVariantTypes.map((t, idx) => `
@@ -14736,7 +14746,7 @@ function addVariantType(){
   const input = document.getElementById('newVariantTypeInput');
   const val = (input.value || '').trim();
   if(!val) return;
-  if(productVariantTypes.includes(val)){ alert('یہ ویرینٹ پہلے سے فہرست میں موجود ہے۔'); return; }
+  if(productVariantTypes.includes(val)){ alert('یہ پیکنگ پہلے سے فہرست میں موجود ہے۔'); return; }
   productVariantTypes.push(val);
   input.value = '';
   persistAllData();
@@ -14744,7 +14754,7 @@ function addVariantType(){
 }
 function editVariantType(idx){
   const current = productVariantTypes[idx];
-  const updated = prompt('ویرینٹ کا نام تبدیل کریں:', current);
+  const updated = prompt('پیکنگ کا نام تبدیل کریں:', current);
   if(updated === null) return;
   const trimmed = updated.trim();
   if(!trimmed) return;
@@ -24546,11 +24556,20 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   ctx.font = `bold ${numFontPx0}px ${canvasFontFamily}`;
   const colPad = Math.round(18 * fscale);
   const noW = Math.max(Math.round(22 * fscale), ctx.measureText(String(invoice.items.length)).width + colPad);
-  const qtyW = Math.max(Math.round(32 * fscale), ctx.measureText(maxQtyStr).width + colPad);
+  // ---------- 6 ستمبر: تعداد (Qty) کا کالم صرف 1-2 ہندسوں کے لیے ہوتا ہے — تنگ رکھیں، جگہ نام/ٹوٹل کو دیں ---------- -->
+  const qtyW = Math.max(Math.round(26 * fscale), ctx.measureText(maxQtyStr).width + Math.round(12*fscale));
   const priceW = Math.max(Math.round(38 * fscale), ctx.measureText(maxPriceStr).width + colPad);
-  const totalW = Math.max(Math.round(42 * fscale), ctx.measureText(maxTotalStr).width + colPad);
+  // ---------- 6 ستمبر: ٹوٹل کا کالم ہمیشہ چوڑا رکھیں — یہاں 5-6 ہندسے تک آ سکتے ہیں، کبھی نہ کٹے ---------- -->
+  const totalW = Math.max(Math.round(52 * fscale), ctx.measureText(maxTotalStr).width + Math.round(22*fscale));
   // ---------- 💪 صدام کی ہدایت: بل میں "مزدوری" کا اپنا الگ کالم — تعداد اور نرخ کے درمیان ----------
-  const laborW = Math.max(Math.round(38 * fscale), ctx.measureText(maxLaborStr).width + colPad);
+  // ---------- 6 ستمبر: مزدوری کا کالم تنگ کر دیا (3-4 ہندسے تک کافی ہے) — پیکنگ کالم کے لیے جگہ بچانی تھی ---------- -->
+  const laborW = Math.max(Math.round(30 * fscale), ctx.measureText(maxLaborStr).width + Math.round(12*fscale));
+  // ---------- 📦 صدام کی ہدایت (6 ستمبر): "پیکنگ" کا اپنا الگ کالم — نام اور تعداد کے درمیان (کارٹن/شاپر/توڑا/بوری/گٹی وغیرہ)،
+  // اب نام اشیاء کے کالم میں شامل نہیں ہوگا، بلکہ اپنی الگ جگہ پر — بالکل کسٹمر کے بھیجے بل کی طرح ---------- -->
+  ctx.font = `${Math.round(14*fscale)}px ${itemFontFamily}`;
+  let maxPackStr = '';
+  invoice.items.forEach(it => { const l = it.label || ''; if(ctx.measureText(l).width > ctx.measureText(maxPackStr).width) maxPackStr = l; });
+  const packW = maxPackStr ? Math.max(Math.round(38 * fscale), ctx.measureText(maxPackStr).width + Math.round(14*fscale)) : Math.round(38*fscale);
   // ---------- 🐛 صدام کی ہدایت (FM3SEPTH26): پہلے نام اشیاء کالم صرف سب سے لمبے نام جتنا چوڑا رہتا تھا اور
   // بچ جانے والی خالی جگہ بائیں کنارے پر خالی رہ جاتی تھی — اصل پرنٹ پر یہ ایک طرف خالی، دوسری طرف بھرا
   // ہوا، غیر متناسب/غیر خوبصورت نظر آتا تھا۔ اب نام کا کالم ہمیشہ بقیہ پوری جگہ (remainderW) لیتا ہے
@@ -24558,18 +24577,20 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // پیشہ ورانہ اور خوبصورت طریقے سے — نہ کوئی کالم غیر ضروری تنگ، نہ کوئی خالی جگہ ---------- -->
   ctx.font = `bold ${Math.round(18*fscale)}px ${canvasFontFamily}`;
   const itemPad = Math.round(16 * fscale);
-  const remainderW = (tableRight - tableLeft0) - noW - qtyW - priceW - totalW - laborW;
-  const itemW = Math.max(Math.round(60*fscale), remainderW);
+  const remainderW = (tableRight - tableLeft0) - noW - qtyW - priceW - totalW - laborW - packW;
+  // ---------- 6 ستمبر: نام اشیاء کا کالم کبھی بھی بہت تنگ نہ ہو (کم از کم 100px جتنا) — نام ایک دوسرے پر نہ چڑھیں ---------- -->
+  const itemW = Math.max(Math.round(100*fscale), remainderW);
   // ---------- نام کالم بقیہ پوری جگہ لیتا ہے، اس لیے ٹیبل ہمیشہ tableLeft0 سے tableRight تک پورا پھیلا رہتا ہے ---------- -->
-  const tableLeft = tableRight - (noW + itemW + qtyW + laborW + priceW + totalW);
+  const tableLeft = tableRight - (noW + itemW + packW + qtyW + laborW + priceW + totalW);
   const colX = [
-    tableLeft,                                                 // 0: ٹوٹل شروع (سب سے بائیں)
-    tableLeft + totalW,                                        // 1: قیمت شروع
-    tableLeft + totalW + priceW,                               // 2: مزدوری شروع
-    tableLeft + totalW + priceW + laborW,                      // 3: تعداد شروع
-    tableLeft + totalW + priceW + laborW + qtyW,               // 4: نام اشیاء شروع
-    tableLeft + totalW + priceW + laborW + qtyW + itemW,       // 5: نمبر شروع (سب سے دائیں)
-    tableRight                                                  // 6: دائیں کنارہ
+    tableLeft,                                                          // 0: ٹوٹل شروع (سب سے بائیں)
+    tableLeft + totalW,                                                 // 1: قیمت شروع
+    tableLeft + totalW + priceW,                                        // 2: مزدوری شروع
+    tableLeft + totalW + priceW + laborW,                               // 3: تعداد شروع
+    tableLeft + totalW + priceW + laborW + qtyW,                        // 4: پیکنگ شروع (NEW — 6 ستمبر)
+    tableLeft + totalW + priceW + laborW + qtyW + packW,                // 5: نام اشیاء شروع
+    tableLeft + totalW + priceW + laborW + qtyW + packW + itemW,        // 6: نمبر شروع (سب سے دائیں)
+    tableRight                                                           // 7: دائیں کنارہ
   ];
   const rowScale = (AppState.settings.printRowScale || 100) / 100; // ---------- پرنٹ پریویو میں لائیو ↕ Row کنٹرول سے ----------
   const rowH = Math.round(24 * rowScale), headerH = Math.round(22 * rowScale);
@@ -24683,7 +24704,8 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const headerItemAlign = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
   const colCenterX = (a, b) => headerItemAlign === 'center' ? (a + b) / 2 : (headerItemAlign === 'right' ? b - 6 : a + 6);
   // ---------- 🔁 صدام کی ہدایت (FM3SEPTH23): بل اردو کی طرح رائٹ سے لیفٹ (RTL) — نام اشیاء اب اپنے ہی کالم میں دائیں طرف ---------- -->
-  const headerItemNameX = colX[5] - 6; // ---------- Item کا نام اپنے کالم کے دائیں کنارے سے شروع (right-aligned) ----------
+  const headerItemNameX = colX[6] - 6; // ---------- Item کا نام اپنے کالم کے دائیں کنارے سے شروع (right-aligned) ----------
+  const headerPackX = colCenterX(colX[4], colX[5]); // ---------- 📦 پیکنگ کالم — 6 ستمبر ----------
   const headerQtyX = colCenterX(colX[3], colX[4]);
   const headerLaborX = colCenterX(colX[2], colX[3]);
   const headerPriceX = colCenterX(colX[1], colX[2]);
@@ -24713,9 +24735,10 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // ---------- نوٹ: پہلے یہاں ہلکا shadowBlur گلو تھا — صارف کو یہ "دھندلا/مدھم" محسوس ہوا، اسی لیے ہٹا دیا۔
   // اب کیپشن بالکل صاف، ٹھوس اور روشن (بغیر کسی دھندلاہٹ کے) ----------
   ctx.textAlign = 'center';
-  fitHeaderFont('نمبر', colX[6]-colX[5]-6);
-  ctx.fillText('نمبر', (colX[5]+colX[6])/2, headerBaseline);
-  drawClippedHeaderCaption('نام اشیاء', colX[4], colX[5], headerItemNameX, 'right');
+  fitHeaderFont('نمبر', colX[7]-colX[6]-6);
+  ctx.fillText('نمبر', (colX[6]+colX[7])/2, headerBaseline);
+  drawClippedHeaderCaption('نام اشیاء', colX[5], colX[6], headerItemNameX, 'right');
+  drawClippedHeaderCaption('پیکنگ', colX[4], colX[5], headerPackX, headerItemAlign);
   drawClippedHeaderCaption('تعداد', colX[3], colX[4], headerQtyX, headerItemAlign);
   drawClippedHeaderCaption('مزدوری', colX[2], colX[3], headerLaborX, headerItemAlign);
   drawClippedHeaderCaption('قیمت', colX[1], colX[2], headerPriceX, headerItemAlign);
@@ -24764,7 +24787,13 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     const remainingQty = Math.max(0, item.qty - returnedQty);
     const isFullyReturned = returnedQty > 0 && remainingQty === 0;
 
+    // ---------- 📦 صدام کی ہدایت (6 ستمبر): نام سے پیکنگ (شاپر/کارٹن/توڑا/بوری/گٹی وغیرہ) الگ کریں —
+    // یہ الگ کالم میں چھپے گی، نام کے ساتھ جُڑی ہوئی نہیں دکھے گی ---------- -->
     let baseName = item.name;
+    const packLabel = item.label || '';
+    if(packLabel && baseName.endsWith(packLabel)){
+      baseName = baseName.slice(0, baseName.length - packLabel.length).trim();
+    }
     let displayName = (isHighlighted ? '👉 ' : '') + baseName;
     ctx.textAlign = 'right';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){
@@ -24775,17 +24804,34 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
     ctx.font = `bold ${numRowFontPx}px ${canvasFontFamily}`;
-    ctx.fillText(String(idx + 1), (colX[5]+colX[6])/2, rowBaseline);
+    ctx.fillText(String(idx + 1), (colX[6]+colX[7])/2, rowBaseline);
     ctx.textAlign = itemAlign;
     ctx.font = `${itemFontWeight}${rowFontPx}px ${itemFontFamily}`; // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): سبزیوں کے نام کا اپنا الگ فونٹ ----------
     // ---------- سخت کلپنگ — item کا نام کبھی بھی اپنے کالم کی حد سے ایک پکسل بھی باہر نہ چھپے،
     // چاہے measureText میں کہیں معمولی فرق ہی کیوں نہ ہو (خاص طور پر Bold وزن میں) ----------
     ctx.save();
     ctx.beginPath();
-    ctx.rect(colX[4], hLineY, colX[5] - colX[4], rowH);
+    ctx.rect(colX[5], hLineY, colX[6] - colX[5], rowH);
     ctx.clip();
     ctx.fillText(displayName, itemNameX, rowBaseline);
     ctx.restore();
+    // ---------- 📦 پیکنگ کالم — نام اشیاء اور تعداد کے درمیان، ہلکے (غیر بولڈ) فونٹ میں، درمیان میں ----------
+    if(packLabel){
+      ctx.save();
+      ctx.textAlign = headerItemAlign;
+      ctx.font = `${Math.round(rowFontPx*0.85)}px ${itemFontFamily}`;
+      let packDisp = packLabel;
+      while(ctx.measureText(packDisp).width > (colX[5]-colX[4])-6 && packDisp.length > 2){
+        packDisp = packDisp.slice(0, -1);
+      }
+      if(packDisp !== packLabel) packDisp = packDisp.trim() + '…';
+      ctx.beginPath();
+      ctx.rect(colX[4], hLineY, colX[5] - colX[4], rowH);
+      ctx.clip();
+      ctx.fillText(packDisp, headerPackX, rowBaseline);
+      ctx.restore();
+      ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000';
+    }
     const qtyText = String(remainingQty), priceText = item.unitPrice.toFixed(decimals);
     const itemLaborTotal = (item.laborPerUnit||0) * remainingQty;
     const totalText = (remainingQty*item.unitPrice + itemLaborTotal).toFixed(decimals);
@@ -24817,7 +24863,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
       ctx.font = F('11px');
       ctx.fillStyle = '#9ca3af';
       ctx.textAlign = 'left';
-      ctx.fillText(`↩ ${returnedQty} Returned`, colX[4] + 4, hLineY + 10);
+      ctx.fillText(`↩ ${returnedQty} Returned`, colX[5] + 4, hLineY + 10);
       ctx.fillStyle = '#000';
       ctx.font = F(itemFontWeight + '18px');
       hLineY += returnedNoteExtra;
@@ -25150,7 +25196,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.textAlign = a4Align;
   ctx.fillText('Item', a4ItemNameX, headerBaseline);
   ctx.textAlign = 'center';
-  ctx.fillText('Variant', (colX[2]+colX[3])/2, headerBaseline);
+  ctx.fillText('Packing', (colX[2]+colX[3])/2, headerBaseline);
   ctx.textAlign = a4Align;
   ctx.fillText('Qty', a4QtyX, headerBaseline);
   ctx.fillText('Labor', a4LaborX, headerBaseline);
