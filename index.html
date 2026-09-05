@@ -117,6 +117,13 @@
     0%, 100%{ filter:drop-shadow(0 0 1px rgba(255,255,255,.4)); opacity:.92; }
     50%{ filter:drop-shadow(0 0 5px rgba(255,255,255,.9)); opacity:1; }
   }
+  /* ---------- 🌈 صدام کی ہدایت (FM5SEPTH...): Online بیج کے نیچے ورژن/لوڈ ٹائم بیج کا بیک گراؤنڈ
+       آہستہ آہستہ خوبصورتی سے رنگ بدلتا رہے (چمکیلا) ---------- */
+  @keyframes versionBadgeBgShift{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
   /* ---------- ✨ صدام کی ہدایت (FM4SEPFR04): پرانا بلٹ ان <marquee> ٹیگ صدام کی اصل ڈیوائس کے
        WebView میں بالکل ساکت رہتا تھا (کبھی حرکت نہیں کرتا تھا) — اس لیے اب خالص CSS animation
        (transform: translateX) والا طریقہ استعمال کیا ہے، جو ہر براؤزر/WebView میں قابلِ بھروسہ چلتا ہے۔
@@ -2541,7 +2548,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:2px; flex:0 0 auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں (اب ایک ہی لائن میں، ہیڈر کو چوڑا/لمبا نہیں کرتا) ---------- -->
-      <span id="topbarVersionBadge" onclick="handleVersionBadgeTap()" dir="ltr" style="unicode-bidi:plaintext; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif; font-size:8.5px; color:#fff; font-weight:800; letter-spacing:0; background:rgba(255,255,255,.18); padding:2px 7px; border-radius:9px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px; text-align:center; line-height:1.3;"></span>
+      <span id="topbarVersionBadge" onclick="handleVersionBadgeTap()" dir="ltr" style="unicode-bidi:plaintext; font-family:var(--font, 'JameelNooriNastaleeqKasheeda'), 'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif; font-size:12px; color:#fff; font-weight:900; letter-spacing:.2px; background:linear-gradient(90deg, #be185d, #d97706, #059669, #2563eb, #7c3aed, #be185d); background-size:400% auto; animation:versionBadgeBgShift 8s ease-in-out infinite; padding:4px 12px; border-radius:10px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:190px; text-align:center; line-height:1.4; border:1px solid rgba(255,255,255,.55); box-shadow:0 0 10px rgba(255,255,255,.35), inset 0 1px 0 rgba(255,255,255,.3);"></span>
     </div>
     <!-- ---------- 🔤 شاپ کا نام (چھوٹا، ثانوی) — کوڈ محفوظ، بس چھپا ہوا ---------- -->
     <span id="mobileBrandText" class="mobileBrand" style="display:none;">صدام فروٹ منڈی</span>
@@ -7154,7 +7161,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ5ستمبر8:51pm';
+const APP_BUILD_VERSION = 'ہفتہ5ستمبر10:02pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16812,7 +16819,20 @@ function renderPartyList(query = ''){
     let filtered = customersData.filter(c => partyMatchesQuery(c, query));
     filtered = applyCustomerCategorization(filtered);
     if(filtered.length === 0){
-      wrap.innerHTML = `<div class="placeholder">${customerFilterState.showDormant ? 'کھوہ کھاتے میں کوئی کسٹمر نہیں' : 'No customer found'}</div>`;
+      // ---------- 🐞 صدام کی ہدایت (FM5SEPTH...): پرانی خرابی — علاقہ فلٹر (اسلام آباد/راولپنڈی/مضافات) آن ہو اور
+      //          اکثر پرانے کسٹمرز کا rateArea خالی ہو تو فہرست خالی نظر آتی تھی، وجہ واضح نہیں تھی، لگتا تھا
+      //          کسٹمرز "غائب" ہو گئے۔ اب صاف پیغام کے ساتھ ایک ٹیپ میں "سب دکھائیں" بٹن بھی دیا گیا ہے ---------- -->
+      const f2 = customerFilterState;
+      let emptyMsg = f2.showDormant ? 'کھوہ کھاتے میں کوئی کسٹمر نہیں' : 'No customer found';
+      let showAllBtn = '';
+      if(f2.area !== 'all'){
+        emptyMsg = `اس علاقے (${RATE_AREA_LABELS[f2.area] || ''}) میں کوئی کسٹمر ٹیگ نہیں — کسٹمرز غائب نہیں ہوئے، صرف علاقہ فلٹر آن ہے`;
+        showAllBtn = `<button onclick="setCustFilter('area','all')" style="margin-top:12px; padding:9px 18px; border-radius:9px; border:none; background:var(--primary); color:#fff; font-size:12.5px; font-weight:800; cursor:pointer;">🔄 سب کسٹمر دکھائیں</button>`;
+      } else if(f2.todayOnly){
+        emptyMsg = 'آج تک کسی کسٹمر نے خریداری نہیں کی — کسٹمرز غائب نہیں ہوئے، صرف "آج کے خریدار" فلٹر آن ہے';
+        showAllBtn = `<button onclick="setCustFilter('todayOnly', false)" style="margin-top:12px; padding:9px 18px; border-radius:9px; border:none; background:var(--primary); color:#fff; font-size:12.5px; font-weight:800; cursor:pointer;">🔄 سب دکھائیں</button>`;
+      }
+      wrap.innerHTML = `<div class="placeholder">${emptyMsg}${showAllBtn ? '<br>'+showAllBtn : ''}</div>`;
       return;
     }
     const isAdmin = AppState.currentRole === 'admin';
