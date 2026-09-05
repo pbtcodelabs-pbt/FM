@@ -24412,20 +24412,26 @@ let currentPreviewInvoiceId = null;
 //            دونوں پرنٹ سٹائلز (تھرمل اور A4) میں یکساں استعمال ہوتا ہے تاکہ ترتیب/حساب ہمیشہ ایک جیسا رہے ----------
 function getBillSummaryRows(invoice){
   const rawSubtotal = (invoice.items || []).reduce((s, i) => s + i.qty * i.unitPrice, 0);
-  // ---------- 💪 صدام کی ہدایت (FM050926): "مزدوری فروخت" کا کل — سمری میں اپنی الگ لائن، Grand Total میں پہلے سے شامل ----------
+  // ---------- 💪 صدام کی ہدایت (6 ستمبر): مزدوری اب سمری میں الگ رو نہیں دکھائی جاتی — یہ ہر آئٹم کی
+  // "ٹوٹل" رقم میں پہلے سے ضرب ہو کر شامل ہے (مثلاً 800+40=840)، اس لیے یہاں "کل بل" میں ہی ملا دیں،
+  // ورنہ اوپر سے نیچے ٹوٹل کرتے وقت مزدوری دو دفعہ نظر آتی اور کسٹمر کو الجھن ہوتی تھی ---------- -->
   const laborTotalBill = (invoice.items || []).reduce((s, i) => s + i.qty * (i.laborPerUnit||0), 0);
   const hasLabor = laborTotalBill > 0;
+  const mergedSubtotal = rawSubtotal + laborTotalBill; // ---------- قیمت + مزدوری ملی جلی رقم ----------
   const hasDiscount = invoice.discount && invoice.discount > 0;
   const hasOldCredit = !!(invoice.customer_id && invoice.previous_balance > 0);
   const walletApplied = invoice.wallet_applied || 0;
   const cashNow = invoice.cash_received_now !== undefined ? invoice.cash_received_now : Math.max(0, (invoice.paid_now || 0) - walletApplied);
 
+  // ---------- 💪 صدام کی ہدایت (6 ستمبر - دوسری تصحیح): پہلے "ذیلی ٹوٹل" اور نیچے "یہ بل" دونوں ایک ہی
+  // رقم کو دو دفعہ دکھا رہے تھے (کھلارا) — اب صرف ایک ہی لائن "یہ بل" کے نام سے دکھے گی، دہرائی نہیں ---------- -->
   const rows = [];
+  let shownThisBillAlready = false;
   if(hasDiscount || hasLabor){
-    rows.push(['کل بل', rawSubtotal]);
-    if(hasLabor) rows.push(['💪 مزدوری ٹوٹل', laborTotalBill]);
+    rows.push(['یہ بل', mergedSubtotal]);
     if(hasDiscount) rows.push(['اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : ''), invoice.discount]);
-    rows.push(['ذیلی ٹوٹل', invoice.grand_total]);
+    rows.push(['ٹوٹل', invoice.grand_total]);
+    shownThisBillAlready = true;
   }
   if(invoice.tax_amount && invoice.tax_amount > 0){
     rows.push([`ٹیکس (${invoice.tax_percent}%)`, invoice.tax_amount]);
@@ -24434,12 +24440,12 @@ function getBillSummaryRows(invoice){
   let finalLabel, finalValue;
   if(hasOldCredit){
     rows.push(['سابقہ بقایہ', invoice.previous_balance]);
-    rows.push(['یہ بل', invoice.grand_total]);
-    rows.push(['ٹوٹل', invoice.previous_balance + invoice.grand_total]);
+    if(!shownThisBillAlready) rows.push(['یہ بل', invoice.grand_total]);
+    rows.push(['تازہ ٹوٹل', invoice.previous_balance + invoice.grand_total]);
     finalLabel = 'حتمی بقایہ رقم';
     finalValue = invoice.new_balance || 0;
   } else {
-    if(!hasDiscount && !hasLabor) rows.push(['یہ بل', invoice.grand_total]);
+    if(!shownThisBillAlready) rows.push(['یہ بل', invoice.grand_total]);
     finalLabel = 'حتمی بل';
     finalValue = Math.max(0, invoice.grand_total - walletApplied - cashNow);
   }
@@ -24784,7 +24790,9 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     const itemLaborTotal = (item.laborPerUnit||0) * remainingQty;
     const totalText = (remainingQty*item.unitPrice + itemLaborTotal).toFixed(decimals);
     // ---------- 💪 صدام کی ہدایت: اس آئٹم کی "مزدوری فروخت" کل رقم (فی یونٹ مزدوری × باقی ماندہ تعداد) ----------
-    const laborText = itemLaborTotal.toFixed(decimals);
+    // ---------- 💪 صدام کی ہدایت (5 ستمبر): "مزدوری" کالم میں فی نگ ریٹ ہی دکھائیں (ٹوٹل نہیں)،
+    // البتہ "ٹوٹل" کالم میں قیمت + مزدوری ملا کر ایک ہی مشترکہ رقم آئے (اوپر totalText میں پہلے سے شامل ہے) ---------- -->
+    const laborText = (item.laborPerUnit||0).toFixed(decimals);
     // ---------- سخت کلپنگ کے ساتھ لکھیں — ہر کالم کی اپنی حد کے اندر مقفل ----------
     const drawClippedNum = (text, x1, x2, textX) => {
       ctx.textAlign = headerItemAlign;
@@ -24827,12 +24835,10 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const laborTotalForWalkIn = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
   if(!invoice.customer_id){
     if((invoice.discount && invoice.discount > 0) || laborTotalForWalkIn > 0){
-      const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+      // ---------- 💪 صدام کی ہدایت (6 ستمبر): مزدوری الگ رو میں نہیں — پہلے سے ذیلی ٹوٹل میں ملی ہوئی ----------
+      const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0) + laborTotalForWalkIn;
       ctx.font = FP('14px');
       ctx.fillText('ذیلی ٹوٹل: Rs. ' + subtotalAmt.toFixed(decimals), summaryColRight, y); y += 20;
-      if(laborTotalForWalkIn > 0){
-        ctx.fillText('💪 مزدوری ٹوٹل: + Rs. ' + laborTotalForWalkIn.toFixed(decimals), summaryColRight, y); y += 20;
-      }
       if(invoice.discount && invoice.discount > 0){
         ctx.fillText('اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : '') + ': + Rs. ' + invoice.discount.toFixed(decimals), summaryColRight, y); y += 24;
       }
@@ -25222,7 +25228,8 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.textAlign = a4Align;
     ctx.fillText(String(remainingQtyA4), a4QtyX, rowBaseline);
     const itemLaborTotalA4 = (item.laborPerUnit||0)*remainingQtyA4;
-    ctx.fillText(itemLaborTotalA4.toFixed(0), a4LaborX, rowBaseline);
+    // ---------- 💪 صدام کی ہدایت (5 ستمبر): مزدوری کالم میں فی نگ ریٹ دکھائیں، ٹوٹل کالم میں ملی جلی رقم ---------- -->
+    ctx.fillText((item.laborPerUnit||0).toFixed(0), a4LaborX, rowBaseline);
     ctx.fillText(item.unitPrice.toFixed(0), a4PriceX, rowBaseline);
     ctx.fillText((remainingQtyA4*item.unitPrice + itemLaborTotalA4).toFixed(0), a4TotalX, rowBaseline);
     ctx.fillStyle = '#1a1a1a';
@@ -25247,12 +25254,10 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const laborTotalA4WalkIn = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
   if(!invoice.customer_id){
     if((invoice.discount && invoice.discount > 0) || laborTotalA4WalkIn > 0){
-      const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+      // ---------- 💪 صدام کی ہدایت (6 ستمبر): مزدوری الگ رو میں نہیں — پہلے سے Subtotal میں ملی ہوئی ----------
+      const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0) + laborTotalA4WalkIn;
       ctx.font = FP('14px');
       ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), tableLeft + 10, y); y += lineStepA4;
-      if(laborTotalA4WalkIn > 0){
-        ctx.fillText('💪 مزدوری ٹوٹل: + Rs. ' + laborTotalA4WalkIn.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
-      }
       if(invoice.discount && invoice.discount > 0){
         ctx.fillText('اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : '') + ': + Rs. ' + invoice.discount.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
       }
