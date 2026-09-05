@@ -1080,8 +1080,10 @@
   .cardDragHandle:active{cursor:grabbing; background:#e2e8f0;}
   .productCard.cardDragging{opacity:.96; box-shadow:0 10px 26px rgba(0,0,0,.32); z-index:9999; position:fixed; pointer-events:none; transform:scale(1.03); transition:none !important;}
   .productCard.cardDragPlaceholder{background:#eef2ff; border:2px dashed var(--primary); box-shadow:none; opacity:.6;}
-  .chevron{transition:transform .2s;}
-  .productCard.open .chevron{transform:rotate(90deg);}
+  /* ---------- 🔄 صدام کی ہدایت (5 ستمبر): اب کھولنے کے لیے کوئی خاص/نایاب فیلڈ باقی نہیں (Expiry Date بھی
+       ہٹا دی گئی) — اس لیے ▶ کھولنے کا تیر بالکل ہٹا دیا، کارڈ مکمل کمپیکٹ رہے گا ---------- */
+  .chevron{display:none;}
+  .variantCardWrap{display:none !important;}
 
   .variantTableWrap{display:none; padding:0 18px 16px;}
   .productCard.open .variantTableWrap{display:block;}
@@ -1105,12 +1107,13 @@
   /* ---------- 📏 صدام کی ہدایت (4 ستمبر): ہر پراڈکٹ کی روزمرہ فیلڈز (خرید، مزدوری، ریٹس، سٹاک) اب
        کارڈ کے اندر ہی، براہ راست ایک لائن میں — ▶ کھولنے کی ضرورت نہیں۔ موبائل پر جگہ کم ہو تو یہ
        پٹی خود بخود سائیڈ سے سکرول ہو جائے گی (افقی سکرول)، لکھائی کبھی کٹے/پھٹے گی نہیں ---------- */
-  .vcInlineFieldsRow{display:flex; gap:5px; overflow-x:auto; overflow-y:hidden; padding:6px 8px 8px; -webkit-overflow-scrolling:touch; scrollbar-width:thin; direction:rtl; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;}
-  .vcInlineFieldsRow .vcFieldWrap{flex:0 0 auto; width:64px;}
-  .vcInlineFieldsRow .vcFieldWrap.vcWide{width:230px; background:#fffbeb; border-radius:8px; padding:4px 6px; border:1px dashed #f59e0b;}
-  .vcInlineFieldsRow .vcFieldLabel{font-size:9.5px; font-weight:800; color:var(--muted); text-transform:none; letter-spacing:0; margin-bottom:2px; display:block; white-space:nowrap; text-align:center; font-family:inherit;}
-  .vcInlineFieldsRow input{width:100%; padding:6px 2px; border:1px solid #dbe1ea; border-radius:7px; font-size:13px; font-weight:700; text-align:center; background:#fafbfc; font-family:inherit;}
-  .vcInlineFieldsRow .vcEffectiveRatesNote{font-size:10px; white-space:nowrap; font-family:inherit;}
+  .vcInlineFieldsRow{display:flex; gap:6px; overflow-x:auto; overflow-y:hidden; padding:7px 8px 9px; -webkit-overflow-scrolling:touch; scrollbar-width:thin; direction:rtl; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;}
+  /* ---------- 🎨 صدام کی ہدایت (5 ستمبر): ہر خانہ اپنے رنگین، ابھرے ہوئے (embossed) بیک گراؤنڈ کے ساتھ —
+       ایک اچھے، الگ بٹن جیسا نظر آئے، سب کی اونچائی برابر، تنگ چوڑائی (زیادہ جگہ نہ گھیرے) ---------- */
+  .vcInlineFieldsRow .vcFieldWrap{flex:0 0 auto; width:66px; border-radius:10px; padding:5px 4px; box-shadow:0 2px 4px rgba(41,29,10,.12), inset 0 1px 0 rgba(255,255,255,.6);}
+  .vcInlineFieldsRow .vcFieldWrap.vcRateWrap{width:78px;}
+  .vcInlineFieldsRow .vcFieldLabel{font-size:10.5px; font-weight:800; color:#57534e; text-transform:none; letter-spacing:0; margin-bottom:3px; display:block; white-space:nowrap; text-align:center; font-family:inherit;}
+  .vcInlineFieldsRow input{width:100%; height:34px; padding:4px 2px; border:1.5px solid rgba(0,0,0,.08); border-radius:7px; font-size:14px; font-weight:800; text-align:center; font-family:inherit; box-sizing:border-box;}
   .vcFieldLabel{font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; margin-bottom:4px; display:block;}
   .vcFieldWrap input, .vcFieldWrap .vcInputRow{width:100%;}
   .vcFieldWrap input{padding:9px 10px; border:1px solid #dbe1ea; border-radius:9px; font-size:14px; background:#fafbfc;}
@@ -5067,6 +5070,9 @@
           <div class="settingsHint" id="appBuildVersionText" dir="ltr" style="unicode-bidi:plaintext; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif; font-weight:800; color:var(--primary-dark); font-size:15px; line-height:1.6;"></div>
         </div>
 
+        <!-- ---------- 📢 صدام کی ہدایت (5 ستمبر): سلائیڈنگ پیغامات صرف Developer Panel سے ایڈٹ ہو سکتے ہیں —
+             عام ایڈمن یوزرز کے لیے یہاں نہیں (نیچے Developer Panel میں دیکھیں) ---------- -->
+
         <!-- ---------- 🏠 پرانا "Home Screen Shortcuts" کارڈ یہاں سے ہٹا دیا گیا ہے — یہ دراصل کچھ کام نہیں کر
              رہا تھا کیونکہ renderHomeIconGrid() ایڈمن کے لیے اب اسے پڑھتا ہی نہیں (کوڈ محفوظ ہے، فنکشنز اب بھی
              موجود ہیں)۔ اب ایڈمن کی ہوم اسکرین وہی نظام استعمال کرتی ہے جو ملازم کے لیے پہلے سے تھا: Users →
@@ -5414,6 +5420,19 @@
     <div id="devSecretUnlocked" style="display:none; max-height:70vh; overflow-y:auto;">
       <div id="devCloudSyncStatus" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:8px 12px; margin-bottom:12px; font-size:11.5px; font-weight:600; text-align:left; line-height:1.5;"></div>
       <button class="testPrintBtn" style="margin-bottom:14px; background:#eef2ff; color:var(--primary-dark);" onclick="devEnterAppDirectly()">🚀 Enter App Now (skip PIN / activation code)</button>
+
+      <!-- ---------- 📢 صدام کی ہدایت (5 ستمبر): سلائیڈنگ پیغامات — صرف Developer Panel سے، عام Admin کے لیے نہیں —
+           ہر پیغام کا اپنا آن/آف، رنگ، رفتار (سیکنڈ)، سمت (دائیں/بائیں) الگ سے سیٹ ہو سکتا ہے ---------- -->
+      <div style="background:#fffbeb; border:1.5px solid #fcd34d; border-radius:12px; padding:12px; margin-bottom:16px;" dir="rtl">
+        <h3 style="margin:0 0 4px; font-size:14px; color:#92400e;">📢 سلائیڈنگ پیغامات (صرف ڈویلپر)</h3>
+        <p style="font-size:11.5px; color:#78716c; margin:0 0 10px;">اوپر چلنے والی پٹی کے پیغامات یہاں سے ترتیب دیں — آن/آف، رنگ، رفتار، سمت۔</p>
+        <div id="mqDevListWrap"></div>
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <input type="text" id="mqNewMsgInput" placeholder="✍️ نیا پیغام لکھیں..." style="flex:1; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+          <button type="button" onclick="addMarqueeMsg()" style="flex:0 0 auto; padding:9px 14px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:12.5px; cursor:pointer;">+ شامل کریں</button>
+        </div>
+      </div>
+
       <div class="settingsSubLabel">Developer WhatsApp Number</div>
       <input type="text" id="devWhatsappInput" placeholder="e.g. 923206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveDevSecretPanel()">
       <div class="settingsSubLabel">Developer SMS Number</div>
@@ -6220,6 +6239,7 @@ function persistAllData(){
   if(typeof nextDiaryId !== 'undefined') saveToStorage('nextDiaryId', nextDiaryId);
   if(typeof expenseData !== 'undefined') saveToStorage('expenses', expenseData);
   if(typeof nextExpenseId !== 'undefined') saveToStorage('nextExpenseId', nextExpenseId);
+  if(typeof marqueeSettings !== 'undefined') saveToStorage('marqueeSettings', marqueeSettings);
 }
 setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خودکار محفوظ (fail-safe) ----------
 
@@ -6982,7 +7002,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FMہفتہ5ستمبرصبح4بجکر46منٹ';
+const APP_BUILD_VERSION = 'ہفتہ5ستمبر5:15am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8256,42 +8276,103 @@ const SUB_MARQUEE_THRESHOLD_DAYS = 999; // ---------- 🧪 ٹیسٹ موڈ — �
 // ---------- 🔁 صدام کی ہدایت (FM4SEPFR08): تین پیغامات (لاگ ان، سبسکرپشن یاد دہانی، اسکرین شاٹ یاد دہانی) —
 // اب اکٹھے نظر نہیں آتے، ایک ایک کر کے باری باری، ہمیشہ دائیں سے بائیں، بہت آہستہ رفتار سے چلتے ہیں ---------- -->
 let mqQueueIdx = 0;
+// ---------- 📢 صدام کی ہدایت (5 ستمبر): سلائیڈنگ پیغامات اب سیدھا سکرین سے ایڈٹ ہو سکتے ہیں —
+// کوڈ میں جانے کی ضرورت نہیں۔ ہر پیغام کو آن/آف کریں، سکرین شاٹ والا پیغام اپنی مرضی سے لکھیں،
+// اور اپنے نئے پیغامات بھی شامل/حذف کریں ---------- -->
+// ---------- 📢 صدام کی ہدایت (5 ستمبر): سلائیڈنگ پیغامات — رنگ، رفتار (سیکنڈ)، سمت (دائیں/بائیں) ہر پیغام کا
+// اپنا الگ سیٹ کیا جا سکتا ہے۔ صرف Developer Panel سے (عام ایڈمن کے لیے نہیں) ---------- -->
+let marqueeSettings = loadFromStorage('marqueeSettings', {
+  messages: [
+    { id:'login',        builtin:true, label:'لاگ ان پیغام (👑 نام)',          enabled:true, color:'#ffd700', direction:'rtl', speed:18 },
+    { id:'subscription', builtin:true, label:'⭐ سبسکرپشن یاد دہانی',           enabled:true, color:'#ffffff', direction:'ltr', speed:18 },
+    { id:'screenshot',   builtin:true, label:'📸 اسکرین شاٹ یاد دہانی',        enabled:true, color:'#ffffff', direction:'ltr', speed:18,
+      text:'📸   پیارے بھائی، اس ایپ کے اندر جو بھی مسئلہ نظر آئے، اسی وقت اس کا اسکرین شاٹ لے کر مجھے بھیج دیا کریں' },
+    { id:'updateNotice', builtin:true, label:'🔔 نیا اپڈیٹ یاد دہانی',          enabled:true, color:'#ffffff', direction:'ltr', speed:18 }
+  ] // ---------- اپنے نئے پیغامات اسی فہرست کے آخر میں {id, builtin:false, text, enabled, color, direction, speed} کی صورت میں شامل ہوں گے ----------
+});
+function getMarqueeMsgDef(id){ return marqueeSettings.messages.find(m => m.id === id); }
+
 function buildMarqueeQueue(){
   const q = [];
-  if(AppState.currentUser){
-    const icon = AppState.currentRole === 'admin' ? '👑' : '🧑‍💼';
-    q.push({ text: `${icon}   لاگ ان   ${AppState.currentUser.name}`, cls: 'mqPartLogin', dir: 'rtl' });
-  }
-  if(AppState.currentRole === 'admin' && isSubscriptionActive()){
-    const daysLeft = daysLeftInSubscription();
-    if(daysLeft <= SUB_MARQUEE_THRESHOLD_DAYS){
-      q.push({
-        text: `⭐   آپ کی سبسکرپشن کے ${daysLeft} دن باقی رہ گئے ہیں۔۔`,
-        cls: daysLeft < 7 ? 'mqPartSub mqUrgent' : 'mqPartSub',
-        dir: 'ltr',
-        noGlow: true // ---------- 🤍 صدام کی ہدایت (FM4SEPFR13): سفید رنگ، بغیر گلو، سب کی رفتار یکساں ---------- -->
-      });
+  marqueeSettings.messages.forEach(m => {
+    if(!m.enabled) return;
+    let text = m.text;
+    if(m.id === 'login'){
+      if(!AppState.currentUser) return;
+      const icon = AppState.currentRole === 'admin' ? '👑' : '🧑‍💼';
+      text = `${icon}   لاگ ان   ${AppState.currentUser.name}`;
+    } else if(m.id === 'subscription'){
+      if(!(AppState.currentRole === 'admin' && isSubscriptionActive())) return;
+      const daysLeft = daysLeftInSubscription();
+      if(daysLeft > SUB_MARQUEE_THRESHOLD_DAYS) return;
+      text = `⭐   آپ کی سبسکرپشن کے ${daysLeft} دن باقی رہ گئے ہیں۔۔`;
+    } else if(m.id === 'updateNotice'){
+      const loadedMins = Math.max(0, Math.floor((Date.now() - APP_LOAD_TIME) / 60000));
+      text = `🔔   تازہ ترین ورژن ${APP_BUILD_VERSION} کو لوڈ ہوئے ${loadedMins} منٹ ہو چکے ہیں، براہ کرم اپنی ایپ کو اپڈیٹ کر لیں`;
     }
-  }
-  // ---------- 📸 صدام کی ہدایت (FM4SEPFR11): اب کسی مخصوص ملازم کا نام نہیں — جو بھی لاگ ان ہو اسے یہی
-  // عمومی "پیارے بھائی" پیغام نظر آئے ---------- -->
-  q.push({
-    text: '📸   پیارے بھائی، اس ایپ کے اندر جو بھی مسئلہ نظر آئے، اسی وقت اس کا اسکرین شاٹ لے کر مجھے بھیج دیا کریں',
-    cls: 'mqPartNotice',
-    dir: 'ltr',
-    noGlow: true // ---------- 🤍 صدام کی ہدایت (FM4SEPFR13): سفید رنگ، بغیر گلو، سب کی رفتار یکساں ---------- -->
-  });
-  // ---------- 🔔 صدام کی ہدایت (4 ستمبر): چوتھا پیغام — تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا، اپڈیٹ کی
-  // یاد دہانی — یہ ہمیشہ بار کے اندر آئے گا، چاہے نیچے والا الگ "اپڈیٹ دستیاب ہے" ڈبہ ظاہر ہو یا نہ ہو ---------- -->
-  const loadedMins = Math.max(0, Math.floor((Date.now() - APP_LOAD_TIME) / 60000));
-  q.push({
-    text: `🔔   تازہ ترین ورژن ${APP_BUILD_VERSION} کو لوڈ ہوئے ${loadedMins} منٹ ہو چکے ہیں، براہ کرم اپنی ایپ کو اپڈیٹ کر لیں`,
-    cls: 'mqPartNotice',
-    dir: 'ltr',
-    noGlow: true
+    if(!text || !text.trim()) return;
+    q.push({ text, color: m.color || '#ffffff', direction: m.direction || 'ltr', speed: m.speed || 18 });
   });
   return q;
 }
+
+/* =====================================================================
+   🕵️ Developer Panel کے اندر سلائیڈنگ پیغامات ترتیب دینے کا سسٹم —
+   ہر پیغام کا اپنا: آن/آف، متن (صرف قابلِ ترمیم اقسام میں)، رنگ، رفتار (سیکنڈ)، سمت
+   ===================================================================== */
+function renderMarqueeDevList(){
+  const wrap = document.getElementById('mqDevListWrap');
+  if(!wrap) return;
+  wrap.innerHTML = marqueeSettings.messages.map((m, idx) => `
+    <div style="background:#f8fafc; border:1px solid #e5e9f0; border-radius:10px; padding:10px; margin-bottom:8px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+        <input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="updateMarqueeMsgField(${idx}, 'enabled', this.checked)" style="width:18px; height:18px; margin:0; flex:0 0 auto;">
+        <span style="flex:1; font-size:12.5px; font-weight:800; color:var(--text);">${m.builtin ? m.label : '✍️ اپنا پیغام'}</span>
+        ${!m.builtin ? `<button type="button" onclick="deleteMarqueeMsg(${idx})" style="flex:0 0 auto; background:#fee2e2; color:#b91c1c; border:none; border-radius:7px; padding:5px 9px; font-size:11.5px; font-weight:800; cursor:pointer;">🗑️</button>` : ''}
+      </div>
+      ${(!m.builtin || m.id === 'screenshot') ? `
+      <textarea onchange="updateMarqueeMsgField(${idx}, 'text', this.value)" rows="2" style="width:100%; padding:7px; border:1px solid #dbe1ea; border-radius:7px; font-size:12.5px; margin-bottom:6px; font-family:inherit;">${(m.text||'').replace(/</g,'&lt;')}</textarea>` : ''}
+      <div style="display:flex; gap:6px; align-items:center;">
+        <label style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">رنگ:</label>
+        <input type="color" value="${m.color || '#ffffff'}" onchange="updateMarqueeMsgField(${idx}, 'color', this.value)" style="width:36px; height:28px; padding:0; border:1px solid #dbe1ea; border-radius:6px; flex:0 0 auto;">
+        <label style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">سمت:</label>
+        <select onchange="updateMarqueeMsgField(${idx}, 'direction', this.value)" style="flex:1; padding:5px; border:1px solid #dbe1ea; border-radius:6px; font-size:11.5px;">
+          <option value="rtl" ${m.direction === 'rtl' ? 'selected' : ''}>➡️ دائیں سے بائیں</option>
+          <option value="ltr" ${m.direction !== 'rtl' ? 'selected' : ''}>⬅️ بائیں سے دائیں</option>
+        </select>
+        <label style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">رفتار:</label>
+        <input type="number" min="5" max="60" value="${m.speed || 18}" onchange="updateMarqueeMsgField(${idx}, 'speed', parseInt(this.value)||18)" style="width:50px; padding:5px; border:1px solid #dbe1ea; border-radius:6px; font-size:11.5px; text-align:center;">
+        <span style="font-size:10px; color:var(--muted);">سیکنڈ</span>
+      </div>
+    </div>`).join('');
+}
+function updateMarqueeMsgField(idx, field, value){
+  if(!marqueeSettings.messages[idx]) return;
+  marqueeSettings.messages[idx][field] = value;
+  saveToStorage('marqueeSettings', marqueeSettings);
+  mqQueueIdx = 0;
+  playNextMarqueeMessage();
+}
+function deleteMarqueeMsg(idx){
+  if(marqueeSettings.messages[idx]?.builtin) return; // ---------- اصل 4 پیغامات کبھی حذف نہیں ہو سکتے، صرف آف ---------- -->
+  marqueeSettings.messages.splice(idx, 1);
+  saveToStorage('marqueeSettings', marqueeSettings);
+  renderMarqueeDevList();
+  mqQueueIdx = 0;
+  playNextMarqueeMessage();
+}
+function addMarqueeMsg(){
+  const input = document.getElementById('mqNewMsgInput');
+  const text = (input.value || '').trim();
+  if(!text){ alert('پہلے پیغام لکھیں'); return; }
+  marqueeSettings.messages.push({ id: 'custom_' + Date.now(), builtin:false, text, enabled:true, color:'#ffffff', direction:'ltr', speed:18 });
+  saveToStorage('marqueeSettings', marqueeSettings);
+  input.value = '';
+  renderMarqueeDevList();
+  mqQueueIdx = 0;
+  playNextMarqueeMessage();
+}
+
 
 function playNextMarqueeMessage(){
   const wrap = document.getElementById('loginMarqueeText');
@@ -8303,17 +8384,25 @@ function playNextMarqueeMessage(){
   if(mqQueueIdx >= queue.length) mqQueueIdx = 0;
 
   const msg = queue[mqQueueIdx];
-  part.className = msg.cls;
+  // ---------- 🎨 صدام کی ہدایت (5 ستمبر): اب رنگ، رفتار اور سمت CSS کلاس کی بجائے براہ راست ہر پیغام کی اپنی
+  // Developer Panel سیٹنگ سے آتے ہیں — ہر پیغام مختلف رنگ/رفتار/سمت میں چل سکتا ہے ---------- -->
+  part.className = '';
   part.textContent = msg.text;
+  part.style.color = msg.color || '#ffffff';
+  part.style.background = 'none';
+  part.style.webkitBackgroundClip = 'initial';
+  part.style.backgroundClip = 'initial';
+  part.style.filter = 'drop-shadow(0 1px 3px rgba(0,0,0,.65))';
 
-  // ---------- ♻️ ہر پیغام کے لیے حرکت نئے سرے سے شروع کروائیں (ری فلو کروا کر) — پہلا پیغام RTL،
-  // باقی دو LTR (صدام کی ہدایت FM4SEPFR10) ---------- -->
-  wrap.classList.remove('mqPlayRTL', 'mqPlayLTR', 'mqNoGlow');
+  // ---------- ♻️ ہر پیغام کے لیے حرکت نئے سرے سے شروع کروائیں (ری فلو کروا کر) ---------- -->
+  wrap.classList.remove('mqPlayRTL', 'mqPlayLTR');
+  wrap.style.animation = 'none';
   void wrap.offsetWidth; // force reflow
-  // ---------- 🤍 صدام کی ہدایت (FM4SEPFR13): سبسکرپشن اور مدد والے پیغامات بغیر گلو کے چلیں —
-  // رفتار اب تینوں پیغامات کی ایک جیسی ہے (18s)، صرف گلو کا فرق ہے ---------- -->
-  if(msg.noGlow) wrap.classList.add('mqNoGlow');
-  wrap.classList.add(msg.dir === 'ltr' ? 'mqPlayLTR' : 'mqPlayRTL');
+  const dirClass = msg.direction === 'rtl' ? 'mqPlayRTL' : 'mqPlayLTR';
+  const slideAnim = msg.direction === 'rtl' ? 'loginMarqueeSlideRTL' : 'loginMarqueeSlideLTR';
+  const speed = msg.speed || 18;
+  wrap.style.animation = `${slideAnim} ${speed}s linear 1 forwards, testShimmer 2.4s linear infinite`;
+  wrap.classList.add(dirClass);
 
   mqQueueIdx = (mqQueueIdx + 1) % queue.length;
   requestAnimationFrame(syncMobileTopbarHeight);
@@ -12459,43 +12548,53 @@ function crossRefreshStockAdjustment(){
 // ایک جگہ بدلیں، ہر جگہ بدل جائے گا ---------- -->
 function buildInlineFieldsRow(productId, v){
   const isNegative = v.stock < 0;
+  const totalPurchase = (v.purchase||0) + (v.labor||0);
+  const finalIsb = Number(v.retail||0) + Number(v.sellLabor||0);
+  const finalRwp = Number(v.wholesale||0) + Number(v.sellLabor||0);
+  // ---------- 🎨 صدام کی ہدایت (5 ستمبر): ہوم پیج کے 🎨 تھیم بٹن سے منتخب کردہ کارڈ رنگ یہاں بھی لاگو —
+  // وہی سیٹنگ (productCardNameBg) جو پرانے فوٹو کارڈز پر اثر کرتی تھی، اب یہاں بھی، تاکہ ایک ہی جگہ سے
+  // پورے ایپ کا تھیم بدلا جا سکے (Stock Adjustment + Products دونوں) ---------- -->
+  const themeBase = AppState.settings.productCardNameBg || null;
+  const shade = (lightness) => themeBase ? shiftColorLightness(themeBase, lightness) : null;
+  const purchaseBg = shade(38) || '#eef2ff';
+  const laborBg = shade(30) || '#fff7ed';
+  const totalBg = shade(20) || '#f1f5f9';
   return `
     <div class="vcInlineFieldsRow" dir="rtl">
-      <div class="vcFieldWrap">
+      <div class="vcFieldWrap" style="background:${purchaseBg};">
         <span class="vcFieldLabel">💰 خرید</span>
         <input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value); vcRecalcTotalPurchase(this)" oninput="vcRecalcTotalPurchase(this)">
       </div>
-      <div class="vcFieldWrap">
+      <div class="vcFieldWrap" style="background:${laborBg};">
         <span class="vcFieldLabel">💪 م.خرید</span>
         <input type="number" value="${v.labor || 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'labor',this.value); vcRecalcTotalPurchase(this)" oninput="vcRecalcTotalPurchase(this)">
       </div>
-      <div class="vcFieldWrap">
-        <span class="vcFieldLabel">🧮 ٹوٹل خرید</span>
-        <input type="text" class="vcTotalPurchaseField" value="${((v.purchase||0) + (v.labor||0)).toLocaleString()}" readonly style="background:#f1f5f9; font-weight:800; color:var(--primary-dark);">
+      <!-- ---------- 💪 صدام کی ہدایت: مزدوری خرید اور مزدوری فروخت ساتھ ساتھ ---------- -->
+      <div class="vcFieldWrap" style="background:#fffbeb;">
+        <span class="vcFieldLabel" style="color:#b45309;">💪 م.فروخت</span>
+        <input type="number" value="${v.sellLabor || 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'sellLabor',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fff; border-color:#fcd34d; color:#b45309;">
       </div>
-      <div class="vcFieldWrap">
-        <span class="vcFieldLabel">💪 م.فروخت</span>
-        <input type="number" value="${v.sellLabor || 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'sellLabor',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="border-color:#fcd34d; color:#b45309;">
+      <div class="vcFieldWrap" style="background:${totalBg};">
+        <span class="vcFieldLabel">🧮 حتمی خرید</span>
+        <input type="text" class="vcTotalPurchaseField" value="${totalPurchase.toLocaleString()}" readonly style="background:#fff; font-weight:900; color:var(--primary-dark);">
       </div>
-      <div class="vcFieldWrap">
+      <!-- ---------- 🔴 اسلام آباد ریٹ — سرخ، موٹی رقم + نیچے حتمی (مزدوری سمیت) ریٹ خودکار ---------- -->
+      <div class="vcFieldWrap vcRateWrap" style="background:#fee2e2;">
         <span class="vcFieldLabel" style="color:#b91c1c;">🔴 اسلام آباد</span>
-        <input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fef2f2; border-color:#fca5a5; color:#b91c1c;">
+        <input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fff; border-color:#fca5a5; color:#b91c1c; font-weight:900;">
+        <div class="vcFinalRateNote" style="font-size:9.5px; font-weight:800; color:#b91c1c; margin-top:2px; white-space:nowrap;">حتمی: <span class="vcEffIsb">${finalIsb.toLocaleString()}</span></div>
       </div>
-      <div class="vcFieldWrap">
+      <!-- ---------- 🟢 راولپنڈی ریٹ — سبز، موٹی رقم + نیچے حتمی (مزدوری سمیت) ریٹ خودکار ---------- -->
+      <div class="vcFieldWrap vcRateWrap" style="background:#dcfce7;">
         <span class="vcFieldLabel" style="color:#15803d;">🟢 راولپنڈی</span>
-        <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#f0fdf4; border-color:#86efac; color:#15803d;">
+        <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fff; border-color:#86efac; color:#15803d; font-weight:900;">
+        <div class="vcFinalRateNote" style="font-size:9.5px; font-weight:800; color:#15803d; margin-top:2px; white-space:nowrap;">حتمی: <span class="vcEffRwp">${finalRwp.toLocaleString()}</span></div>
       </div>
-      <div class="vcFieldWrap vcStockWrap">
+      <div class="vcFieldWrap vcStockWrap" style="background:#e0e7ff;">
         <span class="vcFieldLabel">📦 سٹاک</span>
-        <input type="number" value="${v.stock}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value,this)">
-        <div class="vcStockTag vcLowStockTagCls" style="display:${(!isNegative && v.stock <= v.lowStockAt) ? 'block' : 'none'}; color:#b45309; font-size:7px;">⚠️ کم</div>
-        <div class="vcStockTag vcNegStockTagCls" style="display:${isNegative ? 'block' : 'none'}; color:var(--danger); font-size:7px;">❌ منفی</div>
-      </div>
-      <div class="vcFieldWrap vcWide">
-        <span class="vcFieldLabel" style="color:#78716c;">🧮 مؤثر ریٹ (مزدوری سمیت)</span>
-        <div class="vcEffectiveRatesNote" style="font-weight:700; color:#78716c; text-align:center;">
-          🔴<span class="vcEffIsb">${(Number(v.retail||0) + Number(v.sellLabor||0)).toLocaleString()}</span> · 🟢<span class="vcEffRwp">${(Number(v.wholesale||0) + Number(v.sellLabor||0)).toLocaleString()}</span>
-        </div>
+        <input type="number" value="${v.stock}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value,this)" style="background:#fff;">
+        <div class="vcStockTag vcLowStockTagCls" style="display:${(!isNegative && v.stock <= v.lowStockAt) ? 'block' : 'none'}; color:#b45309; font-size:8.5px;">⚠️ کم</div>
+        <div class="vcStockTag vcNegStockTagCls" style="display:${isNegative ? 'block' : 'none'}; color:var(--danger); font-size:8.5px;">❌ منفی</div>
       </div>
     </div>`;
 }
@@ -12544,7 +12643,7 @@ function renderVariantCardSection(productId, cardId){
             <span class="vcFieldLabel">Low Stock Alert At</span>
             <input type="number" value="${v.lowStockAt ?? 0}" onfocus="this.select()" title="Low Stock alert will trigger when stock reaches this number or below" onchange="updateVariantField(${productId},${v.variant_id},'lowStockAt',this.value,this)">
           </div>
-          <div class="vcFieldWrap">
+          <div class="vcFieldWrap" style="display:none;">
             <span class="vcFieldLabel">📅 Expiry Date</span>
             <input type="date" class="expiryInput ${expiryTier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)">
           </div>
@@ -26069,6 +26168,7 @@ async function unlockDevSecretPanel(){
   document.getElementById('devSecretPasswordInput').value = '';
   document.getElementById('devSecretLocked').style.display = 'none';
   document.getElementById('devSecretUnlocked').style.display = 'block';
+  renderMarqueeDevList();
 
   // ---------- 🩺 کلاؤڈ سنک کی خرابی اب کسٹمر کو نظر نہیں آتی — صرف یہاں، ڈویلپر پینل کے اندر ----------
   const cloudStatusEl = document.getElementById('devCloudSyncStatus');
