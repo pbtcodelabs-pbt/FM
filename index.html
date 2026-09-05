@@ -552,6 +552,14 @@
        اب سیلزمین سے مکمل چھپا دیا گیا ہے — صرف ایڈمن اب PIN تبدیل/سیٹ کر کے دے سکتا ہے --- */
   body.role-salesman #sidebar .navItem{display:none;}
   body.role-salesman #sidebar .navItem.perm-allowed{display:flex;}
+
+  /* ---------- 🧪 FMtest01 — کسٹمر رول: صرف اپنی مخصوص اسکرینز (customer-only کلاس والی) نظر آئیں،
+       باقی سب (Admin کی تمام اسکرینز، سائیڈبار مینیو آئٹمز) مکمل چھپے رہیں — نہ کوئی دوسرے کسٹمر کا ڈیٹا
+       نظر آئے نہ ایڈمن کا کوئی مینیو آئٹم ---------- */
+  body.role-customer #sidebar .navItem{display:none;}
+  body.role-customer .screen{display:none;}
+  body.role-customer .screen.customer-only.active{display:block;}
+  body.role-customer #hamburgerBtn, body.role-customer .navArrowsBar{display:none;}
   /* --- صرف ایک ہی اسکرین Assign ہو تو نیچے ◀/🏠/▶ بار کی بھی کوئی ضرورت نہیں — سیدھا اسی ایک اسکرین پر رہے --- */
   body.single-screen-employee .navArrowBar{display:none !important;}
 
@@ -1771,6 +1779,7 @@
   .billRow .brAmount{font-size:14px; font-weight:800; color:var(--text); flex:0 0 auto; background:#fff; padding:5px 10px; border-radius:9px; box-shadow:0 1px 3px rgba(15,23,42,.08);}
   .billRow.pending .brAmount{color:#b91c1c; background:#fef2f2;}
   .billRow.pending .brDesc{color:#b91c1c;}
+  .billRow.rejected .brDesc{color:#b91c1c;}
 
   /* --- Transactions/ledger کی قطار — Khatabook طرز: تاریخ+تفصیل، اور رقم سبز (وصول) یا سرخ (ادا) --- */
   .ledgerRow{padding:10px 13px; background:#fbfbf9; border:1px solid rgba(0,0,0,.05); border-radius:12px; margin-bottom:7px;}
@@ -2196,7 +2205,7 @@
     <h2 id="loginHeading" onclick="handleVersionBadgeTap()" style="cursor:pointer;" title="🔒">🔐 Login</h2>
 
     <!-- ---------- 🏷️ لاگ ان اسکرین پر موٹا/نمایاں ورژن بیج — ایپ کھلنے سے پہلے ہی پتا چل جائے کہ تازہ ترین ورژن اپلوڈ ہوا ہے یا نہیں (خودکار APP_BUILD_VERSION سے بھرتا ہے) ---------- -->
-    <div id="loginVersionBadge" onclick="handleVersionBadgeTap()" dir="ltr" style="display:inline-block; unicode-bidi:plaintext; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif; font-size:15px; font-weight:800; letter-spacing:.2px; color:var(--primary-dark); background:#eef2ff; padding:6px 16px; border-radius:16px; margin-bottom:14px; cursor:pointer; max-width:92vw; white-space:normal; word-break:break-word; text-align:center; line-height:1.5;"></div>
+    <div id="loginVersionBadge" onclick="handleVersionBadgeTap()" dir="ltr" style="display:inline-block; unicode-bidi:plaintext; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif; font-size:21px; font-weight:900; letter-spacing:.3px; color:var(--primary-dark); background:#eef2ff; border:2px solid var(--primary-dark); padding:10px 20px; border-radius:16px; margin-bottom:14px; cursor:pointer; max-width:92vw; white-space:normal; word-break:break-word; text-align:center; line-height:1.6;"></div>
 
     <!-- ---------- 🎉 خوش آمدید بینر — بیٹا ٹیسٹنگ کی صاف وضاحت، پہلی نظر میں ---------- -->
     <div class="welcomeTrialBanner" style="display:none;">
@@ -2221,6 +2230,14 @@
     <!-- ---------- ڈیفالٹ PIN (1234) پر موجود نئے/ٹرائل صارف کے لیے — کوئی PIN ٹائپ نہیں کرنی، سیدھا اندر ---------- -->
     <div id="loginQuickEnterWrap" style="display:none;">
       <button onclick="quickEnterApp()" style="background:var(--primary); font-size:16px; padding:14px;">🎁 Enter App — Free Trial</button>
+    </div>
+
+    <!-- ---------- 🧪 FMtest01: لاگ ان موڈ ٹوگل — Staff (Admin/Employee) بمقابلہ Customer۔
+         صدام کی ہدایت کے مطابق: عملہ کا لاگ ان بالکل ویسا ہی رہے (نام ڈراپ ڈاؤن + PIN)، کسٹمر کا لاگ ان الگ اور
+         محفوظ طریقے سے (صرف پاسورڈ — نام کی فہرست نہیں دکھے گی) ---------- -->
+    <div id="loginModeToggleWrap" style="display:flex; gap:8px; margin-bottom:14px;">
+      <button type="button" id="loginModeStaffBtn" onclick="switchLoginMode('staff')" style="flex:1; padding:10px 6px !important; border-radius:9px !important; font-weight:800; font-size:12.5px; background:var(--primary) !important; color:#fff !important; border:none !important;">🔐 Staff Login</button>
+      <button type="button" id="loginModeCustomerBtn" onclick="switchLoginMode('customer')" style="flex:1; padding:10px 6px !important; border-radius:9px !important; font-weight:800; font-size:12.5px; background:#f1f5f9 !important; color:var(--text) !important; border:1.5px solid #dbe1ea !important;">🧑‍🤝‍🧑 Customer Login</button>
     </div>
 
     <!-- ---------- 🍇 Fruit Mandi POS (FM3SEPTH12، صدام کی ہدایت): سادہ، ایک ہی لاگ ان — الگ الگ Admin/Employee باکس
@@ -2271,6 +2288,30 @@
         <div class="loginHint" style="margin-top:10px;">
           <a href="javascript:void(0)" onclick="openEmployeePinResetModal()" style="display:block; color:var(--primary-dark); font-weight:700; text-decoration:none; background:#eef2ff; padding:9px 12px; border-radius:9px; font-size:12.5px;">Forgot your PIN? Recover with your Year of Birth.</a>
         </div>
+      </div>
+    </div>
+
+    <!-- ---------- 🧪 FMtest01 — 🧑‍🤝‍🧑 کسٹمر لاگ ان پینل: صرف پاسورڈ (بلائنڈ) — کوئی نام کی فہرست نہیں دکھائی جاتی۔
+         صحیح پاسورڈ پر خود اسی کسٹمر کا نام تصدیق کے لیے نظر آتا ہے؛ غلط پاسورڈ پر کبھی کوئی نام ظاہر نہیں ہوتا ---------- -->
+    <div id="loginCustomerPanel" style="display:none;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin:0 0 4px; text-align:left; font-weight:700;">Enter your password</label>
+      <div style="display:flex; align-items:center; gap:2px; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:10px; padding:2px 6px 2px 2px; box-shadow:inset 0 1px 3px rgba(0,0,0,.05);">
+        <button type="button"
+          onmousedown="showPinWhilePressed('customerLoginPasswordInput')" onmouseup="hidePinAfterRelease('customerLoginPasswordInput')" onmouseleave="hidePinAfterRelease('customerLoginPasswordInput')"
+          ontouchstart="showPinWhilePressed('customerLoginPasswordInput')" ontouchend="hidePinAfterRelease('customerLoginPasswordInput')" ontouchcancel="hidePinAfterRelease('customerLoginPasswordInput')"
+          style="flex:0 0 auto !important; width:26px !important; height:26px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:13px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ پاسورڈ نظر آئے">👁️</button>
+        <input type="password" id="customerLoginPasswordInput" placeholder="Enter your password" maxlength="20" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" oninput="onCustomerLoginPasswordInput()" onkeydown="if(event.key==='Enter') attemptCustomerLogin()">
+        <button type="button" onclick="attemptCustomerLogin()" style="flex:0 0 auto !important; width:auto !important; margin:0 !important; padding:9px 14px !important; background:linear-gradient(180deg,#14b8a6,#0f766e) !important; color:#fff !important; border:none !important; border-radius:8px !important; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(15,118,110,.35);">⏎ Enter</button>
+      </div>
+      <div id="customerLoginMsg" style="margin-top:10px; font-size:13px; font-weight:700; text-align:center; min-height:18px;"></div>
+      <div id="customerLoginConfirmBox" style="display:none; margin-top:6px; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:12px; text-align:center;">
+        <div style="font-size:12.5px; color:var(--muted); font-weight:700;">Is this you?</div>
+        <div id="customerLoginConfirmName" style="font-size:17px; font-weight:900; color:var(--primary-dark); margin:6px 0;"></div>
+        <button type="button" onclick="confirmCustomerLogin()" style="background:var(--success) !important; width:100%;">✅ Yes, this is me — Enter</button>
+        <button type="button" onclick="cancelCustomerLoginConfirm()" style="background:#f1f5f9 !important; color:var(--text) !important; width:100%; margin-top:6px; border:1.5px solid #dbe1ea !important;">✖ Not me</button>
+      </div>
+      <div class="loginHint" style="margin-top:10px;">
+        <a href="javascript:void(0)" onclick="openDevChat('support')" style="display:block; color:var(--primary-dark); font-weight:700; text-decoration:none; background:#eef2ff; padding:9px 12px; border-radius:9px; font-size:12.5px;">Forgot your password? Please contact the shop owner.</a>
       </div>
     </div>
 
@@ -2601,6 +2642,8 @@
     <!-- ---------- 🍇 صدام کی ہدایت پر: Trends مینیو سے مکمل ہٹا دی گئی — کوڈ محفوظ ہے، صرف display:none ---------- -->
     <div class="navItem admin-only" data-screen="trends" onclick="goTo('trends')" style="display:none;">📈 Trends</div>
     <div class="navItem admin-only" data-screen="users" data-navkey="users" data-navlabel="Users" onclick="goTo('users')" style="background:#475569; color:#fff;">🔑 یوزرز<span class="navDragHandle">⠿</span></div>
+    <!-- ---------- 🧪 FMtest01 — کسٹمر ایپ ایکسیس مینجمنٹ (زیرِ تعمیر ماڈیول): ہر کسٹمر کا پاسورڈ سیٹ/دیکھنا + ایکسیس آن/آف ---------- -->
+    <div class="navItem admin-only" data-screen="customerAccess" data-navkey="customerAccess" data-navlabel="Customer App Access" onclick="goTo('customerAccess')" style="background:#B45309; color:#fff;">📲 کسٹمر ایپ ایکسیس<span class="navDragHandle">⠿</span></div>
 
     <!-- ---------- نیچے کی چیزیں (PIN تبدیل کرنا / Admin ٹیگ / Logout) جان بوجھ کر الفابیٹیکل ترتیب سے الگ —
          باریک لائن سے واضح جدائی ---------- -->
@@ -2872,6 +2915,7 @@
           <div class="totalsBox" style="position:relative;">
             <div id="profitWatermark" class="profitWatermark" style="display:none;"></div>
             <div class="row"><span>Subtotal</span><span id="sumSubtotal">Rs. 0</span></div>
+            <div class="row" id="sumLaborRow" style="display:none; color:#b45309;"><span>💪 مزدوری ٹوٹل</span><span id="sumLabor">Rs. 0</span></div>
             <div class="row" id="sumDiscountRow"><span id="sumDiscountLabel">اضافی چارجز</span><span id="sumDiscount">Rs. 0</span></div>
             <div class="row" id="sumTaxRow" style="display:none;"><span id="sumTaxLabel">Tax</span><span id="sumTax">Rs. 0</span></div>
             <div class="row" id="sumThisBillRow" style="display:none;"><span>This Bill</span><span id="sumThisBill">Rs. 0</span></div>
@@ -3451,7 +3495,7 @@
         <div class="profileHead">
           <div class="pAvatarLg">🔔</div>
           <div class="pInfo">
-            <div class="pName">Bills Awaiting Approval</div>
+            <div class="pName">منظوری کے منتظر بلز</div>
             <div class="pMeta" id="pendingListMeta">—</div>
           </div>
           <span class="closeBtn" onclick="document.getElementById('pendingBillsListModal').classList.remove('show')">✖</span>
@@ -3468,27 +3512,63 @@
         <div class="profileHead">
           <div class="pAvatarLg">📋</div>
           <div class="pInfo">
-            <div class="pName">Review Bill</div>
+            <div class="pName">بل کا جائزہ</div>
             <div class="pMeta" id="reviewModalMeta">—</div>
           </div>
           <span class="closeBtn" onclick="document.getElementById('pendingReviewModal').classList.remove('show')">✖</span>
         </div>
         <div class="profileBody">
-          <div class="reviewSalesmanBar" id="reviewSalesmanBar">👤 Submitted by: —</div>
+          <div class="reviewSalesmanBar" id="reviewSalesmanBar">👤 جمع کروانے والا: —</div>
           <div id="reviewItemsList"></div>
           <div class="searchRow" style="margin-top:10px;">
-            <input type="text" id="reviewAddItemInput" placeholder="🔍 Add another item..." oninput="searchReviewItems(this.value)">
+            <input type="text" id="reviewAddItemInput" placeholder="🔍 مزید آئٹم شامل کریں..." oninput="searchReviewItems(this.value)">
           </div>
           <div class="searchResults" id="reviewSearchResults"></div>
           <div class="totalsBox" style="margin-top:10px;">
-            <div class="grand"><span>Grand Total</span><span id="reviewGrandTotal">Rs. 0</span></div>
+            <div class="grand"><span>کل رقم</span><span id="reviewGrandTotal">Rs. 0</span></div>
           </div>
           <div class="reviewActionBtns">
-            <button class="btnReject" onclick="rejectPendingBill()">❌ Reject</button>
-            <button class="btnApprove" onclick="approvePendingBill()">✅ Approve & Create Bill</button>
+            <button class="btnReject" onclick="rejectPendingBill()">❌ مسترد کریں</button>
+            <button class="btnApprove" onclick="approvePendingBill()">✅ منظور کریں اور بل بنائیں</button>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ---------- 🧪 Phase 4 (Step 2 و 3): کسٹمر کی پیمنٹ رسید دیکھنے کا مخصوص ماڈل — رقم، طریقہ/اکاؤنٹ،
+         اور اسکرین شاٹ (تھمب نیل، کلک کرنے پر فل اسکرین) — Approve/Reject اگلے مرحلے میں فعال ہوں گے ---------- -->
+    <div class="modalOverlay" id="paymentReviewModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="profileBox" style="width:420px;">
+        <div class="profileHead">
+          <div class="pAvatarLg">💰</div>
+          <div class="pInfo">
+            <div class="pName">کسٹمر پیمنٹ رسید</div>
+            <div class="pMeta" id="paymentReviewMeta">—</div>
+          </div>
+          <span class="closeBtn" onclick="document.getElementById('paymentReviewModal').classList.remove('show')">✖</span>
+        </div>
+        <div class="profileBody">
+          <div class="reviewSalesmanBar" id="paymentReviewCustomerBar">👤 —</div>
+          <div style="background:#f0fdf4; border-radius:10px; padding:14px; text-align:center; margin:12px 0;">
+            <div style="font-size:12px; color:var(--muted);">ادا کی گئی رقم</div>
+            <div style="font-size:24px; font-weight:900; color:var(--success);" id="paymentReviewAmount">Rs. 0</div>
+          </div>
+          <div id="paymentReviewAccountInfo" style="font-size:13.5px; color:var(--text); margin-bottom:12px;"></div>
+          <div class="profileSectionTitle"><span>🧾 اسکرین شاٹ</span></div>
+          <img id="paymentReviewShotThumb" onclick="openScreenshotFullscreen(this.src)" style="width:100%; max-height:260px; object-fit:contain; border-radius:10px; border:1px solid #dbe1ea; cursor:zoom-in; background:#f8fafc;">
+          <div style="text-align:center; font-size:11.5px; color:var(--muted); margin-top:4px;">تصویر پر ٹیپ کریں — فل اسکرین دیکھنے کے لیے</div>
+          <div class="reviewActionBtns" style="margin-top:16px;">
+            <button class="btnReject" onclick="rejectPendingPayment()">❌ مسترد کریں</button>
+            <button class="btnApprove" onclick="approvePendingPayment()">✅ منظور کریں</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- عمومی فل اسکرین تصویر ویور — سکرین شاٹس/QR/رسیدیں جہاں بھی بڑا کر کے دیکھنے کی ضرورت ہو ---------- -->
+    <div class="modalOverlay" id="imgFullscreenModal" onclick="closeScreenshotFullscreen()" style="z-index:99999; background:rgba(0,0,0,.9); display:none; align-items:center; justify-content:center;">
+      <img id="imgFullscreenImg" style="max-width:95vw; max-height:95vh; object-fit:contain;">
+      <span onclick="closeScreenshotFullscreen()" style="position:fixed; top:16px; inset-inline-end:16px; color:#fff; font-size:28px; cursor:pointer;">✖</span>
     </div>
 
     <!-- PARTY PROFILE MODAL (کسٹمر/سپلائر کی Completed 360° پروفائل — ایک ہی جگہ سب کچھ) -->
@@ -4045,6 +4125,39 @@
       </div>
     </div>
 
+    <!-- ---------- 🧪 FMtest01 — 📲 Customer App Access (زیرِ تعمیر ماڈیول): ایڈمن یہاں سے ہر کسٹمر کو ایپ
+         استعمال کرنے کا پاسورڈ جاری/تبدیل کر سکتا ہے، ایکسیس آن/آف کر سکتا ہے، اور یہ دیکھ سکتا ہے کہ کس کسٹمر
+         کو کون سا پاسورڈ دیا گیا ہے (پاسورڈ ہمیشہ منفرد رہے گا، سسٹم خودکار چیک کرتا ہے) ---------- -->
+    <div class="screen admin-only" id="screen-customerAccess">
+      <div class="pageTitle">📲 Customer App Access</div>
+      <div style="font-size:12.5px; color:var(--muted); margin:-6px 0 12px; background:#eef2ff; border-radius:10px; padding:10px 12px;">
+        🧪 یہ ٹیسٹ ماڈیول ہے۔ یہاں سے کسٹمر کو ایپ کے کسٹمر پورشن (اپنا بقایا، آرڈر، پیمنٹ) استعمال کرنے کے لیے پاسورڈ دیں۔
+      </div>
+      <div class="partyToolbar">
+        <input type="text" id="customerAccessSearchInput" placeholder="🔍 Search by name/phone..." oninput="filterCustomerAccessList()" style="flex:1;">
+      </div>
+      <div id="customerAccessListWrap"></div>
+    </div>
+
+    <!-- ---------- 🧪 FMtest01 — 🧑‍🤝‍🧑 کسٹمر کا اپنا ہوم — Phase 1: صرف اپنا نام + بقایا/والٹ دکھانا۔
+         آرڈر دینا اور پیمنٹ بھیجنا اگلے مراحل میں یہاں شامل ہوں گے ---------- -->
+    <div class="screen customer-only" id="screen-customerHome">
+      <div class="pageTitle">🧑‍🤝‍🧑 میرا اکاؤنٹ</div>
+      <div id="customerHomeContent"></div>
+      <button onclick="logout()" style="margin-top:20px; background:#334155 !important;">🚪 Logout</button>
+    </div>
+
+    <!-- ---------- 🧪 FMtest03 Phase 4 (Step 1): کسٹمر کی اپنی پیمنٹ اسکرین — اپنے JazzCash/EasyPaisa/بینک
+         اکاؤنٹس فیڈ کرنا، پیمنٹ کے لیے اس ادارے کے صفحہ پر جانا (پاسورڈ/API ہمارے پاس نہیں)، اور اسکرین شاٹ
+         محفوظ کر کے ایڈمن کو بھیجنے کی تیاری کرنا ---------- -->
+    <div class="screen customer-only" id="screen-customerPayment">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <button type="button" onclick="goTo('customerHome')" style="width:auto; padding:9px 14px; background:#f1f5f9 !important; color:#334155 !important; border-radius:10px; font-weight:800;">◀ واپس</button>
+        <div class="pageTitle" style="margin:0;">💰 پیمنٹ بھیجیں</div>
+      </div>
+      <div id="customerPaymentContent"></div>
+    </div>
+
     <!-- NEW USER MODAL -->
     <div class="modalOverlay" id="newUserModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
@@ -4583,7 +4696,7 @@
          نہ سرچ، نہ کیٹگری، نہ ریٹ — بس اوپر کسٹمر کا نام اور نیچے تمام آئٹمز کی سیدھی
          لسٹ (اردو نام + تعداد)۔ Submit کرنے پر ایڈوانس آرڈر کی طرح ایڈمن کے پاس ریویو کے لیے چلا جاتا ہے۔
          ===================================================================== -->
-    <div class="screen" id="screen-orderTaking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+    <div class="screen customer-only" id="screen-orderTaking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="pageTitle">🧾 Order Taking</div>
 
       <!-- STEP 1: پہلے کسٹمر منتخب کریں — ایریا ریکارڈ سے خودبخود آ جائے گا -->
@@ -4604,7 +4717,7 @@
             <div style="font-size:12px; color:var(--muted);" id="otTopCustArea"></div>
           </div>
           <div style="display:flex; gap:6px; flex:0 0 auto;">
-            <button type="button" onclick="backToOtCustomer()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
+            <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
             <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
           </div>
         </div>
@@ -4647,7 +4760,7 @@
             <button type="button" onclick="confirmSendOtOrder()" style="flex:2; padding:15px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">📤 صدام کو بھیجیں</button>
           </div>
           <!-- ---------- 🏠 ہوم پیج پر واپس — صدام کی ہدایت (FM3SEPTH10): پہلے یہاں سے واپس جانے کا کوئی راستہ نہیں تھا ---------- -->
-          <button type="button" onclick="goTo('home')" style="padding:13px; background:#f1f5f9; border:none; color:#334155; border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">🏠 ہوم پیج</button>
+          <button type="button" onclick="goTo(AppState.currentRole==='customer' ? 'customerHome' : 'home')" style="padding:13px; background:#f1f5f9; border:none; color:#334155; border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">🏠 ہوم پیج</button>
         </div>
       </div>
     </div>
@@ -7002,7 +7115,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ5ستمبر5:15am';
+const APP_BUILD_VERSION = 'ہفتہ5ستمبر7:57pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -7756,6 +7869,7 @@ async function setupLoginScreen(){
     document.getElementById('loginQuickEnterWrap').style.display = skipPin ? 'block' : 'none';
     document.getElementById('loginPinWrap').style.display = skipPin ? 'none' : 'block';
     if(!skipPin){ populateUnifiedLoginDropdown(); switchLoginTab('admin'); }
+    if(typeof switchLoginMode === 'function') switchLoginMode('staff'); // ---------- 🧪 FMtest01: ہمیشہ Staff موڈ سے شروع ----------
 
     // ---------- ٹرائل کے دوران "Login" کا لفظ خود بھی کنفیوژن پیدا کرتا ہے — چھپا دیں، صرف ٹرائل ختم ہونے پر واپس نظر آئے ----------
     const heading = document.getElementById('loginHeading');
@@ -7866,6 +7980,692 @@ function finishLogin(user, rememberOverride){
     if(!AppState.settings.gdrivePromptShown) setTimeout(showGDriveFirstRunPrompt, 900); // ---------- پہلی بار ایپ استعمال ہو تو Google Drive اکاؤنٹ فوراً جوڑنے کی دعوت دیں ----------
     else setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
   }
+}
+
+/* =====================================================================
+   🧪 FMtest01 — 🧑‍🤝‍🧑 کسٹمر لاگ ان سسٹم (زیرِ تعمیر ماڈیول — صرف اس ٹیسٹ فائل میں)
+   طریقہ کار (صدام کی ہدایت کے مطابق):
+   - پاسورڈ صرف ایڈمن جاری/تبدیل کرتا ہے (کسٹمر خود تبدیل نہیں کر سکتا)
+   - لاگ ان بلائنڈ ہے: کسٹمر صرف پاسورڈ ڈالتا ہے، نام کی کوئی فہرست نظر نہیں آتی
+   - صحیح پاسورڈ پر خود اسی کسٹمر کا نام تصدیق کے لیے دکھایا جاتا ہے (Enter دبانے سے پہلے)
+   - غلط پاسورڈ پر ہمیشہ صرف "Incorrect password" — کبھی کسی کا نام ظاہر نہیں ہوتا
+   - ہر کسٹمر کا پاسورڈ منفرد ہونا لازمی ہے (نیچے دیے گئے isCustomerPasswordUnique میں چیک ہوتا ہے)
+   ===================================================================== */
+let pendingCustomerLoginId = null;
+
+function switchLoginMode(mode){
+  const staffBtn = document.getElementById('loginModeStaffBtn');
+  const custBtn = document.getElementById('loginModeCustomerBtn');
+  const staffWrap = document.getElementById('loginPinWrap');
+  const custWrap = document.getElementById('loginCustomerPanel');
+  if(!staffBtn || !custBtn || !staffWrap || !custWrap) return;
+  if(mode === 'customer'){
+    staffWrap.style.display = 'none';
+    custWrap.style.display = 'block';
+    staffBtn.style.background = '#f1f5f9'; staffBtn.style.color = 'var(--text)'; staffBtn.style.border = '1.5px solid #dbe1ea';
+    custBtn.style.background = 'var(--primary)'; custBtn.style.color = '#fff'; custBtn.style.border = 'none';
+  } else {
+    staffWrap.style.display = (document.getElementById('loginQuickEnterWrap')?.style.display === 'block') ? 'none' : 'block';
+    custWrap.style.display = 'none';
+    custBtn.style.background = '#f1f5f9'; custBtn.style.color = 'var(--text)'; custBtn.style.border = '1.5px solid #dbe1ea';
+    staffBtn.style.background = 'var(--primary)'; staffBtn.style.color = '#fff'; staffBtn.style.border = 'none';
+  }
+  const msgEl = document.getElementById('customerLoginMsg');
+  const confirmBox = document.getElementById('customerLoginConfirmBox');
+  if(msgEl) msgEl.textContent = '';
+  if(confirmBox) confirmBox.style.display = 'none';
+  const pwInput = document.getElementById('customerLoginPasswordInput');
+  if(pwInput) pwInput.value = '';
+  pendingCustomerLoginId = null;
+}
+
+// ---------- پاسورڈ ٹائپ کرتے ہی پرانی تصدیقی حالت صاف کر دیں — تاکہ ایک نظر آ چکا نام دوبارہ ٹائپ کرنے پر غلطی سے نہ رہ جائے ----------
+function onCustomerLoginPasswordInput(){
+  pendingCustomerLoginId = null;
+  const confirmBox = document.getElementById('customerLoginConfirmBox');
+  if(confirmBox) confirmBox.style.display = 'none';
+  const msgEl = document.getElementById('customerLoginMsg');
+  if(msgEl) msgEl.textContent = '';
+}
+
+function attemptCustomerLogin(){
+  const pwInput = document.getElementById('customerLoginPasswordInput');
+  const pass = (pwInput?.value || '').trim();
+  const msgEl = document.getElementById('customerLoginMsg');
+  const confirmBox = document.getElementById('customerLoginConfirmBox');
+  if(!pass){ return; }
+  // ---------- 🔒 حفاظتی اصول: صرف صحیح پاسورڈ پر ہی خود اپنا نام نظر آئے، کبھی کسی اور کا نہیں ----------
+  const match = customersData.find(c => c.appAccessEnabled && c.appPassword && c.appPassword === pass);
+  if(!match){
+    msgEl.style.color = 'var(--danger)';
+    msgEl.textContent = '❌ Incorrect password. Please try again.';
+    confirmBox.style.display = 'none';
+    pendingCustomerLoginId = null;
+    return;
+  }
+  msgEl.textContent = '';
+  pendingCustomerLoginId = match.customer_id;
+  document.getElementById('customerLoginConfirmName').textContent = '🧑 ' + match.name;
+  confirmBox.style.display = 'block';
+}
+
+function cancelCustomerLoginConfirm(){
+  pendingCustomerLoginId = null;
+  document.getElementById('customerLoginConfirmBox').style.display = 'none';
+  document.getElementById('customerLoginPasswordInput').value = '';
+  document.getElementById('customerLoginPasswordInput').focus();
+}
+
+function confirmCustomerLogin(){
+  const cust = customersData.find(c => c.customer_id === pendingCustomerLoginId);
+  if(!cust){ alert('Something went wrong, please try again.'); switchLoginMode('customer'); return; }
+  document.getElementById('customerLoginPasswordInput').value = '';
+  document.getElementById('customerLoginConfirmBox').style.display = 'none';
+  pendingCustomerLoginId = null;
+  finishCustomerLogin(cust);
+}
+
+// ---------- عملے کے finishLogin() سے مکمل الگ — کسٹمر کے پاس صرف customer-only اسکرینز ہی نظر آئیں گی ----------
+function finishCustomerLogin(cust){
+  AppState.currentUser = { name: cust.name };
+  AppState.currentRole = 'customer';
+  AppState.currentCustomerId = cust.customer_id;
+  document.body.classList.remove('role-admin','role-salesman','role-customer');
+  document.body.classList.add('role-customer');
+
+  document.getElementById('loginScreen').style.display = 'none';
+  getOrCreateDeviceUID();
+  if(!isSubscriptionActive()){
+    showSubscriptionGate();
+    return;
+  }
+  document.getElementById('app').style.display = 'grid';
+  const userTagEl = document.getElementById('userTag');
+  if(userTagEl) userTagEl.innerHTML = '🧑‍🤝‍🧑 Customer: ' + cust.name;
+  updateTopbarUserBadge();
+  goTo('customerHome');
+}
+
+// ---------- ✅ ایڈمن کی طرف سے کسی کسٹمر کو پاسورڈ دینے/تبدیل کرنے سے پہلے یکتا پن یقینی بنائیں —
+// دو کسٹمرز کا پاسورڈ کبھی ایک جیسا نہ ہو، ورنہ لاگ ان کے وقت غلط کسٹمر کا اکاؤنٹ کھل سکتا ہے ----------
+function isCustomerPasswordUnique(password, excludeCustomerId){
+  return !customersData.some(c => c.customer_id !== excludeCustomerId && c.appPassword === password);
+}
+
+function generateRandomCustomerPassword(){
+  // ---------- سادہ، بولنے/لکھنے میں آسان — صرف ہندسے (6 عدد)، تاکہ عام صارف کو یاد رکھنے میں دقت نہ ہو ----------
+  let pass;
+  let tries = 0;
+  do{
+    pass = String(Math.floor(100000 + Math.random() * 900000));
+    tries++;
+  } while(!isCustomerPasswordUnique(pass, null) && tries < 50);
+  return pass;
+}
+
+// ---------- 🖥️ Admin > Customer Access اسکرین کی فہرست بنائیں ----------
+function renderCustomerAccessList(){
+  const wrap = document.getElementById('customerAccessListWrap');
+  if(!wrap) return;
+  const q = (document.getElementById('customerAccessSearchInput')?.value || '').trim().toLowerCase();
+  let list = customersData.filter(c => c.customer_id !== 3); // ---------- Walk-in Customer کو اس فہرست میں دکھانے کا کوئی فائدہ نہیں ----------
+  if(q) list = list.filter(c => (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q));
+  if(list.length === 0){
+    wrap.innerHTML = '<div style="text-align:center; color:var(--muted); padding:30px 10px;">No customers found.</div>';
+    return;
+  }
+  wrap.innerHTML = list.map(c => `
+    <div class="ledgerRow" style="display:flex; flex-direction:column; gap:6px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div>
+          <div style="font-weight:800; font-size:14px;">#${c.customer_id} — ${c.name}</div>
+          <div style="font-size:11.5px; color:var(--muted);">${c.phone || 'No phone on file'}</div>
+        </div>
+        <label style="display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--muted); cursor:pointer;">
+          <input type="checkbox" ${c.appAccessEnabled ? 'checked' : ''} onchange="toggleCustomerAppAccess(${c.customer_id}, this.checked)" style="width:17px; height:17px; margin:0;">
+          App Access
+        </label>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; background:#fbfbf9; border-radius:8px; padding:8px 10px;">
+        <div style="font-size:12px; color:var(--muted); flex:0 0 auto;">🔑 Password:</div>
+        <div style="font-weight:800; font-size:14px; letter-spacing:1px; direction:ltr;">${c.appPassword ? c.appPassword : '— not set —'}</div>
+        <button type="button" onclick="openSetCustomerPasswordPrompt(${c.customer_id})" style="margin-inline-start:auto; padding:6px 10px !important; font-size:11.5px !important; background:var(--primary) !important;">✏️ Set/Change</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---------- ایڈمن نیا پاسورڈ سیٹ/تبدیل کرے — ہر بار یکتا پن چیک ہوگا؛ خالی چھوڑنے پر خودکار 6 ہندسوں کا پاسورڈ تجویز ----------
+function openSetCustomerPasswordPrompt(customerId){
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!c) return;
+  const suggestion = generateRandomCustomerPassword();
+  let entered = prompt(`Set app password for "${c.name}"\n\n(Leave empty to auto-generate: ${suggestion})`, c.appPassword || '');
+  if(entered === null) return; // ---------- Cancel دبایا ----------
+  entered = entered.trim();
+  if(!entered) entered = suggestion;
+  if(entered.length < 4){
+    alert('⚠️ Password must be at least 4 characters long.');
+    return;
+  }
+  if(!isCustomerPasswordUnique(entered, customerId)){
+    alert('⚠️ This password is already assigned to another customer. Please choose a different, unique password.');
+    return;
+  }
+  c.appPassword = entered;
+  c.appAccessEnabled = true; // ---------- پاسورڈ سیٹ ہوتے ہی ایکسیس خودکار آن — ایڈمن الگ سے ٹوگل کرنا نہ بھولے ----------
+  saveCustomersLight();
+  renderCustomerAccessList();
+  alert(`✅ Password saved for ${c.name}:\n\n${entered}\n\nPlease share this with the customer.`);
+}
+
+function toggleCustomerAppAccess(customerId, enabled){
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!c) return;
+  if(enabled && !c.appPassword){
+    alert('Please set a password for this customer first.');
+    renderCustomerAccessList();
+    return;
+  }
+  c.appAccessEnabled = enabled;
+  saveCustomersLight();
+}
+
+function filterCustomerAccessList(){ renderCustomerAccessList(); }
+
+// ---------- 🏠 کسٹمر کا اپنا ہوم — صرف اپنا نام، بقایا/والٹ، اور اگلے مراحل کے لیے خالی جگہ (آرڈر/پیمنٹ بعد میں شامل ہوں گے) ----------
+// ---------- 🧪 FMtest01 Phase 2: کسٹمر ہوم پر ٹیب ریاست — 'ledger' (لین دین) یا 'bills' (بلز) ----------
+let customerHomeTab = 'ledger';
+
+function renderCustomerHomeScreen(){
+  const cust = customersData.find(c => c.customer_id === AppState.currentCustomerId);
+  const wrap = document.getElementById('customerHomeContent');
+  if(!wrap) return;
+  if(!cust){ wrap.innerHTML = '<div style="text-align:center; color:var(--danger); padding:20px;">Customer record not found.</div>'; return; }
+  wrap.innerHTML = `
+    <div style="background:linear-gradient(155deg,#0f766e,#0b4a45); color:#fff; border-radius:16px; padding:20px; text-align:center; margin-bottom:16px;">
+      <div style="font-size:13px; opacity:.85;">Welcome</div>
+      <div style="font-size:20px; font-weight:900; margin-top:4px;">🧑‍🤝‍🧑 ${cust.name}</div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="pfBox" style="background:#fef2f2;"><div class="pfLabel">📥 آپ کا بقایا (Payable)</div><div class="pfValue receivable">Rs. ${(cust.total_receivable||0).toLocaleString()}</div></div>
+      <div class="pfBox" style="background:#f0fdf4;"><div class="pfLabel">💰 والٹ بیلنس</div><div class="pfValue" style="color:var(--success);">Rs. ${(cust.wallet_balance||0).toLocaleString()}</div></div>
+    </div>
+
+    <!-- ---------- 🧪 FMtest01 Phase 2: Ledger ↔ Bills ٹوگل — سادہ، بڑے بٹن، صرف اپنا ڈیٹا ---------- -->
+    <div style="display:flex; gap:8px; margin:18px 0 12px;">
+      <button type="button" id="custHomeTabLedgerBtn" onclick="switchCustomerHomeTab('ledger')" style="flex:1; padding:11px 6px !important; border-radius:9px !important; font-weight:800; font-size:13px;">📜 لین دین</button>
+      <button type="button" id="custHomeTabBillsBtn" onclick="switchCustomerHomeTab('bills')" style="flex:1; padding:11px 6px !important; border-radius:9px !important; font-weight:800; font-size:13px;">📦 بلز</button>
+    </div>
+    <div id="customerHomeTabContent"></div>
+
+    <!-- ---------- 🧪 FMtest02 Phase 3: خود آرڈر دینے کا بٹن — موجودہ Order Taking ماڈیول کھلے گا،
+         نام خودکار خود اسی کسٹمر کا لگا ہوا ہوگا ---------- -->
+    <button type="button" onclick="goTo('orderTaking')" style="width:100%; margin-top:18px; padding:16px; background:linear-gradient(180deg,#4F46E5,#3730a3); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">🛒 نیا آرڈر دیں</button>
+
+    <!-- ---------- 🧪 FMtest03 Phase 4 (Step 1): تیسرا بٹن — پیمنٹ بھیجنے کی اسکرین پر لے جائے ---------- -->
+    <button type="button" onclick="goTo('customerPayment')" style="width:100%; margin-top:12px; padding:16px; background:linear-gradient(180deg,#16A34A,#0b4a45); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">💰 پیمنٹ بھیجیں</button>
+  `;
+  renderCustomerHomeTabButtonsUI();
+  if(customerHomeTab === 'bills') renderCustomerHomeBillsList(cust.customer_id);
+  else renderCustomerHomeLedgerList(cust.customer_id);
+}
+
+// ---------- ٹیب بٹنوں کی ایکٹو/غیر ایکٹو رنگت اپڈیٹ کریں ----------
+function renderCustomerHomeTabButtonsUI(){
+  const ledgerBtn = document.getElementById('custHomeTabLedgerBtn');
+  const billsBtn = document.getElementById('custHomeTabBillsBtn');
+  if(!ledgerBtn || !billsBtn) return;
+  const activeStyle = 'background:var(--primary) !important; color:#fff !important; border:none !important;';
+  const inactiveStyle = 'background:#f1f5f9 !important; color:var(--text) !important; border:1.5px solid #dbe1ea !important;';
+  ledgerBtn.style.cssText += customerHomeTab === 'ledger' ? activeStyle : inactiveStyle;
+  billsBtn.style.cssText += customerHomeTab === 'bills' ? activeStyle : inactiveStyle;
+}
+
+function switchCustomerHomeTab(tab){
+  customerHomeTab = tab;
+  renderCustomerHomeTabButtonsUI();
+  if(!AppState.currentCustomerId) return;
+  if(tab === 'bills') renderCustomerHomeBillsList(AppState.currentCustomerId);
+  else renderCustomerHomeLedgerList(AppState.currentCustomerId);
+}
+
+// ---------- کسٹمر کی اپنی بلز فہرست — مکمل بل + پینڈنگ (منظوری کے منتظر) آرڈر + پیمنٹ رسیدیں (اپنی سٹیٹس کے ساتھ)، صرف اسی کسٹمر کا ڈیٹا ----------
+function renderCustomerHomeBillsList(customerId){
+  const wrap = document.getElementById('customerHomeTabContent');
+  if(!wrap) return;
+  const completedBills = invoicesData.filter(inv => inv.customer_id === customerId).map(inv => ({ kind:'invoice', when: inv.created_at, inv }));
+  // ---------- 🧪 Phase 4 (Step 15): سیلزمین کے بل صرف اس وقت تک یہاں نظر آئیں جب تک منظور نہ ہو جائیں (منظوری کے بعد اصل invoice اوپر نظر آ جاتا ہے) —
+  // لیکن کسٹمر کی اپنی جمع کروائی پیمنٹ رسیدیں (type:'payment') ہر حالت (pending/approved/rejected) میں نظر آئیں تاکہ کسٹمر کو اپنی پیمنٹ کی حالت پتا رہے ----------
+  const pendingForCustomer = (typeof pendingBillsData !== 'undefined' ? pendingBillsData : [])
+    .filter(p => p.customer_id === customerId && (p.type === 'payment' || p.status !== 'approved'))
+    .map(p => ({ kind:'pending', when: p.submitted_at, p }));
+  const allBills = [...completedBills, ...pendingForCustomer].sort((a,b) => new Date(b.when) - new Date(a.when));
+
+  if(allBills.length === 0){
+    wrap.innerHTML = `<div class="profileEmpty">ابھی تک آپ کا کوئی بل موجود نہیں</div>`;
+    return;
+  }
+
+  const rowsHtml = allBills.map(row => {
+    if(row.kind === 'invoice'){
+      const inv = row.inv;
+      const amountDue = getInvoiceAmountDue(inv);
+      const isPending = amountDue > 0;
+      const itemCount = (inv.items || []).length;
+      const amountHtml = isPending
+        ? `<div class="brAmount" style="background:#fef2f2; color:#b91c1c; padding:4px 10px; border-radius:8px; font-weight:800; font-size:12px; white-space:nowrap;">Rs. ${amountDue.toLocaleString()}<br><span style="font-size:9.5px; font-weight:700;">بقایا</span></div>`
+        : `<div class="brAmount" style="color:#15803d; font-weight:800; font-size:20px;">✅</div>`;
+      return `
+        <div class="billRow ${isPending?'pending':''}">
+          <div class="brInfo">
+            <div class="brDate">📅 ${new Date(inv.created_at).toLocaleDateString('en-GB')} · ${inv.invoice_no}</div>
+            <div class="brDesc">${itemCount ? itemCount + ' آئٹمز' : ''}</div>
+          </div>
+          ${amountHtml}
+        </div>`;
+    } else {
+      const p = row.p;
+      const isPayment = p.type === 'payment';
+      // ---------- 🧪 Step 15: پیمنٹ رسید کی درست رقم (p.amount) — پہلے یہاں غلطی سے p.items پر انحصار تھا جو پیمنٹ انٹریز میں خالی ہوتا ہے ----------
+      const total = isPayment ? (p.amount || 0) : (p.items || []).reduce((s,i) => s + i.qty*i.unitPrice, 0);
+
+      let descText, tagBg, tagColor, tagText;
+      if(p.status === 'approved'){
+        descText = isPayment ? '✅ آپ کی پیمنٹ منظور ہو گئی' : '✅ منظور ہو گیا';
+        tagBg = '#f0fdf4'; tagColor = '#15803d'; tagText = 'منظور شدہ';
+      } else if(p.status === 'rejected'){
+        descText = isPayment
+          ? `❌ آپ کی پیمنٹ مسترد ہوئی${p.admin_note ? ' — ' + p.admin_note : ''}`
+          : `❌ مسترد ہوا${p.admin_note ? ' — ' + p.admin_note : ''}`;
+        tagBg = '#fef2f2'; tagColor = '#b91c1c'; tagText = 'مسترد';
+      } else {
+        descText = isPayment ? '⏳ پیمنٹ کی منظوری کا انتظار' : '⏳ منظوری کا انتظار';
+        tagBg = '#fef9e7'; tagColor = '#92620a'; tagText = 'پینڈنگ';
+      }
+      const rowClass = p.status === 'approved' ? '' : p.status === 'rejected' ? 'rejected' : 'pending';
+
+      return `
+        <div class="billRow ${rowClass}">
+          <div class="brInfo">
+            <div class="brDate">📅 ${new Date(p.submitted_at).toLocaleDateString('en-GB')}${isPayment ? ' · 💰 پیمنٹ' : ''}</div>
+            <div class="brDesc">${descText}</div>
+          </div>
+          <div class="brAmount" style="background:${tagBg}; color:${tagColor}; padding:4px 10px; border-radius:8px; font-weight:800; font-size:12px; white-space:nowrap;">Rs. ${total.toLocaleString()}<br><span style="font-size:9.5px; font-weight:700;">${tagText}</span></div>
+        </div>`;
+    }
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="profileSectionTitle"><span>📦 آپ کے بلز اور پیمنٹس</span><span class="cnt">${allBills.length}</span></div>
+    <div>${rowsHtml}</div>
+  `;
+}
+
+// ---------- کسٹمر کی اپنی لین دین (Ledger/Khatabook) فہرست — سبز=وصول، سرخ=واپس/نکالا، صرف اسی کسٹمر کا ڈیٹا ----------
+function renderCustomerHomeLedgerList(customerId){
+  const wrap = document.getElementById('customerHomeTabContent');
+  if(!wrap) return;
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!c){ wrap.innerHTML = ''; return; }
+
+  const history = c.walletHistory || [];
+  const ledgerHtml = history.length === 0
+    ? `<div class="profileEmpty">ابھی تک کوئی لین دین موجود نہیں</div>`
+    : history.map(h => {
+        let label, isGot;
+        if(h.type === 'deposit'){ label = '➕ والٹ میں شامل ہوا'; isGot = true; }
+        else if(h.type === 'redeem'){ label = '➖ والٹ سے نکالا گیا'; isGot = false; }
+        else { label = `📥 بقایا وصول ہوا (${h.via === 'wallet' ? 'والٹ سے' : 'نقد'})`; isGot = true; }
+        return `<div class="ledgerRow"><div class="lrTop">
+            <div><div class="lrDate">${h.date ? new Date(h.date).toLocaleDateString('en-GB') : ''}</div><div class="lrDesc">${label}</div></div>
+            <div class="lrAmount ${isGot?'got':'gave'}">${isGot?'+':'-'} Rs. ${h.amount.toLocaleString()}</div>
+          </div></div>`;
+      }).join('');
+
+  const returnedItems = [];
+  invoicesData.filter(inv => inv.customer_id === customerId).forEach(inv => {
+    (inv.items || []).filter(i => i.returned).forEach(i => {
+      returnedItems.push({invoice_no: inv.invoice_no, name: i.name, qty: i.returnQty, amount: i.returnAmount});
+    });
+  });
+  const returnsHtml = returnedItems.length === 0
+    ? `<div class="profileEmpty">آپ کا کوئی آئٹم واپس نہیں کیا گیا</div>`
+    : returnedItems.map(r => `
+        <div class="ledgerRow"><div class="lrTop">
+          <div><div class="lrDate">${r.invoice_no}</div><div class="lrDesc">↩️ ${r.name} · تعداد: ${r.qty}</div></div>
+          <div class="lrAmount gave">- Rs. ${(r.amount||0).toLocaleString()}</div>
+        </div></div>`).join('');
+
+  wrap.innerHTML = `
+    <div class="profileSectionTitle"><span>📜 لین دین کی تفصیل</span><span class="cnt">${history.length}</span></div>
+    <div>${ledgerHtml}</div>
+    <div class="profileSectionTitle"><span>↩️ واپس شدہ آئٹمز</span><span class="cnt">${returnedItems.length}</span></div>
+    <div>${returnsHtml}</div>
+  `;
+}
+
+/* =====================================================================
+   🧪 FMtest03 Phase 4 (Step 1): کسٹمر کی اپنی پیمنٹ اسکرین
+   ------------------------------------------------------------------
+   - کسٹمر اپنے JazzCash / EasyPaisa / بینک اکاؤنٹس خود فیڈ کر سکتا ہے
+     (بالکل اسی طرح جیسے ایڈمن کا "میرا اکاؤنٹ" یا سپلائر کے Bank Accounts کام کرتے ہیں)
+   - "پیمنٹ کریں" دبانے پر ہم پاسورڈ/لاگ ان خود نہیں کر سکتے (نہ API ہمارے پاس ہے) —
+     صرف اُس ادارے (JazzCash/EasyPaisa/بینک) کا اپنا صفحہ نئے ٹیب میں کھول دیتے ہیں،
+     تاکہ کسٹمر خود اپنے پاسورڈ سے لاگ ان کر کے پیمنٹ کر سکے۔
+   - پیمنٹ ہو جانے کے بعد کسٹمر اسکرین شاٹ اپلوڈ/کیمرہ سے لے کر رقم کے ساتھ Submit کرے —
+     یہ معلومات ایڈمن کو بھیجنے کے لیے مقامی طور پر محفوظ ہو جاتی ہیں
+     (ایڈمن کی طرف اسے دکھانے/منظور کرنے کا نظام اگلے مرحلے میں شامل ہوگا)
+   ===================================================================== */
+
+// ---------- کسٹمر کے اپنے پیمنٹ اکاؤنٹس — موجودہ BANK_LOGIN_URLS نقشہ ہی دوبارہ استعمال (JazzCash/EasyPaisa/بینک) ----------
+function getCustomerPaymentAccounts(c){
+  if(!c.myPaymentAccounts) c.myPaymentAccounts = [];
+  return c.myPaymentAccounts;
+}
+
+let editingCustomerPaymentAccountIdx = null; // null = نیا اکاؤنٹ شامل ہو رہا ہے
+let customerPaymentScreenshotDataUrl = null; // ---------- منتخب/کھینچی گئی رسید کی تصویر — base64 ----------
+
+// ---------- ایڈمن (صدام) کے اپنے پیمنٹ اکاؤنٹس — کسٹمر کو فوری دکھانا تاکہ وہ صحیح اکاؤنٹ میں QR سکین کر کے پیمنٹ کر سکے ----------
+let customerExpandedAdminAccountIdx = null; // جو اکاؤنٹ کارڈ کھلا ہوا ہے (تفصیل نظر آ رہی ہے) — ایک وقت میں ایک یا ایک سے زیادہ بھی کھل سکتے ہیں
+let customerExpandedAdminAccountSet = new Set();
+function toggleAdminAccountForCustomer(idx){
+  if(customerExpandedAdminAccountSet.has(idx)) customerExpandedAdminAccountSet.delete(idx);
+  else customerExpandedAdminAccountSet.add(idx);
+  renderCustomerPaymentScreen();
+}
+function copyAdminAccountNumberForCustomer(idx, ev){
+  if(ev) ev.stopPropagation();
+  const acc = (AppState.settings.paymentAccounts || [])[idx];
+  if(!acc || !acc.number) return;
+  const doCopy = () => navigator.clipboard && navigator.clipboard.writeText
+    ? navigator.clipboard.writeText(acc.number)
+    : Promise.reject();
+  doCopy().catch(() => {
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = acc.number; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(e){}
+  }).finally(() => {
+    const el = document.getElementById('custAdminAccNum_' + idx);
+    if(el){ const orig = el.textContent; el.textContent = '✅ کاپی ہو گیا'; setTimeout(() => { el.textContent = orig; }, 1200); }
+  });
+}
+function buildAdminPaymentAccountsForCustomerHtml(){
+  const accounts = AppState.settings.paymentAccounts || [];
+  if(accounts.length === 0) return '';
+  const cardsHtml = accounts.map((acc, idx) => {
+    const isOpen = customerExpandedAdminAccountSet.has(idx);
+    return `
+      <div style="background:#fff; border:1.5px solid ${isOpen ? '#16A34A' : '#dbe1ea'}; border-radius:14px; margin-bottom:10px; overflow:hidden; transition:border-color .15s;">
+        <div onclick="toggleAdminAccountForCustomer(${idx})" style="display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; background:${isOpen ? '#f0fdf4' : '#fff'};">
+          <div style="width:38px; height:38px; border-radius:50%; overflow:hidden; flex:0 0 38px; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-size:16px;">
+            ${acc.photo ? `<img src="${acc.photo}" style="width:100%; height:100%; object-fit:cover;">` : '👤'}
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:800; font-size:14px; color:#0f172a;">${acc.name || 'صدام حسین'}</div>
+            <div style="display:flex; align-items:center; gap:5px; font-size:12.5px; color:var(--muted); margin-top:2px;">
+              ${bankLogoImgHtml(acc.type, 16)}<span>${acc.type || 'بینک/والٹ'}</span>
+            </div>
+          </div>
+          <div style="font-size:18px; color:#16A34A;">${isOpen ? '▲' : '▼'}</div>
+        </div>
+        ${isOpen ? `
+          <div style="padding:14px; border-top:1.5px solid #e2f0e6; background:#fafffe;">
+            ${acc.qr ? `
+              <div style="text-align:center; margin-bottom:12px;">
+                <img src="${acc.qr}" style="width:170px; height:170px; object-fit:contain; background:#fff; border:1.5px solid #dbe1ea; border-radius:10px; padding:6px;">
+                <div style="font-size:11.5px; color:var(--muted); margin-top:6px;">📷 اپنی ${acc.type || ''} ایپ سے یہ کیو آر کوڈ سکین کریں</div>
+              </div>
+            ` : `<div style="text-align:center; color:var(--muted); font-size:12.5px; padding:10px; background:#f8fafc; border-radius:8px; margin-bottom:12px;">اس اکاؤنٹ کا QR کوڈ ابھی شامل نہیں کیا گیا</div>`}
+            <div style="background:#f8fafc; border-radius:10px; padding:10px 12px; margin-bottom:8px;">
+              <div style="font-size:11px; color:var(--muted); font-weight:700;">نام</div>
+              <div style="font-size:14.5px; font-weight:800; color:#0f172a;">${acc.name || 'صدام حسین'}</div>
+            </div>
+            <div onclick="copyAdminAccountNumberForCustomer(${idx}, event)" style="background:#f8fafc; border-radius:10px; padding:10px 12px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px;" title="نمبر کاپی کرنے کے لیے دبائیں">
+              <div>
+                <div style="font-size:11px; color:var(--muted); font-weight:700;">${acc.type || 'اکاؤنٹ'} نمبر</div>
+                <div id="custAdminAccNum_${idx}" style="font-size:16px; font-weight:800; color:#0f172a; letter-spacing:.3px;">${acc.number || '—'}</div>
+              </div>
+              <div style="font-size:20px;">📋</div>
+            </div>
+            ${acc.iban ? `<div style="font-size:11.5px; color:var(--muted); margin-top:8px; padding:0 2px;">IBAN: ${acc.iban}</div>` : ''}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+  return `
+    <div style="background:linear-gradient(180deg,#ecfdf5,#f0fdf4); border:1.5px solid #bbf7d0; border-radius:16px; padding:14px; margin-bottom:18px;">
+      <div style="font-weight:800; font-size:15px; color:#166534; margin-bottom:10px;">💳 صدام فروٹ منڈی کو پیمنٹ کریں — اکاؤنٹ منتخب کریں</div>
+      ${cardsHtml}
+    </div>
+  `;
+}
+
+function renderCustomerPaymentScreen(){
+  const wrap = document.getElementById('customerPaymentContent');
+  const cust = customersData.find(c => c.customer_id === AppState.currentCustomerId);
+  if(!wrap) return;
+  if(!cust){ wrap.innerHTML = '<div style="text-align:center; color:var(--danger); padding:20px;">کسٹمر ریکارڈ نہیں ملا۔</div>'; return; }
+
+  const accounts = getCustomerPaymentAccounts(cust);
+  const accountsHtml = accounts.length === 0
+    ? `<div class="profileEmpty">ابھی تک آپ نے کوئی پیمنٹ اکاؤنٹ فیڈ نہیں کیا</div>`
+    : accounts.map((acc, idx) => `
+        <div class="bankAccCard">
+          <div class="bankAccCardTop">
+            <div style="min-width:0; display:flex; align-items:center; gap:8px;">
+              ${bankLogoImgHtml(acc.type, 26)}
+              <div>
+                <div class="bankAccType">${acc.type || 'بینک/والٹ'}</div>
+                ${acc.title ? `<div class="bankAccTitle">${acc.title}</div>` : ''}
+              </div>
+            </div>
+            <div class="bankAccBtns">
+              <button onclick="editCustomerPaymentAccount(${idx})" title="ترمیم">✏️</button>
+              <button onclick="deleteCustomerPaymentAccount(${idx})" title="حذف کریں">🗑️</button>
+            </div>
+          </div>
+          <div class="bankAccNumber">${acc.number || '—'}</div>
+          <button type="button" onclick="openCustomerPaymentLoginPage(${idx})"
+            style="width:100%; margin-top:10px; padding:12px; background:linear-gradient(180deg,#16A34A,#0b4a45); color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer;">
+            ↗️ ${acc.type || 'اکاؤنٹ'} پر پیمنٹ کریں
+          </button>
+        </div>
+      `).join('');
+
+  wrap.innerHTML = `
+    ${buildAdminPaymentAccountsForCustomerHtml()}
+    <div class="profileSectionTitle"><span>🏦 میرے پیمنٹ اکاؤنٹس</span><span class="cnt">${accounts.length}</span></div>
+    <div>${accountsHtml}</div>
+    <button type="button" class="addBankAccBtn" onclick="openAddCustomerPaymentAccount()">➕ نیا اکاؤنٹ شامل کریں</button>
+
+    <!-- ---------- اکاؤنٹ شامل/ترمیم فارم — ابتدا میں چھپا ہوا ---------- -->
+    <div id="cpaFormBox" style="display:none; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:12px; padding:14px; margin-top:14px;">
+      <div style="font-weight:800; margin-bottom:10px;" id="cpaFormTitle">➕ نیا پیمنٹ اکاؤنٹ</div>
+      <select id="cpaType" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px;"></select>
+      <input type="text" id="cpaTitle" placeholder="اکاؤنٹ ٹائٹل (اختیاری، مثلاً: میرا نام)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px;">
+      <input type="text" id="cpaNumber" placeholder="اکاؤنٹ/موبائل نمبر" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px;">
+      <div style="display:flex; gap:10px;">
+        <button type="button" onclick="closeCustomerPaymentAccountForm()" style="flex:1; padding:11px; background:#f1f5f9 !important; color:#334155 !important;">منسوخ کریں</button>
+        <button type="button" onclick="saveCustomerPaymentAccount()" style="flex:1; padding:11px; background:linear-gradient(180deg,#16A34A,#0b4a45) !important; color:#fff !important;">💾 محفوظ کریں</button>
+      </div>
+    </div>
+
+    <!-- ---------- پیمنٹ ہو جانے کے بعد رسید (اسکرین شاٹ) ایڈمن کو بھیجنے کا سیکشن ---------- -->
+    <div style="background:#fff7ed; border:1.5px solid #fde4bd; border-radius:12px; padding:14px; margin-top:20px;">
+      <div style="font-weight:800; margin-bottom:10px; color:#9a3412;">🧾 پیمنٹ کی رسید ایڈمن کو بھیجیں</div>
+      <input type="number" id="cpsAmount" placeholder="ادا کی گئی رقم (Rs.)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px;">
+      <select id="cpsAccountSelect" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px;">
+        <option value="">— طریقہ منتخب کریں (اختیاری) —</option>
+        ${accounts.map((acc, idx) => `<option value="${idx}">${acc.type || 'اکاؤنٹ'}${acc.number ? ' — '+acc.number : ''}</option>`).join('')}
+      </select>
+      <button type="button" onclick="attachCustomerPaymentScreenshot()" style="width:100%; padding:10px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:8px; color:var(--muted); cursor:pointer; font-size:13px; margin-bottom:10px;">📷 اسکرین شاٹ اپلوڈ / کیمرہ سے لیں</button>
+      <div id="cpsShotPreview" style="display:none; text-align:center; margin-bottom:10px;">
+        <img id="cpsShotImg" style="max-width:100%; border-radius:8px; border:1px solid #dbe1ea;">
+        <button type="button" onclick="removeCustomerPaymentScreenshot()" style="width:100%; margin-top:8px; padding:9px; background:#fef2f2 !important; color:#b91c1c !important; border:1px solid #fecaca !important; border-radius:8px; font-weight:800; font-size:12.5px;">🗑️ ہٹائیں / دوبارہ لیں</button>
+      </div>
+      <button type="button" onclick="submitCustomerPaymentScreenshot()" style="width:100%; padding:14px; background:linear-gradient(180deg,#EA580C,#9a3412); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:800; cursor:pointer;">✅ ایڈمن کو بھیجیں</button>
+    </div>
+  `;
+}
+
+// ---------- اکاؤنٹ شامل/ترمیم فارم کھولنا/بند کرنا ----------
+function openAddCustomerPaymentAccount(){
+  editingCustomerPaymentAccountIdx = null;
+  document.getElementById('cpaFormTitle').textContent = '➕ نیا پیمنٹ اکاؤنٹ';
+  fillCustomerPaymentAccountForm({});
+  document.getElementById('cpaFormBox').style.display = 'block';
+}
+function editCustomerPaymentAccount(idx){
+  const cust = customersData.find(c => c.customer_id === AppState.currentCustomerId);
+  const acc = cust && getCustomerPaymentAccounts(cust)[idx];
+  if(!acc) return;
+  editingCustomerPaymentAccountIdx = idx;
+  document.getElementById('cpaFormTitle').textContent = '✏️ اکاؤنٹ میں ترمیم';
+  fillCustomerPaymentAccountForm(acc);
+  document.getElementById('cpaFormBox').style.display = 'block';
+}
+function fillCustomerPaymentAccountForm(acc){
+  document.getElementById('cpaType').innerHTML = `<option value="">— بینک/والٹ منتخب کریں —</option>` +
+    Object.keys(BANK_LOGIN_URLS).map(b => `<option value="${b}" ${acc.type===b?'selected':''}>${b}</option>`).join('') +
+    `<option value="Other" ${acc.type==='Other'?'selected':''}>دیگر</option>`;
+  document.getElementById('cpaTitle').value = acc.title || '';
+  document.getElementById('cpaNumber').value = acc.number || '';
+}
+function closeCustomerPaymentAccountForm(){
+  document.getElementById('cpaFormBox').style.display = 'none';
+  editingCustomerPaymentAccountIdx = null;
+}
+function saveCustomerPaymentAccount(){
+  const cust = customersData.find(c => c.customer_id === AppState.currentCustomerId);
+  if(!cust) return;
+  const type = document.getElementById('cpaType').value;
+  const number = document.getElementById('cpaNumber').value.trim();
+  if(!type || !number){
+    alert('براہ کرم بینک/والٹ منتخب کریں اور اکاؤنٹ نمبر لکھیں۔');
+    return;
+  }
+  const acc = { type, number, title: document.getElementById('cpaTitle').value.trim() };
+  const accounts = getCustomerPaymentAccounts(cust);
+  if(editingCustomerPaymentAccountIdx === null) accounts.push(acc);
+  else accounts[editingCustomerPaymentAccountIdx] = acc;
+  closeCustomerPaymentAccountForm();
+  persistAllData();
+  renderCustomerPaymentScreen();
+}
+function deleteCustomerPaymentAccount(idx){
+  const cust = customersData.find(c => c.customer_id === AppState.currentCustomerId);
+  if(!cust) return;
+  if(!confirm('یہ پیمنٹ اکاؤنٹ حذف کریں؟')) return;
+  getCustomerPaymentAccounts(cust).splice(idx, 1);
+  persistAllData();
+  renderCustomerPaymentScreen();
+}
+
+// ---------- منتخب اکاؤنٹ کے ادارے (JazzCash/EasyPaisa/بینک) کا اپنا صفحہ کھولیں —
+// ہم کبھی پاسورڈ خود نہیں ڈالتے، نہ ہی خودکار لاگ ان کرتے ہیں؛ کسٹمر خود اپنے پاسورڈ سے لاگ ان کر کے پیمنٹ کرے ----------
+function openCustomerPaymentLoginPage(idx){
+  const cust = customersData.find(c => c.customer_id === AppState.currentCustomerId);
+  const acc = cust && getCustomerPaymentAccounts(cust)[idx];
+  if(!acc || !acc.type){
+    alert('براہ کرم پہلے بینک/والٹ منتخب کریں۔');
+    return;
+  }
+  const url = BANK_LOGIN_URLS[acc.type];
+  if(!url){
+    alert('اس بینک کا براہ راست لنک ابھی دستیاب نہیں — براہ کرم خود تلاش کریں۔');
+    return;
+  }
+  window.open(url, '_blank');
+}
+
+// ---------- اسکرین شاٹ منسلک کرنا — بالکل اسی طرز پر جیسے لوگو/QR کوڈ کے لیے پہلے سے موجود ہے ----------
+function attachCustomerPaymentScreenshot(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxW = 700;
+        const scale = Math.min(1, maxW / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        customerPaymentScreenshotDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        document.getElementById('cpsShotImg').src = customerPaymentScreenshotDataUrl;
+        document.getElementById('cpsShotPreview').style.display = 'block';
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+// ---------- اگر غلط اسکرین شاٹ لگ جائے تو ہٹا کر دوبارہ لینے کا موقع ----------
+function removeCustomerPaymentScreenshot(){
+  customerPaymentScreenshotDataUrl = null;
+  document.getElementById('cpsShotPreview').style.display = 'none';
+  document.getElementById('cpsShotImg').src = '';
+}
+
+// ---------- 🧪 Phase 4 (Step 1 مکمل): کسٹمر کی جانب سے بھیجی گئی پیمنٹ رسیدیں اب الگ array کی بجائے
+// موجودہ pendingBillsData میں ہی جاتی ہیں (type:'payment') — تاکہ ایڈمن کی موجودہ Bills Awaiting
+// Approval لسٹ خودکار انہیں پہچان سکے (اگلے مراحل میں لسٹ/ریویو UI اپڈیٹ ہوگا) ----------
+function submitCustomerPaymentScreenshot(){
+  const cust = customersData.find(c => c.customer_id === AppState.currentCustomerId);
+  if(!cust) return;
+  const amount = parseFloat(document.getElementById('cpsAmount').value) || 0;
+  if(amount <= 0){
+    alert('براہ کرم درست رقم درج کریں۔');
+    return;
+  }
+  if(!customerPaymentScreenshotDataUrl){
+    alert('براہ کرم پیمنٹ کی اسکرین شاٹ اپلوڈ/کیمرہ سے لیں۔');
+    return;
+  }
+  const accIdx = document.getElementById('cpsAccountSelect').value;
+  const accounts = getCustomerPaymentAccounts(cust);
+  const chosenAcc = accIdx !== '' ? accounts[accIdx] : null;
+
+  const pendingPayment = {
+    pending_id: nextPendingId++,
+    type: 'payment',                    // ---------- 'bill' (سیلزمین کے پرانے بل) بمقابلہ 'payment' (کسٹمر کی پیمنٹ رسید) ----------
+    customer_id: cust.customer_id,
+    customer_name: cust.name,
+    salesman_name: 'Customer App',      // ---------- پرانی لسٹ کی UI میں یہ فیلڈ پہلے سے پڑھی جاتی ہے، اس لیے خالی نہ چھوڑیں ----------
+    amount,                             // ---------- نئی فیلڈ ----------
+    account_type: chosenAcc ? (chosenAcc.type || '') : '',   // ---------- نئی فیلڈ ----------
+    account_number: chosenAcc ? (chosenAcc.number || '') : '', // ---------- نئی فیلڈ ----------
+    screenshot_base64: customerPaymentScreenshotDataUrl,      // ---------- نئی فیلڈ ----------
+    submitted_by: 'customer',           // ---------- نئی فیلڈ — 'salesman' کے مقابلے میں بتاتی ہے کہ یہ کسٹمر کی طرف سے آئی ہے ----------
+    items: [],                          // ---------- پرانی UI بغیر ٹوٹے چلتی رہے اس لیے خالی رکھا ----------
+    payment_method: chosenAcc ? (chosenAcc.type || 'Cash') : 'Cash',
+    status: 'pending',
+    admin_note: '',
+    acknowledged: false,
+    submitted_at: new Date().toISOString()
+  };
+  pendingBillsData.unshift(pendingPayment);
+  persistAllData();
+
+  // ---------- فارم صاف کریں اور تصدیقی پیغام دکھائیں ----------
+  document.getElementById('cpsAmount').value = '';
+  document.getElementById('cpsAccountSelect').value = '';
+  customerPaymentScreenshotDataUrl = null;
+  document.getElementById('cpsShotPreview').style.display = 'none';
+  alert('✅ آپ کی پیمنٹ کی معلومات ایڈمن کو بھیج دی گئی ہیں۔\nایڈمن کی منظوری کے بعد آپ کا بقایا خودکار کم ہو جائے گا۔');
 }
 
 /* =====================================================================
@@ -8252,7 +9052,7 @@ function applyRole(role, name){
   AppState.currentUser = { name: name || (role==='admin' ? 'Saddam Hussain' : 'Abdul Wahab') };
   AppState.currentRole = role;
 
-  document.body.classList.remove('role-admin','role-salesman');
+  document.body.classList.remove('role-admin','role-salesman','role-customer');
   document.body.classList.add('role-' + role);
 
   document.getElementById('userTag').innerHTML =
@@ -8513,10 +9313,14 @@ function logout(){
   try{
     AppState.currentUser = null;
     AppState.currentRole = null;
+    AppState.currentCustomerId = null;
+    document.body.classList.remove('role-admin','role-salesman','role-customer');
     document.getElementById('pinInput').value = '';
     saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
     document.getElementById('app').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
+    // ---------- 🧪 FMtest01: کسٹمر لاگ ان کی حالت بھی صاف کر دیں تاکہ اگلی بار خالی سکرین ملے ----------
+    if(typeof switchLoginMode === 'function') switchLoginMode('staff');
   }catch(e){
     console.error('logout failed', e);
     alert('⚠️ Logout Error: ' + e.message);
@@ -8622,6 +9426,9 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'customers') enterPartyPage('customers');
   if(screenName === 'suppliers') enterPartyPage('suppliers');
   if(screenName === 'users') { renderUserList(); renderApprovalList(); }
+  if(screenName === 'customerAccess') renderCustomerAccessList(); // ---------- 🧪 FMtest01 ----------
+  if(screenName === 'customerHome') renderCustomerHomeScreen(); // ---------- 🧪 FMtest01 ----------
+  if(screenName === 'customerPayment') renderCustomerPaymentScreen(); // ---------- 🧪 FMtest03 Phase 4 ----------
   if(screenName === 'billhistory') renderBillHistory();
   if(screenName === 'mydiary') renderMyDiaryScreen();
   if(screenName === 'expenditure') renderExpenditureScreen();
@@ -9853,10 +10660,10 @@ function addToCart(variantId){
   }
 
   const price = Billing.saleMode === 'retail' ? product.retail : product.wholesale;
-  // ---------- 💪 صدام کی ہدایت (FM4SEPFR30): فروخت مزدوری — ہر آئٹم کی اپنی مزدوری خودکار ریٹ میں جمع ہو جاتی ہے
-  // (کسٹمر کے پرنٹ پر الگ سے نظر نہیں آتی، صرف حتمی قیمت میں شامل ہوتی ہے)؛ رپورٹ کے لیے علیحدہ سے محفوظ رہتی ہے ---------- -->
+  // ---------- 💪 صدام کی ہدایت (FM050926): فروخت مزدوری اب نرخ (unitPrice) میں خودکار جمع نہیں ہوتی —
+  // نرخ ہمیشہ خالص/صاف رہے گا (کسٹمر رقم × نرخ)، مزدوری صرف اپنے علیحدہ کالم اور علیحدہ ٹوٹل میں شامل ہوگی ---------- -->
   const laborPerUnit = product.sellLabor || 0;
-  const finalPrice = price + laborPerUnit;
+  const finalPrice = price;
 
   if(existing){
     existing.qty += 1;
@@ -10143,7 +10950,7 @@ function setSaleMode(mode){
     if(product){
       const baseRate = mode === 'retail' ? product.retail : product.wholesale;
       item.laborPerUnit = product.sellLabor || 0;
-      item.unitPrice = baseRate + item.laborPerUnit;
+      item.unitPrice = baseRate; // ---------- 💪 صدام کی ہدایت (FM050926): نرخ خالص رہے گا، مزدوری الگ کالم/ٹوٹل میں ---------- -->
     }
   });
 
@@ -10257,11 +11064,13 @@ function renderCart(){
   }
 
   const subtotal = Billing.cart.reduce((sum, i) => sum + (i.qty * i.unitPrice), 0);
+  // ---------- 💪 صدام کی ہدایت (FM050926): "مزدوری فروخت" کا کل — نرخ سے الگ، لیکن Grand Total میں شامل ----------
+  const laborTotal = Billing.cart.reduce((sum, i) => sum + (i.qty * (i.laborPerUnit||0)), 0);
   // ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): "Discount" ختم — اب یہ خانہ "اضافی چارجز" (منشیانہ/ریڑھی/بائیک/کوچ)
   // ہے، جو ٹوٹل میں سے کٹتا نہیں بلکہ جمع ہوتا ہے (اسی لیے یہاں subtotal پر کیپ نہیں لگائی) ----------
   const discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
   const taxAmount = AppState.settings.taxEnabled ? Math.round(subtotal * (AppState.settings.taxPercent || 0) / 100) : 0;
-  const grandTotal = subtotal + discount + taxAmount;
+  const grandTotal = subtotal + laborTotal + discount + taxAmount;
 
   // ---------- منتخب کسٹمر کا پرانا بقایہ معلوم کریں — اگر ہو تو "This Bill" اور "Previous Balance" دونوں الگ دکھا کر Grand Total میں جمع کریں ----------
   const custIdForBalance = document.getElementById('customerSelect')?.value;
@@ -10270,6 +11079,8 @@ function renderCart(){
   const combinedTotal = grandTotal + previousBalance; // ---------- یہی اصل رقم ہے جو کسٹمر پر واجب ہے، Received/Balance Due/Change اسی کے خلاف حساب ہوں گے ----------
 
   document.getElementById('sumSubtotal').textContent = `Rs. ${subtotal.toFixed(0)}`;
+  document.getElementById('sumLaborRow').style.display = laborTotal > 0 ? 'flex' : 'none';
+  document.getElementById('sumLabor').textContent = `+ Rs. ${laborTotal.toFixed(0)}`;
   const extraChargeType = document.getElementById('extraChargeTypeSelect')?.value || 'منشیانہ';
   document.getElementById('sumDiscountLabel').textContent = `➕ اضافی چارجز (${extraChargeType})`;
   document.getElementById('sumDiscountRow').style.display = discount > 0 ? 'flex' : 'none';
@@ -10355,10 +11166,11 @@ function renderCart(){
   if(profitEl){
     const grossProfit = Billing.cart.reduce((sum, item) => {
       const v = flat.find(f => f.variant_id === item.variant_id);
-      const cost = v ? v.purchase : (item.costPerUnit || 0);
+      // ---------- 💪 صدام کی ہدایت (FM050926): اصل لاگت میں خرید مزدوری بھی شامل ہو (v.purchase + v.labor) ----------
+      const cost = v ? (v.purchase + (v.labor||0)) : (item.costPerUnit || 0);
       return sum + ((item.unitPrice - cost) * item.qty);
     }, 0);
-    const profit = grossProfit + discount; // ---------- FM4SEPFR25: اضافی چارجز (منشیانہ/کرایہ وغیرہ) اضافی آمدنی ہے، منافع میں جمع ہوگی ----------
+    const profit = grossProfit + discount; // ---------- FM050926 (تصحیح): مزدوری کبھی منافع میں شامل نہیں — یہ ریڑھی/رکشہ والوں کی امانت ہے، ہماری آمدنی نہیں ----------
     if(Billing.cart.length === 0){
       profitEl.style.display = 'none';
     } else {
@@ -10387,7 +11199,7 @@ function renderFloatingCartBar(){
   const bar = document.getElementById('floatingCartBar');
   if(!bar) return;
   const itemCount = Billing.cart.reduce((s,i) => s + i.qty, 0);
-  const subtotal = Billing.cart.reduce((s,i) => s + (i.qty*i.unitPrice), 0);
+  const subtotal = Billing.cart.reduce((s,i) => s + (i.qty*i.unitPrice) + (i.qty*(i.laborPerUnit||0)), 0);
 
   if(Billing.cart.length === 0){
     document.getElementById('floatingCartText').textContent = '🛒 Cart is empty — tap products above';
@@ -10493,12 +11305,13 @@ async function openBillPreviewBeforeComplete(){
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
   const subtotal = Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0);
+  const laborTotalPrev = Billing.cart.reduce((sum,i) => sum + (i.qty*(i.laborPerUnit||0)), 0);
   // ---------- FM4SEPFR25: "Discount" کی جگہ "اضافی چارجز" — یہ ٹوٹل میں سے کٹتا نہیں بلکہ جمع ہوتا ہے،
   // اور ٹیکس صرف اصل اشیاء کی subtotal پر لگے گا، اضافی چارجز پر نہیں ----------
   const discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
   const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
   const taxAmount = Math.round(subtotal * taxPercent / 100);
-  const grandTotal = subtotal + discount + taxAmount;
+  const grandTotal = subtotal + laborTotalPrev + discount + taxAmount;
   const previousBalance = customer ? customer.total_receivable : 0;
 
   const draftInvoice = {
@@ -10531,12 +11344,13 @@ function finalizeInvoice(){
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
   const subtotal = Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0);
+  const laborTotal = Billing.cart.reduce((sum,i) => sum + (i.qty*(i.laborPerUnit||0)), 0);
   // ---------- FM4SEPFR25: "Discount" کی جگہ "اضافی چارجز" — یہ ٹوٹل میں سے کٹتا نہیں بلکہ جمع ہوتا ہے،
   // اور ٹیکس صرف اصل اشیاء کی subtotal پر لگے گا، اضافی چارجز پر نہیں ----------
   const discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
   const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
   const taxAmount = Math.round(subtotal * taxPercent / 100);
-  const grandTotal = subtotal + discount + taxAmount;
+  const grandTotal = subtotal + laborTotal + discount + taxAmount;
 
   // ---------- کسٹمر منتخب نہیں، اور کسی نہ کسی صورت بقایہ رہ جائے گا — ادھار ٹریک کرنے کے لیے نام/نمبر مانگیں:
   // (a) عام Retail/Wholesale موڈ میں ہمیشہ (پرانا رویہ) — یا
@@ -10721,7 +11535,7 @@ function submitBillForApproval(customer, method, subtotal){
   renderAutoPaymentNote();
 
   closeCartSheet();
-  alert('✅ Bill sent to Admin for approval.\nOnce approved, it will appear in Bill History and can be printed.');
+  alert('✅ بل ایڈمن کو منظوری کے لیے بھیج دیا گیا۔\nمنظور ہونے کے بعد یہ بل ہسٹری میں نظر آئے گا اور پرنٹ کیا جا سکے گا۔');
 }
 
 /* =====================================================================
@@ -10735,23 +11549,32 @@ function openPendingBillsList(){
 }
 function renderPendingBillsListModal(){
   const pendingCount = pendingBillsData.filter(p => p.status === 'pending').length;
-  document.getElementById('pendingListMeta').textContent = `${pendingCount} pending`;
+  document.getElementById('pendingListMeta').textContent = `${pendingCount} پینڈنگ`;
 
   const body = document.getElementById('pendingBillsListBody');
   if(pendingBillsData.length === 0){
-    body.innerHTML = `<div class="profileEmpty">No bills submitted yet</div>`;
+    body.innerHTML = `<div class="profileEmpty">ابھی تک کوئی بل جمع نہیں ہوا</div>`;
     return;
   }
 
   body.innerHTML = pendingBillsData.map(p => {
-    const total = p.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+    const isPayment = p.type === 'payment'; // ---------- 🧪 Phase 4 Step 1: کسٹمر کی پیمنٹ رسید بمقابلہ سیلزمین کا بل ----------
+    const total = isPayment ? (p.amount || 0) : p.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
     const tagClass = p.status === 'pending' ? 'pending' : p.status === 'approved' ? 'approved' : 'rejected';
-    const tagLabel = p.status === 'pending' ? 'PENDING' : p.status === 'approved' ? 'APPROVED' : 'REJECTED';
+    // ---------- 🧪 اردو ورژن: کیپشن اب پیمنٹ/بل کے حساب سے الگ الگ اردو میں (پینڈنگ پیمنٹ / منظور شدہ پیمنٹ / مسترد پیمنٹ، اور بل کے لیے پینڈنگ بل / منظور شدہ بل / مسترد بل) ----------
+    const tagLabel = p.status === 'pending' ? (isPayment ? 'پینڈنگ پیمنٹ' : 'پینڈنگ بل')
+      : p.status === 'approved' ? (isPayment ? 'منظور شدہ پیمنٹ' : 'منظور شدہ بل')
+      : (isPayment ? 'مسترد پیمنٹ' : 'مسترد بل');
+    // ---------- ابھی صرف Step 1 (ڈیٹا ڈھانچہ) مکمل ہوا ہے — پیمنٹ رسید کی مخصوص ریویو/اسکرین شاٹ/Approve-Reject UI
+    // اگلے مراحل (2,3,4) میں بنے گی، اس لیے فی الحال پیمنٹ انٹری پر کلک کرنے سے پرانا بل-ریویو موڈل نہ کھلے ----------
+    const rowClickHandler = p.status === 'pending' ? (isPayment ? `openPendingPaymentReview(${p.pending_id})` : `openPendingReview(${p.pending_id})`) : '';
+    const submitterLabel = isPayment ? `💰 ${p.customer_name} کی طرف سے پیمنٹ` : `👤 ${p.salesman_name}`;
+    const metaLabel = isPayment ? `${p.account_type || 'پیمنٹ'}${p.account_number ? ' — '+p.account_number : ''} • ${new Date(p.submitted_at).toLocaleString()}` : `${p.customer_name} • ${p.items.length} آئٹمز • ${new Date(p.submitted_at).toLocaleString()}`;
     return `
-      <div class="pendingRow status-${p.status}" onclick="${p.status === 'pending' ? `openPendingReview(${p.pending_id})` : ''}">
+      <div class="pendingRow status-${p.status}" onclick="${rowClickHandler}">
         <div class="prLeft">
-          <div class="prSalesman"><span class="pendingStatusTag ${tagClass}">${tagLabel}</span>👤 ${p.salesman_name}</div>
-          <div class="prMeta">${p.customer_name} • ${p.items.length} item(s) • ${new Date(p.submitted_at).toLocaleString()}</div>
+          <div class="prSalesman"><span class="pendingStatusTag ${tagClass}">${tagLabel}</span>${submitterLabel}</div>
+          <div class="prMeta">${metaLabel}</div>
         </div>
         <div class="prAmount">Rs. ${total.toLocaleString()}</div>
       </div>`;
@@ -10767,12 +11590,103 @@ function openPendingReview(pendingId){
   renderPendingReview();
   document.getElementById('pendingReviewModal').classList.add('show');
 }
+
+// ---------- 🧪 Phase 4 (Step 2 و 3): کسٹمر پیمنٹ رسید ریویو ماڈل — رقم/اکاؤنٹ/اسکرین شاٹ دکھانا ----------
+function openPendingPaymentReview(pendingId){
+  activeReviewPendingId = pendingId;
+  document.getElementById('pendingBillsListModal').classList.remove('show');
+  renderPendingPaymentReview();
+  document.getElementById('paymentReviewModal').classList.add('show');
+}
+function renderPendingPaymentReview(){
+  const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
+  if(!p) return;
+  document.getElementById('paymentReviewMeta').textContent = new Date(p.submitted_at).toLocaleString();
+  document.getElementById('paymentReviewCustomerBar').textContent = `👤 کسٹمر: ${p.customer_name}`;
+  document.getElementById('paymentReviewAmount').textContent = 'Rs. ' + (p.amount || 0).toLocaleString();
+  document.getElementById('paymentReviewAccountInfo').innerHTML =
+    `💳 طریقہ: <b>${p.account_type || 'نامعلوم'}</b>` +
+    (p.account_number ? `<br>🔢 اکاؤنٹ نمبر: <b>${p.account_number}</b>` : '');
+  const img = document.getElementById('paymentReviewShotThumb');
+  img.src = p.screenshot_base64 || '';
+  img.style.display = p.screenshot_base64 ? 'block' : 'none';
+}
+// ---------- اسکرین شاٹ کو بڑا کر کے فل اسکرین دیکھنا ----------
+function openScreenshotFullscreen(src){
+  if(!src) return;
+  document.getElementById('imgFullscreenImg').src = src;
+  document.getElementById('imgFullscreenModal').classList.add('show');
+}
+function closeScreenshotFullscreen(){
+  document.getElementById('imgFullscreenModal').classList.remove('show');
+}
+// ---------- ابھی Approve/Reject کا اصل عمل (بقایا کم کرنا، walletHistory بنانا) اگلے مراحل (4 اور 6) میں بنے گا —
+// فی الحال صرف پیغام دکھا کر بتاتے ہیں کہ یہ حصہ زیرِ تعمیر ہے ----------
+// ---------- 🧪 Phase 4 (Step 4): Approve دباتے ہی کسٹمر کا بقایا (total_receivable) خودکار کم ہو جائے ----------
+function approvePendingPayment(){
+  const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
+  if(!p) return;
+  const cust = customersData.find(c => c.customer_id === p.customer_id);
+  if(!cust){
+    alert('⚠️ یہ کسٹمر ریکارڈ میں نہیں ملا — شاید ڈیلیٹ ہو چکا ہے۔');
+    return;
+  }
+  if(!confirm(`کیا آپ ${cust.name} کی Rs. ${(p.amount||0).toLocaleString()} کی پیمنٹ منظور کرنا چاہتے ہیں؟\nمنظوری کے بعد ان کا بقایا خودکار کم ہو جائے گا۔`)) return;
+
+  const balanceBefore = cust.total_receivable || 0;
+  cust.total_receivable = Math.max(0, balanceBefore - (p.amount || 0));
+
+  p.status = 'approved';
+  p.approved_at = new Date().toISOString();
+  p.balance_before = balanceBefore;
+  p.balance_after = cust.total_receivable;
+
+  // ---------- 🧪 Phase 4 (Step 13): Approve ہونے پر کسٹمر کی walletHistory میں نیا اندراج بنانا ----------
+  cust.walletHistory = cust.walletHistory || [];
+  cust.walletHistory.unshift({
+    type: 'receivable_collected',
+    amount: p.amount || 0,
+    via: (p.account_type || 'bank').toLowerCase(),
+    date: new Date().toISOString().split('T')[0],
+    note: `Customer self-payment approved (${p.account_type || 'نامعلوم'}${p.account_number ? ' — ' + p.account_number : ''})`
+  });
+
+  persistAllData();
+  document.getElementById('paymentReviewModal').classList.remove('show');
+  renderPendingBillsBanner();
+
+  alert(`✅ پیمنٹ منظور ہو گئی۔\n${cust.name} کا نیا بقایا: Rs. ${cust.total_receivable.toLocaleString()}`);
+}
+// ---------- 🧪 Phase 4 (Step 14): Reject کا اصل عمل — وجہ لینا اور status رکھنا ----------
+function rejectPendingPayment(){
+  const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
+  if(!p) return;
+
+  const reason = prompt('پیمنٹ مسترد کرنے کی وجہ لکھیں (کسٹمر کو نظر آئے گی):');
+  if(reason === null) return; // منسوخ کیا
+  if(!reason.trim()){
+    alert('براہ کرم وجہ لکھیں۔');
+    return;
+  }
+
+  p.status = 'rejected';
+  p.admin_note = reason.trim();
+  p.acknowledged = false;
+  p.rejected_at = new Date().toISOString();
+
+  persistAllData();
+  document.getElementById('paymentReviewModal').classList.remove('show');
+  renderPendingBillsBanner();
+
+  alert(`❌ پیمنٹ مسترد کر دی گئی۔\nکسٹمر کو یہ وجہ نظر آئے گی: ${p.admin_note}`);
+}
 function renderPendingReview(){
   const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
   if(!p) return;
 
-  document.getElementById('reviewModalMeta').textContent = `${p.customer_name} — ${p.payment_method}`;
-  document.getElementById('reviewSalesmanBar').textContent = `👤 Submitted by: ${p.salesman_name}`;
+  const paymentMethodLabelsUr = {cash:'نقد', credit:'ادھار', wallet:'والٹ'};
+  document.getElementById('reviewModalMeta').textContent = `${p.customer_name} — ${paymentMethodLabelsUr[p.payment_method] || p.payment_method}`;
+  document.getElementById('reviewSalesmanBar').textContent = `👤 جمع کروانے والا: ${p.salesman_name}`;
 
   document.getElementById('reviewItemsList').innerHTML = p.items.map((item, idx) => `
     <div class="reviewItemRow">
@@ -10800,7 +11714,7 @@ function updateReviewRate(idx, rate){
 function removeReviewItem(idx){
   const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
   if(p.items.length <= 1){
-    alert('A bill needs at least one item. Reject the bill instead if nothing should be given.');
+    alert('بل میں کم از کم ایک آئٹم ہونا ضروری ہے۔ اگر کچھ بھی نہیں دینا تو بل مسترد کر دیں۔');
     return;
   }
   p.items.splice(idx, 1);
@@ -10814,9 +11728,9 @@ function searchReviewItems(query){
   const flat = getFlatVariants().filter(v => v.name.toLowerCase().includes(query));
   box.innerHTML = flat.slice(0,6).map(v => `
     <div class="resultItem" onclick="addReviewItem(${v.variant_id})">
-      <div><div class="rName">${v.name}</div><div class="rMeta">Stock: ${v.stock} | Rs. ${v.retail}</div></div>
+      <div><div class="rName">${v.name}</div><div class="rMeta">اسٹاک: ${v.stock} | Rs. ${v.retail}</div></div>
     </div>
-  `).join('') || `<div class="resultItem" style="cursor:default;"><span class="rMeta">No item found</span></div>`;
+  `).join('') || `<div class="resultItem" style="cursor:default;"><span class="rMeta">کوئی آئٹم نہیں ملا</span></div>`;
   box.classList.add('show');
 }
 function addReviewItem(variantId){
@@ -10919,10 +11833,10 @@ function rejectPendingBill(){
   const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
   if(!p) return;
 
-  const reason = prompt('Reason for rejecting this bill (visible to the salesman):');
+  const reason = prompt('بل مسترد کرنے کی وجہ لکھیں (سیلزمین کو نظر آئے گی):');
   if(reason === null) return; // منسوخ کیا
   if(!reason.trim()){
-    alert('Please provide a reason.');
+    alert('براہ کرم وجہ لکھیں۔');
     return;
   }
 
@@ -10932,7 +11846,7 @@ function rejectPendingBill(){
 
   document.getElementById('pendingReviewModal').classList.remove('show');
   renderPendingBillsBanner();
-  alert(`❌ Bill rejected. ${p.salesman_name} will see the reason next time they open Billing.`);
+  alert(`❌ بل مسترد کر دیا گیا۔ ${p.salesman_name} اگلی بار Billing کھولنے پر یہ وجہ دیکھ لے گا۔`);
 }
 
 
@@ -16556,6 +17470,9 @@ function getSupplierBankAccounts(s){
 const BANK_LOGIN_URLS = {
   'EasyPaisa': 'https://easypaisa.com.pk/',
   'JazzCash': 'https://www.jazzcash.com.pk/',
+  'UPaisa': 'https://www.upaisa.com/',
+  'NayaPay': 'https://nayapay.com/',
+  'SadaPay': 'https://sadapay.pk/',
   'HBL': 'https://www.hbl.com/',
   'UBL': 'https://www.ubldigital.com/',
   'MCB': 'https://www.mcb.com.pk/',
@@ -16565,7 +17482,35 @@ const BANK_LOGIN_URLS = {
   'Askari Bank': 'https://www.askaribank.com/',
   'Faysal Bank': 'https://www.faysalbank.com/',
   'Standard Chartered': 'https://www.sc.com/pk/',
+  'Bank of Punjab': 'https://www.bop.com.pk/',
+  'National Bank of Pakistan': 'https://www.nbp.com.pk/',
+  'JS Bank': 'https://www.jsbl.com/',
+  'Soneri Bank': 'https://www.soneribank.com/',
+  'Silk Bank': 'https://www.silkbank.com.pk/',
+  'Bank Islami': 'https://www.bankislami.com.pk/',
+  'Habib Metropolitan Bank': 'https://www.hmb.com.pk/',
+  'Al Baraka Bank': 'https://www.albaraka.com.pk/',
+  'Bank of Khyber': 'https://www.bok.com.pk/',
+  'Sindh Bank': 'https://www.sindhbankltd.com/',
+  'Summit Bank': 'https://www.summitbank.com.pk/',
 };
+
+// ---------- ہر بینک/والٹ کا اصلی لوگو — خود اسی بینک کے اپنے ڈومین سے (کوئی ہاتھ سے منتخب/غلط لوگو نہیں) ----------
+function getBankLogoUrl(bankName){
+  const url = BANK_LOGIN_URLS[bankName];
+  if(!url) return '';
+  try{
+    const domain = new URL(url).hostname.replace(/^www\./, '');
+    return `https://logo.clearbit.com/${domain}?size=64`;
+  }catch(e){ return ''; }
+}
+// بینک لوگو کا HTML <img> ٹیگ — لوڈ نہ ہو تو خودکار طور پر چھپ جائے (کوئی ٹوٹا ہوا/غلط آئیکن کبھی نظر نہ آئے)
+function bankLogoImgHtml(bankName, size){
+  size = size || 28;
+  const src = getBankLogoUrl(bankName);
+  if(!src) return '';
+  return `<img src="${src}" alt="" style="width:${size}px;height:${size}px;border-radius:6px;object-fit:contain;background:#fff;border:1px solid rgba(0,0,0,.08);flex-shrink:0;" onerror="this.remove()">`;
+}
 
 // ---------- Bank Accounts سیکشن کی مکمل فہرست — ہر اکاؤنٹ کارڈ، ➕ نیا اکاؤنٹ شامل کرنے کا بٹن ----------
 function buildSupplierBankAccountsHtml(s){
@@ -16575,9 +17520,12 @@ function buildSupplierBankAccountsHtml(s){
     : accounts.map((acc, idx) => `
       <div class="bankAccCard">
         <div class="bankAccCardTop">
-          <div style="min-width:0;">
-            <div class="bankAccType">${acc.type || 'Bank/Wallet'}</div>
-            ${acc.title ? `<div class="bankAccTitle">${acc.title}</div>` : ''}
+          <div style="min-width:0; display:flex; align-items:center; gap:8px;">
+            ${bankLogoImgHtml(acc.type, 26)}
+            <div>
+              <div class="bankAccType">${acc.type || 'Bank/Wallet'}</div>
+              ${acc.title ? `<div class="bankAccTitle">${acc.title}</div>` : ''}
+            </div>
           </div>
           <div class="bankAccBtns">
             <button onclick="openBankLoginPageForAccount(${s.supplier_id}, ${idx})" title="Open bank/wallet login page">↗️</button>
@@ -17796,6 +18744,7 @@ function renderOrderTakingScreen(){
   otCheckedMap = {};
   otPage = 0;
   otReviewItems = [];
+  otSavedOrderId = null;
 
   const s1 = document.getElementById('otStepCustomer');
   const s2 = document.getElementById('otStepItems');
@@ -17804,9 +18753,23 @@ function renderOrderTakingScreen(){
   if(s2) s2.style.display = 'none';
   if(s3) s3.style.display = 'none';
 
+  // ---------- 🧪 FMtest02 Phase 3: کسٹمر خود لاگ ان ہو تو کسٹمر منتخب کرنے کا مرحلہ (STEP 1) بالکل چھوڑ دیں —
+  // نام خودکار خود اسی لاگ ان شدہ کسٹمر کا لگے، تلاش کرنے کی ضرورت نہ ہو ---------- -->
+  if(AppState.currentRole === 'customer'){
+    selectOtCustomer(AppState.currentCustomerId);
+    return;
+  }
+
   const search = document.getElementById('otCustSearch');
   if(search) search.value = '';
   renderOtCustomerList('');
+}
+
+// ---------- 🧪 FMtest02 Phase 3: اوپر والا بیک بٹن — کسٹمر رول میں سیدھا اپنے ہوم پیج پر واپس،
+// عملے کے لیے حسبِ سابق کسٹمر لسٹ پر واپس ---------- -->
+function otBackButtonClick(){
+  if(AppState.currentRole === 'customer'){ goTo('customerHome'); return; }
+  backToOtCustomer();
 }
 
 // ---------- STEP 1: کسٹمر لسٹ (سرچ کے ساتھ) — ٹیپ کرتے ہی کسٹمر + ایریا سیٹ ہو جاتا ہے ----------
@@ -17848,6 +18811,10 @@ function selectOtCustomer(customerId){
   const areaEl = document.getElementById('otTopCustArea');
   if(nameEl) nameEl.textContent = '🧑 ' + otCustomer.name;
   if(areaEl) areaEl.textContent = otCustomer.area ? '🗺️ ' + otCustomer.area : '';
+
+  // ---------- 🧪 FMtest02 Phase 3: کسٹمر خود ہو تو بیک بٹن پر "کسٹمر لسٹ" کی بجائے "ہوم" لکھا آئے ----------
+  const backBtn = document.getElementById('otBackTopBtn');
+  if(backBtn) backBtn.textContent = (AppState.currentRole === 'customer') ? '🏠 ہوم' : '◀ کسٹمر';
 
   document.getElementById('otStepCustomer').style.display = 'none';
   document.getElementById('otStepItems').style.display = '';
@@ -17991,10 +18958,12 @@ async function openOtReview(){
       customerName: otCustomer.name,
       customerPhone: otCustomer.phone || '',
       customerArea: otCustomer.area || '',
+      customer_id: otCustomer.customer_id, // ---------- 🧪 FMtest02 Phase 3: کسٹمر کی اپنی customer_id بھی محفوظ — تاکہ اسی کسٹمر کی سکرین پر یہ آرڈر دوبارہ دکھایا جا سکے ----------
       note: '',
       items: itemsForSave,
       status: 'pending',
       employeeName: AppState.currentUser?.name || 'Unknown', // ---------- کس ملازم نے بھیجا — ایڈمن کی سکرین پر ملازم کے نام سے گروپ بندی کے لیے ----------
+      placedByCustomer: AppState.currentRole === 'customer', // ---------- 🧪 FMtest02 Phase 3: true ہو تو ایڈمن کو نظر آئے کہ یہ آرڈر خود کسٹمر نے موبائل سے بھیجا ہے، کسی ملازم نے نہیں ----------
       extraCharges: [], // ---------- ایڈمن یہاں بعد میں فریٹ/شپنگ وغیرہ اضافی خرچے شامل کر سکتا ہے ----------
       createdAt: new Date().toISOString(),
       fulfilledAt: null
@@ -18018,6 +18987,13 @@ async function openOtReview(){
 // یہ آرڈر مستقل طور پر لاک ہو جائے گا (ملازم اس میں مزید ترمیم یا حذف نہیں کر سکے گا) ---------- -->
 function confirmSendOtOrder(){
   if(!confirm('کیا آپ واقعی یہ آرڈر صدام کو بھیجنا چاہتے ہیں؟\n\nبھیجنے کے بعد اس آرڈر میں مزید ترمیم یا حذف نہیں ہو سکے گی — یہ آپ کے "میرے بھیجے گئے آرڈرز" ریکارڈ میں ہمیشہ کے لیے محفوظ رہے گا۔')) return;
+  // ---------- 🧪 FMtest02 Phase 3: کسٹمر خود ہو تو اگلا کسٹمر منتخب کرنے والی سکرین دکھانے کی بجائے
+  // سیدھا اپنے ہوم پیج پر واپس بھیج دیں ---------- -->
+  if(AppState.currentRole === 'customer'){
+    alert('✅ آپ کا آرڈر بھیج دیا گیا ہے۔');
+    goTo('customerHome');
+    return;
+  }
   startNextOtCustomer();
 }
 
@@ -23331,15 +24307,19 @@ let currentPreviewInvoiceId = null;
 //            دونوں پرنٹ سٹائلز (تھرمل اور A4) میں یکساں استعمال ہوتا ہے تاکہ ترتیب/حساب ہمیشہ ایک جیسا رہے ----------
 function getBillSummaryRows(invoice){
   const rawSubtotal = (invoice.items || []).reduce((s, i) => s + i.qty * i.unitPrice, 0);
+  // ---------- 💪 صدام کی ہدایت (FM050926): "مزدوری فروخت" کا کل — سمری میں اپنی الگ لائن، Grand Total میں پہلے سے شامل ----------
+  const laborTotalBill = (invoice.items || []).reduce((s, i) => s + i.qty * (i.laborPerUnit||0), 0);
+  const hasLabor = laborTotalBill > 0;
   const hasDiscount = invoice.discount && invoice.discount > 0;
   const hasOldCredit = !!(invoice.customer_id && invoice.previous_balance > 0);
   const walletApplied = invoice.wallet_applied || 0;
   const cashNow = invoice.cash_received_now !== undefined ? invoice.cash_received_now : Math.max(0, (invoice.paid_now || 0) - walletApplied);
 
   const rows = [];
-  if(hasDiscount){
+  if(hasDiscount || hasLabor){
     rows.push(['کل بل', rawSubtotal]);
-    rows.push(['اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : ''), invoice.discount]);
+    if(hasLabor) rows.push(['💪 مزدوری ٹوٹل', laborTotalBill]);
+    if(hasDiscount) rows.push(['اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : ''), invoice.discount]);
     rows.push(['ذیلی ٹوٹل', invoice.grand_total]);
   }
   if(invoice.tax_amount && invoice.tax_amount > 0){
@@ -23354,7 +24334,7 @@ function getBillSummaryRows(invoice){
     finalLabel = 'حتمی بقایہ رقم';
     finalValue = invoice.new_balance || 0;
   } else {
-    if(!hasDiscount) rows.push(['یہ بل', invoice.grand_total]);
+    if(!hasDiscount && !hasLabor) rows.push(['یہ بل', invoice.grand_total]);
     finalLabel = 'حتمی بل';
     finalValue = Math.max(0, invoice.grand_total - walletApplied - cashNow);
   }
@@ -23421,13 +24401,15 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // بالکل نام کے ساتھ ہی آتی ہے — بچ جانے والی خالی جگہ بائیں کنارے پر رہ جاتی ہے (RTL میں یہی درست ہے) ---------- -->
   const tableLeft0 = 8, tableRight = pxWidth - 8;
   const decimals = AppState.settings.priceDecimals ?? 0; // ---------- کریانہ/میڈیکل جیسے کاروبار کے لیے قیمتوں کے بعد ڈیسیمل پوائنٹس ----------
-  let maxQtyStr = '0', maxPriceStr = '0', maxTotalStr = '0';
+  let maxQtyStr = '0', maxPriceStr = '0', maxTotalStr = '0', maxLaborStr = '0';
   invoice.items.forEach(it => {
     const remQ = Math.max(0, it.qty - (it.returnQty || 0));
     const qS = String(remQ), pS = it.unitPrice.toFixed(decimals), tS = (remQ*it.unitPrice).toFixed(decimals);
+    const lS = ((it.laborPerUnit||0)*remQ).toFixed(decimals);
     if(qS.length > maxQtyStr.length) maxQtyStr = qS;
     if(pS.length > maxPriceStr.length) maxPriceStr = pS;
     if(tS.length > maxTotalStr.length) maxTotalStr = tS;
+    if(lS.length > maxLaborStr.length) maxLaborStr = lS;
   });
   // ---------- 🔤 صدام کی ہدایت (FM3SEPTH23): نمبر/تعداد/قیمت/ٹوٹل — چاروں کا فونٹ سائز اب یکساں (ایک جیسا موٹا) —
   // پہلے ہر کالم اپنی الگ (اکثر تنگ) چوڑائی میں آزادانہ سکڑتا تھا، اس لیے تعداد باقیوں سے باریک لگتی تھی ---------- -->
@@ -23441,6 +24423,8 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const qtyW = Math.max(Math.round(32 * fscale), ctx.measureText(maxQtyStr).width + colPad);
   const priceW = Math.max(Math.round(38 * fscale), ctx.measureText(maxPriceStr).width + colPad);
   const totalW = Math.max(Math.round(42 * fscale), ctx.measureText(maxTotalStr).width + colPad);
+  // ---------- 💪 صدام کی ہدایت: بل میں "مزدوری" کا اپنا الگ کالم — تعداد اور نرخ کے درمیان ----------
+  const laborW = Math.max(Math.round(38 * fscale), ctx.measureText(maxLaborStr).width + colPad);
   // ---------- 🐛 صدام کی ہدایت (FM3SEPTH26): پہلے نام اشیاء کالم صرف سب سے لمبے نام جتنا چوڑا رہتا تھا اور
   // بچ جانے والی خالی جگہ بائیں کنارے پر خالی رہ جاتی تھی — اصل پرنٹ پر یہ ایک طرف خالی، دوسری طرف بھرا
   // ہوا، غیر متناسب/غیر خوبصورت نظر آتا تھا۔ اب نام کا کالم ہمیشہ بقیہ پوری جگہ (remainderW) لیتا ہے
@@ -23448,17 +24432,18 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // پیشہ ورانہ اور خوبصورت طریقے سے — نہ کوئی کالم غیر ضروری تنگ، نہ کوئی خالی جگہ ---------- -->
   ctx.font = `bold ${Math.round(18*fscale)}px ${canvasFontFamily}`;
   const itemPad = Math.round(16 * fscale);
-  const remainderW = (tableRight - tableLeft0) - noW - qtyW - priceW - totalW;
+  const remainderW = (tableRight - tableLeft0) - noW - qtyW - priceW - totalW - laborW;
   const itemW = Math.max(Math.round(60*fscale), remainderW);
   // ---------- نام کالم بقیہ پوری جگہ لیتا ہے، اس لیے ٹیبل ہمیشہ tableLeft0 سے tableRight تک پورا پھیلا رہتا ہے ---------- -->
-  const tableLeft = tableRight - (noW + itemW + qtyW + priceW + totalW);
+  const tableLeft = tableRight - (noW + itemW + qtyW + laborW + priceW + totalW);
   const colX = [
-    tableLeft,                                     // 0: ٹوٹل شروع (سب سے بائیں)
-    tableLeft + totalW,                            // 1: قیمت شروع
-    tableLeft + totalW + priceW,                   // 2: تعداد شروع
-    tableLeft + totalW + priceW + qtyW,             // 3: نام اشیاء شروع
-    tableLeft + totalW + priceW + qtyW + itemW,     // 4: نمبر شروع (سب سے دائیں)
-    tableRight                                      // 5: دائیں کنارہ
+    tableLeft,                                                 // 0: ٹوٹل شروع (سب سے بائیں)
+    tableLeft + totalW,                                        // 1: قیمت شروع
+    tableLeft + totalW + priceW,                               // 2: مزدوری شروع
+    tableLeft + totalW + priceW + laborW,                      // 3: تعداد شروع
+    tableLeft + totalW + priceW + laborW + qtyW,               // 4: نام اشیاء شروع
+    tableLeft + totalW + priceW + laborW + qtyW + itemW,       // 5: نمبر شروع (سب سے دائیں)
+    tableRight                                                  // 6: دائیں کنارہ
   ];
   const rowScale = (AppState.settings.printRowScale || 100) / 100; // ---------- پرنٹ پریویو میں لائیو ↕ Row کنٹرول سے ----------
   const rowH = Math.round(24 * rowScale), headerH = Math.round(22 * rowScale);
@@ -23476,7 +24461,9 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     const summary = getBillSummaryRows(invoice);
     summaryBlockH = Math.round(26*rowScale) + ((summary.rows.length + 1) * Math.round(22*rowScale)) + 6;
   } else {
-    if(invoice.discount && invoice.discount > 0) estimatedHeight += 44;
+    const laborChk = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
+    if((invoice.discount && invoice.discount > 0) || laborChk > 0) estimatedHeight += 44;
+    if(laborChk > 0) estimatedHeight += 20; // ---------- 💪 صدام کی ہدایت: مزدوری کی اضافی لائن کے لیے مزید جگہ ----------
     if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 20;
   }
   if(receiptAccounts.length){
@@ -23570,8 +24557,9 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const headerItemAlign = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
   const colCenterX = (a, b) => headerItemAlign === 'center' ? (a + b) / 2 : (headerItemAlign === 'right' ? b - 6 : a + 6);
   // ---------- 🔁 صدام کی ہدایت (FM3SEPTH23): بل اردو کی طرح رائٹ سے لیفٹ (RTL) — نام اشیاء اب اپنے ہی کالم میں دائیں طرف ---------- -->
-  const headerItemNameX = colX[4] - 6; // ---------- Item کا نام اپنے کالم کے دائیں کنارے سے شروع (right-aligned) ----------
-  const headerQtyX = colCenterX(colX[2], colX[3]);
+  const headerItemNameX = colX[5] - 6; // ---------- Item کا نام اپنے کالم کے دائیں کنارے سے شروع (right-aligned) ----------
+  const headerQtyX = colCenterX(colX[3], colX[4]);
+  const headerLaborX = colCenterX(colX[2], colX[3]);
   const headerPriceX = colCenterX(colX[1], colX[2]);
   const headerTotalX = colCenterX(colX[0], colX[1]);
   const headerBaseline = tableTop + headerH - Math.round(7 * rowScale);
@@ -23599,10 +24587,11 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // ---------- نوٹ: پہلے یہاں ہلکا shadowBlur گلو تھا — صارف کو یہ "دھندلا/مدھم" محسوس ہوا، اسی لیے ہٹا دیا۔
   // اب کیپشن بالکل صاف، ٹھوس اور روشن (بغیر کسی دھندلاہٹ کے) ----------
   ctx.textAlign = 'center';
-  fitHeaderFont('نمبر', colX[5]-colX[4]-6);
-  ctx.fillText('نمبر', (colX[4]+colX[5])/2, headerBaseline);
-  drawClippedHeaderCaption('نام اشیاء', colX[3], colX[4], headerItemNameX, 'right');
-  drawClippedHeaderCaption('تعداد', colX[2], colX[3], headerQtyX, headerItemAlign);
+  fitHeaderFont('نمبر', colX[6]-colX[5]-6);
+  ctx.fillText('نمبر', (colX[5]+colX[6])/2, headerBaseline);
+  drawClippedHeaderCaption('نام اشیاء', colX[4], colX[5], headerItemNameX, 'right');
+  drawClippedHeaderCaption('تعداد', colX[3], colX[4], headerQtyX, headerItemAlign);
+  drawClippedHeaderCaption('مزدوری', colX[2], colX[3], headerLaborX, headerItemAlign);
   drawClippedHeaderCaption('قیمت', colX[1], colX[2], headerPriceX, headerItemAlign);
   drawClippedHeaderCaption('ٹوٹل', colX[0], colX[1], headerTotalX, headerItemAlign);
 
@@ -23615,6 +24604,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const itemNameX = headerItemNameX;
   // ---------- Center/Right منتخب ہو تو مقدار/قیمت/ٹوٹل کالمز بھی اپنے اپنے کالم میں اسی طرف آئیں ----------
   const qtyX = headerQtyX;
+  const laborX = headerLaborX;
   const priceX = headerPriceX;
   const totalX = headerTotalX;
   ctx.font = F(itemFontWeight + '18px');
@@ -23659,18 +24649,22 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
     ctx.font = `bold ${numRowFontPx}px ${canvasFontFamily}`;
-    ctx.fillText(String(idx + 1), (colX[4]+colX[5])/2, rowBaseline);
+    ctx.fillText(String(idx + 1), (colX[5]+colX[6])/2, rowBaseline);
     ctx.textAlign = itemAlign;
     ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`;
     // ---------- سخت کلپنگ — item کا نام کبھی بھی اپنے کالم کی حد سے ایک پکسل بھی باہر نہ چھپے،
     // چاہے measureText میں کہیں معمولی فرق ہی کیوں نہ ہو (خاص طور پر Bold وزن میں) ----------
     ctx.save();
     ctx.beginPath();
-    ctx.rect(colX[3], hLineY, colX[4] - colX[3], rowH);
+    ctx.rect(colX[4], hLineY, colX[5] - colX[4], rowH);
     ctx.clip();
     ctx.fillText(displayName, itemNameX, rowBaseline);
     ctx.restore();
-    const qtyText = String(remainingQty), priceText = item.unitPrice.toFixed(decimals), totalText = (remainingQty*item.unitPrice).toFixed(decimals);
+    const qtyText = String(remainingQty), priceText = item.unitPrice.toFixed(decimals);
+    const itemLaborTotal = (item.laborPerUnit||0) * remainingQty;
+    const totalText = (remainingQty*item.unitPrice + itemLaborTotal).toFixed(decimals);
+    // ---------- 💪 صدام کی ہدایت: اس آئٹم کی "مزدوری فروخت" کل رقم (فی یونٹ مزدوری × باقی ماندہ تعداد) ----------
+    const laborText = itemLaborTotal.toFixed(decimals);
     // ---------- سخت کلپنگ کے ساتھ لکھیں — ہر کالم کی اپنی حد کے اندر مقفل ----------
     const drawClippedNum = (text, x1, x2, textX) => {
       ctx.textAlign = headerItemAlign;
@@ -23682,7 +24676,8 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
       ctx.fillText(text, textX, rowBaseline);
       ctx.restore();
     };
-    drawClippedNum(qtyText, colX[2], colX[3], qtyX);
+    drawClippedNum(qtyText, colX[3], colX[4], qtyX);
+    drawClippedNum(laborText, colX[2], colX[3], laborX);
     drawClippedNum(priceText, colX[1], colX[2], priceX);
     drawClippedNum(totalText, colX[0], colX[1], totalX);
     ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`; // ---------- اگلی لائن کے لیے بنیادی فونٹ واپس بحال ----------
@@ -23694,7 +24689,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
       ctx.font = F('11px');
       ctx.fillStyle = '#9ca3af';
       ctx.textAlign = 'left';
-      ctx.fillText(`↩ ${returnedQty} Returned`, colX[3] + 4, hLineY + 10);
+      ctx.fillText(`↩ ${returnedQty} Returned`, colX[4] + 4, hLineY + 10);
       ctx.fillStyle = '#000';
       ctx.font = F(itemFontWeight + '18px');
       hLineY += returnedNoteExtra;
@@ -23709,12 +24704,18 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // اس لیے یہ لائنیں اب اسی کالم کے دائیں کنارے (colX[1]) سے right-align ہو کر بالکل اسی کے نیچے اپنی جگہ پر فٹ ہوں گی ---------- -->
   const summaryColRight = colX[1] - 6;
   ctx.textAlign = 'right';
+  const laborTotalForWalkIn = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
   if(!invoice.customer_id){
-    if(invoice.discount && invoice.discount > 0){
+    if((invoice.discount && invoice.discount > 0) || laborTotalForWalkIn > 0){
       const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
       ctx.fillText('ذیلی ٹوٹل: Rs. ' + subtotalAmt.toFixed(decimals), summaryColRight, y); y += 20;
-      ctx.fillText('اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : '') + ': + Rs. ' + invoice.discount.toFixed(decimals), summaryColRight, y); y += 24;
+      if(laborTotalForWalkIn > 0){
+        ctx.fillText('💪 مزدوری ٹوٹل: + Rs. ' + laborTotalForWalkIn.toFixed(decimals), summaryColRight, y); y += 20;
+      }
+      if(invoice.discount && invoice.discount > 0){
+        ctx.fillText('اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : '') + ': + Rs. ' + invoice.discount.toFixed(decimals), summaryColRight, y); y += 24;
+      }
     }
     if(invoice.tax_amount && invoice.tax_amount > 0){
       ctx.font = F('14px');
@@ -23724,7 +24725,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
 
   // ---------- کوئی Item واپس ہوا ہو تو اصل بل کی رقم اور واپسی کی رقم الگ الگ دکھائیں، تاکہ Grand Total کیوں کم ہوا یہ صاف نظر آئے ----------
   if(totalReturnedAmt > 0){
-    const alreadyShowedSubtotal = !invoice.customer_id && invoice.discount && invoice.discount > 0;
+    const alreadyShowedSubtotal = !invoice.customer_id && ((invoice.discount && invoice.discount > 0) || laborTotalForWalkIn > 0);
     if(!alreadyShowedSubtotal){
       const originalSubtotal = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
@@ -23751,7 +24752,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     const summary = getBillSummaryRows(invoice);
     // ---------- 🔁 FM3SEPTH23: RTL کے بعد Qty+Price+Total کالمز اب بائیں طرف ہیں، اس لیے Payment Summary باکس بھی بائیں طرف ----------
     const sumLeft = colX[0];
-    const sumRight = colX[3];
+    const sumRight = colX[4];
     const sumBoxW = sumRight - sumLeft;
     const sumLabelW = Math.round(sumBoxW * 0.5);
     const sumValueX = sumRight - sumLabelW; // ---------- 🐛 FM3SEPTH25: لیبل اب دائیں طرف ہے، تو تقسیم کی لکیر بھی دائیں کنارے سے ناپی جائے ----------
@@ -23806,9 +24807,9 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     // جو کہ QR کوڈ کے لیے بہت کم جگہ تھی اور لے آؤٹ ٹوٹا ہوا/اوورلیپ نظر آتا تھا۔ اب یہ "نام اشیاء" + "نمبر" دونوں
     // کالمز کی مشترکہ چوڑائی (colX[3] سے tableRight) استعمال کرتا ہے — بالکل اسی چوڑائی کے برابر جتنی "ادائیگی کی تفصیل"
     // باکس دوسری طرف لیتا ہے، تاکہ QR کوڈ صاف، بڑا اور بغیر اوورلیپ کے نظر آئے ---------- -->
-    const leftCx = (colX[3] + tableRight) / 2;
+    const leftCx = (colX[4] + tableRight) / 2;
     const lineH = 16;
-    const qrSize = Math.min(150, (tableRight - colX[3]) - 16);
+    const qrSize = Math.min(150, (tableRight - colX[4]) - 16);
     // ---------- پہلے پورے بلاک کی اونچائی معلوم کر لیں تاکہ اسے دستیاب جگہ میں عمودی طور پر درمیان میں رکھ سکیں ----------
     let blockH = 0;
     receiptAccounts.forEach(acc => {
@@ -23893,15 +24894,16 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const rowScale = (AppState.settings.printRowScale || 100) / 100;
 
   const tableLeft = 50, tableRight = 800;
-  const noW = 44, variantW = 90, qtyW = 80, priceW = 120, totalW = 140;
-  const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - priceW - totalW;
+  const noW = 44, variantW = 90, qtyW = 80, laborW = 90, priceW = 120, totalW = 140;
+  const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - laborW - priceW - totalW;
   const colX = [
     tableLeft,
     tableLeft+noW,
     tableLeft+noW+itemW,
     tableLeft+noW+itemW+variantW,
     tableLeft+noW+itemW+variantW+qtyW,
-    tableLeft+noW+itemW+variantW+qtyW+priceW,
+    tableLeft+noW+itemW+variantW+qtyW+laborW,
+    tableLeft+noW+itemW+variantW+qtyW+laborW+priceW,
     tableRight
   ];
   const headerRowH = Math.round(34 * rowScale), rowH = Math.round(32 * rowScale);
@@ -23916,7 +24918,9 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   // ---------- کل اونچائی کا اندازہ ----------
   let estimatedHeight = headerBandH + 30 + detailsBoxH + 20 + tableH + 30;
   if(!invoice.customer_id){
-    if(invoice.discount && invoice.discount > 0) estimatedHeight += Math.round(50*fscale);
+    const laborChkA4 = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
+    if((invoice.discount && invoice.discount > 0) || laborChkA4 > 0) estimatedHeight += Math.round(50*fscale);
+    if(laborChkA4 > 0) estimatedHeight += Math.round(26*fscale); // ---------- 💪 صدام کی ہدایت: مزدوری کی اضافی لائن ----------
     if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += Math.round(26*fscale);
   }
   const totalReturnedAmtA4 = invoice.items.reduce((s,i) => s + (i.returnAmount||0), 0);
@@ -23992,8 +24996,9 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const a4ColCenterX = (a, b) => a4Align === 'center' ? (a + b) / 2 : (a4Align === 'right' ? b - 10 : a + 10);
   const a4ItemNameX = a4ColCenterX(colX[1], colX[2]);
   const a4QtyX = a4ColCenterX(colX[3], colX[4]);
-  const a4PriceX = a4ColCenterX(colX[4], colX[5]);
-  const a4TotalX = a4ColCenterX(colX[5], colX[6]);
+  const a4LaborX = a4ColCenterX(colX[4], colX[5]);
+  const a4PriceX = a4ColCenterX(colX[5], colX[6]);
+  const a4TotalX = a4ColCenterX(colX[6], colX[7]);
   const tableTop = y;
   ctx.fillStyle = theme.primary;
   ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerRowH);
@@ -24007,6 +25012,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.fillText('Variant', (colX[2]+colX[3])/2, headerBaseline);
   ctx.textAlign = a4Align;
   ctx.fillText('Qty', a4QtyX, headerBaseline);
+  ctx.fillText('Labor', a4LaborX, headerBaseline);
   ctx.fillText('Price', a4PriceX, headerBaseline);
   ctx.fillText('Total', a4TotalX, headerBaseline);
 
@@ -24080,8 +25086,10 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.font = F('13px');
     ctx.textAlign = a4Align;
     ctx.fillText(String(remainingQtyA4), a4QtyX, rowBaseline);
+    const itemLaborTotalA4 = (item.laborPerUnit||0)*remainingQtyA4;
+    ctx.fillText(itemLaborTotalA4.toFixed(0), a4LaborX, rowBaseline);
     ctx.fillText(item.unitPrice.toFixed(0), a4PriceX, rowBaseline);
-    ctx.fillText((remainingQtyA4*item.unitPrice).toFixed(0), a4TotalX, rowBaseline);
+    ctx.fillText((remainingQtyA4*item.unitPrice + itemLaborTotalA4).toFixed(0), a4TotalX, rowBaseline);
     ctx.fillStyle = '#1a1a1a';
 
     hLineY += rowH;
@@ -24101,12 +25109,18 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.textAlign = 'left';
   ctx.fillStyle = '#1a1a1a';
   const lineStepA4 = Math.round(24*fscale), lineStepA4b = Math.round(26*fscale);
+  const laborTotalA4WalkIn = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
   if(!invoice.customer_id){
-    if(invoice.discount && invoice.discount > 0){
+    if((invoice.discount && invoice.discount > 0) || laborTotalA4WalkIn > 0){
       const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
       ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), tableLeft + 10, y); y += lineStepA4;
-      ctx.fillText('اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : '') + ': + Rs. ' + invoice.discount.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
+      if(laborTotalA4WalkIn > 0){
+        ctx.fillText('💪 مزدوری ٹوٹل: + Rs. ' + laborTotalA4WalkIn.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
+      }
+      if(invoice.discount && invoice.discount > 0){
+        ctx.fillText('اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : '') + ': + Rs. ' + invoice.discount.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
+      }
     }
     if(invoice.tax_amount && invoice.tax_amount > 0){
       ctx.font = F('14px');
@@ -24116,7 +25130,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 
   // ---------- کوئی Item واپس ہوا ہو تو اصل بل کی رقم اور واپسی کی رقم الگ الگ دکھائیں ----------
   if(totalReturnedAmtA4 > 0){
-    const alreadyShowedSubtotalA4 = !invoice.customer_id && invoice.discount && invoice.discount > 0;
+    const alreadyShowedSubtotalA4 = !invoice.customer_id && ((invoice.discount && invoice.discount > 0) || laborTotalA4WalkIn > 0);
     if(!alreadyShowedSubtotalA4){
       const originalSubtotalA4 = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
@@ -26992,7 +28006,7 @@ function renderMyPaymentAccounts(){
           ${acc.photo ? `<img src="${acc.photo}" style="width:100%; height:100%; object-fit:cover;">` : '👤'}
         </div>
         <div class="paymentAccInfo">
-          <div class="paymentAccTitle">${acc.name || 'Untitled'} <span class="paymentAccBank">${acc.type || '—'}</span></div>
+          <div class="paymentAccTitle">${acc.name || 'Untitled'} <span class="paymentAccBank" style="display:inline-flex; align-items:center; gap:4px; vertical-align:middle;">${bankLogoImgHtml(acc.type, 18)}${acc.type || '—'}</span></div>
           <div class="paymentAccNumber paymentAccNumberValue" onclick="copyMyAccountNumber(${idx})" style="cursor:pointer; text-decoration:underline dotted;" title="Tap to copy">${acc.number || '—'}</div>
           <div class="paymentAccNumber" onclick="editAccountIban(${idx})" style="cursor:pointer; text-decoration:underline dotted; font-size:11px; color:var(--primary-dark); font-weight:600;" title="Tap to add/edit IBAN">${acc.iban ? `IBAN: ${acc.iban}` : '➕ Add IBAN Number'}</div>
         </div>

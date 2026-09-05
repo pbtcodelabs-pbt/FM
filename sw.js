@@ -1,30 +1,10 @@
-// ======================================================================
-// 🔄 Fruit Mandi POS — Service Worker
-// مقصد: (1) آف لائن بھی ایپ کھلے اور کام کرے (2) Home Screen پر Add
-// کرنے پر یہ ایک اصلی PWA کی طرح برتاؤ کرے (3) نیا ورژن اپلوڈ ہونے پر
-// یوزر کو اپڈیٹ کا ٹوسٹ نظر آئے (یہ index.html میں پہلے سے موجود ہے)
-//
-// ⚠️ ضروری: جب بھی آپ index.html (یا کوئی اور فائل) میں تبدیلی کر کے
-// دوبارہ اپلوڈ کریں، نیچے دیا گیا CACHE_VERSION نمبر ایک بڑھا دیں
-// (v1 → v2 → v3...) — ورنہ براؤزر یہ نہیں سمجھ پائے گا کہ نیا ورژن آیا
-// ہے، اور صارف کو پرانی، کیش شدہ فائل ہی ملتی رہے گی۔
-// ======================================================================
+// ---------- 🏷️ صدام فروٹ منڈی — Service Worker ----------
+// یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
+// صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
+// ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
+const CACHE_VERSION = 'FM5SEPTH0757PM';
+const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
-// ⚠️ ضروری: یہ ورژن نمبر ہمیشہ index.html کے اندر موجود APP_BUILD_VERSION
-// کے بالکل برابر ہونا چاہیے (اور فائل کے نام کے ساتھ بھی ملتا ہو، مثلاً
-// FM318MO13.html) — جب بھی نئی فائل بھیجیں، یہاں بھی وہی نیا نمبر ڈال دیں۔
-// اسی ایک تبدیلی سے براؤزر خود بخود سمجھ جائے گا کہ نیا ورژن آیا ہے،
-// پرانی کیش صاف کر دے گا، اور صارف کو اپڈیٹ کا ٹوسٹ نظر آئے گا۔
-//
-// 📌 نئی قاعدہ (صدام کی ہدایت 4 ستمبر — پرانا سیریل والا فارمیٹ اب متروک): اب یہ ورژن نمبر مکمل اردو
-// تاریخ/وقت کی شکل میں ہوگا، بعینہٖ ویسا ہی جیسا index.html کے APP_BUILD_VERSION میں لکھا ہے —
-// حرف بہ حرف ایک جیسا رکھیں (نہ چھوٹا کریں نہ فارمیٹ بدلیں)۔ مکمل تفصیل index.html میں
-// APP_BUILD_VERSION کے اوپر والے کمنٹ میں موجود ہے۔
-
-const CACHE_VERSION = 'ہفتہ5ستمبر5:15am';
-const CACHE_NAME = `fruit-mandi-pos-${CACHE_VERSION}`;
-
-// ---------- یہ فائلیں انسٹال کے وقت ہی محفوظ کر لی جائیں گی — آف لائن پہلی بار کھلنے کے لیے ضروری ----------
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -36,58 +16,53 @@ const PRECACHE_URLS = [
   './JameelNooriNastaleeq-Regular.ttf',
   './JameelNooriNastaleeq-Kasheeda.ttf',
   './PDMS_Multan_Regular.ttf',
-  // ---------- 🐛 صدام کی ہدایت (5 ستمبر) اہم فکس: سٹاک رپورٹ/انوائس کا "🖨️ پرنٹ (A4)" بٹن انٹرنیٹ نہ ہونے
-  // پر کام نہیں کر رہا تھا — کیونکہ jsPDF لائبریری CDN سے ہر بار تازہ لوڈ ہوتی تھی، کبھی کیش نہیں ہوتی تھی۔
-  // اب اسے بھی پہلی بار (انٹرنیٹ کے ساتھ) کھلتے ہی محفوظ کر لیا جائے گا، تاکہ بعد میں آف لائن بھی پرنٹ چلے ---------- -->
+  // ---------- 🐛 صدام کی ہدایت: "پرنٹ (A4)" بٹن انٹرنیٹ نہ ہونے پر کام کرے، اس لیے jsPDF بھی پہلے سے کیش ----------
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
-// ---------- 📦 INSTALL: بنیادی فائلیں کیش میں رکھ دیں — ہر فائل الگ سے، تاکہ اگر کوئی ایک فائل
-// (مثلاً کوئی فونٹ ابھی سرور پر اپلوڈ نہ ہوئی ہو) نہ ملے تو باقی ساری کیشنگ پھر بھی چلتی رہے ----------
+// ---------- انسٹال — نیا ورژن آتے ہی سب ضروری فائلیں پیشگی کیش کر لیں ----------
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      Promise.all(
+    caches.open(CACHE_NAME).then((cache) => {
+      return Promise.all(
         PRECACHE_URLS.map((url) =>
-          cache.add(url).catch((err) => console.warn('[SW] precache میں یہ فائل نہیں ملی، نظرانداز کر دی:', url, err))
+          cache.add(url).catch((err) => {
+            console.warn('Precache failed for', url, err);
+          })
         )
-      )
-    )
+      );
+    }).then(() => self.skipWaiting())
   );
-  // ---------- نوٹ: یہاں خود بخود skipWaiting نہیں بلاتے — index.html کا اپنا
-  // "Update" ٹوسٹ سسٹم صارف کی مرضی سے (بٹن دبانے پر) نیا ورژن فعال کرتا ہے ----------
 });
 
-// ---------- 🧹 ACTIVATE: پرانے ورژن کی کیشز صاف کریں ----------
+// ---------- ایکٹیویٹ — پرانے ورژن کے کیش خودکار صاف کر دیں ----------
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) return caches.delete(key);
+        })
       )
     ).then(() => self.clients.claim())
   );
 });
 
-// ---------- 📡 FETCH: HTML کے لیے "Network First" (آن لائن ہو تو ہمیشہ تازہ ترین)،
-// باقی فائلوں (آئیکنز/manifest) کے لیے "Cache First" (تیز اور کم ڈیٹا خرچ) ----------
+// ---------- فیچ — اسی اوریجن کی فائلیں: پہلے کیش، نہ ملے تو نیٹ ورک (اور نیٹ ورک سے ملنے پر خودکار کیش اپڈیٹ) ----------
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  if(req.method !== 'GET') return; // ---------- POST/PUT وغیرہ (جیسے Firestore کالز) کبھی کیش نہ ہوں ----------
+  if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
-  // ---------- 🐛 صدام کی ہدایت (5 ستمبر) اہم فکس: پہلے یہاں کوئی بھی دوسری ویب سائٹ (CDN وغیرہ) کی فائل
-  // بالکل کیش نہیں ہوتی تھی — چاہے وہ پہلے کیش میں موجود بھی ہو، آف لائن ہونے پر فوراً ناکام ہو جاتی تھی۔
-  // اسی وجہ سے "پرنٹ (A4)" بٹن انٹرنیٹ نہ ہونے پر کام نہیں کرتا تھا (jsPDF لائبریری CDN سے آتی ہے)۔
-  // اب مخصوص، محفوظ CDN فائلیں (jsPDF، گوگل فونٹس) بھی کیش ہوں گی — Firestore وغیرہ اب بھی براہ راست نیٹ ورک پر ہی رہیں گی ---------- -->
+
+  // ---------- 🐛 صدام کی ہدایت: مخصوص، محفوظ CDN فائلیں (jsPDF، گوگل فونٹس) بھی کیش ہوں —
+  // باقی سب (Firestore کالز وغیرہ) ہمیشہ کی طرح براہ راست نیٹ ورک پر ہی رہیں ---------- -->
   const CACHEABLE_CROSS_ORIGIN_HOSTS = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
-  if(url.origin !== self.location.origin){
-    if(CACHEABLE_CROSS_ORIGIN_HOSTS.includes(url.hostname)){
+  if (url.origin !== self.location.origin) {
+    if (CACHEABLE_CROSS_ORIGIN_HOSTS.includes(url.hostname)) {
       event.respondWith(
         caches.match(req).then((cached) => {
-          if(cached) return cached;
+          if (cached) return cached;
           return fetch(req).then((res) => {
             const resClone = res.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
@@ -96,43 +71,19 @@ self.addEventListener('fetch', (event) => {
         })
       );
     }
-    // ---------- باقی سب (Firestore کالز وغیرہ) — ہمیشہ کی طرح براہ راست نیٹ ورک پر ہی چھوڑ دیں ----------
     return;
   }
 
-  const isHTML = req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
-
-  if(isHTML){
-    // ---------- Network First: آن لائن ہو تو تازہ index.html لائیں اور کیش بھی اپڈیٹ کر دیں؛
-    // آف لائن ہو تو کیش سے دکھا دیں (ایپ بند نہیں ہوگی) ----------
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          const resClone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
-          return res;
-        })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match('./index.html')))
-    );
-    return;
-  }
-
-  // ---------- باقی سب (icons, manifest, وغیرہ): پہلے کیش، نہ ملے تو نیٹ ورک سے لا کر کیش کر لیں ----------
   event.respondWith(
     caches.match(req).then((cached) => {
-      if(cached) return cached;
-      return fetch(req).then((res) => {
-        const resClone = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+      const networkFetch = fetch(req).then((res) => {
+        if (res && res.status === 200) {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+        }
         return res;
       }).catch(() => cached);
+      return cached || networkFetch;
     })
   );
-});
-
-// ---------- ⏭️ index.html میں موجود "ابھی اپڈیٹ کریں" بٹن یہی پیغام بھیجتا ہے ----------
-self.addEventListener('message', (event) => {
-  if(event.data === 'SKIP_WAITING'){
-    self.skipWaiting();
-  }
 });
