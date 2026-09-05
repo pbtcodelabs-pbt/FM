@@ -2715,6 +2715,12 @@
       <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
       <div id="homeUnfinishedCartCard" style="display:none;"></div>
 
+      <!-- ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ — Admin کے لیے مکمل ورکر/کسٹمر ڈراپ ڈاؤن + PIN،
+           Salesman کے لیے صرف ایڈمن سے رابطہ (بغیر نمبر دکھائے، بغیر PIN کے) ---------- -->
+      <div style="background:#fff; border:1.5px solid #dbe1ea; border-radius:14px; padding:12px; margin-bottom:12px;" id="quickContactWrap">
+        <div id="quickContactPanelBody"></div>
+      </div>
+
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — Admin کے لیے اب انہی کی منتخب کردہ Shortcut اسکرینیں،
            Salesman کے لیے اسے Assign کی گئی اسکرینیں ---------- -->
       <div class="homeIconGrid" id="homeIconGrid"></div>
@@ -4173,6 +4179,7 @@
         <h3>🔑 Add New User</h3>
         <input type="text" id="nuName" placeholder="Full name">
         <input type="text" id="nuUsername" placeholder="Username">
+        <input type="tel" id="nuPhone" placeholder="Mobile number (e.g. 03001234567) — optional, for Call/SMS/WhatsApp">
         <input type="password" id="nuPin" placeholder="PIN (4-6 digits)" maxlength="6">
         <select id="nuRole" onchange="toggleNewUserScreensBox()" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px;">
           <option value="salesman">🧑‍💼 Salesman (limited access)</option>
@@ -7163,7 +7170,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر3:37am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر4:03am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8253,6 +8260,12 @@ function renderCustomerHomeScreen(){
 
     <!-- ---------- 🧪 FMtest03 Phase 4 (Step 1): تیسرا بٹن — پیمنٹ بھیجنے کی اسکرین پر لے جائے ---------- -->
     <button type="button" onclick="goTo('customerPayment')" style="width:100%; margin-top:12px; padding:16px; background:linear-gradient(180deg,#16A34A,#0b4a45); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">💰 پیمنٹ بھیجیں</button>
+
+    <!-- ---------- 📇 صدام کی ہدایت (6 ستمبر): کسٹمر کے لیے بھی ایڈمن سے فوری رابطہ — نمبر کہیں لکھا نظر نہیں آتا، صرف بٹن ---------- -->
+    <div style="background:#fff; border:1.5px solid #dbe1ea; border-radius:14px; padding:12px; margin-top:16px;">
+      <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px;">📞 ایڈمن سے فوری رابطہ</div>
+      ${buildAdminContactCardHTML()}
+    </div>
   `;
   renderCustomerHomeTabButtonsUI();
   if(customerHomeTab === 'bills') renderCustomerHomeBillsList(cust.customer_id);
@@ -8856,6 +8869,7 @@ async function finishEmployeePinReset(){
     return;
   }
   user.pin = await hashPin(newPin);
+  user.pinPlain = newPin; // ---------- 📇 صدام کی ہدایت (6 ستمبر): ایڈمن کے فوری رابطہ پینل میں دیکھنے کے لیے ----------
   persistAllData();
   // ---------- 🔧 FM3SEPTH35 فکس: پہلے یہ نیا PIN صرف اسی فون پر رہتا تھا، کلاؤڈ میں کبھی نہیں جاتا تھا — اسی وجہ سے دوسرے فون پر پرانا PIN ہی چلتا رہتا تھا۔ اب یہاں بھی کلاؤڈ میں فوراً محفوظ ہوگا ----------
   const syncedOk = await pushUsersToCloud();
@@ -8866,6 +8880,7 @@ async function finishEmployeePinReset(){
   } else {
     alert(`✅ ${user.name}'s new PIN has been set on this phone.\n⚠️ No internet right now — it will sync to the cloud automatically once internet is available. Until then, log in with this new PIN only on this phone.`);
   }
+  populateQuickContactDropdown(); // ---------- 📇 نیا PIN فوری رابطہ پینل میں بھی اپڈیٹ ہو ----------
 }
 
 /* =====================================================================
@@ -9518,6 +9533,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'dashboard') renderDashboard();
   if(screenName === 'home') {
     renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI();
+    renderQuickContactPanel(); // ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ پینل — رول کے مطابق مختلف مواد ----------
     // ---------- ☁️ Home پر پہنچتے ہی خاموشی سے تازہ ترین Pending Orders منگوا لیں — تاکہ گنتی کا بیج (🔴) درست ہو ----------
     if(AppState.currentRole === 'admin') fetchAdvanceOrdersFromCloud(true).then(added => { if(added) renderHomeIconGrid(); });
     // ---------- 🔴 صدام کی ہدایت (FM3SEPTH10): اسی طرح Recovery List کا بیج بھی Home پر پہنچتے ہی تازہ ہو ----------
@@ -23416,9 +23432,9 @@ function renderTrendsScreen(){
 // screens: صرف 'salesman' یوزرز کے لیے معنی رکھتا ہے — یہی وہ اسکرینز ہیں جو صدام (Admin) نے اس
 // ملازم کو دیکھنے کی اجازت دی ہے۔ Admin ہمیشہ سب کچھ دیکھتا ہے، اس کے لیے یہ فیلڈ نظرانداز ہوتا ہے ----------
 const USERS_SEED_DATA = [
-  {user_id:1, name:'Saddam Hussain', username:'admin', pin:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', dobHash:'', role:'admin', is_active:true, screens:[]}, // PIN: 1234
-  {user_id:2, name:'Abdul Wahab', username:'aslam', pin:'b3282a2f2a28757b3a18ab833de16a9c54518c0b0cf493e3f0a7cf09386f326a', dobHash:'', role:'salesman', is_active:true, screens:['billing','advanceorders','billhistory']}, // PIN: 1122
-  {user_id:3, name:'ABC', username:'bilal', pin:'b3282a2f2a28757b3a18ab833de16a9c54518c0b0cf493e3f0a7cf09386f326a', dobHash:'', role:'salesman', is_active:true, screens:['payments']}, // PIN: 1122
+  {user_id:1, name:'Saddam Hussain', username:'admin', pin:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', pinPlain:'1234', phone:'03425556364', dobHash:'', role:'admin', is_active:true, screens:[]}, // PIN: 1234
+  {user_id:2, name:'Abdul Wahab', username:'aslam', pin:'b3282a2f2a28757b3a18ab833de16a9c54518c0b0cf493e3f0a7cf09386f326a', pinPlain:'1122', phone:'', dobHash:'', role:'salesman', is_active:true, screens:['billing','advanceorders','billhistory']}, // PIN: 1122
+  {user_id:3, name:'ABC', username:'bilal', pin:'b3282a2f2a28757b3a18ab833de16a9c54518c0b0cf493e3f0a7cf09386f326a', pinPlain:'1122', phone:'', dobHash:'', role:'salesman', is_active:true, screens:['payments']}, // PIN: 1122
 ];
 let usersData = loadFromStorage('users', USERS_SEED_DATA);
 // ---------- حفاظتی تدبیر: اگر localStorage میں کوئی پرانا/خراب ڈیٹا ہو جس میں کوئی درست Admin موجود نہ ہو،
@@ -23872,7 +23888,7 @@ function openNewUserModal(){
 }
 function closeNewUserModal(){
   document.getElementById('newUserModal').classList.remove('show');
-  ['nuName','nuUsername','nuPin'].forEach(id => document.getElementById(id).value = '');
+  ['nuName','nuUsername','nuPhone','nuPin'].forEach(id => document.getElementById(id).value = '');
   document.querySelectorAll('#nuScreensCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
 }
 // ---------- Admin منتخب ہو تو اسکرین چیک باکسز چھپا دیں (Admin کو ویسے بھی سب کچھ نظر آتا ہے) ----------
@@ -23891,6 +23907,7 @@ function renderNewUserScreenCheckboxes(){
 async function saveNewUser(){
   const name = document.getElementById('nuName').value.trim();
   const username = document.getElementById('nuUsername').value.trim();
+  const phone = document.getElementById('nuPhone').value.trim();
   const pin = document.getElementById('nuPin').value.trim();
   const role = document.getElementById('nuRole').value;
   const screens = Array.from(document.querySelectorAll('#nuScreensCheckboxes input[type="checkbox"]:checked')).map(cb => cb.value);
@@ -23904,17 +23921,169 @@ async function saveNewUser(){
     return;
   }
 
-  // ---------- PIN کبھی plain text محفوظ نہیں ہوتا — پہلے hash بنا کر پھر duplicate چیک اور save کریں ----------
+  // ---------- PIN ہمیشہ hash ہو کر لاگ ان کی تصدیق کے لیے محفوظ ہوتا ہے —
+  // اب ساتھ ہی pinPlain بھی محفوظ کریں تاکہ ایڈمن Home اسکرین کے "فوری رابطہ" پینل سے کسی بھی وقت
+  // ورکر کا اصل PIN دیکھ/بتا سکے (صرف Admin کو نظر آتا ہے، ورکر کو خود کبھی نہیں) ---------- -->
   const hashedPin = await hashPin(pin);
   if(usersData.some(u => u.pin === hashedPin)){
     alert('This PIN is already used by another user. Please choose a different PIN.');
     return;
   }
-  usersData.push({user_id: nextUserId++, name, username, pin: hashedPin, role, is_active:true, screens: role === 'admin' ? [] : screens});
+  usersData.push({user_id: nextUserId++, name, username, phone, pin: hashedPin, pinPlain: pin, role, is_active:true, screens: role === 'admin' ? [] : screens});
   pushUsersToCloud();
 
   closeNewUserModal();
   renderUserList();
+  populateQuickContactDropdown(); // ---------- 📇 نیا ورکر شامل ہوتے ہی فوری رابطہ ڈراپ ڈاؤن میں بھی آ جائے ----------
+}
+
+// ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ — Home اسکرین پر ایک ہی ڈراپ ڈاؤن میں تمام ورکرز اور کسٹمرز،
+// منتخب کرتے ہی کال/SMS/واٹس ایپ بٹن اور (صرف ورکرز کے لیے) ان کا لاگ ان PIN — نظر کے آئیکن سے دیکھیں ---------- -->
+// ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ — Home اسکرین پر رول کے مطابق مختلف پینل۔
+// Admin: تمام ورکرز اور کسٹمرز کی ڈراپ ڈاؤن + کال/SMS/واٹس ایپ + (صرف ورکرز کے لیے) PIN آنکھ 👁 دبا کر دیکھیں۔
+// Salesman/Customer: صرف "ایڈمن سے فوری رابطہ" کارڈ — کال/SMS/واٹس ایپ بٹن، مگر ایڈمن کا نمبر کہیں لکھا نظر نہ آئے، PIN بالکل نہیں ---------- -->
+function renderQuickContactPanel(){
+  const body = document.getElementById('quickContactPanelBody');
+  if(!body) return;
+  if(AppState.currentRole === 'admin'){
+    body.innerHTML = `
+      <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px;">📇 فوری رابطہ — ورکر یا کسٹمر منتخب کریں</div>
+      <select id="quickContactSelect" onchange="renderQuickContactCard()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:10px; font-size:13.5px; font-weight:700; background:#fff;">
+        <option value="">— منتخب کریں —</option>
+      </select>
+      <div id="quickContactCard" style="margin-top:10px;"></div>`;
+    populateQuickContactDropdown();
+  } else {
+    body.innerHTML = `
+      <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px;">📞 ایڈمن سے فوری رابطہ</div>
+      ${buildAdminContactCardHTML()}`;
+  }
+}
+
+// ---------- ایڈمن سے رابطے کا کارڈ — Salesman اور Customer دونوں کے لیے مشترکہ (نمبر کہیں ٹیکسٹ میں نظر نہیں آتا، صرف بٹن) ---------- -->
+function buildAdminContactCardHTML(){
+  const admin = usersData.find(u => u.role === 'admin' && u.is_active && u.phone);
+  if(!admin){
+    return `<div style="font-size:12.5px; color:var(--muted);">⚠️ ایڈمن کا رابطہ نمبر ابھی محفوظ نہیں ہے۔</div>`;
+  }
+  const waDigits = formatPhoneForWhatsApp(admin.phone);
+  return `
+    <div style="display:flex; gap:6px;">
+      <a href="tel:+${waDigits}" style="flex:1; text-align:center; padding:11px 4px; background:#eef2ff; color:var(--primary-dark); border-radius:9px; font-size:13px; font-weight:800; text-decoration:none;">📞 کال</a>
+      <a href="sms:+${waDigits}" style="flex:1; text-align:center; padding:11px 4px; background:#fff7ed; color:#b45309; border-radius:9px; font-size:13px; font-weight:800; text-decoration:none;">✉️ SMS</a>
+      <a href="https://wa.me/${waDigits}" target="_blank" rel="noopener" style="flex:1; text-align:center; padding:11px 4px; background:#dcfce7; color:#15803d; border-radius:9px; font-size:13px; font-weight:800; text-decoration:none;">💬 واٹس ایپ</a>
+    </div>`;
+}
+
+function populateQuickContactDropdown(){
+  const sel = document.getElementById('quickContactSelect');
+  if(!sel) return;
+  const prevValue = sel.value;
+  const workers = usersData.filter(u => u.is_active);
+  const customers = customersData.filter(c => c.name && !c.name.startsWith('Walk-in'));
+  // ---------- 👨‍💻 صدام کی ہدایت (6 ستمبر): سب سے اوپر "Contact Developer" — لاگ ان بلبلے والی وہی موجودہ لاجک (sendDevChat/getDeveloperContact) یہاں بھی ---------- -->
+  let html = '<option value="">— منتخب کریں —</option><option value="developer:1">👨‍💻 Developer سے رابطہ</option>';
+  if(workers.length){
+    html += `<optgroup label="👷 ورکرز">`;
+    workers.forEach(u => { html += `<option value="worker:${u.user_id}">${u.name}${u.role==='admin' ? ' (Admin)' : ''}</option>`; });
+    html += `</optgroup>`;
+  }
+  if(customers.length){
+    html += `<optgroup label="🧑‍🤝‍🧑 کسٹمرز">`;
+    customers.forEach(c => { html += `<option value="customer:${c.customer_id}">${c.name}</option>`; });
+    html += `</optgroup>`;
+  }
+  sel.innerHTML = html;
+  if(prevValue) sel.value = prevValue;
+  renderQuickContactCard();
+}
+
+function renderQuickContactCard(){
+  const sel = document.getElementById('quickContactSelect');
+  const card = document.getElementById('quickContactCard');
+  if(!sel || !card) return;
+  const val = sel.value;
+  if(!val){ card.innerHTML = ''; return; }
+  const [kind, idStr] = val.split(':');
+
+  // ---------- 👨‍💻 Developer سے رابطہ — کال/SMS/واٹس ایپ (Gmail/Email شامل نہیں، صدام کی ہدایت) ---------- -->
+  if(kind === 'developer'){
+    const contact = getDeveloperContact();
+    const smsDigits = String(contact.sms || '').replace(/[^0-9]/g, '');
+    card.innerHTML = `
+      <div style="border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 12px; background:#fafbfc;">
+        <div style="font-weight:800; font-size:14.5px; color:#1a1a1a;">👨‍💻 Developer</div>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <a href="tel:+${smsDigits}" style="flex:1; text-align:center; padding:9px 4px; background:#eef2ff; color:var(--primary-dark); border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">📞 کال</a>
+          <a href="#" onclick="sendDevChat('sms'); return false;" style="flex:1; text-align:center; padding:9px 4px; background:#fff7ed; color:#b45309; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">✉️ SMS</a>
+          <a href="#" onclick="sendDevChat('whatsapp'); return false;" style="flex:1; text-align:center; padding:9px 4px; background:#dcfce7; color:#15803d; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">💬 واٹس ایپ</a>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const id = Number(idStr);
+  let person, isWorker = (kind === 'worker');
+  if(isWorker) person = usersData.find(u => u.user_id === id);
+  else person = customersData.find(c => c.customer_id === id);
+  if(!person){ card.innerHTML = ''; return; }
+
+  const phone = person.phone || '';
+  const waDigits = formatPhoneForWhatsApp(phone);
+  const noPhoneNote = !phone ? `<div style="margin-top:6px;">
+        <div style="font-size:12px; color:#b91c1c;">⚠️ اس کا موبائل نمبر محفوظ نہیں</div>
+        ${isWorker ? `<button type="button" onclick="quickAddWorkerPhone(${person.user_id})" style="margin-top:4px; background:#eef2ff; color:var(--primary-dark); border:1px dashed var(--primary); border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer;">➕ نمبر شامل کریں</button>` : ''}
+      </div>` : '';
+
+  let contactBtns = '';
+  if(phone){
+    contactBtns = `
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <a href="tel:+${waDigits}" style="flex:1; text-align:center; padding:9px 4px; background:#eef2ff; color:var(--primary-dark); border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">📞 کال</a>
+        <a href="sms:+${waDigits}" style="flex:1; text-align:center; padding:9px 4px; background:#fff7ed; color:#b45309; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">✉️ SMS</a>
+        <a href="https://wa.me/${waDigits}" target="_blank" rel="noopener" style="flex:1; text-align:center; padding:9px 4px; background:#dcfce7; color:#15803d; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">💬 واٹس ایپ</a>
+      </div>`;
+  }
+
+  let pinBlock = '';
+  if(isWorker){
+    const pinPlain = person.pinPlain || '—';
+    const dots = '•'.repeat(String(pinPlain).length || 4);
+    pinBlock = `
+      <div style="margin-top:10px; display:flex; align-items:center; gap:8px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:9px; padding:8px 10px;">
+        <span style="font-size:12.5px; color:var(--muted); font-weight:700;">🔑 لاگ ان PIN:</span>
+        <span id="qcPinDisplay" data-pin="${pinPlain}" style="font-size:15px; font-weight:800; letter-spacing:2px; color:#1a1a1a; font-family:monospace;">${dots}</span>
+        <button type="button" onclick="toggleQuickContactPin(this)" style="margin-left:auto; background:none; border:none; font-size:17px; cursor:pointer; padding:2px 6px;" title="PIN دیکھیں">👁️</button>
+      </div>`;
+  }
+
+  card.innerHTML = `
+    <div style="border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 12px; background:#fafbfc;">
+      <div style="font-weight:800; font-size:14.5px; color:#1a1a1a;">${person.name}${isWorker && person.role ? ` <span style="font-size:11px; font-weight:700; color:var(--muted);">(${person.role})</span>` : ''}</div>
+      ${phone ? `<div style="font-size:12.5px; color:var(--muted); margin-top:2px;">📱 ${phone}</div>` : noPhoneNote}
+      ${contactBtns}
+      ${pinBlock}
+    </div>`;
+}
+
+function toggleQuickContactPin(btn){
+  const disp = document.getElementById('qcPinDisplay');
+  if(!disp) return;
+  const pin = disp.getAttribute('data-pin') || '—';
+  const isHidden = disp.textContent.includes('•');
+  disp.textContent = isHidden ? pin : '•'.repeat(String(pin).length || 4);
+  btn.textContent = isHidden ? '🙈' : '👁️';
+}
+
+function quickAddWorkerPhone(userId){
+  const user = usersData.find(u => u.user_id === userId);
+  if(!user) return;
+  const num = prompt(`${user.name} کا موبائل نمبر درج کریں (مثلاً 03001234567):`, user.phone || '');
+  if(num === null) return;
+  user.phone = num.trim();
+  persistAllData();
+  pushUsersToCloud();
+  renderQuickContactCard();
 }
 
 // ---------- Render Approval Requests ----------
