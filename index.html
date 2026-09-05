@@ -7170,7 +7170,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر4:08am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر4:20am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9568,6 +9568,7 @@ function goTo(screenName, _isHistoryNav){
   stopAdvanceOrdersPolling();
   stopRecoveryListPolling();
   stopCustomersPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): کسٹمرز کا Firestore polling بھی دوسری اسکرین پر جاتے ہی بند ----------
+  stopSuppliersPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): سپلائرز کا Firestore polling بھی دوسری اسکرین پر جاتے ہی بند ----------
   if(screenName === 'advanceorders'){
     renderAdvanceOrdersScreen();
     fetchAdvanceOrdersFromCloud(false);
@@ -9587,6 +9588,8 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'customers' || screenName === 'suppliers'){
     fetchCustomersFromCloud(false);
     startCustomersPolling();
+    fetchSuppliersFromCloud(false); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): سپلائرز بھی پارٹیز اسکرین پر جاتے ہی تازہ کریں ----------
+    startSuppliersPolling();
   }
   if(screenName === 'customerHome'){
     fetchCustomersFromCloud(false);
@@ -12917,6 +12920,7 @@ function confirmPartyCsvImport(){
   document.getElementById('partyImportPreviewModal').classList.remove('show');
   pendingPartyImportRows = [];
   persistAllData();
+  if(!isCustomer) pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): CSV سے امپورٹ شدہ سپلائرز بھی فوراً کلاؤڈ میں ----------
   renderPartyList();
   document.getElementById('backupConfirmIcon').textContent = '✅';
   document.getElementById('backupConfirmTitle').textContent = (isCustomer ? 'Customers' : 'Suppliers') + ' Imported!';
@@ -16963,6 +16967,7 @@ function deleteSupplier(supplierId){
   idbDeleteImage('supplier_' + supplierId);
   suppliersData = suppliersData.filter(x => x.supplier_id !== supplierId);
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): ڈیلیٹ ہونا بھی کلاؤڈ میں فوراً جائے ----------
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
 
@@ -17572,7 +17577,9 @@ function applySupplierPoFilter(field, value){
 function updateSupplierEmail(supplierId, email){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(s){
-    s.email = email.trim(); // TODO: DB میں suppliers.email UPDATE
+    s.email = email.trim();
+    persistAllData();
+    pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
     document.getElementById('profileHeadContacts').innerHTML = buildContactButtons(s.phone, s.email);
   }
 }
@@ -17591,7 +17598,9 @@ function updateCustomerKeywords(customerId, keywords){
 function updateSupplierKeywords(supplierId, keywords){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(s){
-    s.keywords = keywords.trim(); // TODO: DB میں suppliers.keywords UPDATE
+    s.keywords = keywords.trim();
+    persistAllData();
+    pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
     renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
     renderProfileNicknameTag(s.keywords);
   }
@@ -17764,6 +17773,7 @@ function saveSupplierBankAccount(){
   closeSupplierBankAccountModal();
   renderSupplierPoSection(s.supplier_id);
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
 }
 function deleteSupplierBankAccount(supplierId, idx){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
@@ -17772,6 +17782,7 @@ function deleteSupplierBankAccount(supplierId, idx){
   getSupplierBankAccounts(s).splice(idx, 1);
   renderSupplierPoSection(supplierId);
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
 }
 // ---------- 🚫 صدام کی ہدایت (FM5SEPTH): بینک ویب سائٹ لاگ ان لنک سسٹم ختم — QR کوڈ ہی واحد طریقہ ----------
 // ---------- اکاؤنٹ کی تصویر (چیک/QR وغیرہ) منسلک کریں — ابھی محفوظ ہونے سے پہلے ماڈل میں ہی پیش نظارہ ----------
@@ -17916,6 +17927,7 @@ function confirmPaySupplier(){
 
   closePaySupplierModal();
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): ادائیگی کے بعد بقایا فوراً کلاؤڈ میں ----------
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   openSupplierProfile(s.supplier_id); // پروفائل فوراً تازہ ترین حالت میں دوبارہ کھلے
   sharePaymentReceiptImage(savedPayment.payment_id);
@@ -18343,6 +18355,8 @@ function savePurchaseOrder(){
     status: 'pending_receipt' // 'pending_receipt' | 'received'
   });
 
+  persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): نیا پرچیز آرڈر بننے پر واجب الادا فوراً کلاؤڈ میں ----------
   closePoModal();
   renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
   renderBillingProductGrid(); // نیا اسٹاک بلنگ گرڈ میں بھی فوراً نظر آئے
@@ -21683,6 +21697,7 @@ function deletePendingPurchaseOrder(supplierId, poIdx){
   if(!confirm(`Delete this pending Purchase Order (${po.items.length} items, dated ${po.date})? This cannot be undone.`)) return;
   s.purchaseHistory.splice(poIdx, 1);
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
   renderSupplierPoSection(supplierId);
 }
 
@@ -21904,6 +21919,8 @@ function confirmShipmentReceipt(){
   if(receiveShipmentBillPhoto) po.billPhoto = receiveShipmentBillPhoto;
   // TODO: DB میں purchase_orders.status='received', receipt_photo_url اپڈیٹ ہوگا
 
+  persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): شپمنٹ موصول ہونے پر واجب الادا/PO حیثیت فوراً کلاؤڈ میں ----------
   const receivedSupplierId = activeReceiveSupplierId, receivedPoIdx = activeReceivePoIdx;
   closeReceiveShipmentModal();
   renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
@@ -22241,6 +22258,8 @@ function confirmSupplierReturn(itemIndex){
   item.returnQty = qty;
   item.returnAmount = amount;
 
+  persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): واپسی کے بعد واجب الادا فوراً کلاؤڈ میں ----------
   renderSupplierReturnModal();
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   alert(`✅ ${qty} unit(s) of "${item.name}" returned to supplier. Rs. ${amount.toLocaleString()} deducted from payable.`);
@@ -22466,19 +22485,20 @@ function saveNewParty(){
         s.name = name; s.phone = phone; s.address = address; s.area = area; s.keywords = keywords;
         s.openingBalance = openingBalance;
         s.total_payable = (s.total_payable || 0) + diff;
-        if(npPhotoDataUrl !== null) s.photo = npPhotoDataUrl; // TODO: suppliers.photo UPDATE
+        if(npPhotoDataUrl !== null) s.photo = npPhotoDataUrl; // ✅ Firestore Sync (قدم 2) — saveNewParty کے آخر میں pushSuppliersToCloud() سے کلاؤڈ میں
       }
     }
   } else if(currentPartyTab === 'customers'){
     // ✅ Firestore Sync (قدم 1) — saveNewParty کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں
     customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, rateArea, photo: npPhotoDataUrl, wallet_balance:0, openingBalance, total_receivable: openingBalance, createdAt: new Date().toISOString(), walletHistory:[]});
   } else {
-    // TODO: یہ suppliers table میں INSERT ہوگا
+    // ✅ Firestore Sync (قدم 2) — saveNewParty کے آخر میں pushSuppliersToCloud() سے کلاؤڈ میں
     suppliersData.push({supplier_id: nextSupplierId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, openingBalance, total_payable: openingBalance, createdAt: new Date().toISOString()});
   }
 
   persistAllData();
   if(currentPartyTab === 'customers') pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): نیا/ترمیم شدہ کسٹمر فوراً کلاؤڈ میں ----------
+  else pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): نیا/ترمیم شدہ سپلائر فوراً کلاؤڈ میں ----------
   closeNewPartyModal();
   renderPartyList();
 }
@@ -23848,6 +23868,90 @@ window.addEventListener('online', () => {
   }
 });
 
+/* =====================================================================
+   ☁️ SUPPLIERS — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 2)
+   بالکل کسٹمرز والا ہی pattern — نیا سپلائر، واجب الادا (total_payable)، خریداری
+   ہسٹری (purchaseHistory)، بینک اکاؤنٹس، keywords، ای میل، تصویر، ڈیلیٹ —
+   ہر تبدیلی خودکار ہر ڈیوائس پر۔ full-overwrite + pendingSync pattern استعمال کیا
+   ہے (سپلائر ریکارڈز میں بھی edit-in-place ہوتا ہے، اسی لیے یہی موزوں ہے) ----------
+   ===================================================================== */
+const SUPPLIERS_DOC_PATH = 'shopData/suppliers';
+let suppliersPollTimer = null;
+
+async function pushSuppliersToCloud(){
+  saveToStorage('suppliers', suppliersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextSupplierId', nextSupplierId);
+  try{
+    const res = await authFirestoreFetch(`${SUPPLIERS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(suppliersData) },
+          nextSupplierId: { integerValue: String(nextSupplierId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.suppliersPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.suppliersPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchSuppliersFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی سپلائر تبدیلی (نیا سپلائر، ادائیگی، PO وغیرہ) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
+  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.suppliersPendingSync){
+    const pushed = await pushSuppliersToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${SUPPLIERS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudSuppliers = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudSuppliers)) return false;
+    suppliersData = cloudSuppliers;
+    const cloudNextId = parseInt(doc.fields?.nextSupplierId?.integerValue || '0');
+    if(cloudNextId > nextSupplierId) nextSupplierId = cloudNextId;
+    saveToStorage('suppliers', suppliersData);
+    saveToStorage('nextSupplierId', nextSupplierId);
+    if(!silent){
+      if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Suppliers/Parties اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startSuppliersPolling(){
+  stopSuppliersPolling();
+  suppliersPollTimer = setInterval(() => {
+    fetchSuppliersFromCloud(false);
+  }, 12000);
+}
+function stopSuppliersPolling(){
+  if(suppliersPollTimer){ clearInterval(suppliersPollTimer); suppliersPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.suppliersPendingSync){
+    pushSuppliersToCloud();
+  }
+});
+
 // ---------- Dummy Approval Requests (بعد میں Salesman خود Billing اسکرین سے یہ بھیجے گا) ----------
 const APPROVAL_REQUESTS_SEED_DATA = [
   {request_id:1, requested_by:'Aslam Bhai', action_type:'delete_bill', target:'Invoice #INV-0042', reason:'Customer cancelled the order', status:'pending', date:'2026-07-01'},
@@ -24092,7 +24196,9 @@ function populateQuickContactDropdown(){
   if(!sel) return;
   const prevValue = sel.value;
   const workers = usersData.filter(u => u.is_active);
-  const customers = customersData.filter(c => c.name && !c.name.startsWith('Walk-in'));
+  // ---------- 📇 صدام کی ہدایت (6 ستمبر): صرف وہی کسٹمر یہاں نظر آئیں جنہیں ایپ ایکسیس/پاسورڈ باقاعدہ دیا جا چکا ہے —
+  // باقی سینکڑوں عام کسٹمرز (جو ایپ استعمال ہی نہیں کرتے) اس ڈراپ ڈاؤن میں شامل نہ ہوں ---------- -->
+  const customers = customersData.filter(c => c.name && !c.name.startsWith('Walk-in') && c.appAccessEnabled && c.appPassword);
   // ---------- 👨‍💻 صدام کی ہدایت (6 ستمبر): سب سے اوپر "Contact Developer" — لاگ ان بلبلے والی وہی موجودہ لاجک (sendDevChat/getDeveloperContact) یہاں بھی ---------- -->
   let html = '<option value="">— منتخب کریں —</option><option value="developer:1">👨‍💻 Developer سے رابطہ</option>';
   if(workers.length){
