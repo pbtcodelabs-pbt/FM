@@ -7115,7 +7115,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ5ستمبر7:57pm';
+const APP_BUILD_VERSION = 'ہفتہ5ستمبر8:10pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8472,10 +8472,6 @@ function renderCustomerPaymentScreen(){
             </div>
           </div>
           <div class="bankAccNumber">${acc.number || '—'}</div>
-          <button type="button" onclick="openCustomerPaymentLoginPage(${idx})"
-            style="width:100%; margin-top:10px; padding:12px; background:linear-gradient(180deg,#16A34A,#0b4a45); color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer;">
-            ↗️ ${acc.type || 'اکاؤنٹ'} پر پیمنٹ کریں
-          </button>
         </div>
       `).join('');
 
@@ -8568,22 +8564,9 @@ function deleteCustomerPaymentAccount(idx){
   renderCustomerPaymentScreen();
 }
 
-// ---------- منتخب اکاؤنٹ کے ادارے (JazzCash/EasyPaisa/بینک) کا اپنا صفحہ کھولیں —
-// ہم کبھی پاسورڈ خود نہیں ڈالتے، نہ ہی خودکار لاگ ان کرتے ہیں؛ کسٹمر خود اپنے پاسورڈ سے لاگ ان کر کے پیمنٹ کرے ----------
-function openCustomerPaymentLoginPage(idx){
-  const cust = customersData.find(c => c.customer_id === AppState.currentCustomerId);
-  const acc = cust && getCustomerPaymentAccounts(cust)[idx];
-  if(!acc || !acc.type){
-    alert('براہ کرم پہلے بینک/والٹ منتخب کریں۔');
-    return;
-  }
-  const url = BANK_LOGIN_URLS[acc.type];
-  if(!url){
-    alert('اس بینک کا براہ راست لنک ابھی دستیاب نہیں — براہ کرم خود تلاش کریں۔');
-    return;
-  }
-  window.open(url, '_blank');
-}
+// ---------- 🚫 صدام کی ہدایت (FM5SEPTH): بینک/والٹ کی ویب سائٹ پر لے جانے والا سسٹم مکمل ختم — یہ کبھی صحیح
+// لاگ ان صفحہ پر نہیں لے جاتا تھا (ہر بینک صرف اپنی عام سرکاری سائٹ پر بھیجتا، پاسورڈ فارم تک نہیں) —
+// اب صرف QR کوڈ + اکاؤنٹ نمبر کا محفوظ طریقہ استعمال ہوگا (اوپر "صدام فروٹ منڈی کو پیمنٹ کریں" سیکشن) ----------
 
 // ---------- اسکرین شاٹ منسلک کرنا — بالکل اسی طرز پر جیسے لوگو/QR کوڈ کے لیے پہلے سے موجود ہے ----------
 function attachCustomerPaymentScreenshot(){
@@ -17528,7 +17511,6 @@ function buildSupplierBankAccountsHtml(s){
             </div>
           </div>
           <div class="bankAccBtns">
-            <button onclick="openBankLoginPageForAccount(${s.supplier_id}, ${idx})" title="Open bank/wallet login page">↗️</button>
             <button onclick="openEditSupplierBankAccount(${s.supplier_id}, ${idx})" title="Edit">✏️</button>
             <button onclick="deleteSupplierBankAccount(${s.supplier_id}, ${idx})" title="Delete">🗑️</button>
           </div>
@@ -17611,21 +17593,7 @@ function deleteSupplierBankAccount(supplierId, idx){
   renderSupplierPoSection(supplierId);
   persistAllData();
 }
-function openBankLoginPageForAccount(supplierId, idx){
-  const s = suppliersData.find(x => x.supplier_id === supplierId);
-  const acc = s && getSupplierBankAccounts(s)[idx];
-  if(!acc || !acc.type){
-    alert('Please select the bank/wallet type first.');
-    return;
-  }
-  const url = BANK_LOGIN_URLS[acc.type];
-  if(!url){
-    alert('No direct login link available for this bank yet — please search for it manually.');
-    return;
-  }
-  // نوٹ: ہم کبھی خودکار لاگ ان نہیں کر سکتے (نہ کریں گے) — صرف صحیح بینک/والیٹ کا آغاز صفحہ کھلے گا
-  window.open(url, '_blank');
-}
+// ---------- 🚫 صدام کی ہدایت (FM5SEPTH): بینک ویب سائٹ لاگ ان لنک سسٹم ختم — QR کوڈ ہی واحد طریقہ ----------
 // ---------- اکاؤنٹ کی تصویر (چیک/QR وغیرہ) منسلک کریں — ابھی محفوظ ہونے سے پہلے ماڈل میں ہی پیش نظارہ ----------
 function attachSupplierBankAccountImage(){
   const input = document.createElement('input');
