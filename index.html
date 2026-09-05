@@ -7170,7 +7170,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر4:03am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر4:08am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9538,6 +9538,8 @@ function goTo(screenName, _isHistoryNav){
     if(AppState.currentRole === 'admin') fetchAdvanceOrdersFromCloud(true).then(added => { if(added) renderHomeIconGrid(); });
     // ---------- 🔴 صدام کی ہدایت (FM3SEPTH10): اسی طرح Recovery List کا بیج بھی Home پر پہنچتے ہی تازہ ہو ----------
     if(AppState.currentRole === 'admin') fetchRecoveryListFromCloud(true).then(added => { if(added) renderHomeIconGrid(); });
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): کسٹمرز بھی خاموشی سے تازہ ہوں — تاکہ فوری رابطہ ڈراپ ڈاؤن ہمیشہ درست ہو ----------
+    if(AppState.currentRole === 'admin') fetchCustomersFromCloud(true).then(added => { if(added && typeof populateQuickContactDropdown === 'function') populateQuickContactDropdown(); });
   }
   if(screenName === 'billing') {
     renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn();
@@ -9565,6 +9567,7 @@ function goTo(screenName, _isHistoryNav){
   // دوسری کسی سکرین پر جائیں تو polling خودکار بند — فالتو Firestore reads نہ ہوں ---------- -->
   stopAdvanceOrdersPolling();
   stopRecoveryListPolling();
+  stopCustomersPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): کسٹمرز کا Firestore polling بھی دوسری اسکرین پر جاتے ہی بند ----------
   if(screenName === 'advanceorders'){
     renderAdvanceOrdersScreen();
     fetchAdvanceOrdersFromCloud(false);
@@ -9580,6 +9583,14 @@ function goTo(screenName, _isHistoryNav){
     renderRecoveryListScreen();
     fetchRecoveryListFromCloud(false);
     startRecoveryListPolling();
+  }
+  if(screenName === 'customers' || screenName === 'suppliers'){
+    fetchCustomersFromCloud(false);
+    startCustomersPolling();
+  }
+  if(screenName === 'customerHome'){
+    fetchCustomersFromCloud(false);
+    startCustomersPolling();
   }
   if(screenName === 'dailyRecovery') renderDailyRecoveryScreen();
   if(screenName === 'settings') renderSettingsScreen();
@@ -11559,7 +11570,7 @@ function finalizeInvoice(){
   let walletApplied = 0;
   if(customer && method === 'credit' && customer.wallet_balance > 0){
     walletApplied = Math.min(customer.wallet_balance, grandTotal);
-    customer.wallet_balance -= walletApplied; // TODO: customers.wallet_balance UPDATE
+    customer.wallet_balance -= walletApplied; // ✅ Firestore Sync (قدم 1) — finalizeInvoice کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں جاتا ہے
     customer.walletHistory = customer.walletHistory || [];
     customer.walletHistory.unshift({type:'receivable_collected', amount:walletApplied, via:'wallet', date:new Date().toISOString().split('T')[0], note:`Auto-applied to ${invoice.invoice_no}`});
   }
@@ -11593,7 +11604,7 @@ function finalizeInvoice(){
   if(customer && method === 'credit'){
     // ---------- کسٹمر کا نیا کل بقایہ سیدھا SET کریں (پرانا + یہ بل − وصولی) — increment نہیں، تاکہ پرانے بقایہ پر بھی ادائیگی درست جھلکے ----------
     customer.total_receivable = Math.max(0, combinedDueForPayment - cashReceivedNow);
-    // TODO: customers.total_receivable UPDATE
+    // ✅ Firestore Sync (قدم 1) — finalizeInvoice کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں جاتا ہے
   }
   invoice.wallet_applied = walletApplied;
   invoice.cash_received_now = cashReceivedNow;
@@ -11632,6 +11643,7 @@ function finalizeInvoice(){
 
   closeCartSheet();
   persistAllData();
+  if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): والٹ/بقایا کی تبدیلی خودکار کلاؤڈ میں ----------
   if(walletApplied > 0){
     alert(`💳 Rs. ${walletApplied.toLocaleString()} auto-deducted from ${customer.name}'s wallet.` + (remainingDue > 0 ? ` Remaining due: Rs. ${remainingDue.toLocaleString()}` : ` Bill fully paid — nothing outstanding.`));
   }
@@ -12099,9 +12111,10 @@ function saveQuickAddCustomer(){
     return;
   }
 
-  // TODO: یہ customers table میں INSERT ہوگا — یہی مرکزی فہرست ہے جو "Customers/Suppliers" اسکرین پر بھی نظر آتی ہے
+  // ✅ Firestore Sync (قدم 1) — pushCustomersToCloud() سے فوراً کلاؤڈ میں
   const newCustomer = {customer_id: nextCustomerId++, name, phone, address:'', wallet_balance:0, total_receivable:0, walletHistory:[]};
   customersData.push(newCustomer);
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): نیا کسٹمر فوراً کلاؤڈ میں ----------
 
   populateCustomerDropdown();
   document.getElementById('customerSelect').value = newCustomer.customer_id; // نیا کسٹمر فوراً اسی bills کے لیے منتخب ہو جائے
@@ -12128,9 +12141,10 @@ function confirmQuickCreditCustomer(){
     customer = customersData.find(c => c.phone && c.phone.replace(/\D/g,'') === phoneDigits);
   }
   if(!customer){
-    // TODO: یہ customers table میں INSERT ہوگا
+    // ✅ Firestore Sync (قدم 1) — pushCustomersToCloud() سے فوراً کلاؤڈ میں
     customer = {customer_id: nextCustomerId++, name, phone, address:'', wallet_balance:0, total_receivable:0, walletHistory:[]};
     customersData.push(customer);
+    pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): نیا کسٹمر فوراً کلاؤڈ میں ----------
   }
 
   populateCustomerDropdown();
@@ -16933,6 +16947,7 @@ function deleteCustomer(customerId){
   idbDeleteImage('customer_' + customerId);
   customersData = customersData.filter(x => x.customer_id !== customerId);
   persistAllData();
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): ڈیلیٹ ہونا بھی کلاؤڈ میں فوراً جائے ----------
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
 
@@ -17566,7 +17581,9 @@ function updateSupplierEmail(supplierId, email){
 function updateCustomerKeywords(customerId, keywords){
   const c = customersData.find(x => x.customer_id === customerId);
   if(c){
-    c.keywords = keywords.trim(); // TODO: DB میں customers.keywords UPDATE
+    c.keywords = keywords.trim(); // ✅ Firestore Sync (قدم 1) — updateCustomerKeywords میں pushCustomersToCloud() موجود ہے
+    persistAllData();
+    pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1) ----------
     renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
     renderProfileNicknameTag(c.keywords);
   }
@@ -22042,8 +22059,10 @@ function confirmBatchReturn(invoiceId){
 
   if(method === 'wallet'){
     // ---------- طے شدہ رقم کسٹمر کے والٹ میں شامل کریں ----------
-    customer.wallet_balance += totalRefund; // TODO: customers.wallet_balance UPDATE
+    customer.wallet_balance += totalRefund; // ✅ Firestore Sync (قدم 1) — نیچے pushCustomersToCloud() موجود ہے
     customer.walletHistory.unshift({type:'deposit', amount: totalRefund, date:new Date().toISOString().split('T')[0], note:`Item Return: ${returnedNames.join(', ')}`});
+    persistAllData();
+    pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1) ----------
   } else {
     // ---------- کیش ریفنڈ — کیش ان ہینڈ سے رقم منہا کریں ----------
     financeDummy.cashInHand -= totalRefund; // TODO: نقدی لیجر (cash ledger) میں INSERT
@@ -22436,7 +22455,7 @@ function saveNewParty(){
         c.name = name; c.phone = phone; c.address = address; c.area = area; c.keywords = keywords; c.rateArea = rateArea;
         c.openingBalance = openingBalance;
         c.total_receivable = (c.total_receivable || 0) + diff;
-        if(npPhotoDataUrl !== null) c.photo = npPhotoDataUrl; // TODO: customers.photo UPDATE
+        if(npPhotoDataUrl !== null) c.photo = npPhotoDataUrl; // ✅ Firestore Sync (قدم 1) — saveNewParty کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں
       }
     } else {
       const s = suppliersData.find(x => x.supplier_id === editingPartyId);
@@ -22451,13 +22470,15 @@ function saveNewParty(){
       }
     }
   } else if(currentPartyTab === 'customers'){
-    // TODO: یہ customers table میں INSERT ہوگا
+    // ✅ Firestore Sync (قدم 1) — saveNewParty کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں
     customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, rateArea, photo: npPhotoDataUrl, wallet_balance:0, openingBalance, total_receivable: openingBalance, createdAt: new Date().toISOString(), walletHistory:[]});
   } else {
     // TODO: یہ suppliers table میں INSERT ہوگا
     suppliersData.push({supplier_id: nextSupplierId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, openingBalance, total_payable: openingBalance, createdAt: new Date().toISOString()});
   }
 
+  persistAllData();
+  if(currentPartyTab === 'customers') pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): نیا/ترمیم شدہ کسٹمر فوراً کلاؤڈ میں ----------
   closeNewPartyModal();
   renderPartyList();
 }
@@ -22499,10 +22520,12 @@ function saveWalletTxn(){
     return;
   }
 
-  // TODO: یہ wallet_transactions table میں INSERT ہوگا اور customers.wallet_balance UPDATE ہوگا
+  // ✅ Firestore Sync (قدم 1) — saveWalletTxn کے آخر میں pushCustomersToCloud() موجود ہے
   c.wallet_balance += (activeTxnType === 'deposit' ? amount : -amount);
   c.walletHistory.unshift({type: activeTxnType, amount, date: new Date().toISOString().split('T')[0]});
 
+  persistAllData();
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1) ----------
   closeWalletModal();
   renderPartyList(document.getElementById('partySearchInput').value);
 }
@@ -22534,7 +22557,7 @@ function saveOpeningBalanceAdjustment(){
     if(!confirm(`This would take the balance below zero (currently Rs. ${c.total_receivable.toLocaleString()}). Continue anyway?`)) return;
   }
 
-  // TODO: یہ receivable_adjustments table میں INSERT ہوگا اور customers.total_receivable UPDATE ہوگا
+  // ✅ Firestore Sync (قدم 1) — saveOpeningBalanceAdjustment کے آخر میں pushCustomersToCloud() موجود ہے
   c.total_receivable += (activeOpeningBalanceType === 'add' ? amount : -amount);
   c.walletHistory = c.walletHistory || [];
   c.walletHistory.unshift({
@@ -22547,6 +22570,7 @@ function saveOpeningBalanceAdjustment(){
 
   document.getElementById('openingBalanceModal').classList.remove('show');
   persistAllData();
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1) ----------
   renderPartyList(document.getElementById('partySearchInput')?.value);
   alert(`✅ ${c.name}'s balance updated. New Receivable: Rs. ${c.total_receivable.toLocaleString()}`);
 }
@@ -22643,7 +22667,7 @@ function saveCollectReceivable(){
     return;
   }
 
-  // TODO: یہاں receivable_collections table میں INSERT ہوگا، customers.total_receivable UPDATE ہوگا
+  // ✅ Firestore Sync (قدم 1) — saveCollectReceivable کے آخر میں pushCustomersToCloud() موجود ہے
   const balanceBefore = c.total_receivable;
   c.total_receivable -= amount;
 
@@ -22662,7 +22686,7 @@ function saveCollectReceivable(){
   }
 
   if(activeCollectMode === 'wallet'){
-    c.wallet_balance -= amount; // TODO: customers.wallet_balance UPDATE
+    c.wallet_balance -= amount; // ✅ Firestore Sync (قدم 1) — نیچے pushCustomersToCloud() موجود ہے
   } else {
     financeDummy.cashInHand += amount; // TODO: نقدی لیجر (cash ledger) میں INSERT
   }
@@ -22690,6 +22714,8 @@ function saveCollectReceivable(){
   });
 
   closeCollectModal();
+  persistAllData();
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): وصولی کے بعد بقایا/والٹ فوراً کلاؤڈ میں ----------
   renderPartyList(document.getElementById('partySearchInput').value);
   sharePaymentReceiptImage(savedPayment.payment_id);
 
@@ -23735,6 +23761,92 @@ function startRecoveryListPolling(){
 function stopRecoveryListPolling(){
   if(recoveryListPollTimer){ clearInterval(recoveryListPollTimer); recoveryListPollTimer = null; }
 }
+
+/* =====================================================================
+   ☁️ CUSTOMERS — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 1)
+   نیا کسٹمر، والٹ بیلنس، بقایا رقم (total_receivable)، keywords، تصویر —
+   ہر تبدیلی خودکار ہر ڈیوائس پر۔ usersData والا ہی full-overwrite + pendingSync
+   pattern استعمال کیا ہے (چونکہ کسٹمر ریکارڈز میں edit-in-place ہوتا ہے،
+   advance-orders والا "صرف نئے شامل کریں" pattern یہاں موزوں نہیں) ----------
+   ===================================================================== */
+const CUSTOMERS_DOC_PATH = 'shopData/customers';
+let customersPollTimer = null;
+
+async function pushCustomersToCloud(){
+  saveToStorage('customers', customersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextCustomerId', nextCustomerId);
+  try{
+    const res = await authFirestoreFetch(`${CUSTOMERS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(customersData) },
+          nextCustomerId: { integerValue: String(nextCustomerId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.customersPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.customersPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchCustomersFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی کسٹمر تبدیلی (نیا کسٹمر، والٹ، بقایا وغیرہ) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
+  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.customersPendingSync){
+    const pushed = await pushCustomersToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${CUSTOMERS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudCustomers = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudCustomers)) return false;
+    customersData = cloudCustomers;
+    const cloudNextId = parseInt(doc.fields?.nextCustomerId?.integerValue || '0');
+    if(cloudNextId > nextCustomerId) nextCustomerId = cloudNextId;
+    saveToStorage('customers', customersData);
+    saveToStorage('nextCustomerId', nextCustomerId);
+    if(!silent){
+      if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList();
+      if(typeof renderCustomerHomeScreen === 'function' && AppState.currentRole === 'customer') renderCustomerHomeScreen();
+      if(typeof populateQuickContactDropdown === 'function' && AppState.currentRole === 'admin') populateQuickContactDropdown();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Customers/Parties یا Customer's own Home اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startCustomersPolling(){
+  stopCustomersPolling();
+  customersPollTimer = setInterval(() => {
+    fetchCustomersFromCloud(false);
+  }, 12000);
+}
+function stopCustomersPolling(){
+  if(customersPollTimer){ clearInterval(customersPollTimer); customersPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.customersPendingSync){
+    pushCustomersToCloud();
+  }
+});
 
 // ---------- Dummy Approval Requests (بعد میں Salesman خود Billing اسکرین سے یہ بھیجے گا) ----------
 const APPROVAL_REQUESTS_SEED_DATA = [
