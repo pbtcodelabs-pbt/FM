@@ -4590,6 +4590,12 @@
                 <span class="pscLabel" style="min-width:110px;">💳 پیمنٹ تفصیل</span>
                 <select id="pscPaymentFontSelect" onchange="setSectionFontFamily('printFontPaymentId', this.value)" class="pscDropdown"></select>
               </div>
+              <!-- ---------- 🔤 صدام کی ہدایت (FM6SEPSU): 5واں الگ فونٹ — صرف انگریزی ہندسے (تعداد/نرخ/مزدوری/ٹوٹل کے نمبر)،
+                   یہ سبزیوں کے نام یا پیمنٹ کی تفصیل کے فونٹ سے بالکل الگ رہے گا ---------- -->
+              <div class="pscCompactRow" style="margin-top:6px;">
+                <span class="pscLabel" style="min-width:110px;">🔢 ہندسے (ریٹ/قیمت/ٹوٹل)</span>
+                <select id="pscNumberFontSelect" onchange="setSectionFontFamily('printFontNumberId', this.value)" class="pscDropdown"></select>
+              </div>
             </div>
             <div class="pscCompactRow">
               <span class="pscLabel">🎨</span>
@@ -7170,7 +7176,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر7:53am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر8:39am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -25475,6 +25481,8 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const captionFontFamily = getFontFamily('printFontCaptionId');
   const itemFontFamily = getFontFamily('printFontItemId');
   const paymentFontFamily = getFontFamily('printFontPaymentId');
+  // ---------- 🔤 صدام کی ہدایت (FM6SEPSU): صرف انگریزی ہندسوں (تعداد/مزدوری/قیمت/ٹوٹل/نمبر) کا اپنا الگ فونٹ ----------
+  const numberFontFamily = getFontFamily('printFontNumberId');
 
   // ---------- ٹیبل کالمز کی چوڑائی — اب مکمل RTL ترتیب اور خودکار (auto-width) سائز، صدام کی ہدایت (FM3SEPTH23):
   // دائیں سے بائیں پڑھنے کی صحیح ترتیب: نمبر → نام اشیاء → تعداد → قیمت → ٹوٹل
@@ -25590,6 +25598,11 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   try{
     await document.fonts.load(`bold 26px ${canvasFontFamily}`);
     await document.fonts.load(`16px ${canvasFontFamily}`);
+    await document.fonts.load(`bold 16px ${titleFontFamily}`);
+    await document.fonts.load(`bold 16px ${captionFontFamily}`);
+    await document.fonts.load(`bold 16px ${itemFontFamily}`);
+    await document.fonts.load(`bold 16px ${paymentFontFamily}`);
+    await document.fonts.load(`bold 16px ${numberFontFamily}`); // ---------- 🔤 صدام کی ہدایت (FM6SEPSU): ہندسوں کا الگ فونٹ بھی پہلے سے لوڈ کریں ----------
     await document.fonts.ready;
   }catch(e){ /* فونٹ لوڈ نہ ہو سکے تو براؤزر کا فال بیک فونٹ خودکار استعمال ہوگا */ }
 
@@ -25711,10 +25724,10 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const numRowFontPx = numFontPx0;
   const fitBodyFont = (text, maxWidth) => {
     let px = numRowFontPx;
-    ctx.font = `bold ${px}px ${canvasFontFamily}`;
+    ctx.font = `bold ${px}px ${numberFontFamily}`; // ---------- 🔤 صدام کی ہدایت (FM6SEPSU): ہندسوں کا الگ فونٹ ----------
     while(ctx.measureText(text).width > maxWidth && px > 7){
       px -= 1;
-      ctx.font = `bold ${px}px ${canvasFontFamily}`;
+      ctx.font = `bold ${px}px ${numberFontFamily}`;
     }
   };
   printItems.forEach((item, idx) => {
@@ -25749,7 +25762,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
 
     ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
-    ctx.font = `bold ${numRowFontPx}px ${canvasFontFamily}`;
+    ctx.font = `bold ${numRowFontPx}px ${numberFontFamily}`; // ---------- 🔤 صدام کی ہدایت (FM6SEPSU): سیریل نمبر کا فونٹ بھی ہندسوں والا ہی ----------
     ctx.fillText(String(idx + 1), (colX[6]+colX[7])/2, rowBaseline);
     ctx.textAlign = itemAlign;
     ctx.font = `${itemFontWeight}${rowFontPx}px ${itemFontFamily}`; // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): سبزیوں کے نام کا اپنا الگ فونٹ ----------
@@ -26072,6 +26085,9 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const captionFontFamily = getFontFamilyA4('printFontCaptionId');
   const itemFontFamily = getFontFamilyA4('printFontItemId');
   const paymentFontFamily = getFontFamilyA4('printFontPaymentId');
+  // ---------- 🔤 صدام کی ہدایت (FM6SEPSU): A4 بل میں بھی صرف انگریزی ہندسوں کا اپنا الگ فونٹ ----------
+  const numberFontFamily = getFontFamilyA4('printFontNumberId');
+  const FN = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${numberFontFamily}`;
   const FT = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${titleFontFamily}`;
   const FC = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${captionFontFamily}`;
   const FI = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${itemFontFamily}`;
@@ -26079,6 +26095,11 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   try{
     await document.fonts.load(`bold 30px ${fontFam}`);
     await document.fonts.load(`16px ${fontFam}`);
+    await document.fonts.load(`bold 16px ${titleFontFamily}`);
+    await document.fonts.load(`bold 16px ${captionFontFamily}`);
+    await document.fonts.load(`bold 16px ${itemFontFamily}`);
+    await document.fonts.load(`bold 16px ${paymentFontFamily}`);
+    await document.fonts.load(`bold 16px ${numberFontFamily}`); // ---------- 🔤 صدام کی ہدایت (FM6SEPSU) ----------
     await document.fonts.ready;
   }catch(e){}
 
@@ -26197,6 +26218,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     if(displayName !== ((isHighlighted ? '👉 ' : '') + baseNameA4)) displayName = displayName.trim() + '…';
 
     if(isFullyReturnedA4) ctx.fillStyle = '#9ca3af';
+    ctx.font = FN('13px'); // ---------- 🔤 صدام کی ہدایت (FM6SEPSU): سیریل نمبر کا فونٹ ہندسوں والا ----------
     ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
     ctx.textAlign = a4Align;
     // ---------- سخت کلپنگ — نام کبھی بھی اپنے کالم کی حد سے باہر نہ چھپے ----------
@@ -26216,7 +26238,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.clip();
     ctx.fillText(variantTextA4, (colX[2]+colX[3])/2, rowBaseline);
     ctx.restore();
-    ctx.font = F('13px');
+    ctx.font = FN('13px'); // ---------- 🔤 صدام کی ہدایت (FM6SEPSU): تعداد/مزدوری/قیمت/ٹوٹل کے ہندسوں کا الگ فونٹ ----------
     ctx.textAlign = a4Align;
     ctx.fillText(String(remainingQtyA4), a4QtyX, rowBaseline);
     const itemLaborTotalA4 = (item.laborPerUnit||0)*remainingQtyA4;
@@ -26416,7 +26438,8 @@ function syncPreviewStyleControls(){
     pscTitleFontSelect: 'printFontTitleId',
     pscCaptionFontSelect: 'printFontCaptionId',
     pscItemFontSelect: 'printFontItemId',
-    pscPaymentFontSelect: 'printFontPaymentId'
+    pscPaymentFontSelect: 'printFontPaymentId',
+    pscNumberFontSelect: 'printFontNumberId'
   };
   Object.keys(sectionFontMap).forEach(selId => {
     const sel = document.getElementById(selId);
