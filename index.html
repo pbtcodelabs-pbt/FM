@@ -7170,7 +7170,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر5:04am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر7:53am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8703,6 +8703,7 @@ function submitCustomerPaymentScreenshot(){
   };
   pendingBillsData.unshift(pendingPayment);
   persistAllData();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): کسٹمر کی پیمنٹ رسید فوراً کلاؤڈ میں — ایڈمن کسی بھی ڈیوائس سے فوراً دیکھ سکے ----------
 
   // ---------- فارم صاف کریں اور تصدیقی پیغام دکھائیں ----------
   document.getElementById('cpsAmount').value = '';
@@ -9530,7 +9531,26 @@ function goTo(screenName, _isHistoryNav){
   resetScrollNow();
   requestAnimationFrame(() => { window.fixMainAreaHeight && window.fixMainAreaHeight(); resetScrollNow(); });
 
-  if(screenName === 'dashboard') renderDashboard();
+  // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4 — اہم فکس): یہ سب "stop" کالز پہلے یہاں سے نیچے (advanceorders سے پہلے) تھیں —
+  // یعنی 'billing'/'products'/'billhistory' جیسی اسکرینز جو اوپر ہی startProductsPolling()/startInvoicesPolling() چلا چکی تھیں،
+  // انہیں یہ کالز فوراً بند کر دیتی تھیں (اسی ترتیب میں ہونے کی وجہ سے)، جس سے 12 سیکنڈ والا خودکار ریفریش کبھی کام ہی نہیں کرتا تھا۔
+  // اب سب سے پہلے یہاں بند کریں، پھر نیچے متعلقہ اسکرین والا polling شروع ہو — یہی درست ترتیب ہے ----------
+  stopAdvanceOrdersPolling();
+  stopRecoveryListPolling();
+  stopCustomersPolling();
+  stopSuppliersPolling();
+  stopProductsPolling();
+  stopInvoicesPolling();
+  stopPendingBillsPolling();
+  stopFinancePolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7) ----------
+  stopApprovalRequestsPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 8) ----------
+
+  if(screenName === 'dashboard') {
+    renderDashboard();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): Dashboard پر Cash in Hand کارڈ دکھتا ہے —
+    // اس لیے یہاں پہنچتے ہی خاموشی سے تازہ ترین کیش/اخراجات منگوا لیں ----------
+    fetchFinanceFromCloud(true).then(added => { if(added) renderKpiCards(); });
+  }
   if(screenName === 'home') {
     renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI();
     renderQuickContactPanel(); // ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ پینل — رول کے مطابق مختلف مواد ----------
@@ -9540,12 +9560,18 @@ function goTo(screenName, _isHistoryNav){
     if(AppState.currentRole === 'admin') fetchRecoveryListFromCloud(true).then(added => { if(added) renderHomeIconGrid(); });
     // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): کسٹمرز بھی خاموشی سے تازہ ہوں — تاکہ فوری رابطہ ڈراپ ڈاؤن ہمیشہ درست ہو ----------
     if(AppState.currentRole === 'admin') fetchCustomersFromCloud(true).then(added => { if(added && typeof populateQuickContactDropdown === 'function') populateQuickContactDropdown(); });
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): Home پر پہنچتے ہی خاموشی سے پینڈنگ بلز بھی تازہ ہوں — تاکہ 🔔 بیج درست ہو ----------
+    fetchPendingBillsFromCloud(true).then(added => { if(added && typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner(); });
   }
   if(screenName === 'billing') {
     renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn();
     // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): بلنگ سکرین پر جاتے ہی سٹاک تازہ منگوائیں — تاکہ دوسرے فون سے ابھی بکی چیز یہاں بھی صفر نظر آئے ----------
     fetchProductsFromCloud(true).then(added => { if(added) renderBillingProductGrid(); });
     startProductsPolling();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): بلنگ سکرین پر پینڈنگ بلز بھی تازہ رکھیں — سیلزمین کو رد شدہ بل کی وجہ فوراً نظر آئے،
+    // اور ایڈمن کو 🔔 پینڈنگ بیج بھی فوراً اپڈیٹ ہو ----------
+    fetchPendingBillsFromCloud(true).then(added => { if(added) renderRejectionNotice(); });
+    startPendingBillsPolling();
   }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
@@ -9560,13 +9586,31 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'categories') renderCategoriesScreen();
   if(screenName === 'customers') enterPartyPage('customers');
   if(screenName === 'suppliers') enterPartyPage('suppliers');
-  if(screenName === 'users') { renderUserList(); renderApprovalList(); }
+  if(screenName === 'users') {
+    renderUserList(); renderApprovalList();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 8): Users اسکرین (Approvals ٹیب) پر جاتے ہی تازہ ترین درخواستیں منگوائیں —
+    // تاکہ سیلزمین کی نئی درخواست یا ایڈمن کا دوسرے فون سے کیا فیصلہ فوراً یہاں نظر آئے ----------
+    fetchApprovalRequestsFromCloud(false).then(added => { if(added) renderApprovalList(); });
+    startApprovalRequestsPolling();
+  }
   if(screenName === 'customerAccess') renderCustomerAccessList(); // ---------- 🧪 FMtest01 ----------
   if(screenName === 'customerHome') renderCustomerHomeScreen(); // ---------- 🧪 FMtest01 ----------
   if(screenName === 'customerPayment') renderCustomerPaymentScreen(); // ---------- 🧪 FMtest03 Phase 4 ----------
-  if(screenName === 'billhistory') renderBillHistory();
+  if(screenName === 'billhistory'){
+    renderBillHistory();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): Bill History اسکرین پر جاتے ہی تازہ ترین بلز منگوائیں —
+    // تاکہ دوسرے فون سے ابھی بننے والا/Void ہونے والا بل بھی فوراً یہاں نظر آئے ----------
+    fetchInvoicesFromCloud(false).then(added => { if(added) renderBillHistory(); });
+    startInvoicesPolling();
+  }
   if(screenName === 'mydiary') renderMyDiaryScreen();
-  if(screenName === 'expenditure') renderExpenditureScreen();
+  if(screenName === 'expenditure') {
+    renderExpenditureScreen();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): Expenditure اسکرین پر جاتے ہی تازہ ترین اخراجات/کیش منگوائیں —
+    // تاکہ دوسرے فون سے ابھی درج کیا گیا خرچہ یہاں بھی فوراً نظر آئے ----------
+    fetchFinanceFromCloud(false).then(added => { if(added) renderExpenseList(); });
+    startFinancePolling();
+  }
   if(screenName === 'stockadjustment'){
     renderStockAdjustmentScreen();
     // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): Stock Adjustment سکرین پر جاتے ہی تازہ ترین سٹاک منگوائیں ----------
@@ -9578,16 +9622,16 @@ function goTo(screenName, _isHistoryNav){
     // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): Purchase Orders سکرین پر بھی سٹاک تازہ رہے (Receive Shipment یہیں سے ہوتا ہے) ----------
     fetchProductsFromCloud(true);
     startProductsPolling();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 5): purchaseHistory دراصل suppliersData کے اندر ہی محفوظ ہے —
+    // اس لیے اصل PO لسٹ (نیا آرڈر/Receive Shipment/Delete) تازہ رکھنے کے لیے سپلائرز کی fetch+polling بھی یہاں ضروری ہے،
+    // ورنہ دوسرے فون سے بنایا/وصول کیا گیا PO یہاں تب تک نظر نہیں آتا جب تک صارف خود Suppliers اسکرین نہ کھولے ----------
+    fetchSuppliersFromCloud(true).then(added => { if(added) renderPurchaseOrdersScreen(); });
+    startSuppliersPolling();
   }
 
   // ---------- ☁️ Order Taking / Pending Orders / Recovery List — کلاؤڈ سے تازہ ترین ڈیٹا منگوائیں اور جب تک
   // اسی سکرین پر رہیں، ہر 12 سیکنڈ بعد خودکار fetch ہوتا رہے (تقریباً real-time کا تجربہ)۔
   // دوسری کسی سکرین پر جائیں تو polling خودکار بند — فالتو Firestore reads نہ ہوں ---------- -->
-  stopAdvanceOrdersPolling();
-  stopRecoveryListPolling();
-  stopCustomersPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): کسٹمرز کا Firestore polling بھی دوسری اسکرین پر جاتے ہی بند ----------
-  stopSuppliersPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): سپلائرز کا Firestore polling بھی دوسری اسکرین پر جاتے ہی بند ----------
-  stopProductsPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پراڈکٹس/سٹاک کا Firestore polling بھی دوسری اسکرین پر جاتے ہی بند ----------
   if(screenName === 'advanceorders'){
     renderAdvanceOrdersScreen();
     fetchAdvanceOrdersFromCloud(false);
@@ -11667,6 +11711,8 @@ function finalizeInvoice(){
   persistAllData();
   if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): والٹ/بقایا کی تبدیلی خودکار کلاؤڈ میں ----------
   pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): بل بننے پر سٹاک کٹنا فوراً کلاؤڈ میں ----------
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): نیا بل بنتے ہی فوراً کلاؤڈ میں — دوسرے فون پر بھی فوری نظر آئے ----------
+  if(method === 'cash' || cashReceivedNow > 0) pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد وصولی سے Cash in Hand بدلا ہو تو فوراً کلاؤڈ میں ----------
   if(walletApplied > 0){
     alert(`💳 Rs. ${walletApplied.toLocaleString()} auto-deducted from ${customer.name}'s wallet.` + (remainingDue > 0 ? ` Remaining due: Rs. ${remainingDue.toLocaleString()}` : ` Bill fully paid — nothing outstanding.`));
   }
@@ -11703,6 +11749,7 @@ function submitBillForApproval(customer, method, subtotal){
   renderAutoPaymentNote();
 
   closeCartSheet();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): سیلزمین کا بل جمع ہوتے ہی فوراً کلاؤڈ میں — ایڈمن کسی بھی ڈیوائس سے فوراً دیکھ سکے ----------
   alert('✅ بل ایڈمن کو منظوری کے لیے بھیج دیا گیا۔\nمنظور ہونے کے بعد یہ بل ہسٹری میں نظر آئے گا اور پرنٹ کیا جا سکے گا۔');
 }
 
@@ -11714,6 +11761,10 @@ function submitBillForApproval(customer, method, subtotal){
 function openPendingBillsList(){
   renderPendingBillsListModal();
   document.getElementById('pendingBillsListModal').classList.add('show');
+  // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): یہ ماڈل Home بینر سے بغیر اسکرین بدلے بھی کھلتا ہے —
+  // اس لیے یہاں خود اپنی fetch + polling شروع کریں (اگلی بار اسکرین بدلتے ہی عمومی stopPendingBillsPolling() سے خودکار بند ہو جائے گی) ----------
+  fetchPendingBillsFromCloud(false).then(added => { if(added) renderPendingBillsListModal(); });
+  startPendingBillsPolling();
 }
 function renderPendingBillsListModal(){
   const pendingCount = pendingBillsData.filter(p => p.status === 'pending').length;
@@ -11822,6 +11873,8 @@ function approvePendingPayment(){
   persistAllData();
   document.getElementById('paymentReviewModal').classList.remove('show');
   renderPendingBillsBanner();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): پیمنٹ منظور ہوتے ہی فوراً کلاؤڈ میں ----------
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): بقایا/والٹ کی تبدیلی بھی فوراً کلاؤڈ میں ----------
 
   alert(`✅ پیمنٹ منظور ہو گئی۔\n${cust.name} کا نیا بقایا: Rs. ${cust.total_receivable.toLocaleString()}`);
 }
@@ -11845,6 +11898,7 @@ function rejectPendingPayment(){
   persistAllData();
   document.getElementById('paymentReviewModal').classList.remove('show');
   renderPendingBillsBanner();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): پیمنٹ مسترد ہوتے ہی فوراً کلاؤڈ میں ----------
 
   alert(`❌ پیمنٹ مسترد کر دی گئی۔\nکسٹمر کو یہ وجہ نظر آئے گی: ${p.admin_note}`);
 }
@@ -11994,6 +12048,9 @@ function approvePendingBill(){
   persistAllData();
   pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): بل منظور ہونے پر سٹاک کٹنا فوراً کلاؤڈ میں ----------
   if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): بل منظور ہونے پر والٹ/بقایا بھی فوراً کلاؤڈ میں ----------
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): منظور شدہ بل فوراً Bill History میں کلاؤڈ کے ذریعے ہر ڈیوائس پر ----------
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): status='approved' بھی فوراً کلاؤڈ میں — سیلزمین کے فون پر پینڈنگ لسٹ سے فوراً ہٹے ----------
+  if(p.payment_method === 'cash') pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد بل منظور ہونے پر Cash in Hand بھی فوراً کلاؤڈ میں ----------
 
   document.getElementById('pendingReviewModal').classList.remove('show');
   renderPendingBillsBanner();
@@ -12021,6 +12078,7 @@ function rejectPendingBill(){
 
   document.getElementById('pendingReviewModal').classList.remove('show');
   renderPendingBillsBanner();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): بل مسترد ہوتے ہی فوراً کلاؤڈ میں — سیلزمین کسی بھی ڈیوائس سے وجہ فوراً دیکھ سکے ----------
   alert(`❌ بل مسترد کر دیا گیا۔ ${p.salesman_name} اگلی بار Billing کھولنے پر یہ وجہ دیکھ لے گا۔`);
 }
 
@@ -16050,6 +16108,7 @@ function saveNewExpense(){
   });
   saveToStorage('expenses', expenseData);
   saveToStorage('nextExpenseId', nextExpenseId);
+  pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نیا خرچہ فوراً کلاؤڈ میں — دوسرے فون پر بھی فوراً نظر آئے ----------
   document.getElementById('expenseAddModal').classList.remove('show');
   renderExpenseList();
 }
@@ -16081,6 +16140,7 @@ function saveExpenseEdit(){
   entry.note = document.getElementById('expEditNote').value.trim();
 
   saveToStorage('expenses', expenseData);
+  pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): ایڈٹ ہونا فوراً کلاؤڈ میں ----------
   document.getElementById('expenseEditModal').classList.remove('show');
   renderExpenseList();
 }
@@ -16091,6 +16151,7 @@ function deleteExpenseEntry(){
   if(!confirm('Delete this expense entry ("' + entry.name + '")?')) return;
   expenseData = expenseData.filter(e => e.id !== activeExpenseEntryId);
   saveToStorage('expenses', expenseData);
+  pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): ڈیلیٹ ہونا فوراً کلاؤڈ میں ----------
   document.getElementById('expenseEditModal').classList.remove('show');
   renderExpenseList();
 }
@@ -17962,6 +18023,7 @@ function confirmPaySupplier(){
   closePaySupplierModal();
   persistAllData();
   pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): ادائیگی کے بعد بقایا فوراً کلاؤڈ میں ----------
+  pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد ادائیگی سے Cash in Hand کم ہونا فوراً کلاؤڈ میں ----------
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   openSupplierProfile(s.supplier_id); // پروفائل فوراً تازہ ترین حالت میں دوبارہ کھلے
   sharePaymentReceiptImage(savedPayment.payment_id);
@@ -22122,11 +22184,17 @@ function confirmBatchReturn(invoiceId){
   } else {
     // ---------- کیش ریفنڈ — کیش ان ہینڈ سے رقم منہا کریں ----------
     financeDummy.cashInHand -= totalRefund; // TODO: نقدی لیجر (cash ledger) میں INSERT
+    pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): کیش ریفنڈ سے Cash in Hand کم ہونا فوراً کلاؤڈ میں ----------
   }
 
   // ---------- بل کی مجموعی رقم میں سے واپس شدہ رقم منہا کریں تاکہ آج کی سیل/آمدن خودکار درست ہو جائے ----------
   inv.grand_total = Math.max(0, (inv.grand_total || 0) - totalRefund);
   // TODO: یہاں sales_returns table میں INSERT ہوگا (invoice_id, items, qty, amount, method, date)
+
+  persistAllData();
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 6) اہم فکس: پہلے یہاں سیلز ریٹرن کے بعد invoicesData کبھی کلاؤڈ میں نہیں جاتا تھا —
+  // اس لیے item.returned/returnQty/returnAmount اور بل کی کم شدہ grand_total صرف اسی فون پر رہتی تھی، دوسرے فون کو
+  // پرانا (بغیر ریٹرن والا) بل نظر آتا رہتا تھا جب تک اسی فون سے کوئی نیا بل بن کر پش نہ ہو۔ اب ریٹرن ہوتے ہی فوراً ہر ڈیوائس پر ----------
 
   renderReturnItemModal(invoiceId);
   document.getElementById('billSearchInput') && renderBillHistory();
@@ -22749,6 +22817,7 @@ function saveCollectReceivable(){
     c.wallet_balance -= amount; // ✅ Firestore Sync (قدم 1) — نیچے pushCustomersToCloud() موجود ہے
   } else {
     financeDummy.cashInHand += amount; // TODO: نقدی لیجر (cash ledger) میں INSERT
+    pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد وصولی سے Cash in Hand بڑھنا فوراً کلاؤڈ میں ----------
   }
   // ---------- نوٹ: totalReceivable اب Dashboard پر لائیو حساب ہوتا ہے (customersData سے براہ راست)، اس لیے یہاں الگ سے اپڈیٹ کرنے کی ضرورت نہیں ----------
 
@@ -22776,6 +22845,9 @@ function saveCollectReceivable(){
   closeCollectModal();
   persistAllData();
   pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): وصولی کے بعد بقایا/والٹ فوراً کلاؤڈ میں ----------
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 6) اہم فکس: پہلے یہاں اوپر بلوں کا amount_due بدلنے کے بعد
+  // کبھی invoicesData کلاؤڈ میں نہیں جاتا تھا — اس لیے وصولی صرف اسی فون پر بل کا بقایہ صحیح دکھاتی تھی،
+  // دوسرے فون پر وہی بل ابھی تک "پورا بقایہ" دکھاتا رہتا تھا۔ اب وصولی ہوتے ہی فوراً ہر ڈیوائس پر ----------
   renderPartyList(document.getElementById('partySearchInput').value);
   sharePaymentReceiptImage(savedPayment.payment_id);
 
@@ -23107,6 +23179,13 @@ function saveRecordPaymentModal(){
     s.ledgerHistory = s.ledgerHistory || [];
     s.ledgerHistory.unshift({type:'payment', amount, date:new Date().toISOString().split('T')[0], note});
   }
+
+  // ---------- 🛠️ صدام کی ہدایت (6 ستمبر، قدم 7) اہم فکس: یہ پورا فنکشن پہلے کبھی persistAllData()/کلاؤڈ سنک کال نہیں کرتا تھا —
+  // اس لیے "Record Payment" سے کسٹمر کا بقایہ/سپلائر کا واجب الادا/Cash in Hand صرف اسی وقت (in-memory) کے لیے بدلتا تھا،
+  // ایپ دوبارہ کھلتے ہی یا کلاؤڈ سے تازہ ڈیٹا آتے ہی پرانی حالت واپس آ جاتی تھی۔ اب یہاں سے مکمل محفوظ + کلاؤڈ سنک ----------
+  persistAllData();
+  if(recordPaymentDirection === 'in') pushCustomersToCloud(); else pushSuppliersToCloud();
+  pushFinanceToCloud();
 
   const savedPayment = recordPaymentEntry({
     direction: recordPaymentDirection,
@@ -24085,6 +24164,261 @@ window.addEventListener('online', () => {
   }
 });
 
+/* =====================================================================
+   ☁️ BILLS & INVOICES — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 4)
+   نیا بل (finalize/approve)، Void، مستقل ڈیلیٹ (تنہا یا بلک) — سب فوری کلاؤڈ
+   میں جاتا ہے تاکہ ایڈمن اور سیلزمین دونوں ایک ہی بل ہسٹری دیکھیں (یہی سب سے
+   اہم حصہ تھا)۔ بالکل کسٹمرز/سپلائرز/پراڈکٹس والا ہی full-overwrite +
+   pendingSync pattern استعمال کیا ہے (invoicesData میں بھی edit-in-place
+   ہوتا ہے — void سے status بدلتی ہے، delete سے فہرست سے نکلتا ہے) ----------
+   ===================================================================== */
+const INVOICES_DOC_PATH = 'shopData/invoices';
+let invoicesPollTimer = null;
+
+async function pushInvoicesToCloud(){
+  saveToStorage('invoices', invoicesData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  try{
+    const res = await authFirestoreFetch(`${INVOICES_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(invoicesData) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.invoicesPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.invoicesPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchInvoicesFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی بل تبدیلی (نیا بل، Void، ڈیلیٹ وغیرہ) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
+  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.invoicesPendingSync){
+    const pushed = await pushInvoicesToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${INVOICES_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudInvoices = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudInvoices)) return false;
+    invoicesData = cloudInvoices;
+    saveToStorage('invoices', invoicesData);
+    if(!silent){
+      if(typeof renderBillHistory === 'function' && currentScreenName === 'billhistory') renderBillHistory();
+      if(typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Bill History اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startInvoicesPolling(){
+  stopInvoicesPolling();
+  invoicesPollTimer = setInterval(() => {
+    fetchInvoicesFromCloud(false);
+  }, 12000);
+}
+function stopInvoicesPolling(){
+  if(invoicesPollTimer){ clearInterval(invoicesPollTimer); invoicesPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.invoicesPendingSync){
+    pushInvoicesToCloud();
+  }
+});
+
+/* =====================================================================
+   ☁️ PENDING BILLS — بل جو منظوری کے منتظر ہیں + کسٹمر کی پیمنٹ رسیدیں
+   (صدام کی ہدایت 6 ستمبر، قدم 4) — سیلزمین کا نیا بل جمع ہونا، ایڈمن کا
+   Approve/Reject، کسٹمر ایپ سے پیمنٹ اسکرین شاٹ — سب فوری ہر ڈیوائس پر۔
+   بالکل انوائسز والا ہی full-overwrite + pendingSync pattern ----------
+   ===================================================================== */
+const PENDING_BILLS_DOC_PATH = 'shopData/pendingBills';
+let pendingBillsPollTimer = null;
+
+async function pushPendingBillsToCloud(){
+  saveToStorage('pendingBills', pendingBillsData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextPendingId', nextPendingId);
+  try{
+    const res = await authFirestoreFetch(`${PENDING_BILLS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(pendingBillsData) },
+          nextPendingId: { integerValue: String(nextPendingId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.pendingBillsPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.pendingBillsPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchPendingBillsFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی تبدیلی (نیا بل جمع، Approve/Reject، پیمنٹ رسید) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں ----------
+  if(AppState.settings.pendingBillsPendingSync){
+    const pushed = await pushPendingBillsToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${PENDING_BILLS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudPending = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudPending)) return false;
+    pendingBillsData = cloudPending;
+    const cloudNextId = parseInt(doc.fields?.nextPendingId?.integerValue || '0');
+    if(cloudNextId > nextPendingId) nextPendingId = cloudNextId;
+    saveToStorage('pendingBills', pendingBillsData);
+    saveToStorage('nextPendingId', nextPendingId);
+    if(!silent){
+      if(typeof renderPendingBillsListModal === 'function' && document.getElementById('pendingBillsListModal')?.classList.contains('show')) renderPendingBillsListModal();
+      if(typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner();
+      if(typeof renderRejectionNotice === 'function' && currentScreenName === 'billing') renderRejectionNotice();
+      if(AppState.currentRole === 'salesman' && typeof renderTodaysBillBadge === 'function' && document.getElementById('userTag')){
+        document.getElementById('userTag').innerHTML = '🧑‍💼 سیلزمین: ' + AppState.currentUser.name + renderTodaysBillBadge();
+      }
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Billing اسکرین یا Pending Bills لسٹ کھلی ہو تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startPendingBillsPolling(){
+  stopPendingBillsPolling();
+  pendingBillsPollTimer = setInterval(() => {
+    fetchPendingBillsFromCloud(false);
+  }, 12000);
+}
+function stopPendingBillsPolling(){
+  if(pendingBillsPollTimer){ clearInterval(pendingBillsPollTimer); pendingBillsPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.pendingBillsPendingSync){
+    pushPendingBillsToCloud();
+  }
+});
+
+/* =====================================================================
+   ☁️ FINANCE & EXPENSES — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 7)
+   financeDummy.cashInHand (نقدی ان ہینڈ) اور expenseData (روزمرہ اخراجات کی فہرست) —
+   دونوں ایک ہی shopData/finance ڈاکومنٹ میں محفوظ ہوتے ہیں (چھوٹا ڈیٹا، الگ ڈاکومنٹ کی ضرورت نہیں)۔
+   بالکل customers/suppliers/products/invoices والا ہی full-overwrite + pendingSync pattern ----------
+   ===================================================================== */
+const FINANCE_DOC_PATH = 'shopData/finance';
+let financePollTimer = null;
+
+async function pushFinanceToCloud(){
+  saveToStorage('expenses', expenseData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextExpenseId', nextExpenseId);
+  try{
+    const res = await authFirestoreFetch(`${FINANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          cashInHand: { doubleValue: financeDummy.cashInHand },
+          expensesJson: { stringValue: JSON.stringify(expenseData) },
+          nextExpenseId: { integerValue: String(nextExpenseId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.financePendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.financePendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchFinanceFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی خرچہ/کیش تبدیلی ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
+  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.financePendingSync){
+    const pushed = await pushFinanceToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${FINANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const cloudCash = doc.fields?.cashInHand?.doubleValue ?? doc.fields?.cashInHand?.integerValue;
+    if(cloudCash !== undefined) financeDummy.cashInHand = parseFloat(cloudCash);
+    const jsonStr = doc.fields?.expensesJson?.stringValue;
+    if(jsonStr){
+      const cloudExpenses = JSON.parse(jsonStr);
+      if(Array.isArray(cloudExpenses)) expenseData = cloudExpenses;
+    }
+    const cloudNextId = parseInt(doc.fields?.nextExpenseId?.integerValue || '0');
+    if(cloudNextId > nextExpenseId) nextExpenseId = cloudNextId;
+    saveToStorage('expenses', expenseData);
+    saveToStorage('nextExpenseId', nextExpenseId);
+    if(!silent){
+      if(typeof renderExpenseList === 'function' && document.getElementById('expenseListWrap')) renderExpenseList();
+      if(typeof renderKpiCards === 'function' && currentScreenName === 'dashboard') renderKpiCards();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Expenditure/Dashboard اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startFinancePolling(){
+  stopFinancePolling();
+  financePollTimer = setInterval(() => {
+    fetchFinanceFromCloud(false);
+  }, 12000);
+}
+function stopFinancePolling(){
+  if(financePollTimer){ clearInterval(financePollTimer); financePollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.financePendingSync){
+    pushFinanceToCloud();
+  }
+});
+
 // ---------- Dummy Approval Requests (بعد میں Salesman خود Billing اسکرین سے یہ بھیجے گا) ----------
 const APPROVAL_REQUESTS_SEED_DATA = [
   {request_id:1, requested_by:'Aslam Bhai', action_type:'delete_bill', target:'Invoice #INV-0042', reason:'Customer cancelled the order', status:'pending', date:'2026-07-01'},
@@ -24093,6 +24427,89 @@ const APPROVAL_REQUESTS_SEED_DATA = [
 ];
 let approvalRequests = loadFromStorage('approvalRequests', APPROVAL_REQUESTS_SEED_DATA);
 let nextRequestId = loadFromStorage('nextRequestId', 4);
+
+/* =====================================================================
+   ☁️ APPROVAL REQUESTS — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 8)
+   سیلزمین کی Edit/Delete درخواست بھیجنا اور ایڈمن کا Approve/Reject — دونوں فوری
+   ہر ڈیوائس پر۔ بالکل customers/suppliers/invoices/pendingBills والا ہی
+   full-overwrite + pendingSync pattern استعمال کیا ہے ----------
+   ===================================================================== */
+const APPROVAL_REQUESTS_DOC_PATH = 'shopData/approvalRequests';
+let approvalRequestsPollTimer = null;
+
+async function pushApprovalRequestsToCloud(){
+  saveToStorage('approvalRequests', approvalRequests); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextRequestId', nextRequestId);
+  try{
+    const res = await authFirestoreFetch(`${APPROVAL_REQUESTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(approvalRequests) },
+          nextRequestId: { integerValue: String(nextRequestId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.approvalRequestsPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.approvalRequestsPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchApprovalRequestsFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی درخواست/فیصلہ ابھی کلاؤڈ میں نہیں گیا تو پہلے وہی بھیجیں —
+  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.approvalRequestsPendingSync){
+    const pushed = await pushApprovalRequestsToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${APPROVAL_REQUESTS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudRequests = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudRequests)) return false;
+    approvalRequests = cloudRequests;
+    const cloudNextId = parseInt(doc.fields?.nextRequestId?.integerValue || '0');
+    if(cloudNextId > nextRequestId) nextRequestId = cloudNextId;
+    saveToStorage('approvalRequests', approvalRequests);
+    saveToStorage('nextRequestId', nextRequestId);
+    if(!silent){
+      if(typeof renderApprovalList === 'function' && document.getElementById('approvalListWrap')) renderApprovalList();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Users اسکرین (Approvals ٹیب) پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startApprovalRequestsPolling(){
+  stopApprovalRequestsPolling();
+  approvalRequestsPollTimer = setInterval(() => {
+    fetchApprovalRequestsFromCloud(false);
+  }, 12000);
+}
+function stopApprovalRequestsPolling(){
+  if(approvalRequestsPollTimer){ clearInterval(approvalRequestsPollTimer); approvalRequestsPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.approvalRequestsPendingSync){
+    pushApprovalRequestsToCloud();
+  }
+});
 
 // ---------- Tabs ----------
 function switchUsersTab(tab){
@@ -24484,6 +24901,8 @@ function resolveApproval(requestId, decision){
 
   // TODO: یہاں approval_requests table UPDATE ہوگا، اور 'approved' ہونے پر اصل bill edit/delete کی اجازت ملے گی
   r.status = decision;
+  persistAllData();
+  pushApprovalRequestsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 8): منظور/مسترد ہوتے ہی فوراً کلاؤڈ میں — سیلزمین کسی بھی ڈیوائس سے فوراً دیکھ سکے ----------
   renderApprovalList();
 }
 
@@ -24570,7 +24989,7 @@ async function confirmBulkDeleteWithPin(){
   }
   const countDeleted = selectedBillIds.size;
   invoicesData = invoicesData.filter(inv => !selectedBillIds.has(inv.invoice_id));
-  saveToStorage('invoices', invoicesData);
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): بلک ڈیلیٹ بھی فوراً کلاؤڈ میں (اندر ہی saveToStorage + persistAllData بھی ہو جاتا ہے) ----------
   document.getElementById('bulkDeletePinModal').classList.remove('show');
   alert(`✅ ${countDeleted} bill(s) permanently deleted.`);
   toggleBulkDeleteMode();
@@ -24852,6 +25271,7 @@ function permanentlyDeleteBill(invoiceId){
   invoicesData = invoicesData.filter(i => i.invoice_id !== invoiceId);
   persistAllData();
   renderBillHistory();
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): مستقل ڈیلیٹ ہونا فوراً کلاؤڈ میں — دوسرے فون پر بھی غائب ہو ----------
 }
 
 function adminVoidBill(invoiceId){
@@ -24893,6 +25313,10 @@ function adminVoidBill(invoiceId){
   inv.status = 'voided';
   persistAllData();
   renderBillHistory();
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): Void ہوتے ہی فوراً کلاؤڈ میں — دوسرے فون پر بھی فوراً Voided ٹیب میں چلا جائے ----------
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): اسٹاک واپس آنا بھی فوراً کلاؤڈ میں ----------
+  if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): بقایا/والٹ کی واپسی بھی فوراً کلاؤڈ میں ----------
+  if(inv.payment_method === 'cash') pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد بل Void ہونے پر Cash in Hand کم ہونا بھی فوراً کلاؤڈ میں ----------
   alert('✅ Bill voided — stock and any cash/receivable/wallet effects have been reversed.');
 }
 
@@ -24932,6 +25356,8 @@ function sendApprovalRequest(){
   });
 
   closeRequestActionModal();
+  persistAllData();
+  pushApprovalRequestsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 8): سیلزمین کی نئی درخواست فوراً کلاؤڈ میں — ایڈمن کسی بھی ڈیوائس سے فوراً دیکھ سکے ----------
   alert('Your request has been sent to Admin. It will take effect only after approval.');
 }
 
@@ -28918,6 +29344,13 @@ function performSoftReset(){
   financeDummy.cashInHand = 0;
   AppState.settings.openingCashBalance = 0;
   persistAllData();
+  // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): ری سیٹ کے بعد خالی بل/پینڈنگ لسٹ بھی فوراً کلاؤڈ میں —
+  // ورنہ دوسرا فون اگلی بار پرانا (ری سیٹ سے پہلے کا) ڈیٹا واپس کھینچ لے گا ----------
+  pushInvoicesToCloud();
+  pushPendingBillsToCloud();
+  pushCustomersToCloud(); // بقایا/والٹ زیرو ہونا بھی فوراً کلاؤڈ میں
+  pushSuppliersToCloud(); // واجب الادا زیرو ہونا بھی فوراً کلاؤڈ میں
+  pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): Cash in Hand زیرو ہونا بھی فوراً کلاؤڈ میں ----------
 }
 
 function requestMasterResetAuth(){
@@ -28956,6 +29389,14 @@ function performMasterReset(){
   financeDummy.cashInHand = 0;
   AppState.settings.openingCashBalance = 0;
   persistAllData();
+  // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): مکمل صفر ہونا بھی فوراً کلاؤڈ میں —
+  // ورنہ دوسرا فون اگلی بار پرانا ڈیٹا واپس کھینچ کر "زیرو" حالت غلط ثابت کر دے گا ----------
+  pushInvoicesToCloud();
+  pushPendingBillsToCloud();
+  pushCustomersToCloud();
+  pushSuppliersToCloud();
+  pushProductsToCloud();
+  pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): Cash in Hand زیرو ہونا بھی فوراً کلاؤڈ میں ----------
 }
 
 // ---------- اکاؤنٹ ڈیلیٹ کریں ----------
@@ -31478,6 +31919,7 @@ function updateOpeningCashBalance(value){
   financeDummy.cashInHand += diff;
   AppState.settings.openingCashBalance = newBalance;
   persistAllData();
+  pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): اوپننگ کیش بیلنس بدلنا فوراً کلاؤڈ میں ----------
   renderKpiCards(); // Dashboard کھلا ہو تو فوری اپڈیٹ ہو جائے
 }
 
