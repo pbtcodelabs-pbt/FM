@@ -7170,7 +7170,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر4:20am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر5:04am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9543,12 +9543,20 @@ function goTo(screenName, _isHistoryNav){
   }
   if(screenName === 'billing') {
     renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): بلنگ سکرین پر جاتے ہی سٹاک تازہ منگوائیں — تاکہ دوسرے فون سے ابھی بکی چیز یہاں بھی صفر نظر آئے ----------
+    fetchProductsFromCloud(true).then(added => { if(added) renderBillingProductGrid(); });
+    startProductsPolling();
   }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
       '🧑‍💼 سیلزمین: ' + AppState.currentUser.name + renderTodaysBillBadge();
   }
-  if(screenName === 'products') renderProductList(document.getElementById('productSearchInput').value);
+  if(screenName === 'products'){
+    renderProductList(document.getElementById('productSearchInput').value);
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): Products سکرین پر جاتے ہی تازہ ترین پراڈکٹس/سٹاک منگوائیں ----------
+    fetchProductsFromCloud(false);
+    startProductsPolling();
+  }
   if(screenName === 'categories') renderCategoriesScreen();
   if(screenName === 'customers') enterPartyPage('customers');
   if(screenName === 'suppliers') enterPartyPage('suppliers');
@@ -9559,8 +9567,18 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'billhistory') renderBillHistory();
   if(screenName === 'mydiary') renderMyDiaryScreen();
   if(screenName === 'expenditure') renderExpenditureScreen();
-  if(screenName === 'stockadjustment') renderStockAdjustmentScreen();
-  if(screenName === 'purchaseorders') renderPurchaseOrdersScreen();
+  if(screenName === 'stockadjustment'){
+    renderStockAdjustmentScreen();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): Stock Adjustment سکرین پر جاتے ہی تازہ ترین سٹاک منگوائیں ----------
+    fetchProductsFromCloud(false);
+    startProductsPolling();
+  }
+  if(screenName === 'purchaseorders'){
+    renderPurchaseOrdersScreen();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): Purchase Orders سکرین پر بھی سٹاک تازہ رہے (Receive Shipment یہیں سے ہوتا ہے) ----------
+    fetchProductsFromCloud(true);
+    startProductsPolling();
+  }
 
   // ---------- ☁️ Order Taking / Pending Orders / Recovery List — کلاؤڈ سے تازہ ترین ڈیٹا منگوائیں اور جب تک
   // اسی سکرین پر رہیں، ہر 12 سیکنڈ بعد خودکار fetch ہوتا رہے (تقریباً real-time کا تجربہ)۔
@@ -9569,6 +9587,7 @@ function goTo(screenName, _isHistoryNav){
   stopRecoveryListPolling();
   stopCustomersPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): کسٹمرز کا Firestore polling بھی دوسری اسکرین پر جاتے ہی بند ----------
   stopSuppliersPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): سپلائرز کا Firestore polling بھی دوسری اسکرین پر جاتے ہی بند ----------
+  stopProductsPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پراڈکٹس/سٹاک کا Firestore polling بھی دوسری اسکرین پر جاتے ہی بند ----------
   if(screenName === 'advanceorders'){
     renderAdvanceOrdersScreen();
     fetchAdvanceOrdersFromCloud(false);
@@ -11647,6 +11666,7 @@ function finalizeInvoice(){
   closeCartSheet();
   persistAllData();
   if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): والٹ/بقایا کی تبدیلی خودکار کلاؤڈ میں ----------
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): بل بننے پر سٹاک کٹنا فوراً کلاؤڈ میں ----------
   if(walletApplied > 0){
     alert(`💳 Rs. ${walletApplied.toLocaleString()} auto-deducted from ${customer.name}'s wallet.` + (remainingDue > 0 ? ` Remaining due: Rs. ${remainingDue.toLocaleString()}` : ` Bill fully paid — nothing outstanding.`));
   }
@@ -11967,6 +11987,13 @@ function approvePendingBill(){
   if(p.payment_method === 'cash'){
     financeDummy.cashInHand += grandTotal; // TODO: نقدی لیجر (cash ledger) میں INSERT
   }
+
+  // ---------- 🛠️ صدام کی ہدایت (6 ستمبر، قدم 3) اہم فکس: پہلے یہاں persistAllData() کبھی کال نہیں ہوتا تھا —
+  // اس لیے سیلزمین کا بل منظور ہونے پر سٹاک کٹنا اور کسٹمر کا بقایہ/والٹ صرف اسی وقت (in-memory) کے لیے بدلتا تھا،
+  // ایپ دوبارہ کھلتے ہی یا کلاؤڈ سے تازہ ڈیٹا آتے ہی پرانی حالت واپس آ جاتی تھی۔ اب یہاں سے بھی محفوظ + کلاؤڈ سنک ----------
+  persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): بل منظور ہونے پر سٹاک کٹنا فوراً کلاؤڈ میں ----------
+  if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): بل منظور ہونے پر والٹ/بقایا بھی فوراً کلاؤڈ میں ----------
 
   document.getElementById('pendingReviewModal').classList.remove('show');
   renderPendingBillsBanner();
@@ -13342,6 +13369,7 @@ function toggleProductPresence(productId, makePresent){
   if(!p) return;
   p.isDormant = !makePresent;
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): حاضر/غیر حاضر کی تبدیلی فوراً کلاؤڈ میں ----------
   renderProductList(document.getElementById('productSearchInput')?.value || '');
 }
 
@@ -14572,6 +14600,7 @@ function updateVariantField(productId, variantId, field, value, inputEl){
   // ڈیٹا محفوظ نہ ہونے کا احساس ہوتا تھا۔ اب ہر خانے سے نکلتے ہی (onchange پر) فوری، واضح طور پر محفوظ
   // ہو جاتا ہے — "✅ محفوظ کریں" بٹن دبانے کا انتظار نہیں کرنا پڑتا ---------- -->
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): سٹاک/ریٹ/لیبل کی ہر تبدیلی فوراً کلاؤڈ میں ----------
 
   if(field === 'stock' || field === 'lowStockAt'){
     const isNegative = variant.stock < 0;
@@ -14655,6 +14684,7 @@ function deleteVariant(productId, variantId){
     productsData = productsData.filter(p => p.product_id !== productId);
   }
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): ویریئنٹ/پراڈکٹ ڈیلیٹ ہونا فوراً کلاؤڈ میں ----------
   openProductCards.add(productId);
   rerenderProductListPreserveScroll();
   renderBillingProductGrid();
@@ -14864,6 +14894,7 @@ function saveNewProduct(){
     renderProductList(document.getElementById('productSearchInput').value);
     renderBillingProductGrid();
     persistAllData();
+    pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پراڈکٹ ایڈٹ ہونا فوراً کلاؤڈ میں ----------
     return;
   }
 
@@ -14877,6 +14908,7 @@ function saveNewProduct(){
   productsData.push(newProduct);
   backfillMissingProductSerials(); // ---------- نئی سبزی کو فوراً اگلا خالی سیریل نمبر مل جائے، پرانوں کے نمبر نہیں ہلتے ---------- -->
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): نیا پراڈکٹ فوراً کلاؤڈ میں ----------
 
   closeNewProductModal();
   renderProductList();
@@ -14891,6 +14923,7 @@ function deleteProduct(productId){
   (product.variants || []).forEach(v => idbDeleteImage('product_' + v.variant_id)); // ---------- ہر ویریئنٹ کی تصویر بھی صاف کریں ----------
   productsData = productsData.filter(p => p.product_id !== productId);
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پورا پراڈکٹ ڈیلیٹ ہونا فوراً کلاؤڈ میں ----------
   renderProductList(document.getElementById('productSearchInput').value);
   renderBillingProductGrid();
 }
@@ -16212,6 +16245,7 @@ function resetAllNegativeStockToZero(){
   if(!confirm(`This will reset ${negativeItems.length} item(s) with negative stock to 0. Continue?`)) return;
   negativeItems.forEach(item => { item.variant.stock = 0; });
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): منفی سٹاک زیرو ہونا فوراً کلاؤڈ میں ----------
   renderStockAdjustmentScreen();
 }
 
@@ -21921,6 +21955,7 @@ function confirmShipmentReceipt(){
 
   persistAllData();
   pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): شپمنٹ موصول ہونے پر واجب الادا/PO حیثیت فوراً کلاؤڈ میں ----------
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): شپمنٹ موصول ہونے پر سٹاک بڑھنا فوراً کلاؤڈ میں ----------
   const receivedSupplierId = activeReceiveSupplierId, receivedPoIdx = activeReceivePoIdx;
   closeReceiveShipmentModal();
   renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
@@ -22073,6 +22108,10 @@ function confirmBatchReturn(invoiceId){
     totalRefund += amount;
     returnedNames.push(`${item.name} (${qty})`);
   });
+
+  // ---------- 🛠️ صدام کی ہدایت (6 ستمبر، قدم 3): سٹاک واپسی کیش ہو یا والٹ — دونوں صورتوں میں فوراً محفوظ + کلاؤڈ سنک ----------
+  persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): سیلز ریٹرن پر سٹاک واپس آنا فوراً کلاؤڈ میں ----------
 
   if(method === 'wallet'){
     // ---------- طے شدہ رقم کسٹمر کے والٹ میں شامل کریں ----------
@@ -22260,6 +22299,7 @@ function confirmSupplierReturn(itemIndex){
 
   persistAllData();
   pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): واپسی کے بعد واجب الادا فوراً کلاؤڈ میں ----------
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پرچیز ریٹرن پر سٹاک کم ہونا فوراً کلاؤڈ میں ----------
   renderSupplierReturnModal();
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   alert(`✅ ${qty} unit(s) of "${item.name}" returned to supplier. Rs. ${amount.toLocaleString()} deducted from payable.`);
@@ -23949,6 +23989,99 @@ function stopSuppliersPolling(){
 window.addEventListener('online', () => {
   if(AppState?.settings?.suppliersPendingSync){
     pushSuppliersToCloud();
+  }
+});
+
+/* =====================================================================
+   ☁️ PRODUCTS & STOCK — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 3)
+   پراڈکٹس، ویرینٹس/پیکنگ، خرید/فروخت ریٹس، سٹاک مقدار — نیا پراڈکٹ، ایڈٹ،
+   ڈیلیٹ، Stock Adjustment کی ہر تبدیلی، فروخت (بل بننے پر سٹاک کٹنا)، خریداری
+   (شپمنٹ موصول ہونے پر سٹاک بڑھنا)، اور واپسی (فروخت + خریداری دونوں) — سب پر
+   خودکار سنک۔ بالکل کسٹمرز/سپلائرز والا ہی full-overwrite + pendingSync
+   pattern استعمال کیا ہے (پراڈکٹ ریکارڈز میں بھی edit-in-place ہوتا ہے) ----------
+   ===================================================================== */
+const PRODUCTS_DOC_PATH = 'shopData/products';
+let productsPollTimer = null;
+
+async function pushProductsToCloud(){
+  saveProductsLight(); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں (تصویریں الگ IndexedDB میں)
+  saveToStorage('nextProductId', nextProductId);
+  saveToStorage('nextVariantId', nextVariantId);
+  try{
+    const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(productsData) },
+          nextProductId: { integerValue: String(nextProductId) },
+          nextVariantId: { integerValue: String(nextVariantId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.productsPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.productsPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchProductsFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی پراڈکٹ/سٹاک تبدیلی (نیا آئٹم، ریٹ، سٹاک ایڈجسٹمنٹ، فروخت وغیرہ) ابھی کلاؤڈ میں نہیں گئی
+  // تو پہلے وہی بھیجیں — ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی (مثلاً ابھی کٹا ہوا سٹاک) مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.productsPendingSync){
+    const pushed = await pushProductsToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudProducts = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudProducts)) return false;
+    productsData = cloudProducts;
+    const cloudNextProductId = parseInt(doc.fields?.nextProductId?.integerValue || '0');
+    if(cloudNextProductId > nextProductId) nextProductId = cloudNextProductId;
+    const cloudNextVariantId = parseInt(doc.fields?.nextVariantId?.integerValue || '0');
+    if(cloudNextVariantId > nextVariantId) nextVariantId = cloudNextVariantId;
+    saveProductsLight();
+    saveToStorage('nextProductId', nextProductId);
+    saveToStorage('nextVariantId', nextVariantId);
+    await hydratePhotosFromIndexedDB(); // ---------- کلاؤڈ سے آیا ڈیٹا تصویروں کے بغیر ہے — اسی فون کی IndexedDB سے واپس جوڑ دیں ----------
+    if(!silent){
+      if(typeof renderProductList === 'function' && document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
+      if(typeof renderStockAdjustmentScreen === 'function' && document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+      if(typeof renderBillingProductGrid === 'function' && currentScreenName === 'billing') renderBillingProductGrid();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Products/Stock Adjustment/Purchase Orders/Billing اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startProductsPolling(){
+  stopProductsPolling();
+  productsPollTimer = setInterval(() => {
+    fetchProductsFromCloud(false);
+  }, 12000);
+}
+function stopProductsPolling(){
+  if(productsPollTimer){ clearInterval(productsPollTimer); productsPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.productsPendingSync){
+    pushProductsToCloud();
   }
 });
 
