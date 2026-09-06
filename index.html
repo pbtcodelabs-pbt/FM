@@ -49,13 +49,11 @@
     src:url('./JameelNooriNastaleeq-Kasheeda.ttf') format('truetype');
     font-weight:400; font-style:normal; font-display:swap;
   }
-  /* ---------- 🖋️ PDMS Multan — نیا اردو نستعلیق فونٹ — باقی دو فونٹس کی طرح root میں رکھی جانی چاہیے
-       (Base64 embed نہیں کیا گیا تاکہ index.html کا سائز نہ بڑھے) ---------- */
-  @font-face{
-    font-family:'PDMSMultan';
-    src:url('./PDMS_Multan_Regular.ttf') format('truetype');
-    font-weight:400; font-style:normal; font-display:swap;
-  }
+  /* ---------- 🐛 صدام کی ہدایت (FM6SEPSU4): PDMSMultan والا @font-face یہاں سے ہٹا دیا گیا —
+       یہ فونٹ فائل (PDMS_Multan_Regular.ttf) اصل میں GitHub ریپو میں کبھی موجود ہی نہیں تھی، اس لیے
+       ہر بار پیج کھلتے ہی ایک ناکام (404) نیٹ ورک درخواست جاتی تھی — سست انٹرنیٹ پر یہ قیمتی وقت اور
+       بینڈوڈتھ ضائع کرتی تھی جو اصل ضروری فونٹس (Kasheeda/Regular) کے لوڈ ہونے میں تاخیر کر سکتی تھی۔
+       'PDMSMultan' نام باقی جگہ فونٹ فہرستوں میں بے ضرر طور پر رہنے دیا گیا ہے — براؤزر خودکار نظرانداز کر دے گا ---------- */
   *{box-sizing:border-box; margin:0; padding:0;}
   /* ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر Category والی تمام UI (Billing/Advance Orders/
   Purchase Orders/Stock Adjustment/Products کی کیٹگری ریل، ڈراپ ڈاؤن اور فلٹر) پوری ایپ سے چھپا دی
@@ -1820,12 +1818,19 @@
 
 
   /* --- Customers/Suppliers لسٹ: کمپیکٹ ایک لائن والی قطاریں (بہت سارے ایک ساتھ نظر آئیں) --- */
-  .partyRow{display:flex; align-items:center; gap:8px; background:var(--card); border-radius:10px; padding:8px 10px; margin-bottom:6px; box-shadow:var(--shadow);}
+  /* ---------- 🐞 صدام کی ہدایت (FM6SEPSU4): اصل خرابی — یہ فونٹ کا مسئلہ نہیں تھا، بلکہ لے آؤٹ کا:
+       .prMain پر flex:1 + min-width:0 تھا، اور بڑی رقم (مثلاً Rs. 340,047) کی وجہ سے .prBalance کا خانہ
+       چوڑا ہو جاتا، جس سے نام والا خانہ سکڑ کر تقریباً صفر چوڑائی پر آ جاتا — نام مکمل غائب ہو جاتا،
+       "No phone" جیسا سادہ انگریزی متن بھی "...hone" تک کٹ جاتا (یہی ثابت کرتا ہے کہ یہ فونٹ نہیں، خالص
+       لے آؤٹ سکڑاؤ تھا)۔ اب flex-wrap: اگر جگہ کم پڑے تو رقم/آئیکنز نیچے دوسری لائن پر چلے جائیں گے،
+       نام کے خانے کو کبھی سکیڑا نہیں جائے گا، اور نام کبھی کٹے گا نہیں (ellipsis کی بجائے مکمل نام دو
+       لائنوں میں بھی دکھ سکتا ہے) ---------- */
+  .partyRow{display:flex; flex-wrap:wrap; align-items:center; gap:8px; background:var(--card); border-radius:10px; padding:8px 10px; margin-bottom:6px; box-shadow:var(--shadow);}
   .prDeleteBtn{flex:0 0 auto; background:#fef2f2; color:var(--danger); border:none; border-radius:8px; width:32px; height:32px; font-size:15px; cursor:pointer;}
   .partyRow .prAvatar{width:32px; height:32px; border-radius:50%; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:14px; flex:0 0 32px;}
-  .partyRow .prMain{flex:1; min-width:0; cursor:pointer;}
-  .partyRow .prName{font-size:14.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .partyRow .prPhone{font-size:10.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .partyRow .prMain{flex:1 1 150px; min-width:150px; cursor:pointer;}
+  .partyRow .prName{font-size:14.5px; font-weight:800; white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; word-break:break-word;}
+  .partyRow .prPhone{font-size:10.5px; color:var(--muted); white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere;}
   .partyRow .prBalance{flex:0 0 auto; font-size:12px; font-weight:800; text-align:center; margin-right:4px; white-space:nowrap;}
   .partyRow .prBalance.receivable{color:var(--danger);}
   .partyRow .prBalance.payable{color:var(--warning);}
@@ -7210,7 +7215,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر3:26pm';
+const APP_BUILD_VERSION = 'اتوار6ستمبر7:18pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
