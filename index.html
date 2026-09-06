@@ -5829,13 +5829,33 @@
 
     <!-- ADD PAYMENT ACCOUNT MODAL -->
     <!-- IMAGE SHARE PREVIEW MODAL — کارڈ/پوسٹر بنانے کے فوراً بعد یہاں دکھایا جائے، سیدھا شیئر شیٹ پر نہیں کودنا ---------- -->
-    <div class="modalOverlay" id="imageSharePreviewModal" style="z-index:960;" onclick="if(event.target===this) closeImageSharePreview()">
+    <div class="modalOverlay" id="imageSharePreviewModal" style="z-index:970;" onclick="if(event.target===this) closeImageSharePreview()">
       <div class="modalBox" style="max-width:360px; text-align:center;">
         <h3 id="imageSharePreviewTitle">Preview</h3>
         <img id="imageSharePreviewImg" style="width:100%; border-radius:12px; margin:8px 0; box-shadow:0 4px 14px rgba(0,0,0,.18);">
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeImageSharePreview()">Cancel</button>
           <button class="saveBtn" style="background:#25D366;" onclick="confirmImageShare()">💬 Share</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 🔍 صدام کی ہدایت (FM6SEPSU3): ریویو/زوم پینل — پرنٹ یا شیئر کرنے سے پہلے رپورٹ کو نزدیک سے،
+         بڑا کر کے دیکھنے کے لیے — پنچ زوم کے علاوہ +/- بٹن اور سلائیڈر سے بھی سائز بدل سکتے ہیں ---------- -->
+    <div class="modalOverlay" id="imageReviewModal" style="z-index:975; background:rgba(15,23,42,.92);" onclick="if(event.target===this) closeImageReviewModal()">
+      <div class="modalBox" style="max-width:96vw; width:96vw; max-height:94vh; padding:10px; display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex:0 0 auto;">
+          <h3 id="imageReviewTitle" style="margin:0; font-size:15px;">🔍 ریویو</h3>
+          <span onclick="closeImageReviewModal()" style="cursor:pointer; font-size:22px; color:var(--muted); padding:4px;">✖</span>
+        </div>
+        <div id="imageReviewScroll" style="flex:1 1 auto; overflow:auto; touch-action:pinch-zoom pan-x pan-y; background:#f1f5f9; border-radius:10px; display:flex; align-items:flex-start; justify-content:center; padding:10px;">
+          <img id="imageReviewImg" style="max-width:none; transform-origin:top center; box-shadow:0 4px 14px rgba(0,0,0,.25); border-radius:6px; background:#fff;">
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px; flex:0 0 auto;">
+          <button onclick="setImageReviewZoom(-25)" style="flex:0 0 44px; padding:10px 0; font-size:18px; font-weight:800; border:1px solid #dbe1ea; border-radius:10px; background:#fff; cursor:pointer;">−</button>
+          <input type="range" id="imageReviewZoomSlider" min="50" max="400" step="5" value="100" oninput="setImageReviewZoom(0, this.value)" style="flex:1;">
+          <button onclick="setImageReviewZoom(25)" style="flex:0 0 44px; padding:10px 0; font-size:18px; font-weight:800; border:1px solid #dbe1ea; border-radius:10px; background:#fff; cursor:pointer;">+</button>
+          <span id="imageReviewZoomVal" style="flex:0 0 46px; text-align:center; font-size:12.5px; font-weight:700; color:var(--muted);">100%</span>
         </div>
       </div>
     </div>
@@ -5851,6 +5871,7 @@
         <canvas id="stockReportCanvas" style="width:100%; border-radius:10px; margin:6px 0; box-shadow:0 4px 14px rgba(0,0,0,.18); background:#fff;"></canvas>
         <div class="modalBtns" style="flex-wrap:wrap;">
           <button class="cancelBtn" onclick="closeStockValueReport()">بند کریں</button>
+          <button class="saveBtn" style="background:#7c3aed;" onclick="openImageReviewModal(document.getElementById('stockReportCanvas'), '📊 سٹاک رپورٹ')">🔍 ریویو</button>
           <button class="saveBtn" style="background:#0f766e;" onclick="printStockValueReport()">🖨️ پرنٹ (A4)</button>
           <button class="saveBtn" style="background:#25D366;" onclick="shareStockValueReport()">💬 واٹس ایپ شیئر</button>
         </div>
@@ -5867,6 +5888,7 @@
         <canvas id="laborReportCanvas" style="width:100%; border-radius:10px; margin:6px 0; box-shadow:0 4px 14px rgba(0,0,0,.18); background:#fff;"></canvas>
         <div class="modalBtns" style="flex-wrap:wrap;">
           <button class="cancelBtn" onclick="closeLaborReport()">بند کریں</button>
+          <button class="saveBtn" style="background:#7c3aed;" onclick="openImageReviewModal(document.getElementById('laborReportCanvas'), '💪 مزدوری فروخت رپورٹ')">🔍 ریویو</button>
           <button class="saveBtn" style="background:#0f766e;" onclick="printLaborReport()">🖨️ پرنٹ (A4)</button>
           <button class="saveBtn" style="background:#25D366;" onclick="shareLaborReport()">💬 واٹس ایپ شیئر</button>
         </div>
@@ -7188,7 +7210,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر11:03am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر1:27pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16609,6 +16631,10 @@ async function printStockValueReport(){
 function shareStockValueReport(){
   const canvas = document.getElementById('stockReportCanvas');
   if(!canvas) return;
+  // ---------- 🐛 صدام کی ہدایت (FM6SEPSU3): پہلے یہاں رپورٹ کا موڈل کھلا رہ جاتا تھا اور شیئر پریویو اسی کے
+  // نیچے (پیچھے) کھل جاتا تھا — دونوں کا z-index برابر تھا، اسی لیے شیئر بٹن دبانے پر کچھ نظر نہیں آتا تھا،
+  // صرف رپورٹ موڈل بند کرنے پر ہی شیئر پریویو "اچانک" نظر آتا۔ اب رپورٹ موڈل پہلے بند، پھر شیئر پریویو کھلتا ہے ---------- -->
+  closeStockValueReport();
   showImageSharePreview(canvas, 'Stock_Report.png', '📊 سٹاک رپورٹ', 'سٹاک رپورٹ');
 }
 
@@ -16795,6 +16821,7 @@ async function printLaborReport(){
 function shareLaborReport(){
   const canvas = document.getElementById('laborReportCanvas');
   if(!canvas) return;
+  closeLaborReport(); // ---------- 🐛 صدام کی ہدایت (FM6SEPSU3): سٹاک رپورٹ جیسا ہی فکس ----------
   showImageSharePreview(canvas, 'Labor_Report.png', '💪 مزدوری فروخت رپورٹ', 'مزدوری رپورٹ');
 }
 
@@ -29893,6 +29920,36 @@ async function confirmImageShare(){
     }
     closeImageSharePreview();
   }, 'image/png');
+}
+
+// ---------- 🔍 صدام کی ہدایت (FM6SEPSU3): ریویو/زوم موڈل — پرنٹ/شیئر سے پہلے رپورٹ کو نزدیک سے، بڑا کر کے
+// چیک کرنے کے لیے۔ سلائیڈر اور +/- بٹن دونوں سے سائز بدلا جا سکتا ہے، سکرول کر کے ہر کونہ دیکھا جا سکتا ہے،
+// اور موبائل پر انگلیوں سے پنچ زوم بھی خودکار کام کرے گا (کنٹینر کا touch-action:pinch-zoom اسی لیے رکھا گیا) ---------- -->
+let imageReviewZoomLevel = 100;
+function openImageReviewModal(canvas, title){
+  if(!canvas) return;
+  imageReviewZoomLevel = 100;
+  document.getElementById('imageReviewTitle').textContent = title || '🔍 ریویو';
+  const img = document.getElementById('imageReviewImg');
+  img.src = canvas.toDataURL('image/png');
+  img.style.width = canvas.width + 'px';
+  img.style.transform = 'scale(1)';
+  document.getElementById('imageReviewZoomSlider').value = 100;
+  document.getElementById('imageReviewZoomVal').textContent = '100%';
+  document.getElementById('imageReviewModal').classList.add('show');
+}
+function closeImageReviewModal(){
+  document.getElementById('imageReviewModal').classList.remove('show');
+}
+function setImageReviewZoom(delta, sliderVal){
+  if(sliderVal !== undefined){
+    imageReviewZoomLevel = Math.max(50, Math.min(400, Number(sliderVal) || 100));
+  } else {
+    imageReviewZoomLevel = Math.max(50, Math.min(400, imageReviewZoomLevel + delta));
+  }
+  document.getElementById('imageReviewImg').style.transform = `scale(${imageReviewZoomLevel/100})`;
+  document.getElementById('imageReviewZoomSlider').value = imageReviewZoomLevel;
+  document.getElementById('imageReviewZoomVal').textContent = imageReviewZoomLevel + '%';
 }
 
 // ---------- کسٹمر/سپلائر کی رنگین، شیئر ایبل "پروفائل پوسٹر" — تصویر، نام، موبائل نمبر (سپلائر کے لیے بینک اکاؤنٹ کی تفصیل بھی) ----------
