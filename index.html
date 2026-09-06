@@ -7188,7 +7188,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر10:31am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر11:03am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12284,6 +12284,46 @@ let productsData = loadFromStorage('products', PRODUCTS_SEED_DATA);
 // یہ صرف "ویرینٹ کی قسم" (پیکنگ کی قسم — ٹوکری/شاپر/کارٹن وغیرہ) کی ایک قابلِ ترمیم فہرست ہے، جو نیا پراڈکٹ
 // بناتے وقت ڈراپ ڈاؤن سے منتخب کی جاتی ہے اور خودکار پراڈکٹ کے نام کے ساتھ جُڑ جاتی ہے ---------- -->
 let productVariantTypes = loadFromStorage('productVariantTypes', ['فی کلو', 'ٹوکری', 'شاپر', 'کارٹن', 'دھڑی', 'پیکٹ']);
+
+// ---------- 📦 صدام کی ہدایت (FM6SEPSU2): نام سے پیکنگ/ویرینٹ الگ کرنے کا ایک ہی مشترکہ فنکشن — پوری ایپ میں
+// (بل، PO، Receive Shipment وغیرہ) استعمال ہوتا ہے۔ پہلے یہ صرف اسی وقت کام کرتا تھا جب item.label پہلے سے
+// موجود ہو اور نام کے آخر سے میل کھائے — لیکن پرانے ڈیٹا میں جہاں پیکنگ کا لفظ (فی کلو/شاپر/کاٹن/بوری/توڑا وغیرہ)
+// خود نام کے اندر ہی ٹائپ ہوا تھا (item.label خالی)، وہاں نام سے پیکنگ کبھی الگ نہیں ہوتی تھی — بل پر
+// "ٹماٹر فی کلو" یا "کھیرا شاپر فی کلو" جیسا پورا نام ہی نظر آتا رہتا تھا، پیکنگ کا خانہ خالی رہتا۔
+// اب اگر item.label خالی ہو تو معلوم پیکنگ الفاظ کی فہرست سے خودکار پتا لگا کر نام سے کاٹ دیا جاتا ہے —
+// سافٹ ویئر کے اندر (پراڈکٹس/سٹاک پیج) اصل محفوظ شدہ نام کو کچھ نہیں ہوتا، صرف دکھاوے (پرنٹ/لسٹ) کے لیے ---------- -->
+function splitItemNamePacking(name, existingLabel){
+  let baseName = (name || '').toString().trim();
+  let packing = (existingLabel || '').toString().trim();
+  if(packing && baseName.endsWith(packing) && baseName.length > packing.length){
+    baseName = baseName.slice(0, baseName.length - packing.length).trim();
+    return {baseName, packing};
+  }
+  if(packing) return {baseName, packing}; // لیبل موجود ہے مگر نام سے میل نہیں کھاتا — نام کو چھیڑیں نہیں
+  const knownWords = Array.from(new Set([
+    ...(typeof productVariantTypes !== 'undefined' && Array.isArray(productVariantTypes) ? productVariantTypes : []),
+    'ٹوکری','پیٹی','کاٹن','کارٹن','توڑا','جالی','بوری','گٹھ','درجن','بنڈل','گول کدو','شاپر','پیکٹ','منشی','روپے','دھڑی','کلو'
+  ].filter(Boolean)));
+  const candidates = new Set(['فی کلو']);
+  knownWords.forEach(w => {
+    candidates.add(w);
+    candidates.add('فی ' + w);
+    candidates.add(w + ' فی کلو');
+  });
+  const sorted = Array.from(candidates).sort((a, b) => b.length - a.length);
+  for(const suf of sorted){
+    if(baseName === suf) continue; // پورا نام ہی خالی نہ ہو جائے
+    if(baseName.endsWith(' ' + suf) && baseName.length > suf.length + 1){
+      baseName = baseName.slice(0, baseName.length - suf.length - 1).trim();
+      return {baseName, packing: suf};
+    }
+    if(baseName.endsWith(suf) && baseName.length > suf.length){
+      baseName = baseName.slice(0, baseName.length - suf.length).trim();
+      return {baseName, packing: suf};
+    }
+  }
+  return {baseName, packing};
+}
 let nextProductId = loadFromStorage('nextProductId', 10);
 let nextVariantId = loadFromStorage('nextVariantId', 28);
 
@@ -21476,10 +21516,9 @@ async function renderPoToCanvas(){
   po.items.forEach((item, idx) => {
     const rowBaseline = getBaseline(hLineY, rowH, bodyFontPx);
     // ---------- Item کے نام کے ساتھ ویریئنٹ نہ دہرائیں — وہ اب اپنے الگ Variant کالم میں ہے ----------
-    let baseName = item.name;
-    if(item.label && baseName.endsWith(item.label)){
-      baseName = baseName.slice(0, baseName.length - item.label.length).trim();
-    }
+    const _split_po = splitItemNamePacking(item.name, item.label);
+    let baseName = _split_po.baseName;
+    const poItemPacking = _split_po.packing;
     let displayName = baseName;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0,-1); }
@@ -21493,7 +21532,7 @@ async function renderPoToCanvas(){
     ctx.restore();
 
     ctx.textAlign = 'center';
-    let variantText = item.label || '—';
+    let variantText = poItemPacking || '—';
     while(ctx.measureText(variantText).width > maxVariantWidth && variantText.length > 1){ variantText = variantText.slice(0,-1); }
     ctx.fillText(variantText, (colX[2]+colX[3])/2, rowBaseline);
 
@@ -21894,15 +21933,14 @@ function renderReceiveShipmentCart(){
       total += lineTotal;
       // ---------- Item کے نام سے ویریئنٹ الگ کریں — باقی ایپ کی طرح یہاں بھی "چینی Kg" کی بجائے
       // نام اور Variant الگ الگ خانوں میں نظر آئیں ----------
-      let baseName = item.name;
-      if(item.label && baseName.endsWith(item.label)){
-        baseName = baseName.slice(0, baseName.length - item.label.length).trim();
-      }
+      const _split_rs = splitItemNamePacking(item.name, item.label);
+      let baseName = _split_rs.baseName;
+      const rsItemPacking = _split_rs.packing;
       return `
         <div class="reviewItemRow">
           <span class="riNo">${idx+1}</span>
           <span class="riName">${baseName}</span>
-          <span class="riVariant">${item.label || '—'}</span>
+          <span class="riVariant">${rsItemPacking || '—'}</span>
           <input type="number" class="riQty" min="0" value="${item.qty}" onfocus="this.select()" onchange="updateReceiveQty(${idx}, parseInt(this.value)||0)">
           <input type="number" class="riRate" min="0" value="${item.cost}" onfocus="this.select()" onchange="updateReceiveCost(${idx}, parseFloat(this.value)||0)">
           <span class="riLine">Rs. ${lineTotal.toLocaleString()}</span>
@@ -25758,13 +25796,11 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     const remainingQty = Math.max(0, item.qty - returnedQty);
     const isFullyReturned = returnedQty > 0 && remainingQty === 0;
 
-    // ---------- 📦 صدام کی ہدایت (6 ستمبر): نام سے پیکنگ (شاپر/کارٹن/توڑا/بوری/گٹی وغیرہ) الگ کریں —
-    // یہ الگ کالم میں چھپے گی، نام کے ساتھ جُڑی ہوئی نہیں دکھے گی ---------- -->
-    let baseName = item.name;
-    const packLabel = item.label || '';
-    if(packLabel && baseName.endsWith(packLabel)){
-      baseName = baseName.slice(0, baseName.length - packLabel.length).trim();
-    }
+    // ---------- 📦 صدام کی ہدایت (6 ستمبر / FM6SEPSU2): نام سے پیکنگ (شاپر/کارٹن/توڑا/بوری/گٹی/فی کلو وغیرہ) الگ کریں —
+    // یہ الگ کالم میں چھپے گی، نام کے ساتھ جُڑی ہوئی نہیں دکھے گی — پرانا ڈیٹا ہو (item.label خالی) تب بھی خودکار کٹے گی ---------- -->
+    const _split_th = splitItemNamePacking(item.name, item.label);
+    let baseName = _split_th.baseName;
+    let packLabel = _split_th.packing;
     let displayName = (isHighlighted ? '👉 ' : '') + baseName;
     ctx.textAlign = 'right';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){
@@ -26219,10 +26255,9 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     const isFullyReturnedA4 = returnedQtyA4 > 0 && remainingQtyA4 === 0;
 
     // ---------- Item کے نام سے ویریئنٹ (Kg/Packet/Tikki وغیرہ) نہ دہرائیں — وہ اب اپنے الگ Variant کالم میں ہے ----------
-    let baseNameA4 = item.name;
-    if(item.label && baseNameA4.endsWith(item.label)){
-      baseNameA4 = baseNameA4.slice(0, baseNameA4.length - item.label.length).trim();
-    }
+    const _split_a4 = splitItemNamePacking(item.name, item.label);
+    let baseNameA4 = _split_a4.baseName;
+    const a4ItemPacking = _split_a4.packing;
     let displayName = (isHighlighted ? '👉 ' : '') + baseNameA4;
     ctx.font = FI('13px'); // ---------- 🔤 صدام کی ہدایت (FM5SEPTH): سبزیوں کے نام کا اپنا الگ فونٹ ----------
     ctx.textAlign = 'left';
@@ -26242,7 +26277,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.restore();
     // ---------- Variant کالم — اپنے خانے سے کبھی باہر نہیں نکلے گا ----------
     ctx.textAlign = 'center';
-    const variantTextA4 = item.label || '—';
+    const variantTextA4 = a4ItemPacking || '—';
     fitA4Font(variantTextA4, maxVariantWidthA4, Math.round(13*fscale));
     ctx.save();
     ctx.beginPath();
