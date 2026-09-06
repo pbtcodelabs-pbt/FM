@@ -1939,6 +1939,12 @@
       border-top:1px solid rgba(255,255,255,.15);
     }
     #utilityBarSpacer{flex:1 1 auto;}
+    /* ---------- ☎️ صدام کی ہدایت (FM6SEPSU): ہاٹ لائن بٹن — گیئر اور مینیو کے درمیان، چھوٹا اور کمپیکٹ ---------- */
+    #hotlineBtn{
+      flex:0 0 auto; background:rgba(255,255,255,.16); border:none; color:#fff;
+      padding:7px 12px; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer;
+      white-space:nowrap;
+    }
     #hamburgerBtn, #quickLogoutBtn{
       flex:0 0 auto; background:rgba(255,255,255,.16); border:none; color:#fff;
       padding:9px 14px; border-radius:10px; font-size:14px; font-weight:800; cursor:pointer;
@@ -2574,6 +2580,9 @@
   <div id="utilityBar">
     <button id="topbarPaintBtn" onclick="openFontPaintPanel(event)" title="Font / اردو فونٹ">🎨</button>
     <button id="topbarSettingsBtn" onclick="toggleHomeSettingsPanel(event)" title="Settings">⚙️</button>
+    <!-- ---------- ☎️ صدام کی ہدایت (FM6SEPSU): ہاٹ لائن بٹن — یہاں پہلے فوری رابطہ کا بڑا ڈبہ ہوم پیج پر مستقل نظر آتا تھا،
+         اب اس کی جگہ یہ چھوٹا بٹن ہے، دبانے پر وہی کسٹمر/رابطہ پینل پاپ اپ کی صورت میں کھلتا ہے ---------- -->
+    <button id="hotlineBtn" onclick="toggleQuickContactPanel(event)" title="ہاٹ لائن">☎️ ہاٹ لائن</button>
     <span id="utilityBarSpacer"></span>
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰ مینیو</button>
     <button id="quickLogoutBtn" onclick="logout()" title="لاگ آؤٹ">🚪 لاگ آؤٹ</button>
@@ -2665,6 +2674,11 @@
   <div id="mainArea">
 
     <div class="homeQuickPanel wide" id="homeSettingsPanel"></div>
+    <!-- ---------- 📇 صدام کی ہدایت (FM6SEPSU): "فوری رابطہ" باکس اب ہوم پیج پر ہمیشہ نظر آنے والا نہیں —
+         یہ اب اسی طرح ایک چھوٹا پاپ اپ پینل ہے جیسے ⚙️/🎨 بٹن کھولتے ہیں، ☎️ ہاٹ لائن بٹن سے کھلتا ہے ---------- -->
+    <div class="homeQuickPanel wide" id="quickContactPopupPanel">
+      <div style="padding:10px 12px 4px;" id="quickContactPanelBody"></div>
+    </div>
 
     <!-- BILLING (Admin + Salesman دونوں کو نظر آتی ہے) — پورا صفحہ صرف پراڈکٹس کے لیے، باقی سب فلوٹنگ کارٹ بار میں -->
     <!-- ===================== 🏠 HOME SCREEN — اصل مین پیج، لاگ ان کے فوراً بعد یہی کھلتا ہے ===================== -->
@@ -2715,11 +2729,9 @@
       <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
       <div id="homeUnfinishedCartCard" style="display:none;"></div>
 
-      <!-- ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ — Admin کے لیے مکمل ورکر/کسٹمر ڈراپ ڈاؤن + PIN،
-           Salesman کے لیے صرف ایڈمن سے رابطہ (بغیر نمبر دکھائے، بغیر PIN کے) ---------- -->
-      <div style="background:#fff; border:1.5px solid #dbe1ea; border-radius:14px; padding:12px; margin-bottom:12px;" id="quickContactWrap">
-        <div id="quickContactPanelBody"></div>
-      </div>
+      <!-- ---------- 📇 صدام کی ہدایت (FM6SEPSU): یہاں سے ہٹا دیا گیا — یہ اب ہمیشہ جگہ نہیں گھیرتا،
+           بلکہ ☎️ ہاٹ لائن بٹن (اوپر Topbar میں) دبانے پر ایک چھوٹا پاپ اپ پینل کھلتا ہے
+           (دیکھیں #quickContactPopupPanel + toggleQuickContactPanel) — نیچے آئیکن گرڈ اب اوپر آ گیا ---------- -->
 
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — Admin کے لیے اب انہی کی منتخب کردہ Shortcut اسکرینیں،
            Salesman کے لیے اسے Assign کی گئی اسکرینیں ---------- -->
@@ -7176,7 +7188,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر8:39am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر10:31am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -27749,6 +27761,38 @@ window.addEventListener('resize', () => {
 });
 window.addEventListener('scroll', () => {
   if(homeSettingsPanelOpen) positionHomeQuickPanel(homeSettingsTriggerBtnId, 'homeSettingsPanel');
+}, true);
+
+// ---------- ☎️ صدام کی ہدایت (FM6SEPSU): ہاٹ لائن بٹن — "فوری رابطہ" پینل اب یہاں سے پاپ اپ کی صورت میں کھلتا ہے،
+// بالکل ⚙️/🎨 پینل جیسا ہی انداز (positionHomeQuickPanel اسی فنکشن کا دوبارہ استعمال) ---------- -->
+let quickContactPanelOpen = false;
+function toggleQuickContactPanel(e){
+  if(e) e.stopPropagation();
+  quickContactPanelOpen = !quickContactPanelOpen;
+  const panel = document.getElementById('quickContactPopupPanel');
+  if(panel) panel.classList.toggle('open', quickContactPanelOpen);
+  if(quickContactPanelOpen){
+    renderQuickContactPanel();
+    positionHomeQuickPanel('hotlineBtn', 'quickContactPopupPanel');
+  }
+}
+function closeQuickContactPanel(){
+  quickContactPanelOpen = false;
+  document.getElementById('quickContactPopupPanel')?.classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const qp = document.getElementById('quickContactPopupPanel');
+  const qb = document.getElementById('hotlineBtn');
+  const path = typeof e.composedPath === 'function' ? e.composedPath() : [e.target];
+  const clickedInsideQuickContact = !!(qp && path.includes(qp));
+  const clickedHotlineBtn = !!(qb && path.includes(qb));
+  if(quickContactPanelOpen && !clickedInsideQuickContact && !clickedHotlineBtn) closeQuickContactPanel();
+});
+window.addEventListener('resize', () => {
+  if(quickContactPanelOpen) positionHomeQuickPanel('hotlineBtn', 'quickContactPopupPanel');
+});
+window.addEventListener('scroll', () => {
+  if(quickContactPanelOpen) positionHomeQuickPanel('hotlineBtn', 'quickContactPopupPanel');
 }, true);
 
 // ---------- 🏷️ پراڈکٹ کارڈ کا انداز — سائز/موٹائی/فونٹ/رنگ/پس منظر، سب کچھ خود منتخب کریں ----------
