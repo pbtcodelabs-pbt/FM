@@ -130,6 +130,10 @@
   #loginMarqueeWrap{
     width:100%; height:32px; overflow:hidden; order:9; margin:8px 0 -6px;
     position:relative;
+    /* ---------- 🐞 صدام کی ہدایت (FM6SEPSU7): پہلے یہ پٹی #mobileTopbar کے اندرونی پیڈنگ (6px 10px) کی وجہ سے
+         دونوں طرف سے تھوڑی اندر کو سکڑی ہوئی نظر آتی تھی — TV بریکنگ نیوز پٹی جیسی مکمل edge-to-edge نہیں تھی۔
+         اب منفی مارجن سے اسی پیڈنگ کو توڑ کر پٹی کو والدین کے پیڈنگ سے باہر نکال کر مکمل چوڑائی تک پھیلا دیا گیا ---------- */
+    margin-left:-10px; margin-right:-10px; width:calc(100% + 20px);
     /* ---------- 🎨 صدام کی ہدایت (FM4SEPFR08): نیلا مدھم نہیں، خوبصورت/رچ نیلا — چمک برقرار رکھی گئی ---------- */
     background:linear-gradient(90deg, #1e40af, #3b82f6, #1e40af);
     /* ---------- 🥇 صدام کی ہدایت (FM4SEPFR08): پہلے سے تھوڑا زیادہ رچ/خوبصورت سنہری بارڈر ---------- */
@@ -274,13 +278,16 @@
   .hbcChatBtn svg{display:block; margin:0 auto;}
 
   /* --- 📅 Subscription Boxes — تین الگ خوبصورت ڈبے، ایک ہی لائن میں، صرف Billing پیج پر --- */
-  .subBoxRow{display:flex; gap:6px; margin-bottom:8px; background:#f4f1ea; padding:8px; border-radius:14px;}
-  .subBox{flex:1; padding:5px 4px; border-radius:10px; text-align:center; background:#eef2ff;}
+  /* ---------- 🐞 صدام کی ہدایت (FM6SEPSU7): سبسکرپشن والے تین ڈبے (Free Trial/Expires/Remaining) بہت اونچے
+       (اوپر سے نیچے چوڑے) تھے — لیبل اور قدر الگ الگ لائن میں تھے۔ اب باریک پٹی: لیبل + قدر ایک ہی لائن میں،
+       پیڈنگ اور مارجن بہت کم — تاکہ نیچے کے آئیکنز کے لیے زیادہ جگہ خالی ہو ---------- */
+  .subBoxRow{display:flex; gap:5px; margin-bottom:6px; background:#f4f1ea; padding:4px 5px; border-radius:9px;}
+  .subBox{flex:1; padding:3px 3px; border-radius:7px; text-align:center; background:#eef2ff; display:flex; align-items:baseline; justify-content:center; gap:3px; white-space:nowrap; overflow:hidden;}
   .subBox#subBoxStart{background:#e0f2fe;}
   .subBox#subBoxEnd{background:#fef3c7;}
   .subBox#subBoxDays{background:#dcfce7;}
-  .subBoxLabel{font-size:8.5px; font-weight:700; text-transform:uppercase; opacity:.75; margin-bottom:1px;}
-  .subBoxVal{font-size:11px; font-weight:800;}
+  .subBoxLabel{font-size:7.5px; font-weight:700; text-transform:uppercase; opacity:.75; flex:0 0 auto;}
+  .subBoxVal{font-size:9.5px; font-weight:800; flex:0 0 auto; overflow:hidden; text-overflow:ellipsis;}
 
   /* --- 🔔 Role Toast — لاگ ان کے بعد چند سیکنڈ کے لیے نظر آئے --- */
   .roleToast{
@@ -5595,6 +5602,11 @@
       <div id="devCloudSyncStatus" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:8px 12px; margin-bottom:12px; font-size:11.5px; font-weight:600; text-align:left; line-height:1.5;"></div>
       <button class="testPrintBtn" style="margin-bottom:14px; background:#eef2ff; color:var(--primary-dark);" onclick="devEnterAppDirectly()">🚀 Enter App Now (skip PIN / activation code)</button>
 
+      <!-- ---------- 🔍 صدام کی ہدایت (FM6SEPSU8): آرڈر سنکرونائزیشن تشخیصی بٹن — تاکہ اندازوں کی بجائے
+           اصل ثبوت (لوکل ڈیٹا، کلاؤڈ ڈیٹا، اصل خرابی کا پیغام) نظر آئے۔ کسٹمر اور ایڈمن دونوں کے فون پر
+           یہ چلا کر screenshot بھیجیں تو اصل خرابی صاف پتا چل جائے گی ---------- -->
+      <button class="testPrintBtn" style="margin-bottom:14px; background:#fef3c7; color:#92400e;" onclick="runOrderSyncDiagnostic()">🔍 آرڈر Sync تشخیص چلائیں</button>
+
       <!-- ---------- 📢 صدام کی ہدایت (5 ستمبر): سلائیڈنگ پیغامات — صرف Developer Panel سے، عام Admin کے لیے نہیں —
            ہر پیغام کا اپنا آن/آف، رنگ، رفتار (سیکنڈ)، سمت (دائیں/بائیں)، اور اگلے پیغام تک وقفہ الگ سے سیٹ ہو سکتا ہے۔
            💡 صدام کی ہدایت (FM5SEPTH): لائیو پریویو + پٹی کا اپنا بیک گراؤنڈ/بارڈر رنگ + چمک کنٹرول شامل کیا گیا ---------- -->
@@ -7215,7 +7227,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر7:49pm';
+const APP_BUILD_VERSION = 'اتوار6ستمبر8:15pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -23897,6 +23909,52 @@ window.addEventListener('online', () => {
 const ADVANCE_ORDERS_DOC_PATH = 'shopData/advanceOrders';
 let advanceOrdersPollTimer = null;
 
+// ---------- 🔍 صدام کی ہدایت (FM6SEPSU8): آرڈر Sync تشخیص — کسٹمر یا ایڈمن، کسی بھی فون سے چلا کر
+// screenshot بھیجیں تو پتا چل جائے: مقامی (لوکل) ڈیٹا کیا ہے، کلاؤڈ پر اصل میں کیا محفوظ ہے،
+// اور fetch/push میں کوئی خرابی آ رہی ہے یا نہیں (window.__cloudSyncError میں محفوظ ہوتی ہے) ---------- -->
+async function runOrderSyncDiagnostic(){
+  const lines = [];
+  lines.push('📱 رول: ' + AppState.currentRole);
+  lines.push('🆔 Device UID: ' + getOrCreateDeviceUID());
+  lines.push('');
+  lines.push('--- مقامی (لوکل) ڈیٹا ---');
+  lines.push('کل آرڈر: ' + advanceOrdersData.length);
+  lines.push('اگلا ID: ' + nextAdvOrderId);
+  advanceOrdersData.slice(0, 5).forEach(o => {
+    lines.push(`#${o.id} — ${o.customerName} — ${o.createdAt ? o.createdAt.slice(0,16) : '?'}`);
+  });
+  lines.push('');
+  lines.push('--- کلاؤڈ سے تازہ منگوا رہے ہیں... ---');
+  window.__cloudSyncError = null;
+  let cloudOk = false, cloudCount = '?', cloudNextId = '?';
+  try{
+    const res = await authFirestoreFetch(`${ADVANCE_ORDERS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404){
+      lines.push('❌ کلاؤڈ پر یہ ڈاکومنٹ ابھی تک بنا ہی نہیں (404) — کبھی کسی نے پش نہیں کیا۔');
+    } else if(!res.ok){
+      lines.push('❌ کلاؤڈ سے جواب ناکام: HTTP ' + res.status);
+    } else {
+      const doc = await res.json();
+      const jsonStr = doc.fields?.json?.stringValue;
+      const cloudOrders = jsonStr ? JSON.parse(jsonStr) : [];
+      cloudCount = Array.isArray(cloudOrders) ? cloudOrders.length : '?';
+      cloudNextId = doc.fields?.nextAdvOrderId?.integerValue || '?';
+      cloudOk = true;
+      lines.push('✅ کلاؤڈ سے کامیابی سے جواب ملا');
+      lines.push('کلاؤڈ پر کل آرڈر: ' + cloudCount);
+      lines.push('کلاؤڈ کا اگلا ID: ' + cloudNextId);
+      (cloudOrders || []).slice(0, 5).forEach(o => {
+        const existsLocally = advanceOrdersData.some(lo => lo.id === o.id);
+        lines.push(`#${o.id} — ${o.customerName} — ${existsLocally ? '(مقامی طور پر بھی موجود)' : '⚠️ مقامی فہرست میں غائب!'}`);
+      });
+    }
+  }catch(e){
+    lines.push('❌ Fetch میں خرابی: ' + e.message);
+  }
+  lines.push('');
+  lines.push('__cloudSyncError: ' + (window.__cloudSyncError || 'کوئی نہیں'));
+  alert(lines.join('\n'));
+}
 async function pushAdvanceOrdersToCloud(){
   saveToStorage('advanceOrders', advanceOrdersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
   saveToStorage('nextAdvOrderId', nextAdvOrderId);
