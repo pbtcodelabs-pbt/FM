@@ -2715,14 +2715,10 @@
       <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
       <div id="homeUnfinishedCartCard" style="display:none;"></div>
 
-      <!-- ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ — ورکرز اور کسٹمرز کی ایک ہی ڈراپ ڈاؤن میں فہرست،
-           منتخب کرتے ہی کال/SMS/واٹس ایپ بٹن اور (صرف ورکرز کے لیے) ان کا لاگ ان PIN (چھپا ہوا، آنکھ 👁 دبا کر دیکھیں) ---------- -->
-      <div class="admin-only" style="background:#fff; border:1.5px solid #dbe1ea; border-radius:14px; padding:12px; margin-bottom:12px;">
-        <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px;">📇 فوری رابطہ — ورکر یا کسٹمر منتخب کریں</div>
-        <select id="quickContactSelect" onchange="renderQuickContactCard()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:10px; font-size:13.5px; font-weight:700; background:#fff;">
-          <option value="">— منتخب کریں —</option>
-        </select>
-        <div id="quickContactCard" style="margin-top:10px;"></div>
+      <!-- ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ — Admin کے لیے مکمل ورکر/کسٹمر ڈراپ ڈاؤن + PIN،
+           Salesman کے لیے صرف ایڈمن سے رابطہ (بغیر نمبر دکھائے، بغیر PIN کے) ---------- -->
+      <div style="background:#fff; border:1.5px solid #dbe1ea; border-radius:14px; padding:12px; margin-bottom:12px;" id="quickContactWrap">
+        <div id="quickContactPanelBody"></div>
       </div>
 
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — Admin کے لیے اب انہی کی منتخب کردہ Shortcut اسکرینیں،
@@ -7174,7 +7170,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر3:51am';
+const APP_BUILD_VERSION = 'اتوار6ستمبر7:20am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8264,6 +8260,12 @@ function renderCustomerHomeScreen(){
 
     <!-- ---------- 🧪 FMtest03 Phase 4 (Step 1): تیسرا بٹن — پیمنٹ بھیجنے کی اسکرین پر لے جائے ---------- -->
     <button type="button" onclick="goTo('customerPayment')" style="width:100%; margin-top:12px; padding:16px; background:linear-gradient(180deg,#16A34A,#0b4a45); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">💰 پیمنٹ بھیجیں</button>
+
+    <!-- ---------- 📇 صدام کی ہدایت (6 ستمبر): کسٹمر کے لیے بھی ایڈمن سے فوری رابطہ — نمبر کہیں لکھا نظر نہیں آتا، صرف بٹن ---------- -->
+    <div style="background:#fff; border:1.5px solid #dbe1ea; border-radius:14px; padding:12px; margin-top:16px;">
+      <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px;">📞 ایڈمن سے فوری رابطہ</div>
+      ${buildAdminContactCardHTML()}
+    </div>
   `;
   renderCustomerHomeTabButtonsUI();
   if(customerHomeTab === 'bills') renderCustomerHomeBillsList(cust.customer_id);
@@ -8701,6 +8703,7 @@ function submitCustomerPaymentScreenshot(){
   };
   pendingBillsData.unshift(pendingPayment);
   persistAllData();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): کسٹمر کی پیمنٹ رسید فوراً کلاؤڈ میں — ایڈمن کسی بھی ڈیوائس سے فوراً دیکھ سکے ----------
 
   // ---------- فارم صاف کریں اور تصدیقی پیغام دکھائیں ----------
   document.getElementById('cpsAmount').value = '';
@@ -9528,23 +9531,51 @@ function goTo(screenName, _isHistoryNav){
   resetScrollNow();
   requestAnimationFrame(() => { window.fixMainAreaHeight && window.fixMainAreaHeight(); resetScrollNow(); });
 
+  // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4 — اہم فکس): یہ سب "stop" کالز پہلے یہاں سے نیچے (advanceorders سے پہلے) تھیں —
+  // یعنی 'billing'/'products'/'billhistory' جیسی اسکرینز جو اوپر ہی startProductsPolling()/startInvoicesPolling() چلا چکی تھیں،
+  // انہیں یہ کالز فوراً بند کر دیتی تھیں (اسی ترتیب میں ہونے کی وجہ سے)، جس سے 12 سیکنڈ والا خودکار ریفریش کبھی کام ہی نہیں کرتا تھا۔
+  // اب سب سے پہلے یہاں بند کریں، پھر نیچے متعلقہ اسکرین والا polling شروع ہو — یہی درست ترتیب ہے ----------
+  stopAdvanceOrdersPolling();
+  stopRecoveryListPolling();
+  stopCustomersPolling();
+  stopSuppliersPolling();
+  stopProductsPolling();
+  stopInvoicesPolling();
+  stopPendingBillsPolling();
+
   if(screenName === 'dashboard') renderDashboard();
   if(screenName === 'home') {
     renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI();
-    if(AppState.currentRole === 'admin') populateQuickContactDropdown(); // ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ ڈراپ ڈاؤن ----------
+    renderQuickContactPanel(); // ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ پینل — رول کے مطابق مختلف مواد ----------
     // ---------- ☁️ Home پر پہنچتے ہی خاموشی سے تازہ ترین Pending Orders منگوا لیں — تاکہ گنتی کا بیج (🔴) درست ہو ----------
     if(AppState.currentRole === 'admin') fetchAdvanceOrdersFromCloud(true).then(added => { if(added) renderHomeIconGrid(); });
     // ---------- 🔴 صدام کی ہدایت (FM3SEPTH10): اسی طرح Recovery List کا بیج بھی Home پر پہنچتے ہی تازہ ہو ----------
     if(AppState.currentRole === 'admin') fetchRecoveryListFromCloud(true).then(added => { if(added) renderHomeIconGrid(); });
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): کسٹمرز بھی خاموشی سے تازہ ہوں — تاکہ فوری رابطہ ڈراپ ڈاؤن ہمیشہ درست ہو ----------
+    if(AppState.currentRole === 'admin') fetchCustomersFromCloud(true).then(added => { if(added && typeof populateQuickContactDropdown === 'function') populateQuickContactDropdown(); });
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): Home پر پہنچتے ہی خاموشی سے پینڈنگ بلز بھی تازہ ہوں — تاکہ 🔔 بیج درست ہو ----------
+    fetchPendingBillsFromCloud(true).then(added => { if(added && typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner(); });
   }
   if(screenName === 'billing') {
     renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): بلنگ سکرین پر جاتے ہی سٹاک تازہ منگوائیں — تاکہ دوسرے فون سے ابھی بکی چیز یہاں بھی صفر نظر آئے ----------
+    fetchProductsFromCloud(true).then(added => { if(added) renderBillingProductGrid(); });
+    startProductsPolling();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): بلنگ سکرین پر پینڈنگ بلز بھی تازہ رکھیں — سیلزمین کو رد شدہ بل کی وجہ فوراً نظر آئے،
+    // اور ایڈمن کو 🔔 پینڈنگ بیج بھی فوراً اپڈیٹ ہو ----------
+    fetchPendingBillsFromCloud(true).then(added => { if(added) renderRejectionNotice(); });
+    startPendingBillsPolling();
   }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
       '🧑‍💼 سیلزمین: ' + AppState.currentUser.name + renderTodaysBillBadge();
   }
-  if(screenName === 'products') renderProductList(document.getElementById('productSearchInput').value);
+  if(screenName === 'products'){
+    renderProductList(document.getElementById('productSearchInput').value);
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): Products سکرین پر جاتے ہی تازہ ترین پراڈکٹس/سٹاک منگوائیں ----------
+    fetchProductsFromCloud(false);
+    startProductsPolling();
+  }
   if(screenName === 'categories') renderCategoriesScreen();
   if(screenName === 'customers') enterPartyPage('customers');
   if(screenName === 'suppliers') enterPartyPage('suppliers');
@@ -9552,17 +9583,36 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'customerAccess') renderCustomerAccessList(); // ---------- 🧪 FMtest01 ----------
   if(screenName === 'customerHome') renderCustomerHomeScreen(); // ---------- 🧪 FMtest01 ----------
   if(screenName === 'customerPayment') renderCustomerPaymentScreen(); // ---------- 🧪 FMtest03 Phase 4 ----------
-  if(screenName === 'billhistory') renderBillHistory();
+  if(screenName === 'billhistory'){
+    renderBillHistory();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): Bill History اسکرین پر جاتے ہی تازہ ترین بلز منگوائیں —
+    // تاکہ دوسرے فون سے ابھی بننے والا/Void ہونے والا بل بھی فوراً یہاں نظر آئے ----------
+    fetchInvoicesFromCloud(false).then(added => { if(added) renderBillHistory(); });
+    startInvoicesPolling();
+  }
   if(screenName === 'mydiary') renderMyDiaryScreen();
   if(screenName === 'expenditure') renderExpenditureScreen();
-  if(screenName === 'stockadjustment') renderStockAdjustmentScreen();
-  if(screenName === 'purchaseorders') renderPurchaseOrdersScreen();
+  if(screenName === 'stockadjustment'){
+    renderStockAdjustmentScreen();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): Stock Adjustment سکرین پر جاتے ہی تازہ ترین سٹاک منگوائیں ----------
+    fetchProductsFromCloud(false);
+    startProductsPolling();
+  }
+  if(screenName === 'purchaseorders'){
+    renderPurchaseOrdersScreen();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): Purchase Orders سکرین پر بھی سٹاک تازہ رہے (Receive Shipment یہیں سے ہوتا ہے) ----------
+    fetchProductsFromCloud(true);
+    startProductsPolling();
+    // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 5): purchaseHistory دراصل suppliersData کے اندر ہی محفوظ ہے —
+    // اس لیے اصل PO لسٹ (نیا آرڈر/Receive Shipment/Delete) تازہ رکھنے کے لیے سپلائرز کی fetch+polling بھی یہاں ضروری ہے،
+    // ورنہ دوسرے فون سے بنایا/وصول کیا گیا PO یہاں تب تک نظر نہیں آتا جب تک صارف خود Suppliers اسکرین نہ کھولے ----------
+    fetchSuppliersFromCloud(true).then(added => { if(added) renderPurchaseOrdersScreen(); });
+    startSuppliersPolling();
+  }
 
   // ---------- ☁️ Order Taking / Pending Orders / Recovery List — کلاؤڈ سے تازہ ترین ڈیٹا منگوائیں اور جب تک
   // اسی سکرین پر رہیں، ہر 12 سیکنڈ بعد خودکار fetch ہوتا رہے (تقریباً real-time کا تجربہ)۔
   // دوسری کسی سکرین پر جائیں تو polling خودکار بند — فالتو Firestore reads نہ ہوں ---------- -->
-  stopAdvanceOrdersPolling();
-  stopRecoveryListPolling();
   if(screenName === 'advanceorders'){
     renderAdvanceOrdersScreen();
     fetchAdvanceOrdersFromCloud(false);
@@ -9578,6 +9628,16 @@ function goTo(screenName, _isHistoryNav){
     renderRecoveryListScreen();
     fetchRecoveryListFromCloud(false);
     startRecoveryListPolling();
+  }
+  if(screenName === 'customers' || screenName === 'suppliers'){
+    fetchCustomersFromCloud(false);
+    startCustomersPolling();
+    fetchSuppliersFromCloud(false); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): سپلائرز بھی پارٹیز اسکرین پر جاتے ہی تازہ کریں ----------
+    startSuppliersPolling();
+  }
+  if(screenName === 'customerHome'){
+    fetchCustomersFromCloud(false);
+    startCustomersPolling();
   }
   if(screenName === 'dailyRecovery') renderDailyRecoveryScreen();
   if(screenName === 'settings') renderSettingsScreen();
@@ -11557,7 +11617,7 @@ function finalizeInvoice(){
   let walletApplied = 0;
   if(customer && method === 'credit' && customer.wallet_balance > 0){
     walletApplied = Math.min(customer.wallet_balance, grandTotal);
-    customer.wallet_balance -= walletApplied; // TODO: customers.wallet_balance UPDATE
+    customer.wallet_balance -= walletApplied; // ✅ Firestore Sync (قدم 1) — finalizeInvoice کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں جاتا ہے
     customer.walletHistory = customer.walletHistory || [];
     customer.walletHistory.unshift({type:'receivable_collected', amount:walletApplied, via:'wallet', date:new Date().toISOString().split('T')[0], note:`Auto-applied to ${invoice.invoice_no}`});
   }
@@ -11591,7 +11651,7 @@ function finalizeInvoice(){
   if(customer && method === 'credit'){
     // ---------- کسٹمر کا نیا کل بقایہ سیدھا SET کریں (پرانا + یہ بل − وصولی) — increment نہیں، تاکہ پرانے بقایہ پر بھی ادائیگی درست جھلکے ----------
     customer.total_receivable = Math.max(0, combinedDueForPayment - cashReceivedNow);
-    // TODO: customers.total_receivable UPDATE
+    // ✅ Firestore Sync (قدم 1) — finalizeInvoice کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں جاتا ہے
   }
   invoice.wallet_applied = walletApplied;
   invoice.cash_received_now = cashReceivedNow;
@@ -11630,6 +11690,9 @@ function finalizeInvoice(){
 
   closeCartSheet();
   persistAllData();
+  if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): والٹ/بقایا کی تبدیلی خودکار کلاؤڈ میں ----------
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): بل بننے پر سٹاک کٹنا فوراً کلاؤڈ میں ----------
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): نیا بل بنتے ہی فوراً کلاؤڈ میں — دوسرے فون پر بھی فوری نظر آئے ----------
   if(walletApplied > 0){
     alert(`💳 Rs. ${walletApplied.toLocaleString()} auto-deducted from ${customer.name}'s wallet.` + (remainingDue > 0 ? ` Remaining due: Rs. ${remainingDue.toLocaleString()}` : ` Bill fully paid — nothing outstanding.`));
   }
@@ -11666,6 +11729,7 @@ function submitBillForApproval(customer, method, subtotal){
   renderAutoPaymentNote();
 
   closeCartSheet();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): سیلزمین کا بل جمع ہوتے ہی فوراً کلاؤڈ میں — ایڈمن کسی بھی ڈیوائس سے فوراً دیکھ سکے ----------
   alert('✅ بل ایڈمن کو منظوری کے لیے بھیج دیا گیا۔\nمنظور ہونے کے بعد یہ بل ہسٹری میں نظر آئے گا اور پرنٹ کیا جا سکے گا۔');
 }
 
@@ -11677,6 +11741,10 @@ function submitBillForApproval(customer, method, subtotal){
 function openPendingBillsList(){
   renderPendingBillsListModal();
   document.getElementById('pendingBillsListModal').classList.add('show');
+  // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): یہ ماڈل Home بینر سے بغیر اسکرین بدلے بھی کھلتا ہے —
+  // اس لیے یہاں خود اپنی fetch + polling شروع کریں (اگلی بار اسکرین بدلتے ہی عمومی stopPendingBillsPolling() سے خودکار بند ہو جائے گی) ----------
+  fetchPendingBillsFromCloud(false).then(added => { if(added) renderPendingBillsListModal(); });
+  startPendingBillsPolling();
 }
 function renderPendingBillsListModal(){
   const pendingCount = pendingBillsData.filter(p => p.status === 'pending').length;
@@ -11785,6 +11853,8 @@ function approvePendingPayment(){
   persistAllData();
   document.getElementById('paymentReviewModal').classList.remove('show');
   renderPendingBillsBanner();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): پیمنٹ منظور ہوتے ہی فوراً کلاؤڈ میں ----------
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): بقایا/والٹ کی تبدیلی بھی فوراً کلاؤڈ میں ----------
 
   alert(`✅ پیمنٹ منظور ہو گئی۔\n${cust.name} کا نیا بقایا: Rs. ${cust.total_receivable.toLocaleString()}`);
 }
@@ -11808,6 +11878,7 @@ function rejectPendingPayment(){
   persistAllData();
   document.getElementById('paymentReviewModal').classList.remove('show');
   renderPendingBillsBanner();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): پیمنٹ مسترد ہوتے ہی فوراً کلاؤڈ میں ----------
 
   alert(`❌ پیمنٹ مسترد کر دی گئی۔\nکسٹمر کو یہ وجہ نظر آئے گی: ${p.admin_note}`);
 }
@@ -11951,6 +12022,15 @@ function approvePendingBill(){
     financeDummy.cashInHand += grandTotal; // TODO: نقدی لیجر (cash ledger) میں INSERT
   }
 
+  // ---------- 🛠️ صدام کی ہدایت (6 ستمبر، قدم 3) اہم فکس: پہلے یہاں persistAllData() کبھی کال نہیں ہوتا تھا —
+  // اس لیے سیلزمین کا بل منظور ہونے پر سٹاک کٹنا اور کسٹمر کا بقایہ/والٹ صرف اسی وقت (in-memory) کے لیے بدلتا تھا،
+  // ایپ دوبارہ کھلتے ہی یا کلاؤڈ سے تازہ ڈیٹا آتے ہی پرانی حالت واپس آ جاتی تھی۔ اب یہاں سے بھی محفوظ + کلاؤڈ سنک ----------
+  persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): بل منظور ہونے پر سٹاک کٹنا فوراً کلاؤڈ میں ----------
+  if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): بل منظور ہونے پر والٹ/بقایا بھی فوراً کلاؤڈ میں ----------
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): منظور شدہ بل فوراً Bill History میں کلاؤڈ کے ذریعے ہر ڈیوائس پر ----------
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): status='approved' بھی فوراً کلاؤڈ میں — سیلزمین کے فون پر پینڈنگ لسٹ سے فوراً ہٹے ----------
+
   document.getElementById('pendingReviewModal').classList.remove('show');
   renderPendingBillsBanner();
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
@@ -11977,6 +12057,7 @@ function rejectPendingBill(){
 
   document.getElementById('pendingReviewModal').classList.remove('show');
   renderPendingBillsBanner();
+  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): بل مسترد ہوتے ہی فوراً کلاؤڈ میں — سیلزمین کسی بھی ڈیوائس سے وجہ فوراً دیکھ سکے ----------
   alert(`❌ بل مسترد کر دیا گیا۔ ${p.salesman_name} اگلی بار Billing کھولنے پر یہ وجہ دیکھ لے گا۔`);
 }
 
@@ -12097,9 +12178,10 @@ function saveQuickAddCustomer(){
     return;
   }
 
-  // TODO: یہ customers table میں INSERT ہوگا — یہی مرکزی فہرست ہے جو "Customers/Suppliers" اسکرین پر بھی نظر آتی ہے
+  // ✅ Firestore Sync (قدم 1) — pushCustomersToCloud() سے فوراً کلاؤڈ میں
   const newCustomer = {customer_id: nextCustomerId++, name, phone, address:'', wallet_balance:0, total_receivable:0, walletHistory:[]};
   customersData.push(newCustomer);
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): نیا کسٹمر فوراً کلاؤڈ میں ----------
 
   populateCustomerDropdown();
   document.getElementById('customerSelect').value = newCustomer.customer_id; // نیا کسٹمر فوراً اسی bills کے لیے منتخب ہو جائے
@@ -12126,9 +12208,10 @@ function confirmQuickCreditCustomer(){
     customer = customersData.find(c => c.phone && c.phone.replace(/\D/g,'') === phoneDigits);
   }
   if(!customer){
-    // TODO: یہ customers table میں INSERT ہوگا
+    // ✅ Firestore Sync (قدم 1) — pushCustomersToCloud() سے فوراً کلاؤڈ میں
     customer = {customer_id: nextCustomerId++, name, phone, address:'', wallet_balance:0, total_receivable:0, walletHistory:[]};
     customersData.push(customer);
+    pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): نیا کسٹمر فوراً کلاؤڈ میں ----------
   }
 
   populateCustomerDropdown();
@@ -12901,6 +12984,7 @@ function confirmPartyCsvImport(){
   document.getElementById('partyImportPreviewModal').classList.remove('show');
   pendingPartyImportRows = [];
   persistAllData();
+  if(!isCustomer) pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): CSV سے امپورٹ شدہ سپلائرز بھی فوراً کلاؤڈ میں ----------
   renderPartyList();
   document.getElementById('backupConfirmIcon').textContent = '✅';
   document.getElementById('backupConfirmTitle').textContent = (isCustomer ? 'Customers' : 'Suppliers') + ' Imported!';
@@ -13322,6 +13406,7 @@ function toggleProductPresence(productId, makePresent){
   if(!p) return;
   p.isDormant = !makePresent;
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): حاضر/غیر حاضر کی تبدیلی فوراً کلاؤڈ میں ----------
   renderProductList(document.getElementById('productSearchInput')?.value || '');
 }
 
@@ -14552,6 +14637,7 @@ function updateVariantField(productId, variantId, field, value, inputEl){
   // ڈیٹا محفوظ نہ ہونے کا احساس ہوتا تھا۔ اب ہر خانے سے نکلتے ہی (onchange پر) فوری، واضح طور پر محفوظ
   // ہو جاتا ہے — "✅ محفوظ کریں" بٹن دبانے کا انتظار نہیں کرنا پڑتا ---------- -->
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): سٹاک/ریٹ/لیبل کی ہر تبدیلی فوراً کلاؤڈ میں ----------
 
   if(field === 'stock' || field === 'lowStockAt'){
     const isNegative = variant.stock < 0;
@@ -14635,6 +14721,7 @@ function deleteVariant(productId, variantId){
     productsData = productsData.filter(p => p.product_id !== productId);
   }
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): ویریئنٹ/پراڈکٹ ڈیلیٹ ہونا فوراً کلاؤڈ میں ----------
   openProductCards.add(productId);
   rerenderProductListPreserveScroll();
   renderBillingProductGrid();
@@ -14844,6 +14931,7 @@ function saveNewProduct(){
     renderProductList(document.getElementById('productSearchInput').value);
     renderBillingProductGrid();
     persistAllData();
+    pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پراڈکٹ ایڈٹ ہونا فوراً کلاؤڈ میں ----------
     return;
   }
 
@@ -14857,6 +14945,7 @@ function saveNewProduct(){
   productsData.push(newProduct);
   backfillMissingProductSerials(); // ---------- نئی سبزی کو فوراً اگلا خالی سیریل نمبر مل جائے، پرانوں کے نمبر نہیں ہلتے ---------- -->
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): نیا پراڈکٹ فوراً کلاؤڈ میں ----------
 
   closeNewProductModal();
   renderProductList();
@@ -14871,6 +14960,7 @@ function deleteProduct(productId){
   (product.variants || []).forEach(v => idbDeleteImage('product_' + v.variant_id)); // ---------- ہر ویریئنٹ کی تصویر بھی صاف کریں ----------
   productsData = productsData.filter(p => p.product_id !== productId);
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پورا پراڈکٹ ڈیلیٹ ہونا فوراً کلاؤڈ میں ----------
   renderProductList(document.getElementById('productSearchInput').value);
   renderBillingProductGrid();
 }
@@ -16192,6 +16282,7 @@ function resetAllNegativeStockToZero(){
   if(!confirm(`This will reset ${negativeItems.length} item(s) with negative stock to 0. Continue?`)) return;
   negativeItems.forEach(item => { item.variant.stock = 0; });
   persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): منفی سٹاک زیرو ہونا فوراً کلاؤڈ میں ----------
   renderStockAdjustmentScreen();
 }
 
@@ -16931,6 +17022,7 @@ function deleteCustomer(customerId){
   idbDeleteImage('customer_' + customerId);
   customersData = customersData.filter(x => x.customer_id !== customerId);
   persistAllData();
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): ڈیلیٹ ہونا بھی کلاؤڈ میں فوراً جائے ----------
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
 
@@ -16946,6 +17038,7 @@ function deleteSupplier(supplierId){
   idbDeleteImage('supplier_' + supplierId);
   suppliersData = suppliersData.filter(x => x.supplier_id !== supplierId);
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): ڈیلیٹ ہونا بھی کلاؤڈ میں فوراً جائے ----------
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
 
@@ -17555,7 +17648,9 @@ function applySupplierPoFilter(field, value){
 function updateSupplierEmail(supplierId, email){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(s){
-    s.email = email.trim(); // TODO: DB میں suppliers.email UPDATE
+    s.email = email.trim();
+    persistAllData();
+    pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
     document.getElementById('profileHeadContacts').innerHTML = buildContactButtons(s.phone, s.email);
   }
 }
@@ -17564,7 +17659,9 @@ function updateSupplierEmail(supplierId, email){
 function updateCustomerKeywords(customerId, keywords){
   const c = customersData.find(x => x.customer_id === customerId);
   if(c){
-    c.keywords = keywords.trim(); // TODO: DB میں customers.keywords UPDATE
+    c.keywords = keywords.trim(); // ✅ Firestore Sync (قدم 1) — updateCustomerKeywords میں pushCustomersToCloud() موجود ہے
+    persistAllData();
+    pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1) ----------
     renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
     renderProfileNicknameTag(c.keywords);
   }
@@ -17572,7 +17669,9 @@ function updateCustomerKeywords(customerId, keywords){
 function updateSupplierKeywords(supplierId, keywords){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(s){
-    s.keywords = keywords.trim(); // TODO: DB میں suppliers.keywords UPDATE
+    s.keywords = keywords.trim();
+    persistAllData();
+    pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
     renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
     renderProfileNicknameTag(s.keywords);
   }
@@ -17745,6 +17844,7 @@ function saveSupplierBankAccount(){
   closeSupplierBankAccountModal();
   renderSupplierPoSection(s.supplier_id);
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
 }
 function deleteSupplierBankAccount(supplierId, idx){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
@@ -17753,6 +17853,7 @@ function deleteSupplierBankAccount(supplierId, idx){
   getSupplierBankAccounts(s).splice(idx, 1);
   renderSupplierPoSection(supplierId);
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
 }
 // ---------- 🚫 صدام کی ہدایت (FM5SEPTH): بینک ویب سائٹ لاگ ان لنک سسٹم ختم — QR کوڈ ہی واحد طریقہ ----------
 // ---------- اکاؤنٹ کی تصویر (چیک/QR وغیرہ) منسلک کریں — ابھی محفوظ ہونے سے پہلے ماڈل میں ہی پیش نظارہ ----------
@@ -17897,6 +17998,7 @@ function confirmPaySupplier(){
 
   closePaySupplierModal();
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): ادائیگی کے بعد بقایا فوراً کلاؤڈ میں ----------
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   openSupplierProfile(s.supplier_id); // پروفائل فوراً تازہ ترین حالت میں دوبارہ کھلے
   sharePaymentReceiptImage(savedPayment.payment_id);
@@ -18324,6 +18426,8 @@ function savePurchaseOrder(){
     status: 'pending_receipt' // 'pending_receipt' | 'received'
   });
 
+  persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): نیا پرچیز آرڈر بننے پر واجب الادا فوراً کلاؤڈ میں ----------
   closePoModal();
   renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
   renderBillingProductGrid(); // نیا اسٹاک بلنگ گرڈ میں بھی فوراً نظر آئے
@@ -21664,6 +21768,7 @@ function deletePendingPurchaseOrder(supplierId, poIdx){
   if(!confirm(`Delete this pending Purchase Order (${po.items.length} items, dated ${po.date})? This cannot be undone.`)) return;
   s.purchaseHistory.splice(poIdx, 1);
   persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2) ----------
   renderSupplierPoSection(supplierId);
 }
 
@@ -21885,6 +21990,9 @@ function confirmShipmentReceipt(){
   if(receiveShipmentBillPhoto) po.billPhoto = receiveShipmentBillPhoto;
   // TODO: DB میں purchase_orders.status='received', receipt_photo_url اپڈیٹ ہوگا
 
+  persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): شپمنٹ موصول ہونے پر واجب الادا/PO حیثیت فوراً کلاؤڈ میں ----------
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): شپمنٹ موصول ہونے پر سٹاک بڑھنا فوراً کلاؤڈ میں ----------
   const receivedSupplierId = activeReceiveSupplierId, receivedPoIdx = activeReceivePoIdx;
   closeReceiveShipmentModal();
   renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
@@ -22038,10 +22146,16 @@ function confirmBatchReturn(invoiceId){
     returnedNames.push(`${item.name} (${qty})`);
   });
 
+  // ---------- 🛠️ صدام کی ہدایت (6 ستمبر، قدم 3): سٹاک واپسی کیش ہو یا والٹ — دونوں صورتوں میں فوراً محفوظ + کلاؤڈ سنک ----------
+  persistAllData();
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): سیلز ریٹرن پر سٹاک واپس آنا فوراً کلاؤڈ میں ----------
+
   if(method === 'wallet'){
     // ---------- طے شدہ رقم کسٹمر کے والٹ میں شامل کریں ----------
-    customer.wallet_balance += totalRefund; // TODO: customers.wallet_balance UPDATE
+    customer.wallet_balance += totalRefund; // ✅ Firestore Sync (قدم 1) — نیچے pushCustomersToCloud() موجود ہے
     customer.walletHistory.unshift({type:'deposit', amount: totalRefund, date:new Date().toISOString().split('T')[0], note:`Item Return: ${returnedNames.join(', ')}`});
+    persistAllData();
+    pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1) ----------
   } else {
     // ---------- کیش ریفنڈ — کیش ان ہینڈ سے رقم منہا کریں ----------
     financeDummy.cashInHand -= totalRefund; // TODO: نقدی لیجر (cash ledger) میں INSERT
@@ -22220,6 +22334,9 @@ function confirmSupplierReturn(itemIndex){
   item.returnQty = qty;
   item.returnAmount = amount;
 
+  persistAllData();
+  pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): واپسی کے بعد واجب الادا فوراً کلاؤڈ میں ----------
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پرچیز ریٹرن پر سٹاک کم ہونا فوراً کلاؤڈ میں ----------
   renderSupplierReturnModal();
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   alert(`✅ ${qty} unit(s) of "${item.name}" returned to supplier. Rs. ${amount.toLocaleString()} deducted from payable.`);
@@ -22434,7 +22551,7 @@ function saveNewParty(){
         c.name = name; c.phone = phone; c.address = address; c.area = area; c.keywords = keywords; c.rateArea = rateArea;
         c.openingBalance = openingBalance;
         c.total_receivable = (c.total_receivable || 0) + diff;
-        if(npPhotoDataUrl !== null) c.photo = npPhotoDataUrl; // TODO: customers.photo UPDATE
+        if(npPhotoDataUrl !== null) c.photo = npPhotoDataUrl; // ✅ Firestore Sync (قدم 1) — saveNewParty کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں
       }
     } else {
       const s = suppliersData.find(x => x.supplier_id === editingPartyId);
@@ -22445,17 +22562,20 @@ function saveNewParty(){
         s.name = name; s.phone = phone; s.address = address; s.area = area; s.keywords = keywords;
         s.openingBalance = openingBalance;
         s.total_payable = (s.total_payable || 0) + diff;
-        if(npPhotoDataUrl !== null) s.photo = npPhotoDataUrl; // TODO: suppliers.photo UPDATE
+        if(npPhotoDataUrl !== null) s.photo = npPhotoDataUrl; // ✅ Firestore Sync (قدم 2) — saveNewParty کے آخر میں pushSuppliersToCloud() سے کلاؤڈ میں
       }
     }
   } else if(currentPartyTab === 'customers'){
-    // TODO: یہ customers table میں INSERT ہوگا
+    // ✅ Firestore Sync (قدم 1) — saveNewParty کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں
     customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, rateArea, photo: npPhotoDataUrl, wallet_balance:0, openingBalance, total_receivable: openingBalance, createdAt: new Date().toISOString(), walletHistory:[]});
   } else {
-    // TODO: یہ suppliers table میں INSERT ہوگا
+    // ✅ Firestore Sync (قدم 2) — saveNewParty کے آخر میں pushSuppliersToCloud() سے کلاؤڈ میں
     suppliersData.push({supplier_id: nextSupplierId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, openingBalance, total_payable: openingBalance, createdAt: new Date().toISOString()});
   }
 
+  persistAllData();
+  if(currentPartyTab === 'customers') pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): نیا/ترمیم شدہ کسٹمر فوراً کلاؤڈ میں ----------
+  else pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): نیا/ترمیم شدہ سپلائر فوراً کلاؤڈ میں ----------
   closeNewPartyModal();
   renderPartyList();
 }
@@ -22497,10 +22617,12 @@ function saveWalletTxn(){
     return;
   }
 
-  // TODO: یہ wallet_transactions table میں INSERT ہوگا اور customers.wallet_balance UPDATE ہوگا
+  // ✅ Firestore Sync (قدم 1) — saveWalletTxn کے آخر میں pushCustomersToCloud() موجود ہے
   c.wallet_balance += (activeTxnType === 'deposit' ? amount : -amount);
   c.walletHistory.unshift({type: activeTxnType, amount, date: new Date().toISOString().split('T')[0]});
 
+  persistAllData();
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1) ----------
   closeWalletModal();
   renderPartyList(document.getElementById('partySearchInput').value);
 }
@@ -22532,7 +22654,7 @@ function saveOpeningBalanceAdjustment(){
     if(!confirm(`This would take the balance below zero (currently Rs. ${c.total_receivable.toLocaleString()}). Continue anyway?`)) return;
   }
 
-  // TODO: یہ receivable_adjustments table میں INSERT ہوگا اور customers.total_receivable UPDATE ہوگا
+  // ✅ Firestore Sync (قدم 1) — saveOpeningBalanceAdjustment کے آخر میں pushCustomersToCloud() موجود ہے
   c.total_receivable += (activeOpeningBalanceType === 'add' ? amount : -amount);
   c.walletHistory = c.walletHistory || [];
   c.walletHistory.unshift({
@@ -22545,6 +22667,7 @@ function saveOpeningBalanceAdjustment(){
 
   document.getElementById('openingBalanceModal').classList.remove('show');
   persistAllData();
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1) ----------
   renderPartyList(document.getElementById('partySearchInput')?.value);
   alert(`✅ ${c.name}'s balance updated. New Receivable: Rs. ${c.total_receivable.toLocaleString()}`);
 }
@@ -22641,7 +22764,7 @@ function saveCollectReceivable(){
     return;
   }
 
-  // TODO: یہاں receivable_collections table میں INSERT ہوگا، customers.total_receivable UPDATE ہوگا
+  // ✅ Firestore Sync (قدم 1) — saveCollectReceivable کے آخر میں pushCustomersToCloud() موجود ہے
   const balanceBefore = c.total_receivable;
   c.total_receivable -= amount;
 
@@ -22660,7 +22783,7 @@ function saveCollectReceivable(){
   }
 
   if(activeCollectMode === 'wallet'){
-    c.wallet_balance -= amount; // TODO: customers.wallet_balance UPDATE
+    c.wallet_balance -= amount; // ✅ Firestore Sync (قدم 1) — نیچے pushCustomersToCloud() موجود ہے
   } else {
     financeDummy.cashInHand += amount; // TODO: نقدی لیجر (cash ledger) میں INSERT
   }
@@ -22688,6 +22811,8 @@ function saveCollectReceivable(){
   });
 
   closeCollectModal();
+  persistAllData();
+  pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): وصولی کے بعد بقایا/والٹ فوراً کلاؤڈ میں ----------
   renderPartyList(document.getElementById('partySearchInput').value);
   sharePaymentReceiptImage(savedPayment.payment_id);
 
@@ -23734,6 +23859,437 @@ function stopRecoveryListPolling(){
   if(recoveryListPollTimer){ clearInterval(recoveryListPollTimer); recoveryListPollTimer = null; }
 }
 
+/* =====================================================================
+   ☁️ CUSTOMERS — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 1)
+   نیا کسٹمر، والٹ بیلنس، بقایا رقم (total_receivable)، keywords، تصویر —
+   ہر تبدیلی خودکار ہر ڈیوائس پر۔ usersData والا ہی full-overwrite + pendingSync
+   pattern استعمال کیا ہے (چونکہ کسٹمر ریکارڈز میں edit-in-place ہوتا ہے،
+   advance-orders والا "صرف نئے شامل کریں" pattern یہاں موزوں نہیں) ----------
+   ===================================================================== */
+const CUSTOMERS_DOC_PATH = 'shopData/customers';
+let customersPollTimer = null;
+
+async function pushCustomersToCloud(){
+  saveToStorage('customers', customersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextCustomerId', nextCustomerId);
+  try{
+    const res = await authFirestoreFetch(`${CUSTOMERS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(customersData) },
+          nextCustomerId: { integerValue: String(nextCustomerId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.customersPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.customersPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchCustomersFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی کسٹمر تبدیلی (نیا کسٹمر، والٹ، بقایا وغیرہ) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
+  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.customersPendingSync){
+    const pushed = await pushCustomersToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${CUSTOMERS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudCustomers = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudCustomers)) return false;
+    customersData = cloudCustomers;
+    const cloudNextId = parseInt(doc.fields?.nextCustomerId?.integerValue || '0');
+    if(cloudNextId > nextCustomerId) nextCustomerId = cloudNextId;
+    saveToStorage('customers', customersData);
+    saveToStorage('nextCustomerId', nextCustomerId);
+    if(!silent){
+      if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList();
+      if(typeof renderCustomerHomeScreen === 'function' && AppState.currentRole === 'customer') renderCustomerHomeScreen();
+      if(typeof populateQuickContactDropdown === 'function' && AppState.currentRole === 'admin') populateQuickContactDropdown();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Customers/Parties یا Customer's own Home اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startCustomersPolling(){
+  stopCustomersPolling();
+  customersPollTimer = setInterval(() => {
+    fetchCustomersFromCloud(false);
+  }, 12000);
+}
+function stopCustomersPolling(){
+  if(customersPollTimer){ clearInterval(customersPollTimer); customersPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.customersPendingSync){
+    pushCustomersToCloud();
+  }
+});
+
+/* =====================================================================
+   ☁️ SUPPLIERS — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 2)
+   بالکل کسٹمرز والا ہی pattern — نیا سپلائر، واجب الادا (total_payable)، خریداری
+   ہسٹری (purchaseHistory)، بینک اکاؤنٹس، keywords، ای میل، تصویر، ڈیلیٹ —
+   ہر تبدیلی خودکار ہر ڈیوائس پر۔ full-overwrite + pendingSync pattern استعمال کیا
+   ہے (سپلائر ریکارڈز میں بھی edit-in-place ہوتا ہے، اسی لیے یہی موزوں ہے) ----------
+   ===================================================================== */
+const SUPPLIERS_DOC_PATH = 'shopData/suppliers';
+let suppliersPollTimer = null;
+
+async function pushSuppliersToCloud(){
+  saveToStorage('suppliers', suppliersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextSupplierId', nextSupplierId);
+  try{
+    const res = await authFirestoreFetch(`${SUPPLIERS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(suppliersData) },
+          nextSupplierId: { integerValue: String(nextSupplierId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.suppliersPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.suppliersPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchSuppliersFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی سپلائر تبدیلی (نیا سپلائر، ادائیگی، PO وغیرہ) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
+  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.suppliersPendingSync){
+    const pushed = await pushSuppliersToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${SUPPLIERS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudSuppliers = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudSuppliers)) return false;
+    suppliersData = cloudSuppliers;
+    const cloudNextId = parseInt(doc.fields?.nextSupplierId?.integerValue || '0');
+    if(cloudNextId > nextSupplierId) nextSupplierId = cloudNextId;
+    saveToStorage('suppliers', suppliersData);
+    saveToStorage('nextSupplierId', nextSupplierId);
+    if(!silent){
+      if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Suppliers/Parties اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startSuppliersPolling(){
+  stopSuppliersPolling();
+  suppliersPollTimer = setInterval(() => {
+    fetchSuppliersFromCloud(false);
+  }, 12000);
+}
+function stopSuppliersPolling(){
+  if(suppliersPollTimer){ clearInterval(suppliersPollTimer); suppliersPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.suppliersPendingSync){
+    pushSuppliersToCloud();
+  }
+});
+
+/* =====================================================================
+   ☁️ PRODUCTS & STOCK — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 3)
+   پراڈکٹس، ویرینٹس/پیکنگ، خرید/فروخت ریٹس، سٹاک مقدار — نیا پراڈکٹ، ایڈٹ،
+   ڈیلیٹ، Stock Adjustment کی ہر تبدیلی، فروخت (بل بننے پر سٹاک کٹنا)، خریداری
+   (شپمنٹ موصول ہونے پر سٹاک بڑھنا)، اور واپسی (فروخت + خریداری دونوں) — سب پر
+   خودکار سنک۔ بالکل کسٹمرز/سپلائرز والا ہی full-overwrite + pendingSync
+   pattern استعمال کیا ہے (پراڈکٹ ریکارڈز میں بھی edit-in-place ہوتا ہے) ----------
+   ===================================================================== */
+const PRODUCTS_DOC_PATH = 'shopData/products';
+let productsPollTimer = null;
+
+async function pushProductsToCloud(){
+  saveProductsLight(); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں (تصویریں الگ IndexedDB میں)
+  saveToStorage('nextProductId', nextProductId);
+  saveToStorage('nextVariantId', nextVariantId);
+  try{
+    const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(productsData) },
+          nextProductId: { integerValue: String(nextProductId) },
+          nextVariantId: { integerValue: String(nextVariantId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.productsPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.productsPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchProductsFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی پراڈکٹ/سٹاک تبدیلی (نیا آئٹم، ریٹ، سٹاک ایڈجسٹمنٹ، فروخت وغیرہ) ابھی کلاؤڈ میں نہیں گئی
+  // تو پہلے وہی بھیجیں — ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی (مثلاً ابھی کٹا ہوا سٹاک) مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.productsPendingSync){
+    const pushed = await pushProductsToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudProducts = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudProducts)) return false;
+    productsData = cloudProducts;
+    const cloudNextProductId = parseInt(doc.fields?.nextProductId?.integerValue || '0');
+    if(cloudNextProductId > nextProductId) nextProductId = cloudNextProductId;
+    const cloudNextVariantId = parseInt(doc.fields?.nextVariantId?.integerValue || '0');
+    if(cloudNextVariantId > nextVariantId) nextVariantId = cloudNextVariantId;
+    saveProductsLight();
+    saveToStorage('nextProductId', nextProductId);
+    saveToStorage('nextVariantId', nextVariantId);
+    await hydratePhotosFromIndexedDB(); // ---------- کلاؤڈ سے آیا ڈیٹا تصویروں کے بغیر ہے — اسی فون کی IndexedDB سے واپس جوڑ دیں ----------
+    if(!silent){
+      if(typeof renderProductList === 'function' && document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
+      if(typeof renderStockAdjustmentScreen === 'function' && document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+      if(typeof renderBillingProductGrid === 'function' && currentScreenName === 'billing') renderBillingProductGrid();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Products/Stock Adjustment/Purchase Orders/Billing اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startProductsPolling(){
+  stopProductsPolling();
+  productsPollTimer = setInterval(() => {
+    fetchProductsFromCloud(false);
+  }, 12000);
+}
+function stopProductsPolling(){
+  if(productsPollTimer){ clearInterval(productsPollTimer); productsPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.productsPendingSync){
+    pushProductsToCloud();
+  }
+});
+
+/* =====================================================================
+   ☁️ BILLS & INVOICES — Firestore Sync مکمل (صدام کی ہدایت 6 ستمبر، قدم 4)
+   نیا بل (finalize/approve)، Void، مستقل ڈیلیٹ (تنہا یا بلک) — سب فوری کلاؤڈ
+   میں جاتا ہے تاکہ ایڈمن اور سیلزمین دونوں ایک ہی بل ہسٹری دیکھیں (یہی سب سے
+   اہم حصہ تھا)۔ بالکل کسٹمرز/سپلائرز/پراڈکٹس والا ہی full-overwrite +
+   pendingSync pattern استعمال کیا ہے (invoicesData میں بھی edit-in-place
+   ہوتا ہے — void سے status بدلتی ہے، delete سے فہرست سے نکلتا ہے) ----------
+   ===================================================================== */
+const INVOICES_DOC_PATH = 'shopData/invoices';
+let invoicesPollTimer = null;
+
+async function pushInvoicesToCloud(){
+  saveToStorage('invoices', invoicesData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  try{
+    const res = await authFirestoreFetch(`${INVOICES_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(invoicesData) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.invoicesPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.invoicesPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchInvoicesFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی بل تبدیلی (نیا بل، Void، ڈیلیٹ وغیرہ) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
+  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
+  if(AppState.settings.invoicesPendingSync){
+    const pushed = await pushInvoicesToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${INVOICES_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudInvoices = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudInvoices)) return false;
+    invoicesData = cloudInvoices;
+    saveToStorage('invoices', invoicesData);
+    if(!silent){
+      if(typeof renderBillHistory === 'function' && currentScreenName === 'billhistory') renderBillHistory();
+      if(typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner();
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Bill History اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startInvoicesPolling(){
+  stopInvoicesPolling();
+  invoicesPollTimer = setInterval(() => {
+    fetchInvoicesFromCloud(false);
+  }, 12000);
+}
+function stopInvoicesPolling(){
+  if(invoicesPollTimer){ clearInterval(invoicesPollTimer); invoicesPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.invoicesPendingSync){
+    pushInvoicesToCloud();
+  }
+});
+
+/* =====================================================================
+   ☁️ PENDING BILLS — بل جو منظوری کے منتظر ہیں + کسٹمر کی پیمنٹ رسیدیں
+   (صدام کی ہدایت 6 ستمبر، قدم 4) — سیلزمین کا نیا بل جمع ہونا، ایڈمن کا
+   Approve/Reject، کسٹمر ایپ سے پیمنٹ اسکرین شاٹ — سب فوری ہر ڈیوائس پر۔
+   بالکل انوائسز والا ہی full-overwrite + pendingSync pattern ----------
+   ===================================================================== */
+const PENDING_BILLS_DOC_PATH = 'shopData/pendingBills';
+let pendingBillsPollTimer = null;
+
+async function pushPendingBillsToCloud(){
+  saveToStorage('pendingBills', pendingBillsData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
+  saveToStorage('nextPendingId', nextPendingId);
+  try{
+    const res = await authFirestoreFetch(`${PENDING_BILLS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(pendingBillsData) },
+          nextPendingId: { integerValue: String(nextPendingId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings.pendingBillsPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    persistAllData();
+    return ok;
+  }catch(e){
+    AppState.settings.pendingBillsPendingSync = true;
+    persistAllData();
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+  }
+}
+
+async function fetchPendingBillsFromCloud(silent){
+  // ---------- اگر اسی فون پر کوئی تبدیلی (نیا بل جمع، Approve/Reject، پیمنٹ رسید) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں ----------
+  if(AppState.settings.pendingBillsPendingSync){
+    const pushed = await pushPendingBillsToCloud();
+    if(pushed) return true;
+    return false;
+  }
+  try{
+    const res = await authFirestoreFetch(`${PENDING_BILLS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudPending = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudPending)) return false;
+    pendingBillsData = cloudPending;
+    const cloudNextId = parseInt(doc.fields?.nextPendingId?.integerValue || '0');
+    if(cloudNextId > nextPendingId) nextPendingId = cloudNextId;
+    saveToStorage('pendingBills', pendingBillsData);
+    saveToStorage('nextPendingId', nextPendingId);
+    if(!silent){
+      if(typeof renderPendingBillsListModal === 'function' && document.getElementById('pendingBillsListModal')?.classList.contains('show')) renderPendingBillsListModal();
+      if(typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner();
+      if(typeof renderRejectionNotice === 'function' && currentScreenName === 'billing') renderRejectionNotice();
+      if(AppState.currentRole === 'salesman' && typeof renderTodaysBillBadge === 'function' && document.getElementById('userTag')){
+        document.getElementById('userTag').innerHTML = '🧑‍💼 سیلزمین: ' + AppState.currentUser.name + renderTodaysBillBadge();
+      }
+    }
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+  }
+}
+
+// ---------- Billing اسکرین یا Pending Bills لسٹ کھلی ہو تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+function startPendingBillsPolling(){
+  stopPendingBillsPolling();
+  pendingBillsPollTimer = setInterval(() => {
+    fetchPendingBillsFromCloud(false);
+  }, 12000);
+}
+function stopPendingBillsPolling(){
+  if(pendingBillsPollTimer){ clearInterval(pendingBillsPollTimer); pendingBillsPollTimer = null; }
+}
+
+window.addEventListener('online', () => {
+  if(AppState?.settings?.pendingBillsPendingSync){
+    pushPendingBillsToCloud();
+  }
+});
+
 // ---------- Dummy Approval Requests (بعد میں Salesman خود Billing اسکرین سے یہ بھیجے گا) ----------
 const APPROVAL_REQUESTS_SEED_DATA = [
   {request_id:1, requested_by:'Aslam Bhai', action_type:'delete_bill', target:'Invoice #INV-0042', reason:'Customer cancelled the order', status:'pending', date:'2026-07-01'},
@@ -23937,13 +24493,52 @@ async function saveNewUser(){
 
 // ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ — Home اسکرین پر ایک ہی ڈراپ ڈاؤن میں تمام ورکرز اور کسٹمرز،
 // منتخب کرتے ہی کال/SMS/واٹس ایپ بٹن اور (صرف ورکرز کے لیے) ان کا لاگ ان PIN — نظر کے آئیکن سے دیکھیں ---------- -->
+// ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ — Home اسکرین پر رول کے مطابق مختلف پینل۔
+// Admin: تمام ورکرز اور کسٹمرز کی ڈراپ ڈاؤن + کال/SMS/واٹس ایپ + (صرف ورکرز کے لیے) PIN آنکھ 👁 دبا کر دیکھیں۔
+// Salesman/Customer: صرف "ایڈمن سے فوری رابطہ" کارڈ — کال/SMS/واٹس ایپ بٹن، مگر ایڈمن کا نمبر کہیں لکھا نظر نہ آئے، PIN بالکل نہیں ---------- -->
+function renderQuickContactPanel(){
+  const body = document.getElementById('quickContactPanelBody');
+  if(!body) return;
+  if(AppState.currentRole === 'admin'){
+    body.innerHTML = `
+      <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px;">📇 فوری رابطہ — ورکر یا کسٹمر منتخب کریں</div>
+      <select id="quickContactSelect" onchange="renderQuickContactCard()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:10px; font-size:13.5px; font-weight:700; background:#fff;">
+        <option value="">— منتخب کریں —</option>
+      </select>
+      <div id="quickContactCard" style="margin-top:10px;"></div>`;
+    populateQuickContactDropdown();
+  } else {
+    body.innerHTML = `
+      <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px;">📞 ایڈمن سے فوری رابطہ</div>
+      ${buildAdminContactCardHTML()}`;
+  }
+}
+
+// ---------- ایڈمن سے رابطے کا کارڈ — Salesman اور Customer دونوں کے لیے مشترکہ (نمبر کہیں ٹیکسٹ میں نظر نہیں آتا، صرف بٹن) ---------- -->
+function buildAdminContactCardHTML(){
+  const admin = usersData.find(u => u.role === 'admin' && u.is_active && u.phone);
+  if(!admin){
+    return `<div style="font-size:12.5px; color:var(--muted);">⚠️ ایڈمن کا رابطہ نمبر ابھی محفوظ نہیں ہے۔</div>`;
+  }
+  const waDigits = formatPhoneForWhatsApp(admin.phone);
+  return `
+    <div style="display:flex; gap:6px;">
+      <a href="tel:+${waDigits}" style="flex:1; text-align:center; padding:11px 4px; background:#eef2ff; color:var(--primary-dark); border-radius:9px; font-size:13px; font-weight:800; text-decoration:none;">📞 کال</a>
+      <a href="sms:+${waDigits}" style="flex:1; text-align:center; padding:11px 4px; background:#fff7ed; color:#b45309; border-radius:9px; font-size:13px; font-weight:800; text-decoration:none;">✉️ SMS</a>
+      <a href="https://wa.me/${waDigits}" target="_blank" rel="noopener" style="flex:1; text-align:center; padding:11px 4px; background:#dcfce7; color:#15803d; border-radius:9px; font-size:13px; font-weight:800; text-decoration:none;">💬 واٹس ایپ</a>
+    </div>`;
+}
+
 function populateQuickContactDropdown(){
   const sel = document.getElementById('quickContactSelect');
   if(!sel) return;
   const prevValue = sel.value;
   const workers = usersData.filter(u => u.is_active);
-  const customers = customersData.filter(c => c.name && !c.name.startsWith('Walk-in'));
-  let html = '<option value="">— منتخب کریں —</option>';
+  // ---------- 📇 صدام کی ہدایت (6 ستمبر): صرف وہی کسٹمر یہاں نظر آئیں جنہیں ایپ ایکسیس/پاسورڈ باقاعدہ دیا جا چکا ہے —
+  // باقی سینکڑوں عام کسٹمرز (جو ایپ استعمال ہی نہیں کرتے) اس ڈراپ ڈاؤن میں شامل نہ ہوں ---------- -->
+  const customers = customersData.filter(c => c.name && !c.name.startsWith('Walk-in') && c.appAccessEnabled && c.appPassword);
+  // ---------- 👨‍💻 صدام کی ہدایت (6 ستمبر): سب سے اوپر "Contact Developer" — لاگ ان بلبلے والی وہی موجودہ لاجک (sendDevChat/getDeveloperContact) یہاں بھی ---------- -->
+  let html = '<option value="">— منتخب کریں —</option><option value="developer:1">👨‍💻 Developer سے رابطہ</option>';
   if(workers.length){
     html += `<optgroup label="👷 ورکرز">`;
     workers.forEach(u => { html += `<option value="worker:${u.user_id}">${u.name}${u.role==='admin' ? ' (Admin)' : ''}</option>`; });
@@ -23966,6 +24561,23 @@ function renderQuickContactCard(){
   const val = sel.value;
   if(!val){ card.innerHTML = ''; return; }
   const [kind, idStr] = val.split(':');
+
+  // ---------- 👨‍💻 Developer سے رابطہ — کال/SMS/واٹس ایپ (Gmail/Email شامل نہیں، صدام کی ہدایت) ---------- -->
+  if(kind === 'developer'){
+    const contact = getDeveloperContact();
+    const smsDigits = String(contact.sms || '').replace(/[^0-9]/g, '');
+    card.innerHTML = `
+      <div style="border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 12px; background:#fafbfc;">
+        <div style="font-weight:800; font-size:14.5px; color:#1a1a1a;">👨‍💻 Developer</div>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <a href="tel:+${smsDigits}" style="flex:1; text-align:center; padding:9px 4px; background:#eef2ff; color:var(--primary-dark); border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">📞 کال</a>
+          <a href="#" onclick="sendDevChat('sms'); return false;" style="flex:1; text-align:center; padding:9px 4px; background:#fff7ed; color:#b45309; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">✉️ SMS</a>
+          <a href="#" onclick="sendDevChat('whatsapp'); return false;" style="flex:1; text-align:center; padding:9px 4px; background:#dcfce7; color:#15803d; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">💬 واٹس ایپ</a>
+        </div>
+      </div>`;
+    return;
+  }
+
   const id = Number(idStr);
   let person, isWorker = (kind === 'worker');
   if(isWorker) person = usersData.find(u => u.user_id === id);
@@ -24163,7 +24775,7 @@ async function confirmBulkDeleteWithPin(){
   }
   const countDeleted = selectedBillIds.size;
   invoicesData = invoicesData.filter(inv => !selectedBillIds.has(inv.invoice_id));
-  saveToStorage('invoices', invoicesData);
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): بلک ڈیلیٹ بھی فوراً کلاؤڈ میں (اندر ہی saveToStorage + persistAllData بھی ہو جاتا ہے) ----------
   document.getElementById('bulkDeletePinModal').classList.remove('show');
   alert(`✅ ${countDeleted} bill(s) permanently deleted.`);
   toggleBulkDeleteMode();
@@ -24445,6 +25057,7 @@ function permanentlyDeleteBill(invoiceId){
   invoicesData = invoicesData.filter(i => i.invoice_id !== invoiceId);
   persistAllData();
   renderBillHistory();
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): مستقل ڈیلیٹ ہونا فوراً کلاؤڈ میں — دوسرے فون پر بھی غائب ہو ----------
 }
 
 function adminVoidBill(invoiceId){
@@ -24486,6 +25099,9 @@ function adminVoidBill(invoiceId){
   inv.status = 'voided';
   persistAllData();
   renderBillHistory();
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): Void ہوتے ہی فوراً کلاؤڈ میں — دوسرے فون پر بھی فوراً Voided ٹیب میں چلا جائے ----------
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): اسٹاک واپس آنا بھی فوراً کلاؤڈ میں ----------
+  if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): بقایا/والٹ کی واپسی بھی فوراً کلاؤڈ میں ----------
   alert('✅ Bill voided — stock and any cash/receivable/wallet effects have been reversed.');
 }
 
@@ -28511,6 +29127,12 @@ function performSoftReset(){
   financeDummy.cashInHand = 0;
   AppState.settings.openingCashBalance = 0;
   persistAllData();
+  // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): ری سیٹ کے بعد خالی بل/پینڈنگ لسٹ بھی فوراً کلاؤڈ میں —
+  // ورنہ دوسرا فون اگلی بار پرانا (ری سیٹ سے پہلے کا) ڈیٹا واپس کھینچ لے گا ----------
+  pushInvoicesToCloud();
+  pushPendingBillsToCloud();
+  pushCustomersToCloud(); // بقایا/والٹ زیرو ہونا بھی فوراً کلاؤڈ میں
+  pushSuppliersToCloud(); // واجب الادا زیرو ہونا بھی فوراً کلاؤڈ میں
 }
 
 function requestMasterResetAuth(){
@@ -28549,6 +29171,13 @@ function performMasterReset(){
   financeDummy.cashInHand = 0;
   AppState.settings.openingCashBalance = 0;
   persistAllData();
+  // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): مکمل صفر ہونا بھی فوراً کلاؤڈ میں —
+  // ورنہ دوسرا فون اگلی بار پرانا ڈیٹا واپس کھینچ کر "زیرو" حالت غلط ثابت کر دے گا ----------
+  pushInvoicesToCloud();
+  pushPendingBillsToCloud();
+  pushCustomersToCloud();
+  pushSuppliersToCloud();
+  pushProductsToCloud();
 }
 
 // ---------- اکاؤنٹ ڈیلیٹ کریں ----------
