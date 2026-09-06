@@ -7215,7 +7215,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر7:18pm';
+const APP_BUILD_VERSION = 'اتوار6ستمبر7:49pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9179,19 +9179,33 @@ let marqueeSettings = loadFromStorage('marqueeSettings', {
   barBackground: '#1e40af', // ---------- 🎨 صدام کی ہدایت (FM5SEPTH): پوری پٹی کا اپنا بیک گراؤنڈ رنگ ----------
   barBorderColor: '#eab308', // ---------- 🖼️ صدام کی ہدایت (FM5SEPTH): پٹی کا اپنا بارڈر رنگ ----------
   messages: [
-    { id:'login',        builtin:true, label:'لاگ ان پیغام (👑 نام)',          enabled:true, color:'#ffd700', direction:'rtl', speed:18, gap:0.5, brightness:100 },
-    { id:'subscription', builtin:true, label:'⭐ سبسکرپشن یاد دہانی',           enabled:true, color:'#ffffff', direction:'ltr', speed:18, gap:0.5, brightness:100 },
+    { id:'login',        builtin:true, label:'لاگ ان پیغام (👑 نام)',          enabled:true, color:'#ffd700', direction:'rtl', speed:18, gap:0.5, brightness:100, audience:['admin','salesman','customer'] },
+    { id:'subscription', builtin:true, label:'⭐ سبسکرپشن یاد دہانی',           enabled:true, color:'#ffffff', direction:'ltr', speed:18, gap:0.5, brightness:100, audience:['admin'] },
     { id:'screenshot',   builtin:true, label:'📸 اسکرین شاٹ یاد دہانی',        enabled:true, color:'#ffffff', direction:'ltr', speed:18, gap:0.5, brightness:100,
-      text:'📸   پیارے بھائی، اس ایپ کے اندر جو بھی مسئلہ نظر آئے، اسی وقت اس کا اسکرین شاٹ لے کر مجھے بھیج دیا کریں' },
-    { id:'updateNotice', builtin:true, label:'🔔 نیا اپڈیٹ یاد دہانی',          enabled:true, color:'#ffffff', direction:'ltr', speed:18, gap:0.5, brightness:100 }
-  ] // ---------- اپنے نئے پیغامات اسی فہرست کے آخر میں {id, builtin:false, text, enabled, color, direction, speed, gap, brightness} کی صورت میں شامل ہوں گے ----------
+      text:'📸   پیارے بھائی، اس ایپ کے اندر جو بھی مسئلہ نظر آئے، اسی وقت اس کا اسکرین شاٹ لے کر مجھے بھیج دیا کریں', audience:['admin'] },
+    { id:'updateNotice', builtin:true, label:'🔔 نیا اپڈیٹ یاد دہانی',          enabled:true, color:'#ffffff', direction:'ltr', speed:18, gap:0.5, brightness:100, audience:['admin','salesman','customer'] }
+  ] // ---------- اپنے نئے پیغامات اسی فہرست کے آخر میں {id, builtin:false, text, enabled, color, direction, speed, gap, brightness, audience} کی صورت میں شامل ہوں گے ----------
 });
 function getMarqueeMsgDef(id){ return marqueeSettings.messages.find(m => m.id === id); }
+
+// ---------- 🎯 صدام کی ہدایت (FM6SEPSU6): ہر پیغام کا اپنا "کس کے لیے ہے" (audience) — تاکہ صرف
+// اجازت یافتہ رول (ایڈمن/ملازم/کسٹمر) کی سکرین پر ہی وہ پیغام نظر آئے۔ پرانے محفوظ شدہ ڈیٹا میں یہ خانہ
+// موجود نہیں ہوگا (چونکہ نیا فیچر ہے)، اس لیے یہاں محفوظ ڈیفالٹ دیا گیا ہے: لاگ ان اور نیا اپڈیٹ سب کو،
+// باقی سب (سبسکرپشن، اسکرین شاٹ، اور کوئی بھی نیا/اپنا پیغام) صرف ایڈمن کو — تاکہ کسی کسٹمر/ملازم کی
+// سکرین پر کبھی غلطی سے اشتہار/نجی پیغام نہ چلا جائے ---------- -->
+function getMarqueeMsgAudience(m){
+  if(Array.isArray(m.audience) && m.audience.length) return m.audience;
+  if(m.id === 'login' || m.id === 'updateNotice') return ['admin','salesman','customer'];
+  return ['admin'];
+}
 
 function buildMarqueeQueue(){
   const q = [];
   marqueeSettings.messages.forEach(m => {
     if(!m.enabled) return;
+    // ---------- 🎯 صدام کی ہدایت (FM6SEPSU6): موجودہ لاگ ان رول اجازت یافتہ فہرست میں نہ ہو تو یہ پیغام
+    // بالکل مت دکھائیں — ایڈمن کے لیے بھیجے گئے پیغامات ملازم/کسٹمر کی سکرین پر کبھی نہیں جائیں گے ---------- -->
+    if(!getMarqueeMsgAudience(m).includes(AppState.currentRole)) return;
     let text = m.text;
     if(m.id === 'login'){
       if(!AppState.currentUser) return;
@@ -9228,6 +9242,20 @@ function renderMarqueeDevList(){
       </div>
       ${(!m.builtin || m.id === 'screenshot') ? `
       <textarea onchange="updateMarqueeMsgField(${idx}, 'text', this.value)" rows="2" style="width:100%; padding:7px; border:1px solid #dbe1ea; border-radius:7px; font-size:12.5px; margin-bottom:6px; font-family:inherit;">${(m.text||'').replace(/</g,'&lt;')}</textarea>` : ''}
+      <!-- ---------- 🎯 صدام کی ہدایت (FM6SEPSU6): یہ پیغام کس کس رول کی سکرین پر نظر آئے —
+           تاکہ ایڈمن کے لیے بھیجا گیا پیغام ملازم/کسٹمر کی سکرین پر کبھی نہ جائے ---------- -->
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:6px; background:#eef2ff; border-radius:8px; padding:6px 8px;">
+        <label style="font-size:10.5px; font-weight:800; color:var(--primary-dark); flex:0 0 auto;">👁️ کس کے لیے:</label>
+        <label style="display:flex; align-items:center; gap:3px; font-size:11px; font-weight:700; cursor:pointer;">
+          <input type="checkbox" ${getMarqueeMsgAudience(m).includes('admin') ? 'checked' : ''} onchange="updateMarqueeMsgAudience(${idx}, 'admin', this.checked)" style="width:15px; height:15px; margin:0;"> 👑 ایڈمن
+        </label>
+        <label style="display:flex; align-items:center; gap:3px; font-size:11px; font-weight:700; cursor:pointer;">
+          <input type="checkbox" ${getMarqueeMsgAudience(m).includes('salesman') ? 'checked' : ''} onchange="updateMarqueeMsgAudience(${idx}, 'salesman', this.checked)" style="width:15px; height:15px; margin:0;"> 🧑‍💼 ملازم
+        </label>
+        <label style="display:flex; align-items:center; gap:3px; font-size:11px; font-weight:700; cursor:pointer;">
+          <input type="checkbox" ${getMarqueeMsgAudience(m).includes('customer') ? 'checked' : ''} onchange="updateMarqueeMsgAudience(${idx}, 'customer', this.checked)" style="width:15px; height:15px; margin:0;"> 🧑 کسٹمر
+        </label>
+      </div>
       <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:6px;">
         <label style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">رنگ:</label>
         <input type="color" value="${m.color || '#ffffff'}" onchange="updateMarqueeMsgField(${idx}, 'color', this.value)" oninput="updateMarqueeMsgField(${idx}, 'color', this.value)" style="width:36px; height:28px; padding:0; border:1px solid #dbe1ea; border-radius:6px; flex:0 0 auto;">
@@ -9316,6 +9344,23 @@ function updateMarqueeMsgField(idx, field, value){
   mqQueueIdx = 0;
   playNextMarqueeMessage();
 }
+// ---------- 🎯 صدام کی ہدایت (FM6SEPSU6): ایک رول کو ٹک/ان ٹک کر کے audience فہرست بدلیں —
+// پرانے ڈیٹا میں audience خانہ نہ ہو تو پہلے getMarqueeMsgAudience() سے ڈیفالٹ لے کر اسے حقیقی خانہ بنا دیا جاتا ہے ---------- -->
+function updateMarqueeMsgAudience(idx, role, checked){
+  const m = marqueeSettings.messages[idx];
+  if(!m) return;
+  const current = getMarqueeMsgAudience(m).slice();
+  if(checked){
+    if(!current.includes(role)) current.push(role);
+  } else {
+    const pos = current.indexOf(role);
+    if(pos > -1) current.splice(pos, 1);
+  }
+  m.audience = current;
+  saveToStorage('marqueeSettings', marqueeSettings);
+  mqQueueIdx = 0;
+  playNextMarqueeMessage();
+}
 function deleteMarqueeMsg(idx){
   if(marqueeSettings.messages[idx]?.builtin) return; // ---------- اصل 4 پیغامات کبھی حذف نہیں ہو سکتے، صرف آف ---------- -->
   marqueeSettings.messages.splice(idx, 1);
@@ -9328,7 +9373,7 @@ function addMarqueeMsg(){
   const input = document.getElementById('mqNewMsgInput');
   const text = (input.value || '').trim();
   if(!text){ alert('پہلے پیغام لکھیں'); return; }
-  marqueeSettings.messages.push({ id: 'custom_' + Date.now(), builtin:false, text, enabled:true, color:'#ffffff', direction:'ltr', speed:18 });
+  marqueeSettings.messages.push({ id: 'custom_' + Date.now(), builtin:false, text, enabled:true, color:'#ffffff', direction:'ltr', speed:18, audience:['admin'] });
   saveToStorage('marqueeSettings', marqueeSettings);
   input.value = '';
   renderMarqueeDevList();
@@ -19035,12 +19080,18 @@ function applyAdvOrderRateMode(mode){
   renderAdvOrderCart();
 }
 
-function saveAdvanceOrder(){
+async function saveAdvanceOrder(){
   if(advOrderCart.length === 0){ alert('Please add at least one item.'); return; }
   const customerName = document.getElementById('advCustomerName').value.trim();
   if(!customerName){ alert('Please enter the customer\'s name.'); return; }
   const customerPhone = document.getElementById('advCustomerPhone').value.trim();
   const note = document.getElementById('advOrderNote').value.trim();
+
+  // ---------- 🐞 صدام کی ہدایت (FM6SEPSU5): نئی آرڈر بننے سے پہلے کلاؤڈ سے sync — ملازم کا فون بھی
+  // ایڈمن کی طرح آٹو fetch نہیں کرتا، اسی لیے یہاں بھی وہی ID ٹکراؤ والی خرابی ہو سکتی تھی ---------- -->
+  if(!editingAdvOrderId){
+    try{ await fetchAdvanceOrdersFromCloud(true); }catch(e){}
+  }
 
   if(editingAdvOrderId){
     const order = advanceOrdersData.find(o => o.id === editingAdvOrderId);
@@ -19293,6 +19344,14 @@ async function openOtReview(){
 
   if(items.length === 0){ alert('کم از کم ایک چیز کو ٹک کر کے تعداد لگائیں'); return; }
   otReviewItems = items;
+
+  // ---------- 🐞 صدام کی ہدایت (FM6SEPSU5): اصل خرابی — کسٹمر کا موبائل کبھی بھی آرڈر بھیجنے سے پہلے کلاؤڈ سے
+  // fetch نہیں کرتا تھا (صرف ایڈمن کا فون کرتا ہے)۔ اس لیے کسٹمر کے فون پر nextAdvOrderId ہمیشہ 1 سے شروع ہوتا،
+  // اور جب یہ نیا آرڈر (id:1) کلاؤڈ پر PATCH ہوتا تو ایڈمن کے فون پر پہلے سے موجود id:1 والے آرڈر سے ٹکراتا —
+  // ایڈمن کا merge-by-id منطق اس نئے آرڈر کو خاموشی سے "پہلے سے موجود" سمجھ کر رد کر دیتا، آرڈر کبھی نظر نہ آتا۔
+  // اب آرڈر بنانے سے پہلے کلاؤڈ سے sync کیا جاتا ہے — صحیح nextAdvOrderId ملے گا اور موجودہ آرڈرز بھی مقامی
+  // فہرست میں شامل ہو جائیں گے، تاکہ اگلا PATCH پرانا ڈیٹا اووررائٹ نہ کرے ---------- -->
+  try{ await fetchAdvanceOrdersFromCloud(true); }catch(e){ /* آف لائن ہو تو مقامی ID سے ہی آگے بڑھیں */ }
 
   // ---------- 🍇 صدام کی ہدایت پر: اب یہاں "ایڈمن کو بھیجیں" کا الگ بٹن دبانے کی ضرورت نہیں —
   // آرڈر مکمل دباتے ہی یہیں خودکار محفوظ ہو جاتا ہے اور اسی وقت ایڈمن کی سکرین پر پہنچ جاتا ہے۔
