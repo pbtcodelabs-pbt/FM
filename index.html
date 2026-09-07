@@ -418,6 +418,11 @@
     background:var(--danger); color:#fff; font-size:11px; font-weight:800; z-index:5;
     display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.3);
   }
+  .homeEditModeToggle{
+    display:block; width:100%; margin-bottom:10px; padding:9px; border:none; border-radius:10px;
+    background:#f1f5f9; color:var(--muted); font-weight:800; font-size:12.5px; cursor:pointer;
+  }
+  .homeEditModeToggle.active{background:var(--danger); color:#fff;}
   .homeIconTile .hitBadge{
     position:absolute; top:6px; right:6px; background:var(--danger); color:#fff; border-radius:10px;
     font-size:9.5px; font-weight:800; padding:1px 6px; box-shadow:0 2px 5px rgba(185,28,28,.45);
@@ -2777,6 +2782,10 @@
         </button>
       </div>
       <input type="file" id="localRestoreFileInput" accept=".json,application/json" style="display:none;" onchange="importBackupData(event); this.value='';">
+
+      <!-- ---------- ✏️ صدام کی ہدایت (FM7SEPMO): پہلے ✖ ہمیشہ نظر آتا تھا جو گڑبڑ لگتا تھا — اب صرف اسی وقت
+           نظر آئے گا جب یہ "ترتیب بدلیں" بٹن دبایا جائے، عام حالت میں ہوم پیج بالکل صاف رہے ---------- -->
+      <button class="homeEditModeToggle admin-only" id="homeEditModeToggle" onclick="toggleHomeEditMode()">✏️ آئیکن ترتیب بدلیں</button>
 
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — Admin کے لیے اب انہی کی منتخب کردہ Shortcut اسکرینیں،
            Salesman کے لیے اسے Assign کی گئی اسکرینیں ---------- -->
@@ -7336,7 +7345,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر7ستمبر8:23am';
+const APP_BUILD_VERSION = 'پیر7ستمبر8:47am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -7814,10 +7823,22 @@ function renderHomeShortcutCards(){
     </button>`).join('');
 }
 
+// ---------- ✏️ صدام کی ہدایت (FM7SEPMO): ہوم آئیکن ہٹانے کا موڈ — خاموش (false) ہی رہے، صرف اسی وقت فعال
+// ہو جب ایڈمن خود بٹن دبائے، تاکہ ہوم پیج عام حالت میں بالکل صاف رہے، ہر آئیکن پر ✖ ہمیشہ نظر نہ آئے ---------- -->
+let homeEditMode = false;
+function toggleHomeEditMode(){
+  homeEditMode = !homeEditMode;
+  renderHomeIconGrid();
+}
 function renderHomeIconGrid(){
   renderHomeUnfinishedCartCard();
   const grid = document.getElementById('homeIconGrid');
   if(!grid) return;
+  const editBtn = document.getElementById('homeEditModeToggle');
+  if(editBtn){
+    editBtn.textContent = homeEditMode ? '✅ مکمل ہو گیا' : '✏️ آئیکن ترتیب بدلیں';
+    editBtn.classList.toggle('active', homeEditMode);
+  }
   const tileHtml = (t) => `
     <button class="homeIconTile" onclick="${t.action ? t.action + '()' : `goTo('${t.screen}')`}">
       <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span></span>
@@ -7839,7 +7860,7 @@ function renderHomeIconGrid(){
     const spaceIdx = def.label.indexOf(' ');
     const icon = spaceIdx > -1 ? def.label.slice(0, spaceIdx) : '📄';
     const label = spaceIdx > -1 ? def.label.slice(spaceIdx + 1) : def.label;
-    return {icon, label, screen:key};
+    return {icon, label, screen:key, action:def.action || null};
   }).filter(Boolean);
 
   document.getElementById('otherFeaturesDropWrap').style.display = 'none';
@@ -7852,8 +7873,8 @@ function renderHomeIconGrid(){
   }
 
   const myTileHtml = (t) => `
-    <button class="homeIconTile" style="position:relative;" onclick="goTo('${t.screen}')">
-      ${AppState.currentRole === 'admin' ? `<span class="hitRemoveBtn" title="ہوم سے ہٹائیں" onclick="event.stopPropagation(); removeScreenFromMyHomeGrid('${t.screen}')">✖</span>` : ''}
+    <button class="homeIconTile" style="position:relative;" onclick="${t.action ? t.action + '()' : `goTo('${t.screen}')`}">
+      ${(AppState.currentRole === 'admin' && homeEditMode) ? `<span class="hitRemoveBtn" title="ہوم سے ہٹائیں" onclick="event.stopPropagation(); removeScreenFromMyHomeGrid('${t.screen}')">✖</span>` : ''}
       ${t.screen === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingCount}</span>` : ''}
       ${t.screen === 'recoveryList' && pendingRecoveryCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingRecoveryCount}</span>` : ''}
       <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span></span>
@@ -10036,16 +10057,18 @@ function onSidebarDragStart(e){
     document.addEventListener('pointercancel', onSidebarDragEnd);
   }catch(err){ console.warn('onSidebarDragStart failed', err); }
 }
-// ---------- 👻 انگلی کے ساتھ ساتھ چلنے والا اشارہ — جب سائیڈبار سے باہر نکل جائیں تو نظر آئے ---------- -->
+// ---------- 👻 انگلی کے ساتھ ساتھ چلنے والا اشارہ — سفید بٹن، صاف نظر آنے والا "+" — صدام کی ہدایت (FM7SEPMO2):
+// پہلے یہ صرف ایک سبز لکھائی تھی جو کانپتی/غائب ہو جاتی تھی — اب ایک مستحکم، واضح سفید بٹن ---------- -->
 function showAddToHomeGhost(x, y, label){
   let ghost = document.getElementById('addToHomeGhost');
   if(!ghost){
     ghost = document.createElement('div');
     ghost.id = 'addToHomeGhost';
-    ghost.style.cssText = 'position:fixed; z-index:2000; pointer-events:none; transform:translate(-50%,-120%); background:#15803d; color:#fff; font-weight:800; font-size:12.5px; padding:8px 14px; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.35); white-space:nowrap;';
+    ghost.style.cssText = 'position:fixed; z-index:2000; pointer-events:none; transform:translate(-50%,-130%); background:#ffffff; color:#15803d; font-weight:800; font-size:13px; padding:10px 16px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.4); border:2.5px solid #15803d; white-space:nowrap; display:flex; align-items:center; gap:6px;';
+    ghost.innerHTML = `<span style="font-size:20px; line-height:1;">➕</span><span id="addToHomeGhostText"></span>`;
     document.body.appendChild(ghost);
   }
-  ghost.textContent = '➕ ' + label + ' — ہوم پر شامل کریں';
+  document.getElementById('addToHomeGhostText').textContent = label + ' — ہوم پر شامل کریں';
   ghost.style.left = x + 'px';
   ghost.style.top = y + 'px';
 }
@@ -10056,15 +10079,14 @@ function onSidebarDragMove(e){
   if(!sidebarDragState) return;
   try{
     const { item, divider, sidebarLeft } = sidebarDragState;
-    // ---------- سائیڈبار کی بائیں کنارے سے باہر — "ہوم پر شامل کریں" موڈ ---------- -->
-    if(e.clientX < sidebarLeft - 6){
+    // ---------- 🐛 صدام کی ہدایت (FM7SEPMO2): اصل خرابی — پہلے انگلی حد کے بالکل قریب رہنے پر بار بار
+    // اندر/باہر موڈ میں بدلتی رہتی تھی (چند پکسل کا فرق بھی)، اسی لیے کبھی شامل ہوتا کبھی نہیں ہوتا تھا،
+    // اور سبز اشارہ ٹمٹماتا رہتا تھا۔ اب ایک بار "باہر" موڈ میں آ جانے کے بعد اسی ڈریگ کے دوران دوبارہ
+    // "اندر" موڈ میں واپس نہیں جاتا — مکمل مستحکم (sticky) رہتا ہے، صرف انگلی چھوڑنے پر ہی فیصلہ ہوتا ہے ---------- -->
+    if(sidebarDragState.outsideMode || e.clientX < sidebarLeft - 6){
       sidebarDragState.outsideMode = true;
       showAddToHomeGhost(e.clientX, e.clientY, item.dataset.navlabel || item.textContent.trim());
       return;
-    }
-    if(sidebarDragState.outsideMode){
-      sidebarDragState.outsideMode = false;
-      hideAddToHomeGhost();
     }
     const y = e.clientY;
     const others = getSortableNavItems().filter(el => el !== item);
@@ -24538,6 +24560,9 @@ const ASSIGNABLE_SCREENS = [
   {key:'payments', label:'💳 Payments'},
   {key:'purchaseorders', label:'📦 Purchase Orders'},
   {key:'stockadjustment', label:'🧮 Stock Adjustment'},
+  // ---------- 📑 صدام کی ہدایت (FM7SEPMO): Reports کو بھی باقاعدہ اسائن ایبل بنا دیا — یہ اسکرین نہیں،
+  // بلکہ ایک پاپ اپ (openReportCenterModal) کھولتا ہے، اسی لیے action سے چلتا ہے، goTo() سے نہیں ---------- -->
+  {key:'reports', label:'📑 Reports', action:'openReportCenterModal'},
   // ---------- 🍇 صدام کی ہدایت پر: Dashboard, Categories, Trends —
   // یہ ملازم کو Assign کرنے کی فہرست سے مکمل ہٹا دیے گئے ہیں (کوڈ محفوظ ہے)۔ FM4SEPFR25: Stock Adjustment اور
   // Home دوبارہ شامل — صدام کی ہدایت کہ مینیو کی ہر آئٹم یہاں 100% نظر آئے ----------
