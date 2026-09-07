@@ -7460,7 +7460,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر7ستمبر2:08pm';
+const APP_BUILD_VERSION = 'پیر7ستمبر3:29pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -14325,21 +14325,24 @@ function renderVariantCardSection(productId, cardId){
   // ---------- 📏 صدام کی ہدایت (4 ستمبر): روزمرہ فیلڈز (خرید/مزدوری/ریٹس/سٹاک) اب اوپر مین لائن میں ہی
   // نظر آتی ہیں (buildInlineFieldsRow سے) — یہاں صرف وہ فیلڈز ہیں جو کبھی کبھار درکار ہوں (Barcode, Expiry,
   // Location, Batches, Variant کا نام/سائز، اور ایک سے زیادہ variants کے درمیان سوئچ کرنا) ---------- -->
+  // ---------- 📦 صدام کی ہدایت (FM7SEPMO10): لفظ "Variant" کہیں نہیں لکھنا، ہر جگہ "پیکنگ" — اور پیکنگ کا نام
+  // لکھنے والا خانہ (کاٹن/ٹوکری/شاپر/کلو) دوبارہ کھول دیا ہے، ورنہ نئی پیکنگ کا نام لکھا ہی نہیں جا سکتا تھا۔
+  // باقی جو چیزیں پہلے چھپائی تھیں (Barcode, Expiry, Low Stock, Location, Batches) وہ اسی طرح چھپی رہیں گی ---------- -->
   return `
     <div class="vcNavBar" style="display:${p.variants.length > 1 ? 'flex' : 'none'};">
       <div class="vcNavTitle">
-        ${idx === 0 ? `<span class="vcMainBadge">MAIN</span>` : ''}
-        <span>Variant ${idx + 1} of ${p.variants.length}</span>
+        ${idx === 0 ? `<span class="vcMainBadge">مرکزی</span>` : ''}
+        <span>پیکنگ ${idx + 1} از ${p.variants.length}</span>
       </div>
       <div class="vcNavArrows">
-        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, -1)" ${idx === 0 ? 'disabled' : ''} title="Previous variant">◀</button>
-        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, 1)" ${idx === p.variants.length - 1 ? 'disabled' : ''} title="Next variant">▶</button>
+        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, -1)" ${idx === 0 ? 'disabled' : ''} title="پچھلی پیکنگ">◀</button>
+        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, 1)" ${idx === p.variants.length - 1 ? 'disabled' : ''} title="اگلی پیکنگ">▶</button>
       </div>
     </div>
     <div class="vcCard">
       <div class="vcFieldsArea">
-        <div class="vcFieldWrap vcFieldFull vcNameField" style="display:none;">
-          <span class="vcFieldLabel">Variant Name / Size</span>
+        <div class="vcFieldWrap vcFieldFull vcNameField">
+          <span class="vcFieldLabel">📦 پیکنگ کا نام (مثلاً کاٹن، ٹوکری، شاپر، فی کلو)</span>
           <input value="${v.label}" list="fmVariantUnitOptions" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'label',this.value)">
         </div>
         <div class="vcFieldWrap vcFieldFull" style="display:none;">
@@ -14366,11 +14369,11 @@ function renderVariantCardSection(productId, cardId){
       </div>
       <div class="vcActionsRow">
         <button class="vcBatchBtn" style="display:none;" onclick="openVariantBatchesModal(${productId},${v.variant_id})">🗓️ Batches${v.batches && v.batches.length > 1 ? ` (${v.batches.length})` : ''}</button>
-        <button class="vcDeleteBtn" style="display:none;" onclick="deleteVariant(${productId},${v.variant_id})">🗑️ Delete This Variant</button>
+        <button class="vcDeleteBtn" ${p.variants.length <= 1 ? 'disabled title="کم از کم ایک پیکنگ رہنی چاہیے"' : ''} onclick="deleteVariant(${productId},${v.variant_id})">🗑️ یہ پیکنگ حذف کریں</button>
       </div>
     </div>
     <div class="vcBottomBtns">
-      <button class="addVariantBtn" style="display:none;" onclick="addVariantRow(${productId})">+ Add New Variant (e.g. 100g)</button>
+      <button class="addVariantBtn" onclick="addVariantRow(${productId})">➕ نئی پیکنگ شامل کریں (مثلاً ٹوکری، کاٹن)</button>
       <button class="collapseCardBtn" onclick="saveAndCloseVariantCard(${productId}, '${cardId}', this)">✅ محفوظ کریں</button>
     </div>
   `;
@@ -15161,6 +15164,7 @@ function toggleProductCard(productId, cardId){
 // چند لمحوں کے لیے "✅ محفوظ ہو گیا" دکھاتا ہے، پھر کارڈ بند کرتا ہے ---------- -->
 function saveAndCloseVariantCard(productId, cardId, btnEl){
   persistAllData(); // ---------- فوری، واضح سیو — 1.5 سیکنڈ کے خودکار انتظار پر انحصار نہیں ----------
+  pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (FM7SEPMO10): نئی/تبدیل شدہ پیکنگ فوراً کلاؤڈ پر بھی جائے ----------
   if(btnEl){
     const original = btnEl.textContent;
     btnEl.textContent = '✅ محفوظ ہو گیا';
@@ -15281,7 +15285,7 @@ function addVariantRow(productId){
 
   product.variants.push({
     variant_id: nextVariantId++,
-    label: 'New Variant', barcode: '', purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', image:null, expiryDate:''
+    label: 'نئی پیکنگ', barcode: '', purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', image:null, expiryDate:''
   });
 
   activeVariantIndexByProduct.set(productId, product.variants.length - 1);
@@ -15290,7 +15294,7 @@ function addVariantRow(productId){
 }
 
 function deleteVariant(productId, variantId){
-  if(!confirm('Are you sure you want to delete this variant?')) return;
+  if(!confirm('کیا آپ واقعی یہ پیکنگ حذف کرنا چاہتے ہیں؟')) return;
   idbDeleteImage('product_' + variantId); // ---------- تصویر بھی صاف کریں تاکہ IndexedDB میں بے کار ڈیٹا جمع نہ ہو ----------
   const product = productsData.find(p => p.product_id === productId);
   product.variants = product.variants.filter(v => v.variant_id !== variantId);
