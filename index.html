@@ -1567,7 +1567,14 @@
   /* ---------- کینوس کا سکرول ایریا — صرف یہی حصہ سکرول ہو، اوپر کی کنٹرولز پینل اور نیچے کے بٹن ہمیشہ اپنی جگہ نظر آئیں ---------- */
   .invoicePreviewScrollArea{flex:1 1 auto; overflow-y:auto; min-height:0; border-top:1px solid #eee;}
   .invoicePreviewBox .previewHeader{padding:14px 18px; border-bottom:1px solid #eef1f6; display:flex; justify-content:space-between; align-items:center;}
-  .previewStyleControls{display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; background:#f8fafc; border-bottom:1px solid #eef1f6;}
+  .previewStyleControls{display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; background:#f8fafc; border-bottom:1px solid #eef1f6;
+    /* ---------- 🐛 صدام کی ہدایت (FM7SEPMO5): پہلے یہ خانہ لامحدود بڑا ہو سکتا تھا — "More" کھلتے ہی اتنی
+         جگہ لے لیتا کہ نیچے بل کا کینوس بالکل سکڑ کر غائب ہو جاتا (نظر ہی نہیں آتا تھا)۔ اب اس کی اپنی زیادہ
+         سے زیادہ اونچائی مقرر ہے، اس سے آگے یہ خود اپنے اندر سکرول ہوگا — کینوس کو ہمیشہ جگہ ملے گی، ہر وقت
+         نظر آئے گا، چاہے جتنی بھی سیٹنگز کھلی ہوں ---------- */
+    max-height:38vh; overflow-y:auto; flex:0 1 auto;
+  }
+  .invoicePreviewScrollArea{ min-height:22vh; } /* ---------- کینوس کے لیے ہمیشہ کم از کم اتنی جگہ محفوظ رہے ---------- */
   .pscMoreWrap{display:none; width:100%; flex-direction:column; gap:6px;}
   .pscMoreWrap.open{display:flex;}
   .pscMoreToggleBtn{border:1.5px dashed var(--primary); background:#fff; color:var(--primary-dark); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; margin-inline-start:auto;}
@@ -2616,11 +2623,10 @@
 
   <!-- ---------- ☰ مینیو / 🚪 لاگ آؤٹ / 🎨 فونٹ / ⚙️ سیٹنگز — سب یہیں ایک الگ، کھلی پٹی میں (صدام کی ہدایت FM3SEPTH10: اوپر بھیڑ نہ ہو) ---------- -->
   <div id="utilityBar">
+    <!-- ---------- ☎️ صدام کی ہدایت (FM7SEPMO6): ہاٹ لائن بٹن اب بالکل بائیں کونے میں (سب سے پہلے) ---------- -->
+    <button id="hotlineBtn" onclick="toggleQuickContactPanel(event)" title="ہاٹ لائن">☎️ ہاٹ لائن</button>
     <button id="topbarPaintBtn" onclick="openFontPaintPanel(event)" title="Font / اردو فونٹ">🎨</button>
     <button id="topbarSettingsBtn" onclick="toggleHomeSettingsPanel(event)" title="Settings">⚙️</button>
-    <!-- ---------- ☎️ صدام کی ہدایت (FM6SEPSU): ہاٹ لائن بٹن — یہاں پہلے فوری رابطہ کا بڑا ڈبہ ہوم پیج پر مستقل نظر آتا تھا،
-         اب اس کی جگہ یہ چھوٹا بٹن ہے، دبانے پر وہی کسٹمر/رابطہ پینل پاپ اپ کی صورت میں کھلتا ہے ---------- -->
-    <button id="hotlineBtn" onclick="toggleQuickContactPanel(event)" title="ہاٹ لائن">☎️ ہاٹ لائن</button>
     <span id="utilityBarSpacer"></span>
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰ مینیو</button>
     <button id="quickLogoutBtn" onclick="logout()" title="لاگ آؤٹ">🚪 لاگ آؤٹ</button>
@@ -2684,6 +2690,8 @@
     <div class="navItem" data-screen="home" data-navkey="home" data-navlabel="Home" onclick="goTo('home')" style="background:#9333EA; color:#fff;">🏠 ہوم<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="myaccount" data-navkey="myaccount" data-navlabel="My Account" onclick="goTo('myaccount')" style="background:#4D7C0F; color:#fff;">🏦 میرا اکاؤنٹ<span class="navDragHandle">⠿</span></div>
     <div class="navItem" data-screen="orderTaking" data-navkey="orderTaking" data-navlabel="Order Taking" onclick="goTo('orderTaking')" style="background:#4F46E5; color:#fff;">🧾 آرڈر لینا<span class="navDragHandle">⠿</span></div>
+    <div class="navItem" data-screen="returnRequest" data-navkey="returnRequest" data-navlabel="Return Request" onclick="goTo('returnRequest')" style="background:#DC2626; color:#fff;">↩️ واپسی کی درخواست<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="returnReview" data-navkey="returnReview" data-navlabel="Return Requests Review" onclick="goTo('returnReview')" style="background:#9F1239; color:#fff;">📋 واپسی کا جائزہ<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="payments" data-navkey="payments" data-navlabel="Payments" onclick="goTo('payments')" style="background:#0E7490; color:#fff;">💳 ادائیگیاں<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="products" data-navkey="products" data-navlabel="Products" onclick="goTo('products')" style="background:#EA580C; color:#fff;">📦 پراڈکٹس<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "پرچیز آرڈر" ٹیب دوبارہ فعال — سپلائر سے خرید و اسٹاک وصولی ---------- -->
@@ -3299,6 +3307,8 @@
             <input type="text" id="productSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderProductList(this.value)">
             <button onclick="openNewProductModal()">+ New Product</button>
           </div>
+          <!-- ---------- 🖨️ صدام کی ہدایت (FM7SEPMO3): اسی صفحے سے سیدھا سبزیوں کی پرنٹ رپورٹ ---------- -->
+          <button onclick="openVegListReport()" style="width:100%; margin-bottom:10px; padding:11px; background:#eef2ff; color:var(--primary-dark); border:1.5px solid var(--primary); border-radius:10px; font-weight:800; cursor:pointer;">🖨️ سبزیوں کی پرنٹ رپورٹ</button>
           <div class="csvImportBar" style="display:none;">
             <button class="csvTemplateBtn" onclick="downloadProductCsvTemplate()">📄 Download Excel/CSV Template</button>
             <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import Products</button>
@@ -3376,6 +3386,9 @@
         <input type="text" id="partySearchInput" placeholder="🔍 نام، فون نمبر یا سیریل نمبر لکھیں" oninput="renderPartyList(this.value)">
         <button onclick="openNewPartyModal()">+ نیا شامل کریں</button>
       </div>
+      <!-- ---------- 🖨️ صدام کی ہدایت (FM7SEPMO3): اسی صفحے سے سیدھا پرنٹ رپورٹ — الگ سے Reports میں جا کر
+           ڈھونڈنے کی ضرورت نہیں۔ کسٹمر ٹیب پر ہوں تو کسٹمر رپورٹ، سپلائر ٹیب پر ہوں تو سپلائر رپورٹ ---------- -->
+      <button onclick="currentPartyTab === 'customers' ? openCustListReport() : openSupListReport()" style="width:100%; margin-bottom:12px; padding:11px; background:#eef2ff; color:var(--primary-dark); border:1.5px solid var(--primary); border-radius:10px; font-weight:800; cursor:pointer;">🖨️ <span id="partyReportBtnLabel">کسٹمر کی</span> پرنٹ رپورٹ</button>
       <!-- ---------- 🗂️ کسٹمر کیٹگرائزیشن — صدام کی ہدایت (FM3SEPTH10): علاقہ/بقایہ/آج کی خریداری فلٹر +
            حاضر موجود / کھوہ کھاتے ٹیب۔ انتخاب اسی ڈیوائس پر ہمیشہ محفوظ رہتا ہے (دوبارہ کھولنے پر ری سیٹ نہیں ہوتا) ---------- -->
       <div id="custFilterBar" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;"></div>
@@ -4232,6 +4245,8 @@
     <div class="screen customer-only" id="screen-customerHome">
       <div class="pageTitle">🧑‍🤝‍🧑 میرا اکاؤنٹ</div>
       <div id="customerHomeContent"></div>
+      <!-- ---------- ↩️ صدام کی ہدایت (FM7SEPMO4): کسٹمر کو سائیڈبار نظر نہیں آتی، اس لیے یہاں براہ راست بٹن ---------- -->
+      <button onclick="goTo('returnRequest')" style="margin-top:14px; background:linear-gradient(155deg, var(--danger), #991b1b) !important;">↩️ واپسی کی درخواست بھیجیں</button>
       <button onclick="logout()" style="margin-top:20px; background:#334155 !important;">🚪 Logout</button>
     </div>
 
@@ -4878,6 +4893,70 @@
           </div>
           <!-- ---------- 🏠 ہوم پیج پر واپس — صدام کی ہدایت (FM3SEPTH10): پہلے یہاں سے واپس جانے کا کوئی راستہ نہیں تھا ---------- -->
           <button type="button" onclick="goTo(AppState.currentRole==='customer' ? 'customerHome' : 'home')" style="padding:13px; background:#f1f5f9; border:none; color:#334155; border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">🏠 ہوم پیج</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواست — بالکل Order Taking جیسا سادہ صفحہ،
+         صرف نام+پیکنگ+تعداد، کوئی قیمت کا ذکر نہیں۔ ایڈمن بعد میں خود ریٹ لگا کر مکمل کرے گا
+         ===================================================================== -->
+    <div class="screen" id="screen-returnRequest" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <button type="button" onclick="goTo(AppState.currentRole==='customer' ? 'customerHome' : 'home')" style="width:auto; padding:9px 14px; background:#f1f5f9 !important; color:#334155 !important; border-radius:10px; font-weight:800;">◀ واپس</button>
+        <div class="pageTitle" style="margin:0;">↩️ واپسی کی درخواست</div>
+      </div>
+
+      <!-- ---------- ملازم/ایڈمن کے لیے کسٹمر منتخب کریں — کسٹمر خود لاگ ان ہو تو یہ حصہ چھپا رہے گا ---------- -->
+      <div id="rrCustomerPickWrap">
+        <input type="text" id="rrCustSearch" placeholder="🔍 کسٹمر کا نام تلاش کریں" oninput="renderRrCustomerList(this.value)" style="width:100%; padding:12px; border:1.5px solid #dbe1ea; border-radius:12px; font-size:15px; margin-bottom:10px;">
+        <div id="rrCustomerListWrap"></div>
+      </div>
+
+      <!-- ---------- منتخب کسٹمر کا نام + آئٹم گرڈ — کوئی قیمت نہیں دکھائی جائے گی ---------- -->
+      <div id="rrItemsWrap" style="display:none;">
+        <div style="display:flex; align-items:center; justify-content:space-between; background:#eef2ff; border-radius:10px; padding:10px 14px; margin-bottom:10px;">
+          <div style="font-weight:800; font-size:15px;">👤 <span id="rrTopCustName">—</span></div>
+          <button type="button" onclick="backToRrCustomer()" style="background:none; border:none; color:var(--primary-dark); font-weight:700; cursor:pointer;">🔄 بدلیں</button>
+        </div>
+        <input type="text" id="rrItemSearch" placeholder="🔍 سبزی کا نام لکھیں" oninput="renderRrItemGrid(this.value)" style="width:100%; padding:12px; border:1.5px solid #dbe1ea; border-radius:12px; font-size:15px; margin-bottom:10px;">
+        <div id="rrItemGridWrap" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;"></div>
+        <button type="button" onclick="submitReturnRequest()" style="width:100%; padding:15px; background:linear-gradient(180deg, var(--danger), #991b1b); color:#fff; border:none; border-radius:14px; font-weight:800; font-size:15px; cursor:pointer;">✅ واپسی بھیج دیں</button>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواستوں کا جائزہ (صرف ایڈمن) — یہاں ریٹ لگائیں،
+         کٹوتیاں کریں، اور حتمی رقم کسٹمر کے کھاتے میں جمع کریں
+         ===================================================================== -->
+    <div class="screen admin-only" id="screen-returnReview">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <button type="button" onclick="goTo('home')" style="width:auto; padding:9px 14px; background:#f1f5f9; color:#334155; border-radius:10px; font-weight:800;">◀ واپس</button>
+        <div class="pageTitle" style="margin:0;">↩️ واپسی کی درخواستیں</div>
+      </div>
+      <div id="returnReviewListWrap"></div>
+    </div>
+
+    <!-- ---------- واپسی کی تفصیل/قیمت لگانے کا موڈل ---------- -->
+    <div class="modalOverlay" id="returnPriceModal" onclick="if(event.target===this) closeReturnPriceModal()">
+      <div class="modalBox" style="max-width:480px; max-height:88vh; overflow-y:auto;">
+        <h3 style="margin-top:0;">↩️ واپسی کی قیمت لگائیں</h3>
+        <div id="returnPriceMeta" style="font-weight:700; margin-bottom:10px;"></div>
+        <div id="returnPriceItemsWrap"></div>
+        <div style="background:#fff7ed; border-radius:10px; padding:12px; margin:12px 0;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <div style="font-weight:800; color:#9a3412;">➖ کٹوتیاں (مزدوری/کرایہ/خرابی وغیرہ)</div>
+            <button type="button" onclick="addReturnDeductionRow()" style="background:#fff; border:1px solid #fdba74; border-radius:8px; padding:5px 10px; font-weight:700; cursor:pointer;">+ شامل کریں</button>
+          </div>
+          <div id="returnDeductionsWrap"></div>
+        </div>
+        <div style="background:#f1f5f9; border-radius:10px; padding:14px; text-align:center; margin-bottom:14px;">
+          <div style="font-size:12px; color:var(--muted); font-weight:700;">حتمی واپسی رقم (کسٹمر کے کھاتے میں جمع ہوگی)</div>
+          <div id="returnFinalTotal" style="font-size:24px; font-weight:900; color:var(--primary-dark);">Rs. 0</div>
+        </div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeReturnPriceModal()">بند کریں</button>
+          <button class="saveBtn" onclick="confirmReturnCredit()">✅ تصدیق کریں اور جمع کریں</button>
         </div>
       </div>
     </div>
@@ -7345,7 +7424,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر7ستمبر8:47am';
+const APP_BUILD_VERSION = 'پیر7ستمبر11:59am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -7852,6 +7931,8 @@ function renderHomeIconGrid(){
   const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending').length : 0;
   // ---------- 🔴 صدام کی ہدایت (FM3SEPTH10): Recovery List آئیکن پر بھی وہی سرخ بلبلا بیج — کتنی نئی وصولی تصدیق کی منتظر ہے ----------
   const pendingRecoveryCount = (typeof recoveryListData !== 'undefined') ? recoveryListData.filter(r => r.status === 'pending').length : 0;
+  // ---------- ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی زیرِ التوا درخواستوں پر بھی وہی سرخ بلبلا بیج ---------- -->
+  const pendingReturnCount = (typeof returnRequestsData !== 'undefined') ? returnRequestsData.filter(r => r.status !== 'completed').length : 0;
   const currentUser = usersData.find(x => x.name === AppState.currentUser?.name && x.role === AppState.currentRole);
   const assignedKeys = (currentUser && Array.isArray(currentUser.screens)) ? currentUser.screens : [];
   const myTiles = assignedKeys.map(key => {
@@ -7877,6 +7958,7 @@ function renderHomeIconGrid(){
       ${(AppState.currentRole === 'admin' && homeEditMode) ? `<span class="hitRemoveBtn" title="ہوم سے ہٹائیں" onclick="event.stopPropagation(); removeScreenFromMyHomeGrid('${t.screen}')">✖</span>` : ''}
       ${t.screen === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingCount}</span>` : ''}
       ${t.screen === 'recoveryList' && pendingRecoveryCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingRecoveryCount}</span>` : ''}
+      ${t.screen === 'returnReview' && pendingReturnCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingReturnCount}</span>` : ''}
       <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span></span>
       <span class="hitLabel">${t.label}</span>
     </button>`;
@@ -9771,6 +9853,7 @@ function goTo(screenName, _isHistoryNav){
   // انہیں یہ کالز فوراً بند کر دیتی تھیں (اسی ترتیب میں ہونے کی وجہ سے)، جس سے 12 سیکنڈ والا خودکار ریفریش کبھی کام ہی نہیں کرتا تھا۔
   // اب سب سے پہلے یہاں بند کریں، پھر نیچے متعلقہ اسکرین والا polling شروع ہو — یہی درست ترتیب ہے ----------
   stopAdvanceOrdersPolling();
+  stopReturnRequestsPolling();
   stopRecoveryListPolling();
   stopCustomersPolling();
   stopSuppliersPolling();
@@ -9877,6 +9960,17 @@ function goTo(screenName, _isHistoryNav){
     renderOrderTakingScreen();
     fetchAdvanceOrdersFromCloud(true);
     startAdvanceOrdersPolling();
+  }
+  // ---------- ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواست/جائزہ — بالکل Order Taking جیسا sync ---------- -->
+  if(screenName === 'returnRequest'){
+    renderReturnRequestScreen();
+    fetchReturnRequestsFromCloud(true);
+    startReturnRequestsPolling();
+  }
+  if(screenName === 'returnReview'){
+    renderReturnReviewScreen();
+    fetchReturnRequestsFromCloud(false);
+    startReturnRequestsPolling();
   }
   if(screenName === 'recoveryList'){
     renderRecoveryListScreen();
@@ -15699,6 +15793,13 @@ function updatePartySerial(type, id, newValue){
    ===================================================================== */
 let advanceOrdersData = loadFromStorage('advanceOrders', []);
 let nextAdvOrderId = loadFromStorage('nextAdvOrderId', 1);
+
+// =====================================================================
+// ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواست — بالکل Order Taking جیسا سادہ نظام (صرف نام+پیکنگ+تعداد،
+// کوئی قیمت نہیں)۔ کسٹمر صرف یہ بھیجتا ہے کہ کیا کیا واپس کرنا ہے، ایڈمن خود ریٹ لگا کر، کٹوتیاں کر کے،
+// حتمی رقم کسٹمر کے کھاتے میں جمع کرتا ہے — پرانا بل ڈھونڈنے کی ضرورت نہیں ---------- -->
+let returnRequestsData = loadFromStorage('returnRequests', []);
+let nextReturnId = loadFromStorage('nextReturnId', 1);
 // ---------- 💰 وصولی لسٹ (Recovery List) — ملازم روزانہ کسٹمرز سے وصول کی گئی رقم یہاں درج کرتا ہے،
 // ایڈمن اصل کھاتے میں اندراج کے بعد تصدیق (Confirm) کرتا ہے، تب جا کر customer.total_receivable کم ہوتا ہے ----------
 let recoveryListData = loadFromStorage('recoveryList', []);
@@ -17682,6 +17783,8 @@ function enterPartyPage(tab){
   document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 نام، فون نمبر یا سیریل نمبر لکھیں' : '🔍 سپلائر کا نام یا فون نمبر تلاش کریں...';
   document.getElementById('partySearchInput').value = '';
   document.getElementById('bulkReminderBtn').style.display = tab === 'customers' ? 'block' : 'none';
+  const partyReportBtnLabel = document.getElementById('partyReportBtnLabel');
+  if(partyReportBtnLabel) partyReportBtnLabel.textContent = tab === 'customers' ? 'کسٹمر کی' : 'سپلائرز کی';
   renderPartyList();
 }
 
@@ -24535,6 +24638,14 @@ if(!Array.isArray(usersData) || !usersData.some(u => u.role === 'admin' && u.is_
 }
 // ---------- پرانے ڈیوائسز پر محفوظ شدہ یوزرز میں screens فیلڈ نہ ہو تو خالی array لگا دیں (ٹوٹنے سے بچاؤ) ----------
 usersData.forEach(u => { if(!Array.isArray(u.screens)) u.screens = []; });
+// ---------- ↩️ صدام کی ہدایت (FM7SEPMO4): ایک بار خودکار — ہر ایڈمن کے ہوم پیج پر نیا "واپسی کا جائزہ"
+// آئیکن خودکار شامل کر دیں (صرف ایک بار، تاکہ دستی ڈریگ نہ کرنا پڑے) ---------- -->
+if(!loadFromStorage('returnReviewMigrationDoneV1', false)){
+  usersData.forEach(u => {
+    if(u.role === 'admin' && !u.screens.includes('returnReview')) u.screens.push('returnReview');
+  });
+  saveToStorage('returnReviewMigrationDoneV1', true);
+}
 // ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): Customers/Suppliers/My Diary اب دوبارہ الگ الگ اجازتیں ہیں —
 // پرانی خودکار "ضم کرنے" والی منتقلی (merge migration) یہاں سے ہٹا دی گئی ہے، تاکہ نئی الگ Assign کی گئی
 // اجازتیں ہر بار لوڈ پر واپس 'customers' میں جمع ہو کر ضائع نہ ہوں (کوڈ نیچے تبصرے میں محفوظ ہے) ----------
@@ -24554,6 +24665,8 @@ const ASSIGNABLE_SCREENS = [
   {key:'home', label:'🏠 Home'},
   {key:'billing', label:'🛒 Billing'},
   {key:'orderTaking', label:'🧾 Order Taking'},
+  {key:'returnRequest', label:'↩️ Return Request'},
+  {key:'returnReview', label:'📋 Return Requests Review'},
   {key:'advanceorders', label:'📝 Advance Orders'},
   {key:'recoveryList', label:'💰 Recovery List'},
   {key:'billhistory', label:'🧾 Bill History'},
@@ -24792,6 +24905,339 @@ function startAdvanceOrdersPolling(){
 }
 function stopAdvanceOrdersPolling(){
   if(advanceOrdersPollTimer){ clearInterval(advanceOrdersPollTimer); advanceOrdersPollTimer = null; }
+}
+
+/* =====================================================================
+   ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواستیں — بالکل Advance Orders جیسا Firestore Sync ---------- -->
+   ===================================================================== */
+const RETURN_REQUESTS_DOC_PATH = 'shopData/returnRequests';
+let returnRequestsPollTimer = null;
+async function pushReturnRequestsToCloud(){
+  saveToStorage('returnRequests', returnRequestsData);
+  saveToStorage('nextReturnId', nextReturnId);
+  try{
+    await authFirestoreFetch(`${RETURN_REQUESTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(returnRequestsData) },
+          nextReturnId: { integerValue: String(nextReturnId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+  }catch(e){ /* آف لائن — localStorage میں محفوظ ہو چکا، اگلی بار sync ہو جائے گا */ }
+}
+async function fetchReturnRequestsFromCloud(silent){
+  try{
+    const res = await authFirestoreFetch(`${RETURN_REQUESTS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false;
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudReturns = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudReturns)) return false;
+
+    const localIds = new Set(returnRequestsData.map(o => o.id));
+    let addedAny = false;
+    cloudReturns.forEach(co => {
+      const localMatch = returnRequestsData.find(l => l.id === co.id);
+      if(!localMatch){
+        returnRequestsData.push(co);
+        addedAny = true;
+      } else if(co.status === 'completed' && localMatch.status !== 'completed'){
+        // ---------- دوسرے فون پر مکمل ہو چکی ہو تو یہاں بھی حالت اپڈیٹ کریں ----------
+        Object.assign(localMatch, co);
+        addedAny = true;
+      }
+    });
+    if(addedAny) returnRequestsData.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const cloudNextId = parseInt(doc.fields?.nextReturnId?.integerValue || '0');
+    if(cloudNextId > nextReturnId) nextReturnId = cloudNextId;
+
+    saveToStorage('returnRequests', returnRequestsData);
+    saveToStorage('nextReturnId', nextReturnId);
+
+    if(addedAny && !silent && typeof renderReturnReviewScreen === 'function' && document.getElementById('returnReviewListWrap')){
+      renderReturnReviewScreen();
+    }
+    return addedAny;
+  }catch(e){ return false; }
+}
+function startReturnRequestsPolling(){
+  stopReturnRequestsPolling();
+  returnRequestsPollTimer = setInterval(() => { fetchReturnRequestsFromCloud(false); }, 12000);
+}
+function stopReturnRequestsPolling(){
+  if(returnRequestsPollTimer){ clearInterval(returnRequestsPollTimer); returnRequestsPollTimer = null; }
+}
+
+// =====================================================================
+// ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواست — کسٹمر سائیڈ (سادہ، بغیر قیمت) ---------- -->
+// =====================================================================
+let rrCustomer = null;
+let rrQtyMap = {};
+function renderReturnRequestScreen(){
+  rrCustomer = null;
+  rrQtyMap = {};
+  document.getElementById('rrItemsWrap').style.display = 'none';
+  document.getElementById('rrCustomerPickWrap').style.display = 'block';
+  const search = document.getElementById('rrCustSearch');
+  if(search) search.value = '';
+
+  // ---------- کسٹمر خود لاگ ان ہو تو کسٹمر منتخب کرنے کا مرحلہ چھوڑ دیں ---------- -->
+  if(AppState.currentRole === 'customer'){
+    selectRrCustomer(AppState.currentCustomerId);
+    return;
+  }
+  renderRrCustomerList('');
+}
+function renderRrCustomerList(query){
+  const wrap = document.getElementById('rrCustomerListWrap');
+  if(!wrap) return;
+  const q = (query || '').trim().toLowerCase();
+  const list = customersData.filter(c => {
+    if(c.isDormant) return false;
+    if(!q) return true;
+    return (c.name || '').toLowerCase().includes(q) || (c.phone || '').includes(q);
+  }).sort((a, b) => a.name.localeCompare(b.name, 'ur'));
+
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">کوئی کسٹمر نہیں ملا</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(c => `
+    <div onclick="selectRrCustomer(${c.customer_id})" style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:13px 14px; margin-bottom:6px; cursor:pointer;">
+      <div style="font-weight:800; font-size:16px;">${c.name}</div>
+      <div style="font-size:12.5px; color:var(--muted); font-weight:700;">${c.phone || ''}</div>
+    </div>`).join('');
+}
+function selectRrCustomer(customerId){
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!c) return;
+  rrCustomer = {customer_id: c.customer_id, name: c.name, phone: c.phone || ''};
+  rrQtyMap = {};
+  document.getElementById('rrTopCustName').textContent = c.name;
+  document.getElementById('rrCustomerPickWrap').style.display = 'none';
+  document.getElementById('rrItemsWrap').style.display = 'block';
+  const itemSearch = document.getElementById('rrItemSearch');
+  if(itemSearch) itemSearch.value = '';
+  renderRrItemGrid('');
+}
+function backToRrCustomer(){
+  document.getElementById('rrItemsWrap').style.display = 'none';
+  document.getElementById('rrCustomerPickWrap').style.display = 'block';
+  renderRrCustomerList('');
+}
+// ---------- آئٹم گرڈ — نام + پیکنگ + خالی تعداد (کوئی قیمت نہیں) ---------- -->
+function renderRrItemGrid(query){
+  const wrap = document.getElementById('rrItemGridWrap');
+  if(!wrap) return;
+  const q = (query || '').trim().toLowerCase();
+  const rows = [];
+  productsData.filter(p => !p.isDormant).sort((a,b) => (a.serial_no||0) - (b.serial_no||0)).forEach(p => {
+    (p.variants || []).forEach(v => {
+      const fullName = p.name + (v.label && v.label !== p.name ? ' ' + v.label : '');
+      if(q && !fullName.toLowerCase().includes(q)) return;
+      rows.push({variant_id: v.variant_id, name: fullName});
+    });
+  });
+  if(rows.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="grid-column:1/-1; padding:20px 0; text-align:center;">کوئی سبزی نہیں ملی</div>`;
+    return;
+  }
+  wrap.innerHTML = rows.map(r => {
+    const qty = rrQtyMap[r.variant_id] || 0;
+    return `
+    <div style="background:#fff; border:1.5px solid ${qty > 0 ? 'var(--danger)' : '#e5e9f0'}; border-radius:12px; padding:10px; text-align:center;">
+      <div style="font-weight:800; font-size:13px; margin-bottom:8px; min-height:32px; display:flex; align-items:center; justify-content:center;">${r.name}</div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+        <button type="button" onclick="rrChangeQty(${r.variant_id}, -1)" style="width:32px; height:32px; border:none; border-radius:8px; background:#fee2e2; color:#b91c1c; font-size:17px; font-weight:800; cursor:pointer;">−</button>
+        <span style="min-width:24px; font-weight:900; font-size:16px;" id="rrQtyDisplay-${r.variant_id}">${qty}</span>
+        <button type="button" onclick="rrChangeQty(${r.variant_id}, 1)" style="width:32px; height:32px; border:none; border-radius:8px; background:#dcfce7; color:#15803d; font-size:17px; font-weight:800; cursor:pointer;">+</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function rrChangeQty(variantId, delta){
+  const current = rrQtyMap[variantId] || 0;
+  const next = Math.max(0, current + delta);
+  if(next === 0) delete rrQtyMap[variantId]; else rrQtyMap[variantId] = next;
+  const display = document.getElementById(`rrQtyDisplay-${variantId}`);
+  if(display){
+    display.textContent = next;
+    display.closest('div[style*="border"]').style.borderColor = next > 0 ? 'var(--danger)' : '#e5e9f0';
+  }
+}
+async function submitReturnRequest(){
+  if(!rrCustomer){ alert('پہلے کسٹمر منتخب کریں'); return; }
+  const items = [];
+  Object.keys(rrQtyMap).forEach(vidStr => {
+    const vid = Number(vidStr);
+    const qty = rrQtyMap[vid];
+    if(qty <= 0) return;
+    const flat = getFlatVariants().find(f => f.variant_id === vid);
+    if(flat) items.push({variant_id: vid, name: flat.name + (flat.label && flat.label !== flat.name ? ' ' + flat.label : ''), qty});
+  });
+  if(items.length === 0){ alert('کم از کم ایک چیز کی تعداد لگائیں'); return; }
+
+  // ---------- بھیجنے سے پہلے کلاؤڈ سے sync — بالکل Order Taking جیسا (ID ٹکراؤ سے بچنے کے لیے) ---------- -->
+  try{ await fetchReturnRequestsFromCloud(true); }catch(e){}
+
+  returnRequestsData.push({
+    id: nextReturnId++,
+    customer_id: rrCustomer.customer_id,
+    customerName: rrCustomer.name,
+    customerPhone: rrCustomer.phone,
+    items,
+    status: 'pending',
+    createdBy: AppState.currentUser?.name || '',
+    createdAt: new Date().toISOString()
+  });
+  persistAllData();
+  pushReturnRequestsToCloud();
+
+  alert('✅ آپ کی واپسی کی درخواست بھیج دی گئی ہے — صدام حسین جلد اس کی قیمت لگا کر آپ کے کھاتے میں جمع کر دیں گے۔');
+  goTo(AppState.currentRole === 'customer' ? 'customerHome' : 'home');
+}
+
+// =====================================================================
+// ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواستوں کا جائزہ — ایڈمن سائیڈ (یہاں ریٹ لگتا ہے) ---------- -->
+// =====================================================================
+function renderReturnReviewScreen(){
+  const wrap = document.getElementById('returnReviewListWrap');
+  if(!wrap) return;
+  const pending = returnRequestsData.filter(r => r.status !== 'completed').sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const completed = returnRequestsData.filter(r => r.status === 'completed').sort((a,b) => new Date(b.completedAt||b.createdAt) - new Date(a.completedAt||a.createdAt)).slice(0, 15);
+
+  const rowHtml = (r, isDone) => `
+    <div style="background:#fff; border:1.5px solid ${isDone ? '#e5e9f0' : 'var(--danger)'}; border-radius:12px; padding:12px 14px; margin-bottom:8px; ${isDone ? 'opacity:.7;' : 'cursor:pointer;'}" ${isDone ? '' : `onclick="openReturnPriceModal(${r.id})"`}>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-weight:800; font-size:15px;">${isDone ? '✅' : '⏳'} ${r.customerName}</div>
+        <div style="font-size:11px; color:var(--muted);">${(r.createdAt||'').slice(0,16).replace('T',' ')}</div>
+      </div>
+      <div style="font-size:12.5px; color:var(--muted); margin-top:4px;">${r.items.map(i => `${i.name} × ${i.qty}`).join('، ')}</div>
+      ${isDone ? `<div style="font-size:12.5px; font-weight:800; color:var(--primary-dark); margin-top:4px;">حتمی رقم: Rs. ${(r.finalTotal||0).toLocaleString()}</div>` : ''}
+    </div>`;
+
+  let html = '';
+  if(pending.length === 0 && completed.length === 0){
+    html = `<div class="placeholder" style="padding:30px 0; text-align:center;">فی الحال کوئی واپسی کی درخواست نہیں</div>`;
+  } else {
+    if(pending.length > 0) html += `<div style="font-weight:800; margin-bottom:8px; color:var(--danger);">⏳ زیرِ التوا (${pending.length})</div>` + pending.map(r => rowHtml(r, false)).join('');
+    if(completed.length > 0) html += `<div style="font-weight:800; margin:16px 0 8px; color:var(--muted);">✅ مکمل شدہ (حالیہ)</div>` + completed.map(r => rowHtml(r, true)).join('');
+  }
+  wrap.innerHTML = html;
+}
+
+let currentReturnReq = null;
+let returnDeductions = [];
+function openReturnPriceModal(reqId){
+  const req = returnRequestsData.find(r => r.id === reqId);
+  if(!req) return;
+  currentReturnReq = req;
+  returnDeductions = [];
+  document.getElementById('returnPriceMeta').textContent = `👤 ${req.customerName} — ${req.items.length} اقسام`;
+  document.getElementById('returnPriceItemsWrap').innerHTML = req.items.map(it => `
+    <div style="display:flex; align-items:center; gap:8px; background:#f7f9fc; border-radius:10px; padding:10px; margin-bottom:8px;">
+      <div style="flex:1; font-weight:700; font-size:13.5px;">${it.name}<div style="font-size:11px; color:var(--muted); font-weight:400;">تعداد: ${it.qty}</div></div>
+      <div style="flex:0 0 100px;">
+        <div style="font-size:10.5px; color:var(--muted); margin-bottom:2px;">ریٹ فی یونٹ (Rs.)</div>
+        <input type="number" min="0" value="0" id="returnRate-${it.variant_id}" oninput="recalcReturnFinalTotal()" style="width:100%; padding:7px; border:1px solid #dbe1ea; border-radius:7px; text-align:center;">
+      </div>
+    </div>`).join('');
+  renderReturnDeductions();
+  recalcReturnFinalTotal();
+  document.getElementById('returnPriceModal').classList.add('show');
+}
+function closeReturnPriceModal(){
+  document.getElementById('returnPriceModal').classList.remove('show');
+  currentReturnReq = null;
+}
+function renderReturnDeductions(){
+  const wrap = document.getElementById('returnDeductionsWrap');
+  if(!wrap) return;
+  if(returnDeductions.length === 0){
+    wrap.innerHTML = `<div style="font-size:11.5px; color:var(--muted); text-align:center; padding:6px 0;">کوئی کٹوتی شامل نہیں</div>`;
+    return;
+  }
+  wrap.innerHTML = returnDeductions.map((d, idx) => `
+    <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+      <input type="text" placeholder="جیسے مزدوری، کرایہ، خرابی" value="${d.label}" oninput="returnDeductions[${idx}].label=this.value" style="flex:1; padding:7px; border:1px solid #fdba74; border-radius:7px; font-size:12.5px;">
+      <input type="number" min="0" placeholder="رقم" value="${d.amount}" oninput="returnDeductions[${idx}].amount=Number(this.value)||0; recalcReturnFinalTotal()" style="flex:0 0 80px; padding:7px; border:1px solid #fdba74; border-radius:7px; text-align:center;">
+      <button type="button" onclick="removeReturnDeductionRow(${idx})" style="flex:0 0 auto; background:#fee2e2; color:#b91c1c; border:none; border-radius:7px; width:30px; height:30px; font-weight:800; cursor:pointer;">✖</button>
+    </div>`).join('');
+}
+function addReturnDeductionRow(){
+  returnDeductions.push({label:'', amount:0});
+  renderReturnDeductions();
+}
+function removeReturnDeductionRow(idx){
+  returnDeductions.splice(idx, 1);
+  renderReturnDeductions();
+  recalcReturnFinalTotal();
+}
+function recalcReturnFinalTotal(){
+  if(!currentReturnReq) return;
+  let subtotal = 0;
+  currentReturnReq.items.forEach(it => {
+    const rateEl = document.getElementById(`returnRate-${it.variant_id}`);
+    const rate = rateEl ? (Number(rateEl.value) || 0) : 0;
+    subtotal += rate * it.qty;
+  });
+  const deductionTotal = returnDeductions.reduce((s, d) => s + (Number(d.amount) || 0), 0);
+  const final = subtotal - deductionTotal;
+  const totalEl = document.getElementById('returnFinalTotal');
+  if(totalEl) totalEl.textContent = 'Rs. ' + final.toLocaleString();
+  return final;
+}
+async function confirmReturnCredit(){
+  if(!currentReturnReq) return;
+  const req = currentReturnReq;
+  const pricedItems = req.items.map(it => {
+    const rateEl = document.getElementById(`returnRate-${it.variant_id}`);
+    const rate = rateEl ? (Number(rateEl.value) || 0) : 0;
+    return {name: it.name, qty: it.qty, rate, amount: rate * it.qty};
+  });
+  const finalTotal = recalcReturnFinalTotal();
+
+  const customer = customersData.find(c => c.customer_id === req.customer_id);
+  const balanceBefore = customer ? (customer.total_receivable || 0) : 0;
+  if(customer){
+    customer.total_receivable = balanceBefore - finalTotal;
+    if(!Array.isArray(customer.walletHistory)) customer.walletHistory = [];
+    customer.walletHistory.push({
+      date: new Date().toISOString(), type: 'return_credit', amount: finalTotal,
+      note: `واپسی #${req.id} — ${pricedItems.map(p => p.name + ' × ' + p.qty).join('، ')}`
+    });
+  }
+
+  req.status = 'completed';
+  req.pricedItems = pricedItems;
+  req.deductions = returnDeductions.filter(d => d.label || d.amount);
+  req.finalTotal = finalTotal;
+  req.completedAt = new Date().toISOString();
+
+  persistAllData();
+  if(customer) pushCustomersToCloud();
+  pushReturnRequestsToCloud();
+
+  // ---------- کسٹمر کو واپسی کی رسید کا خلاصہ (واٹس ایپ کے لیے تیار) ---------- -->
+  const balanceAfter = customer ? customer.total_receivable : 0;
+  const itemLines = pricedItems.map(p => `${p.name} × ${p.qty} @ Rs.${p.rate} = Rs.${p.amount.toLocaleString()}`).join('\n');
+  const deductionLines = (req.deductions || []).map(d => `${d.label}: -Rs.${d.amount.toLocaleString()}`).join('\n');
+  const summary = `↩️ واپسی کی تفصیل — ${req.customerName}\n\n${itemLines}\n${deductionLines ? '\n' + deductionLines : ''}\n\n💰 حتمی واپسی رقم: Rs. ${finalTotal.toLocaleString()}\n\n📒 پرانا بقایہ: Rs. ${balanceBefore.toLocaleString()}\n📒 نیا بقایہ: Rs. ${balanceAfter.toLocaleString()}\n\n— صدام فروٹ منڈی`;
+
+  closeReturnPriceModal();
+  renderReturnReviewScreen();
+
+  if(req.customerPhone && confirm('کیا آپ یہ واپسی کی رسید واٹس ایپ پر کسٹمر کو بھیجنا چاہتے ہیں؟')){
+    const waNumber = formatPhoneForWhatsApp(req.customerPhone);
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(summary)}`, '_blank');
+  }
 }
 
 /* =====================================================================
@@ -25687,18 +26133,64 @@ function renderQuickContactPanel(){
   const body = document.getElementById('quickContactPanelBody');
   if(!body) return;
   if(AppState.currentRole === 'admin'){
+    // ---------- 🎨 صدام کی ہدایت (FM7SEPMO6): پہلے یہ ایک سادہ ڈراپ ڈاؤن تھا (منتخب کرو، پھر بڑا کارڈ کھلے) —
+    // اب سیدھی، کمپیکٹ، رنگین فہرست — نستعلیق میں نام، رنگ سے پتا چلے کون ڈویلپر/عملہ/کسٹمر ہے،
+    // اور کال/SMS کے چھوٹے بٹن اسی لائن میں شامل ---------- -->
     body.innerHTML = `
-      <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px;">📇 فوری رابطہ — ورکر یا کسٹمر منتخب کریں</div>
-      <select id="quickContactSelect" onchange="renderQuickContactCard()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:10px; font-size:13.5px; font-weight:700; background:#fff;">
-        <option value="">— منتخب کریں —</option>
-      </select>
-      <div id="quickContactCard" style="margin-top:10px;"></div>`;
-    populateQuickContactDropdown();
+      <div style="font-weight:800; font-size:13.5px; color:var(--primary-dark); margin-bottom:8px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">📇 فوری رابطہ</div>
+      <div id="quickContactListWrap" style="max-height:44vh; overflow-y:auto;"></div>`;
+    renderQuickContactList();
   } else {
     body.innerHTML = `
       <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px;">📞 ایڈمن سے فوری رابطہ</div>
       ${buildAdminContactCardHTML()}`;
   }
+}
+// ---------- ہر قسم کا اپنا رنگ — ڈویلپر (جامنی)، عملہ (نیلا)، کسٹمر (سبز) — ایک نظر میں پہچان ---------- -->
+function quickContactRowHtml(kind, id, name, phone, bg, fg){
+  const digits = phone ? formatPhoneForWhatsApp(phone) : '';
+  const iconBtn = (emoji, attrs) => `<a ${attrs} onclick="event.stopPropagation();${attrs.includes('onclick') ? '' : ''}" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border-radius:50%; text-decoration:none; font-size:12px; flex:0 0 auto;">${emoji}</a>`;
+  let extraBtn = '';
+  if(digits){
+    extraBtn = `<a href="tel:+${digits}" onclick="event.stopPropagation();" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border-radius:50%; text-decoration:none; font-size:12px; flex:0 0 auto;">📞</a>`
+      + (kind === 'developer'
+        ? `<a href="#" onclick="event.stopPropagation(); sendDevChat('sms'); return false;" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border-radius:50%; text-decoration:none; font-size:11px; flex:0 0 auto;">✉️</a>`
+        : `<a href="sms:+${digits}" onclick="event.stopPropagation();" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border-radius:50%; text-decoration:none; font-size:11px; flex:0 0 auto;">✉️</a>`);
+  } else if(kind === 'worker'){
+    extraBtn = `<button type="button" onclick="event.stopPropagation(); quickAddWorkerPhone(${id})" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border:none; border-radius:50%; font-size:14px; font-weight:800; cursor:pointer; flex:0 0 auto;">➕</button>`;
+  }
+  const pinBtn = kind === 'worker' ? `<button type="button" onclick="event.stopPropagation(); quickShowWorkerPin(${id})" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border:none; border-radius:50%; font-size:12px; cursor:pointer; flex:0 0 auto;" title="PIN دیکھیں">🔑</button>` : '';
+  return `
+    <div style="display:flex; align-items:center; gap:5px; background:${bg}; color:#fff; border-radius:9px; padding:6px 8px; margin-bottom:5px;">
+      <div style="flex:1; min-width:0; font-weight:800; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">${name}</div>
+      ${pinBtn}${extraBtn}
+    </div>`;
+}
+function quickShowWorkerPin(userId){
+  const user = usersData.find(u => u.user_id === userId);
+  if(!user) return;
+  alert(`🔑 ${user.name} کا لاگ ان PIN: ${user.pinPlain || '—'}`);
+}
+function renderQuickContactList(){
+  const wrap = document.getElementById('quickContactListWrap');
+  if(!wrap) return;
+  const workers = usersData.filter(u => u.is_active);
+  const customers = customersData.filter(c => c.name && !c.name.startsWith('Walk-in') && c.appAccessEnabled && c.appPassword);
+  const devContact = getDeveloperContact();
+
+  let html = quickContactRowHtml('developer', 1, '👨‍💻 Developer', devContact.sms, '#7c3aed', '#7c3aed');
+  workers.forEach(u => {
+    html += quickContactRowHtml('worker', u.user_id, (u.role === 'admin' ? '👑 ' : '👷 ') + u.name, u.phone, '#0369a1', '#0369a1');
+  });
+  customers.forEach(c => {
+    html += quickContactRowHtml('customer', c.customer_id, '🧑‍🤝‍🧑 ' + c.name, c.phone, '#15803d', '#15803d');
+  });
+  wrap.innerHTML = html || `<div style="font-size:12px; color:var(--muted); text-align:center; padding:10px 0;">کوئی رابطہ محفوظ نہیں</div>`;
+}
+// ---------- ⚠️ صدام کی ہدایت (FM7SEPMO6): پرانا ڈراپ ڈاؤن نظام اب ختم — یہ فنکشن نام صرف پرانی کالز کے لیے
+// زندہ رکھا ہے (تاکہ کہیں error نہ آئے)، اب یہ سیدھا نئی کمپیکٹ فہرست ہی تازہ کرتا ہے ---------- -->
+function populateQuickContactDropdown(){
+  renderQuickContactList();
 }
 
 // ---------- ایڈمن سے رابطے کا کارڈ — Salesman اور Customer دونوں کے لیے مشترکہ (نمبر کہیں ٹیکسٹ میں نظر نہیں آتا، صرف بٹن) ---------- -->
@@ -25716,108 +26208,6 @@ function buildAdminContactCardHTML(){
     </div>`;
 }
 
-function populateQuickContactDropdown(){
-  const sel = document.getElementById('quickContactSelect');
-  if(!sel) return;
-  const prevValue = sel.value;
-  const workers = usersData.filter(u => u.is_active);
-  // ---------- 📇 صدام کی ہدایت (6 ستمبر): صرف وہی کسٹمر یہاں نظر آئیں جنہیں ایپ ایکسیس/پاسورڈ باقاعدہ دیا جا چکا ہے —
-  // باقی سینکڑوں عام کسٹمرز (جو ایپ استعمال ہی نہیں کرتے) اس ڈراپ ڈاؤن میں شامل نہ ہوں ---------- -->
-  const customers = customersData.filter(c => c.name && !c.name.startsWith('Walk-in') && c.appAccessEnabled && c.appPassword);
-  // ---------- 👨‍💻 صدام کی ہدایت (6 ستمبر): سب سے اوپر "Contact Developer" — لاگ ان بلبلے والی وہی موجودہ لاجک (sendDevChat/getDeveloperContact) یہاں بھی ---------- -->
-  let html = '<option value="">— منتخب کریں —</option><option value="developer:1">👨‍💻 Developer سے رابطہ</option>';
-  if(workers.length){
-    html += `<optgroup label="👷 ورکرز">`;
-    workers.forEach(u => { html += `<option value="worker:${u.user_id}">${u.name}${u.role==='admin' ? ' (Admin)' : ''}</option>`; });
-    html += `</optgroup>`;
-  }
-  if(customers.length){
-    html += `<optgroup label="🧑‍🤝‍🧑 کسٹمرز">`;
-    customers.forEach(c => { html += `<option value="customer:${c.customer_id}">${c.name}</option>`; });
-    html += `</optgroup>`;
-  }
-  sel.innerHTML = html;
-  if(prevValue) sel.value = prevValue;
-  renderQuickContactCard();
-}
-
-function renderQuickContactCard(){
-  const sel = document.getElementById('quickContactSelect');
-  const card = document.getElementById('quickContactCard');
-  if(!sel || !card) return;
-  const val = sel.value;
-  if(!val){ card.innerHTML = ''; return; }
-  const [kind, idStr] = val.split(':');
-
-  // ---------- 👨‍💻 Developer سے رابطہ — کال/SMS/واٹس ایپ (Gmail/Email شامل نہیں، صدام کی ہدایت) ---------- -->
-  if(kind === 'developer'){
-    const contact = getDeveloperContact();
-    const smsDigits = String(contact.sms || '').replace(/[^0-9]/g, '');
-    card.innerHTML = `
-      <div style="border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 12px; background:#fafbfc;">
-        <div style="font-weight:800; font-size:14.5px; color:#1a1a1a;">👨‍💻 Developer</div>
-        <div style="display:flex; gap:6px; margin-top:8px;">
-          <a href="tel:+${smsDigits}" style="flex:1; text-align:center; padding:9px 4px; background:#eef2ff; color:var(--primary-dark); border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">📞 کال</a>
-          <a href="#" onclick="sendDevChat('sms'); return false;" style="flex:1; text-align:center; padding:9px 4px; background:#fff7ed; color:#b45309; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">✉️ SMS</a>
-          <a href="#" onclick="sendDevChat('whatsapp'); return false;" style="flex:1; text-align:center; padding:9px 4px; background:#dcfce7; color:#15803d; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">💬 واٹس ایپ</a>
-        </div>
-      </div>`;
-    return;
-  }
-
-  const id = Number(idStr);
-  let person, isWorker = (kind === 'worker');
-  if(isWorker) person = usersData.find(u => u.user_id === id);
-  else person = customersData.find(c => c.customer_id === id);
-  if(!person){ card.innerHTML = ''; return; }
-
-  const phone = person.phone || '';
-  const waDigits = formatPhoneForWhatsApp(phone);
-  const noPhoneNote = !phone ? `<div style="margin-top:6px;">
-        <div style="font-size:12px; color:#b91c1c;">⚠️ اس کا موبائل نمبر محفوظ نہیں</div>
-        ${isWorker ? `<button type="button" onclick="quickAddWorkerPhone(${person.user_id})" style="margin-top:4px; background:#eef2ff; color:var(--primary-dark); border:1px dashed var(--primary); border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer;">➕ نمبر شامل کریں</button>` : ''}
-      </div>` : '';
-
-  let contactBtns = '';
-  if(phone){
-    contactBtns = `
-      <div style="display:flex; gap:6px; margin-top:8px;">
-        <a href="tel:+${waDigits}" style="flex:1; text-align:center; padding:9px 4px; background:#eef2ff; color:var(--primary-dark); border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">📞 کال</a>
-        <a href="sms:+${waDigits}" style="flex:1; text-align:center; padding:9px 4px; background:#fff7ed; color:#b45309; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">✉️ SMS</a>
-        <a href="https://wa.me/${waDigits}" target="_blank" rel="noopener" style="flex:1; text-align:center; padding:9px 4px; background:#dcfce7; color:#15803d; border-radius:9px; font-size:12.5px; font-weight:800; text-decoration:none;">💬 واٹس ایپ</a>
-      </div>`;
-  }
-
-  let pinBlock = '';
-  if(isWorker){
-    const pinPlain = person.pinPlain || '—';
-    const dots = '•'.repeat(String(pinPlain).length || 4);
-    pinBlock = `
-      <div style="margin-top:10px; display:flex; align-items:center; gap:8px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:9px; padding:8px 10px;">
-        <span style="font-size:12.5px; color:var(--muted); font-weight:700;">🔑 لاگ ان PIN:</span>
-        <span id="qcPinDisplay" data-pin="${pinPlain}" style="font-size:15px; font-weight:800; letter-spacing:2px; color:#1a1a1a; font-family:monospace;">${dots}</span>
-        <button type="button" onclick="toggleQuickContactPin(this)" style="margin-left:auto; background:none; border:none; font-size:17px; cursor:pointer; padding:2px 6px;" title="PIN دیکھیں">👁️</button>
-      </div>`;
-  }
-
-  card.innerHTML = `
-    <div style="border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 12px; background:#fafbfc;">
-      <div style="font-weight:800; font-size:14.5px; color:#1a1a1a;">${person.name}${isWorker && person.role ? ` <span style="font-size:11px; font-weight:700; color:var(--muted);">(${person.role})</span>` : ''}</div>
-      ${phone ? `<div style="font-size:12.5px; color:var(--muted); margin-top:2px;">📱 ${phone}</div>` : noPhoneNote}
-      ${contactBtns}
-      ${pinBlock}
-    </div>`;
-}
-
-function toggleQuickContactPin(btn){
-  const disp = document.getElementById('qcPinDisplay');
-  if(!disp) return;
-  const pin = disp.getAttribute('data-pin') || '—';
-  const isHidden = disp.textContent.includes('•');
-  disp.textContent = isHidden ? pin : '•'.repeat(String(pin).length || 4);
-  btn.textContent = isHidden ? '🙈' : '👁️';
-}
-
 function quickAddWorkerPhone(userId){
   const user = usersData.find(u => u.user_id === userId);
   if(!user) return;
@@ -25826,7 +26216,7 @@ function quickAddWorkerPhone(userId){
   user.phone = num.trim();
   persistAllData();
   pushUsersToCloud();
-  renderQuickContactCard();
+  renderQuickContactList();
 }
 
 // ---------- Render Approval Requests ----------
