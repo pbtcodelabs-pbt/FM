@@ -130,10 +130,11 @@
   #loginMarqueeWrap{
     width:100%; height:32px; overflow:hidden; order:9; margin:8px 0 -6px;
     position:relative;
-    /* ---------- 🐞 صدام کی ہدایت (FM6SEPSU7): پہلے یہ پٹی #mobileTopbar کے اندرونی پیڈنگ (6px 10px) کی وجہ سے
-         دونوں طرف سے تھوڑی اندر کو سکڑی ہوئی نظر آتی تھی — TV بریکنگ نیوز پٹی جیسی مکمل edge-to-edge نہیں تھی۔
-         اب منفی مارجن سے اسی پیڈنگ کو توڑ کر پٹی کو والدین کے پیڈنگ سے باہر نکال کر مکمل چوڑائی تک پھیلا دیا گیا ---------- */
-    margin-left:-10px; margin-right:-10px; width:calc(100% + 20px);
+    /* ---------- 🐞 صدام کی ہدایت (FM6SEPSU9): پچھلی بار صرف -10px منفی مارجن لگایا تھا (والدین کے پیڈنگ کے
+         برابر اندازہ لگا کر)، مگر پھر بھی بائیں کونے پر ہلکا سا خلا رہ گیا۔ اب اس سے زیادہ پکا (bulletproof)
+         طریقہ: براہ راست 100vw (پورے فون کی چوڑائی) تک پھیلاؤ — یہ کسی بھی والدین کے پیڈنگ کے اندازے پر
+         منحصر نہیں، ہمیشہ بالکل سکرین کے دونوں کناروں تک جائے گا، چاہے پیڈنگ کچھ بھی ہو ---------- */
+    width:100vw; margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%);
     /* ---------- 🎨 صدام کی ہدایت (FM4SEPFR08): نیلا مدھم نہیں، خوبصورت/رچ نیلا — چمک برقرار رکھی گئی ---------- */
     background:linear-gradient(90deg, #1e40af, #3b82f6, #1e40af);
     /* ---------- 🥇 صدام کی ہدایت (FM4SEPFR08): پہلے سے تھوڑا زیادہ رچ/خوبصورت سنہری بارڈر ---------- */
@@ -281,7 +282,7 @@
   /* ---------- 🐞 صدام کی ہدایت (FM6SEPSU7): سبسکرپشن والے تین ڈبے (Free Trial/Expires/Remaining) بہت اونچے
        (اوپر سے نیچے چوڑے) تھے — لیبل اور قدر الگ الگ لائن میں تھے۔ اب باریک پٹی: لیبل + قدر ایک ہی لائن میں،
        پیڈنگ اور مارجن بہت کم — تاکہ نیچے کے آئیکنز کے لیے زیادہ جگہ خالی ہو ---------- */
-  .subBoxRow{display:flex; gap:5px; margin-bottom:6px; background:#f4f1ea; padding:4px 5px; border-radius:9px;}
+  .subBoxRow{display:flex; gap:5px; margin-bottom:6px; padding:4px 5px; border-radius:9px; background:linear-gradient(135deg, #fdf6e3, #f9ecc9); border:1px solid #eaddb0;}
   .subBox{flex:1; padding:3px 3px; border-radius:7px; text-align:center; background:#eef2ff; display:flex; align-items:baseline; justify-content:center; gap:3px; white-space:nowrap; overflow:hidden;}
   .subBox#subBoxStart{background:#e0f2fe;}
   .subBox#subBoxEnd{background:#fef3c7;}
@@ -3236,6 +3237,8 @@
 
       <button onclick="openStockValueReport()" style="width:100%; margin-top:10px; background:linear-gradient(180deg, var(--primary), var(--primary-dark)); color:#fff; border:none; border-radius:12px; padding:13px; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">📊 سٹاک رپورٹ بنائیں</button>
       <button onclick="openLaborReport()" style="width:100%; margin-top:8px; background:linear-gradient(180deg, #f59e0b, #b45309); color:#fff; border:none; border-radius:12px; padding:13px; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">💪 آج کی مزدوری رپورٹ بنائیں</button>
+      <!-- ---------- 🥬 صدام کی ہدایت (FM6SEPSU11): سبزیوں کی پرنٹ لسٹ — نام+پیکنگ اور خالی خانہ، آرڈر لکھنے کے لیے ---------- -->
+      <button onclick="openVegListReport()" style="width:100%; margin-top:8px; background:linear-gradient(180deg, #16a34a, #14532d); color:#fff; border:none; border-radius:12px; padding:13px; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">🥬 سبزیوں کی پرنٹ لسٹ بنائیں</button>
       <button id="stockAdjResetAllBtn" onclick="resetAllNegativeStockToZero()" style="display:none; width:100%; margin-top:14px; background:linear-gradient(180deg, var(--danger), #991b1b); color:#fff; border:none; border-radius:12px; padding:14px; font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">🔄 تمام منفی سٹاک صفر پر ری سیٹ کریں</button>
     </div>
 
@@ -5895,6 +5898,30 @@
       </div>
     </div>
 
+    <!-- ---------- 🥬 صدام کی ہدایت (FM6SEPSU11): سبزیوں کی پرنٹ لسٹ — صرف نام+پیکنگ اور خالی خانہ (قیمت/سٹاک نہیں)،
+         حاضر/غیر حاضر/دونوں — ہر پیکنگ اپنی الگ لائن میں، سیریل نمبر کی ترتیب سے ---------- -->
+    <div class="modalOverlay" id="vegListReportModal" style="z-index:960;" onclick="if(event.target===this) closeVegListReport()" dir="rtl">
+      <div class="modalBox" style="max-width:640px; width:94vw; text-align:center; max-height:90vh; overflow-y:auto;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <h3 style="margin:0; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">🥬 سبزیوں کی پرنٹ لسٹ</h3>
+          <span onclick="closeVegListReport()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
+        </div>
+        <div id="vegListFilterZone" style="display:flex; gap:8px; justify-content:center; margin-bottom:10px; flex-wrap:wrap;">
+          <button class="pscToggleBtn vegListModeBtn" data-mode="present" onclick="setVegListMode('present')">🟢 حاضر سبزیاں</button>
+          <button class="pscToggleBtn vegListModeBtn" data-mode="absent" onclick="setVegListMode('absent')">🔴 غیر حاضر سبزیاں</button>
+          <button class="pscToggleBtn vegListModeBtn" data-mode="both" onclick="setVegListMode('both')">⚪ دونوں</button>
+        </div>
+        <canvas id="vegListReportCanvas" style="width:100%; border-radius:10px; margin:6px 0; box-shadow:0 4px 14px rgba(0,0,0,.18); background:#fff;"></canvas>
+        <div class="modalBtns" style="flex-wrap:wrap;">
+          <button class="cancelBtn" onclick="closeVegListReport()">بند کریں</button>
+          <button class="saveBtn" style="background:#7c3aed;" onclick="openImageReviewModal(document.getElementById('vegListReportCanvas'), '🥬 سبزیوں کی لسٹ')">🔍 ریویو</button>
+          <button class="saveBtn" style="background:#0f766e;" onclick="printVegListReport('a4')">🖨️ پرنٹ (A4)</button>
+          <button class="saveBtn" style="background:#0369a1;" onclick="printVegListReport('thermal')">🖨️ پرنٹ (تھرمل)</button>
+          <button class="saveBtn" style="background:#25D366;" onclick="shareVegListReport()">💬 واٹس ایپ شیئر</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ---------- 💪 صدام کی ہدایت (FM4SEPFR30): مزدوری فروخت رپورٹ — آج کے بلوں سے ہر کسٹمر کی مزدوری الگ الگ ---------- -->
     <div class="modalOverlay" id="laborReportModal" style="z-index:960;" onclick="if(event.target===this) closeLaborReport()" dir="rtl">
       <div class="modalBox" style="max-width:640px; width:94vw; text-align:center; max-height:90vh; overflow-y:auto;">
@@ -7227,7 +7254,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار6ستمبر8:15pm';
+const APP_BUILD_VERSION = 'پیر7ستمبر5:55am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12433,6 +12460,33 @@ function backfillMissingProductSerials(){
   productsData.forEach(p => { if(!p.serial_no){ maxSerial++; p.serial_no = maxSerial; } });
 }
 
+// ---------- 🔢 صدام کی ہدایت (FM6SEPSU10): سیریل نمبر اب صارف کی اپنی مرضی سے (manually) بدلا جا سکتا ہے —
+// جیسے آلو کو 25 دینا ہو، پیاز کو 3 — بس ڈپلیکیٹ نمبر روکنا ضروری ہے، ورنہ دو سبزیوں کا نمبر ایک جیسا ہو کر
+// فہرست/پرنٹ کی ترتیب الجھ جائے گی۔ Products اور Stock Adjustment دونوں سکرینیں یہی فنکشن استعمال کرتی ہیں ---------- -->
+function updateProductSerial(productId, newValue){
+  const num = parseInt(newValue, 10);
+  const product = productsData.find(p => p.product_id === productId);
+  if(!product) return;
+  if(!newValue || isNaN(num) || num <= 0){
+    alert('براہ کرم ایک درست مثبت سیریل نمبر لکھیں۔');
+    renderProductList(document.getElementById('productSearchInput')?.value || '');
+    crossRefreshStockAdjustment();
+    return;
+  }
+  const dup = productsData.find(p => p.product_id !== productId && p.serial_no === num);
+  if(dup){
+    alert(`⚠️ سیریل نمبر ${num} پہلے سے "${dup.name}" کو دیا ہوا ہے۔ براہ کرم کوئی اور نمبر منتخب کریں۔`);
+    renderProductList(document.getElementById('productSearchInput')?.value || ''); // ---------- خانہ واپس پرانی قدر پر ----------
+    crossRefreshStockAdjustment();
+    return;
+  }
+  product.serial_no = num;
+  persistAllData();
+  pushProductsToCloud();
+  renderProductList(document.getElementById('productSearchInput')?.value || '');
+  crossRefreshStockAdjustment();
+}
+
 // ---------- 🛠️ خرابی کی اصل جڑ کی مرمت: کبھی کبھار دو الگ الگ آئٹمز کی variant_id آپس میں ٹکرا جاتی تھی
 // (ایک ہی نمبر دو مختلف چیزوں کو مل جاتا تھا)۔ چونکہ Order Taking، Billing وغیرہ ہر جگہ آئٹم کو اسی
 // variant_id سے پہچانا جاتا ہے، اس ٹکراؤ کی وجہ سے ایک آئٹم کو ٹک/تعداد دینے پر وہی تعداد دوسرے
@@ -13807,7 +13861,12 @@ function renderProductList(query = ''){
           <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
         </label>
         <div class="pNameWrap">
-          <div class="pName"><span style="display:inline-block; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border-radius:6px; padding:1px 6px; margin-inline-end:5px; direction:ltr;">#${p.serial_no ?? '?'}</span>${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
+          <!-- ---------- 🔢 صدام کی ہدایت (FM6SEPSU10): سیریل نمبر اب خودکار نہیں، خود لکھ سکتے ہیں — اپنی مرضی کی
+               ترتیب (مثلاً آلو=25، پیاز=3) دینے کے لیے۔ ڈپلیکیٹ نمبر پر خودکار ایرر آئے گا، محفوظ نہیں ہوگا ---------- -->
+          <input type="number" class="pSerialEdit" value="${p.serial_no ?? ''}" onclick="event.stopPropagation();" onfocus="this.select()"
+            onchange="updateProductSerial(${p.product_id}, this.value)"
+            style="width:44px; flex:0 0 44px; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border:none; border-radius:6px; padding:2px 3px; margin-inline-end:5px; direction:ltr; text-align:center;">
+          <div class="pName">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
           <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
@@ -15098,6 +15157,36 @@ function saveNewProduct(){
     persistAllData();
     pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پراڈکٹ ایڈٹ ہونا فوراً کلاؤڈ میں ----------
     return;
+  }
+
+  // ---------- 🐞 صدام کی ہدایت (FM6SEPSU10): اصل خرابی کی جڑ — پہلے یہاں ہر نئی "نام+پیکنگ" کو ہمیشہ
+  // بالکل نیا، الگ پراڈکٹ بنا دیا جاتا تھا (مثلاً "ٹماٹر کلو" اور "ٹماٹر ٹوکری" دو الگ الگ پراڈکٹ بن جاتے)۔
+  // اسی لیے فہرست 70-80 اندراجات تک بھر جاتی تھی جبکہ اصل سبزیاں صرف 20-22 تھیں۔ اب: اگر اسی نام کا
+  // پراڈکٹ پہلے سے موجود ہے تو نیا پیکنگ اسی موجودہ پراڈکٹ کے اندر بطور نیا variant شامل ہو جاتا ہے —
+  // نام صرف ایک بار، پیکنگ کی جتنی چاہیں قسمیں اسی کے نیچے ---------- -->
+  if(!editingProductId){
+    const existingProduct = productsData.find(p => p.name.trim().toLowerCase() === name.toLowerCase());
+    if(existingProduct){
+      const dupVariant = existingProduct.variants.find(v => (v.label || '').trim().toLowerCase() === variantLabel.trim().toLowerCase());
+      if(dupVariant){
+        if(!confirm(`"${name}" میں "${variantLabel || 'بغیر پیکنگ'}" پہلے سے موجود ہے۔ کیا آپ اسی کی قیمتیں/سٹاک نئی قدروں سے بدلنا چاہتے ہیں؟`)) return;
+        Object.assign(dupVariant, {barcode, purchase, labor, retail, wholesale, stock});
+        if(npProductPhotoDataUrl) dupVariant.image = npProductPhotoDataUrl;
+      } else {
+        existingProduct.variants.push({
+          variant_id: nextVariantId++, label: variantLabel, barcode, purchase, labor, retail, wholesale, stock,
+          lowStockAt: 5, location: '', expiryDate: '', image: npProductPhotoDataUrl || null
+        });
+      }
+      persistAllData();
+      pushProductsToCloud();
+      closeNewProductModal();
+      renderProductList();
+      openProductCards.add(existingProduct.product_id);
+      document.getElementById(`pcard-${existingProduct.product_id}`)?.classList.add('open');
+      renderBillingProductGrid();
+      return;
+    }
   }
 
   const newProduct = {
@@ -16408,7 +16497,10 @@ function renderStockAdjustmentScreen(query){
           <input type="checkbox" ${p.isDormant ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('sa-pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
         </label>
         <div class="pNameWrap">
-          <div class="pName"><span style="display:inline-block; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border-radius:6px; padding:1px 6px; margin-inline-end:5px; direction:ltr;">#${p.serial_no ?? '?'}</span>${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
+          <input type="number" class="pSerialEdit" value="${p.serial_no ?? ''}" onclick="event.stopPropagation();" onfocus="this.select()"
+            onchange="updateProductSerial(${p.product_id}, this.value)"
+            style="width:44px; flex:0 0 44px; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border:none; border-radius:6px; padding:2px 3px; margin-inline-end:5px; direction:ltr; text-align:center;">
+          <div class="pName">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
           <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
@@ -16700,6 +16792,225 @@ function shareStockValueReport(){
   // صرف رپورٹ موڈل بند کرنے پر ہی شیئر پریویو "اچانک" نظر آتا۔ اب رپورٹ موڈل پہلے بند، پھر شیئر پریویو کھلتا ہے ---------- -->
   closeStockValueReport();
   showImageSharePreview(canvas, 'Stock_Report.png', '📊 سٹاک رپورٹ', 'سٹاک رپورٹ');
+}
+
+/* =====================================================================
+   🥬 صدام کی ہدایت (FM6SEPSU11): سبزیوں کی پرنٹ لسٹ — نام+پیکنگ اور خالی خانہ صرف، قیمت/سٹاک نہیں۔
+   ہر پیکنگ اپنی الگ لائن میں (چاہے ٹماٹر کی 4 پیکنگ ہوں تو 4 لائنیں)، سیریل نمبر کی ترتیب سے۔
+   A4 پر 2 کالم (کاغذ چوڑا ہے)، تھرمل پر صرف 1 کالم (کاغذ تنگ ہے) — دونوں پر خانہ اتنا چوڑا کہ پینسل سے لکھا جا سکے
+   ===================================================================== */
+let vegListMode = 'present';
+function setVegListMode(mode){
+  vegListMode = mode;
+  document.querySelectorAll('.vegListModeBtn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  renderVegListReportToCanvas();
+}
+function buildVegListRows(){
+  const rows = [];
+  productsData
+    .filter(p => vegListMode === 'both' ? true : (!!p.isDormant === (vegListMode === 'absent')))
+    .sort((a,b) => (a.serial_no||0) - (b.serial_no||0))
+    .forEach(p => {
+      (p.variants || []).forEach(v => {
+        rows.push({ serial: p.serial_no || 0, name: p.name + (v.label && v.label !== p.name ? ' ' + v.label : '') });
+      });
+    });
+  return rows;
+}
+async function openVegListReport(){
+  document.querySelectorAll('.vegListModeBtn').forEach(b => b.classList.toggle('active', b.dataset.mode === vegListMode));
+  document.getElementById('vegListReportModal')?.classList.add('show');
+  await new Promise(r => setTimeout(r, 30));
+  await renderVegListReportToCanvas();
+}
+function closeVegListReport(){
+  document.getElementById('vegListReportModal')?.classList.remove('show');
+}
+// ---------- پیش نظارہ (preview) ہمیشہ A4 انداز میں دکھے گا — تھرمل کا اپنا الگ کینوس صرف پرنٹ کے وقت بنتا ہے ---------- -->
+async function renderVegListReportToCanvas(){
+  const canvas = document.getElementById('vegListReportCanvas');
+  if(!canvas) return;
+  await drawVegListA4(canvas, buildVegListRows());
+}
+async function drawVegListA4(canvas, rows){
+  const ctx = canvas.getContext('2d');
+  const fontFam = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif";
+  try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
+  const F = (px, boldFlag) => `${boldFlag ? 'bold ' : ''}${px}px ${fontFam}`;
+
+  const pxWidth = 850, margin = 26;
+  const numCols = 2; // ---------- A4 پر 2 کالم — خانہ کافی چوڑا رہے تاکہ پینسل سے لکھا جا سکے ---------- -->
+  const colGap = 20;
+  const colW = (pxWidth - margin*2 - colGap*(numCols-1)) / numCols;
+  const rowsPerCol = Math.ceil(rows.length / numCols) || 1;
+  const rowH = 34, headerRowH = 30;
+  const tableH = headerRowH + rowsPerCol * rowH;
+  const estHeight = 140 + tableH + 40;
+
+  canvas.width = pxWidth; canvas.height = estHeight;
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, pxWidth, estHeight);
+
+  let y = 34;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#0f172a';
+  ctx.font = F(22, true);
+  ctx.fillText(AppState.settings.businessName || 'صدام فروٹ منڈی', pxWidth/2, y); y += 26;
+  ctx.font = F(13, true); ctx.fillStyle = '#334155';
+  const modeLabel = vegListMode === 'present' ? '🟢 حاضر سبزیاں' : (vegListMode === 'absent' ? '🔴 غیر حاضر سبزیاں' : '⚪ حاضر + غیر حاضر (دونوں)');
+  ctx.fillText(`🥬 سبزیوں کی لسٹ — ${modeLabel} — ${new Date().toLocaleDateString('en-GB')}`, pxWidth/2, y); y += 24;
+  drawSolidLine(ctx, y, pxWidth); y += 14;
+
+  const tableTop = y;
+  // ---------- ہر کالم کے اندر ذیلی کالمز: نمبر | نام | خالی خانہ ---------- -->
+  const serialW = Math.round(colW * 0.14), boxW = Math.round(colW * 0.30);
+  const nameW = colW - serialW - boxW;
+
+  for(let c = 0; c < numCols; c++){
+    // ---------- 🔄 دائیں سے بائیں: پہلا کالم سب سے دائیں کنارے پر شروع ہو (اردو کی فطری ترتیب) ---------- -->
+    const colRightX = pxWidth - margin - c*(colW + colGap);
+    const colLeftX = colRightX - colW;
+    // ہیڈر
+    ctx.fillStyle = '#eef2ff'; ctx.fillRect(colLeftX, tableTop, colW, headerRowH);
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+    ctx.strokeRect(colLeftX + 0.5, tableTop + 0.5, colW - 1, headerRowH - 1);
+    ctx.fillStyle = '#0f172a'; ctx.font = F(12, true); ctx.textAlign = 'center';
+    ctx.fillText('#', colRightX - serialW/2, tableTop + headerRowH/2 + 4);
+    ctx.fillText('نام', colRightX - serialW - nameW/2, tableTop + headerRowH/2 + 4);
+    ctx.fillText('آرڈر', colLeftX + boxW/2, tableTop + headerRowH/2 + 4);
+
+    for(let i = 0; i < rowsPerCol; i++){
+      const rIdx = c * rowsPerCol + i;
+      const rowTop = tableTop + headerRowH + i*rowH;
+      // خانوں کی لکیریں
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.strokeRect(colLeftX + 0.5, rowTop + 0.5, serialW - 1, rowH - 1); // سیریل — دائیں کنارہ
+      ctx.strokeRect(colLeftX + boxW + 0.5, rowTop + 0.5, nameW - 1, rowH - 1); // نام — درمیان
+      ctx.strokeRect(colLeftX + 0.5, rowTop + 0.5, boxW - 1, rowH - 1); // خالی خانہ — بائیں کنارہ
+      if(rIdx < rows.length){
+        const r = rows[rIdx];
+        ctx.fillStyle = '#0f172a';
+        ctx.font = F(12, true); ctx.textAlign = 'center';
+        ctx.fillText(String(r.serial), colRightX - serialW/2, rowTop + rowH/2 + 4);
+        ctx.font = F(13, false); ctx.textAlign = 'right';
+        let txt = r.name;
+        while(ctx.measureText(txt).width > nameW - 8 && txt.length > 2){ txt = txt.slice(0, -1); }
+        ctx.fillText(txt, colRightX - serialW - 6, rowTop + rowH/2 + 4);
+      }
+    }
+  }
+  y = tableTop + headerRowH + rowsPerCol*rowH + 24;
+  ctx.textAlign = 'center'; ctx.font = F(11, false); ctx.fillStyle = '#64748b';
+  ctx.fillText(`کل ${rows.length} اقسام — رپورٹ تیار کردہ ${new Date().toLocaleString('en-GB')}`, pxWidth/2, y); y += 16;
+
+  if(Math.abs(y - canvas.height) > 4){
+    const finalH = Math.round(y + 10);
+    const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
+    canvas.height = finalH; ctx.putImageData(imgData, 0, 0);
+  }
+}
+// ---------- تھرمل (58/80mm) کینوس — صرف 1 کالم، لمبی فہرست نیچے کو چلتی جائے گی ---------- -->
+async function drawVegListThermal(canvas, rows){
+  const ctx = canvas.getContext('2d');
+  const fontFam = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif";
+  try{ await document.fonts.load(`bold 18px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
+  const F = (px, boldFlag) => `${boldFlag ? 'bold ' : ''}${px}px ${fontFam}`;
+
+  const paperWidthMM = AppState.settings.paperWidth || 80;
+  const pxWidth = paperWidthMM === 80 ? 576 : 384;
+  const margin = 14;
+  const serialW = Math.round(pxWidth * 0.14), boxW = Math.round(pxWidth * 0.30);
+  const nameW = pxWidth - margin*2 - serialW - boxW;
+  const rowH = 36, headerRowH = 30;
+  const estHeight = 130 + headerRowH + rows.length*rowH + 40;
+
+  canvas.width = pxWidth; canvas.height = estHeight;
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, pxWidth, estHeight);
+
+  let y = 26;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#0f172a';
+  ctx.font = F(18, true);
+  ctx.fillText(AppState.settings.businessName || 'صدام فروٹ منڈی', pxWidth/2, y); y += 22;
+  ctx.font = F(12, true); ctx.fillStyle = '#334155';
+  const modeLabel = vegListMode === 'present' ? '🟢 حاضر' : (vegListMode === 'absent' ? '🔴 غیر حاضر' : '⚪ دونوں');
+  ctx.fillText(`🥬 سبزیوں کی لسٹ — ${modeLabel} — ${new Date().toLocaleDateString('en-GB')}`, pxWidth/2, y); y += 20;
+  drawSolidLine(ctx, y, pxWidth); y += 10;
+
+  const tableRight = pxWidth - margin, tableLeft = margin;
+  const tableTop = y;
+  ctx.fillStyle = '#eef2ff'; ctx.fillRect(tableLeft, tableTop, tableRight-tableLeft, headerRowH);
+  ctx.strokeStyle = '#94a3b8'; ctx.strokeRect(tableLeft+0.5, tableTop+0.5, tableRight-tableLeft-1, headerRowH-1);
+  ctx.fillStyle = '#0f172a'; ctx.font = F(11, true); ctx.textAlign = 'center';
+  ctx.fillText('#', tableRight - serialW/2, tableTop + headerRowH/2 + 4);
+  ctx.fillText('نام', tableRight - serialW - nameW/2, tableTop + headerRowH/2 + 4);
+  ctx.fillText('آرڈر', tableLeft + boxW/2, tableTop + headerRowH/2 + 4);
+
+  rows.forEach((r, i) => {
+    const rowTop = tableTop + headerRowH + i*rowH;
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.strokeRect(tableRight - serialW + 0.5, rowTop + 0.5, serialW - 1, rowH - 1);
+    ctx.strokeRect(tableLeft + boxW + 0.5, rowTop + 0.5, nameW - 1, rowH - 1);
+    ctx.strokeRect(tableLeft + 0.5, rowTop + 0.5, boxW - 1, rowH - 1);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = F(11, true); ctx.textAlign = 'center';
+    ctx.fillText(String(r.serial), tableRight - serialW/2, rowTop + rowH/2 + 4);
+    ctx.font = F(12, false); ctx.textAlign = 'right';
+    let txt = r.name;
+    while(ctx.measureText(txt).width > nameW - 8 && txt.length > 2){ txt = txt.slice(0, -1); }
+    ctx.fillText(txt, tableRight - serialW - 6, rowTop + rowH/2 + 4);
+  });
+  y = tableTop + headerRowH + rows.length*rowH + 20;
+  ctx.textAlign = 'center'; ctx.font = F(10, false); ctx.fillStyle = '#64748b';
+  ctx.fillText(`کل ${rows.length} اقسام`, pxWidth/2, y); y += 14;
+
+  if(Math.abs(y - canvas.height) > 4){
+    const finalH = Math.round(y + 10);
+    const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
+    canvas.height = finalH; ctx.putImageData(imgData, 0, 0);
+  }
+}
+function buildVegListPdf(){
+  const canvas = document.getElementById('vegListReportCanvas');
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = 210, pageH = 297, marginMM = 10;
+  const availW = pageW - marginMM*2, availH = pageH - marginMM*2;
+  let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
+  if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
+  const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM;
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  return pdf;
+}
+async function printVegListReport(mode){
+  const rows = buildVegListRows();
+  if(mode === 'thermal'){
+    // ---------- تھرمل: عارضی کینوس بنا کر سیدھا امیج پرنٹ (موبائل کے OS پرنٹ سسٹم سے) ---------- -->
+    const tempCanvas = document.createElement('canvas');
+    await drawVegListThermal(tempCanvas, rows);
+    const area = document.getElementById('printPreviewArea') || document.body;
+    const img = new Image();
+    img.src = tempCanvas.toDataURL('image/png');
+    img.style.width = '100%';
+    const printWin = window.open('', '_blank');
+    printWin.document.write(`<html><head><title>Print</title></head><body style="margin:0;"><img src="${img.src}" style="width:100%;" onload="window.print();"></body></html>`);
+    printWin.document.close();
+    return;
+  }
+  await renderVegListReportToCanvas(); // یقینی بنائیں کینوس تازہ ترین (A4) ڈیٹا کے ساتھ ہے
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  if(isMobile){
+    const canvas = document.getElementById('vegListReportCanvas');
+    const printWin = window.open('', '_blank');
+    printWin.document.write(`<html><head><title>Print</title></head><body style="margin:0;"><img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="window.print();"></body></html>`);
+    printWin.document.close();
+  } else {
+    const pdf = buildVegListPdf();
+    window.open(pdf.output('bloburl'), '_blank');
+  }
+}
+function shareVegListReport(){
+  const canvas = document.getElementById('vegListReportCanvas');
+  if(!canvas) return;
+  closeVegListReport();
+  showImageSharePreview(canvas, 'Vegetable_List.png', '🥬 سبزیوں کی لسٹ', 'سبزیوں کی لسٹ');
 }
 
 /* =====================================================================
