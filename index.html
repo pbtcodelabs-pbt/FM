@@ -421,14 +421,13 @@
   /* ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): سیریل نمبر کا پرانا "گندا کالا ڈبہ" مکمل ختم — اب صاف، خوبصورت
        بیج (badge)، موٹے Arial Black ہندسے، دبانے پر فہرست کھلتی ہے (ٹائپ کرنے کی ضرورت نہیں) ---------- -->
   .serialBadgeBtn{
-    /* ---------- 🐛 صدام کی ہدایت (FM7SEPMO11): پچھلی بار الائن فکس کیا تھا مگر پھر بھی چوڑا نظر آ رہا تھا —
-         شاید کوئی پرانا کیشڈ ورژن یا کوئی اور مقابلے کی CSS رکاوٹ بن رہی تھی۔ اب !important سے پکا کر دیا
-         ہے تاکہ یہ خانہ ہمیشہ چھوٹا ہی رہے، کوئی اور اصول اسے کبھی چوڑا نہ کر سکے ---------- */
-    align-self:flex-start !important; width:auto !important; max-width:44px !important;
-    flex:0 0 auto !important; min-width:34px !important; padding:4px 7px !important; border-radius:8px !important;
-    background:linear-gradient(155deg, #fef3c7, #fde68a) !important; border:1.5px solid #d97706 !important; color:#78350f !important;
-    font-family:'Arial Black', Arial, sans-serif !important; font-weight:900 !important; font-size:15px !important;
-    cursor:pointer; margin-inline-end:6px; margin-bottom:4px; text-align:center !important; box-shadow:0 1px 2px rgba(0,0,0,.15);
+    /* ---------- 🔢 صدام کی ہدایت (FM7SEPMO14): ہندسے مزید موٹے/بڑے کریں، کارنر مکمل راؤنڈ کریں —
+         نمبر واضح نظر آنا چاہیے (جیسے "5"، "16" وغیرہ صاف پڑھا جا سکے) ---------- */
+    align-self:flex-start !important; width:auto !important; max-width:50px !important;
+    flex:0 0 auto !important; min-width:38px !important; padding:5px 8px !important; border-radius:50px !important;
+    background:linear-gradient(155deg, #fef3c7, #fde68a) !important; border:2px solid #d97706 !important; color:#78350f !important;
+    font-family:'Arial Black', Arial, sans-serif !important; font-weight:900 !important; font-size:18px !important;
+    cursor:pointer; margin-inline-end:6px; margin-bottom:4px; text-align:center !important; box-shadow:0 1px 3px rgba(0,0,0,.2);
     display:inline-block !important;
   }
   .serialBadgeBtn:active{transform:scale(.95);}
@@ -443,6 +442,13 @@
     min-width:44px; text-align:center; flex:0 0 auto;
   }
   .serialPickRow.used .serialPickDigit{color:#15803d;}
+  .serialPickRow.dragOver{background:#fef3c7 !important; border-color:#d97706 !important; border-width:2.5px !important;}
+  .serialDragHandle{
+    flex:0 0 auto; width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+    background:#fff; border:1px solid #86efac; border-radius:8px; color:#15803d; font-size:15px;
+    cursor:grab; touch-action:none;
+  }
+  .serialDragHandle:active{cursor:grabbing;}
   .homeEditModeToggle{
     display:block; width:100%; margin-bottom:10px; padding:9px; border:none; border-radius:10px;
     background:#f1f5f9; color:var(--muted); font-weight:800; font-size:12.5px; cursor:pointer;
@@ -3135,6 +3141,11 @@
         <!-- ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر یہ فارم مکمل سادہ کر دیا گیا ہے —
              نہ کیمرہ/تصویر، نہ بارکوڈ، نہ کیٹیگری، نہ ویرینٹ کا الگ مرحلہ۔ صرف چند خانے، ایک ہی جگہ پر، ایک ہی ٹیپ میں محفوظ ---------- -->
         <input type="text" id="npName" placeholder="Product name (e.g. آلو میٹھا)" style="font-weight:800; font-size:16px;">
+        <!-- ---------- 📦 صدام کی ہدایت (FM7SEPMO14): نیا پراڈکٹ بناتے وقت اب صرف نام پوچھا جائے گا —
+             پیکنگ/قیمت کا خانہ یہاں نظر ہی نہیں آئے گا، تاکہ نام کے خانے میں غلطی سے "ٹماٹر کاٹن" جیسا
+             ملا جلا نام نہ لکھا جائے۔ محفوظ کرتے ہی کارڈ خودکار کھل جائے گا، وہیں سے "➕ نئی پیکنگ شامل کریں"
+             سے پیکنگ الگ سے شامل کی جائے — نام اور پیکنگ ہمیشہ الگ الگ رہیں گے ---------- -->
+        <div id="npPackingSection">
         <!-- ---------- 🏷️ ویرینٹ (پیکنگ کی قسم) — ڈراپ ڈاؤن سے منتخب کریں، خودکار پراڈکٹ کے نام کے ساتھ جُڑ جائے گا
              (مثلاً "ٹماٹر" + "ٹوکری" = کارڈ پر "ٹماٹر ٹوکری" نظر آئے گا) ---------- -->
         <div style="display:flex; gap:6px; margin-top:8px;">
@@ -3170,6 +3181,11 @@
             <label class="npFieldLabel">📦 Stock</label>
             <input type="number" id="npStock" placeholder="0">
           </div>
+        </div>
+        </div>
+        <!-- ---------- 💡 نیا پراڈکٹ بناتے وقت یہ پیغام نظر آئے گا (ایڈٹ کرتے وقت چھپا رہے گا) ---------- -->
+        <div id="npCreateHint" style="display:none; background:#eef2ff; color:var(--primary-dark); border-radius:10px; padding:10px 12px; font-size:12.5px; font-weight:700; margin-top:8px;">
+          💡 صرف سبزی/آئٹم کا نام لکھیں — پیکنگ (کلو، ٹوکری، کاٹن وغیرہ) محفوظ کرنے کے بعد الگ سے شامل کریں گے۔
         </div>
         <!-- ---------- کیٹیگری/بارکوڈ/تصویر — کوڈ محفوظ ہے، صرف چھپایا گیا ہے ---------- -->
         <input type="text" id="npCategory" placeholder="Category (optional)" list="categoryDatalist" autocomplete="off" style="display:none;">
@@ -7462,7 +7478,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر7ستمبر6:47pm';
+const APP_BUILD_VERSION = 'پیر7ستمبر9:40pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12806,15 +12822,20 @@ function renderSerialPickerList(){
   for(let n = 1; n <= listMax; n++){
     const usedBy = usedMap[n];
     const isCurrent = n === currentValue;
-    html += `<div class="serialPickRow ${usedBy ? 'used' : (isCurrent ? 'current' : '')}" ${usedBy ? '' : `onclick="pickSerialNumber(${n})"`}>
+    // ---------- 🔀 صدام کی ہدایت (FM7SEPMO13): جو نمبر پہلے سے کسی اور آئٹم کو ملا ہو، اسے پکڑ کر (⠿) کسی
+    // دوسرے نمبر پر لے جائیں تو دونوں آئٹمز آپس میں اپنی جگہ بدل لیتے ہیں — نمبر خود اپنی جگہ پر رہتے ہیں،
+    // صرف یہ بدلتا ہے کہ کون سا آئٹم کس نمبر پر کھڑا ہے ---------- -->
+    html += `<div class="serialPickRow ${usedBy ? 'used' : (isCurrent ? 'current' : '')}" data-serial="${n}" ${usedBy ? '' : `onclick="pickSerialNumber(${n})"`}>
       <span class="serialPickDigit">${n}</span>
       <span style="flex:1; font-size:12.5px; font-weight:700; color:${usedBy ? '#15803d' : 'var(--muted)'};">
         ${usedBy ? '✅ ' + usedBy + ' کے لیے مختص' : (isCurrent ? '⭐ ابھی یہی منتخب ہے' : '⚪ خالی — منتخب کرنے کے لیے دبائیں')}
       </span>
+      ${usedBy ? `<span class="serialDragHandle" data-serial="${n}" title="پکڑ کر دوسری جگہ لے جائیں">⠿</span>` : ''}
     </div>`;
   }
   html += `<button type="button" onclick="serialPickerListMax += 60; renderSerialPickerList();" style="width:100%; padding:10px; margin-top:6px; background:#eef2ff; color:var(--primary-dark); border:1.5px dashed var(--primary); border-radius:10px; font-weight:800; cursor:pointer;">⬇️ مزید نمبر دکھائیں</button>`;
   document.getElementById('serialPickerListWrap').innerHTML = html;
+  initSerialPickerDrag();
 }
 function pickSerialNumber(n){
   if(!serialPickerCtx) return;
@@ -12822,6 +12843,65 @@ function pickSerialNumber(n){
   if(type === 'product') updateProductSerial(id, n);
   else updatePartySerial(type, id, n);
   closeSerialPicker();
+}
+
+// ---------- 🔀 پیکر لسٹ میں ⠿ سے پکڑ کر جگہ بدلنے کا نظام — Pointer Events (وہی آزمودہ طریقہ جو سائیڈبار
+// ری آرڈر میں استعمال ہوتا ہے) ---------- -->
+let serialDragState = null;
+function initSerialPickerDrag(){
+  document.querySelectorAll('.serialDragHandle').forEach(handle => {
+    handle.addEventListener('pointerdown', onSerialDragStart);
+  });
+}
+function onSerialDragStart(e){
+  e.preventDefault();
+  e.stopPropagation();
+  const fromN = Number(e.target.dataset.serial);
+  serialDragState = {fromN};
+  e.target.closest('.serialPickRow').style.opacity = '.5';
+  try{ e.target.setPointerCapture(e.pointerId); }catch(err){}
+  document.addEventListener('pointermove', onSerialDragMove);
+  document.addEventListener('pointerup', onSerialDragEnd);
+  document.addEventListener('pointercancel', onSerialDragEnd);
+}
+function onSerialDragMove(e){
+  if(!serialDragState) return;
+  document.querySelectorAll('.serialPickRow.dragOver').forEach(el => el.classList.remove('dragOver'));
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const row = el ? el.closest('.serialPickRow') : null;
+  if(row) row.classList.add('dragOver');
+}
+function onSerialDragEnd(e){
+  if(!serialDragState) return;
+  document.removeEventListener('pointermove', onSerialDragMove);
+  document.removeEventListener('pointerup', onSerialDragEnd);
+  document.removeEventListener('pointercancel', onSerialDragEnd);
+  document.querySelectorAll('.serialPickRow').forEach(el => { el.style.opacity = ''; el.classList.remove('dragOver'); });
+
+  const { fromN } = serialDragState;
+  serialDragState = null;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const row = el ? el.closest('.serialPickRow') : null;
+  if(!row) return;
+  const toN = Number(row.dataset.serial);
+  if(!toN || toN === fromN) return;
+
+  const {type, id} = serialPickerCtx;
+  const {pool, idField} = getSerialPool(type);
+  const itemA = pool.find(p => p.serial_no === fromN); // جو پکڑ کر لے جایا گیا
+  const itemB = pool.find(p => p.serial_no === toN);   // جو نمبر پر پہلے سے کھڑا تھا (ہو سکتا ہے کوئی نہ ہو)
+  if(!itemA) return;
+  itemA.serial_no = toN;
+  if(itemB) itemB.serial_no = fromN; // ---------- دونوں آپس میں جگہ بدل لیتے ہیں ----------
+
+  persistAllData();
+  if(type === 'product') pushProductsToCloud(); else if(type === 'customers') pushCustomersToCloud(); else pushSuppliersToCloud();
+  // ---------- serialPickerCtx.currentValue بھی اپڈیٹ کریں اگر یہی آئٹم دیکھ رہے تھے ----------
+  if(serialPickerCtx && serialPickerCtx.id === itemA[idField]) serialPickerCtx.currentValue = itemA.serial_no;
+  renderSerialPickerList();
+  // ---------- پیچھے اصل فہرست (Products/Stock Adjustment/Customers/Suppliers) بھی فوراً تازہ ہو جائے ----------
+  if(typeof renderProductList === 'function' && document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
+  if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
 
 function updateProductSerial(productId, newValue){
@@ -14221,11 +14301,11 @@ function renderProductList(query = ''){
         <label class="pPresenceCheck" title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="${isAdmin ? 'cursor:pointer;' : 'cursor:default;'}" onclick="event.stopPropagation();">
           <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
         </label>
-        <div class="pNameWrap">
-          <!-- ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): سیریل نمبر اب فہرست سے چنیں — پرانا ٹائپ کرنے والا
-               "گندا ڈبہ" ختم، دبانے پر خالی/استعمال شدہ نمبروں کی صاف فہرست کھلتی ہے ---------- -->
+        <div class="pNameWrap" style="display:flex; flex-direction:row; align-items:center; gap:6px;">
+          <!-- ---------- 🔢 صدام کی ہدایت (FM7SEPMO13): سیریل نمبر اب چھوٹا خانہ، نام کے دائیں طرف (ایک ہی لائن
+               میں) — پہلے پورا اوپر والا row لے لیتا تھا، اب صرف اتنی جگہ جتنی اس کی ضرورت ہے ---------- -->
           <button type="button" class="serialBadgeBtn" onclick="event.stopPropagation(); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button>
-          <div class="pName">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
+          <div class="pName" style="flex:1; font-weight:900;">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
           <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
@@ -15382,6 +15462,9 @@ function openNewProductModal(productId = null){
     document.getElementById('npStock').value = '';
     renderProductPhotoPreview(null);
   }
+  // ---------- 📦 صدام کی ہدایت (FM7SEPMO14): نیا پراڈکٹ بناتے وقت پیکنگ/قیمت کا حصہ مکمل چھپا دیں ---------- -->
+  document.getElementById('npPackingSection').style.display = productId ? 'block' : 'none';
+  document.getElementById('npCreateHint').style.display = productId ? 'none' : 'block';
   npRecalcTotalPurchase(); // ---------- ہر بار موڈل کھلتے ہی ٹوٹل قیمتِ خرید تازہ کریں ----------
 
   document.getElementById('newProductModal').classList.add('show');
@@ -15566,6 +15649,7 @@ function saveNewProduct(){
 
   closeNewProductModal();
   renderProductList();
+  openProductCards.add(newProduct.product_id);
   document.getElementById(`pcard-${newProduct.product_id}`)?.classList.add('open');
 }
 
@@ -16902,9 +16986,9 @@ function renderStockAdjustmentScreen(query){
         <label class="pPresenceCheck" title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="${isAdmin ? 'cursor:pointer;' : 'cursor:default;'}" onclick="event.stopPropagation();">
           <input type="checkbox" ${p.isDormant ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('sa-pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
         </label>
-        <div class="pNameWrap">
+        <div class="pNameWrap" style="display:flex; flex-direction:row; align-items:center; gap:6px;">
           <button type="button" class="serialBadgeBtn" onclick="event.stopPropagation(); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button>
-          <div class="pName">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
+          <div class="pName" style="flex:1; font-weight:900;">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
           <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
