@@ -421,12 +421,12 @@
   /* ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): سیریل نمبر کا پرانا "گندا کالا ڈبہ" مکمل ختم — اب صاف، خوبصورت
        بیج (badge)، موٹے Arial Black ہندسے، دبانے پر فہرست کھلتی ہے (ٹائپ کرنے کی ضرورت نہیں) ---------- -->
   .serialBadgeBtn{
-    /* ---------- 🔢 صدام کی ہدایت (FM7SEPMO14): ہندسے مزید موٹے/بڑے کریں، کارنر مکمل راؤنڈ کریں —
-         نمبر واضح نظر آنا چاہیے (جیسے "5"، "16" وغیرہ صاف پڑھا جا سکے) ---------- */
-    align-self:flex-start !important; width:auto !important; max-width:50px !important;
-    flex:0 0 auto !important; min-width:38px !important; padding:5px 8px !important; border-radius:50px !important;
+    /* ---------- 🔢 صدام کی ہدایت (FM7SEPMO16): پہلے اتنا چھوٹا کر دیا تھا کہ دو ہندسے (جیسے "16") ٹھیک سے
+         نہیں سما رہے تھے — اب مناسب چوڑائی، تاکہ 99 تک کوئی بھی نمبر صاف، بغیر کٹے نظر آئے ---------- */
+    align-self:flex-start !important; width:auto !important; max-width:64px !important;
+    flex:0 0 auto !important; min-width:50px !important; padding:6px 10px !important; border-radius:50px !important;
     background:linear-gradient(155deg, #fef3c7, #fde68a) !important; border:2px solid #d97706 !important; color:#78350f !important;
-    font-family:'Arial Black', Arial, sans-serif !important; font-weight:900 !important; font-size:18px !important;
+    font-family:'Arial Black', Arial, sans-serif !important; font-weight:900 !important; font-size:19px !important;
     cursor:pointer; margin-inline-end:6px; margin-bottom:4px; text-align:center !important; box-shadow:0 1px 3px rgba(0,0,0,.2);
     display:inline-block !important;
   }
@@ -7478,7 +7478,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر7ستمبر9:40pm';
+const APP_BUILD_VERSION = 'پیر7ستمبر10:05pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -14315,7 +14315,7 @@ function renderProductList(query = ''){
           <span class="chevron">▶</span>
         </div>
       </div>
-      ${isAdmin ? buildInlineFieldsRow(p.product_id, mainV) : ''}
+      ${isAdmin && p.variants.length === 1 ? buildInlineFieldsRow(p.product_id, mainV) : ''}
       <div class="variantCardWrap" id="vcWrap-${p.product_id}">
         ${renderVariantCardSection(p.product_id, 'pcard-' + p.product_id)}
       </div>
@@ -14398,62 +14398,34 @@ function renderVariantCardSection(productId, cardId){
   cardId = cardId || `pcard-${productId}`;
   const p = productsData.find(pr => pr.product_id === productId);
   if(!p || !p.variants.length) return '';
-  let idx = activeVariantIndexByProduct.get(productId) ?? 0;
-  idx = Math.max(0, Math.min(p.variants.length - 1, idx));
-  activeVariantIndexByProduct.set(productId, idx);
-  const v = p.variants[idx];
-  const expiryTier = getExpiryTier(v.expiryDate);
 
-  // ---------- 📏 صدام کی ہدایت (4 ستمبر): روزمرہ فیلڈز (خرید/مزدوری/ریٹس/سٹاک) اب اوپر مین لائن میں ہی
-  // نظر آتی ہیں (buildInlineFieldsRow سے) — یہاں صرف وہ فیلڈز ہیں جو کبھی کبھار درکار ہوں (Barcode, Expiry,
-  // Location, Batches, Variant کا نام/سائز، اور ایک سے زیادہ variants کے درمیان سوئچ کرنا) ---------- -->
-  // ---------- 📦 صدام کی ہدایت (FM7SEPMO10): لفظ "Variant" کہیں نہیں لکھنا، ہر جگہ "پیکنگ" — اور پیکنگ کا نام
-  // لکھنے والا خانہ (کاٹن/ٹوکری/شاپر/کلو) دوبارہ کھول دیا ہے، ورنہ نئی پیکنگ کا نام لکھا ہی نہیں جا سکتا تھا۔
-  // باقی جو چیزیں پہلے چھپائی تھیں (Barcode, Expiry, Low Stock, Location, Batches) وہ اسی طرح چھپی رہیں گی ---------- -->
+  // ---------- 📋 صدام کی ہدایت (FM7SEPMO15): پہلے ایک وقت میں صرف ایک پیکنگ نظر آتی تھی (◀▶ سے سوئچ کرنا
+  // پڑتا تھا)، جبکہ اوپر ہمیشہ نظر آنے والا رنگین خانہ ہمیشہ صرف پہلی پیکنگ کی قیمت دکھاتا تھا — دونوں الگ
+  // ڈیٹا دکھاتے، الجھن پیدا ہوتی۔ اب: صرف ایک پیکنگ ہو تو اوپر والا سادہ خانہ ہی کافی ہے (نیچے کچھ نہیں)۔
+  // ایک سے زیادہ پیکنگ ہوں تو سب کی سب ایک ساتھ، الگ الگ صاف نظر آئیں گی — کوئی سوئچ کرنے کی ضرورت نہیں ---------- -->
+  if(p.variants.length === 1){
+    return `
+    <div class="vcBottomBtns">
+      <button class="addVariantBtn" onclick="addVariantRow(${productId})">➕ نئی پیکنگ شامل کریں (مثلاً ٹوکری، کاٹن)</button>
+      <button class="collapseCardBtn" onclick="saveAndCloseVariantCard(${productId}, '${cardId}', this)">✅ محفوظ کریں</button>
+    </div>`;
+  }
+
+  const rows = p.variants.map((v, idx) => {
+    const isNegative = v.stock < 0;
+    return `
+    <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:10px; margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+        <span style="background:var(--primary-dark); color:#fff; font-weight:800; font-size:11px; padding:3px 9px; border-radius:20px; flex:0 0 auto;">پیکنگ ${idx + 1}</span>
+        <input value="${v.label}" list="fmVariantUnitOptions" placeholder="پیکنگ کا نام (کاٹن، ٹوکری، فی کلو)" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'label',this.value)" style="flex:1; font-weight:900; font-size:14px; padding:8px; border:1.5px solid #94a3b8; border-radius:8px;">
+      </div>
+      ${buildInlineFieldsRow(productId, v)}
+      <button ${p.variants.length <= 1 ? 'disabled' : ''} onclick="deleteVariant(${productId},${v.variant_id})" style="width:100%; margin-top:8px; background:#fee2e2; color:#b91c1c; border:none; border-radius:8px; padding:7px; font-weight:800; cursor:pointer;">🗑️ یہ پیکنگ حذف کریں</button>
+    </div>`;
+  }).join('');
+
   return `
-    <div class="vcNavBar" style="display:${p.variants.length > 1 ? 'flex' : 'none'};">
-      <div class="vcNavTitle">
-        ${idx === 0 ? `<span class="vcMainBadge">مرکزی</span>` : ''}
-        <span>پیکنگ ${idx + 1} از ${p.variants.length}</span>
-      </div>
-      <div class="vcNavArrows">
-        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, -1)" ${idx === 0 ? 'disabled' : ''} title="پچھلی پیکنگ">◀</button>
-        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, 1)" ${idx === p.variants.length - 1 ? 'disabled' : ''} title="اگلی پیکنگ">▶</button>
-      </div>
-    </div>
-    <div class="vcCard">
-      <div class="vcFieldsArea">
-        <div class="vcFieldWrap vcFieldFull vcNameField">
-          <span class="vcFieldLabel">📦 پیکنگ کا نام (مثلاً کاٹن، ٹوکری، شاپر، فی کلو)</span>
-          <input value="${v.label}" list="fmVariantUnitOptions" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'label',this.value)">
-        </div>
-        <div class="vcFieldWrap vcFieldFull" style="display:none;">
-          <span class="vcFieldLabel">Barcode</span>
-          <div class="vcInputRow">
-            <input id="variantBarcode-${v.variant_id}" value="${v.barcode}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'barcode',this.value)">
-            <button type="button" onclick="openBarcodeScanner('variantBarcode-${v.variant_id}')" title="Scan barcode" style="display:none;">📷</button>
-          </div>
-        </div>
-        <div class="vcFieldGrid">
-          <div class="vcFieldWrap" style="display:none;">
-            <span class="vcFieldLabel">Low Stock Alert At</span>
-            <input type="number" value="${v.lowStockAt ?? 0}" onfocus="this.select()" title="Low Stock alert will trigger when stock reaches this number or below" onchange="updateVariantField(${productId},${v.variant_id},'lowStockAt',this.value,this)">
-          </div>
-          <div class="vcFieldWrap" style="display:none;">
-            <span class="vcFieldLabel">📅 Expiry Date</span>
-            <input type="date" class="expiryInput ${expiryTier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)">
-          </div>
-        </div>
-        <div class="vcFieldWrap vcFieldFull" style="display:none;">
-          <span class="vcFieldLabel">Location (Aisle / Shelf / Warehouse)</span>
-          <input value="${v.location}" placeholder="e.g. Aisle 4, Shelf B" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)">
-        </div>
-      </div>
-      <div class="vcActionsRow">
-        <button class="vcBatchBtn" style="display:none;" onclick="openVariantBatchesModal(${productId},${v.variant_id})">🗓️ Batches${v.batches && v.batches.length > 1 ? ` (${v.batches.length})` : ''}</button>
-        <button class="vcDeleteBtn" ${p.variants.length <= 1 ? 'disabled title="کم از کم ایک پیکنگ رہنی چاہیے"' : ''} onclick="deleteVariant(${productId},${v.variant_id})">🗑️ یہ پیکنگ حذف کریں</button>
-      </div>
-    </div>
+    <div style="padding:2px 0;">${rows}</div>
     <div class="vcBottomBtns">
       <button class="addVariantBtn" onclick="addVariantRow(${productId})">➕ نئی پیکنگ شامل کریں (مثلاً ٹوکری، کاٹن)</button>
       <button class="collapseCardBtn" onclick="saveAndCloseVariantCard(${productId}, '${cardId}', this)">✅ محفوظ کریں</button>
@@ -16997,7 +16969,7 @@ function renderStockAdjustmentScreen(query){
           <span class="chevron">▶</span>
         </div>
       </div>
-      ${isAdmin ? buildInlineFieldsRow(p.product_id, mainV) : ''}
+      ${isAdmin && p.variants.length === 1 ? buildInlineFieldsRow(p.product_id, mainV) : ''}
       <div class="variantCardWrap" id="sa-vcWrap-${p.product_id}">
         ${renderVariantCardSection(p.product_id, 'sa-pcard-' + p.product_id)}
       </div>
