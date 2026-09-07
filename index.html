@@ -412,6 +412,12 @@
   .homeQuickBackupBtn.restore{background:linear-gradient(155deg, #2563eb, #1d4ed8);}
   .homeQuickBackupBtn:active{transform:translateY(1px); box-shadow:0 1px 0 rgba(0,0,0,.15);}
   .homeQuickBackupBtn .hqbIcon{font-size:16px;}
+  /* ---------- ✖ ہوم آئیکن سے ہٹانے والا چھوٹا بٹن — صرف ایڈمن کو نظر آئے ---------- */
+  .hitRemoveBtn{
+    position:absolute; top:-6px; left:-6px; width:20px; height:20px; border-radius:50%;
+    background:var(--danger); color:#fff; font-size:11px; font-weight:800; z-index:5;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.3);
+  }
   .homeIconTile .hitBadge{
     position:absolute; top:6px; right:6px; background:var(--danger); color:#fff; border-radius:10px;
     font-size:9.5px; font-weight:800; padding:1px 6px; box-shadow:0 2px 5px rgba(185,28,28,.45);
@@ -7330,7 +7336,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر7ستمبر7:20am';
+const APP_BUILD_VERSION = 'پیر7ستمبر8:23am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -7847,6 +7853,7 @@ function renderHomeIconGrid(){
 
   const myTileHtml = (t) => `
     <button class="homeIconTile" style="position:relative;" onclick="goTo('${t.screen}')">
+      ${AppState.currentRole === 'admin' ? `<span class="hitRemoveBtn" title="ہوم سے ہٹائیں" onclick="event.stopPropagation(); removeScreenFromMyHomeGrid('${t.screen}')">✖</span>` : ''}
       ${t.screen === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingCount}</span>` : ''}
       ${t.screen === 'recoveryList' && pendingRecoveryCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingRecoveryCount}</span>` : ''}
       <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span></span>
@@ -10016,7 +10023,12 @@ function onSidebarDragStart(e){
     const divider = getSidebarNavDivider();
     if(!item || !divider) return;
     e.preventDefault();
-    sidebarDragState = { item, divider };
+    const sidebarEl = document.getElementById('sidebar');
+    const sidebarRect = sidebarEl.getBoundingClientRect();
+    // ---------- 🖐️ صدام کی ہدایت (FM7SEPMO): اگر انگلی سائیڈبار کی بائیں کنارے سے باہر (ہوم سکرین کی طرف)
+    // نکل جائے، تو یہ اب سائیڈبار کے اندر ترتیب بدلنا نہیں رہا — بلکہ اس آئٹم کو ہوم پیج پر بطور آئیکن
+    // شامل کرنے کی درخواست بن جاتی ہے ---------- -->
+    sidebarDragState = { item, divider, sidebarLeft: sidebarRect.left, outsideMode: false };
     item.classList.add('navDragging');
     try{ e.target.setPointerCapture(e.pointerId); }catch(err){}
     document.addEventListener('pointermove', onSidebarDragMove);
@@ -10024,10 +10036,36 @@ function onSidebarDragStart(e){
     document.addEventListener('pointercancel', onSidebarDragEnd);
   }catch(err){ console.warn('onSidebarDragStart failed', err); }
 }
+// ---------- 👻 انگلی کے ساتھ ساتھ چلنے والا اشارہ — جب سائیڈبار سے باہر نکل جائیں تو نظر آئے ---------- -->
+function showAddToHomeGhost(x, y, label){
+  let ghost = document.getElementById('addToHomeGhost');
+  if(!ghost){
+    ghost = document.createElement('div');
+    ghost.id = 'addToHomeGhost';
+    ghost.style.cssText = 'position:fixed; z-index:2000; pointer-events:none; transform:translate(-50%,-120%); background:#15803d; color:#fff; font-weight:800; font-size:12.5px; padding:8px 14px; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.35); white-space:nowrap;';
+    document.body.appendChild(ghost);
+  }
+  ghost.textContent = '➕ ' + label + ' — ہوم پر شامل کریں';
+  ghost.style.left = x + 'px';
+  ghost.style.top = y + 'px';
+}
+function hideAddToHomeGhost(){
+  document.getElementById('addToHomeGhost')?.remove();
+}
 function onSidebarDragMove(e){
   if(!sidebarDragState) return;
   try{
-    const { item, divider } = sidebarDragState;
+    const { item, divider, sidebarLeft } = sidebarDragState;
+    // ---------- سائیڈبار کی بائیں کنارے سے باہر — "ہوم پر شامل کریں" موڈ ---------- -->
+    if(e.clientX < sidebarLeft - 6){
+      sidebarDragState.outsideMode = true;
+      showAddToHomeGhost(e.clientX, e.clientY, item.dataset.navlabel || item.textContent.trim());
+      return;
+    }
+    if(sidebarDragState.outsideMode){
+      sidebarDragState.outsideMode = false;
+      hideAddToHomeGhost();
+    }
     const y = e.clientY;
     const others = getSortableNavItems().filter(el => el !== item);
     for(const other of others){
@@ -10046,12 +10084,47 @@ function onSidebarDragEnd(){
   if(!sidebarDragState) return;
   try{
     sidebarDragState.item.classList.remove('navDragging');
-    saveSidebarNavOrder();
+    if(sidebarDragState.outsideMode){
+      hideAddToHomeGhost();
+      const navkey = sidebarDragState.item.dataset.navkey;
+      const navlabel = sidebarDragState.item.dataset.navlabel || sidebarDragState.item.textContent.trim();
+      addScreenToMyHomeGrid(navkey, navlabel);
+    } else {
+      saveSidebarNavOrder();
+    }
   }catch(err){ console.warn('onSidebarDragEnd failed', err); }
   document.removeEventListener('pointermove', onSidebarDragMove);
   document.removeEventListener('pointerup', onSidebarDragEnd);
   document.removeEventListener('pointercancel', onSidebarDragEnd);
   sidebarDragState = null;
+}
+// ---------- ➕ سائیڈبار سے کھینچ کر ہوم پر شامل کریں — بالکل وہی .screens نظام استعمال ہوتا ہے
+// جو Users → 🖥️ Screens میں چیک باکس سے ہوتا ہے، بس یہاں ڈریگ سے خودکار ہو جاتا ہے ---------- -->
+function addScreenToMyHomeGrid(navkey, navlabel){
+  if(!navkey) return;
+  const currentUser = usersData.find(x => x.name === AppState.currentUser?.name && x.role === AppState.currentRole);
+  if(!currentUser){ closeSidebar(); return; }
+  if(!Array.isArray(currentUser.screens)) currentUser.screens = [];
+  if(currentUser.screens.includes(navkey)){
+    closeSidebar();
+    return; // پہلے سے موجود ہے، دوبارہ شامل کرنے کی ضرورت نہیں
+  }
+  currentUser.screens.push(navkey);
+  pushUsersToCloud();
+  closeSidebar();
+  renderHomeIconGrid();
+}
+// ---------- ➖ ہوم آئیکن پر چھوٹا ✖ — صرف ایڈمن کو نظر آئے، دبانے پر وہی آئیکن ہوم سے ہٹ جائے ---------- -->
+function removeScreenFromMyHomeGrid(navkey){
+  const currentUser = usersData.find(x => x.name === AppState.currentUser?.name && x.role === AppState.currentRole);
+  if(!currentUser || !Array.isArray(currentUser.screens)) return;
+  if(currentUser.screens.length <= 1){
+    alert('⚠️ کم از کم ایک آئیکن ہوم پیج پر ضرور رہنا چاہیے۔');
+    return;
+  }
+  currentUser.screens = currentUser.screens.filter(k => k !== navkey);
+  pushUsersToCloud();
+  renderHomeIconGrid();
 }
 function initSidebarNavCustomize(){
   applySidebarNavOrder();
