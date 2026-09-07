@@ -418,6 +418,26 @@
     background:var(--danger); color:#fff; font-size:11px; font-weight:800; z-index:5;
     display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.3);
   }
+  /* ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): سیریل نمبر کا پرانا "گندا کالا ڈبہ" مکمل ختم — اب صاف، خوبصورت
+       بیج (badge)، موٹے Arial Black ہندسے، دبانے پر فہرست کھلتی ہے (ٹائپ کرنے کی ضرورت نہیں) ---------- -->
+  .serialBadgeBtn{
+    flex:0 0 auto; min-width:34px; padding:4px 7px; border-radius:8px;
+    background:linear-gradient(155deg, #fef3c7, #fde68a); border:1.5px solid #d97706; color:#78350f;
+    font-family:'Arial Black', Arial, sans-serif; font-weight:900; font-size:13px;
+    cursor:pointer; margin-inline-end:6px; text-align:center; box-shadow:0 1px 2px rgba(0,0,0,.15);
+  }
+  .serialBadgeBtn:active{transform:scale(.95);}
+  .serialPickRow{
+    display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; margin-bottom:5px;
+    background:#f8fafc; border:1.5px solid #e2e8f0; cursor:pointer;
+  }
+  .serialPickRow.used{background:#f0fdf4; border-color:#86efac; cursor:default; opacity:.85;}
+  .serialPickRow.current{background:#eff6ff; border-color:#3b82f6;}
+  .serialPickDigit{
+    font-family:'Arial Black', Arial, sans-serif; font-weight:900; font-size:20px; color:var(--primary-dark);
+    min-width:44px; text-align:center; flex:0 0 auto;
+  }
+  .serialPickRow.used .serialPickDigit{color:#15803d;}
   .homeEditModeToggle{
     display:block; width:100%; margin-bottom:10px; padding:9px; border:none; border-radius:10px;
     background:#f1f5f9; color:var(--muted); font-weight:800; font-size:12.5px; cursor:pointer;
@@ -3091,6 +3111,18 @@
     </div>
 
     <!-- NEW PRODUCT (PARENT) MODAL — صرف parent بنے گا، variants بعد میں کارڈ کھول کر شامل ہوں گے -->
+    <!-- ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): سیریل نمبر منتخب کرنے کی فہرست — ٹائپ کرنے کی بجائے فہرست میں سے
+         چنیں، استعمال شدہ نمبروں پر سبز ✅ نشان کے ساتھ نام بھی نظر آئے گا ---------- -->
+    <div class="modalOverlay" id="serialPickerModal" onclick="if(event.target===this) closeSerialPicker()">
+      <div class="modalBox" style="max-width:380px; max-height:80vh; display:flex; flex-direction:column;">
+        <h3 id="serialPickerTitle" style="margin-top:0;">🔢 سیریل نمبر منتخب کریں</h3>
+        <div id="serialPickerListWrap" style="flex:1; overflow-y:auto;"></div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeSerialPicker()">بند کریں</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modalOverlay" id="newProductModal" onclick="if(event.target===this) closeNewProductModal()">
       <div class="modalBoxWide npEditCard">
         <h3 id="newProductModalTitle">📦 New Product</h3>
@@ -7424,7 +7456,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر7ستمبر11:59am';
+const APP_BUILD_VERSION = 'پیر7ستمبر12:17pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10612,6 +10644,7 @@ function getFlatVariants(){
       flat.push({
         variant_id: v.variant_id,
         product_id: p.product_id,
+        serial_no: p.serial_no, // ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): آرڈر لینے کی سکرین پر بھی سیریل نمبر دکھانا ہے (صرف دیکھنے کے لیے) ----------
         label: v.label,
         name: `${p.name} ${v.label}`.trim(),
         barcode: v.barcode,
@@ -12714,6 +12747,7 @@ let nextVariantId = loadFromStorage('nextVariantId', 28);
 // اگلا خالی نمبر (زیادہ سے زیادہ موجودہ نمبر + 1) مل جاتا ہے، تاکہ پرانے نمبر کبھی نہ ہلیں ---------- -->
 function assignInitialProductSerials(){
   if(loadFromStorage('productSerialsAssignedV1', false)) return; // پہلے ہی ہو چکا — دوبارہ نہیں کرنا
+  if(loadFromStorage('serialManualMode', false)) return; // ---------- صدام کی ہدایت (FM7SEPMO7): مینوئل موڈ میں خودکار نمبر ہرگز نہ لگیں ----------
   const sorted = [...productsData].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ur', {numeric:true, sensitivity:'base'}));
   sorted.forEach((p, idx) => { p.serial_no = idx + 1; });
   saveToStorage('productSerialsAssignedV1', true);
@@ -12721,6 +12755,9 @@ function assignInitialProductSerials(){
 // ---------- نئی شامل ہونے والی کسی بھی سبزی کو، اگر اس کا سیریل نمبر ابھی خالی ہو، اگلا نمبر دے دیں —
 // موجودہ کسی سبزی کا نمبر کبھی نہیں بدلتا ---------- -->
 function backfillMissingProductSerials(){
+  // ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): اب نمبر خود اپنی مرضی سے دیں گے — خودکار بھرنے کا نظام بند،
+  // ورنہ صاف کیے گئے (خالی چھوڑے گئے) نمبر ہر بار پیج کھلتے ہی خودکار دوبارہ بھر جاتے ---------- -->
+  if(loadFromStorage('serialManualMode', false)) return;
   let maxSerial = productsData.reduce((m, p) => Math.max(m, p.serial_no || 0), 0);
   productsData.forEach(p => { if(!p.serial_no){ maxSerial++; p.serial_no = maxSerial; } });
 }
@@ -12728,6 +12765,59 @@ function backfillMissingProductSerials(){
 // ---------- 🔢 صدام کی ہدایت (FM6SEPSU10): سیریل نمبر اب صارف کی اپنی مرضی سے (manually) بدلا جا سکتا ہے —
 // جیسے آلو کو 25 دینا ہو، پیاز کو 3 — بس ڈپلیکیٹ نمبر روکنا ضروری ہے، ورنہ دو سبزیوں کا نمبر ایک جیسا ہو کر
 // فہرست/پرنٹ کی ترتیب الجھ جائے گی۔ Products اور Stock Adjustment دونوں سکرینیں یہی فنکشن استعمال کرتی ہیں ---------- -->
+// =====================================================================
+// 🔢 صدام کی ہدایت (FM7SEPMO7): سیریل نمبر منتخب کرنے کی فہرست — ٹائپ کرنے کی بجائے دبانے سے چنیں،
+// استعمال شدہ نمبروں پر سبز نشان + نام نظر آئے، تاکہ خالی نمبر آسانی سے مل جائیں ---------- -->
+// =====================================================================
+let serialPickerCtx = null;
+let serialPickerListMax = 60;
+function openSerialPicker(type, id, currentValue, title){
+  serialPickerCtx = {type, id, currentValue: currentValue || null};
+  serialPickerListMax = 60;
+  document.getElementById('serialPickerTitle').textContent = '🔢 ' + (title || 'سیریل نمبر منتخب کریں');
+  renderSerialPickerList();
+  document.getElementById('serialPickerModal').classList.add('show');
+}
+function closeSerialPicker(){
+  document.getElementById('serialPickerModal').classList.remove('show');
+  serialPickerCtx = null;
+}
+function getSerialPool(type){
+  if(type === 'product') return {pool: productsData, idField: 'product_id'};
+  if(type === 'customers') return {pool: customersData, idField: 'customer_id'};
+  return {pool: suppliersData, idField: 'supplier_id'};
+}
+function renderSerialPickerList(){
+  if(!serialPickerCtx) return;
+  const {type, id, currentValue} = serialPickerCtx;
+  const {pool, idField} = getSerialPool(type);
+  const usedMap = {};
+  pool.forEach(p => { if(p.serial_no && p[idField] !== id) usedMap[p.serial_no] = p.name; });
+  const maxUsed = pool.reduce((m,p) => Math.max(m, p.serial_no||0), 0);
+  const listMax = Math.max(serialPickerListMax, maxUsed + 5);
+
+  let html = '';
+  for(let n = 1; n <= listMax; n++){
+    const usedBy = usedMap[n];
+    const isCurrent = n === currentValue;
+    html += `<div class="serialPickRow ${usedBy ? 'used' : (isCurrent ? 'current' : '')}" ${usedBy ? '' : `onclick="pickSerialNumber(${n})"`}>
+      <span class="serialPickDigit">${n}</span>
+      <span style="flex:1; font-size:12.5px; font-weight:700; color:${usedBy ? '#15803d' : 'var(--muted)'};">
+        ${usedBy ? '✅ ' + usedBy + ' کے لیے مختص' : (isCurrent ? '⭐ ابھی یہی منتخب ہے' : '⚪ خالی — منتخب کرنے کے لیے دبائیں')}
+      </span>
+    </div>`;
+  }
+  html += `<button type="button" onclick="serialPickerListMax += 60; renderSerialPickerList();" style="width:100%; padding:10px; margin-top:6px; background:#eef2ff; color:var(--primary-dark); border:1.5px dashed var(--primary); border-radius:10px; font-weight:800; cursor:pointer;">⬇️ مزید نمبر دکھائیں</button>`;
+  document.getElementById('serialPickerListWrap').innerHTML = html;
+}
+function pickSerialNumber(n){
+  if(!serialPickerCtx) return;
+  const {type, id} = serialPickerCtx;
+  if(type === 'product') updateProductSerial(id, n);
+  else updatePartySerial(type, id, n);
+  closeSerialPicker();
+}
+
 function updateProductSerial(productId, newValue){
   const num = parseInt(newValue, 10);
   const product = productsData.find(p => p.product_id === productId);
@@ -14126,11 +14216,9 @@ function renderProductList(query = ''){
           <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
         </label>
         <div class="pNameWrap">
-          <!-- ---------- 🔢 صدام کی ہدایت (FM6SEPSU10): سیریل نمبر اب خودکار نہیں، خود لکھ سکتے ہیں — اپنی مرضی کی
-               ترتیب (مثلاً آلو=25، پیاز=3) دینے کے لیے۔ ڈپلیکیٹ نمبر پر خودکار ایرر آئے گا، محفوظ نہیں ہوگا ---------- -->
-          <input type="number" class="pSerialEdit" value="${p.serial_no ?? ''}" onclick="event.stopPropagation();" onfocus="this.select()"
-            onchange="updateProductSerial(${p.product_id}, this.value)"
-            style="width:44px; flex:0 0 44px; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border:none; border-radius:6px; padding:2px 3px; margin-inline-end:5px; direction:ltr; text-align:center;">
+          <!-- ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): سیریل نمبر اب فہرست سے چنیں — پرانا ٹائپ کرنے والا
+               "گندا ڈبہ" ختم، دبانے پر خالی/استعمال شدہ نمبروں کی صاف فہرست کھلتی ہے ---------- -->
+          <button type="button" class="serialBadgeBtn" onclick="event.stopPropagation(); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button>
           <div class="pName">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
@@ -15756,10 +15844,12 @@ let nextCustomerId = loadFromStorage('nextCustomerId', 4);
 // بالکل سبزیوں کی طرح۔ کسٹمر اور سپلائر کی نمبرنگ الگ الگ (آزاد) حوض ہیں — ایک کسٹمر کا #5 اور
 // ایک سپلائر کا #5 آپس میں نہیں ٹکراتے، ہر فہرست اپنی الگ گنتی رکھتی ہے ---------- -->
 function backfillMissingCustomerSerials(){
+  if(loadFromStorage('serialManualMode', false)) return;
   let maxSerial = customersData.reduce((m, c) => Math.max(m, c.serial_no || 0), 0);
   customersData.forEach(c => { if(!c.serial_no){ maxSerial++; c.serial_no = maxSerial; } });
 }
 function backfillMissingSupplierSerials(){
+  if(loadFromStorage('serialManualMode', false)) return;
   let maxSerial = suppliersData.reduce((m, s) => Math.max(m, s.serial_no || 0), 0);
   suppliersData.forEach(s => { if(!s.serial_no){ maxSerial++; s.serial_no = maxSerial; } });
 }
@@ -16803,9 +16893,7 @@ function renderStockAdjustmentScreen(query){
           <input type="checkbox" ${p.isDormant ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('sa-pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
         </label>
         <div class="pNameWrap">
-          <input type="number" class="pSerialEdit" value="${p.serial_no ?? ''}" onclick="event.stopPropagation();" onfocus="this.select()"
-            onchange="updateProductSerial(${p.product_id}, this.value)"
-            style="width:44px; flex:0 0 44px; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border:none; border-radius:6px; padding:2px 3px; margin-inline-end:5px; direction:ltr; text-align:center;">
+          <button type="button" class="serialBadgeBtn" onclick="event.stopPropagation(); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button>
           <div class="pName">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
@@ -17974,7 +18062,7 @@ function renderPartyList(query = ''){
         </label>
         <div class="prAvatar">${c.photo ? `<img src="${c.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '👤'}</div>
         <div class="prMain" onclick="openCustomerProfile(${c.customer_id})">
-          <div class="prName"><input type="number" class="pSerialEdit" value="${c.serial_no ?? ''}" onclick="event.stopPropagation();" onfocus="this.select()" onchange="updatePartySerial('customers', ${c.customer_id}, this.value)" style="width:38px; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border:none; border-radius:6px; padding:1px 3px; margin-inline-end:5px; direction:ltr; text-align:center;">${c.name}
+          <div class="prName"><button type="button" class="serialBadgeBtn" onclick="event.stopPropagation(); openSerialPicker('customers', ${c.customer_id}, ${c.serial_no ?? 'null'}, '${(c.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${c.serial_no ?? '?'}</button>${c.name}
             ${c.rateArea ? `<span style="font-size:9.5px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px; margin-inline-start:3px;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}
             ${customerBoughtToday(c.customer_id) ? `<span style="font-size:9.5px; font-weight:700; color:#15803d; background:#dcfce7; border-radius:6px; padding:1px 5px; margin-inline-start:3px;">🔥 آج</span>` : ''}
             ${c.keywords ? ` <span style="font-size:10px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 6px;">${c.keywords}</span>` : ''}
@@ -18011,7 +18099,7 @@ function renderPartyList(query = ''){
       <div class="partyRow" dir="rtl">
         <div class="prAvatar">${s.photo ? `<img src="${s.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🏭'}</div>
         <div class="prMain" onclick="openSupplierProfile(${s.supplier_id})">
-          <div class="prName"><input type="number" class="pSerialEdit" value="${s.serial_no ?? ''}" onclick="event.stopPropagation();" onfocus="this.select()" onchange="updatePartySerial('suppliers', ${s.supplier_id}, this.value)" style="width:38px; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border:none; border-radius:6px; padding:1px 3px; margin-inline-end:5px; direction:ltr; text-align:center;">${s.name}${s.keywords ? ` <span style="font-size:10px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 6px;">${s.keywords}</span>` : ''}</div>
+          <div class="prName"><button type="button" class="serialBadgeBtn" onclick="event.stopPropagation(); openSerialPicker('suppliers', ${s.supplier_id}, ${s.serial_no ?? 'null'}, '${(s.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${s.serial_no ?? '?'}</button>${s.name}${s.keywords ? ` <span style="font-size:10px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 6px;">${s.keywords}</span>` : ''}</div>
           <div class="prPhone">${s.phone || 'نمبر درج نہیں'}</div>
         </div>
         <div class="prBalance ${s.total_payable > 0 ? 'payable' : 'zero'}">
@@ -20110,7 +20198,12 @@ function renderOtItemsPage(){
     <div class="otItemRow" data-variant-id="${v.variant_id}" dir="rtl" style="display:flex; flex-direction:column; gap:7px; background:#fff; border:1.5px solid ${checked ? 'var(--primary)' : '#e5e9f0'}; border-radius:10px; padding:8px 9px; max-width:100%; overflow:hidden;">
       <!-- ---------- 🔤 صدام کی ہدایت (FM3SEPTH10): نام اپنی الگ، پوری چوڑائی کی لائن میں — نستعلیق میں، ویرینٹ سمیت مکمل نظر آئے
            (نام کے اندر ہی ویرینٹ شامل ہے، جیسے "ٹماٹر ٹوکری" / "ٹماٹر گٹو" / "ٹماٹر شاپر") ---------- -->
-      <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:700; width:100%; text-align:right; line-height:1.4; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
+      <div style="display:flex; align-items:center; width:100%;">
+        <!-- ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): یہاں سیریل نمبر صرف دکھانے کے لیے ہے، دبانے سے کچھ نہیں ہوتا
+             (یہاں سے ایڈٹ کرنے کی سہولت نہیں دینی — وہ صرف Products/Stock Adjustment میں ہے) ---------- -->
+        <span class="serialBadgeBtn" style="cursor:default;">${v.serial_no ?? '?'}</span>
+        <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:700; flex:1; text-align:right; line-height:1.4; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
+      </div>
       <!-- ---------- ✅ چیک باکس + ➖➕ — صدام کی ہدایت: + دائیں (سیدھے ہاتھ) پر، − بائیں پر ---------- -->
       <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
         <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:40px; height:40px; border:none; border-radius:9px; background:#dcfce7; color:#15803d; font-size:20px; font-weight:800; cursor:pointer; padding:0; flex:0 0 auto;">+</button>
@@ -25042,7 +25135,7 @@ function renderRrItemGrid(query){
     (p.variants || []).forEach(v => {
       const fullName = p.name + (v.label && v.label !== p.name ? ' ' + v.label : '');
       if(q && !fullName.toLowerCase().includes(q)) return;
-      rows.push({variant_id: v.variant_id, name: fullName});
+      rows.push({variant_id: v.variant_id, name: fullName, serial_no: p.serial_no});
     });
   });
   if(rows.length === 0){
@@ -25053,7 +25146,10 @@ function renderRrItemGrid(query){
     const qty = rrQtyMap[r.variant_id] || 0;
     return `
     <div style="background:#fff; border:1.5px solid ${qty > 0 ? 'var(--danger)' : '#e5e9f0'}; border-radius:12px; padding:10px; text-align:center;">
-      <div style="font-weight:800; font-size:13px; margin-bottom:8px; min-height:32px; display:flex; align-items:center; justify-content:center;">${r.name}</div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:5px; margin-bottom:8px; min-height:32px;">
+        <span class="serialBadgeBtn" style="cursor:default; margin:0;">${r.serial_no ?? '?'}</span>
+        <span style="font-weight:800; font-size:13px;">${r.name}</span>
+      </div>
       <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
         <button type="button" onclick="rrChangeQty(${r.variant_id}, -1)" style="width:32px; height:32px; border:none; border-radius:8px; background:#fee2e2; color:#b91c1c; font-size:17px; font-weight:800; cursor:pointer;">−</button>
         <span style="min-width:24px; font-weight:900; font-size:16px;" id="rrQtyDisplay-${r.variant_id}">${qty}</span>
@@ -26147,23 +26243,32 @@ function renderQuickContactPanel(){
   }
 }
 // ---------- ہر قسم کا اپنا رنگ — ڈویلپر (جامنی)، عملہ (نیلا)، کسٹمر (سبز) — ایک نظر میں پہچان ---------- -->
+// ---------- 🎨 صدام کی ہدایت (FM7SEPMO8): پرانے مدھم/چپٹے دائرے والے بٹن ختم — اب ہر بٹن اپنے اصل رنگ کا
+// ابھرا ہوا (3D گلوسی) بٹن ہے: 📞 کال = نیلا، 💬 واٹس ایپ = اصل واٹس ایپ سبز، 🔑 PIN = سنہری، ➕ = سفید ---------- -->
+function qc3dBtn(emoji, bgGrad, darkShade, attrs){
+  return `<a ${attrs} style="width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+    background:${bgGrad}; color:#fff; border-radius:50%; text-decoration:none; font-size:13px; flex:0 0 auto; border:none;
+    box-shadow:0 2.5px 0 ${darkShade}, 0 3px 5px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.5);
+    cursor:pointer;">${emoji}</a>`;
+}
 function quickContactRowHtml(kind, id, name, phone, bg, fg){
   const digits = phone ? formatPhoneForWhatsApp(phone) : '';
-  const iconBtn = (emoji, attrs) => `<a ${attrs} onclick="event.stopPropagation();${attrs.includes('onclick') ? '' : ''}" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border-radius:50%; text-decoration:none; font-size:12px; flex:0 0 auto;">${emoji}</a>`;
-  let extraBtn = '';
+  let extraBtns = '';
   if(digits){
-    extraBtn = `<a href="tel:+${digits}" onclick="event.stopPropagation();" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border-radius:50%; text-decoration:none; font-size:12px; flex:0 0 auto;">📞</a>`
+    extraBtns = qc3dBtn('📞', 'linear-gradient(155deg,#38bdf8,#0369a1)', '#0c4a6e', `href="tel:+${digits}" onclick="event.stopPropagation();"`)
+      // ---------- 💬 صدام کی ہدایت (FM7SEPMO8): پہلے یہاں ✉️ SMS تھا — عملی طور پر سب لوگ واٹس ایپ ہی استعمال
+      // کرتے ہیں، اس لیے اب یہ اصل واٹس ایپ بٹن ہے (سبز، wa.me پر جاتا ہے) ---------- -->
       + (kind === 'developer'
-        ? `<a href="#" onclick="event.stopPropagation(); sendDevChat('sms'); return false;" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border-radius:50%; text-decoration:none; font-size:11px; flex:0 0 auto;">✉️</a>`
-        : `<a href="sms:+${digits}" onclick="event.stopPropagation();" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border-radius:50%; text-decoration:none; font-size:11px; flex:0 0 auto;">✉️</a>`);
+        ? qc3dBtn('💬', 'linear-gradient(155deg,#4ade80,#16a34a)', '#166534', `href="#" onclick="event.stopPropagation(); sendDevChat('whatsapp'); return false;"`)
+        : qc3dBtn('💬', 'linear-gradient(155deg,#4ade80,#16a34a)', '#166534', `href="https://wa.me/${digits}" target="_blank" rel="noopener" onclick="event.stopPropagation();"`));
   } else if(kind === 'worker'){
-    extraBtn = `<button type="button" onclick="event.stopPropagation(); quickAddWorkerPhone(${id})" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border:none; border-radius:50%; font-size:14px; font-weight:800; cursor:pointer; flex:0 0 auto;">➕</button>`;
+    extraBtns = qc3dBtn('➕', 'linear-gradient(155deg,#f8fafc,#e2e8f0)', '#94a3b8', `onclick="event.stopPropagation(); quickAddWorkerPhone(${id})"`).replace('color:#fff', `color:${fg}`);
   }
-  const pinBtn = kind === 'worker' ? `<button type="button" onclick="event.stopPropagation(); quickShowWorkerPin(${id})" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.9); color:${fg}; border:none; border-radius:50%; font-size:12px; cursor:pointer; flex:0 0 auto;" title="PIN دیکھیں">🔑</button>` : '';
+  const pinBtn = kind === 'worker' ? qc3dBtn('🔑', 'linear-gradient(155deg,#fde047,#d97706)', '#92400e', `onclick="event.stopPropagation(); quickShowWorkerPin(${id})" title="PIN دیکھیں"`) : '';
   return `
-    <div style="display:flex; align-items:center; gap:5px; background:${bg}; color:#fff; border-radius:9px; padding:6px 8px; margin-bottom:5px;">
+    <div style="display:flex; align-items:center; gap:6px; background:${bg}; color:#fff; border-radius:9px; padding:7px 9px; margin-bottom:6px;">
       <div style="flex:1; min-width:0; font-weight:800; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">${name}</div>
-      ${pinBtn}${extraBtn}
+      ${pinBtn}${extraBtns}
     </div>`;
 }
 function quickShowWorkerPin(userId){
@@ -33529,6 +33634,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // declare ہوتے ہیں — اوپر top-level پر کال کرنے سے وہ ابھی initialize نہیں ہوئے ہوتے (ReferenceError آتا
   // ہے اور پوری اسکرپٹ رک جاتی ہے، جس سے لاگ ان اسکرین آگے نہیں بڑھتی) ----------
   try{ seedVegetableProductsOnce(); }catch(e){ console.error('seedVegetableProductsOnce failed', e); }
+  // ---------- 🧹 صدام کی ہدایت (FM7SEPMO7): ایک بار خودکار — پرانے تمام خودکار سیریل نمبر (سبزی/کسٹمر/سپلائر)
+  // صاف کر دیں، تاکہ صدام شروع سے اپنی مرضی کے نمبر خود الاٹ کر سکیں (خالی جگہ چھوڑ کر بعد میں پُر کرنے کے لیے بھی)۔
+  // اس کے بعد خودکار بھرنے کا نظام ہمیشہ کے لیے بند — نیا آئٹم شامل ہو تو "?" نظر آئے گا، جب تک خود نمبر نہ دیں ---------- -->
+  if(!loadFromStorage('serialWipeV1Done', false)){
+    try{
+      productsData.forEach(p => { delete p.serial_no; });
+      customersData.forEach(c => { delete c.serial_no; });
+      suppliersData.forEach(s => { delete s.serial_no; });
+      saveToStorage('serialManualMode', true);
+      saveProductsLight(); saveCustomersLight(); saveSuppliersLight();
+      pushProductsToCloud(); pushCustomersToCloud(); pushSuppliersToCloud();
+    }catch(e){ console.error('serial wipe failed', e); }
+    saveToStorage('serialWipeV1Done', true);
+  }
   // ---------- 🔢 صدام کی ہدایت (FM4SEPFR12): سبزیوں کو مستقل سیریل نمبر دیں — پہلی بار نام کی ترتیب سے،
   // اس کے بعد صرف نئے آئٹمز کو خالی نمبر بھریں، پرانے کبھی نہیں بدلتے ---------- -->
   try{ assignInitialProductSerials(); backfillMissingProductSerials(); saveProductsLight(); }catch(e){ console.error('product serial assignment failed', e); }
