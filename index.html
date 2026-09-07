@@ -398,6 +398,20 @@
     font-size:11.5px; font-weight:800; color:var(--text); text-align:center; line-height:1.2;
     text-shadow:0 1px 0 rgba(255,255,255,.7);
   }
+  /* ---------- 💾 صدام کی ہدایت (FM7SEPMO): ہوم پیج پر مقامی بیک اپ/ریسٹور بٹن — صاف، خوبصورت،
+       نیلا/سبز (مرون/نارنجی رنگ کی بجائے جو پسند نہیں تھا) ---------- */
+  .homeQuickBackupRow{display:flex; gap:8px; margin-bottom:10px;}
+  body.role-admin .homeQuickBackupRow.admin-only{display:flex;}
+  .homeQuickBackupBtn{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:11px 8px; border:none; border-radius:12px; cursor:pointer;
+    font-size:12.5px; font-weight:800; color:#fff;
+    background:linear-gradient(155deg, #0d9488, #0f766e);
+    box-shadow:0 3px 0 rgba(0,0,0,.15), 0 4px 8px rgba(0,0,0,.12);
+  }
+  .homeQuickBackupBtn.restore{background:linear-gradient(155deg, #2563eb, #1d4ed8);}
+  .homeQuickBackupBtn:active{transform:translateY(1px); box-shadow:0 1px 0 rgba(0,0,0,.15);}
+  .homeQuickBackupBtn .hqbIcon{font-size:16px;}
   .homeIconTile .hitBadge{
     position:absolute; top:6px; right:6px; background:var(--danger); color:#fff; border-radius:10px;
     font-size:9.5px; font-weight:800; padding:1px 6px; box-shadow:0 2px 5px rgba(185,28,28,.45);
@@ -2746,6 +2760,18 @@
            بلکہ ☎️ ہاٹ لائن بٹن (اوپر Topbar میں) دبانے پر ایک چھوٹا پاپ اپ پینل کھلتا ہے
            (دیکھیں #quickContactPopupPanel + toggleQuickContactPanel) — نیچے آئیکن گرڈ اب اوپر آ گیا ---------- -->
 
+      <!-- ---------- 💾 صدام کی ہدایت (FM7SEPMO): مقامی (Google کے بغیر) بیک اپ/ریسٹور — ہمیشہ ہوم پیج پر نظر
+           آئیں، گیئر ⚙️ کے اندر موجود Google Drive والے بٹن اپنی جگہ بالکل ویسے ہی رہیں گے، یہ الگ/اضافی ہیں ---------- -->
+      <div class="homeQuickBackupRow admin-only">
+        <button class="homeQuickBackupBtn" onclick="exportBackupData()">
+          <span class="hqbIcon">💾</span><span>بیک اپ (فون میں محفوظ)</span>
+        </button>
+        <button class="homeQuickBackupBtn restore" onclick="document.getElementById('localRestoreFileInput').click()">
+          <span class="hqbIcon">📥</span><span>ریسٹور (فائل سے)</span>
+        </button>
+      </div>
+      <input type="file" id="localRestoreFileInput" accept=".json,application/json" style="display:none;" onchange="importBackupData(event); this.value='';">
+
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — Admin کے لیے اب انہی کی منتخب کردہ Shortcut اسکرینیں،
            Salesman کے لیے اسے Assign کی گئی اسکرینیں ---------- -->
       <div class="homeIconGrid" id="homeIconGrid"></div>
@@ -3239,6 +3265,9 @@
       <button onclick="openLaborReport()" style="width:100%; margin-top:8px; background:linear-gradient(180deg, #f59e0b, #b45309); color:#fff; border:none; border-radius:12px; padding:13px; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">💪 آج کی مزدوری رپورٹ بنائیں</button>
       <!-- ---------- 🥬 صدام کی ہدایت (FM6SEPSU11): سبزیوں کی پرنٹ لسٹ — نام+پیکنگ اور خالی خانہ، آرڈر لکھنے کے لیے ---------- -->
       <button onclick="openVegListReport()" style="width:100%; margin-top:8px; background:linear-gradient(180deg, #16a34a, #14532d); color:#fff; border:none; border-radius:12px; padding:13px; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">🥬 سبزیوں کی پرنٹ لسٹ بنائیں</button>
+      <!-- ---------- 📇 صدام کی ہدایت (FM6SEPSU12): کسٹمر اور سپلائر کی پرنٹ لسٹ ---------- -->
+      <button onclick="openCustListReport()" style="width:100%; margin-top:8px; background:linear-gradient(180deg, #0369a1, #0c4a6e); color:#fff; border:none; border-radius:12px; padding:13px; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">👥 کسٹمر کی پرنٹ لسٹ بنائیں</button>
+      <button onclick="openSupListReport()" style="width:100%; margin-top:8px; background:linear-gradient(180deg, #b45309, #78350f); color:#fff; border:none; border-radius:12px; padding:13px; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">🚚 سپلائرز کی پرنٹ لسٹ بنائیں</button>
       <button id="stockAdjResetAllBtn" onclick="resetAllNegativeStockToZero()" style="display:none; width:100%; margin-top:14px; background:linear-gradient(180deg, var(--danger), #991b1b); color:#fff; border:none; border-radius:12px; padding:14px; font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">🔄 تمام منفی سٹاک صفر پر ری سیٹ کریں</button>
     </div>
 
@@ -3380,6 +3409,8 @@
             <!-- ---------- ملتے جلتے موجودہ ناموں کی فہرست — نام ڈپلیکیٹ ہو سکتا ہے، بس یاد دہانی کے لیے ---------- -->
             <div id="npPartyNameListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:82;"></div>
           </div>
+          <!-- ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): اپنی مرضی کا سیریل نمبر — جیسے سبزیوں میں دیا جاتا ہے ---------- -->
+          <input type="number" id="npPartySerial" placeholder="#" title="سیریل نمبر (اپنی مرضی سے)" style="flex:0 0 56px; width:56px; text-align:center;">
           <button type="button" onclick="pickContactForNewParty()" title="Pick from phone contacts" style="flex:0 0 auto; width:42px; height:42px; border:1.5px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:8px; font-size:17px; cursor:pointer; display:flex; align-items:center; justify-content:center;">📇</button>
         </div>
         <div style="position:relative;">
@@ -5917,7 +5948,51 @@
           <button class="saveBtn" style="background:#7c3aed;" onclick="openImageReviewModal(document.getElementById('vegListReportCanvas'), '🥬 سبزیوں کی لسٹ')">🔍 ریویو</button>
           <button class="saveBtn" style="background:#0f766e;" onclick="printVegListReport('a4')">🖨️ پرنٹ (A4)</button>
           <button class="saveBtn" style="background:#0369a1;" onclick="printVegListReport('thermal')">🖨️ پرنٹ (تھرمل)</button>
+          <button class="saveBtn" style="background:#334155;" onclick="saveVegListPdf()">💾 PDF محفوظ کریں</button>
           <button class="saveBtn" style="background:#25D366;" onclick="shareVegListReport()">💬 واٹس ایپ شیئر</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 👥 صدام کی ہدایت (FM6SEPSU12): کسٹمر کی پرنٹ لسٹ — نام/موبائل/بقایہ، ایک لائن کا سادہ نظام ---------- -->
+    <div class="modalOverlay" id="custListReportModal" style="z-index:960;" onclick="if(event.target===this) closeCustListReport()" dir="rtl">
+      <div class="modalBox" style="max-width:640px; width:94vw; text-align:center; max-height:90vh; overflow-y:auto;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <h3 style="margin:0; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">👥 کسٹمر کی پرنٹ لسٹ</h3>
+          <span onclick="closeCustListReport()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:center; margin-bottom:10px; flex-wrap:wrap;">
+          <button class="pscToggleBtn custListModeBtn" data-mode="present" onclick="setCustListMode('present')">🟢 حاضر کسٹمر</button>
+          <button class="pscToggleBtn custListModeBtn" data-mode="absent" onclick="setCustListMode('absent')">🔴 غیر حاضر کسٹمر</button>
+          <button class="pscToggleBtn custListModeBtn" data-mode="both" onclick="setCustListMode('both')">⚪ دونوں</button>
+        </div>
+        <canvas id="custListReportCanvas" style="width:100%; border-radius:10px; margin:6px 0; box-shadow:0 4px 14px rgba(0,0,0,.18); background:#fff;"></canvas>
+        <div class="modalBtns" style="flex-wrap:wrap;">
+          <button class="cancelBtn" onclick="closeCustListReport()">بند کریں</button>
+          <button class="saveBtn" style="background:#7c3aed;" onclick="openImageReviewModal(document.getElementById('custListReportCanvas'), '👥 کسٹمر لسٹ')">🔍 ریویو</button>
+          <button class="saveBtn" style="background:#0f766e;" onclick="printCustListReport('a4')">🖨️ پرنٹ (A4)</button>
+          <button class="saveBtn" style="background:#0369a1;" onclick="printCustListReport('thermal')">🖨️ پرنٹ (تھرمل)</button>
+          <button class="saveBtn" style="background:#334155;" onclick="saveCustListPdf()">💾 PDF محفوظ کریں</button>
+          <button class="saveBtn" style="background:#25D366;" onclick="shareCustListReport()">💬 واٹس ایپ شیئر</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 🚚 صدام کی ہدایت (FM6SEPSU12): سپلائرز کی پرنٹ لسٹ — نام/موبائل/بقایہ (جو ہم نے دینا ہے) ---------- -->
+    <div class="modalOverlay" id="supListReportModal" style="z-index:960;" onclick="if(event.target===this) closeSupListReport()" dir="rtl">
+      <div class="modalBox" style="max-width:640px; width:94vw; text-align:center; max-height:90vh; overflow-y:auto;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <h3 style="margin:0; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">🚚 سپلائرز کی پرنٹ لسٹ</h3>
+          <span onclick="closeSupListReport()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
+        </div>
+        <canvas id="supListReportCanvas" style="width:100%; border-radius:10px; margin:6px 0; box-shadow:0 4px 14px rgba(0,0,0,.18); background:#fff;"></canvas>
+        <div class="modalBtns" style="flex-wrap:wrap;">
+          <button class="cancelBtn" onclick="closeSupListReport()">بند کریں</button>
+          <button class="saveBtn" style="background:#7c3aed;" onclick="openImageReviewModal(document.getElementById('supListReportCanvas'), '🚚 سپلائرز لسٹ')">🔍 ریویو</button>
+          <button class="saveBtn" style="background:#0f766e;" onclick="printSupListReport('a4')">🖨️ پرنٹ (A4)</button>
+          <button class="saveBtn" style="background:#0369a1;" onclick="printSupListReport('thermal')">🖨️ پرنٹ (تھرمل)</button>
+          <button class="saveBtn" style="background:#334155;" onclick="saveSupListPdf()">💾 PDF محفوظ کریں</button>
+          <button class="saveBtn" style="background:#25D366;" onclick="shareSupListReport()">💬 واٹس ایپ شیئر</button>
         </div>
       </div>
     </div>
@@ -6970,6 +7045,7 @@ function proceedWithImport(){
       // ---------- 🔢 پرانی بیک اپ فائل میں سیریل نمبر نہ ہوں تو یہاں بھی دے دیں (نئی ترتیب سے) —
       // اگر بیک اپ میں پہلے سے موجود ہوں تو وہ ویسے ہی رہیں گے، دوبارہ نہیں بدلیں گے ---------- -->
       try{ assignInitialProductSerials(); backfillMissingProductSerials(); }catch(e){}
+      try{ backfillMissingCustomerSerials(); backfillMissingSupplierSerials(); }catch(e){}
       nextSupplierId = backup.nextSupplierId || nextSupplierId;
       nextUserId = backup.nextUserId || nextUserId;
       nextRequestId = backup.nextRequestId || nextRequestId;
@@ -7254,7 +7330,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر7ستمبر5:55am';
+const APP_BUILD_VERSION = 'پیر7ستمبر7:20am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15487,6 +15563,40 @@ const CUSTOMERS_SEED_DATA = [
 let customersData = loadFromStorage('customers', CUSTOMERS_SEED_DATA);
 let nextCustomerId = loadFromStorage('nextCustomerId', 4);
 
+// ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): کسٹمر اور سپلائر کی فہرست میں بھی وہی مرضی کا سیریل نمبر —
+// بالکل سبزیوں کی طرح۔ کسٹمر اور سپلائر کی نمبرنگ الگ الگ (آزاد) حوض ہیں — ایک کسٹمر کا #5 اور
+// ایک سپلائر کا #5 آپس میں نہیں ٹکراتے، ہر فہرست اپنی الگ گنتی رکھتی ہے ---------- -->
+function backfillMissingCustomerSerials(){
+  let maxSerial = customersData.reduce((m, c) => Math.max(m, c.serial_no || 0), 0);
+  customersData.forEach(c => { if(!c.serial_no){ maxSerial++; c.serial_no = maxSerial; } });
+}
+function backfillMissingSupplierSerials(){
+  let maxSerial = suppliersData.reduce((m, s) => Math.max(m, s.serial_no || 0), 0);
+  suppliersData.forEach(s => { if(!s.serial_no){ maxSerial++; s.serial_no = maxSerial; } });
+}
+function updatePartySerial(type, id, newValue){
+  const num = parseInt(newValue, 10);
+  const list = type === 'customers' ? customersData : suppliersData;
+  const idField = type === 'customers' ? 'customer_id' : 'supplier_id';
+  const p = list.find(x => x[idField] === id);
+  if(!p) return;
+  if(!newValue || isNaN(num) || num <= 0){
+    alert('براہ کرم ایک درست مثبت سیریل نمبر لکھیں۔');
+    renderPartyList(document.getElementById('partySearchInput')?.value || '');
+    return;
+  }
+  const dup = list.find(x => x[idField] !== id && x.serial_no === num);
+  if(dup){
+    alert(`⚠️ سیریل نمبر ${num} پہلے سے "${dup.name}" کو دیا ہوا ہے۔ براہ کرم کوئی اور نمبر منتخب کریں۔`);
+    renderPartyList(document.getElementById('partySearchInput')?.value || '');
+    return;
+  }
+  p.serial_no = num;
+  persistAllData();
+  if(type === 'customers') pushCustomersToCloud(); else pushSuppliersToCloud();
+  renderPartyList(document.getElementById('partySearchInput')?.value || '');
+}
+
 /* =====================================================================
    📝 ADVANCE ORDERS — رف ایڈوانس آرڈر (بل/اسٹاک کو فوری متاثر نہیں کرتے)
    {id, customerName, customerPhone, items:[{variant_id, name, qty, unitPrice, note}],
@@ -16880,9 +16990,9 @@ async function drawVegListA4(canvas, rows){
     for(let i = 0; i < rowsPerCol; i++){
       const rIdx = c * rowsPerCol + i;
       const rowTop = tableTop + headerRowH + i*rowH;
-      // خانوں کی لکیریں
+      // خانوں کی لکیریں — دائیں سے بائیں: سیریل، نام، پھر خالی خانہ (اردو کی فطری ترتیب)
       ctx.strokeStyle = '#cbd5e1';
-      ctx.strokeRect(colLeftX + 0.5, rowTop + 0.5, serialW - 1, rowH - 1); // سیریل — دائیں کنارہ
+      ctx.strokeRect(colLeftX + boxW + nameW + 0.5, rowTop + 0.5, serialW - 1, rowH - 1); // سیریل — دائیں کنارہ
       ctx.strokeRect(colLeftX + boxW + 0.5, rowTop + 0.5, nameW - 1, rowH - 1); // نام — درمیان
       ctx.strokeRect(colLeftX + 0.5, rowTop + 0.5, boxW - 1, rowH - 1); // خالی خانہ — بائیں کنارہ
       if(rIdx < rows.length){
@@ -16982,35 +17092,257 @@ function buildVegListPdf(){
 async function printVegListReport(mode){
   const rows = buildVegListRows();
   if(mode === 'thermal'){
-    // ---------- تھرمل: عارضی کینوس بنا کر سیدھا امیج پرنٹ (موبائل کے OS پرنٹ سسٹم سے) ---------- -->
+    // ---------- 🐛 صدام کی ہدایت (FM6SEPSU13): پہلے یہاں ایک نئی خالی ونڈو بنا کر پرنٹ کرتے تھے — اس میں
+    // ایپ کا اصل @page سائز/مارجن سرے سے شامل نہیں ہوتا تھا، اسی لیے مارجن غلط آ سکتے تھے۔ اب بالکل وہی
+    // آزمودہ طریقہ جو Bill پرنٹ میں استعمال ہوتا ہے: applyPrintPageSize صحیح 58mm/80mm سیٹ کرتا ہے،
+    // printReceiptArea میں تصویر ڈالی جاتی ہے، اور اصل OS پرنٹ ڈائیلاگ کھلتا ہے ---------- -->
     const tempCanvas = document.createElement('canvas');
     await drawVegListThermal(tempCanvas, rows);
-    const area = document.getElementById('printPreviewArea') || document.body;
-    const img = new Image();
-    img.src = tempCanvas.toDataURL('image/png');
-    img.style.width = '100%';
-    const printWin = window.open('', '_blank');
-    printWin.document.write(`<html><head><title>Print</title></head><body style="margin:0;"><img src="${img.src}" style="width:100%;" onload="window.print();"></body></html>`);
-    printWin.document.close();
+    applyPrintPageSize(AppState.settings.paperWidth || 80);
+    const area = document.getElementById('printReceiptArea');
+    enterPrintMode();
+    area.innerHTML = `<img src="${tempCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
   await renderVegListReportToCanvas(); // یقینی بنائیں کینوس تازہ ترین (A4) ڈیٹا کے ساتھ ہے
-  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-  if(isMobile){
+  if(!window.jspdf){
     const canvas = document.getElementById('vegListReportCanvas');
-    const printWin = window.open('', '_blank');
-    printWin.document.write(`<html><head><title>Print</title></head><body style="margin:0;"><img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="window.print();"></body></html>`);
-    printWin.document.close();
-  } else {
-    const pdf = buildVegListPdf();
-    window.open(pdf.output('bloburl'), '_blank');
+    applyPrintPageSize(210);
+    const area = document.getElementById('printReceiptArea');
+    enterPrintMode();
+    area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+    return;
   }
+  const pdf = buildVegListPdf();
+  window.open(pdf.output('bloburl'), '_blank');
 }
 function shareVegListReport(){
   const canvas = document.getElementById('vegListReportCanvas');
   if(!canvas) return;
   closeVegListReport();
   showImageSharePreview(canvas, 'Vegetable_List.png', '🥬 سبزیوں کی لسٹ', 'سبزیوں کی لسٹ');
+}
+// ---------- 💾 صدام کی ہدایت (FM6SEPSU13): براہ راست PDF فون میں محفوظ کریں (پرنٹ کیے بغیر) ---------- -->
+async function saveVegListPdf(){
+  await renderVegListReportToCanvas();
+  buildVegListPdf().save('Vegetable_List_' + new Date().toISOString().slice(0,10) + '.pdf');
+}
+
+/* =====================================================================
+   📇 صدام کی ہدایت (FM6SEPSU12): کسٹمر اور سپلائر کی پرنٹ لسٹ — ایک لائن کا سادہ نظام:
+   سیریل نمبر | نام (اوپر) + موبائل نمبر (نیچے، چھوٹا) | بقایہ رقم (نمایاں رنگ میں)۔
+   دونوں (کسٹمر/سپلائر) کے لیے ایک ہی مشترکہ ڈرائنگ فنکشن — صرف ڈیٹا اور رنگ الگ
+   ===================================================================== */
+async function drawPartyListCanvas(canvas, rows, opts){
+  const ctx = canvas.getContext('2d');
+  const fontFam = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif";
+  try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
+  const F = (px, boldFlag) => `${boldFlag ? 'bold ' : ''}${px}px ${fontFam}`;
+
+  const pxWidth = opts.pxWidth;
+  const margin = opts.margin;
+  const serialW = Math.round(pxWidth * 0.09);
+  const balanceW = Math.round(pxWidth * 0.24);
+  const nameW = pxWidth - margin*2 - serialW - balanceW;
+  const rowH = opts.rowH, headerRowH = opts.headerRowH;
+  const estHeight = 150 + headerRowH + rows.length*rowH + 50;
+
+  canvas.width = pxWidth; canvas.height = estHeight;
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, pxWidth, estHeight);
+
+  let y = opts.titleY;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#0f172a';
+  ctx.font = F(opts.fsTitle, true);
+  ctx.fillText(AppState.settings.businessName || 'صدام فروٹ منڈی', pxWidth/2, y); y += opts.titleGap;
+  ctx.font = F(opts.fsSub, true); ctx.fillStyle = '#334155';
+  ctx.fillText(`${opts.icon} ${opts.heading} — ${new Date().toLocaleDateString('en-GB')}`, pxWidth/2, y); y += opts.subGap;
+  drawSolidLine(ctx, y, pxWidth); y += 10;
+
+  const tableRight = pxWidth - margin, tableLeft = margin;
+  const tableTop = y;
+  ctx.fillStyle = '#eef2ff'; ctx.fillRect(tableLeft, tableTop, tableRight-tableLeft, headerRowH);
+  ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+  ctx.strokeRect(tableLeft+0.5, tableTop+0.5, tableRight-tableLeft-1, headerRowH-1);
+  ctx.fillStyle = '#0f172a'; ctx.font = F(opts.fsHeader, true); ctx.textAlign = 'center';
+  ctx.fillText('#', tableRight - serialW/2, tableTop + headerRowH/2 + 4);
+  ctx.fillText(opts.nameColLabel, tableRight - serialW - nameW/2, tableTop + headerRowH/2 + 4);
+  ctx.fillText('بقایہ', tableLeft + balanceW/2, tableTop + headerRowH/2 + 4);
+
+  rows.forEach((r, i) => {
+    const rowTop = tableTop + headerRowH + i*rowH;
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.strokeRect(tableRight - serialW + 0.5, rowTop + 0.5, serialW - 1, rowH - 1);
+    ctx.strokeRect(tableLeft + balanceW + 0.5, rowTop + 0.5, nameW - 1, rowH - 1);
+    ctx.strokeRect(tableLeft + 0.5, rowTop + 0.5, balanceW - 1, rowH - 1);
+
+    ctx.fillStyle = '#0f172a'; ctx.font = F(opts.fsRow, true); ctx.textAlign = 'center';
+    ctx.fillText(String(r.serial ?? (i+1)), tableRight - serialW/2, rowTop + rowH/2 + 4);
+
+    // نام (اوپر، بولڈ) + موبائل نمبر (نیچے، چھوٹا) — ایک ہی خانے میں دو لائنیں
+    ctx.textAlign = 'right'; ctx.fillStyle = '#0f172a'; ctx.font = F(opts.fsRow, true);
+    let nameText = r.name;
+    while(ctx.measureText(nameText).width > nameW - 10 && nameText.length > 2){ nameText = nameText.slice(0, -1); }
+    ctx.fillText(nameText, tableRight - serialW - 6, rowTop + rowH/2 - (r.phone ? 8 : -4));
+    if(r.phone){
+      ctx.font = F(opts.fsRow - 3, false); ctx.fillStyle = '#64748b'; ctx.direction = 'ltr';
+      ctx.fillText(r.phone, tableRight - serialW - 6, rowTop + rowH/2 + 12);
+      ctx.direction = 'rtl';
+    }
+
+    // بقایہ رقم — نمایاں رنگ (صرف سکرین/واٹس ایپ کے لیے)، تھرمل پرنٹ پر خالص کالا (thermal printers رنگ صحیح نہیں چھاپتے)
+    ctx.textAlign = 'center'; ctx.font = F(opts.fsRow, true);
+    ctx.fillStyle = opts.mono ? '#000000' : (r.balance > 0 ? opts.balanceColor : '#94a3b8');
+    ctx.fillText(r.balance > 0 ? ('Rs.' + r.balance.toLocaleString()) : '—', tableLeft + balanceW/2, rowTop + rowH/2 + 4);
+  });
+  y = tableTop + headerRowH + rows.length*rowH + 22;
+  ctx.textAlign = 'center'; ctx.font = F(11, false); ctx.fillStyle = '#64748b';
+  ctx.fillText(`کل ${rows.length} — رپورٹ تیار کردہ ${new Date().toLocaleString('en-GB')}`, pxWidth/2, y); y += 16;
+
+  if(Math.abs(y - canvas.height) > 4){
+    const finalH = Math.round(y + 10);
+    const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
+    canvas.height = finalH; ctx.putImageData(imgData, 0, 0);
+  }
+}
+function a4Opts(icon, heading, nameColLabel, balanceColor){
+  return { pxWidth:850, margin:30, rowH:46, headerRowH:34, titleY:36, fsTitle:22, titleGap:28, fsSub:13, subGap:26, fsHeader:12, fsRow:13, icon, heading, nameColLabel, balanceColor };
+}
+function thermalOpts(icon, heading, nameColLabel, balanceColor){
+  const paperWidthMM = AppState.settings.paperWidth || 80;
+  const pxWidth = paperWidthMM === 80 ? 576 : 384;
+  // ---------- 🖨️ صدام کی ہدایت (FM6SEPSU13): تھرمل پرنٹر بلٹن طور پر بلیک اینڈ وائٹ ہوتے ہیں — رنگین متن
+  // ہمیشہ خالص کالے میں پرنٹ ہو، رنگ صرف سکرین ریویو اور واٹس ایپ شیئر کے لیے محفوظ رہے ---------- -->
+  return { pxWidth, margin:14, rowH:44, headerRowH:28, titleY:26, fsTitle:18, titleGap:22, fsSub:11, subGap:20, fsHeader:11, fsRow:12, icon, heading, nameColLabel, balanceColor, mono:true };
+}
+
+function buildPartyListPdf(canvas){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = 210, pageH = 297, marginMM = 10;
+  const availW = pageW - marginMM*2, availH = pageH - marginMM*2;
+  let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
+  if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', marginMM + (availW-drawW)/2, marginMM, drawW, drawH);
+  return pdf;
+}
+// ---------- 💾 صدام کی ہدایت (FM6SEPSU13): براہ راست PDF فون میں محفوظ کریں ---------- -->
+async function saveCustListPdf(){
+  await renderCustListReportToCanvas();
+  buildPartyListPdf(document.getElementById('custListReportCanvas')).save('Customer_List_' + new Date().toISOString().slice(0,10) + '.pdf');
+}
+async function saveSupListPdf(){
+  await renderSupListReportToCanvas();
+  buildPartyListPdf(document.getElementById('supListReportCanvas')).save('Supplier_List_' + new Date().toISOString().slice(0,10) + '.pdf');
+}
+
+// ---------- 👥 کسٹمر لسٹ ---------- -->
+let custListMode = 'present';
+function setCustListMode(mode){
+  custListMode = mode;
+  document.querySelectorAll('.custListModeBtn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  renderCustListReportToCanvas();
+}
+function buildCustListRows(){
+  return customersData
+    .filter(c => custListMode === 'both' ? true : (!!c.isDormant === (custListMode === 'absent')))
+    .sort((a,b) => (a.serial_no||a.customer_id||0) - (b.serial_no||b.customer_id||0))
+    .map(c => ({ serial: c.serial_no || c.customer_id, name: c.name, phone: c.phone || '', balance: c.total_receivable || 0 }));
+}
+async function openCustListReport(){
+  document.querySelectorAll('.custListModeBtn').forEach(b => b.classList.toggle('active', b.dataset.mode === custListMode));
+  document.getElementById('custListReportModal')?.classList.add('show');
+  await new Promise(r => setTimeout(r, 30));
+  await renderCustListReportToCanvas();
+}
+function closeCustListReport(){ document.getElementById('custListReportModal')?.classList.remove('show'); }
+async function renderCustListReportToCanvas(){
+  const canvas = document.getElementById('custListReportCanvas');
+  if(!canvas) return;
+  const modeLabel = custListMode === 'present' ? '🟢 حاضر کسٹمر' : (custListMode === 'absent' ? '🔴 غیر حاضر کسٹمر' : '⚪ حاضر + غیر حاضر (دونوں)');
+  await drawPartyListCanvas(canvas, buildCustListRows(), a4Opts('👥', 'کسٹمر لسٹ — ' + modeLabel, 'نام / موبائل', '#b91c1c'));
+}
+async function printCustListReport(mode){
+  const rows = buildCustListRows();
+  const modeLabel = custListMode === 'present' ? '🟢 حاضر کسٹمر' : (custListMode === 'absent' ? '🔴 غیر حاضر کسٹمر' : '⚪ حاضر + غیر حاضر (دونوں)');
+  if(mode === 'thermal'){
+    const tempCanvas = document.createElement('canvas');
+    await drawPartyListCanvas(tempCanvas, rows, thermalOpts('👥', 'کسٹمر لسٹ — ' + modeLabel, 'نام/موبائل', '#b91c1c'));
+    applyPrintPageSize(AppState.settings.paperWidth || 80);
+    const area = document.getElementById('printReceiptArea');
+    enterPrintMode();
+    area.innerHTML = `<img src="${tempCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+    return;
+  }
+  await renderCustListReportToCanvas();
+  if(!window.jspdf){
+    const canvas = document.getElementById('custListReportCanvas');
+    applyPrintPageSize(210);
+    const area = document.getElementById('printReceiptArea');
+    enterPrintMode();
+    area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+    return;
+  }
+  const pdf = buildPartyListPdf(document.getElementById('custListReportCanvas'));
+  window.open(pdf.output('bloburl'), '_blank');
+}
+function shareCustListReport(){
+  const canvas = document.getElementById('custListReportCanvas');
+  if(!canvas) return;
+  closeCustListReport();
+  showImageSharePreview(canvas, 'Customer_List.png', '👥 کسٹمر لسٹ', 'کسٹمر لسٹ');
+}
+
+// ---------- 🚚 سپلائر لسٹ — کوئی حاضر/غیر حاضر تصور نہیں، سب سپلائرز ---------- -->
+function buildSupplierListRows(){
+  return suppliersData
+    .sort((a,b) => (a.serial_no||a.supplier_id||0) - (b.serial_no||b.supplier_id||0))
+    .map(s => ({ serial: s.serial_no || s.supplier_id, name: s.name, phone: s.phone || '', balance: s.total_payable || 0 }));
+}
+async function openSupListReport(){
+  document.getElementById('supListReportModal')?.classList.add('show');
+  await new Promise(r => setTimeout(r, 30));
+  await renderSupListReportToCanvas();
+}
+function closeSupListReport(){ document.getElementById('supListReportModal')?.classList.remove('show'); }
+async function renderSupListReportToCanvas(){
+  const canvas = document.getElementById('supListReportCanvas');
+  if(!canvas) return;
+  await drawPartyListCanvas(canvas, buildSupplierListRows(), a4Opts('🚚', 'سپلائرز کی لسٹ', 'نام / موبائل', '#b45309'));
+}
+async function printSupListReport(mode){
+  const rows = buildSupplierListRows();
+  if(mode === 'thermal'){
+    const tempCanvas = document.createElement('canvas');
+    await drawPartyListCanvas(tempCanvas, rows, thermalOpts('🚚', 'سپلائرز کی لسٹ', 'نام/موبائل', '#b45309'));
+    applyPrintPageSize(AppState.settings.paperWidth || 80);
+    const area = document.getElementById('printReceiptArea');
+    enterPrintMode();
+    area.innerHTML = `<img src="${tempCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+    return;
+  }
+  await renderSupListReportToCanvas();
+  if(!window.jspdf){
+    const canvas = document.getElementById('supListReportCanvas');
+    applyPrintPageSize(210);
+    const area = document.getElementById('printReceiptArea');
+    enterPrintMode();
+    area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+    return;
+  }
+  const pdf = buildPartyListPdf(document.getElementById('supListReportCanvas'));
+  window.open(pdf.output('bloburl'), '_blank');
+}
+function shareSupListReport(){
+  const canvas = document.getElementById('supListReportCanvas');
+  if(!canvas) return;
+  closeSupListReport();
+  showImageSharePreview(canvas, 'Supplier_List.png', '🚚 سپلائرز کی لسٹ', 'سپلائرز کی لسٹ');
 }
 
 /* =====================================================================
@@ -17383,7 +17715,7 @@ function applyCustomerCategorization(list){
   if(f.sort === 'highest') out.sort((a,b) => (b.total_receivable||0) - (a.total_receivable||0));
   else if(f.sort === 'lowest') out.sort((a,b) => (a.total_receivable||0) - (b.total_receivable||0));
   // ---------- 🔢 صدام کی ہدایت (FM4SEPFR14): سیریل نمبر کے مطابق ترتیب — بالکل 1،2،3،4... کی طرح ---------- -->
-  else if(f.sort === 'serial') out.sort((a,b) => (a.customer_id||0) - (b.customer_id||0));
+  else if(f.sort === 'serial') out.sort((a,b) => (a.serial_no||a.customer_id||0) - (b.serial_no||b.customer_id||0));
   else out.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ur'));
   return out;
 }
@@ -17444,7 +17776,7 @@ function renderPartyList(query = ''){
         </label>
         <div class="prAvatar">${c.photo ? `<img src="${c.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '👤'}</div>
         <div class="prMain" onclick="openCustomerProfile(${c.customer_id})">
-          <div class="prName"><span style="display:inline-block; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border-radius:6px; padding:1px 6px; margin-inline-end:5px; direction:ltr;">#${c.customer_id}</span>${c.name}
+          <div class="prName"><input type="number" class="pSerialEdit" value="${c.serial_no ?? ''}" onclick="event.stopPropagation();" onfocus="this.select()" onchange="updatePartySerial('customers', ${c.customer_id}, this.value)" style="width:38px; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border:none; border-radius:6px; padding:1px 3px; margin-inline-end:5px; direction:ltr; text-align:center;">${c.name}
             ${c.rateArea ? `<span style="font-size:9.5px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px; margin-inline-start:3px;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}
             ${customerBoughtToday(c.customer_id) ? `<span style="font-size:9.5px; font-weight:700; color:#15803d; background:#dcfce7; border-radius:6px; padding:1px 5px; margin-inline-start:3px;">🔥 آج</span>` : ''}
             ${c.keywords ? ` <span style="font-size:10px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 6px;">${c.keywords}</span>` : ''}
@@ -17465,11 +17797,13 @@ function renderPartyList(query = ''){
     // ---------- 🔎 صدام کی ہدایت (FM3SEPTH23): کم/زیادہ بقایہ کی ترتیب ----------
     if(supplierSortMode === 'highest') filtered.sort((a,b) => (b.total_payable||0) - (a.total_payable||0));
     else if(supplierSortMode === 'lowest') filtered.sort((a,b) => (a.total_payable||0) - (b.total_payable||0));
+    // ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): سپلائر کی اپنی مرضی کی ترتیب بھی — بالکل کسٹمر جیسی ---------- -->
+    else if(supplierSortMode === 'serial') filtered.sort((a,b) => (a.serial_no||a.supplier_id||0) - (b.serial_no||b.supplier_id||0));
     else filtered.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ur'));
 
     // ---------- فلٹر بار — دائیں سے بائیں (RTL) ---------- -->
     const sortBtn = (val, label) => `<button onclick="setSupplierSortMode('${val}')" style="flex:1; padding:8px 4px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer; background:${supplierSortMode===val?'var(--primary)':'#f1f5f9'}; color:${supplierSortMode===val?'#fff':'var(--text)'};">${label}</button>`;
-    const filterBarHtml = `<div dir="rtl" style="display:flex; gap:6px; margin-bottom:12px;">${sortBtn('name','🔤 نام')}${sortBtn('highest','📈 زیادہ بقایہ پہلے')}${sortBtn('lowest','📉 کم بقایہ پہلے')}</div>`;
+    const filterBarHtml = `<div dir="rtl" style="display:flex; gap:6px; margin-bottom:12px;">${sortBtn('name','🔤 نام')}${sortBtn('serial','🔢 سیریل')}${sortBtn('highest','📈 زیادہ بقایہ پہلے')}${sortBtn('lowest','📉 کم بقایہ پہلے')}</div>`;
 
     if(filtered.length === 0){
       wrap.innerHTML = filterBarHtml + `<div class="placeholder">کوئی سپلائر نہیں ملا</div>`;
@@ -17479,7 +17813,7 @@ function renderPartyList(query = ''){
       <div class="partyRow" dir="rtl">
         <div class="prAvatar">${s.photo ? `<img src="${s.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🏭'}</div>
         <div class="prMain" onclick="openSupplierProfile(${s.supplier_id})">
-          <div class="prName">${s.name}${s.keywords ? ` <span style="font-size:10px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 6px;">${s.keywords}</span>` : ''}</div>
+          <div class="prName"><input type="number" class="pSerialEdit" value="${s.serial_no ?? ''}" onclick="event.stopPropagation();" onfocus="this.select()" onchange="updatePartySerial('suppliers', ${s.supplier_id}, this.value)" style="width:38px; font-size:10.5px; font-weight:800; color:#fff; background:var(--primary-dark); border:none; border-radius:6px; padding:1px 3px; margin-inline-end:5px; direction:ltr; text-align:center;">${s.name}${s.keywords ? ` <span style="font-size:10px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 6px;">${s.keywords}</span>` : ''}</div>
           <div class="prPhone">${s.phone || 'نمبر درج نہیں'}</div>
         </div>
         <div class="prBalance ${s.total_payable > 0 ? 'payable' : 'zero'}">
@@ -22849,7 +23183,7 @@ let editingPartyId = null;   // null = نیا پارٹی، ورنہ اسی ID و
 let npPhotoDataUrl = null;   // ابھی منتخب کی گئی تصویر (Save پر محفوظ ہوگی)
 
 function resetNewPartyForm(){
-  ['npPartyName','npPartyPhone','npPartyAddress','npPartyArea','npPartyKeywords','npPartyRateArea','npOpeningBalance'].forEach(id => document.getElementById(id).value = '');
+  ['npPartyName','npPartyPhone','npPartyAddress','npPartyArea','npPartyKeywords','npPartyRateArea','npOpeningBalance','npPartySerial'].forEach(id => document.getElementById(id).value = '');
   npPhotoDataUrl = null;
   renderAvatarInto('npPhotoPreview', null, '👤');
   closePartyFormDropdowns();
@@ -22863,6 +23197,11 @@ function openNewPartyModal(){
   resetNewPartyForm();
   const isCustomer = currentPartyTab === 'customers';
   document.getElementById('newPartyTitle').textContent = isCustomer ? '🧑‍🤝‍🧑 New Customer' : '🚚 New Supplier';
+  // ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): نئے کسٹمر/سپلائر کو تجویزاً اگلا خالی سیریل نمبر دکھا دیں،
+  // چاہیں تو بدل سکتے ہیں ---------- -->
+  const poolForSuggest = isCustomer ? customersData : suppliersData;
+  const maxSerial = poolForSuggest.reduce((m, x) => Math.max(m, x.serial_no || 0), 0);
+  document.getElementById('npPartySerial').value = maxSerial + 1;
   // ---------- 💼 Opening Balance اب دونوں (کسٹمر/سپلائر) کے لیے — صدام کی ہدایت (FM3SEPTH10)، بس لیبل بدل جاتا ہے ----------
   const obLabel = document.getElementById('npOpeningBalanceLabel');
   if(obLabel) obLabel.textContent = isCustomer ? '💼 Opening Balance — سابقہ بقایہ جو کسٹمر پر ہے (Rs.)' : '💼 Opening Balance — سابقہ بقایہ جو ہم نے سپلائر کو دینا ہے (Rs.)';
@@ -22889,6 +23228,7 @@ function openEditPartyModal(){
   document.getElementById('npPartyKeywords').value = p.keywords || '';
   document.getElementById('npPartyRateArea').value = p.rateArea || '';
   document.getElementById('npOpeningBalance').value = p.openingBalance || '';
+  document.getElementById('npPartySerial').value = p.serial_no || '';
   // ---------- 💼 Opening Balance اب دونوں (کسٹمر/سپلائر) کے لیے — صدام کی ہدایت (FM3SEPTH10)، بس لیبل بدل جاتا ہے ----------
   const obLabel = document.getElementById('npOpeningBalanceLabel');
   if(obLabel) obLabel.textContent = isCustomer ? '💼 Opening Balance — سابقہ بقایہ جو کسٹمر پر ہے (Rs.)' : '💼 Opening Balance — سابقہ بقایہ جو ہم نے سپلائر کو دینا ہے (Rs.)';
@@ -23028,6 +23368,21 @@ function saveNewParty(){
   // ---------- 💼 سابقہ بقایہ — اب کسٹمر اور سپلائر دونوں ٹیب پر (صدام کی ہدایت FM3SEPTH10) ----------
   const openingBalanceInput = document.getElementById('npOpeningBalance').value;
   const openingBalance = openingBalanceInput === '' ? 0 : (parseFloat(openingBalanceInput) || 0);
+  // ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): اپنی مرضی کا سیریل نمبر — ڈپلیکیٹ ہو تو محفوظ نہ ہو ---------- -->
+  const serialInput = document.getElementById('npPartySerial').value;
+  const serialNum = serialInput === '' ? null : parseInt(serialInput, 10);
+  if(serialInput !== '' && (isNaN(serialNum) || serialNum <= 0)){
+    alert('براہ کرم ایک درست مثبت سیریل نمبر لکھیں۔');
+    return;
+  }
+  if(serialNum !== null){
+    const {list: serialPool, idField: serialIdField} = getActivePartyPool();
+    const dupSerial = serialPool.find(p => (editingPartyId === null || p[serialIdField] !== editingPartyId) && p.serial_no === serialNum);
+    if(dupSerial){
+      alert(`⚠️ سیریل نمبر ${serialNum} پہلے سے "${dupSerial.name}" کو دیا ہوا ہے۔ براہ کرم کوئی اور نمبر منتخب کریں۔`);
+      return;
+    }
+  }
 
   if(!name){
     alert('Please enter a name.');
@@ -23052,6 +23407,7 @@ function saveNewParty(){
         const oldOpening = c.openingBalance || 0;
         const diff = openingBalance - oldOpening;
         c.name = name; c.phone = phone; c.address = address; c.area = area; c.keywords = keywords; c.rateArea = rateArea;
+        if(serialNum !== null) c.serial_no = serialNum;
         c.openingBalance = openingBalance;
         c.total_receivable = (c.total_receivable || 0) + diff;
         if(npPhotoDataUrl !== null) c.photo = npPhotoDataUrl; // ✅ Firestore Sync (قدم 1) — saveNewParty کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں
@@ -23063,6 +23419,7 @@ function saveNewParty(){
         const oldOpening = s.openingBalance || 0;
         const diff = openingBalance - oldOpening;
         s.name = name; s.phone = phone; s.address = address; s.area = area; s.keywords = keywords;
+        if(serialNum !== null) s.serial_no = serialNum;
         s.openingBalance = openingBalance;
         s.total_payable = (s.total_payable || 0) + diff;
         if(npPhotoDataUrl !== null) s.photo = npPhotoDataUrl; // ✅ Firestore Sync (قدم 2) — saveNewParty کے آخر میں pushSuppliersToCloud() سے کلاؤڈ میں
@@ -23070,10 +23427,12 @@ function saveNewParty(){
     }
   } else if(currentPartyTab === 'customers'){
     // ✅ Firestore Sync (قدم 1) — saveNewParty کے آخر میں pushCustomersToCloud() سے کلاؤڈ میں
-    customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, rateArea, photo: npPhotoDataUrl, wallet_balance:0, openingBalance, total_receivable: openingBalance, createdAt: new Date().toISOString(), walletHistory:[]});
+    customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, rateArea, photo: npPhotoDataUrl, wallet_balance:0, openingBalance, total_receivable: openingBalance, createdAt: new Date().toISOString(), walletHistory:[], serial_no: serialNum});
+    backfillMissingCustomerSerials();
   } else {
     // ✅ Firestore Sync (قدم 2) — saveNewParty کے آخر میں pushSuppliersToCloud() سے کلاؤڈ میں
-    suppliersData.push({supplier_id: nextSupplierId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, openingBalance, total_payable: openingBalance, createdAt: new Date().toISOString()});
+    suppliersData.push({supplier_id: nextSupplierId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, openingBalance, total_payable: openingBalance, createdAt: new Date().toISOString(), serial_no: serialNum});
+    backfillMissingSupplierSerials();
   }
 
   persistAllData();
@@ -32685,6 +33044,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------- 🔢 صدام کی ہدایت (FM4SEPFR12): سبزیوں کو مستقل سیریل نمبر دیں — پہلی بار نام کی ترتیب سے،
   // اس کے بعد صرف نئے آئٹمز کو خالی نمبر بھریں، پرانے کبھی نہیں بدلتے ---------- -->
   try{ assignInitialProductSerials(); backfillMissingProductSerials(); saveProductsLight(); }catch(e){ console.error('product serial assignment failed', e); }
+  // ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): کسٹمر/سپلائر کو بھی مستقل سیریل نمبر — نئے آئٹمز کو خالی نمبر ملتا ہے ---------- -->
+  try{ backfillMissingCustomerSerials(); backfillMissingSupplierSerials(); }catch(e){ console.error('party serial assignment failed', e); }
   // ---------- 💼 صدام کے پرانے کاغذی رجسٹر سے 166 کسٹمرز کا سابقہ بقایہ ایک بار خودکار شامل کریں (FM3SEPTH10) ----------
   try{ seedInitialLedgerCustomersOnce(); }catch(e){ console.error('seedInitialLedgerCustomersOnce failed', e); }
   // ---------- 💼 صدام کے پرانے کاغذی رجسٹر سے 14 سپلائرز کا سابقہ بقایہ ایک بار خودکار شامل کریں (FM3SEPTH10) ----------
