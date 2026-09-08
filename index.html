@@ -49,6 +49,24 @@
     src:url('./JameelNooriNastaleeq-Kasheeda.ttf') format('truetype');
     font-weight:400; font-style:normal; font-display:swap;
   }
+  /* ---------- 🆕 صدام کی ہدایت (FM8SEPTU4): 3 نئے فونٹ شامل کیے — یہ فائلیں index.html کا حصہ نہیں،
+       الگ "fonts" فولڈر میں رکھی گئی ہیں (index.html/sw.js کے ساتھ اسی سطح پر، fonts/ نامی فولڈر بنا کر
+       اپلوڈ کریں) ---------- */
+  @font-face{
+    font-family:'PTSimpleBoldRuled';
+    src:url('./fonts/PTSimpleBoldRuled.ttf') format('truetype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'ThuluthAlsmt';
+    src:url('./fonts/ThuluthAlsmt.ttf') format('truetype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'JameelKhushkhati';
+    src:url('./fonts/JameelKhushkhati.ttf') format('truetype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
   /* ---------- 🐛 صدام کی ہدایت (FM6SEPSU4): PDMSMultan والا @font-face یہاں سے ہٹا دیا گیا —
        یہ فونٹ فائل (PDMS_Multan_Regular.ttf) اصل میں GitHub ریپو میں کبھی موجود ہی نہیں تھی، اس لیے
        ہر بار پیج کھلتے ہی ایک ناکام (404) نیٹ ورک درخواست جاتی تھی — سست انٹرنیٹ پر یہ قیمتی وقت اور
@@ -421,16 +439,18 @@
   /* ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): سیریل نمبر کا پرانا "گندا کالا ڈبہ" مکمل ختم — اب صاف، خوبصورت
        بیج (badge)، موٹے Arial Black ہندسے، دبانے پر فہرست کھلتی ہے (ٹائپ کرنے کی ضرورت نہیں) ---------- -->
   .serialBadgeBtn{
-    /* ---------- 🔢 صدام کی ہدایت (FM7SEPMO16): پہلے اتنا چھوٹا کر دیا تھا کہ دو ہندسے (جیسے "16") ٹھیک سے
-         نہیں سما رہے تھے — اب مناسب چوڑائی، تاکہ 99 تک کوئی بھی نمبر صاف، بغیر کٹے نظر آئے ---------- */
-    align-self:flex-start !important; width:auto !important; max-width:64px !important;
-    flex:0 0 auto !important; min-width:50px !important; padding:6px 10px !important; border-radius:50px !important;
-    background:linear-gradient(155deg, #fef3c7, #fde68a) !important; border:2px solid #d97706 !important; color:#78350f !important;
-    font-family:'Arial Black', Arial, sans-serif !important; font-weight:900 !important; font-size:19px !important;
-    cursor:pointer; margin-inline-end:6px; margin-bottom:4px; text-align:center !important; box-shadow:0 1px 3px rgba(0,0,0,.2);
-    display:inline-block !important;
+    /* ---------- 🔵 صدام کی ہدایت (FM8SEPTU3): اب بالکل گول دائرہ (چوڑائی=اونچائی)، ابھرا ہوا (embossed) لُک،
+         موٹے ہندسے آرام سے سمائیں — کبھی نہ کٹیں، دائرے کے اندر ہلکی سی خالی جگہ بھی رہے ---------- */
+    align-self:flex-start !important; width:42px !important; height:42px !important; max-width:none !important;
+    flex:0 0 auto !important; min-width:42px !important; min-height:42px !important; padding:0 !important; border-radius:50% !important;
+    background:radial-gradient(circle at 35% 30%, #fde68a, #f5b400 65%, #d97706) !important; border:2px solid #92400e !important; color:#5a2d0c !important;
+    font-family:'Arial Black', Arial, sans-serif !important; font-weight:900 !important; font-size:16px !important;
+    cursor:pointer; margin-inline-end:6px; margin-bottom:4px;
+    display:flex !important; align-items:center !important; justify-content:center !important; text-align:center !important;
+    box-shadow:0 3px 0 #78350f, 0 4px 6px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.6) !important;
+    line-height:1 !important;
   }
-  .serialBadgeBtn:active{transform:scale(.95);}
+  .serialBadgeBtn:active{transform:translateY(1px); box-shadow:0 1px 0 #78350f, 0 2px 3px rgba(0,0,0,.3), inset 0 1px 1px rgba(255,255,255,.6) !important;}
   .serialPickRow{
     display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; margin-bottom:5px;
     background:#f8fafc; border:1.5px solid #e2e8f0; cursor:pointer;
@@ -1330,9 +1350,9 @@
   .custTriggerBox{flex:1 1 auto; display:flex; align-items:center; justify-content:space-between; gap:6px; padding:8px 10px; border:1px solid #dbe1ea; border-radius:8px; background:#fff; font-size:12.5px; color:var(--text); cursor:pointer; min-width:0;}
   .custTriggerBox .custTriggerText{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .custTriggerBox .custTriggerChevron{flex:0 0 auto; color:var(--muted); font-size:11px;}
-  .custPickList{display:none; max-height:168px; overflow-y:auto; border:1px solid #dbe1ea; border-radius:8px; background:#fff; margin-top:2px;}
+  .custPickList{display:none; max-height:168px; overflow-y:auto; border:1px solid #dbe1ea; border-radius:8px; background:#fff; margin-top:2px; direction:rtl;}
   .custPickList.open{display:block;}
-  .custPickRow{display:flex; align-items:center; gap:6px; padding:7px 10px; cursor:pointer; border-bottom:1px solid #f1f4f8; font-size:12px; font-weight:400; color:var(--text);}
+  .custPickRow{display:flex; align-items:center; gap:6px; padding:7px 10px; cursor:pointer; border-bottom:1px solid #f1f4f8; font-size:12px; font-weight:400; color:var(--text); direction:rtl;}
   .custPickRow:last-child{border-bottom:none;}
   .custPickRow:active{background:#f7f9fc;}
   .custPickRow.selected{background:#eef2ff;}
@@ -2847,7 +2867,10 @@
           <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR30): پہلے یہاں دو بڑے بٹن (اسلام آباد/راولپنڈی) بہت جگہ گھیرتے تھے —
                اب ایک چھوٹا سا ڈراپ ڈاؤن، جس میں تیسرا آپشن "🌿 مضافات" بھی شامل (فی الحال راولپنڈی ریٹ پر ہی —
                اگر مضافات کی الگ قیمت چاہیے تو بتائیں، الگ ریٹ فیلڈ بعد میں شامل کی جا سکتی ہے) ---------- -->
-          <select id="modeAreaSelect" class="billModeSelect" onchange="setSaleMode(this.value)" style="flex:1 1 auto; min-width:0;">
+          <!-- ---------- 🐛 صدام کی ہدایت (FM8SEPTU2): یہ ریٹ منتخب کرنے والا ڈراپ ڈاؤن اب یہاں (مین بلنگ صفحہ)
+               پر نظر نہیں آنا چاہیے — یہ انتخاب صرف بل بننے کے بعد، بل والے صفحے پر (وہاں پہلے سے موجود
+               🔴🟢 بٹنوں سے) ہونا چاہیے۔ فنکشن/ڈیفالٹ ریٹ ویسے ہی کام کرتا رہے گا، بس یہ ڈراپ ڈاؤن یہاں چھپا دیا ---------- -->
+          <select id="modeAreaSelect" class="billModeSelect" onchange="setSaleMode(this.value)" style="display:none;">
             <option value="retail">🔴 اسلام آباد ریٹ</option>
             <option value="wholesale">🟢 راولپنڈی ریٹ</option>
             <option value="suburbs">🌿 مضافات (راولپنڈی ریٹ)</option>
@@ -7478,7 +7501,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل8ستمبر6:15am';
+const APP_BUILD_VERSION = 'منگل8ستمبر6:41am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -28918,6 +28941,10 @@ const FONT_PRESETS = [
   {id:'jameelnastaleeq',        label:'جمیل نوری نستعلیق',          family:"'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif",         weight:400, isNastaleeq:true},
   {id:'jameelnastaleeqkasheeda',label:'جمیل نوری نستعلیق (کشیدہ)',  family:"'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif", weight:400, isNastaleeq:true},
   {id:'pdmsmultan',              label:'PDMS ملتان',                 family:"'PDMSMultan','Noto Nastaliq Urdu',serif",                    weight:400, isNastaleeq:true},
+  // ---------- 🆕 صدام کی ہدایت (FM8SEPTU4): 3 نئے فونٹ ---------- -->
+  {id:'ptsimpleboldruled',       label:'PT Simple Bold Ruled',        family:"'PTSimpleBoldRuled','Noto Nastaliq Urdu',serif",             weight:400, isNastaleeq:true},
+  {id:'thuluthalsmt',            label:'ثلث السمط',                  family:"'ThuluthAlsmt','Noto Nastaliq Urdu',serif",                  weight:400, isNastaleeq:true},
+  {id:'jameelkhushkhati',        label:'جمیل خوشخطی',                family:"'JameelKhushkhati','Noto Nastaliq Urdu',serif",              weight:400, isNastaleeq:true},
 ];
 
 // ---------- پوری ایپ کا سائز (Zoom) — بڑی اسکرین/فونٹ چاہنے والوں کے لیے۔ html root پر zoom لگانے سے

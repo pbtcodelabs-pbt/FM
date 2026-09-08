@@ -2,7 +2,7 @@
 // یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
 // صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
 // ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'FM8SEPTU0615AM';
+const CACHE_VERSION = 'FM8SEPTU0641AM';
 const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
 const PRECACHE_URLS = [
@@ -15,6 +15,10 @@ const PRECACHE_URLS = [
   './icon-512.png',
   './JameelNooriNastaleeq-Regular.ttf',
   './JameelNooriNastaleeq-Kasheeda.ttf',
+  // ---------- 🆕 صدام کی ہدایت (FM8SEPTU4): 3 نئے فونٹ — fonts/ فولڈر میں ---------- -->
+  './fonts/PTSimpleBoldRuled.ttf',
+  './fonts/ThuluthAlsmt.ttf',
+  './fonts/JameelKhushkhati.ttf',
   // ---------- 🐛 صدام کی ہدایت (FM6SEPSU4): PDMS_Multan_Regular.ttf یہاں سے ہٹا دیا — یہ فائل ریپو میں
   // موجود ہی نہیں تھی، ہر install پر ناکام رہتی تھی، ہٹانے سے precache تیز اور صاف ہو گیا ---------- -->
   // ---------- 🐛 صدام کی ہدایت: "پرنٹ (A4)" بٹن انٹرنیٹ نہ ہونے پر کام کرے، اس لیے jsPDF بھی پہلے سے کیش ----------
