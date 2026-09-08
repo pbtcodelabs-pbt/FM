@@ -7478,7 +7478,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر7ستمبر10:05pm';
+const APP_BUILD_VERSION = 'منگل8ستمبر6:15am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11008,17 +11008,23 @@ function openVariantChooser(productId){
 
 function renderVariantChooserList(productId){
   const flat = getFlatVariants().filter(v => v.product_id === productId);
+  const product = productsData.find(p => p.product_id === productId);
   const list = document.getElementById('chooseVariantList');
 
-  list.innerHTML = flat.map(v => {
+  // ---------- 🏷️ صدام کی ہدایت (FM8SEPTU): پہلے یہاں نام سے پیکنگ کا لفظ الگ کرنے کے لیے متن میں سے
+  // "کاٹ کر" نکالا جاتا تھا — اگر پہلی پیکنگ کا نام غلطی سے مین نام جیسا ہی رکھا گیا ہو (جیسے "ادرک" کی
+  // پیکنگ کا نام بھی "ادرک" ہو) تو یہ صاف نظر نہیں آتا تھا، لگتا "ادرک" خود ایک پیکنگ ہے۔ اب سیدھا
+  // v.label (پیکنگ کا اپنا محفوظ شدہ نام) استعمال ہوتا ہے، اور اوپر مین نام بولڈ/درمیان میں الگ سے نظر آتا ہے ---------- -->
+  let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0 6px 0 0;">${product.serial_no}</span>` : ''}${product.name}</div>`;
+
+  html += flat.map(v => {
     const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
     const isNegative = v.stock < 0;
     const outOfStock = v.stock <= 0; // ---------- صرف بصری وارننگ کے لیے، بل بنانے میں رکاوٹ نہیں ----------
     const isLow = !outOfStock && v.stock <= (v.lowStockAt ?? 0);
     const cartItem = Billing.cart.find(c => c.variant_id === v.variant_id);
     const qty = cartItem ? cartItem.qty : 0;
-    // ---------- ویریئنٹ کا لیبل — پراڈکٹ کے نام کے بغیر، صرف سائز/قسم دکھائیں ----------
-    const label = v.name.replace(new RegExp('^' + productsData.find(p=>p.product_id===productId).name + '\\s*', 'i'), '') || v.name;
+    const label = v.label || v.name;
     return `
       <div class="variantChooseRow ${isNegative ? 'negativeStockRow' : outOfStock ? 'outOfStockRow' : isLow ? 'lowStockRow' : ''}">
         <div class="variantChooseInfo">
@@ -11033,6 +11039,8 @@ function renderVariantChooserList(productId){
         </div>
       </div>`;
   }).join('') + `<button class="collapseCardBtn" style="margin-top:14px;" onclick="document.getElementById('chooseVariantModal').classList.remove('show')">◀ Done — Back to Bill</button>`;
+
+  list.innerHTML = html;
 }
 
 function filterBillingCategory(cat){
@@ -11258,8 +11266,8 @@ function renderBillingProductGrid(){
       lowStockClass = anyLow ? 'lowStockCard' : '';
       qtyInCartForBadge = totalQtyInCart;
       stockNote = anyNegative ? `Stock: ${totalStockAllVariants}` : allOutOfStock ? `Out of Stock` : anyLow ? `Low Stock` : `Qty: ${totalStockAllVariants}`;
-      priceLabel = `${p.variants.length} variants`;
-      actionAreaHtml = `<button type="button" class="pgChooseBtn" onclick="openVariantChooser(${p.product_id})" style="flex:1; padding:9px; border:none; border-radius:9px; background:var(--primary); color:#fff; font-size:13.5px; font-weight:800; cursor:pointer;">Choose ▾</button>`;
+      priceLabel = `${p.variants.length} پیکنگ`;
+      actionAreaHtml = `<button type="button" class="pgChooseBtn" onclick="openVariantChooser(${p.product_id})" style="flex:1; padding:9px; border:none; border-radius:9px; background:var(--primary); color:#fff; font-size:13.5px; font-weight:800; cursor:pointer;">📦 پیکنگ سلیکٹ کریں ▾</button>`;
       rowOnClick = `onclick="openVariantChooser(${p.product_id})"`;
     }
 
@@ -11269,10 +11277,11 @@ function renderBillingProductGrid(){
       <div class="productGridCard billingListRow ${outOfStockClass} ${lowStockClass} ${isHot ? 'pgLocked' : ''}" data-product-id="${p.product_id}" ${rowOnClick}
            dir="rtl" style="height:auto; overflow:visible; display:flex; flex-direction:column; gap:6px; background:#fff; border:1.5px solid ${qtyInCartForBadge > 0 ? 'var(--primary)' : '#e5e9f0'}; border-radius:10px; padding:8px 9px; max-width:100%; box-shadow:0 2px 6px rgba(41,29,10,.08);">
         <div style="display:flex; flex-direction:column; gap:2px;">
-          <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:14px; font-weight:700; text-align:right; line-height:1.35; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-            ${isHot ? '🔥 ' : ''}${p.name}${qtyBadgeHtml}
+          <div style="display:flex; align-items:center; justify-content:center; gap:6px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:900; text-align:center; line-height:1.35;">
+            ${p.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0;">${p.serial_no}</span>` : ''}
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${isHot ? '🔥 ' : ''}${p.name}</span>${qtyBadgeHtml}
           </div>
-          <div style="font-size:11px; font-weight:800; color:${outOfStockClass ? 'var(--danger)' : lowStockClass ? 'var(--warning)' : 'var(--muted)'}; text-align:right;">${stockNote}</div>
+          <div style="font-size:11px; font-weight:800; color:${outOfStockClass ? 'var(--danger)' : lowStockClass ? 'var(--warning)' : 'var(--muted)'}; text-align:center;">${stockNote}</div>
         </div>
         <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
           <div style="font-size:13px; font-weight:800; color:var(--primary-dark); flex:0 0 auto;">${priceLabel}</div>
@@ -15236,24 +15245,27 @@ function saveAndCloseVariantCard(productId, cardId, btnEl){
 // دوبارہ بنائے) اپڈیٹ ہو جاتا ہے — باقی پوری اسکرین ساکن رہتی ہے، صارف بلا رکاوٹ اگلی فیلڈ میں جا سکتا ہے۔
 // ---------- 🧮 خرید قیمت + مزدوری = ٹوٹل قیمتِ خرید — inline expand میں لائیو اپڈیٹ (صدام کی ہدایت FM3SEPTH10) ----------
 function vcRecalcTotalPurchase(inputEl){
-  const card = inputEl && inputEl.closest ? inputEl.closest('.productCard') : null;
-  if(!card) return;
-  const inputs = card.querySelectorAll('.vcInlineFieldsRow input[type="number"]');
+  // ---------- 🐛 صدام کی ہدایت (FM7SEPMO17): اصل خرابی — یہ فنکشن پورے کارڈ میں سے پہلی پیکنگ کے
+  // خانے ہی ہمیشہ پکڑ لیتا تھا (چاہے آپ دوسری/تیسری پیکنگ میں لکھ رہے ہوں)۔ اب صرف اسی پیکنگ کی اپنی
+  // لائن (.vcInlineFieldsRow) تک محدود — ہر پیکنگ کا حساب بالکل الگ، درست ---------- -->
+  const row = inputEl && inputEl.closest ? inputEl.closest('.vcInlineFieldsRow') : null;
+  if(!row) return;
+  const inputs = row.querySelectorAll('input[type="number"]');
   const purchase = Number(inputs[0]?.value) || 0;
   const labor = Number(inputs[1]?.value) || 0;
-  const totalEl = card.querySelector('.vcTotalPurchaseField');
+  const totalEl = row.querySelector('.vcTotalPurchaseField');
   if(totalEl) totalEl.value = (purchase + labor).toLocaleString();
 }
 // ---------- 💪 صدام کی ہدایت (FM4SEPFR30): مزدوری فروخت یا ریٹ بدلتے ہی نیچے "مؤثر ریٹ" فوراً تازہ دکھائیں ---------- -->
 function vcRecalcEffectiveRates(inputEl){
-  const card = inputEl && inputEl.closest ? inputEl.closest('.productCard') : null;
-  if(!card) return;
-  const inputs = card.querySelectorAll('.vcInlineFieldsRow input[type="number"]');
+  const row = inputEl && inputEl.closest ? inputEl.closest('.vcInlineFieldsRow') : null;
+  if(!row) return;
+  const inputs = row.querySelectorAll('input[type="number"]');
   const sellLabor = Number(inputs[2]?.value) || 0;
   const retail = Number(inputs[3]?.value) || 0;
   const wholesale = Number(inputs[4]?.value) || 0;
-  const isbEl = card.querySelector('.vcEffIsb');
-  const rwpEl = card.querySelector('.vcEffRwp');
+  const isbEl = row.querySelector('.vcEffIsb');
+  const rwpEl = row.querySelector('.vcEffRwp');
   if(isbEl) isbEl.textContent = (retail + sellLabor).toLocaleString();
   if(rwpEl) rwpEl.textContent = (wholesale + sellLabor).toLocaleString();
 }
@@ -19310,9 +19322,9 @@ function renderPoBrowseList(){
       stockBadgeHtml = allOutOfStock ? `<div class="pgStockBadge outBadge${stackedCls2}">Out of Stock</div>`
         : anyLow ? `<div class="pgStockBadge lowBadge${stackedCls2}">Low Stock</div>`
         : `<div class="pgStockBadge normalBadge${stackedCls2}">Qty: ${totalStockAllVariants}</div>`;
-      priceLabel = `${p.variants.length} variants`;
+      priceLabel = `${p.variants.length} پیکنگ`;
       qtyBadgeHtml = totalQtyInCart > 0 ? `<div class="pgQtyBadge">${totalQtyInCart}</div>` : '';
-      actionAreaHtml = `<button class="pgChooseBtn" onclick="openPoVariantChooser(${p.product_id})">Choose ▾</button>`;
+      actionAreaHtml = `<button class="pgChooseBtn" onclick="openPoVariantChooser(${p.product_id})">📦 پیکنگ سلیکٹ کریں ▾</button>`;
       cardOnClick = `onclick="openPoVariantChooser(${p.product_id})"`;
     }
 
@@ -19323,7 +19335,7 @@ function renderPoBrowseList(){
           ${stockBadgeHtml}
           ${p.image ? `<img src="${p.image}">` : ''}
           <div class="pgCaption${p.image ? '' : ' pgCaptionNoImg'}" style="${p.image ? `background:${getProductCardCaptionBgFinal()};` : `background:${getProductCardBgFinal()};`}">
-            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; line-height:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).isNastaleeq ? '1.9' : '1.15'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
+            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; line-height:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).isNastaleeq ? '1.9' : '1.15'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0 4px 0 0; vertical-align:middle;">${p.serial_no}</span>` : ''}${p.name}</div>
             <div class="pgPrice" style="color:${getProductCardTextColorFinal(!!p.image)};">${priceLabel}</div>
           </div>
         </div>
@@ -19373,12 +19385,14 @@ function openPoVariantChooser(productId){
 function renderPoVariantChooserList(productId){
   const flat = getFlatVariants().filter(v => v.product_id === productId);
   const list = document.getElementById('poChooseVariantList');
-  const productName = productsData.find(p=>p.product_id===productId)?.name || '';
+  const product = productsData.find(p=>p.product_id===productId);
 
-  list.innerHTML = flat.map(v => {
+  let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product?.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0 6px 0 0;">${product.serial_no}</span>` : ''}${product?.name || ''}</div>`;
+
+  html += flat.map(v => {
     const cartItem = poCart.find(c => c.variant_id === v.variant_id);
     const qty = cartItem ? cartItem.qty : 0;
-    const label = v.name.replace(new RegExp('^' + productName + '\\s*', 'i'), '') || v.name;
+    const label = v.label || v.name;
     return `
       <div class="variantChooseRow">
         <div class="variantChooseInfo">
@@ -19392,6 +19406,8 @@ function renderPoVariantChooserList(productId){
         </div>
       </div>`;
   }).join('') + `<button class="collapseCardBtn" style="margin-top:14px;" onclick="document.getElementById('poChooseVariantModal').classList.remove('show'); renderPoBrowseList();">◀ Done — Back to Catalog</button>`;
+
+  list.innerHTML = html;
 }
 
 
@@ -19775,9 +19791,9 @@ function renderAdvOrderProductGrid(){
         const ci = advOrderCart.find(c => c.variant_id === v.variant_id);
         return sum + (ci ? ci.qty : 0);
       }, 0);
-      priceLabel = advIsAdmin ? `${p.variants.length} variants` : '';
+      priceLabel = advIsAdmin ? `${p.variants.length} پیکنگ` : '';
       qtyBadgeHtml = totalQtyInCart > 0 ? `<div class="pgQtyBadge">${totalQtyInCart}</div>` : '';
-      actionAreaHtml = `<button class="pgChooseBtn" onclick="openAdvOrderVariantChooser(${p.product_id})">Choose ▾</button>`;
+      actionAreaHtml = `<button class="pgChooseBtn" onclick="openAdvOrderVariantChooser(${p.product_id})">📦 پیکنگ سلیکٹ کریں ▾</button>`;
       cardOnClick = `onclick="openAdvOrderVariantChooser(${p.product_id})"`;
     }
 
@@ -19787,7 +19803,7 @@ function renderAdvOrderProductGrid(){
           ${qtyBadgeHtml}
           ${p.image ? `<img src="${p.image}">` : ''}
           <div class="pgCaption${p.image ? '' : ' pgCaptionNoImg'}" style="${p.image ? `background:${getProductCardCaptionBgFinal()};` : `background:${getProductCardBgFinal()};`}">
-            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; line-height:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).isNastaleeq ? '1.9' : '1.15'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.name}</div>
+            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; line-height:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).isNastaleeq ? '1.9' : '1.15'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0 4px 0 0; vertical-align:middle;">${p.serial_no}</span>` : ''}${p.name}</div>
             <div class="pgPrice" style="color:${getProductCardTextColorFinal(!!p.image)};">${priceLabel}</div>
           </div>
         </div>
@@ -19840,14 +19856,16 @@ function openAdvOrderVariantChooser(productId){
 function renderAdvOrderVariantChooserList(productId){
   const flat = getFlatVariants().filter(v => v.product_id === productId);
   const list = document.getElementById('advOrderChooseVariantList');
-  const productName = productsData.find(p=>p.product_id===productId)?.name || '';
+  const product = productsData.find(p=>p.product_id===productId);
   const advIsAdmin = document.body.classList.contains('role-admin');
 
-  list.innerHTML = flat.map(v => {
+  let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product?.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0 6px 0 0;">${product.serial_no}</span>` : ''}${product?.name || ''}</div>`;
+
+  html += flat.map(v => {
     const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
     const cartItem = advOrderCart.find(c => c.variant_id === v.variant_id);
     const qty = cartItem ? cartItem.qty : 0;
-    const label = v.name.replace(new RegExp('^' + productName + '\\s*', 'i'), '') || v.name;
+    const label = v.label || v.name;
     return `
       <div class="variantChooseRow">
         <div class="variantChooseInfo">
@@ -19861,6 +19879,8 @@ function renderAdvOrderVariantChooserList(productId){
         </div>
       </div>`;
   }).join('') + `<button class="collapseCardBtn" style="margin-top:14px;" onclick="document.getElementById('advOrderChooseVariantModal').classList.remove('show'); renderAdvOrderProductGrid();">◀ Done — Back to Catalog</button>`;
+
+  list.innerHTML = html;
 }
 
 // ---------- نیچے فلوٹنگ کارٹ بار کی عبارت اپڈیٹ کریں ----------
