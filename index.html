@@ -97,7 +97,23 @@
     position:fixed; inset:0; background:linear-gradient(135deg,var(--primary-dark),var(--primary));
     display:flex; align-items:center; justify-content:center; z-index:999;
   }
-  .loginBox{background:var(--card); padding:32px; border-radius:var(--radius); width:300px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,.3);}
+  /* ---------- 🟢 صدام کی ہدایت (FM8SEPTU6): پورا لاگ ان کارڈ اب سبز تھیم میں — پہلے سفید تھا ---------- */
+  .loginBox{background:linear-gradient(155deg, var(--primary-dark), var(--primary)); padding:32px; border-radius:var(--radius); width:300px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,.3);}
+  .loginBox h2{color:#fff;}
+  .loginRoleRow{background:rgba(255,255,255,.14); border:1.5px solid rgba(255,255,255,.4); border-radius:14px; padding:14px; margin-bottom:14px;}
+  .loginRoleTitle{font-weight:900; font-size:15px; color:#fff; margin-bottom:8px; text-align:right; text-shadow:0 1px 3px rgba(0,0,0,.3);}
+  .loginRoleSelect{width:100%; padding:11px 12px; border:1.5px solid #dbe1ea; border-radius:10px; font-size:13.5px; font-weight:700; margin-bottom:10px; background:#fff; color:var(--text);}
+  .loginRoleInputBar{display:flex; align-items:center; gap:2px; background:#fff; border-radius:10px; padding:2px 6px 2px 2px; box-shadow:0 2px 6px rgba(0,0,0,.18);}
+  .loginRoleInput{flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important; font-size:14px;}
+  .loginEyeBtn{flex:0 0 auto !important; width:26px !important; height:26px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:13px; cursor:pointer; color:var(--muted); padding:0 !important;}
+  /* ---------- 🔘 صدام کی ہدایت: تمام لاگ ان بٹن ابھرے ہوئے (3D) ---------- */
+  .loginRole3dBtn{
+    flex:0 0 auto; width:auto; margin:0; padding:9px 16px; font-weight:900; font-size:15px; cursor:pointer;
+    background:linear-gradient(155deg, #34d399, #059669); color:#fff; border:none; border-radius:8px;
+    box-shadow:0 3px 0 #065f46, 0 4px 6px rgba(0,0,0,.3), inset 0 1px 1px rgba(255,255,255,.4);
+  }
+  .loginRole3dBtn:active{transform:translateY(2px); box-shadow:0 1px 0 #065f46, 0 2px 3px rgba(0,0,0,.25);}
+  .loginRoleRemember{display:flex; align-items:center; gap:6px; margin:10px 0 0; font-size:11.5px; color:#fff; justify-content:flex-end; cursor:pointer;}
   .loginBox h2{margin-bottom:20px; color:var(--primary-dark);}
   .loginBox input{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; text-align:center;}
   .loginBox button{width:100%; padding:12px; margin-top:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;}
@@ -2312,7 +2328,10 @@
 <!-- ===================== LOGIN SCREEN ===================== -->
 <div id="loginScreen">
   <div class="loginBox">
-    <h2 id="loginHeading" onclick="handleVersionBadgeTap()" style="cursor:pointer;" title="🔒">🔐 Login</h2>
+    <!-- ---------- 🕌 صدام کی ہدایت (FM8SEPTU6): اوپر ایپ کا آئیکن + سلائیڈنگ اسلامی خوش آمدید پیغام ---------- -->
+    <img src="./icon-192.png" alt="صدام فروٹ منڈی" style="width:84px; height:84px; border-radius:22px; box-shadow:0 6px 18px rgba(0,0,0,.35); margin-bottom:10px;">
+    <div id="loginIslamicGreeting" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:19px; font-weight:800; color:#fff; text-shadow:0 2px 5px rgba(0,0,0,.4); min-height:32px; margin-bottom:12px; transition:opacity .6s ease; direction:rtl;"></div>
+    <h2 id="loginHeading" onclick="handleVersionBadgeTap()" style="cursor:pointer; color:#fff;" title="🔒">🔐 Login</h2>
 
     <!-- ---------- 🏷️ لاگ ان اسکرین پر موٹا/نمایاں ورژن بیج — ایپ کھلنے سے پہلے ہی پتا چل جائے کہ تازہ ترین ورژن اپلوڈ ہوا ہے یا نہیں (خودکار APP_BUILD_VERSION سے بھرتا ہے) ---------- -->
     <div id="loginVersionBadge" onclick="handleVersionBadgeTap()" dir="ltr" style="display:inline-block; unicode-bidi:plaintext; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif; font-size:21px; font-weight:900; letter-spacing:.3px; color:var(--primary-dark); background:#eef2ff; border:2px solid var(--primary-dark); padding:10px 20px; border-radius:16px; margin-bottom:14px; cursor:pointer; max-width:92vw; white-space:normal; word-break:break-word; text-align:center; line-height:1.6;"></div>
@@ -2325,7 +2344,8 @@
     </div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن/ٹرائل کی حیثیت — لاگ ان سے پہلے ہی صاف پتا چل جائے ---------- -->
-    <div id="loginSubStatus" style="background:#eef2ff; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:var(--primary-dark);"></div>
+    <!-- ---------- 🔹 صدام کی ہدایت (FM8SEPTU7): ٹرائل کی حیثیت اب چھوٹا سا گولی نما بیج — پہلے بڑا ڈبہ تھا ---------- -->
+    <div id="loginSubStatus" style="display:inline-block; background:#eef2ff; border-radius:20px; padding:6px 16px; margin-bottom:14px; font-size:11.5px; font-weight:800; color:var(--primary-dark);"></div>
 
     <!-- ---------- 🩺 تشخیصی بینر — اگر یہ ڈومین (مثلاً Firebase والا) Cloud (Firestore) سے یوزر/PIN ڈیٹا حاصل نہ کر سکے
     // تو یہاں صاف وجہ دکھائیں — تاکہ ڈویلپر بغیر براؤزر Console کھولے فوراً سمجھ سکے کہ کیا مسئلہ ہے ---------- -->
@@ -2345,83 +2365,73 @@
     <!-- ---------- 🧪 FMtest01: لاگ ان موڈ ٹوگل — Staff (Admin/Employee) بمقابلہ Customer۔
          صدام کی ہدایت کے مطابق: عملہ کا لاگ ان بالکل ویسا ہی رہے (نام ڈراپ ڈاؤن + PIN)، کسٹمر کا لاگ ان الگ اور
          محفوظ طریقے سے (صرف پاسورڈ — نام کی فہرست نہیں دکھے گی) ---------- -->
-    <div id="loginModeToggleWrap" style="display:flex; gap:8px; margin-bottom:14px;">
-      <button type="button" id="loginModeStaffBtn" onclick="switchLoginMode('staff')" style="flex:1; padding:10px 6px !important; border-radius:9px !important; font-weight:800; font-size:12.5px; background:var(--primary) !important; color:#fff !important; border:none !important;">🔐 Staff Login</button>
-      <button type="button" id="loginModeCustomerBtn" onclick="switchLoginMode('customer')" style="flex:1; padding:10px 6px !important; border-radius:9px !important; font-weight:800; font-size:12.5px; background:#f1f5f9 !important; color:var(--text) !important; border:1.5px solid #dbe1ea !important;">🧑‍🤝‍🧑 Customer Login</button>
-    </div>
-
-    <!-- ---------- 🍇 Fruit Mandi POS (FM3SEPTH12، صدام کی ہدایت): سادہ، ایک ہی لاگ ان — الگ الگ Admin/Employee باکس
-         ہٹا دیے گئے، اب صرف ایک نام کی ڈراپ ڈاؤن (Admin + تمام فعال ملازمین اسی میں) اور نیچے ایک PIN خانہ ---------- -->
-    <div id="loginPinWrap" style="display:none;">
-      <label style="display:block; font-size:12px; color:var(--muted); margin:0 0 4px; text-align:left; font-weight:700;">Select your name</label>
-      <!-- ---------- 🎨 صدام کی ہدایت (FM3SEPTH23): نام منتخب کرنے کا خانہ اب خوبصورت، پروفیشنل — ہلکا سایہ، صاف باڈر ---------- -->
-      <select id="unifiedLoginSelect" onchange="onUnifiedLoginSelectChange()" style="width:100%; padding:12px 14px; border:1.5px solid #dbe1ea; border-radius:10px; font-size:14.5px; font-weight:700; margin-bottom:14px; background:#f8fafc; box-shadow:inset 0 1px 3px rgba(0,0,0,.05); color:var(--text);"></select>
-
-      <!-- ---------- ایڈمن لاگ ان ---------- -->
-      <div id="adminLoginPanel">
-        <!-- ---------- 🐛 صدام کی ہدایت (FM3SEPTH23): اصل خرابی ملی — .loginBox input/button پر عالمی طور پر
-             width:100% لگا ہوا تھا، جو نیچے دیے گئے flex پر حاوی ہو کر آنکھ کے بٹن کو بہت بڑا اور PIN خانے کو
-             چھوٹا بنا دیتا تھا۔ اب !important کے ساتھ درست کر دیا، اور خوبصورت، پیشہ ورانہ ڈبہ بنایا ---------- -->
-        <div style="display:flex; align-items:center; gap:2px; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:10px; padding:2px 6px 2px 2px; box-shadow:inset 0 1px 3px rgba(0,0,0,.05);">
+    <!-- ---------- 🟢 صدام کی ہدایت (FM8SEPTU6): تین الگ الگ، ہمیشہ نظر آنے والی قطاریں — Admin, Staff, Customer —
+         ہر ایک کا اپنا عنوان (دائیں طرف)، اپنا پاسورڈ خانہ، درمیان میں صاف فاصلہ۔ پرانا Staff/Customer ٹوگل اور
+         مشترکہ ڈراپ ڈاؤن ہٹا دیا — اب کسی کو الجھن نہیں ہوگی کہ کہاں سے لاگ ان کرنا ہے ---------- -->
+    <div id="loginPinWrap">
+      <!-- ---------- 👑 ایڈمن کی قطار ---------- -->
+      <div class="loginRoleRow">
+        <div class="loginRoleTitle">👑 ایڈمن</div>
+        <div class="loginRoleInputBar">
           <button type="button"
             onmousedown="showPinWhilePressed('pinInput')" onmouseup="hidePinAfterRelease('pinInput')" onmouseleave="hidePinAfterRelease('pinInput')"
             ontouchstart="showPinWhilePressed('pinInput')" ontouchend="hidePinAfterRelease('pinInput')" ontouchcancel="hidePinAfterRelease('pinInput')"
-            style="flex:0 0 auto !important; width:26px !important; height:26px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:13px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
-          <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" onkeydown="if(event.key==='Enter') login()">
-          <!-- ---------- ⏎ صدام کی ہدایت (FM4SEPFR25): Enter بٹن اب سیدھا PIN خانے کے ساتھ ہی — کی بورڈ کے نیچے کبھی نہیں چھپے گا ---------- -->
-          <button type="button" onclick="login()" style="flex:0 0 auto !important; width:auto !important; margin:0 !important; padding:9px 14px !important; background:linear-gradient(180deg,#14b8a6,#0f766e) !important; color:#fff !important; border:none !important; border-radius:8px !important; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(15,118,110,.35);">⏎ Enter</button>
+            class="loginEyeBtn" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+          <input type="password" id="pinInput" placeholder="پاسورڈ درج کریں" maxlength="8" inputmode="numeric" class="loginRoleInput" onkeydown="if(event.key==='Enter') login()">
+          <button type="button" onclick="login()" class="loginRole3dBtn">⏎</button>
         </div>
-        <label style="display:flex; align-items:center; gap:8px; margin:12px 0; padding:9px 12px; background:#f8fafc; border:1px solid #eef2f7; border-radius:9px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
-          <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
+        <label class="loginRoleRemember">
+          <input type="checkbox" id="rememberPinChk" checked style="width:15px; height:15px; margin:0; cursor:pointer;">
           🔒 Remember me on this device
         </label>
-        <div class="loginHint" style="margin-top:10px;">
-          <a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="display:block; color:var(--primary-dark); font-weight:700; text-decoration:none; background:#eef2ff; padding:9px 12px; border-radius:9px; font-size:12.5px;">Forgot your PIN? Recover with your Year of Birth.</a>
+        <div class="loginHint" style="margin-top:8px;">
+          <a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="display:block; color:#fff; font-weight:700; text-decoration:underline; font-size:11.5px; text-align:center;">Forgot your PIN? Recover with your Year of Birth.</a>
         </div>
       </div>
 
-      <!-- ---------- ملازم (Employee) لاگ ان — نام اوپر والی مشترکہ ڈراپ ڈاؤن سے طے ہوتا ہے، یہاں صرف PIN ڈالیں ---------- -->
-      <div id="employeeLoginPanel" style="display:none;">
-        <select id="employeeLoginSelect" style="display:none;"></select>
-        <div style="display:flex; align-items:center; gap:2px; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:10px; padding:2px 6px 2px 2px; box-shadow:inset 0 1px 3px rgba(0,0,0,.05);">
+      <!-- ---------- 🧑‍💼 عملہ (Staff) کی قطار ---------- -->
+      <div class="loginRoleRow">
+        <div class="loginRoleTitle">🧑‍💼 عملہ (Staff)</div>
+        <select id="employeeLoginSelect" class="loginRoleSelect"></select>
+        <div class="loginRoleInputBar">
           <button type="button"
             onmousedown="showPinWhilePressed('employeePinInput')" onmouseup="hidePinAfterRelease('employeePinInput')" onmouseleave="hidePinAfterRelease('employeePinInput')"
             ontouchstart="showPinWhilePressed('employeePinInput')" ontouchend="hidePinAfterRelease('employeePinInput')" ontouchcancel="hidePinAfterRelease('employeePinInput')"
-            style="flex:0 0 auto !important; width:26px !important; height:26px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:13px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
-          <input type="password" id="employeePinInput" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" onkeydown="if(event.key==='Enter') employeeLogin()">
-          <button type="button" onclick="employeeLogin()" style="flex:0 0 auto !important; width:auto !important; margin:0 !important; padding:9px 14px !important; background:linear-gradient(180deg,#14b8a6,#0f766e) !important; color:#fff !important; border:none !important; border-radius:8px !important; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(15,118,110,.35);">⏎ Enter</button>
+            class="loginEyeBtn" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+          <input type="password" id="employeePinInput" placeholder="پاسورڈ درج کریں" maxlength="8" inputmode="numeric" class="loginRoleInput" onkeydown="if(event.key==='Enter') employeeLogin()">
+          <button type="button" onclick="employeeLogin()" class="loginRole3dBtn">⏎</button>
         </div>
-        <label style="display:flex; align-items:center; gap:8px; margin:12px 0; padding:9px 12px; background:#f8fafc; border:1px solid #eef2f7; border-radius:9px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
-          <input type="checkbox" id="employeeRememberChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
+        <label class="loginRoleRemember">
+          <input type="checkbox" id="employeeRememberChk" checked style="width:15px; height:15px; margin:0; cursor:pointer;">
           🔒 Remember me on this device
         </label>
-        <div class="loginHint" style="margin-top:10px;">
-          <a href="javascript:void(0)" onclick="openEmployeePinResetModal()" style="display:block; color:var(--primary-dark); font-weight:700; text-decoration:none; background:#eef2ff; padding:9px 12px; border-radius:9px; font-size:12.5px;">Forgot your PIN? Recover with your Year of Birth.</a>
+        <div class="loginHint" style="margin-top:8px;">
+          <a href="javascript:void(0)" onclick="openEmployeePinResetModal()" style="display:block; color:#fff; font-weight:700; text-decoration:underline; font-size:11.5px; text-align:center;">Forgot your PIN? Recover with your Year of Birth.</a>
         </div>
       </div>
     </div>
 
-    <!-- ---------- 🧪 FMtest01 — 🧑‍🤝‍🧑 کسٹمر لاگ ان پینل: صرف پاسورڈ (بلائنڈ) — کوئی نام کی فہرست نہیں دکھائی جاتی۔
+    <!-- ---------- 🧑‍🤝‍🧑 کسٹمر کی قطار — صرف پاسورڈ (بلائنڈ) — کوئی نام کی فہرست نہیں دکھائی جاتی۔
          صحیح پاسورڈ پر خود اسی کسٹمر کا نام تصدیق کے لیے نظر آتا ہے؛ غلط پاسورڈ پر کبھی کوئی نام ظاہر نہیں ہوتا ---------- -->
-    <div id="loginCustomerPanel" style="display:none;">
-      <label style="display:block; font-size:12px; color:var(--muted); margin:0 0 4px; text-align:left; font-weight:700;">Enter your password</label>
-      <div style="display:flex; align-items:center; gap:2px; background:#f8fafc; border:1.5px solid #dbe1ea; border-radius:10px; padding:2px 6px 2px 2px; box-shadow:inset 0 1px 3px rgba(0,0,0,.05);">
+    <div class="loginRoleRow" id="loginCustomerPanel">
+      <div class="loginRoleTitle">🧑‍🤝‍🧑 کسٹمر</div>
+      <div class="loginRoleInputBar">
         <button type="button"
           onmousedown="showPinWhilePressed('customerLoginPasswordInput')" onmouseup="hidePinAfterRelease('customerLoginPasswordInput')" onmouseleave="hidePinAfterRelease('customerLoginPasswordInput')"
           ontouchstart="showPinWhilePressed('customerLoginPasswordInput')" ontouchend="hidePinAfterRelease('customerLoginPasswordInput')" ontouchcancel="hidePinAfterRelease('customerLoginPasswordInput')"
-          style="flex:0 0 auto !important; width:26px !important; height:26px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:13px; cursor:pointer; color:var(--muted); padding:0 !important;" title="دبائے رکھیں تاکہ پاسورڈ نظر آئے">👁️</button>
-        <input type="password" id="customerLoginPasswordInput" placeholder="Enter your password" maxlength="20" style="flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:10px 8px !important;" oninput="onCustomerLoginPasswordInput()" onkeydown="if(event.key==='Enter') attemptCustomerLogin()">
-        <button type="button" onclick="attemptCustomerLogin()" style="flex:0 0 auto !important; width:auto !important; margin:0 !important; padding:9px 14px !important; background:linear-gradient(180deg,#14b8a6,#0f766e) !important; color:#fff !important; border:none !important; border-radius:8px !important; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(15,118,110,.35);">⏎ Enter</button>
+          class="loginEyeBtn" title="دبائے رکھیں تاکہ پاسورڈ نظر آئے">👁️</button>
+        <input type="password" id="customerLoginPasswordInput" placeholder="پاسورڈ درج کریں" maxlength="20" class="loginRoleInput" oninput="onCustomerLoginPasswordInput()" onkeydown="if(event.key==='Enter') attemptCustomerLogin()">
+        <button type="button" onclick="attemptCustomerLogin()" class="loginRole3dBtn">⏎</button>
       </div>
-      <div id="customerLoginMsg" style="margin-top:10px; font-size:13px; font-weight:700; text-align:center; min-height:18px;"></div>
-      <div id="customerLoginConfirmBox" style="display:none; margin-top:6px; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:12px; text-align:center;">
+      <div id="customerLoginMsg" style="margin-top:10px; font-size:13px; font-weight:700; text-align:center; min-height:18px; color:#fff;"></div>
+      <div id="customerLoginConfirmBox" style="display:none; margin-top:6px; background:#fff; border-radius:10px; padding:12px; text-align:center;">
         <div style="font-size:12.5px; color:var(--muted); font-weight:700;">Is this you?</div>
         <div id="customerLoginConfirmName" style="font-size:17px; font-weight:900; color:var(--primary-dark); margin:6px 0;"></div>
         <button type="button" onclick="confirmCustomerLogin()" style="background:var(--success) !important; width:100%;">✅ Yes, this is me — Enter</button>
         <button type="button" onclick="cancelCustomerLoginConfirm()" style="background:#f1f5f9 !important; color:var(--text) !important; width:100%; margin-top:6px; border:1.5px solid #dbe1ea !important;">✖ Not me</button>
       </div>
-      <div class="loginHint" style="margin-top:10px;">
-        <a href="javascript:void(0)" onclick="openDevChat('support')" style="display:block; color:var(--primary-dark); font-weight:700; text-decoration:none; background:#eef2ff; padding:9px 12px; border-radius:9px; font-size:12.5px;">Forgot your password? Please contact the shop owner.</a>
+      <div class="loginHint" style="margin-top:8px;">
+        <a href="javascript:void(0)" onclick="openDevChat('support')" style="display:block; color:#fff; font-weight:700; text-decoration:underline; font-size:11.5px; text-align:center;">Forgot your password? Please contact the shop owner.</a>
       </div>
     </div>
 
@@ -2650,6 +2660,9 @@
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:2px; flex:0 0 auto;">
       <span id="connStatusBadge" class="online">Online</span>
+      <!-- ---------- 👤 صدام کی ہدایت (FM8SEPTU5): "کون لاگ ان ہے" اب مستقل، ساکن نظر آئے گا — پہلے یہ سلائیڈنگ
+           پٹی میں شامل تھا (اور دوسرے پیغامات کے ساتھ باری باری چلتا تھا)، اب یہاں پکا/الگ ---------- -->
+      <span id="fixedLoggedInBadge" style="font-size:10.5px; font-weight:800; color:#fff; background:rgba(0,0,0,.25); padding:2px 9px; border-radius:8px; white-space:nowrap; margin-top:2px;"></span>
       <!-- ---------- تازہ ترین بلڈ ورژن — Online بیج کے بالکل نیچے، صاف/نمایاں (اب ایک ہی لائن میں، ہیڈر کو چوڑا/لمبا نہیں کرتا) ---------- -->
       <span id="topbarVersionBadge" onclick="handleVersionBadgeTap()" dir="ltr" style="unicode-bidi:plaintext; font-family:var(--font, 'JameelNooriNastaleeqKasheeda'), 'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu', serif; font-size:12px; color:#fff; font-weight:900; letter-spacing:.2px; background:linear-gradient(90deg, #be185d, #d97706, #059669, #2563eb, #7c3aed, #be185d); background-size:400% auto; animation:versionBadgeBgShift 8s ease-in-out infinite; padding:4px 12px; border-radius:10px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:190px; text-align:center; line-height:1.4; border:1px solid rgba(255,255,255,.55); box-shadow:0 0 10px rgba(255,255,255,.35), inset 0 1px 0 rgba(255,255,255,.3);"></span>
     </div>
@@ -7501,7 +7514,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل8ستمبر7:15am';
+const APP_BUILD_VERSION = 'منگل8ستمبر9:05am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8272,8 +8285,9 @@ async function setupLoginScreen(){
     const skipPin = false;
     document.getElementById('loginQuickEnterWrap').style.display = skipPin ? 'block' : 'none';
     document.getElementById('loginPinWrap').style.display = skipPin ? 'none' : 'block';
-    if(!skipPin){ populateUnifiedLoginDropdown(); switchLoginTab('admin'); }
-    if(typeof switchLoginMode === 'function') switchLoginMode('staff'); // ---------- 🧪 FMtest01: ہمیشہ Staff موڈ سے شروع ----------
+    document.getElementById('loginCustomerPanel').style.display = skipPin ? 'none' : 'block';
+    // ---------- 🟢 صدام کی ہدایت (FM8SEPTU6): اب تین قطاریں (Admin/Staff/Customer) ہمیشہ ایک ساتھ نظر آتی ہیں —
+    // پرانا ٹیب/ٹوگل نظام (populateUnifiedLoginDropdown/switchLoginTab/switchLoginMode) ختم کر دیا گیا ---------- -->
 
     // ---------- ٹرائل کے دوران "Login" کا لفظ خود بھی کنفیوژن پیدا کرتا ہے — چھپا دیں، صرف ٹرائل ختم ہونے پر واپس نظر آئے ----------
     const heading = document.getElementById('loginHeading');
@@ -8397,6 +8411,24 @@ function finishLogin(user, rememberOverride){
    ===================================================================== */
 let pendingCustomerLoginId = null;
 
+// ---------- 🕌 صدام کی ہدایت (FM8SEPTU6): "السلام علیکم ورحمۃ اللہ" اور "اللہ پاک آپ کے کاروبار میں برکت
+// عطا فرمائے" — دونوں باری باری، ہلکے فیڈ کے ساتھ، لاگ ان سکرین پر ---------- -->
+const LOGIN_GREETING_LINES = ['السلام علیکم ورحمۃ اللہ', 'اللہ پاک آپ کے کاروبار میں برکت عطا فرمائے'];
+let loginGreetingIdx = 0;
+function startLoginGreetingCycle(){
+  const el = document.getElementById('loginIslamicGreeting');
+  if(!el) return;
+  const show = () => {
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.textContent = LOGIN_GREETING_LINES[loginGreetingIdx % LOGIN_GREETING_LINES.length];
+      loginGreetingIdx++;
+      el.style.opacity = '1';
+    }, 400);
+  };
+  show();
+  setInterval(show, 3400);
+}
 function switchLoginMode(mode){
   const staffBtn = document.getElementById('loginModeStaffBtn');
   const custBtn = document.getElementById('loginModeCustomerBtn');
@@ -9510,9 +9542,7 @@ function buildMarqueeQueue(){
     if(!getMarqueeMsgAudience(m).includes(AppState.currentRole)) return;
     let text = m.text;
     if(m.id === 'login'){
-      if(!AppState.currentUser) return;
-      const icon = AppState.currentRole === 'admin' ? '👑' : '🧑‍💼';
-      text = `${icon}   لاگ ان   ${AppState.currentUser.name}`;
+      return; // ---------- 👤 صدام کی ہدایت (FM8SEPTU5): یہ اب سلائیڈنگ پٹی میں نہیں — fixedLoggedInBadge میں مستقل نظر آتا ہے ----------
     } else if(m.id === 'subscription'){
       if(!(AppState.currentRole === 'admin' && isSubscriptionActive())) return;
       const daysLeft = daysLeftInSubscription();
@@ -9737,6 +9767,12 @@ function ensureMarqueeCycleListener(){
 
 function updateTopbarUserBadge(){
   if(!AppState.currentUser) return;
+  // ---------- 👤 صدام کی ہدایت (FM8SEPTU5): مستقل بیج بھریں — اب سلائیڈنگ پٹی میں نہیں، یہاں پکا ---------- -->
+  const fixedBadge = document.getElementById('fixedLoggedInBadge');
+  if(fixedBadge){
+    const icon = AppState.currentRole === 'admin' ? '👑' : (AppState.currentRole === 'customer' ? '🧑' : '🧑‍💼');
+    fixedBadge.textContent = `${icon} ${AppState.currentUser.name}`;
+  }
   // ---------- 🐛 صدام کی ہدایت (FM3SEPTH10): ٹاپ بار کی اصل اونچائی ناپ کر نیچے والی utilityBar پٹی کو
   // بتائیں کہاں سے چپکنا ہے — ورنہ بڑی تصویر/نام/چمکتی پٹی کی وجہ سے وہ اوپر آ کر اوورلیپ کر دیتی تھی ---------- -->
   ensureMarqueeCycleListener();
@@ -33682,6 +33718,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // پہلے یہ صرف لاگ ان فنکشنز کے اندر چلتا تھا — اگر کہیں لاگ ان کا راستہ جلدی نہ چلے تو ٹرائل تاخیر کا شکار ہو سکتا تھا۔
   // اب یہ ایپ کھلتے ہی، سب سے پہلے، براہ راست چلتا ہے ----------
   try{ getOrCreateDeviceUID(); }catch(e){}
+
+  // ---------- 🟢 صدام کی ہدایت (FM8SEPTU6): تین قطاروں والا نیا لاگ ان صفحہ — عملہ کی فہرست فوراً بھر دیں،
+  // پہلے یہ صرف "Staff Login" ٹیب دبانے پر بھرتی تھی، اب تو کوئی ٹیب ہی نہیں، سب ہمیشہ نظر آتا ہے ---------- -->
+  try{ renderEmployeeLoginDropdown(); }catch(e){}
+
+  // ---------- 🕌 صدام کی ہدایت (FM8SEPTU6): اسلامی خوش آمدید پیغام — دو لائنیں باری باری، ہلکے سے فیڈ کے ساتھ ---------- -->
+  try{ startLoginGreetingCycle(); }catch(e){}
 
   // ---------- 🛠️ ایپ کھلتے ہی سب سے پہلے چیک کریں کہ کوئی دو آئٹمز کی اندرونی شناخت (variant_id)
   // آپس میں تو نہیں ٹکرائی — اگر ٹکرائی ہو تو خودکار الگ الگ کر دیں (Order Taking میں "ایک آئٹم کی
