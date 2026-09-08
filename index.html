@@ -93,7 +93,7 @@
   body{font-family:var(--font); font-weight:var(--font-weight); background:var(--bg); color:var(--text); height:100vh; overflow:hidden;}
 
   /* ===================== LOGIN SCREEN ===================== */
-  /* ---------- 🐞 صدام کی ہدایت (FM8SEPTU0606PM) — اصل خرابی: body{overflow:hidden} + یہ باکس align-items:center
+  /* ---------- 🐞 صدام کی ہدایت (FM8SEPTU0738PM) — اصل خرابی: body{overflow:hidden} + یہ باکس align-items:center
        کے ساتھ بغیر سکرول کے تھا۔ جب کارڈ کا مواد فون کی سکرین سے لمبا ہو جائے (چھوٹی سکرینز پر) تو اوپر کا
        آئیکن/سلام اور نیچے کا Customer باکس دونوں کٹ کر غائب ہو جاتے تھے، سکرول کرنے کا کوئی راستہ ہی نہیں تھا۔
        اب #loginScreen خود سکرول ایبل ہے اور مواد اوپر سے شروع ہوتا ہے (align-items:flex-start) تاکہ آئیکن ہمیشہ
@@ -113,7 +113,7 @@
   .loginRoleInput{flex:1 1 auto !important; width:auto !important; min-width:0; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; text-align:left !important; padding:8px 8px !important; font-size:13px;}
   .loginEyeBtn{flex:0 0 auto !important; width:24px !important; height:24px; margin:0 !important; background:transparent !important; border:none !important; border-radius:50%; font-size:12px; cursor:pointer; color:var(--muted); padding:0 !important;}
   /* ---------- 🔘 صدام کی ہدایت: تمام لاگ ان بٹن ابھرے ہوئے (3D) ----------
-       🐞 صدام کی ہدایت (FM8SEPTU0606PM) — اصل خرابی یہیں تھی: نیچے موجود عمومی ".loginBox button" رول
+       🐞 صدام کی ہدایت (FM8SEPTU0738PM) — اصل خرابی یہیں تھی: نیچے موجود عمومی ".loginBox button" رول
        (width:100% وغیرہ) اس سے زیادہ specific تھا (element+class بمقابلہ صرف class)، اس لیے یہ ⏎ بٹن پورے
        Input Bar پر پھیل کر eye/ان پٹ کو ڈھانپ لیتا تھا — یہی وہ "3 انچ کے بڑے سبز ڈبے" تھے۔ اب !important سے
        طے کر دیا کہ یہ بٹن ہمیشہ اپنے مناسب/چھوٹے سائز میں ہی رہے ---------- */
@@ -135,7 +135,7 @@
        اب ایک ہی مشترکہ نام ڈراپ ڈاؤن استعمال ہوتی ہے، اس لیے ٹیب بٹن کا CSS بھی ہٹا دیا ---------- */
   .loginBtn3d{background:linear-gradient(180deg,#3b5b8c,#1e3a5f) !important; box-shadow:0 4px 8px rgba(30,58,95,.35), inset 0 1px 0 rgba(255,255,255,.2) !important; border:1px solid #16304f !important;}
   .loginHint{margin-top:14px; font-size:12px; color:var(--muted);}
-  /* ---------- ⚙️ صدام کی ہدایت (FM8SEPTU0606PM): "مزید آپشنز" کا سمیٹنے/کھولنے والا بٹن —
+  /* ---------- ⚙️ صدام کی ہدایت (FM8SEPTU0738PM): "مزید آپشنز" کا سمیٹنے/کھولنے والا بٹن —
        Share/Activation Code/Chat with Developer اسی کے نیچے چھپے رہتے ہیں، مین سکرین صاف رہتی ہے ---------- */
   .loginMoreToggle{margin-top:6px; padding:6px 12px; background:rgba(255,255,255,.14); border:1.5px solid rgba(255,255,255,.35); border-radius:10px; color:#fff; font-weight:800; font-size:11px; cursor:pointer; text-align:center;}
   .loginMoreToggle.open #loginMoreToggleArrow{display:inline-block; transform:rotate(180deg);}
@@ -182,11 +182,14 @@
   #loginMarqueeWrap{
     width:100%; height:32px; overflow:hidden; order:9; margin:8px 0 -6px;
     position:relative;
-    /* ---------- 🐞 صدام کی ہدایت (FM6SEPSU9): پچھلی بار صرف -10px منفی مارجن لگایا تھا (والدین کے پیڈنگ کے
-         برابر اندازہ لگا کر)، مگر پھر بھی بائیں کونے پر ہلکا سا خلا رہ گیا۔ اب اس سے زیادہ پکا (bulletproof)
-         طریقہ: براہ راست 100vw (پورے فون کی چوڑائی) تک پھیلاؤ — یہ کسی بھی والدین کے پیڈنگ کے اندازے پر
-         منحصر نہیں، ہمیشہ بالکل سکرین کے دونوں کناروں تک جائے گا، چاہے پیڈنگ کچھ بھی ہو ---------- */
-    width:100vw; margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%);
+    /* ---------- 🐞 صدام کی ہدایت (FM8SEPTU0738PM) — اصل، مستقل خرابی یہاں ملی! پرانا `100vw` +
+         `calc(-50vw + 50%)` طریقہ صرف اسی وقت بالکل درست کام کرتا ہے جب پورا صفحہ سچ میں کناروں تک بالکل
+         سیدھا/برابر ہو — لیکن یہ پٹی دراصل `#mobileTopbar` نامی ایک flex-wrap کنٹینر کے اندر ہے جس کی اپنی
+         `padding:6px 10px` ہے، اور flex آئٹم کے طور پر vw والا حساب کبھی کبھار WebView میں تھوڑا سا آگے پیچھے
+         ہو جاتا تھا — اسی وجہ سے ایک طرف پٹی کنارے تک پہنچ جاتی، دوسری طرف خلا رہ جاتا، اور یہ ہمیشہ ایک ہی
+         طرف مستقل رہتا (کبھی درست نہیں ہوتا تھا)۔ اب بجائے viewport (vw) پر انحصار کرنے کے، سیدھا اسی والدین
+         کی معلوم/مقررہ 10px padding کے حساب سے پکا حساب لگایا ہے — یہ کبھی نہیں ہلے گا ---------- -->
+    width:calc(100% + 20px); margin-left:-10px; margin-right:-10px; flex-basis:100%;
     /* ---------- 🎨 صدام کی ہدایت (FM4SEPFR08): نیلا مدھم نہیں، خوبصورت/رچ نیلا — چمک برقرار رکھی گئی ---------- */
     background:linear-gradient(90deg, #1e40af, #3b82f6, #1e40af);
     /* ---------- 🥇 صدام کی ہدایت (FM4SEPFR08): پہلے سے تھوڑا زیادہ رچ/خوبصورت سنہری بارڈر ---------- */
@@ -472,23 +475,24 @@
   }
   /* ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): سیریل نمبر کا پرانا "گندا کالا ڈبہ" مکمل ختم — اب صاف، خوبصورت
        بیج (badge)، موٹے Arial Black ہندسے، دبانے پر فہرست کھلتی ہے (ٹائپ کرنے کی ضرورت نہیں) ---------- -->
-  /* ---------- 🐞 صدام کی ہدایت (FM8SEPTU0606PM): Stock Adjustment/Order Taking جیسی جگہوں پر یہ بیج
+  /* ---------- 🐞 صدام کی ہدایت (FM8SEPTU0738PM): Stock Adjustment/Order Taking جیسی جگہوں پر یہ بیج
        باریک/کٹی ہوئی پٹی جیسا نظر آ رہا تھا — کہیں کوئی نامعلوم رول اسے دبا رہا تھا۔ سلیکٹر کو دگنا
        (specificity boost) کر کے مکمل یقینی بنا دیا کہ یہ بیج ہر جگہ گول، موٹا نظر آئے، چاہے کہیں بھی
        کوئی متصادم رول کیوں نہ ہو ---------- -->
+  /* ---------- 🐞 صدام کی ہدایت (FM8SEPTU0738PM): اب مکمل طور پر سرخ گول بیج (پل) — سفید موٹے ہندسے،
+       بالکل صاف/چمکتا، کبھی کٹا پھٹا نہیں — پہلے سے تھوڑا بڑا تاکہ نمایاں نظر آئے (نام کا خانہ خودکار
+       تھوڑا سکڑ جاتا ہے، چونکہ بیج کا سائز fixed ہے اور نام flex:1 سے بقیہ جگہ لیتا ہے) ---------- -->
   .serialBadgeBtn.serialBadgeBtn{
-    /* ---------- 🔵 صدام کی ہدایت (FM8SEPTU3): اب بالکل گول دائرہ (چوڑائی=اونچائی)، ابھرا ہوا (embossed) لُک،
-         موٹے ہندسے آرام سے سمائیں — کبھی نہ کٹیں، دائرے کے اندر ہلکی سی خالی جگہ بھی رہے ---------- */
-    align-self:flex-start !important; width:42px !important; height:42px !important; max-width:none !important;
-    flex:0 0 auto !important; min-width:42px !important; min-height:42px !important; padding:0 !important; border-radius:50% !important;
-    background:radial-gradient(circle at 35% 30%, #fde68a, #f5b400 65%, #d97706) !important; border:2px solid #92400e !important; color:#5a2d0c !important;
-    font-family:'Arial Black', Arial, sans-serif !important; font-weight:900 !important; font-size:16px !important;
+    align-self:flex-start !important; width:46px !important; height:46px !important; max-width:none !important;
+    flex:0 0 auto !important; min-width:46px !important; min-height:46px !important; padding:0 !important; border-radius:50% !important;
+    background:radial-gradient(circle at 35% 30%, #f87171, #dc2626 65%, #b91c1c) !important; border:2px solid #7f1d1d !important; color:#ffffff !important;
+    font-family:'Arial Black', Arial, sans-serif !important; font-weight:900 !important; font-size:17px !important;
     cursor:pointer; margin-inline-end:6px; margin-bottom:4px;
     display:flex !important; align-items:center !important; justify-content:center !important; text-align:center !important;
-    box-shadow:0 3px 0 #78350f, 0 4px 6px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.6) !important;
+    box-shadow:0 3px 0 #7f1d1d, 0 4px 6px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.5) !important;
     line-height:1 !important; box-sizing:border-box !important; overflow:visible !important; flex-shrink:0 !important;
   }
-  .serialBadgeBtn.serialBadgeBtn:active{transform:translateY(1px); box-shadow:0 1px 0 #78350f, 0 2px 3px rgba(0,0,0,.3), inset 0 1px 1px rgba(255,255,255,.6) !important;}
+  .serialBadgeBtn.serialBadgeBtn:active{transform:translateY(1px); box-shadow:0 1px 0 #7f1d1d, 0 2px 3px rgba(0,0,0,.3), inset 0 1px 1px rgba(255,255,255,.5) !important;}
   .serialPickRow{
     display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; margin-bottom:5px;
     background:#f8fafc; border:1.5px solid #e2e8f0; cursor:pointer;
@@ -1590,7 +1594,7 @@
   .userActions button{padding:7px 12px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;}
   .btnToggleActive{background:#f1f5f9; color:var(--text);}
   .btnResetPin{background:#eef2ff; color:var(--primary-dark);}
-  /* ---------- 🧭 صدام کی ہدایت (FM8SEPTU0606PM): Users سکرین کی مکمل ترتیب — نام → رول بیج (کیپسول) →
+  /* ---------- 🧭 صدام کی ہدایت (FM8SEPTU0738PM): Users سکرین کی مکمل ترتیب — نام → رول بیج (کیپسول) →
        پاسورڈ باکس (ٹیپ کر کے بدلیں) → دو برابر کالم (بائیں: اکاؤنٹ بٹن، دائیں: مجاز اسکرینز فہرست، الگ
        بیک گراؤنڈ)۔ پہلے سب بٹن اوپر ایک ڈھیر میں بکھرے ہوئے تھے ---------- */
   .userCard2{background:var(--card); border-radius:var(--radius); padding:14px 16px; box-shadow:0 2px 10px rgba(41,29,10,.07); margin-bottom:12px;}
@@ -2479,7 +2483,7 @@
       </div>
     </div>
 
-    <!-- ---------- 🗂️ صدام کی ہدایت (FM8SEPTU0606PM): مین لاگ ان سکرین اب صرف 3 ایڈمن/عملہ/کسٹمر باکس دکھائے —
+    <!-- ---------- 🗂️ صدام کی ہدایت (FM8SEPTU0738PM): مین لاگ ان سکرین اب صرف 3 ایڈمن/عملہ/کسٹمر باکس دکھائے —
          باقی سب کچھ (Share، Activation Code، Chat with Developer کا اضافی لنک) اب ایک ہی "مزید آپشنز" بٹن کے
          نیچے سمیٹا ہوا ہے۔ اگر ڈیفالٹ PIN ابھی تک تبدیل نہیں ہوا یا سبسکرپشن/ٹرائل ختم ہو چکی ہو تو یہ سیکشن
          خودکار کھلا ہوا آئے گا (setupLoginScreen میں دیکھیں) تاکہ ضروری چیز کبھی چھپی نہ رہے ---------- -->
@@ -7589,7 +7593,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل8ستمبر6:06pm';
+const APP_BUILD_VERSION = 'منگل8ستمبر7:38pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -7612,7 +7616,7 @@ const DEV_BYPASS_PIN = '927153';
 //     }
 //   }
 // اور Firebase Console → Authentication → Sign-in method میں "Anonymous" کو Enable کرنا نہ بھولیں ----------
-// ---------- 🐞 صدام کی ہدایت (FM8SEPTU0606PM): "Access Blocked" کی سب سے بڑی وجہ یہیں ملی — یہاں پہلے
+// ---------- 🐞 صدام کی ہدایت (FM8SEPTU0738PM): "Access Blocked" کی سب سے بڑی وجہ یہیں ملی — یہاں پہلے
 // `licenses` کے لیے "allow write: if false;" لکھا تھا (یعنی کوئی بھی لکھائی ہمیشہ کے لیے بند)، جبکہ کوڈ خود
 // اسی کلیکشن میں 5 جگہ لکھتا ہے: کسٹمر کا کوڈ Activate کرنا، ڈویلپر کا نیا کوڈ بنانا، معطل/دوبارہ فعال/ڈیلیٹ
 // کرنا۔ Rule اور کوڈ آپس میں متصادم تھے — یہی اصل "access blocked" تھا۔ کوڈ کی طرف سے یہ 5 جگہ اب
@@ -7857,7 +7861,7 @@ async function activateSubscription(code){
   const newExpiryStr = base.toISOString().slice(0,10);
 
   // ---------- Firestore میں کوڈ کو "استعمال شدہ" مارک کریں — دوبارہ استعمال ناممکن ----------
-  // ---------- 🐞 صدام کی ہدایت (FM8SEPTU0606PM): اصل "Access Blocked" خرابی یہیں ملی — یہ لکھائی بغیر
+  // ---------- 🐞 صدام کی ہدایت (FM8SEPTU0738PM): اصل "Access Blocked" خرابی یہیں ملی — یہ لکھائی بغیر
   // Bearer Auth Token کے جاتی تھی (plain fetch)، جبکہ Firestore Rule کے مطابق لکھائی کے لیے
   // request.auth لازمی ہے۔ اب authFirestoreFetch استعمال کیا ہے (نیچے دیکھیں لائسنس رول کی تازہ تجویز) ---------- -->
   try{
@@ -8351,7 +8355,7 @@ async function setupLoginScreen(){
       statusEl.style.background = '#eef2ff';
       statusEl.style.color = 'var(--primary-dark)';
     } else {
-      // ---------- ⚠️ صدام کی ہدایت (FM8SEPTU0606PM): سبسکرپشن/ٹرائل ختم ہو تو یہ پیغام مین سکرین پر ہی
+      // ---------- ⚠️ صدام کی ہدایت (FM8SEPTU0738PM): سبسکرپشن/ٹرائل ختم ہو تو یہ پیغام مین سکرین پر ہی
       // صاف، نمایاں (سرخ) نظر آئے — کسی سمیٹے ہوئے سیکشن کے اندر چھپا نہ ہو ---------- -->
       statusEl.textContent = `⚠️ Subscription Expired — please contact the developer to continue.`;
       statusEl.style.background = '#fef2f2';
@@ -8372,7 +8376,7 @@ async function setupLoginScreen(){
     if(firstPinBannerEl) firstPinBannerEl.style.display = (admin && admin.pin === defaultHash) ? 'block' : 'none';
     const stillDefaultPin = admin && admin.pin === defaultHash;
 
-    // ---------- ⚙️ صدام کی ہدایت (FM8SEPTU0606PM): "مزید آپشنز" سیکشن عام طور پر سمیٹا رہے —
+    // ---------- ⚙️ صدام کی ہدایت (FM8SEPTU0738PM): "مزید آپشنز" سیکشن عام طور پر سمیٹا رہے —
     // مگر سبسکرپشن ختم ہو یا کوئی مسئلہ ہو تو خودکار کھل جائے تاکہ Chat with Developer/Activation Code
     // کبھی چھپے ہوئے نہ رہیں ---------- -->
     toggleLoginMoreOptions(subscriptionExpired);
@@ -9396,7 +9400,7 @@ async function submitMyPinChange(){
     return;
   }
   user.pin = await hashPin(newPin);
-  user.pinPlain = newPin; // ---------- 🐞 صدام کی ہدایت (FM8SEPTU0606PM) فکس: پہلے یہاں صرف .pin (hash) اپڈیٹ ہوتا تھا،
+  user.pinPlain = newPin; // ---------- 🐞 صدام کی ہدایت (FM8SEPTU0738PM) فکس: پہلے یہاں صرف .pin (hash) اپڈیٹ ہوتا تھا،
   // pinPlain نہیں — اسی وجہ سے "فوری رابطہ" پینل کا 🔑 بٹن ہمیشہ پرانا/ڈیفالٹ PIN دکھاتا رہتا تھا ----------
   persistAllData();
   // ---------- 🔧 FM3SEPTH35 فکس: یہ اصل بگ تھا — پہلے "Change My PIN" کا نیا PIN صرف اسی فون کی localStorage میں محفوظ ہوتا تھا، کلاؤڈ (Firestore) میں کبھی نہیں جاتا تھا۔ اسی وجہ سے ایک فون پر بنایا/بدلا گیا PIN دوسرے فون پر کبھی کام نہیں کرتا تھا۔ اب یہاں بھی فوراً کلاؤڈ میں محفوظ ہوگا، اور یوزر کو صاف بتایا جائے گا کہ واقعی کلاؤڈ تک پہنچا یا صرف اسی فون پر رہا ----------
@@ -9502,7 +9506,7 @@ async function submitActivationCode(){
   }
 }
 
-// ---------- ⚙️ صدام کی ہدایت (FM8SEPTU0606PM): "مزید آپشنز" کھولیں/بند کریں — تاکہ Share/Activation
+// ---------- ⚙️ صدام کی ہدایت (FM8SEPTU0738PM): "مزید آپشنز" کھولیں/بند کریں — تاکہ Share/Activation
 // Code/Chat with Developer صرف ضرورت پر ہی نظر آئیں، مین سکرین صاف/کمپیکٹ رہے ----------
 function toggleLoginMoreOptions(open){
   const box = document.getElementById('loginMoreOptions');
@@ -13003,7 +13007,7 @@ function renderSerialPickerList(){
   for(let n = 1; n <= listMax; n++){
     const usedBy = usedMap[n];
     const isCurrent = n === currentValue;
-    // ---------- 🔀 صدام کی ہدایت (FM8SEPTU0606PM) فکس: پہلے جو نمبر پہلے سے کسی اور آئٹم کو ملا ہو، اس پر
+    // ---------- 🔀 صدام کی ہدایت (FM8SEPTU0738PM) فکس: پہلے جو نمبر پہلے سے کسی اور آئٹم کو ملا ہو، اس پر
     // ٹیپ کرنے سے کچھ نہیں ہوتا تھا (بغیر کسی وضاحت کے) — صرف چھوٹا ⠿ آئیکن پکڑ کر گھسیٹنا پڑتا تھا، جو
     // آسانی سے نظر نہیں آتا۔ اسی وجہ سے "نمبر دیا مگر محفوظ نہیں ہوا" کی شکایت آ رہی تھی — اصل میں نمبر
     // پہلے سے کسی اور سبزی کو مل چکا تھا، اور ٹیپ کرنے پر خاموشی سے کچھ نہیں ہوتا تھا۔ اب ٹیپ کرنے پر صاف
@@ -26383,7 +26387,7 @@ function renderUserList(){
   `).join('');
 }
 
-// ---------- 🧭 صدام کی ہدایت (FM8SEPTU0606PM): "مجاز اسکرینز" کالم میں اسکرین پر ٹیپ کرتے ہی فوراً
+// ---------- 🧭 صدام کی ہدایت (FM8SEPTU0738PM): "مجاز اسکرینز" کالم میں اسکرین پر ٹیپ کرتے ہی فوراً
 // اجازت دیں/ہٹائیں — الگ Modal کھولنے کی ضرورت نہیں۔ کم از کم ایک اسکرین ہمیشہ منتخب رہنی چاہیے،
 // ورنہ اس یوزر کا ہوم پیج بالکل خالی نظر آئے گا ---------- -->
 function toggleUserScreenInline(userId, screenKey, checkboxEl){
@@ -26502,7 +26506,7 @@ async function setCustomUserPin(userId){
     return;
   }
   u.pin = await hashPin(newPin.trim());
-  u.pinPlain = newPin.trim(); // ---------- 🐞 FM8SEPTU0606PM فکس: pinPlain بھی اپڈیٹ کریں (وجہ اوپر submitMyPinChange میں دیکھیں) ----------
+  u.pinPlain = newPin.trim(); // ---------- 🐞 FM8SEPTU0738PM فکس: pinPlain بھی اپڈیٹ کریں (وجہ اوپر submitMyPinChange میں دیکھیں) ----------
   pushUsersToCloud();
   alert(`✅ ${u.name}'s PIN is now set to: ${newPin.trim()}\n\nRemember this — it works everywhere Admin access is needed (login, Admin Control, Bulk Delete).`);
 }
@@ -30014,7 +30018,7 @@ async function generateGiftCode(){
   if(nameVal) fields.customerName = { stringValue: nameVal };
 
   try{
-    // ---------- 🐞 FM8SEPTU0606PM فکس: یہاں بھی Auth Token شامل کیا (وجہ اوپر activateSubscription میں دیکھیں) ---------- -->
+    // ---------- 🐞 FM8SEPTU0738PM فکس: یہاں بھی Auth Token شامل کیا (وجہ اوپر activateSubscription میں دیکھیں) ---------- -->
     const res = await authFirestoreFetch(`licenses/${encodeURIComponent(code)}?key=${FIREBASE_API_KEY}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -30133,7 +30137,7 @@ function renderIssuedCodesList(){
 }
 async function suspendLicenseCode(code){
   if(!confirm(`کوڈ ${code} معطل کریں؟ یہ اب کسی کے لیے بھی کام نہیں کرے گا۔`)) return;
-  // ---------- 🐞 FM8SEPTU0606PM فکس: Auth Token شامل کیا (وجہ اوپر activateSubscription میں دیکھیں) ---------- -->
+  // ---------- 🐞 FM8SEPTU0738PM فکس: Auth Token شامل کیا (وجہ اوپر activateSubscription میں دیکھیں) ---------- -->
   await authFirestoreFetch(`licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=active&key=${FIREBASE_API_KEY}`, {
     method: 'PATCH', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ fields: { active: { booleanValue: false } } })
@@ -30141,7 +30145,7 @@ async function suspendLicenseCode(code){
   loadIssuedCodesList();
 }
 async function reactivateLicenseCode(code){
-  // ---------- 🐞 FM8SEPTU0606PM فکس: Auth Token شامل کیا ---------- -->
+  // ---------- 🐞 FM8SEPTU0738PM فکس: Auth Token شامل کیا ---------- -->
   await authFirestoreFetch(`licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=active&key=${FIREBASE_API_KEY}`, {
     method: 'PATCH', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ fields: { active: { booleanValue: true } } })
@@ -30150,7 +30154,7 @@ async function reactivateLicenseCode(code){
 }
 async function deleteLicenseCode(code){
   if(!confirm(`کوڈ ${code} مکمل طور پر ڈیلیٹ کریں؟ یہ عمل واپس نہیں ہو سکتا۔`)) return;
-  // ---------- 🐞 FM8SEPTU0606PM فکس: Auth Token شامل کیا ---------- -->
+  // ---------- 🐞 FM8SEPTU0738PM فکس: Auth Token شامل کیا ---------- -->
   await authFirestoreFetch(`licenses/${encodeURIComponent(code)}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
   loadIssuedCodesList();
 }
@@ -30469,7 +30473,7 @@ async function saveNewPinAndActivate(){
   if(!admin){ errEl.textContent = '❌ No active Admin account found.'; return; }
 
   admin.pin = await hashPin(pin1);
-  admin.pinPlain = pin1; // ---------- 🐞 FM8SEPTU0606PM فکس: pinPlain بھی اپڈیٹ کریں ----------
+  admin.pinPlain = pin1; // ---------- 🐞 FM8SEPTU0738PM فکس: pinPlain بھی اپڈیٹ کریں ----------
   AppState.settings.pinLockEnabled = true;
   persistAllData();
   syncPinLockUI();
@@ -30522,7 +30526,7 @@ async function finishPinRecovery(){
     return;
   }
   adminUser.pin = await hashPin(newPin);
-  adminUser.pinPlain = newPin; // ---------- 🐞 FM8SEPTU0606PM فکس: pinPlain بھی اپڈیٹ کریں ----------
+  adminUser.pinPlain = newPin; // ---------- 🐞 FM8SEPTU0738PM فکس: pinPlain بھی اپڈیٹ کریں ----------
   persistAllData();
   pushUsersToCloud(); // ---------- تاکہ نیا PIN باقی موبائلز/ڈومینز پر بھی فوراً کام کرے ----------
   document.getElementById('pinRecoveryModal').classList.remove('show');
@@ -30555,7 +30559,7 @@ async function saveFirstPinSetup(){
     return;
   }
   adminUser.pin = await hashPin(p1);
-  adminUser.pinPlain = p1; // ---------- 🐞 FM8SEPTU0606PM فکس: pinPlain بھی اپڈیٹ کریں ----------
+  adminUser.pinPlain = p1; // ---------- 🐞 FM8SEPTU0738PM فکس: pinPlain بھی اپڈیٹ کریں ----------
   persistAllData();
   pushUsersToCloud(); // ---------- نیا PIN باقی موبائلز/ڈومینز (GitHub Pages، Firebase وغیرہ) پر بھی فوراً محفوظ کریں ----------
   document.getElementById('firstPinSetupModal').classList.remove('show');
@@ -33996,7 +34000,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // declare ہوتے ہیں — اوپر top-level پر کال کرنے سے وہ ابھی initialize نہیں ہوئے ہوتے (ReferenceError آتا
   // ہے اور پوری اسکرپٹ رک جاتی ہے، جس سے لاگ ان اسکرین آگے نہیں بڑھتی) ----------
   try{ seedVegetableProductsOnce(); }catch(e){ console.error('seedVegetableProductsOnce failed', e); }
-  // ---------- 🐞 صدام کی ہدایت (FM8SEPTU0606PM) — اصل، سنگین خرابی یہیں ملی! یہ "ایک بار خودکار وائپ" پرانا
+  // ---------- 🐞 صدام کی ہدایت (FM8SEPTU0738PM) — اصل، سنگین خرابی یہیں ملی! یہ "ایک بار خودکار وائپ" پرانا
   // کوڈ تھا، جو ہر بار جب بھی کوئی نیا/صاف ڈیوائس ہو (Data Clear، نیا فون، دوبارہ انسٹال) تو سب سیریل نمبر
   // (سبزی/کسٹمر/سپلائر) مکمل ڈیلیٹ کر کے کلاؤڈ میں بھی وہی خالی حالت push کر دیتا تھا — چونکہ "serialWipeV1Done"
   // فلیگ ہر ڈیوائس پر الگ (localStorage) ہے، یہ کبھی نہ ختم ہونے والا لینڈ مائن بن چکا تھا: آج Anonymous Auth
@@ -34004,7 +34008,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // اسی وجہ سے آج ڈیٹا کلیئر کر کے دوبارہ کھولنے پر سب سیریل نمبر (Products/Stock Adjustment/Order Taking تینوں
   // جگہ، چونکہ سب ایک ہی serial_no فیلڈ سے آتے ہیں) "?" ہو گئے — یہ ایک بار پہلے ہی اپنا کام کر چکا تھا، اب
   // مکمل ہٹا دیا گیا ---------- -->
-  // ---------- 🔧 FM8SEPTU0606PM ریکوری: اگر پرانی وائپ کی وجہ سے serialManualMode پھنسا ہوا ہو اور واقعی
+  // ---------- 🔧 FM8SEPTU0738PM ریکوری: اگر پرانی وائپ کی وجہ سے serialManualMode پھنسا ہوا ہو اور واقعی
   // کوئی بھی پراڈکٹ کا سیریل نمبر موجود نہ ہو، تو خودکار طور پر manual mode بند کر کے، سب کو نام کی ترتیب سے
   // 1 سے دوبارہ نمبر دے دیں — ایک ایک کر کے دستی طور پر نمبر لگانے کی ضرورت نہ پڑے ---------- -->
   if(!loadFromStorage('serialAutoRecoveryV2Done', false)){
