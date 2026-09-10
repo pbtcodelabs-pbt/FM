@@ -7768,7 +7768,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات10ستمبر4:45pm';
+const APP_BUILD_VERSION = 'جمعہ11ستمبر3:13am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9893,6 +9893,42 @@ function autoColWidth(headerLabel, values, valueFont, opts){
   return Math.max(min, Math.min(max, Math.ceil(widest + pad)));
 }
 
+// ---------- 💾 صدام کی ہدایت (FM10SEPTH0530PM): جب بھی کوئی خانہ محفوظ ہو، اس پر ایک لمحے کے لیے ہلکا سبز
+// چمک دکھائیں — تاکہ یقین ہو جائے کہ لکھی ہوئی بات واقعی محفوظ ہو گئی ہے ---------- -->
+function flashSavedInput(el){
+  if(!el) return;
+  const prevBg = el.dataset._origBg !== undefined ? el.dataset._origBg : (el.style.backgroundColor || '');
+  el.dataset._origBg = prevBg;
+  el.style.transition = 'background-color .12s ease';
+  el.style.backgroundColor = '#86efac';
+  clearTimeout(el._flashTimer);
+  el._flashTimer = setTimeout(() => { el.style.backgroundColor = prevBg || '#fff'; }, 550);
+}
+
+// ---------- ✅ صدام کی ہدایت (FM10SEPTH0530PM): جدول/شیٹ نظارے میں ہی حاضر/غیر حاضر چیک باکس — کارڈ نظارے
+// جیسا ہی سلائیڈ اثر (ہلکا سا دھندلا ہو کر قطار غائب)، پھر فہرست خودکار تازہ۔ Stock Adjustment اور Products
+// دونوں سکرینز ایک ہی productsData استعمال کرتی ہیں، اس لیے یہاں سے تبدیلی دونوں جگہ فوراً نظر آئے گی —
+// سیریل نمبر کبھی نہیں بدلتا، صرف حاضر/غیر حاضر فہرست کے درمیان آئٹم کی جگہ بدلتی ہے ---------- -->
+function toggleProductPresenceInSheet(productId, checkboxEl){
+  if(AppState.currentRole !== 'admin'){ alert('صرف ایڈمن یہ تبدیل کر سکتا ہے'); if(checkboxEl) checkboxEl.checked = !checkboxEl.checked; return; }
+  const tr = checkboxEl ? checkboxEl.closest('tr') : null;
+  if(tr){ tr.style.transition = 'opacity .22s'; tr.style.opacity = '0.15'; }
+  setTimeout(() => {
+    const p = productsData.find(x => x.product_id === productId);
+    if(!p) return;
+    p.isDormant = !p.isDormant;
+    persistAllData();
+    pushProductsToCloud();
+    const scrollEl = document.getElementById('stockAdjSheetScrollWrap');
+    const savedTop = scrollEl ? scrollEl.scrollTop : 0;
+    const savedLeft = scrollEl ? scrollEl.scrollLeft : 0;
+    if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+    if(document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
+    const newScrollEl = document.getElementById('stockAdjSheetScrollWrap');
+    if(newScrollEl){ newScrollEl.scrollTop = savedTop; newScrollEl.scrollLeft = savedLeft; }
+  }, 220);
+}
+
 function renderProductSpreadsheet(filtered, wrap){
   // ---------- 🧷 صدام کی ہدایت (FM10SEPTH0844AM) فکس: کچھ Android WebView میں `position:sticky` اکیلے
   // بھروسہ مند نہیں — پرانا `-webkit-sticky` ویلیو بھی ساتھ لگا دیا (پہلے، تاکہ جدید sticky بعد میں override
@@ -9912,6 +9948,7 @@ function renderProductSpreadsheet(filtered, wrap){
   const measUrduFont = "800 12.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measPackFont = "700 11px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measNumFont = "900 12px Arial,Helvetica,sans-serif";
+  const presenceW = 32; // ---------- ✅ صدام کی ہدایت (FM11SEPSA0303AM): حاضر/غیر حاضر چیک باکس — اب سب سے پہلا کالم ---------- -->
   const nameW = autoColWidth('نام', filtered.map(p => p.name), measUrduFont, {min:70, max:190, pad:24});
   const packingW = autoColWidth('پیکنگ', filtered.map(p => { const v = p.variants[0]||{}; return v.label || '— منتخب —'; }), measPackFont, {min:52, max:110, pad:14});
   const actionW = 36; // ➕/🗑️ آئیکن — فکسڈ (سرکل بٹن، ٹیکسٹ نہیں)
@@ -9923,40 +9960,58 @@ function renderProductSpreadsheet(filtered, wrap){
   const retailW = autoColWidth('🔴 اسلام آباد', filtered.map(p => p.variants[0]?.retail||0), measNumFont, {min:44, max:90, pad:16});
   const wholesaleW = autoColWidth('🟢 راولپنڈی', filtered.map(p => p.variants[0]?.wholesale||0), measNumFont, {min:44, max:90, pad:16});
   const stockW = autoColWidth('📦 سٹاک', filtered.map(p => p.variants[0]?.stock||0), measNumFont, {min:40, max:80, pad:16});
-  const colWidths = [nameW, packingW, actionW, serialW, purchaseW, laborW, sellLaborW, totalW, retailW, wholesaleW, stockW];
-  const rightOffsets = [0, colWidths[0]];
+  // ---------- 🧷 صدام کی ہدایت (FM11SEPSA0303AM): ترتیب اب — چیک باکس → نام → پیکنگ (تینوں منجمد/فکسڈ، سکرول
+  // کرنے پر بھی نظر آتے رہیں گے)، اس کے بعد ➕/🗑️ اور باقی سب کالم اسکرول ہوتے رہیں گے ---------- -->
+  const colWidths = [presenceW, nameW, packingW, actionW, serialW, purchaseW, laborW, sellLaborW, totalW, retailW, wholesaleW, stockW];
+  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
+  const isAdmin = AppState.currentRole === 'admin';
   const rows = filtered.map((p, idx) => {
     const v = p.variants[0] || {};
     const totalPurchase = (v.purchase||0) + (v.labor||0);
-    const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+    // ---------- 🦓 صدام کی ہدایت (FM10SEPTH0530PM): زیبرا رنگ — ایک قطار گہری، ایک ہلکی — اب پوری قطار
+    // (ہر کالم/خانے) پر لاگو ہوتا ہے، پہلے صرف نام/پیکنگ پر تھا اور باقی سفید رہتا تھا جس سے قطار کا رنگ
+    // آخر تک نہ پہنچتا تھا اور لکھتے وقت لائن گم ہو جاتی تھی ---------- -->
+    const rowBg = idx % 2 === 0 ? '#ffffff' : '#dbe6da';
+    const rowTd = `background:${rowBg};`;
     const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
     const packingBtnStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #dbe1ea;border-radius:6px;font-size:11.5px;text-align:center;background:#fff;cursor:pointer;" + urduFont;
     const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}')">${v.label || '— منتخب کریں —'}</button>`;
     return `
       <tr data-product-id="${p.product_id}">
-        <td style="${tdBase}${frozenTd(0)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onchange="updateProductName(${p.product_id}, this.value)"></td>
-        <td style="${tdBase}${frozenTd(1)}">${packingSelectHtml}</td>
-        <td style="${tdBase}padding:4px;"><div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+        <td style="${tdBase}${frozenTd(0)}padding:2px;">
+          <label title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="display:flex; align-items:center; justify-content:center; ${isAdmin?'cursor:pointer;':'cursor:default;'}">
+            <input type="checkbox" ${p.isDormant ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onclick="toggleProductPresenceInSheet(${p.product_id}, this)" style="width:19px; height:19px; margin:0;">
+          </label>
+        </td>
+        <td style="${tdBase}${frozenTd(1)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
+        <td style="${tdBase}${frozenTd(2)}">${packingSelectHtml}</td>
+        <td style="${tdBase}${rowTd}padding:4px;"><div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
           <button type="button" style="width:28px;height:28px;border-radius:50%;border:none;background:#dcfce7;color:#15803d;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس کے بعد نئی خالی قطار شامل کریں" onclick="insertProductRowAfter(${p.product_id})">➕</button>
           <button type="button" style="width:28px;height:28px;border-radius:50%;border:none;background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس قطار کو حذف کریں" onclick="deleteProductRowInSheet(${p.product_id})">🗑️</button>
         </div></td>
-        <td style="${tdBase}"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:32px !important; height:32px !important; min-width:32px !important; min-height:32px !important; font-size:13px !important;" onclick="openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button></td>
-        <td style="${tdBase}"><input type="number" style="${inputStyle}" value="${v.purchase||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'purchase',this.value); this.closest('tr').querySelector('.shTotalPurchase').textContent=(parseFloat(this.value)||0)+(${v.labor||0});"></td>
-        <td style="${tdBase}"><input type="number" style="${inputStyle}" value="${v.labor||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'labor',this.value); this.closest('tr').querySelector('.shTotalPurchase').textContent=(${v.purchase||0})+(parseFloat(this.value)||0);"></td>
-        <td style="${tdBase}"><input type="number" style="${inputStyle}" value="${v.sellLabor||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'sellLabor',this.value)"></td>
-        <td class="shTotalPurchase" style="${tdBase}font-weight:900;color:#134e2c;${numFont}">${totalPurchase}</td>
-        <td style="${tdBase}"><input type="number" style="${redInputStyle}" value="${v.retail||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'retail',this.value)"></td>
-        <td style="${tdBase}"><input type="number" style="${greenInputStyle}" value="${v.wholesale||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'wholesale',this.value)"></td>
-        <td style="${tdBase}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
+        <td style="${tdBase}${rowTd}"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:32px !important; height:32px !important; min-width:32px !important; min-height:32px !important; font-size:13px !important;" onclick="openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button></td>
+        <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.purchase||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'purchase',this.value,this); this.closest('tr').querySelector('.shTotalPurchase').textContent=(parseFloat(this.value)||0)+(${v.labor||0});"></td>
+        <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.labor||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'labor',this.value,this); this.closest('tr').querySelector('.shTotalPurchase').textContent=(${v.purchase||0})+(parseFloat(this.value)||0);"></td>
+        <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.sellLabor||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'sellLabor',this.value,this)"></td>
+        <td class="shTotalPurchase" style="${tdBase}${rowTd}font-weight:900;color:#134e2c;${numFont}">${totalPurchase}</td>
+        <td style="${tdBase}${rowTd}"><input type="number" style="${redInputStyle}" value="${v.retail||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'retail',this.value,this)"></td>
+        <td style="${tdBase}${rowTd}"><input type="number" style="${greenInputStyle}" value="${v.wholesale||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'wholesale',this.value,this)"></td>
+        <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
       </tr>`;
   }).join('');
-  const headers = ['نام','پیکنگ','➕','#','💰 خرید','💪 م.خرید','💪 م.فروخت','🧮 حتمی خرید','🔴 اسلام آباد','🟢 راولپنڈی','📦 سٹاک'];
+  const headers = ['✔️','نام','پیکنگ','➕','#','💰 خرید','💪 م.خرید','💪 م.فروخت','🧮 حتمی خرید','🔴 اسلام آباد','🟢 راولپنڈی','📦 سٹاک'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
-    const frozen = i < 2 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
+    const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
   }).join('') + '</tr>';
   const colgroupHtml = '<colgroup>' + colWidths.map(w => `<col style="width:${w}px;">`).join('') + '</colgroup>';
   const totalTableW = colWidths.reduce((a,b) => a+b, 0);
+  // ---------- 🧭 صدام کی ہدایت (FM10SEPTH0530PM) فکس: پہلے ہر بار innerHTML بدلتے ہی سکرول واپس شروع
+  // (دائیں/اوپر) پر چلا جاتا تھا — لکھتے ہوئے ایسا لگتا تھا کہ صفحہ "بھاگ کر" پہلے نمبر پر آ گیا۔ اب پرانا
+  // سکرول پوزیشن یاد رکھ کر دوبارہ لاگو کرتے ہیں ---------- -->
+  const oldScrollEl = document.getElementById('stockAdjSheetScrollWrap');
+  const savedScrollTop = oldScrollEl ? oldScrollEl.scrollTop : 0;
+  const savedScrollLeft = oldScrollEl ? oldScrollEl.scrollLeft : 0;
   wrap.innerHTML = `
     <div id="stockAdjSheetScrollWrap" style="width:100%;max-height:74vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea;">
       <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableW}px;table-layout:fixed;font-size:12.5px;">
@@ -9968,7 +10023,7 @@ function renderProductSpreadsheet(filtered, wrap){
     <div style="display:none;"></div>
   `;
   const scrollWrap = document.getElementById('stockAdjSheetScrollWrap');
-  if(scrollWrap) scrollWrap.scrollLeft = 0;
+  if(scrollWrap){ scrollWrap.scrollTop = savedScrollTop; scrollWrap.scrollLeft = savedScrollLeft; }
 }
 // ---------- ➕ صدام کی ہدایت (FM10SEPTH0844AM): فہرست کے کسی بھی درمیانی مقام پر نئی خالی قطار — آخر تک جانے
 // کی ضرورت نہیں۔ نیچے کے سب سیریل نمبر خودکار ایک ایک آگے کھسک جاتے ہیں تاکہ نئی قطار بالکل صحیح جگہ (اسی کے
@@ -10074,12 +10129,13 @@ function insertProductRowAfter(afterProductId){
     window.scrollTo(0, savedScrollY);
   }, 50);
 }
-function updateProductName(productId, newName){
+function updateProductName(productId, newName, inputEl){
   const p = productsData.find(x => x.product_id === productId);
   if(!p || !newName.trim()) return;
   p.name = newName.trim();
   persistAllData();
   pushProductsToCloud();
+  if(inputEl) flashSavedInput(inputEl); // ---------- 💾 صدام کی ہدایت (FM10SEPTH0530PM): محفوظ ہونے کا اشارہ ---------- -->
 }
 // ---------- 🗑️ صدام کی ہدایت (FM10SEPTH0844AM): جدول نظارہ میں ہر قطار کا اپنا حذف بٹن — الگ کارڈ نظارے میں
 // جانے کی ضرورت نہیں۔ productSearchInput والا پرانا بلا-حفاظت والا کوڈ یہاں استعمال نہیں کیا (وہی خرابی جو
@@ -16151,6 +16207,7 @@ function updateVariantField(productId, variantId, field, value, inputEl){
 
   // TODO: یہاں product_variants table میں UPDATE query چلے گی
   openProductCards.add(productId); // کارڈ کھلا رہے گا، محض حفاظتی ریکارڈ کے لیے (اب اصل رینڈر پر انحصار نہیں)
+  if(inputEl) flashSavedInput(inputEl); // ---------- 💾 صدام کی ہدایت (FM10SEPTH0530PM): محفوظ ہونے کا اشارہ — ہلکی سبز چمک ---------- -->
 
   // ---------- 💾 صدام کی ہدایت (4 ستمبر) اہم فکس: پہلے یہاں سے فوری طور پر کچھ محفوظ نہیں ہوتا تھا —
   // صرف 1.5 سیکنڈ کے خودکار وقفے پر انحصار تھا، جس کی وجہ سے "لکھ کر فوراً باہر نکل جانے" پر کبھی کبھار
@@ -21375,19 +21432,22 @@ function renderOtItemsTable(wrap){
   const rows = otFlatCache.map((v, idx) => {
     const qty = otQtyMap[v.variant_id] || 0;
     const checked = qty > 0;
-    const rowBg = checked ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : (idx % 2 === 0 ? '#ffffff' : '#f5f7fa');
+    const rowBg = checked ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : (idx % 2 === 0 ? '#ffffff' : '#dde6e2');
     const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
     const pName = (productsData.find(p => p.product_id === v.product_id)?.name) || v.name;
     const avail = otAvailableStock(v.variant_id);
     const availColor = avail <= 0 ? '#b91c1c' : '#134e2c';
     // ---------- 🔒 صدام کی ہدایت: سیریل نمبر یہاں صرف دکھانے کے لیے (سرخ گول بیج) — کوئی onclick نہیں، ایڈٹ/تبدیل/حذف کبھی ممکن نہیں یہاں سے ---------- -->
+    // ---------- 🦓 صدام کی ہدایت (FM10SEPTH0530PM): زیبرا رنگ اب پوری قطار پر (پہلے صرف # اور نام کالم پر تھا،
+    // باقی سفید رہ جاتے تھے) ---------- -->
+    const rowTd = `background:${rowBg};`;
     return `
       <tr>
         <td style="${tdBase}${frozenTd(0)}"><span class="serialBadgeBtn" style="width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default;pointer-events:none;margin:0 !important;">${v.serial_no ?? '?'}</span></td>
         <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13.5px;font-weight:var(--otFw,700);">${pName}</td>
-        <td style="${tdBase}${urduFont}font-size:11.5px;">${v.label || ''}</td>
-        <td style="${tdBase}font-weight:900;color:${availColor};" data-ot-stock-for="${v.variant_id}">${avail}</td>
-        <td style="${tdBase}padding:4px 3px;">
+        <td style="${tdBase}${rowTd}${urduFont}font-size:11.5px;">${v.label || ''}</td>
+        <td style="${tdBase}${rowTd}font-weight:900;color:${availColor};" data-ot-stock-for="${v.variant_id}">${avail}</td>
+        <td style="${tdBase}${rowTd}padding:4px 3px;">
           <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
             <input type="text" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setOtQtyDirect(${v.variant_id}, this.value, this)" style="width:40px;box-sizing:border-box;padding:5px 2px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:7px;font-size:12.5px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);">
             <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, 1)" style="width:25px;height:25px;border:none;border-radius:7px;background:#dcfce7;color:#15803d;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #86efac;">+</button>
@@ -21428,6 +21488,7 @@ function setOtQtyDirect(variantId, value, inputEl){
     inputEl.style.borderColor = qty > 0 ? 'var(--primary)' : '#dbe1ea';
     const tr = inputEl.closest('tr');
     if(tr) tr.style.background = qty > 0 ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : '';
+    flashSavedInput(inputEl); // ---------- 💾 صدام کی ہدایت (FM10SEPTH0530PM): محفوظ ہونے کا اشارہ ---------- -->
   }
   updateOtStockCell(variantId); // ---------- 📦 صدام کی ہدایت (FM10SEPTH): مقدار بدلتے ہی سٹاک کالم فوراً اپڈیٹ ---------- -->
 }
