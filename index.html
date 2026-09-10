@@ -5100,6 +5100,7 @@
             <div style="font-size:12px; color:var(--muted);" id="otTopCustArea"></div>
           </div>
           <div style="display:flex; gap:6px; flex:0 0 auto;">
+            <button type="button" onclick="openOtStockReport()" style="padding:9px 10px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 سٹاک رپورٹ</button>
             <button type="button" onclick="toggleOtViewMode()" id="otViewModeBtn" style="padding:9px 10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 جدول</button>
             <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
             <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
@@ -5151,6 +5152,16 @@
           <!-- ---------- 🏠 ہوم پیج پر واپس — صدام کی ہدایت (FM3SEPTH10): پہلے یہاں سے واپس جانے کا کوئی راستہ نہیں تھا ---------- -->
           <button type="button" onclick="goTo(AppState.currentRole==='customer' ? 'customerHome' : 'home')" style="padding:13px; background:#f1f5f9; border:none; color:#334155; border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">🏠 ہوم پیج</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ---------- 📊 صدام کی ہدایت (FM10SEPTH): حاضر سبزیوں کا سٹاک رپورٹ — کتنا سٹاک باقی، کتنا آرڈرز کے
+         ذریعے بک/فروخت ہو چکا ---------- -->
+    <div class="modalOverlay" id="otStockReportModal" onclick="if(event.target===this) closeOtStockReport()">
+      <div class="modalBox" style="max-width:420px; max-height:88vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+        <h3 style="margin-top:0;">📊 حاضر سبزیوں کا سٹاک رپورٹ</h3>
+        <div id="otStockReportWrap"></div>
+        <button type="button" onclick="closeOtStockReport()" style="width:100%; margin-top:12px; padding:12px; background:#f1f5f9; border:none; color:#334155; border-radius:12px; font-weight:800; cursor:pointer;">بند کریں</button>
       </div>
     </div>
 
@@ -7708,7 +7719,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات10ستمبر12:52pm';
+const APP_BUILD_VERSION = 'جمعرات10ستمبر4:12pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11339,6 +11350,7 @@ function getFlatVariants(){
         wholesale: v.wholesale,
         sellLabor: v.sellLabor || 0,
         stock: v.stock,
+        reserved: v.reserved || 0, // ---------- 🧮 صدام کی ہدایت (FM10SEPTH): آرڈر ٹیکنگ کے ذریعے بک ہو چکی مقدار ---------- -->
         unit: v.unit || 'pcs',
         location: v.location,
         image: v.image || null,
@@ -15241,6 +15253,32 @@ function syncVariantFromBatches(v){
   v.stock = v.batches.reduce((sum,b) => sum + (Number(b.qty) || 0), 0);
   const dated = v.batches.filter(b => b.expiryDate).sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
   v.expiryDate = dated.length ? dated[0].expiryDate : '';
+}
+
+// ---------- 🧮 صدام کی ہدایت (FM10SEPTH): آرڈر ٹیکنگ کے ذریعے "بک" (reserve) شدہ سٹاک — یہ اصل v.stock کو
+// فوراً نہیں گھٹاتا (اصل کٹوتی صرف حتمی بل بننے پر ہوتی ہے)، بلکہ الگ سے یاد رکھتا ہے کہ کتنی مقدار پہلے
+// سے کسی پینڈنگ آرڈر میں جا چکی ہے، تاکہ "باقی دستیاب سٹاک" = v.stock - v.reserved ہر جگہ درست، ریل ٹائم
+// نظر آئے — بغیر اصل انوینٹری کو دو بار کاٹے ---------- -->
+function findVariantByVariantId(variantId){
+  for(const p of productsData){
+    const v = p.variants.find(vv => vv.variant_id === variantId);
+    if(v) return v;
+  }
+  return null;
+}
+function reserveOrderStock(items){
+  (items || []).forEach(i => {
+    if(!i || i.variant_id === null || i.variant_id === undefined) return;
+    const v = findVariantByVariantId(i.variant_id);
+    if(v) v.reserved = Math.max(0, (v.reserved || 0) + (Number(i.qty) || 0));
+  });
+}
+function releaseOrderStock(items){
+  (items || []).forEach(i => {
+    if(!i || i.variant_id === null || i.variant_id === undefined) return;
+    const v = findVariantByVariantId(i.variant_id);
+    if(v) v.reserved = Math.max(0, (v.reserved || 0) - (Number(i.qty) || 0));
+  });
 }
 
 // ---------- فروخت/واپسی پر ایک ہی جگہ سے سٹاک کاٹیں — Batches موجود ہوں تو FEFO (پہلے ایکسپائر ہونے والی کھیپ پہلے خرچ) ----------
@@ -21056,6 +21094,24 @@ const OT_PAGE_SIZE = 60;    // ہر صفحے پر کتنے آئٹمز دکھائ
 // نہیں، صرف حاضر سبزیاں (otFlatCache پہلے سے صرف حاضر آئٹمز دیتا ہے) ---------- -->
 let otViewMode = loadFromStorage('otViewMode', 'card');
 
+// ---------- 📦 صدام کی ہدایت (FM10SEPTH): اس وقت واقعی "باقی دستیاب" سٹاک — اصل سٹاک میں سے پہلے سے بک
+// (دوسرے پینڈنگ آرڈرز کی) مقدار، اور ابھی اسی کسٹمر کے لیے یہاں لکھی جا رہی مقدار، دونوں گھٹا کر ----------
+function otAvailableStock(variantId){
+  const v = otFlatCache.find(f => f.variant_id === variantId);
+  if(!v) return 0;
+  const here = Number(otQtyMap[variantId]) || 0;
+  return (Number(v.stock) || 0) - (Number(v.reserved) || 0) - here;
+}
+// ---------- ہر جگہ (کارڈ بیج + جدول کالم) جہاں یہ نمبر دکھایا جا رہا ہو، ایک ہی جگہ سے اپڈیٹ کریں ---------- -->
+function updateOtStockCell(variantId){
+  const avail = otAvailableStock(variantId);
+  const style = avail <= 0 ? 'color:#b91c1c;' : 'color:#134e2c;';
+  document.querySelectorAll(`[data-ot-stock-for="${variantId}"]`).forEach(el => {
+    el.textContent = avail;
+    el.setAttribute('style', (el.getAttribute('style') || '').replace(/color:#[0-9a-fA-F]{3,6};?/, '') + style);
+  });
+}
+
 function renderOrderTakingScreen(){
   otCustomer = null;
   otQtyMap = {};
@@ -21193,6 +21249,8 @@ function renderOtItemsPage(){
         <span class="serialBadgeBtn" style="cursor:default;">${v.serial_no ?? '?'}</span>
         <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:var(--otFw,700); flex:1; text-align:right; line-height:1.4; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
       </div>
+      <!-- ---------- 📦 صدام کی ہدایت (FM10SEPTH): دستیاب سٹاک — یہاں سے مقدار بڑھاتے ہی فوراً کم ہوتا نظر آئے گا ---------- -->
+      <div style="text-align:left; font-size:11.5px; font-weight:800; color:#134e2c;">📦 سٹاک: <span data-ot-stock-for="${v.variant_id}">${otAvailableStock(v.variant_id)}</span></div>
       <!-- ---------- ✅ چیک باکس + ➖➕ — صدام کی ہدایت: + دائیں (سیدھے ہاتھ) پر، − بائیں پر ---------- -->
       <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
         <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:40px; height:40px; border:none; border-radius:9px; background:#dcfce7; color:#15803d; font-size:20px; font-weight:800; cursor:pointer; padding:0; flex:0 0 auto;">+</button>
@@ -21219,7 +21277,8 @@ function renderOtItemsTable(wrap){
   const tdBase = "padding:5px 4px;border-bottom:1.5px solid #dbe1ea;border-left:1px solid #eef1f5;text-align:center;vertical-align:middle;box-sizing:border-box;font-weight:700;";
   const urduFont = "font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;";
   // ---------- 🏷️ صدام کی ہدایت: ترتیب اب # (سرخ گول سیریل) → نام → پیکنگ → مقدار — سیریل سب سے پہلے، مستقل جگہ پر ---------- -->
-  const colWidths = [46,108,64,116];
+  // ---------- 📦 صدام کی ہدایت (FM10SEPTH): پیکنگ کے بعد، مقدار سے پہلے، دستیاب سٹاک کا نیا کالم ---------- -->
+  const colWidths = [46,108,64,58,116];
   const rightOffsets = [0, colWidths[0]];
   const rows = otFlatCache.map((v, idx) => {
     const qty = otQtyMap[v.variant_id] || 0;
@@ -21227,12 +21286,15 @@ function renderOtItemsTable(wrap){
     const rowBg = checked ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : (idx % 2 === 0 ? '#ffffff' : '#f5f7fa');
     const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
     const pName = (productsData.find(p => p.product_id === v.product_id)?.name) || v.name;
+    const avail = otAvailableStock(v.variant_id);
+    const availColor = avail <= 0 ? '#b91c1c' : '#134e2c';
     // ---------- 🔒 صدام کی ہدایت: سیریل نمبر یہاں صرف دکھانے کے لیے (سرخ گول بیج) — کوئی onclick نہیں، ایڈٹ/تبدیل/حذف کبھی ممکن نہیں یہاں سے ---------- -->
     return `
       <tr>
         <td style="${tdBase}${frozenTd(0)}"><span class="serialBadgeBtn" style="width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default;pointer-events:none;margin:0 !important;">${v.serial_no ?? '?'}</span></td>
         <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13.5px;font-weight:var(--otFw,700);">${pName}</td>
         <td style="${tdBase}${urduFont}font-size:11.5px;">${v.label || ''}</td>
+        <td style="${tdBase}font-weight:900;color:${availColor};" data-ot-stock-for="${v.variant_id}">${avail}</td>
         <td style="${tdBase}padding:4px 3px;">
           <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
             <input type="text" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setOtQtyDirect(${v.variant_id}, this.value, this)" style="width:40px;box-sizing:border-box;padding:5px 2px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:7px;font-size:12.5px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);">
@@ -21242,7 +21304,7 @@ function renderOtItemsTable(wrap){
         </td>
       </tr>`;
   }).join('');
-  const headers = ['#','نام','پیکنگ','مقدار'];
+  const headers = ['#','نام','پیکنگ','سٹاک','مقدار'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
     const frozen = i < 2 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
@@ -21251,7 +21313,7 @@ function renderOtItemsTable(wrap){
   wrap.style.display = 'block';
   wrap.innerHTML = `
     <div style="width:100%;max-height:62vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1.5px solid #cbd5e1;box-shadow:0 3px 10px rgba(0,0,0,.1);">
-      <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:334px;table-layout:fixed;font-size:12.5px;">
+      <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:392px;table-layout:fixed;font-size:12.5px;">
         ${colgroupHtml}
         <thead>${theadHtml}</thead>
         <tbody>${rows}</tbody>
@@ -21274,6 +21336,7 @@ function setOtQtyDirect(variantId, value, inputEl){
     const tr = inputEl.closest('tr');
     if(tr) tr.style.background = qty > 0 ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : '';
   }
+  updateOtStockCell(variantId); // ---------- 📦 صدام کی ہدایت (FM10SEPTH): مقدار بدلتے ہی سٹاک کالم فوراً اپڈیٹ ---------- -->
 }
 
 // ---------- ➕➖ صدام کی ہدایت: مقدار کے ساتھ افقی (horizontal) پلس/مائنس — مقدار کے بالکل بعد پہلا بٹن پلس
@@ -21292,6 +21355,7 @@ function changeOtQtyTable(btn, variantId, delta){
   }
   const tr = btn.closest('tr');
   if(tr) tr.style.background = next > 0 ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : '';
+  updateOtStockCell(variantId); // ---------- 📦 صدام کی ہدایت (FM10SEPTH): مقدار بدلتے ہی سٹاک کالم فوراً اپڈیٹ ---------- -->
 }
 
 // ---------- 🔤 صدام کی ہدایت: آرڈر ٹیکنگ کی آئٹمز سکرین پر ہی پتلا↔موٹا سلائیڈر — اسی صفحے کی لکھائی
@@ -21335,6 +21399,7 @@ function applyOtRowState(row, variantId, isChecked){
   if(qtyEl) qtyEl.textContent = otQtyMap[variantId] || 0;
   const chk = row.querySelector('input[type="checkbox"]');
   if(chk) chk.checked = isChecked;
+  updateOtStockCell(variantId); // ---------- 📦 صدام کی ہدایت (FM10SEPTH): مقدار بدلتے ہی سٹاک بیج فوراً اپڈیٹ ---------- -->
 }
 
 // ---------- + / − بٹن — variant_id ہمیشہ خود اسی row کے data-variant-id سے پڑھا جاتا ہے، کبھی بھی
@@ -21366,6 +21431,50 @@ function goOtPage(delta){
   renderOtItemsPage();
 }
 
+// ---------- 📊 صدام کی ہدایت (FM10SEPTH): صرف حاضر سبزیاں — کل سٹاک، کتنا آرڈرز میں بک ہو چکا (فروخت کے
+// لیے مختص)، اور کتنا ابھی باقی/دستیاب ہے — سیریل نمبر کی ترتیب سے ---------- -->
+function openOtStockReport(){
+  const wrap = document.getElementById('otStockReportWrap');
+  const list = getFlatVariants().sort((a,b) => (a.serial_no||0) - (b.serial_no||0));
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">کوئی حاضر سبزی نہیں</div>`;
+  } else {
+    const rows = list.map(v => {
+      const reserved = Number(v.reserved) || 0;
+      const stock = Number(v.stock) || 0;
+      const avail = stock - reserved;
+      const availColor = avail <= 0 ? '#b91c1c' : '#134e2c';
+      return `
+      <tr>
+        <td style="padding:6px 4px; border-bottom:1px solid #eef1f5; text-align:center; font-weight:800;">${v.serial_no ?? '?'}</td>
+        <td style="padding:6px 4px; border-bottom:1px solid #eef1f5; text-align:right;">${v.name}</td>
+        <td style="padding:6px 4px; border-bottom:1px solid #eef1f5; text-align:center; font-weight:800;">${stock}</td>
+        <td style="padding:6px 4px; border-bottom:1px solid #eef1f5; text-align:center; font-weight:800; color:#c2410c;">${reserved}</td>
+        <td style="padding:6px 4px; border-bottom:1px solid #eef1f5; text-align:center; font-weight:900; color:${availColor};">${avail}</td>
+      </tr>`;
+    }).join('');
+    wrap.innerHTML = `
+      <div style="max-height:60vh; overflow-y:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:12.5px;" dir="rtl">
+          <thead>
+            <tr style="background:#134e2c; color:#fff;">
+              <th style="padding:7px 4px;">#</th>
+              <th style="padding:7px 4px;">نام</th>
+              <th style="padding:7px 4px;">کل سٹاک</th>
+              <th style="padding:7px 4px;">بک/فروخت</th>
+              <th style="padding:7px 4px;">باقی</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+  document.getElementById('otStockReportModal').classList.add('show');
+}
+function closeOtStockReport(){
+  document.getElementById('otStockReportModal').classList.remove('show');
+}
+
 // ---------- STEP 3: ریویو — اب اصل "Advance Order" بل کینوس کی شکل میں، صرف تعداد کے ساتھ (رقم/ریٹ ابھی نہیں) ----------
 async function openOtReview(){
   if(!otCustomer){ alert('پہلے کسٹمر منتخب کریں'); return; }
@@ -21393,6 +21502,14 @@ async function openOtReview(){
   // اگر بندہ ◀ ترمیم کریں سے واپس جا کر تعداد بدلے اور دوبارہ آرڈر مکمل دبائے تو نئی انٹری نہیں بنتی،
   // وہی پہلے سے محفوظ آرڈر اپڈیٹ ہو جاتا ہے (otSavedOrderId کی مدد سے) ----------
   const itemsForSave = items.map(i => ({variant_id: i.variant_id, name: i.name, label: i.label, qty: i.qty, unitPrice: 0}));
+  // ---------- 📦 صدام کی ہدایت (FM10SEPTH): آرڈر محفوظ/اپڈیٹ ہوتے ہی سٹاک "بک" کریں — پہلے اگر یہی آرڈر
+  // پہلے سے محفوظ تھا تو اس کی پرانی مقدار واپس کریں، پھر نئی مقدار بک کریں (تاکہ ترمیم پر دگنی کٹوتی نہ ہو) ---------- -->
+  if(otSavedOrderId){
+    const existing = advanceOrdersData.find(o => o.id === otSavedOrderId);
+    if(existing) releaseOrderStock(existing.items);
+  }
+  reserveOrderStock(itemsForSave);
+  pushProductsToCloud(); // ---------- ⚡ بک شدہ سٹاک فوراً کلاؤڈ پر، تاکہ دوسرا ملازم بھی ریل ٹائم دستیاب سٹاک دیکھے ---------- -->
   if(otSavedOrderId){
     const existing = advanceOrdersData.find(o => o.id === otSavedOrderId);
     if(existing) existing.items = itemsForSave;
@@ -22691,6 +22808,13 @@ function deleteAdvanceOrder(orderId){
     return;
   }
   if(!confirm('Delete this advance order? This cannot be undone.')) return;
+  const delOrder = advanceOrdersData.find(o => o.id === orderId);
+  // ---------- 📦 صدام کی ہدایت (FM10SEPTH): آرڈر ڈیلیٹ ہونے پر بک شدہ سٹاک واپس دستیاب سٹاک میں شامل کریں
+  // (اگر پہلے سے Fulfill/بل بن چکا ہو تو وہ ریزرویشن پہلے ہی fulfillAdvanceOrder میں خارج ہو چکی ہوتی ہے) ---------- -->
+  if(delOrder && delOrder.status !== 'fulfilled'){
+    releaseOrderStock(delOrder.items);
+    pushProductsToCloud();
+  }
   advanceOrdersData = advanceOrdersData.filter(o => o.id !== orderId);
   persistAllData();
   pushAdvanceOrdersToCloud(); // ---------- کلاؤڈ پر بھی خودکار اپڈیٹ ----------
@@ -22720,6 +22844,13 @@ function fulfillAdvanceOrder(orderId){
   const skippedCustom = order.items.filter(i => i.variant_id === null);
 
   const matchedCustomer = customersData.find(c => c.name.toLowerCase() === order.customerName.toLowerCase());
+
+  // ---------- 📦 صدام کی ہدایت (FM10SEPTH): اب یہ آرڈر اصل بلنگ میں جا رہا ہے (جہاں finalizeInvoice خود
+  // اصل v.stock کاٹے گا) — اس لیے یہاں صرف "بک شدہ" ریزرویشن خارج کریں، تاکہ سٹاک دوہرا نہ کٹے ---------- -->
+  if(order.status !== 'fulfilled'){
+    releaseOrderStock(order.items);
+    pushProductsToCloud();
+  }
 
   order.status = 'fulfilled';
   order.fulfilledAt = new Date().toISOString();
