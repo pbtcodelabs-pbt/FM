@@ -5086,6 +5086,9 @@
       <div id="otStepCustomer">
         <!-- ---------- 📋 صدام کی ہدایت (FM4SEPFR30): ملازم کے بھیجے گئے تمام آرڈرز کا مستقل ریکارڈ —
              بھیجنے کے بعد آرڈر غائب نہیں ہوتا، یہیں سے ہمیشہ دیکھ/پرنٹ/شیئر کر سکتا ہے (ترمیم/حذف نہیں کر سکتا) ---------- -->
+        <!-- ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ڈرافٹ آرڈرز کی الگ فہرست — جب تک صدام کو حتمی طور پر
+             نہ بھیجا جائے، ملازم یہاں سے دیکھ/ترمیم/حذف کر سکتا ہے ---------- -->
+        <button type="button" onclick="openMyDraftOrders()" style="width:100%; padding:12px; margin-bottom:8px; background:linear-gradient(180deg,#c2790f,#8a530a); color:#fff; border:none; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.15);">📝 میرے ڈرافٹ آرڈرز — دیکھیں / ترمیم کریں</button>
         <button type="button" onclick="openMySentOrders()" style="width:100%; padding:12px; margin-bottom:10px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.15);">📋 میرے بھیجے گئے آرڈرز — ریکارڈ دیکھیں</button>
         <input type="text" id="otCustSearch" placeholder="🔍 کسٹمر کا نام یا ایریا لکھیں" oninput="renderOtCustomerList(this.value)"
                style="width:100%; padding:14px; border:2px solid var(--primary); border-radius:12px; font-size:17px; font-weight:800; text-align:center; margin-bottom:10px;">
@@ -5119,7 +5122,7 @@
            صرف تعداد کے ساتھ (رقم/ریٹ ایڈمن خود لگائے گا) — ایڈمن کو بھیجنے کے لیے تیار ---------- -->
       <div id="otStepReview" style="display:none; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
         <!-- ---------- ✅ آرڈر خودکار محفوظ ہو چکا ہے — یہاں صرف تصدیقی پیغام اور بل کی جھلک ---------- -->
-        <div style="background:#dcfce7; color:#15803d; border-radius:12px; padding:10px 14px; margin-bottom:10px; text-align:center; font-weight:800; font-size:15px;">
+        <div id="otReviewBanner" style="background:#dcfce7; color:#15803d; border-radius:12px; padding:10px 14px; margin-bottom:10px; text-align:center; font-weight:800; font-size:15px;">
           ✅ آرڈر محفوظ ہو گیا — صدام کو بھیج دیا گیا
         </div>
         <!-- ---------- 🔤 صدام کی ہدایت (FM4SEPFR25): فونٹ سلیکشن + موٹا/پتلا + پرنٹ سائز — یہیں سے، تھرمل پرنٹ کے لیے ---------- -->
@@ -5147,7 +5150,11 @@
           <button type="button" onclick="shareOtReviewOrder()" style="padding:14px; background:#25D366; color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">💬 واٹس ایپ شیئر</button>
           <div style="display:flex; gap:8px;">
             <button type="button" onclick="backToOtItems()" style="flex:1; padding:15px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:14px; font-size:15px; font-weight:800; cursor:pointer;">✏️ ترمیم کریں</button>
-            <button type="button" onclick="confirmSendOtOrder()" style="flex:2; padding:15px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">📤 صدام کو بھیجیں</button>
+            <!-- ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): یہاں سے "صدام کو بھیجیں" بٹن ہٹا دیا گیا —
+                 ملازم کے لیے اب یہ صرف ڈرافٹ محفوظ کرتا ہے، حتمی ارسال "میرے ڈرافٹ آرڈرز" فہرست سے ہوتا ہے۔
+                 کسٹمر خود آرڈر دے تو اس کے لیے پرانا فوری ارسال کا بٹن ہی رہے گا ---------- -->
+            <button type="button" id="otSaveDraftBtn" onclick="saveOtDraftAndNext()" style="flex:2; padding:15px; background:var(--accent); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2); display:none;">📝 ڈرافٹ محفوظ کریں</button>
+            <button type="button" id="otSendFinalBtn" onclick="confirmSendOtOrder()" style="flex:2; padding:15px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">📤 صدام کو بھیجیں</button>
           </div>
           <!-- ---------- 🏠 ہوم پیج پر واپس — صدام کی ہدایت (FM3SEPTH10): پہلے یہاں سے واپس جانے کا کوئی راستہ نہیں تھا ---------- -->
           <button type="button" onclick="goTo(AppState.currentRole==='customer' ? 'customerHome' : 'home')" style="padding:13px; background:#f1f5f9; border:none; color:#334155; border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">🏠 ہوم پیج</button>
@@ -5161,6 +5168,33 @@
       <div class="modalBox" style="max-width:420px; max-height:88vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
         <h3 style="margin-top:0;">📊 حاضر سبزیوں کا سٹاک رپورٹ</h3>
         <div id="otStockReportWrap"></div>
+
+        <!-- ---------- 🖨️ صدام کی ہدایت (FM10SEPTH04:12PM): آج کے تمام آرڈرز (ڈرافٹ سمیت) کی مجموعی آرڈر شیٹ —
+             پرنٹ اور واٹس ایپ شیئر کے لیے تیار، فونٹ/موٹائی/زوم کے ساتھ ---------- -->
+        <div style="border-top:2px dashed #dbe1ea; margin-top:14px; padding-top:12px;">
+          <div style="font-weight:800; font-size:14px; color:var(--primary-dark); margin-bottom:8px; text-align:center;">🖨️ آج کی مجموعی آرڈر شیٹ — پرنٹ/شیئر</div>
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+            <select id="otSheetFontSelect" onchange="otSheetChangeFont(this.value)" style="flex:1; padding:8px; border:1.5px solid var(--primary); border-radius:9px; font-size:13px; font-weight:700; background:#fff;"></select>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; padding:0 2px;">
+            <span style="font-size:11px; color:var(--muted); flex:0 0 auto;">پتلا</span>
+            <input type="range" id="otSheetWeightSlider" min="400" max="900" step="50" value="700" oninput="otSheetSetWeight(this.value)" style="flex:1;">
+            <span style="font-size:11px; color:var(--muted); flex:0 0 auto;">موٹا</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:8px;">
+            <button type="button" onclick="otSheetAdjustZoom(-10)" style="width:38px; height:38px; border-radius:9px; border:2px solid var(--primary); background:#fff; color:var(--primary); font-size:15px; font-weight:800; cursor:pointer;">A−</button>
+            <span style="font-size:13px; font-weight:700; color:var(--muted);">ٹیکسٹ سائز</span>
+            <button type="button" onclick="otSheetAdjustZoom(10)" style="width:38px; height:38px; border-radius:9px; border:2px solid var(--primary); background:#fff; color:var(--primary); font-size:18px; font-weight:800; cursor:pointer;">A+</button>
+          </div>
+          <div style="background:#fff; border:1px solid #e5e9f0; border-radius:14px; padding:10px; margin-bottom:12px; display:flex; justify-content:center;">
+            <canvas id="otOrderSheetCanvas" style="width:100%; max-width:340px; display:block;"></canvas>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <button type="button" onclick="printOtOrderSheet()" style="padding:13px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:14px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">🖨️ تھرمل پرنٹ کریں</button>
+            <button type="button" onclick="shareOtOrderSheet()" style="padding:13px; background:#25D366; color:#fff; border:none; border-radius:14px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">💬 واٹس ایپ شیئر</button>
+          </div>
+        </div>
+
         <button type="button" onclick="closeOtStockReport()" style="width:100%; margin-top:12px; padding:12px; background:#f1f5f9; border:none; color:#334155; border-radius:12px; font-weight:800; cursor:pointer;">بند کریں</button>
       </div>
     </div>
@@ -5415,6 +5449,20 @@
         </div>
         <div id="mySentOrdersSummary" style="text-align:center; background:#eef2ff; color:var(--primary-dark); border-radius:10px; padding:8px; margin-bottom:10px; font-weight:800; font-size:14px;"></div>
         <div id="mySentOrdersListWrap"></div>
+      </div>
+    </div>
+
+    <!-- ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ڈرافٹ آرڈرز کی فہرست — جب تک صدام کو حتمی طور پر نہ
+         بھیجا جائے، ملازم یہاں سے پریویو/ترمیم/حذف کر سکتا ہے، اور جب چاہے حتمی طور پر صدام کو بھیج سکتا ہے
+         (بھیجنے کے بعد یہ فہرست سے نکل کر "میرے بھیجے گئے آرڈرز" میں مستقل چلا جائے گا) ---------- -->
+    <div class="modalOverlay" id="myDraftOrdersModal" onclick="if(event.target===this) closeMyDraftOrders()" dir="rtl">
+      <div class="modalBox" style="max-width:480px; width:94vw; max-height:85vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <h3 style="margin:0;">📝 میرے ڈرافٹ آرڈرز</h3>
+          <span onclick="closeMyDraftOrders()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
+        </div>
+        <div id="myDraftOrdersSummary" style="text-align:center; background:#fff7ed; color:#9a3412; border-radius:10px; padding:8px; margin-bottom:10px; font-weight:800; font-size:14px;"></div>
+        <div id="myDraftOrdersListWrap"></div>
       </div>
     </div>
 
@@ -7719,7 +7767,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات10ستمبر4:12pm';
+const APP_BUILD_VERSION = 'جمعرات10ستمبر4:45pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8197,7 +8245,7 @@ function renderHomeShortcutCards(){
   if(tiles.length === 0){ wrap.style.display = 'none'; return; }
 
   wrap.style.display = 'flex';
-  const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending').length : 0;
+  const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending' && o.isDraft !== true).length : 0;
 
   wrap.innerHTML = tiles.map(t => `
     <button type="button" onclick="goTo('${t.screen}')" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; background:var(--card); border:1.5px solid #e5e9f0; border-radius:12px; padding:10px 6px; cursor:pointer; box-shadow:var(--shadow);">
@@ -8233,7 +8281,7 @@ function renderHomeIconGrid(){
   // ہر یوزر کے سامنے 🖥️ Screens بٹن سے منتخب کی گئی اپنی u.screens فہرست۔ کوئی ہارڈ کوڈ فکسڈ فہرست نہیں،
   // اور کوئی خاموش ڈیفالٹ بھی نہیں — اگر خالی ہو (پرانا ڈیٹا) تو صاف پیغام دکھایا جاتا ہے، Users میں جا کر
   // ٹھیک کرنے کی ہدایت کے ساتھ ---------- -->
-  const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending').length : 0;
+  const pendingCount = (typeof advanceOrdersData !== 'undefined') ? advanceOrdersData.filter(o => o.status === 'pending' && o.isDraft !== true).length : 0;
   // ---------- 🔴 صدام کی ہدایت (FM3SEPTH10): Recovery List آئیکن پر بھی وہی سرخ بلبلا بیج — کتنی نئی وصولی تصدیق کی منتظر ہے ----------
   const pendingRecoveryCount = (typeof recoveryListData !== 'undefined') ? recoveryListData.filter(r => r.status === 'pending').length : 0;
   // ---------- ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی زیرِ التوا درخواستوں پر بھی وہی سرخ بلبلا بیج ---------- -->
@@ -21470,9 +21518,85 @@ function openOtStockReport(){
       </div>`;
   }
   document.getElementById('otStockReportModal').classList.add('show');
+  syncOtSheetStyleControls();
+  renderAdvOrderToCanvas(buildOtOrderSheetSyntheticOrder(), document.getElementById('otOrderSheetCanvas'));
 }
 function closeOtStockReport(){
   document.getElementById('otStockReportModal').classList.remove('show');
+}
+
+// ---------- 🖨️ صدام کی ہدایت (FM10SEPTH04:12PM): تمام حاضر سبزیوں کی "بک شدہ" (reserved) مقدار — یہ ہر
+// پینڈنگ آرڈر (ڈرافٹ + حتمی بھیجے گئے دونوں) کا مجموعہ ہے — کی بنیاد پر ایک "جعلی/synthetic آرڈر" بنائیں تاکہ
+// موجودہ بل کینوس رینڈرر (renderAdvOrderToCanvas) دوبارہ استعمال ہو سکے، اسی فونٹ/پرنٹ/شیئر سہولت کے ساتھ ---------- -->
+function buildOtOrderSheetSyntheticOrder(){
+  const list = getFlatVariants().sort((a,b) => (a.serial_no||0) - (b.serial_no||0));
+  const items = list
+    .filter(v => (Number(v.reserved) || 0) > 0)
+    .map(v => ({variant_id: v.variant_id, name: v.name, label: v.label || '', qty: Number(v.reserved) || 0, unitPrice: 0}));
+  return {
+    id: 'sheet-' + new Date().toISOString().slice(0,10),
+    customerName: '📦 آج کے تمام آرڈرز — مجموعی خلاصہ',
+    items,
+    extraCharges: [],
+    createdAt: new Date().toISOString(),
+    status: 'pending'
+  };
+}
+function syncOtSheetStyleControls(){
+  const sel = document.getElementById('otSheetFontSelect');
+  if(sel && !sel.dataset.filled){
+    sel.innerHTML = FONT_PRESETS.map(f => `<option value="${f.id}">${f.label}</option>`).join('');
+    sel.dataset.filled = '1';
+  }
+  if(sel) sel.value = AppState.settings.advOrderFontId || 'jameelnastaleeqkasheeda';
+  const weightSlider = document.getElementById('otSheetWeightSlider');
+  if(weightSlider) weightSlider.value = Math.max(400, Math.min(900, Number(AppState.settings.advOrderItemWeight) || 700));
+}
+function otSheetChangeFont(fontId){
+  AppState.settings.advOrderFontId = fontId;
+  persistAllData();
+  renderAdvOrderToCanvas(buildOtOrderSheetSyntheticOrder(), document.getElementById('otOrderSheetCanvas'));
+}
+function otSheetSetWeight(weight){
+  AppState.settings.advOrderItemWeight = Math.max(400, Math.min(900, Number(weight) || 700));
+  persistAllData();
+  renderAdvOrderToCanvas(buildOtOrderSheetSyntheticOrder(), document.getElementById('otOrderSheetCanvas'));
+}
+function otSheetAdjustZoom(delta){
+  const current = AppState.settings.advOrderFontScale || 100;
+  AppState.settings.advOrderFontScale = Math.max(70, Math.min(200, current + delta));
+  persistAllData();
+  renderAdvOrderToCanvas(buildOtOrderSheetSyntheticOrder(), document.getElementById('otOrderSheetCanvas'));
+}
+async function printOtOrderSheet(){
+  const order = buildOtOrderSheetSyntheticOrder();
+  if(order.items.length === 0){ alert('ابھی تک کوئی آرڈر بک نہیں ہوا۔'); return; }
+  await renderAdvOrderToCanvas(order, document.getElementById('otOrderSheetCanvas'));
+  const canvas = document.getElementById('otOrderSheetCanvas');
+  if(!canvas) return;
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+}
+async function shareOtOrderSheet(){
+  const order = buildOtOrderSheetSyntheticOrder();
+  if(order.items.length === 0){ alert('ابھی تک کوئی آرڈر بک نہیں ہوا۔'); return; }
+  const canvas = document.getElementById('otOrderSheetCanvas');
+  await renderAdvOrderToCanvas(order, canvas);
+  canvas.toBlob(async (blob) => {
+    if(!blob){ alert('تصویر بنانے میں مسئلہ ہوا۔'); return; }
+    const file = new File([blob], `Order-Sheet-${new Date().toISOString().slice(0,10)}.png`, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:'آج کے آرڈرز', text:'مجموعی خلاصہ'}); }
+      catch(err){ /* یوزر نے شیئر منسوخ کیا */ }
+    } else if(typeof showImageSharePreview === 'function'){
+      showImageSharePreview(canvas, `Order-Sheet.png`, '📤 آرڈر شیٹ شیئر کریں', 'آج کے آرڈرز');
+    } else {
+      alert('اس ڈیوائس پر شیئرنگ سپورٹ نہیں ہے۔');
+    }
+  }, 'image/png');
 }
 
 // ---------- STEP 3: ریویو — اب اصل "Advance Order" بل کینوس کی شکل میں، صرف تعداد کے ساتھ (رقم/ریٹ ابھی نہیں) ----------
@@ -21527,7 +21651,12 @@ async function openOtReview(){
       placedByCustomer: AppState.currentRole === 'customer', // ---------- 🧪 FMtest02 Phase 3: true ہو تو ایڈمن کو نظر آئے کہ یہ آرڈر خود کسٹمر نے موبائل سے بھیجا ہے، کسی ملازم نے نہیں ----------
       extraCharges: [], // ---------- ایڈمن یہاں بعد میں فریٹ/شپنگ وغیرہ اضافی خرچے شامل کر سکتا ہے ----------
       createdAt: new Date().toISOString(),
-      fulfilledAt: null
+      fulfilledAt: null,
+      // ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ملازم کا لیا ہوا آرڈر پہلے ڈرافٹ کے طور پر محفوظ ہوتا ہے —
+      // صدام (ایڈمن) کو تب تک نظر نہیں آتا جب تک ملازم "میرے ڈرافٹ آرڈرز" سے حتمی طور پر نہ بھیجے۔ کسٹمر خود
+      // اپنا آرڈر دے تو وہ ڈرافٹ نہیں بنتا، پہلے کی طرح فوری چلا جاتا ہے ---------- -->
+      isDraft: AppState.currentRole !== 'customer',
+      finalSentAt: null
     };
     advanceOrdersData.unshift(newOrder);
     otSavedOrderId = newOrder.id;
@@ -21541,7 +21670,27 @@ async function openOtReview(){
   const savedOrder = advanceOrdersData.find(o => o.id === otSavedOrderId);
   await new Promise(r => setTimeout(r, 50));
   syncOtReviewStyleControls();
+  syncOtReviewSendControls(savedOrder);
   await renderAdvOrderToCanvas(savedOrder, document.getElementById('otReviewCanvas'));
+}
+
+// ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ملازم کے لیے یہاں "صدام کو بھیجیں" کی بجائے "ڈرافٹ محفوظ
+// کریں" دکھائیں (حتمی ارسال اب صرف "میرے ڈرافٹ آرڈرز" فہرست سے ہوتا ہے)۔ کسٹمر خود آرڈر دے رہا ہو تو پرانا
+// رویہ برقرار — سیدھا "صدام کو بھیجیں" ---------- -->
+function syncOtReviewSendControls(order){
+  const banner = document.getElementById('otReviewBanner');
+  const draftBtn = document.getElementById('otSaveDraftBtn');
+  const sendBtn = document.getElementById('otSendFinalBtn');
+  const isEmployeeDraft = AppState.currentRole !== 'customer' && order && order.isDraft === true;
+  if(banner) banner.textContent = isEmployeeDraft ? '📝 آرڈر ڈرافٹ کے طور پر محفوظ ہو گیا — ابھی صدام کو نہیں بھیجا گیا' : '✅ آرڈر محفوظ ہو گیا — صدام کو بھیج دیا گیا';
+  if(draftBtn) draftBtn.style.display = isEmployeeDraft ? '' : 'none';
+  if(sendBtn) sendBtn.style.display = isEmployeeDraft ? 'none' : '';
+}
+
+// ---------- 📝 ڈرافٹ محفوظ کریں — آرڈر پہلے ہی مقامی/کلاؤڈ پر محفوظ ہو چکا (بطور ڈرافٹ)، بس اگلے کسٹمر پر جائیں۔
+// یہ آرڈر تب تک صدام کو نظر نہیں آئے گا جب تک "میرے ڈرافٹ آرڈرز" سے حتمی طور پر نہ بھیجا جائے ---------- -->
+function saveOtDraftAndNext(){
+  startNextOtCustomer();
 }
 
 // ---------- 🔒 صدام کی ہدایت (FM4SEPFR30): "صدام کو بھیجیں" دباتے وقت پہلے تصدیق مانگیں — بھیجنے کے بعد
@@ -21673,7 +21822,7 @@ function postOtOrderToAdmin(){
 function openMySentOrders(){
   const myName = AppState.currentUser?.name || '';
   const myOrders = advanceOrdersData
-    .filter(o => o.employeeName === myName)
+    .filter(o => o.employeeName === myName && o.isDraft !== true) // ---------- 📝 FM10SEPTH04:12PM: صرف حتمی طور پر بھیجے گئے آرڈرز — ڈرافٹ یہاں نہیں دکھائے جاتے، وہ "میرے ڈرافٹ آرڈرز" میں ہیں ----------
     .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const wrap = document.getElementById('mySentOrdersListWrap');
@@ -21711,6 +21860,102 @@ function openMySentOrders(){
 }
 function closeMySentOrders(){
   document.getElementById('mySentOrdersModal').classList.remove('show');
+}
+
+// ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ملازم کے اپنے ڈرافٹ آرڈرز — جب تک حتمی طور پر نہ بھیجے،
+// یہاں سے پریویو، ترمیم، حذف، یا حتمی ارسال کر سکتا ہے۔ صرف اسی ملازم کے اپنے ڈرافٹ (employeeName سے ملاتے ہوئے) ---------- -->
+function openMyDraftOrders(){
+  const myName = AppState.currentUser?.name || '';
+  const myDrafts = advanceOrdersData
+    .filter(o => o.employeeName === myName && o.isDraft === true)
+    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const wrap = document.getElementById('myDraftOrdersListWrap');
+  const summary = document.getElementById('myDraftOrdersSummary');
+  summary.textContent = `📝 اس وقت ${myDrafts.length} ڈرافٹ آرڈر موجود ہیں — صدام کو ابھی نہیں بھیجے گئے`;
+
+  if(myDrafts.length === 0){
+    wrap.innerHTML = `<div style="text-align:center; color:var(--muted); padding:30px 10px;">فی الحال کوئی ڈرافٹ آرڈر موجود نہیں۔</div>`;
+  } else {
+    wrap.innerHTML = myDrafts.map(o => {
+      const dt = new Date(o.createdAt);
+      const dateStr = dt.toLocaleDateString('en-GB') + ' — ' + dt.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+      const itemCount = (o.items || []).length;
+      const totalQty = (o.items || []).reduce((s,i) => s + (i.qty||0), 0);
+      return `
+        <div style="background:#fff; border:1.5px solid #fdba74; border-radius:12px; padding:12px; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,.05);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-weight:800; font-size:15px;">🧑 ${o.customerName}</span>
+            <span style="font-size:11px; color:#fff; background:var(--accent); border-radius:7px; padding:2px 8px; font-weight:700;">📝 ڈرافٹ #${o.id}</span>
+          </div>
+          <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">🕐 ${dateStr}</div>
+          <div style="font-size:12.5px; color:var(--text); font-weight:700; margin-bottom:8px;">📦 ${itemCount} اقسام — کل ${totalQty} عدد</div>
+          <div style="display:flex; gap:6px; margin-bottom:6px;">
+            <button onclick="openAdvOrderPreview(${o.id})" style="flex:1; padding:7px; background:#eef2ff; color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">👁️ پریویو</button>
+            <button onclick="editOtDraftOrder(${o.id})" style="flex:1; padding:7px; background:#fff7ed; color:#9a3412; border:1px solid #fdba74; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">✏️ ترمیم</button>
+            <button onclick="deleteMyDraftOrder(${o.id})" style="flex:1; padding:7px; background:#fef2f2; color:#b91c1c; border:1px solid #fca5a5; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">🗑️ حذف</button>
+          </div>
+          <button onclick="sendDraftOrderFinal(${o.id})" style="width:100%; padding:9px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:800; cursor:pointer;">📤 صدام کو حتمی طور پر بھیجیں</button>
+        </div>`;
+    }).join('');
+  }
+
+  document.getElementById('myDraftOrdersModal').classList.add('show');
+}
+function closeMyDraftOrders(){
+  document.getElementById('myDraftOrdersModal').classList.remove('show');
+}
+
+// ---------- ✏️ ڈرافٹ میں ترمیم — اسی کسٹمر اور اسی مقدار کے ساتھ Order Taking کی آئٹم سکرین دوبارہ کھولیں،
+// جمع/تفریق، نئے آئٹم شامل یا موجودہ ہٹا کر دوبارہ "آرڈر مکمل" دبائیں تو یہی ڈرافٹ اپڈیٹ ہو جائے گا ---------- -->
+function editOtDraftOrder(orderId){
+  const order = advanceOrdersData.find(o => o.id === orderId);
+  if(!order) return;
+  if(order.employeeName !== (AppState.currentUser?.name || '')){ alert('❌ آپ صرف اپنے آرڈرز میں ترمیم کر سکتے ہیں۔'); return; }
+  if(order.isDraft !== true){ alert('❌ یہ آرڈر پہلے ہی صدام کو بھیجا جا چکا ہے — اب اس میں ترمیم نہیں ہو سکتی۔'); return; }
+  closeMyDraftOrders();
+  goTo('orderTaking');
+  selectOtCustomer(order.customer_id);
+  otQtyMap = {};
+  otCheckedMap = {};
+  order.items.forEach(i => {
+    if(i.variant_id != null){
+      otQtyMap[i.variant_id] = i.qty;
+      otCheckedMap[i.variant_id] = true;
+    }
+  });
+  otSavedOrderId = order.id;
+  renderOtItemsPage();
+}
+
+// ---------- 🗑️ ملازم اپنا ڈرافٹ خود حذف کر سکتا ہے (حتمی بھیجے گئے آرڈر کے برعکس، جو حذف نہیں ہو سکتا) —
+// حذف ہوتے ہی بک شدہ سٹاک بھی واپس دستیاب سٹاک میں شامل ---------- -->
+function deleteMyDraftOrder(orderId){
+  const order = advanceOrdersData.find(o => o.id === orderId);
+  if(!order) return;
+  if(order.employeeName !== (AppState.currentUser?.name || '')){ alert('❌ آپ صرف اپنے آرڈرز حذف کر سکتے ہیں۔'); return; }
+  if(order.isDraft !== true){ alert('❌ یہ آرڈر پہلے ہی صدام کو بھیجا جا چکا ہے — اب حذف نہیں ہو سکتا۔'); return; }
+  if(!confirm('کیا آپ واقعی یہ ڈرافٹ آرڈر حذف کرنا چاہتے ہیں؟')) return;
+  releaseOrderStock(order.items);
+  pushProductsToCloud();
+  advanceOrdersData = advanceOrdersData.filter(o => o.id !== orderId);
+  persistAllData();
+  pushAdvanceOrdersToCloud();
+  openMyDraftOrders();
+}
+
+// ---------- 📤 صدام کو حتمی طور پر بھیجیں — تصدیق کے بعد یہ آرڈر مستقل طور پر لاک ہو جاتا ہے، مزید ترمیم/حذف
+// ممکن نہیں، اور اب صدام (ایڈمن) کی پینڈنگ فہرست میں نظر آئے گا ---------- -->
+function sendDraftOrderFinal(orderId){
+  const order = advanceOrdersData.find(o => o.id === orderId);
+  if(!order) return;
+  if(order.employeeName !== (AppState.currentUser?.name || '')){ alert('❌ آپ صرف اپنے آرڈرز بھیج سکتے ہیں۔'); return; }
+  if(!confirm('کیا آپ واقعی یہ آرڈر صدام کو حتمی طور پر بھیجنا چاہتے ہیں؟\n\nبھیجنے کے بعد اس آرڈر میں مزید ترمیم یا حذف نہیں ہو سکے گی — یہ آپ کے "میرے بھیجے گئے آرڈرز" ریکارڈ میں ہمیشہ کے لیے محفوظ رہے گا۔')) return;
+  order.isDraft = false;
+  order.finalSentAt = new Date().toISOString();
+  persistAllData();
+  pushAdvanceOrdersToCloud();
+  openMyDraftOrders();
 }
 
 // ---------- 📋 صدام کی ہدایت (5 ستمبر): ملازم کی بھیجی گئی وصولیوں کا مستقل ریکارڈ — نہ ترمیم، نہ حذف،
@@ -22883,7 +23128,7 @@ function renderAdvanceOrdersScreen(){
     return;
   }
 
-  let filtered = advanceOrdersData;
+  let filtered = advanceOrdersData.filter(o => o.isDraft !== true); // ---------- 📝 FM10SEPTH04:12PM: ڈرافٹ آرڈرز عام فہرست میں نہیں دکھائے جاتے، وہ "میرے ڈرافٹ آرڈرز" میں ہیں ----------
   if(advOrderListFilter === 'pending') filtered = filtered.filter(o => o.status !== 'fulfilled');
   else if(advOrderListFilter === 'fulfilled') filtered = filtered.filter(o => o.status === 'fulfilled');
 
@@ -22929,7 +23174,9 @@ function renderAdminPendingOrdersScreen(){
   const wrap = document.getElementById('advOrderListWrap');
   if(!wrap) return;
 
-  const pending = advanceOrdersData.filter(o => o.status !== 'fulfilled');
+  // ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ملازم کے ڈرافٹ آرڈرز یہاں نظر نہیں آئیں گے — صرف وہ آرڈرز
+  // جو ملازم نے حتمی طور پر بھیج دیے ہیں (isDraft !== true) ---------- -->
+  const pending = advanceOrdersData.filter(o => o.status !== 'fulfilled' && o.isDraft !== true);
   if(pending.length === 0){
     wrap.innerHTML = `<div class="placeholder">فی الحال کوئی پینڈنگ آرڈر موجود نہیں</div>`;
     return;
