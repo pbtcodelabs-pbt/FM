@@ -3482,42 +3482,46 @@
 
     <!-- 🧮 STOCK ADJUSTMENT — manual stock/price/low-stock editing for every variant, no Purchase Order needed -->
     <div class="screen admin-only" id="screen-stockadjustment" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
-      <div class="pageTitle" style="margin-bottom:6px;">🧮 سٹاک ایڈجسٹمنٹ</div>
 
-      <!-- ---------- 🗜️ صدام کی ہدایت (FM10SEPTH0844AM): صفحہ زیادہ سے زیادہ کھلا نظر آئے — رپورٹس، فلٹر،
-           انوینٹری چیک باکس سب ایک کولیپس ایبل باکس میں بند، ضرورت پر ہی کھلے۔ صرف سرچ ہمیشہ سامنے رہے ---------- -->
+      <!-- ---------- 🧵 صدام کی ہدایت (FM10SEPTH1044AM): عنوان + Undo/Redo + رپورٹس ڈراپ ڈاؤن + حاضر/غیر حاضر
+           سب ایک ہی اوپر کی لائن میں — پہلے ہر بٹن اپنی الگ قطار میں تھا (جنگل جیسا منظر)، اب ایک کمپیکٹ لائن ---------- -->
+      <div style="display:flex; align-items:center; gap:5px; margin-bottom:6px; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+        <div class="pageTitle" style="margin:0; flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:15px;">🧮 سٹاک ایڈجسٹمنٹ</div>
+        <button id="productsUndoBtn" onclick="undoProductsChange()" disabled title="پچھلا عمل واپس لائیں" style="flex:0 0 auto; width:32px; height:32px; border-radius:8px; border:1.5px solid #dbe1ea; background:#fff; font-size:14px; cursor:pointer;">↩️</button>
+        <button id="productsRedoBtn" onclick="redoProductsChange()" disabled title="واپس لایا گیا عمل دوبارہ کریں" style="flex:0 0 auto; width:32px; height:32px; border-radius:8px; border:1.5px solid #dbe1ea; background:#fff; font-size:14px; cursor:pointer;">↪️</button>
+        <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
+          <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:6px 10px; font-size:11px; max-width:none;">
+            <span>📊 رپورٹس</span>
+            <span class="categoryDropdownArrow">▾</span>
+          </button>
+          <div class="categoryDropdownPanel" id="stockAdjReportsDropdownPanel" style="right:0; left:auto; min-width:150px;">
+            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openStockValueReport();">📊 سٹاک</div>
+            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openLaborReport();">💪 مزدوری</div>
+            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openVegListReport();">🥬 سبزی لسٹ</div>
+            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openCustListReport();">👥 کسٹمر</div>
+            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openSupListReport();">🚚 سپلائرز</div>
+          </div>
+        </div>
+        <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:0 0 auto; padding:6px 8px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap;">🟢 حاضر</button>
+        <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:0 0 auto; padding:6px 8px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap;">🔴 غیر حاضر</button>
+      </div>
+
+      <!-- ---------- دوسری لائن: سرچ ہمیشہ سامنے، ترتیب اور انوینٹری ٹریک ساتھ ہی کمپیکٹ شکل میں ---------- -->
       <div class="productToolbar" style="margin-bottom:6px; display:flex; gap:5px; align-items:center;">
         <input type="text" id="stockAdjSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderStockAdjustmentScreen(this.value)" style="flex:1;">
-        <button id="productsUndoBtn" onclick="undoProductsChange()" disabled title="پچھلا عمل واپس لائیں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:1.5px solid #dbe1ea; background:#fff; font-size:16px; cursor:pointer;">↩️</button>
-        <button id="productsRedoBtn" onclick="redoProductsChange()" disabled title="واپس لایا گیا عمل دوبارہ کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:1.5px solid #dbe1ea; background:#fff; font-size:16px; cursor:pointer;">↪️</button>
-      </div>
-      <button id="stockAdjOptionsToggleBtn" onclick="toggleStockAdjOptionsPanel()" style="width:100%; margin-bottom:6px; padding:8px; background:#eef2ff; color:var(--primary-dark); border:1.5px dashed var(--primary); border-radius:9px; font-weight:800; font-size:12px; cursor:pointer;">⚙️ رپورٹس اور فلٹر ▾</button>
-      <div id="stockAdjOptionsPanel" style="display:none;">
-        <div style="display:flex; gap:4px; margin-bottom:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;">
-          <button onclick="openStockValueReport()" style="flex:0 0 auto; padding:6px 9px; background:var(--primary-dark); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10.5px; cursor:pointer; white-space:nowrap;">📊 سٹاک</button>
-          <button onclick="openLaborReport()" style="flex:0 0 auto; padding:6px 9px; background:#b45309; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10.5px; cursor:pointer; white-space:nowrap;">💪 مزدوری</button>
-          <button onclick="openVegListReport()" style="flex:0 0 auto; padding:6px 9px; background:#14532d; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10.5px; cursor:pointer; white-space:nowrap;">🥬 سبزی لسٹ</button>
-          <button onclick="openCustListReport()" style="flex:0 0 auto; padding:6px 9px; background:#0c4a6e; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10.5px; cursor:pointer; white-space:nowrap;">👥 کسٹمر</button>
-          <button onclick="openSupListReport()" style="flex:0 0 auto; padding:6px 9px; background:#78350f; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10.5px; cursor:pointer; white-space:nowrap;">🚚 سپلائرز</button>
-        </div>
-        <label style="display:flex; align-items:center; gap:6px; background:#eef2ff; border-radius:8px; padding:6px 10px; margin-bottom:6px; font-size:11.5px; font-weight:700; color:var(--primary-dark); cursor:pointer; line-height:1.3;">
-          <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:16px; height:16px; margin:0; flex:0 0 auto;">
-          📦 انوینٹری ٹریک کریں (سٹاک ختم ہونے پر بکری روک دیں)
+        <select id="stockAdjSortFilter" onchange="handleStockAdjSortSelect(this)" style="flex:0 0 108px; padding:6px 2px; border:1px solid #dbe1ea; border-radius:8px; font-size:10px;">
+          <option value="serial">سیریل نمبر کے مطابق</option>
+          <option value="negFirst">زیادہ منفی سٹاک پہلے</option>
+          <option value="az">نام: الف → ی</option>
+          <option value="za">نام: ی → الف</option>
+          <option value="stockLow">سٹاک: کم → زیادہ</option>
+          <option value="stockHigh">سٹاک: زیادہ → کم</option>
+          <option value="__TOGGLE_VIEW__" id="saViewModeBtn">📊 جدول نظارہ</option>
+          <option value="__RENUMBER__">🔢 ترتیب دیں (1 سے نمبر)</option>
+        </select>
+        <label title="📦 انوینٹری ٹریک کریں (سٹاک ختم ہونے پر بکری روک دیں)" style="display:flex; align-items:center; justify-content:center; flex:0 0 34px; height:34px; background:#eef2ff; border-radius:8px; cursor:pointer;">
+          <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:16px; height:16px; margin:0;">
         </label>
-        <div style="display:flex; gap:5px; margin-bottom:6px;">
-          <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:1; padding:6px 2px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer;">🟢 حاضر</button>
-          <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:1; padding:6px 2px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer;">🔴 غیر حاضر</button>
-          <select id="stockAdjSortFilter" onchange="handleStockAdjSortSelect(this)" style="flex:1.4; padding:6px 2px; border:1px solid #dbe1ea; border-radius:8px; font-size:10.5px;">
-            <option value="serial">سیریل نمبر کے مطابق</option>
-            <option value="negFirst">زیادہ منفی سٹاک پہلے</option>
-            <option value="az">نام: الف → ی</option>
-            <option value="za">نام: ی → الف</option>
-            <option value="stockLow">سٹاک: کم → زیادہ</option>
-            <option value="stockHigh">سٹاک: زیادہ → کم</option>
-            <option value="__TOGGLE_VIEW__" id="saViewModeBtn">📊 جدول نظارہ</option>
-            <option value="__RENUMBER__">🔢 ترتیب دیں (1 سے نمبر)</option>
-          </select>
-        </div>
       </div>
 
       <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): اوپر کا حصہ مزید کمپیکٹ — کم جگہ گھیرے، فہرست جلدی نظر آئے ---------- -->
@@ -6301,14 +6305,26 @@
             <select id="vegListNumberFontSelect" onchange="AppState.settings.vegListNumberFontId=this.value; persistAllData(); renderVegListReportToCanvas();" style="width:100%; padding:7px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:12px;"></select>
           </div>
         </div>
-        <canvas id="vegListReportCanvas" style="width:100%; border-radius:10px; margin:6px 0; box-shadow:0 4px 14px rgba(0,0,0,.18); background:#fff;"></canvas>
+        <!-- ---------- 🤏 صدام کی ہدایت (FM10SEPTH1044AM): پرنٹ پریویو پر ہاتھ (انگلیوں) سے پنچ زوم ان/آؤٹ —
+             بغیر کسی بٹن کے، جیسے ہی خانہ نظر آئے فوراً زوم ہو جائے ---------- -->
+        <div id="vegListCanvasZoomWrap" style="overflow:hidden; touch-action:none; border-radius:10px; margin:6px 0; box-shadow:0 4px 14px rgba(0,0,0,.18); background:#fff;">
+          <canvas id="vegListReportCanvas" style="width:100%; display:block; transform-origin:0 0; touch-action:none;"></canvas>
+        </div>
         <div class="modalBtns" style="flex-wrap:wrap;">
           <button class="cancelBtn" onclick="closeVegListReport()">بند کریں</button>
-          <button class="saveBtn" style="background:#7c3aed;" onclick="openImageReviewModal(document.getElementById('vegListReportCanvas'), '🥬 سبزیوں کی لسٹ')">🔍 ریویو</button>
-          <button class="saveBtn" style="background:#0f766e;" onclick="printVegListReport('a4')">🖨️ پرنٹ (A4)</button>
-          <button class="saveBtn" style="background:#0369a1;" onclick="printVegListReport('thermal')">🖨️ پرنٹ (تھرمل)</button>
-          <button class="saveBtn" style="background:#334155;" onclick="saveVegListPdf()">💾 PDF محفوظ کریں</button>
-          <button class="saveBtn" style="background:#25D366;" onclick="shareVegListReport()">💬 واٹس ایپ شیئر</button>
+          <div class="categoryDropdownWrap" id="vegListReportDropdownWrap" style="margin:0;">
+            <button type="button" class="categoryDropdownBtn" onclick="toggleVegListReportDropdown(event)" style="background:#0f766e; color:#fff; padding:9px 16px; font-size:13px; max-width:none;">
+              <span>🖨️ رپورٹ</span>
+              <span class="categoryDropdownArrow">▾</span>
+            </button>
+            <div class="categoryDropdownPanel" id="vegListReportDropdownPanel" style="right:0; left:auto; min-width:190px;">
+              <div class="categoryDropdownItem" onclick="closeVegListReportDropdown(); openImageReviewModal(document.getElementById('vegListReportCanvas'), '🥬 سبزیوں کی لسٹ');">🔍 ریویو</div>
+              <div class="categoryDropdownItem" onclick="closeVegListReportDropdown(); printVegListReport('a4');">🖨️ پرنٹ (A4)</div>
+              <div class="categoryDropdownItem" onclick="closeVegListReportDropdown(); printVegListReport('thermal');">🖨️ پرنٹ (تھرمل)</div>
+              <div class="categoryDropdownItem" onclick="closeVegListReportDropdown(); saveVegListPdf();">💾 PDF محفوظ کریں</div>
+              <div class="categoryDropdownItem" onclick="closeVegListReportDropdown(); shareVegListReport();">💬 واٹس ایپ شیئر</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -7692,7 +7708,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات10ستمبر10:44am';
+const APP_BUILD_VERSION = 'جمعرات10ستمبر12:36pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9645,6 +9661,22 @@ function toggleStockAdjOptionsPanel(){
   panel.style.display = isOpen ? 'none' : 'block';
   btn.textContent = isOpen ? '⚙️ رپورٹس اور فلٹر ▾' : '⚙️ رپورٹس اور فلٹر ▲';
 }
+// ---------- 🧵 صدام کی ہدایت (FM10SEPTH1044AM): سٹاک ایڈجسٹمنٹ کی رپورٹس اب اوپر کی لائن میں ایک چھوٹے
+// "رپورٹس" ڈراپ ڈاؤن بٹن کے اندر — بٹن دبانے پر نیچے فہرست کھلتی ہے، وہی پرانا categoryDropdown ڈیزائن ---------- -->
+function toggleStockAdjReportsDropdown(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('stockAdjReportsDropdownWrap');
+  if(!wrap) return;
+  wrap.classList.toggle('open');
+}
+function closeStockAdjReportsDropdown(){
+  document.getElementById('stockAdjReportsDropdownWrap')?.classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('stockAdjReportsDropdownWrap');
+  if(!wrap || !wrap.classList.contains('open')) return;
+  if(!wrap.contains(e.target)) wrap.classList.remove('open');
+});
 function toggleProdOptionsPanel(){
   const panel = document.getElementById('prodOptionsPanel');
   const btn = document.getElementById('prodOptionsToggleBtn');
@@ -17999,6 +18031,67 @@ function shareStockValueReport(){
    A4 پر 2 کالم (کاغذ چوڑا ہے)، تھرمل پر صرف 1 کالم (کاغذ تنگ ہے) — دونوں پر خانہ اتنا چوڑا کہ پینسل سے لکھا جا سکے
    ===================================================================== */
 let vegListMode = 'present';
+// ---------- 🧵 صدام کی ہدایت (FM10SEPTH1044AM): سبزیوں کی پرنٹ رپورٹ کے تمام بٹن (ریویو/پرنٹ/PDF/واٹس ایپ)
+// اب ایک ہی "رپورٹ ▾" ڈراپ ڈاؤن کے اندر — دبانے پر نیچے فہرست کھلتی ہے ---------- -->
+function toggleVegListReportDropdown(e){
+  if(e) e.stopPropagation();
+  document.getElementById('vegListReportDropdownWrap')?.classList.toggle('open');
+}
+function closeVegListReportDropdown(){
+  document.getElementById('vegListReportDropdownWrap')?.classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('vegListReportDropdownWrap');
+  if(!wrap || !wrap.classList.contains('open')) return;
+  if(!wrap.contains(e.target)) wrap.classList.remove('open');
+});
+// ---------- 🤏 صدام کی ہدایت (FM10SEPTH1044AM): پرنٹ پریویو پر انگلیوں سے پنچ زوم ان/آؤٹ — بغیر کسی بٹن کے،
+// عام موبائل گیلری کی طرح۔ یہ صرف پریویو کا بصری زوم ہے، اصل کینوس/پرنٹ/PDF ڈیٹا پر کوئی اثر نہیں پڑتا ---------- -->
+(function setupVegListPinchZoom(){
+  const wrap = document.getElementById('vegListCanvasZoomWrap');
+  const canvas = document.getElementById('vegListReportCanvas');
+  if(!wrap || !canvas) return;
+  let scale = 1, panX = 0, panY = 0;
+  let startDist = 0, startScale = 1, startPanX = 0, startPanY = 0, startMidX = 0, startMidY = 0;
+  let lastTouchX = 0, lastTouchY = 0, isPanning = false;
+  function applyTransform(){ canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`; }
+  window.resetVegListZoom = function(){ scale = 1; panX = 0; panY = 0; applyTransform(); };
+  function dist(t1, t2){ return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
+  wrap.addEventListener('touchstart', (e) => {
+    if(e.touches.length === 2){
+      startDist = dist(e.touches[0], e.touches[1]);
+      startScale = scale;
+      const rect = wrap.getBoundingClientRect();
+      startMidX = (e.touches[0].clientX + e.touches[1].clientX)/2 - rect.left;
+      startMidY = (e.touches[0].clientY + e.touches[1].clientY)/2 - rect.top;
+      startPanX = panX; startPanY = panY; isPanning = false;
+    } else if(e.touches.length === 1 && scale > 1){
+      isPanning = true; lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
+    }
+  }, {passive:true});
+  wrap.addEventListener('touchmove', (e) => {
+    if(e.touches.length === 2){
+      e.preventDefault();
+      const newDist = dist(e.touches[0], e.touches[1]);
+      let newScale = startScale * (newDist/(startDist||newDist));
+      newScale = Math.min(4, Math.max(1, newScale));
+      panX = startMidX - (startMidX - startPanX) * (newScale/startScale);
+      panY = startMidY - (startMidY - startPanY) * (newScale/startScale);
+      scale = newScale; applyTransform();
+    } else if(e.touches.length === 1 && isPanning){
+      e.preventDefault();
+      const dx = e.touches[0].clientX - lastTouchX, dy = e.touches[0].clientY - lastTouchY;
+      panX += dx; panY += dy;
+      lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
+      applyTransform();
+    }
+  }, {passive:false});
+  wrap.addEventListener('touchend', (e) => {
+    if(e.touches.length < 2) startDist = 0;
+    if(e.touches.length === 0) isPanning = false;
+    if(scale <= 1.02){ scale = 1; panX = 0; panY = 0; applyTransform(); }
+  }, {passive:true});
+})();
 function setVegListMode(mode){
   vegListMode = mode;
   document.querySelectorAll('.vegListModeBtn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
@@ -18032,6 +18125,7 @@ async function openVegListReport(){
   if(nameSel) nameSel.value = AppState.settings.vegListNameFontId || 'jameelnastaleeqkasheeda';
   if(numSel) numSel.value = AppState.settings.vegListNumberFontId || 'tahoma';
   document.getElementById('vegListReportModal')?.classList.add('show');
+  if(window.resetVegListZoom) window.resetVegListZoom(); // ---------- ہر بار ماڈل کھلنے پر زوم ری سیٹ ---------- -->
   await new Promise(r => setTimeout(r, 30));
   await renderVegListReportToCanvas();
 }
@@ -18125,6 +18219,9 @@ async function drawVegListA4(canvas, rows){
     const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
     canvas.height = finalH; ctx.putImageData(imgData, 0, 0);
   }
+  // ---------- 🧵 صدام کی ہدایت (FM10SEPTH1044AM): قطار کی حدود محفوظ کریں تاکہ لمبی فہرست کو A4 پرنٹ میں
+  // ایک ہی صفحے میں سکیڑ کر چھوٹا کرنے کے بجائے، کئی صاف صفحات میں تقسیم کیا جا سکے — کوئی قطار درمیان سے نہ کٹے ---------- -->
+  canvas._vegMeta = { tableTop, headerRowH, rowH, rowsPerCol };
 }
 // ---------- تھرمل (58/80mm) کینوس — صرف 1 کالم، لمبی فہرست نیچے کو چلتی جائے گی ---------- -->
 async function drawVegListThermal(canvas, rows){
@@ -18196,10 +18293,39 @@ function buildVegListPdf(){
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210, pageH = 297, marginMM = 10;
   const availW = pageW - marginMM*2, availH = pageH - marginMM*2;
-  let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
-  if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
-  const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM;
-  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  const mmPerPx = availW / canvas.width;
+  const fullDrawH = canvas.height * mmPerPx;
+  const meta = canvas._vegMeta;
+
+  // ---------- 🧵 صدام کی ہدایت (FM10SEPTH1044AM): اگر فہرست ایک صفحے سے لمبی ہو تو پوری چیز کو سکیڑ کر
+  // چھوٹا کرنے کے بجائے، قطار کی حدود پر صاف تقسیم کر کے کئی A4 صفحات میں پرنٹ کریں — کوئی قطار درمیان سے نہ کٹے ---------- -->
+  if(!meta || fullDrawH <= availH){
+    let drawW = availW, drawH = fullDrawH;
+    if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
+    const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM;
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+    return pdf;
+  }
+
+  const usablePxH = availH / mmPerPx;
+  const rowsPerPage = Math.max(1, Math.floor((usablePxH - meta.headerRowH) / meta.rowH));
+  let sy = 0, first = true;
+  while(sy < canvas.height - 1){
+    const sh = first
+      ? Math.min(canvas.height - sy, meta.headerRowH + rowsPerPage*meta.rowH)
+      : Math.min(canvas.height - sy, rowsPerPage*meta.rowH);
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width; tempCanvas.height = sh;
+    const tctx = tempCanvas.getContext('2d');
+    tctx.fillStyle = '#ffffff'; tctx.fillRect(0, 0, tempCanvas.width, sh);
+    tctx.drawImage(canvas, 0, sy, canvas.width, sh, 0, 0, canvas.width, sh);
+    let drawW = availW, drawH = sh * mmPerPx;
+    if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
+    const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM;
+    if(!first) pdf.addPage();
+    pdf.addImage(tempCanvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+    sy += sh; first = false;
+  }
   return pdf;
 }
 async function printVegListReport(mode){
