@@ -7766,7 +7766,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعہ11ستمبر3:52am';
+const APP_BUILD_VERSION = 'جمعہ11ستمبر3:58am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10174,7 +10174,15 @@ function updateProductName(productId, newName, inputEl){
 function deleteProductRowInSheet(productId){
   const product = productsData.find(p => p.product_id === productId);
   if(!product) return;
-  if(!confirm(`"${product.name || 'یہ خالی قطار'}" کو مکمل حذف کر دیں؟ (اگر غلطی سے ہو جائے تو ↩️ سے واپس لا سکتے ہیں)`)) return;
+  // ---------- 🗑️ صدام کی ہدایت (FM11SEPFR): خالی قطار (نہ نام، نہ پیکنگ، نہ کوئی قیمت/سٹاک) کو فوراً حذف کریں،
+  // بغیر تصدیق مانگے — تصدیق صرف اسی وقت مانگیں جب قطار میں واقعی کوئی نام/پیکنگ/عدد موجود ہو ---------- -->
+  const v0 = product.variants && product.variants[0] ? product.variants[0] : {};
+  const isEmptyRow = !(product.name || '').trim()
+    && !(v0.label || '').trim()
+    && !(v0.purchase) && !(v0.labor) && !(v0.sellLabor) && !(v0.retail) && !(v0.wholesale) && !(v0.stock);
+  if(!isEmptyRow){
+    if(!confirm(`"${product.name || 'یہ قطار'}" کو مکمل حذف کر دیں؟ (اگر غلطی سے ہو جائے تو ↩️ سے واپس لا سکتے ہیں)`)) return;
+  }
   snapshotProductsForUndo();
   (product.variants || []).forEach(v => idbDeleteImage('product_' + v.variant_id));
   productsData = productsData.filter(p => p.product_id !== productId);
