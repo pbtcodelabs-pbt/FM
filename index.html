@@ -3488,8 +3488,6 @@
            2-3 قطاروں میں ٹوٹ جاتے تھے۔ اب nowrap + ضرورت پڑنے پر افقی سکرول، سب بٹن تھوڑے چھوٹے ---------- -->
       <div style="display:flex; align-items:center; gap:4px; margin-bottom:6px; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px;">
         <div class="pageTitle" style="margin:0; flex:0 1 auto; min-width:30px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:14px;">🧮 سٹاک ایڈجسٹمنٹ</div>
-        <button id="productsUndoBtn" onclick="undoProductsChange()" disabled title="پچھلا عمل واپس لائیں" style="flex:0 0 auto; width:28px; height:28px; border-radius:7px; border:1.5px solid #dbe1ea; background:#fff; font-size:13px; cursor:pointer;">↩️</button>
-        <button id="productsRedoBtn" onclick="redoProductsChange()" disabled title="واپس لایا گیا عمل دوبارہ کریں" style="flex:0 0 auto; width:28px; height:28px; border-radius:7px; border:1.5px solid #dbe1ea; background:#fff; font-size:13px; cursor:pointer;">↪️</button>
         <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
           <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:5px 7px; font-size:10.5px; max-width:none; white-space:nowrap;">
             <span>📊 رپورٹس</span>
@@ -7768,7 +7766,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعہ11ستمبر3:13am';
+const APP_BUILD_VERSION = 'جمعہ11ستمبر3:52am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9723,19 +9721,52 @@ function toggleStockAdjOptionsPanel(){
 }
 // ---------- 🧵 صدام کی ہدایت (FM10SEPTH1044AM): سٹاک ایڈجسٹمنٹ کی رپورٹس اب اوپر کی لائن میں ایک چھوٹے
 // "رپورٹس" ڈراپ ڈاؤن بٹن کے اندر — بٹن دبانے پر نیچے فہرست کھلتی ہے، وہی پرانا categoryDropdown ڈیزائن ---------- -->
+// ---------- 🐞 صدام کی ہدایت (FM11SEPFR0334AM) فکس: یہ بٹن اس لائن کے اندر ہے جس پر افقی سکرول
+// (overflow-x:auto) لگا ہوا ہے — چونکہ پینل position:absolute تھا، براؤزر اسے اسی لائن کے باہر جانے پر کاٹ
+// (clip) کر دیتا تھا، اسی وجہ سے دبانے پر کچھ نظر نہیں آتا تھا۔ اب کھلتے وقت پینل کو عارضی طور پر صفحے کے
+// document.body میں منتقل کر کے، بٹن کے بالکل نیچے fixed جگہ پر دکھاتے ہیں — بند ہوتے ہی واپس اپنی اصل جگہ
+// پر آ جاتا ہے، کوئی اور فرق نہیں پڑتا ---------- -->
 function toggleStockAdjReportsDropdown(e){
   if(e) e.stopPropagation();
   const wrap = document.getElementById('stockAdjReportsDropdownWrap');
-  if(!wrap) return;
-  wrap.classList.toggle('open');
+  const panel = document.getElementById('stockAdjReportsDropdownPanel');
+  if(!wrap || !panel) return;
+  if(wrap.classList.contains('open')){ closeStockAdjReportsDropdown(); return; }
+  const btn = wrap.querySelector('.categoryDropdownBtn');
+  const r = btn ? btn.getBoundingClientRect() : {bottom:60,right:window.innerWidth,left:0};
+  document.body.appendChild(panel);
+  panel.style.position = 'fixed';
+  panel.style.top = (r.bottom + 6) + 'px';
+  panel.style.right = Math.max(6, window.innerWidth - r.right) + 'px';
+  panel.style.left = 'auto';
+  panel.style.zIndex = '9999';
+  panel.style.opacity = '1';
+  panel.style.transform = 'translateY(0)';
+  panel.style.pointerEvents = 'auto';
+  wrap.classList.add('open');
 }
 function closeStockAdjReportsDropdown(){
-  document.getElementById('stockAdjReportsDropdownWrap')?.classList.remove('open');
+  const wrap = document.getElementById('stockAdjReportsDropdownWrap');
+  const panel = document.getElementById('stockAdjReportsDropdownPanel');
+  if(wrap) wrap.classList.remove('open');
+  if(panel && wrap && panel.parentElement !== wrap){
+    panel.style.position = '';
+    panel.style.top = '';
+    panel.style.right = '';
+    panel.style.left = '';
+    panel.style.zIndex = '';
+    panel.style.opacity = '';
+    panel.style.transform = '';
+    panel.style.pointerEvents = '';
+    wrap.appendChild(panel);
+  }
 }
 document.addEventListener('click', (e) => {
   const wrap = document.getElementById('stockAdjReportsDropdownWrap');
+  const panel = document.getElementById('stockAdjReportsDropdownPanel');
   if(!wrap || !wrap.classList.contains('open')) return;
-  if(!wrap.contains(e.target)) wrap.classList.remove('open');
+  if(wrap.contains(e.target) || (panel && panel.contains(e.target))) return;
+  closeStockAdjReportsDropdown();
 });
 function toggleProdOptionsPanel(){
   const panel = document.getElementById('prodOptionsPanel');
@@ -9937,9 +9968,9 @@ function renderProductSpreadsheet(filtered, wrap){
   const tdBase = "padding:3px 2px;border-bottom:1px solid #eef1f5;border-left:1px solid #eef1f5;text-align:center;vertical-align:middle;box-sizing:border-box;";
   const numFont = "font-family:Arial,Helvetica,sans-serif;";
   const urduFont = "font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;";
-  const inputStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #dbe1ea;border-radius:6px;font-size:12px;text-align:center;background:#fff;" + numFont;
-  const nameInputStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 3px;border:1.5px solid #dbe1ea;border-radius:6px;font-size:13px;text-align:right;font-weight:800;background:#fff;" + urduFont;
-  const selectStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #dbe1ea;border-radius:6px;font-size:11.5px;text-align:center;background:#fff;" + urduFont;
+  const inputStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:12px;text-align:center;background:#fff;" + numFont;
+  const nameInputStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 3px;border:1.5px solid #d3d8de;border-radius:11px;font-size:13px;text-align:center;font-weight:800;background:#fff;" + urduFont;
+  const selectStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;" + urduFont;
   const redInputStyle = inputStyle + "border-color:#fca5a5;color:#b91c1c;font-weight:900;";
   const greenInputStyle = inputStyle + "border-color:#86efac;color:#15803d;font-weight:900;";
   // ---------- 📏 صدام کی ہدایت (FM10SEPTH0445PM): کالم کی چوڑائی اب فکس نمبر نہیں — ہر کالم میں موجود سب سے
@@ -9974,12 +10005,12 @@ function renderProductSpreadsheet(filtered, wrap){
     const rowBg = idx % 2 === 0 ? '#ffffff' : '#dbe6da';
     const rowTd = `background:${rowBg};`;
     const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
-    const packingBtnStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #dbe1ea;border-radius:6px;font-size:11.5px;text-align:center;background:#fff;cursor:pointer;" + urduFont;
-    const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}')">${v.label || '— منتخب کریں —'}</button>`;
+    const packingBtnStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;cursor:pointer;" + urduFont;
+    const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}')">${v.label || '❓'}</button>`;
     return `
       <tr data-product-id="${p.product_id}">
         <td style="${tdBase}${frozenTd(0)}padding:2px;">
-          <label title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="display:flex; align-items:center; justify-content:center; ${isAdmin?'cursor:pointer;':'cursor:default;'}">
+          <label title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="display:flex; align-items:center; justify-content:center; ${isAdmin?'cursor:pointer;':'cursor:default;'} background:#f4f6f8; border:1.5px solid #d3d8de; border-radius:11px; padding:5px;">
             <input type="checkbox" ${p.isDormant ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onclick="toggleProductPresenceInSheet(${p.product_id}, this)" style="width:19px; height:19px; margin:0;">
           </label>
         </td>
@@ -9993,7 +10024,7 @@ function renderProductSpreadsheet(filtered, wrap){
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.purchase||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'purchase',this.value,this); this.closest('tr').querySelector('.shTotalPurchase').textContent=(parseFloat(this.value)||0)+(${v.labor||0});"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.labor||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'labor',this.value,this); this.closest('tr').querySelector('.shTotalPurchase').textContent=(${v.purchase||0})+(parseFloat(this.value)||0);"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.sellLabor||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'sellLabor',this.value,this)"></td>
-        <td class="shTotalPurchase" style="${tdBase}${rowTd}font-weight:900;color:#134e2c;${numFont}">${totalPurchase}</td>
+        <td style="${tdBase}${rowTd}"><div class="shTotalPurchase" style="background:#e3ebe5;border:1.5px solid #c7d3c9;border-radius:11px;padding:6px 2px;font-weight:900;color:#134e2c;${numFont}">${totalPurchase}</div></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${redInputStyle}" value="${v.retail||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'retail',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${greenInputStyle}" value="${v.wholesale||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'wholesale',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
