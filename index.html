@@ -7766,7 +7766,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعہ11ستمبر3:58am';
+const APP_BUILD_VERSION = 'جمعہ11ستمبر4:05am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10002,7 +10002,12 @@ function renderProductSpreadsheet(filtered, wrap){
     // ---------- 🦓 صدام کی ہدایت (FM10SEPTH0530PM): زیبرا رنگ — ایک قطار گہری، ایک ہلکی — اب پوری قطار
     // (ہر کالم/خانے) پر لاگو ہوتا ہے، پہلے صرف نام/پیکنگ پر تھا اور باقی سفید رہتا تھا جس سے قطار کا رنگ
     // آخر تک نہ پہنچتا تھا اور لکھتے وقت لائن گم ہو جاتی تھی ---------- -->
-    const rowBg = idx % 2 === 0 ? '#ffffff' : '#dbe6da';
+    // ---------- 🎨 صدام کی ہدایت (FM11SEPFR): زیبرا کی دوسری لائن کا رنگ اب فکس/ہارڈ کوڈڈ (#dbe6da) نہیں —
+    // اوپر ⚙️ Settings میں جو "پراڈکٹ کارڈ" کا تھیم رنگ منتخب کیا ہو (getProductCardBgFinal) وہی رنگ، تھوڑا
+    // ہلکا کر کے، یہاں لگتا ہے۔ یعنی Settings میں کارڈ کا رنگ بدلیں تو یہ جدول (Stock Adjustment اور Products
+    // دونوں، چونکہ دونوں یہی فنکشن استعمال کرتے ہیں) اور آرڈر بناتے وقت پراڈکٹ کارڈ — سب خودکار میچ کریں گے،
+    // آرڈر ٹیکنگ سکرین پر رنگ بدلنے کا کوئی الگ آپشن نہیں دیا، وہ ہمیشہ اسی ایک ہی Settings رنگ کی پیروی کرے گی ---------- -->
+    const rowBg = idx % 2 === 0 ? '#ffffff' : getThemeZebraRowColor();
     const rowTd = `background:${rowBg};`;
     const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
     const packingBtnStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;cursor:pointer;" + urduFont;
@@ -10024,7 +10029,7 @@ function renderProductSpreadsheet(filtered, wrap){
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.purchase||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'purchase',this.value,this); this.closest('tr').querySelector('.shTotalPurchase').textContent=(parseFloat(this.value)||0)+(${v.labor||0});"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.labor||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'labor',this.value,this); this.closest('tr').querySelector('.shTotalPurchase').textContent=(${v.purchase||0})+(parseFloat(this.value)||0);"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.sellLabor||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'sellLabor',this.value,this)"></td>
-        <td style="${tdBase}${rowTd}"><div class="shTotalPurchase" style="background:#e3ebe5;border:1.5px solid #c7d3c9;border-radius:11px;padding:6px 2px;font-weight:900;color:#134e2c;${numFont}">${totalPurchase}</div></td>
+        <td class="shTotalPurchase" style="${tdBase}${rowTd}font-weight:900;color:#134e2c;${numFont}">${totalPurchase}</td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${redInputStyle}" value="${v.retail||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'retail',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${greenInputStyle}" value="${v.wholesale||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'wholesale',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
@@ -30962,6 +30967,16 @@ function getProductCardBgFinal(){
   if(!base && !intensity) return 'linear-gradient(145deg,#eef2ff,#e0e7ff)';
   const effectiveBase = base || '#eef2ff';
   return intensity ? shiftColorLightness(effectiveBase, intensity) : effectiveBase;
+}
+// ---------- 🦓 صدام کی ہدایت (FM11SEPFR): جدول (Stock Adjustment/Products) کی زیبرا لائن کا رنگ — پراڈکٹ
+// کارڈ کے تھیم رنگ سے اخذ، مگر مزید ہلکا (پڑھنے میں آسان رہے) — Settings میں کارڈ رنگ نہ بدلا ہو تو ایک
+// ہلکا سا ڈیفالٹ نیلگوں سبز رنگ استعمال ہوگا ---------- -->
+function getThemeZebraRowColor(){
+  const base = AppState.settings.productCardNameBg;
+  if(!base) return '#e9f2ee';
+  const intensity = AppState.settings.productCardNameBgIntensity || 0;
+  const finalHex = intensity ? shiftColorLightness(base, intensity) : base;
+  return shiftColorLightness(finalHex, 28);
 }
 function getProductCardTextColorFinal(overPhoto){
   if(AppState.settings.productCardNameColor) return AppState.settings.productCardNameColor;
