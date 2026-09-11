@@ -5096,15 +5096,8 @@
              بھیجنے کے بعد آرڈر غائب نہیں ہوتا، یہیں سے ہمیشہ دیکھ/پرنٹ/شیئر کر سکتا ہے (ترمیم/حذف نہیں کر سکتا) ---------- -->
         <!-- ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ڈرافٹ آرڈرز کی الگ فہرست — جب تک صدام کو حتمی طور پر
              نہ بھیجا جائے، ملازم یہاں سے دیکھ/ترمیم/حذف کر سکتا ہے ---------- -->
-        <!-- ---------- 📂 صدام کی ہدایت (FM11SEPFR0434AM): پہلے دو لمبے بٹن الگ سے پورا صفحہ لیتے تھے —
-             اب ایک چھوٹے ڈراپ ڈاؤن بٹن میں کمپیکٹ، تاکہ کسٹمر لسٹ کے لیے زیادہ جگہ بچے ---------- -->
-        <div style="position:relative; margin-bottom:10px;">
-          <button type="button" onclick="toggleOtOrdersMenu()" id="otOrdersMenuBtn" style="width:100%; padding:11px; background:linear-gradient(180deg,#334155,#1e293b); color:#fff; border:none; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.15); display:flex; align-items:center; justify-content:center; gap:8px;">📋 میرے آرڈرز <span style="font-size:11px;">▾</span></button>
-          <div id="otOrdersMenuDropdown" style="display:none; position:absolute; top:100%; right:0; left:0; z-index:20; background:#fff; border:1.5px solid #e5e9f0; border-radius:12px; margin-top:4px; box-shadow:0 6px 20px rgba(0,0,0,.18); overflow:hidden;">
-            <button type="button" onclick="closeOtOrdersMenu(); openMyDraftOrders()" style="width:100%; text-align:right; padding:12px 14px; background:#fff7ed; color:#9a3412; border:none; border-bottom:1px solid #f1f5f9; font-size:14px; font-weight:800; cursor:pointer;">📝 ڈرافٹ آرڈرز — دیکھیں / ترمیم کریں</button>
-            <button type="button" onclick="closeOtOrdersMenu(); openMySentOrders()" style="width:100%; text-align:right; padding:12px 14px; background:#f0fdfa; color:#0b4a45; border:none; font-size:14px; font-weight:800; cursor:pointer;">✅ حتمی طور پر بھیجے گئے آرڈرز</button>
-          </div>
-        </div>
+        <button type="button" onclick="openMyDraftOrders()" style="width:100%; padding:12px; margin-bottom:8px; background:linear-gradient(180deg,#c2790f,#8a530a); color:#fff; border:none; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.15);">📝 میرے ڈرافٹ آرڈرز — دیکھیں / ترمیم کریں</button>
+        <button type="button" onclick="openMySentOrders()" style="width:100%; padding:12px; margin-bottom:10px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.15);">📋 میرے بھیجے گئے آرڈرز — ریکارڈ دیکھیں</button>
         <input type="text" id="otCustSearch" placeholder="🔍 کسٹمر کا نام یا ایریا لکھیں" oninput="renderOtCustomerList(this.value)"
                style="width:100%; padding:14px; border:2px solid var(--primary); border-radius:12px; font-size:17px; font-weight:800; text-align:center; margin-bottom:10px;">
         <div id="otCustomerListWrap" style="max-height:65vh; overflow-y:auto; padding-bottom:20px;"></div>
@@ -5112,27 +5105,22 @@
 
       <!-- STEP 2: آئٹمز منتخب کریں — ٹک لگائیں، تعداد لگائیں، صفحہ بدلیں -->
       <div id="otStepItems" style="display:none; --otFw:700;">
-        <div id="otTopBar" style="position:sticky; top:0; z-index:5; background:var(--bg); padding:8px 4px; display:flex; align-items:center; gap:6px; border-bottom:2px solid var(--primary); margin-bottom:8px; flex-wrap:nowrap;">
-          <div style="min-width:0; flex:1 1 auto; overflow:hidden;">
+        <div id="otTopBar" style="position:sticky; top:0; z-index:5; background:var(--bg); padding:8px 4px; display:flex; align-items:center; gap:8px; border-bottom:2px solid var(--primary); margin-bottom:8px; flex-wrap:wrap;">
+          <div style="min-width:0; flex:0 1 auto;">
             <div style="font-weight:800; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="otTopCustName"></div>
-            <div style="font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="otTopCustArea"></div>
+            <div style="font-size:12px; color:var(--muted);" id="otTopCustArea"></div>
           </div>
-          <!-- ---------- 📂 صدام کی ہدایت (FM11SEPFR0434AM): سٹاک رپورٹ + جدول/کارڈ ویو — پہلے کسٹمر کے نام کے ساتھ
-               بھیڑ لگاتے تھے، اب ایک چھوٹے "⋮" مینیو میں کمپیکٹ، تاکہ کسٹمر کا پورا نام نظر آئے ---------- -->
-          <div style="position:relative; flex:0 0 auto;">
-            <button type="button" onclick="toggleOtTopMoreMenu()" id="otTopMoreBtn" style="padding:9px 11px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:16px; cursor:pointer;">⋮</button>
-            <div id="otTopMoreDropdown" style="display:none; position:absolute; top:100%; left:0; z-index:20; background:#fff; border:1.5px solid #e5e9f0; border-radius:10px; margin-top:4px; box-shadow:0 6px 20px rgba(0,0,0,.18); overflow:hidden; min-width:160px;">
-              <button type="button" onclick="closeOtTopMoreMenu(); openOtStockReport()" style="width:100%; text-align:right; padding:10px 12px; background:#fff; border:none; border-bottom:1px solid #f1f5f9; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap;">📊 سٹاک رپورٹ</button>
-              <button type="button" onclick="closeOtTopMoreMenu(); toggleOtViewMode()" id="otViewModeBtn" style="width:100%; text-align:right; padding:10px 12px; background:#fff; border:none; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap;">📊 جدول</button>
-            </div>
+          <div style="display:flex; gap:6px; flex:1 1 auto; min-width:0;">
+            <button type="button" onclick="openOtStockReport()" style="flex:1; padding:9px 4px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer; text-align:center;">📊 سٹاک رپورٹ</button>
+            <button type="button" onclick="toggleOtViewMode()" id="otViewModeBtn" style="flex:1; padding:9px 4px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer; text-align:center;">📊 جدول</button>
+            <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="flex:1; padding:9px 4px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; text-align:center;">◀ کسٹمر</button>
+            <button type="button" onclick="openOtReview()" style="flex:1; padding:9px 4px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap; text-align:center;">✅ آرڈر مکمل</button>
           </div>
-          <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="flex:0 0 auto; padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; white-space:nowrap;">◀ کسٹمر</button>
-          <button type="button" onclick="openOtReview()" style="flex:0 0 auto; padding:9px 12px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
         </div>
         <div id="otBoldSliderRow" style="display:flex; align-items:center; gap:10px; background:#eef2ff; border:1.5px solid #c7d2fe; border-radius:10px; padding:8px 12px; margin-bottom:10px;">
-          <span style="font-size:12.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap;">🔎 چھوٹا</span>
+          <span style="font-size:12.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap;">پتلا</span>
           <input type="range" id="otBoldSlider" min="400" max="900" step="50" value="700" oninput="setOtItemsFontWeight(this.value)" style="flex:1;">
-          <span style="font-size:12.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap;">🔍 بڑا</span>
+          <span style="font-size:12.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap;">موٹا</span>
         </div>
         <div id="otItemsList" style="display:grid; grid-template-columns:1fr 1fr; gap:10px 8px; margin-bottom:10px;" dir="rtl"></div>
         <div id="otPager" style="position:sticky; bottom:8px; display:flex; align-items:center; gap:10px; padding-top:6px; margin-bottom:6px;"></div>
@@ -5210,7 +5198,7 @@
             <canvas id="otOrderSheetCanvas" style="width:100%; max-width:340px; display:block;"></canvas>
           </div>
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <button type="button" onclick="printOtOrderSheet()" style="padding:13px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:14px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">🔵 بلوٹوتھ پرنٹ کریں</button>
+            <button type="button" onclick="printOtOrderSheet()" style="padding:13px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:14px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">🖨️ تھرمل پرنٹ کریں</button>
             <button type="button" onclick="shareOtOrderSheet()" style="padding:13px; background:#25D366; color:#fff; border:none; border-radius:14px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">💬 واٹس ایپ شیئر</button>
           </div>
         </div>
@@ -5468,8 +5456,6 @@
           <span onclick="closeMySentOrders()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
         </div>
         <div id="mySentOrdersSummary" style="text-align:center; background:#eef2ff; color:var(--primary-dark); border-radius:10px; padding:8px; margin-bottom:10px; font-weight:800; font-size:14px;"></div>
-        <!-- ---------- 📅 صدام کی ہدایت (FM11SEPFR04:26AM): تاریخ فلٹر — سب/آج/کل/یہ ہفتہ/کسٹم تاریخ ---------- -->
-        <div id="mySentOrdersFilterBar"></div>
         <div id="mySentOrdersListWrap"></div>
       </div>
     </div>
@@ -5484,8 +5470,6 @@
           <span onclick="closeMyDraftOrders()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
         </div>
         <div id="myDraftOrdersSummary" style="text-align:center; background:#fff7ed; color:#9a3412; border-radius:10px; padding:8px; margin-bottom:10px; font-weight:800; font-size:14px;"></div>
-        <!-- ---------- 📅 صدام کی ہدایت (FM11SEPFR04:26AM): تاریخ فلٹر — سب/آج/کل/یہ ہفتہ/کسٹم تاریخ ---------- -->
-        <div id="myDraftOrdersFilterBar"></div>
         <div id="myDraftOrdersListWrap"></div>
       </div>
     </div>
@@ -7791,7 +7775,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعہ11ستمبر4:41am';
+const APP_BUILD_VERSION = 'جمعہ11ستمبر5:38am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21382,32 +21366,6 @@ function otBackButtonClick(){
   backToOtCustomer();
 }
 
-// ---------- 📂 صدام کی ہدایت (FM11SEPFR0434AM): مین پیج پر "میرے آرڈرز" ڈراپ ڈاؤن (ڈرافٹ/حتمی بھیجے گئے)
-// اور آئٹمز پیج پر "⋮ مزید" ڈراپ ڈاؤن (سٹاک رپورٹ/جدول ویو) — دونوں ایک ہی وقت میں کھلے نہ رہیں،
-// اور باہر کہیں بھی ٹیپ کرنے سے خودکار بند ہو جائیں ---------- -->
-function toggleOtOrdersMenu(){
-  closeOtTopMoreMenu();
-  const d = document.getElementById('otOrdersMenuDropdown');
-  if(d) d.style.display = (d.style.display === 'none' || !d.style.display) ? 'block' : 'none';
-}
-function closeOtOrdersMenu(){
-  const d = document.getElementById('otOrdersMenuDropdown');
-  if(d) d.style.display = 'none';
-}
-function toggleOtTopMoreMenu(){
-  closeOtOrdersMenu();
-  const d = document.getElementById('otTopMoreDropdown');
-  if(d) d.style.display = (d.style.display === 'none' || !d.style.display) ? 'block' : 'none';
-}
-function closeOtTopMoreMenu(){
-  const d = document.getElementById('otTopMoreDropdown');
-  if(d) d.style.display = 'none';
-}
-document.addEventListener('click', (e) => {
-  if(!e.target.closest('#otOrdersMenuBtn, #otOrdersMenuDropdown')) closeOtOrdersMenu();
-  if(!e.target.closest('#otTopMoreBtn, #otTopMoreDropdown')) closeOtTopMoreMenu();
-});
-
 // ---------- STEP 1: کسٹمر لسٹ (سرچ کے ساتھ) — ٹیپ کرتے ہی کسٹمر + ایریا سیٹ ہو جاتا ہے ----------
 function renderOtCustomerList(query){
   const wrap = document.getElementById('otCustomerListWrap');
@@ -21458,7 +21416,6 @@ function selectOtCustomer(customerId){
   // ---------- 🔤 محفوظ شدہ پتلا/موٹا سیٹنگ یہاں دوبارہ لاگو کریں ---------- -->
   const savedFw = Math.max(400, Math.min(900, Number(AppState.settings.otItemsFontWeight) || 700));
   document.getElementById('otStepItems').style.setProperty('--otFw', savedFw);
-  document.getElementById('otStepItems').style.setProperty('--otFsScale', (0.85 + ((savedFw - 400) / 500) * 0.5).toFixed(3)); // ---------- 📏 صدام کی ہدایت (FM11SEPFR0434AM): پتلا/موٹا سلائیڈر اب سائز بھی بدلے، صرف موٹائی نہیں ----------
   const fwSlider = document.getElementById('otBoldSlider');
   if(fwSlider) fwSlider.value = savedFw;
 
@@ -21510,7 +21467,7 @@ function renderOtItemsPage(){
         <!-- ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): یہاں سیریل نمبر صرف دکھانے کے لیے ہے، دبانے سے کچھ نہیں ہوتا
              (یہاں سے ایڈٹ کرنے کی سہولت نہیں دینی — وہ صرف Products/Stock Adjustment میں ہے) ---------- -->
         <span class="serialBadgeBtn" style="cursor:default;">${v.serial_no ?? '?'}</span>
-        <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:calc(16px * var(--otFsScale, 1)); font-weight:var(--otFw,700); flex:1; text-align:right; line-height:1.4; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
+        <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:var(--otFw,700); flex:1; text-align:right; line-height:1.4; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
       </div>
       <!-- ---------- 📦 صدام کی ہدایت (FM10SEPTH): دستیاب سٹاک — یہاں سے مقدار بڑھاتے ہی فوراً کم ہوتا نظر آئے گا ---------- -->
       <div style="text-align:left; font-size:11.5px; font-weight:800; color:#134e2c;">📦 سٹاک: <span data-ot-stock-for="${v.variant_id}">${otAvailableStock(v.variant_id)}</span></div>
@@ -21570,7 +21527,7 @@ function renderOtItemsTable(wrap){
     return `
       <tr>
         <td style="${tdBase}${frozenTd(0)}"><span class="serialBadgeBtn" style="width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default;pointer-events:none;margin:0 !important;">${v.serial_no ?? '?'}</span></td>
-        <td style="${tdBase}${frozenTd(1)}text-align:center;${urduFont}font-size:calc(13.5px * var(--otFsScale, 1));font-weight:var(--otFw,700);">${pName}</td>
+        <td style="${tdBase}${frozenTd(1)}text-align:center;${urduFont}font-size:13.5px;font-weight:var(--otFw,700);">${pName}</td>
         <td style="${tdBase}${rowTd}${urduFont}font-size:11.5px;">${v.label || ''}</td>
         <td style="${tdBase}${rowTd}font-weight:900;color:${availColor};" data-ot-stock-for="${v.variant_id}">${avail}</td>
         <td style="${tdBase}${rowTd}padding:5px 4px;">
@@ -21647,13 +21604,7 @@ function setOtItemsFontWeight(weight){
   AppState.settings.otItemsFontWeight = w;
   persistAllData();
   const stepEl = document.getElementById('otStepItems');
-  if(stepEl){
-    stepEl.style.setProperty('--otFw', w);
-    // ---------- 📏 صدام کی ہدایت (FM11SEPFR0434AM): پہلے یہ سلائیڈر صرف موٹائی بدلتا تھا، فرق نظر ہی نہیں
-    // آتا تھا — اب اسی سلائیڈر سے سائز بھی متناسب چھوٹا/بڑا ہو، تاکہ واقعی زوم جیسا نمایاں فرق نظر آئے ---------- -->
-    const scale = 0.85 + ((w - 400) / 500) * 0.5; // 400 → 0.85x (چھوٹا)، 900 → 1.35x (بڑا)
-    stepEl.style.setProperty('--otFsScale', scale.toFixed(3));
-  }
+  if(stepEl) stepEl.style.setProperty('--otFw', w);
 }
 
 // ---------- نام والی جگہ پر ٹیپ کریں تو بھی ٹک لگ/ہٹ جائے — variant_id ہمیشہ خود اسی row کے data-variant-id سے پڑھا جاتا ہے (حفاظتی: کبھی بھی غلط/دوسرے آئٹم پر اثر نہیں پڑ سکتا) ----------
@@ -21808,16 +21759,17 @@ function otSheetAdjustZoom(delta){
   persistAllData();
   renderAdvOrderToCanvas(buildOtOrderSheetSyntheticOrder(), document.getElementById('otOrderSheetCanvas'));
 }
-// ---------- 🖨️ صدام کی ہدایت (FM4SEPFR25): آج کی مجموعی آرڈر شیٹ براہ راست تھرمل پرنٹر سے پرنٹ
-// ---------- 🔵 صدام کی ہدایت (FM11SEPFR0434AM): پہلے یہ Android کا عام پرنٹ ڈائیلاگ باکس کھولتا تھا —
-// وہ غلط تھا، اب دوسری جگہوں کی طرح سیدھا بلوٹوتھ پرنٹر پر (printViaWebBluetooth کا وہی لاجک استعمال) ---------- -->
 async function printOtOrderSheet(){
   const order = buildOtOrderSheetSyntheticOrder();
   if(order.items.length === 0){ alert('ابھی تک کوئی آرڈر بک نہیں ہوا۔'); return; }
   await renderAdvOrderToCanvas(order, document.getElementById('otOrderSheetCanvas'));
   const canvas = document.getElementById('otOrderSheetCanvas');
   if(!canvas) return;
-  await printViaWebBluetooth(canvas);
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 async function shareOtOrderSheet(){
   const order = buildOtOrderSheetSyntheticOrder();
@@ -22056,107 +22008,23 @@ function postOtOrderToAdmin(){
   startNextOtCustomer();
 }
 
-// ---------- 📅 صدام کی ہدایت (FM11SEPFR04:26AM): "میرے بھیجے گئے آرڈرز" اور "میرے ڈرافٹ آرڈرز" دونوں میں
-// مشترکہ تاریخ فلٹر — سب/آج/کل/یہ ہفتہ/کسٹم تاریخ (From–To)۔ ہر ماڈل کی اپنی الگ فلٹر حالت ہوتی ہے
-// تاکہ ایک کو بدلنے سے دوسرا متاثر نہ ہو ---------- -->
-let mySentOrdersFilter = { type: 'all', from: null, to: null };
-let myDraftOrdersFilter = { type: 'all', from: null, to: null };
-
-function filterOrdersByDate(orders, filter){
-  if(!filter || filter.type === 'all') return orders;
-  const now = new Date();
-  if(filter.type === 'today'){
-    const todayStr = now.toDateString();
-    return orders.filter(o => new Date(o.createdAt).toDateString() === todayStr);
-  }
-  if(filter.type === 'yesterday'){
-    const y = new Date(now); y.setDate(y.getDate() - 1);
-    const yStr = y.toDateString();
-    return orders.filter(o => new Date(o.createdAt).toDateString() === yStr);
-  }
-  if(filter.type === 'week'){
-    const start = new Date(now); start.setDate(start.getDate() - start.getDay()); // ہفتے کی ابتدا — اتوار
-    start.setHours(0,0,0,0);
-    return orders.filter(o => new Date(o.createdAt) >= start);
-  }
-  if(filter.type === 'custom' && filter.from && filter.to){
-    const from = new Date(filter.from); from.setHours(0,0,0,0);
-    const to = new Date(filter.to); to.setHours(23,59,59,999);
-    return orders.filter(o => {
-      const d = new Date(o.createdAt);
-      return d >= from && d <= to;
-    });
-  }
-  return orders;
-}
-
-function buildDateFilterBarHTML(filter, prefix){
-  const chips = [
-    { type: 'all', label: 'سب' },
-    { type: 'today', label: 'آج' },
-    { type: 'yesterday', label: 'کل' },
-    { type: 'week', label: 'یہ ہفتہ' },
-    { type: 'custom', label: '📅 کسٹم تاریخ' }
-  ];
-  let html = `<div style="display:flex; gap:6px; overflow-x:auto; margin-bottom:8px; padding-bottom:2px;">` +
-    chips.map(c => {
-      const active = filter.type === c.type;
-      return `<button onclick="set${prefix}Filter('${c.type}')" style="flex:0 0 auto; padding:6px 12px; border-radius:20px; border:1.5px solid ${active ? 'var(--primary)' : '#e5e9f0'}; background:${active ? 'var(--primary)' : '#fff'}; color:${active ? '#fff' : 'var(--text)'}; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;">${c.label}</button>`;
-    }).join('') +
-    `</div>`;
-  if(filter.type === 'custom'){
-    html += `<div style="display:flex; gap:6px; align-items:center; margin-bottom:10px;">
-      <input type="date" id="${prefix}CustomFrom" value="${filter.from || ''}" style="flex:1; padding:6px; border:1.5px solid #e5e9f0; border-radius:8px; font-size:12.5px;">
-      <span style="font-size:12px; color:var(--muted);">تا</span>
-      <input type="date" id="${prefix}CustomTo" value="${filter.to || ''}" style="flex:1; padding:6px; border:1.5px solid #e5e9f0; border-radius:8px; font-size:12.5px;">
-      <button onclick="apply${prefix}CustomRange()" style="padding:6px 10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap;">لگائیں</button>
-    </div>`;
-  }
-  return html;
-}
-
-function setMySentOrdersFilter(type){
-  mySentOrdersFilter.type = type;
-  if(type !== 'custom'){ mySentOrdersFilter.from = null; mySentOrdersFilter.to = null; }
-  renderMySentOrdersList();
-}
-function applyMySentOrdersCustomRange(){
-  const from = document.getElementById('MySentOrdersCustomFrom').value;
-  const to = document.getElementById('MySentOrdersCustomTo').value;
-  if(!from || !to){ alert('براہ کرم دونوں تاریخیں منتخب کریں۔'); return; }
-  mySentOrdersFilter.type = 'custom';
-  mySentOrdersFilter.from = from;
-  mySentOrdersFilter.to = to;
-  renderMySentOrdersList();
-}
-
 // ---------- 📋 صدام کی ہدایت (FM4SEPFR30): ملازم کے بھیجے گئے آرڈرز کا مستقل ریکارڈ — نہ ترمیم، نہ حذف،
 // صرف پریویو/پرنٹ/شیئر۔ صرف اسی ملازم کے اپنے بھیجے آرڈرز (employeeName سے ملاتے ہوئے) ---------- -->
 function openMySentOrders(){
-  mySentOrdersFilter = { type: 'all', from: null, to: null }; // ---------- 📅 FM11SEPFR04:26AM: ہر بار کھولنے پر فلٹر "سب" پر ری سیٹ ----------
-  renderMySentOrdersList();
-  document.getElementById('mySentOrdersModal').classList.add('show');
-}
-function renderMySentOrdersList(){
   const myName = AppState.currentUser?.name || '';
-  const allMyOrders = advanceOrdersData
+  const myOrders = advanceOrdersData
     .filter(o => o.employeeName === myName && o.isDraft !== true) // ---------- 📝 FM10SEPTH04:12PM: صرف حتمی طور پر بھیجے گئے آرڈرز — ڈرافٹ یہاں نہیں دکھائے جاتے، وہ "میرے ڈرافٹ آرڈرز" میں ہیں ----------
     .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const wrap = document.getElementById('mySentOrdersListWrap');
   const summary = document.getElementById('mySentOrdersSummary');
-  document.getElementById('mySentOrdersFilterBar').innerHTML = buildDateFilterBarHTML(mySentOrdersFilter, 'MySentOrders');
 
   const todayStr = new Date().toDateString();
-  const todaysCount = allMyOrders.filter(o => new Date(o.createdAt).toDateString() === todayStr).length;
-  summary.textContent = `📦 آج ${todaysCount} آرڈر بھیجے — کل ملا کر ${allMyOrders.length} آرڈرز کا ریکارڈ`;
-
-  const myOrders = filterOrdersByDate(allMyOrders, mySentOrdersFilter);
+  const todaysCount = myOrders.filter(o => new Date(o.createdAt).toDateString() === todayStr).length;
+  summary.textContent = `📦 آج ${todaysCount} آرڈر بھیجے — کل ملا کر ${myOrders.length} آرڈرز کا ریکارڈ`;
 
   if(myOrders.length === 0){
-    wrap.innerHTML = allMyOrders.length === 0
-      ? `<div style="text-align:center; color:var(--muted); padding:30px 10px;">ابھی تک آپ نے کوئی آرڈر نہیں بھیجا۔</div>`
-      : `<div style="text-align:center; color:var(--muted); padding:30px 10px;">اس تاریخ فلٹر میں کوئی آرڈر نہیں ملا۔</div>`;
+    wrap.innerHTML = `<div style="text-align:center; color:var(--muted); padding:30px 10px;">ابھی تک آپ نے کوئی آرڈر نہیں بھیجا۔</div>`;
   } else {
     wrap.innerHTML = myOrders.map(o => {
       const dt = new Date(o.createdAt);
@@ -22178,6 +22046,8 @@ function renderMySentOrdersList(){
         </div>`;
     }).join('');
   }
+
+  document.getElementById('mySentOrdersModal').classList.add('show');
 }
 function closeMySentOrders(){
   document.getElementById('mySentOrdersModal').classList.remove('show');
@@ -22185,43 +22055,18 @@ function closeMySentOrders(){
 
 // ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ملازم کے اپنے ڈرافٹ آرڈرز — جب تک حتمی طور پر نہ بھیجے،
 // یہاں سے پریویو، ترمیم، حذف، یا حتمی ارسال کر سکتا ہے۔ صرف اسی ملازم کے اپنے ڈرافٹ (employeeName سے ملاتے ہوئے) ---------- -->
-function setMyDraftOrdersFilter(type){
-  myDraftOrdersFilter.type = type;
-  if(type !== 'custom'){ myDraftOrdersFilter.from = null; myDraftOrdersFilter.to = null; }
-  renderMyDraftOrdersList();
-}
-function applyMyDraftOrdersCustomRange(){
-  const from = document.getElementById('MyDraftOrdersCustomFrom').value;
-  const to = document.getElementById('MyDraftOrdersCustomTo').value;
-  if(!from || !to){ alert('براہ کرم دونوں تاریخیں منتخب کریں۔'); return; }
-  myDraftOrdersFilter.type = 'custom';
-  myDraftOrdersFilter.from = from;
-  myDraftOrdersFilter.to = to;
-  renderMyDraftOrdersList();
-}
-
 function openMyDraftOrders(){
-  myDraftOrdersFilter = { type: 'all', from: null, to: null }; // ---------- 📅 FM11SEPFR04:26AM: ہر بار کھولنے پر فلٹر "سب" پر ری سیٹ ----------
-  renderMyDraftOrdersList();
-  document.getElementById('myDraftOrdersModal').classList.add('show');
-}
-function renderMyDraftOrdersList(){
   const myName = AppState.currentUser?.name || '';
-  const allMyDrafts = advanceOrdersData
+  const myDrafts = advanceOrdersData
     .filter(o => o.employeeName === myName && o.isDraft === true)
     .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const wrap = document.getElementById('myDraftOrdersListWrap');
   const summary = document.getElementById('myDraftOrdersSummary');
-  document.getElementById('myDraftOrdersFilterBar').innerHTML = buildDateFilterBarHTML(myDraftOrdersFilter, 'MyDraftOrders');
-  summary.textContent = `📝 اس وقت ${allMyDrafts.length} ڈرافٹ آرڈر موجود ہیں — صدام کو ابھی نہیں بھیجے گئے`;
-
-  const myDrafts = filterOrdersByDate(allMyDrafts, myDraftOrdersFilter);
+  summary.textContent = `📝 اس وقت ${myDrafts.length} ڈرافٹ آرڈر موجود ہیں — صدام کو ابھی نہیں بھیجے گئے`;
 
   if(myDrafts.length === 0){
-    wrap.innerHTML = allMyDrafts.length === 0
-      ? `<div style="text-align:center; color:var(--muted); padding:30px 10px;">فی الحال کوئی ڈرافٹ آرڈر موجود نہیں۔</div>`
-      : `<div style="text-align:center; color:var(--muted); padding:30px 10px;">اس تاریخ فلٹر میں کوئی ڈرافٹ آرڈر نہیں ملا۔</div>`;
+    wrap.innerHTML = `<div style="text-align:center; color:var(--muted); padding:30px 10px;">فی الحال کوئی ڈرافٹ آرڈر موجود نہیں۔</div>`;
   } else {
     wrap.innerHTML = myDrafts.map(o => {
       const dt = new Date(o.createdAt);
@@ -22245,6 +22090,8 @@ function renderMyDraftOrdersList(){
         </div>`;
     }).join('');
   }
+
+  document.getElementById('myDraftOrdersModal').classList.add('show');
 }
 function closeMyDraftOrders(){
   document.getElementById('myDraftOrdersModal').classList.remove('show');
