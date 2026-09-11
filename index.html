@@ -49,29 +49,6 @@
     src:url('./JameelNooriNastaleeq-Kasheeda.ttf') format('truetype');
     font-weight:400; font-style:normal; font-display:swap;
   }
-  /* ---------- 🆕 صدام کی ہدایت (FM11SEPFR0722AM): 4 نئے اردو فونٹ شامل کیے گئے — AlFars 18 Aban،
-       Akram Unicode، AlQalam Khawar اور Gandhara Suls۔ فائلیں بھی JameelNooriNastaleeq کی طرح
-       root میں ہی ہیں (fonts/ فولڈر میں نہیں) ---------- */
-  @font-face{
-    font-family:'AlFarsAban';
-    src:url('./AlFars_18_Aban_Regular.ttf') format('truetype');
-    font-weight:400; font-style:normal; font-display:swap;
-  }
-  @font-face{
-    font-family:'AkramUnicode';
-    src:url('./Akram_Unicode_Akram_Unicode.ttf') format('truetype');
-    font-weight:400; font-style:normal; font-display:swap;
-  }
-  @font-face{
-    font-family:'AlQalamKhawar';
-    src:url('./alqalam_AlQalam_Khawar.ttf') format('truetype');
-    font-weight:400; font-style:normal; font-display:swap;
-  }
-  @font-face{
-    font-family:'GandharaSuls';
-    src:url('./Gandhara_Suls_Regular.ttf') format('truetype');
-    font-weight:400; font-style:normal; font-display:swap;
-  }
   /* ---------- 🗑️ صدام کی ہدایت (FM11SEP): PT Simple Bold Ruled، ثلث السمط اور جمیل خوشخطی کے @font-face یہاں سے
        ہٹا دیے گئے — صدام نے ان کی فائلیں ریپو سے حذف کر دی ہیں اور یہ فونٹ فہرست سے بھی نکال دیے گئے ہیں،
        اسی PDMSMultan والی وجہ سے (ناکام 404 درخواست سے بچنے کے لیے) ---------- */
@@ -2207,12 +2184,7 @@
     کبھی غائب نہ ہو (صرف اُن صفحوں پر نظر آئے گا جہاں سرچ کی ضرورت ہے، JS سے display خودکار سیٹ ہوتی ہے) ---------- */
     #globalUiZoomBar{
       grid-column:1; grid-row:3;
-      /* ---------- 🐛 صدام کی ہدایت (FM11SEPFR): پہلے یہاں 56px فکس تھا (ٹاپ بار کی صرف بنیادی اونچائی)،
-           جبکہ اصل ٹاپ بار (مارکی/بیجز وغیرہ کی وجہ سے) اکثر اس سے زیادہ اونچا ہوتا ہے — یہی وجہ تھی کہ
-           Products/Order Taking کھولتے وقت یہ پٹی اوپر چڑھ کر ⚙️/🎨 والی utilityBar پٹی کو چھپا/اوورلیپ
-           کر دیتی تھی۔ اب یہ بھی utilityBar کی طرح اصل ناپی گئی var(--mobileTopbarH) استعمال کرتی ہے،
-           تاکہ دونوں پٹیاں ہمیشہ صحیح ترتیب میں ایک دوسرے کے نیچے رہیں، کبھی اوورلیپ نہ ہوں ---------- -->
-      position:sticky; top:calc(var(--mobileTopbarH, 190px) + 54px); z-index:588;
+      position:sticky; top:calc(56px + 54px); z-index:588;
     }
     /* ---------- بلنگ سکرین پر مزید کمپیکٹ ---------- */
     body.billing-active #globalUiZoomBar{ padding:3px 12px; }
@@ -2224,22 +2196,13 @@
       /* ---------- صدام کی ہدایت (FM3SEPTH10): پہلے چوڑائی 230px تھی، دائیں طرف بہت زیادہ خالی جگہ چھوڑتی تھی —
            اب تنگ کر دی گئی ہے تاکہ باکس دائیں کنارے کے قریب سمٹ جائے (مزید خالی جگہ نظر نہ آئے) اور قطاریں
            بھی کمپیکٹ کی گئی ہیں تاکہ تمام آئٹمز ایک ہی سکرین پر (بغیر سکرول کے) نظر آ سکیں ---------- */
-      position:fixed; top:calc(var(--mobileTopbarH, 190px) + 54px); right:8px; bottom:auto; width:172px; max-height:calc(100vh - 76px - 54px);
+      position:fixed; top:calc(56px + 54px); right:8px; bottom:auto; width:172px; max-height:calc(100vh - 76px - 54px);
       z-index:800; border-radius:12px; overflow-y:auto;
       opacity:0; transform:translateY(-8px) scale(.97); pointer-events:none;
       transition:opacity .18s ease, transform .18s ease;
       box-shadow:0 10px 30px rgba(0,0,0,.35);
     }
     #sidebar.open{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
-    /* ---------- 🛡️ صدام کی ہدایت (FM11SEPFR0930AM): حفاظتی جال — کچھ فونز/براؤزرز پر مینیو کبھی کبھار
-         پورا پیج ڈھانپ لیتا تھا (172px والی چوڑائی لاگو نہیں ہو رہی تھی)۔ اب !important کے ساتھ چوڑائی،
-         پوزیشن اور z-index دوبارہ زبردستی سیٹ کر دی گئی ہے تاکہ یہ ہمیشہ چھوٹا ڈرار ہی رہے، کبھی
-         پورا ہوم پیج نیچے نہ دبائے ---------- */
-    #sidebar.open{
-      position:fixed !important; width:172px !important; max-width:78vw !important;
-      top:calc(var(--mobileTopbarH, 190px) + 54px) !important; right:8px !important; left:auto !important;
-      height:auto !important; max-height:calc(100vh - 76px - 54px) !important;
-    }
     /* ---------- کمپیکٹ نیویگیشن قطاریں (صرف موبائل ڈرار) — پہلے 14px 20px پیڈنگ + 15px فونٹ کی وجہ سے
          ہر آئٹم بہت اونچا تھا اور پوری فہرست دو سکرینوں جتنی جگہ لیتی تھی ---------- */
     #sidebar .brand{padding:0 10px 8px; font-size:13.5px; margin-bottom:4px;}
@@ -5170,7 +5133,7 @@
           <canvas id="otReviewCanvas" style="width:100%; max-width:340px; display:block;"></canvas>
         </div>
         <div style="position:sticky; bottom:8px; display:flex; flex-direction:column; gap:8px; padding-top:6px; padding-bottom:8px;">
-          <button type="button" onclick="printViaWebBluetooth('otReviewCanvas')" style="padding:14px; background:#e0f2fe; color:#075985; border:none; border-radius:14px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">🔵 Try Direct Bluetooth Print (no app needed)</button>
+          <button type="button" onclick="printOtReviewOrder()" style="padding:14px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">🖨️ تھرمل پرنٹ کریں</button>
           <button type="button" onclick="shareOtReviewOrder()" style="padding:14px; background:#25D366; color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">💬 واٹس ایپ شیئر</button>
           <div style="display:flex; gap:8px;">
             <button type="button" onclick="backToOtItems()" style="flex:1; padding:15px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:14px; font-size:15px; font-weight:800; cursor:pointer;">✏️ ترمیم کریں</button>
@@ -5214,7 +5177,7 @@
             <canvas id="otOrderSheetCanvas" style="width:100%; max-width:340px; display:block;"></canvas>
           </div>
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <button type="button" onclick="printViaWebBluetooth('otOrderSheetCanvas')" style="padding:13px; background:#e0f2fe; color:#075985; border:none; border-radius:14px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">🔵 Try Direct Bluetooth Print (no app needed)</button>
+            <button type="button" onclick="printOtOrderSheet()" style="padding:13px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:14px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">🖨️ تھرمل پرنٹ کریں</button>
             <button type="button" onclick="shareOtOrderSheet()" style="padding:13px; background:#25D366; color:#fff; border:none; border-radius:14px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">💬 واٹس ایپ شیئر</button>
           </div>
         </div>
@@ -7817,7 +7780,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعہ11ستمبر8:13am';
+const APP_BUILD_VERSION = 'جمعہ11ستمبر6:49am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15303,7 +15266,7 @@ function renderProductList(query = ''){
              46px والا الگ کالم دیا — اب کسی صورت میں سکڑ/کٹ نہیں سکتا ---------- -->
         <button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE}" onclick="event.stopPropagation(); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button>
         <div class="pNameWrap" style="display:flex; flex-direction:row; align-items:center; gap:6px; overflow:visible; min-height:46px;">
-          <div class="pName" style="flex:1; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${getProductCardBgFinal()}; border-color:${AppState.settings.productCardNameBg || '#4ade80'}; color:${getProductCardTextColorFinal(false)};">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
+          <div class="pName" style="flex:1; font-weight:900;">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
           <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
@@ -17998,7 +17961,7 @@ function renderStockAdjustmentScreen(query){
              46px والا الگ کالم دیا — اب کسی صورت میں سکڑ/کٹ نہیں سکتا ---------- -->
         <button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE}" onclick="event.stopPropagation(); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button>
         <div class="pNameWrap" style="display:flex; flex-direction:row; align-items:center; gap:6px; overflow:visible; min-height:46px;">
-          <div class="pName" style="flex:1; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${getProductCardBgFinal()}; border-color:${AppState.settings.productCardNameBg || '#4ade80'}; color:${getProductCardTextColorFinal(false)};">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
+          <div class="pName" style="flex:1; font-weight:900;">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
           <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
@@ -21773,9 +21736,18 @@ function otSheetAdjustZoom(delta){
   persistAllData();
   renderAdvOrderToCanvas(buildOtOrderSheetSyntheticOrder(), document.getElementById('otOrderSheetCanvas'));
 }
-// ---------- 🔵 صدام کی ہدایت (FM11SEPFR): یہاں سے پرانا Android پرنٹ ڈائیلاگ (window.print()) والا راستہ ہٹا دیا گیا —
-// وہ ڈائیلاگ A4 سائز پرنٹنگ کھولتا تھا، تھرمل پرنٹر پر نہیں چھاپتا تھا۔ اب سیدھا printViaWebBluetooth('otOrderSheetCanvas')
-// بٹن سے کال ہوتا ہے، جو براہ راست تھرمل پرنٹر کو Bluetooth کے ذریعے ڈیٹا بھیجتا ہے ---------- -->
+async function printOtOrderSheet(){
+  const order = buildOtOrderSheetSyntheticOrder();
+  if(order.items.length === 0){ alert('ابھی تک کوئی آرڈر بک نہیں ہوا۔'); return; }
+  await renderAdvOrderToCanvas(order, document.getElementById('otOrderSheetCanvas'));
+  const canvas = document.getElementById('otOrderSheetCanvas');
+  if(!canvas) return;
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+}
 async function shareOtOrderSheet(){
   const order = buildOtOrderSheetSyntheticOrder();
   if(order.items.length === 0){ alert('ابھی تک کوئی آرڈر بک نہیں ہوا۔'); return; }
@@ -21961,9 +21933,20 @@ function otSetReviewWeight(weight){
   if(order) renderAdvOrderToCanvas(order, document.getElementById('otReviewCanvas'));
 }
 
-// ---------- 🔵 صدام کی ہدایت (FM11SEPFR): یہاں سے بھی پرانا Android پرنٹ ڈائیلاگ (window.print()) والا راستہ
-// ہٹا دیا گیا — وہ ڈائیلاگ A4 سائز پرنٹنگ کھولتا تھا۔ اب سیدھا printViaWebBluetooth('otReviewCanvas') بٹن سے
-// کال ہوتا ہے، جو براہ راست تھرمل پرنٹر کو Bluetooth کے ذریعے ڈیٹا بھیجتا ہے (کوئی الگ پرنٹ ایپ درکار نہیں) ---------- -->
+// ---------- 🖨️ صدام کی ہدایت (FM4SEPFR25): آرڈر ٹیکنگ کی رسید براہ راست تھرمل پرنٹر سے پرنٹ — پہلے یہاں سے
+// پرنٹ کا کوئی راستہ ہی نہیں تھا ---------- -->
+async function printOtReviewOrder(){
+  const order = advanceOrdersData.find(o => o.id === otSavedOrderId);
+  if(!order){ alert('آرڈر نہیں ملا — پہلے آرڈر محفوظ کریں۔'); return; }
+  await renderAdvOrderToCanvas(order, document.getElementById('otReviewCanvas'));
+  const canvas = document.getElementById('otReviewCanvas');
+  if(!canvas) return;
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+}
 
 // ---------- 💬 صدام کی ہدایت (FM4SEPFR30): آرڈر ٹیکنگ کی رسید کو براہ راست واٹس ایپ/شیئر — پہلے یہاں سے شیئر کا کوئی راستہ نہیں تھا ---------- -->
 async function shareOtReviewOrder(orderIdOverride){
@@ -30597,11 +30580,6 @@ const FONT_PRESETS = [
   {id:'jameelnastaleeqkasheeda',label:'جمیل نوری نستعلیق (کشیدہ)',  family:"'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif", weight:400, isNastaleeq:true},
   // ---------- 🗑️ صدام کی ہدایت (FM11SEP): PDMS ملتان، ثلث السمط اور جمیل خوشخطی فونٹ فہرست سے ہٹا دیے گئے —
   // صدام نے ان کی فائلیں ریپو سے بھی حذف کر دی ہیں، اب صرف اوپر والے دو نستعلیق فونٹ (ریگولر/کشیدہ) باقی ہیں ---------- -->
-  // ---------- 🆕 صدام کی ہدایت (FM11SEPFR0722AM): 4 نئے اردو فونٹ فہرست میں شامل کیے گئے ---------- -->
-  {id:'alfarsaban',    label:'الفارس 18 آبان',   family:"'AlFarsAban','Noto Nastaliq Urdu',serif",   weight:400, isNastaleeq:true},
-  {id:'akramunicode',  label:'اکرم یونیکوڈ',     family:"'AkramUnicode','Noto Nastaliq Urdu',serif", weight:400, isNastaleeq:true},
-  {id:'alqalamkhawar', label:'القلم خاور',       family:"'AlQalamKhawar','Noto Nastaliq Urdu',serif",weight:400, isNastaleeq:true},
-  {id:'gandharasuls',  label:'گندھارا ثلث',      family:"'GandharaSuls','Noto Nastaliq Urdu',serif", weight:400, isNastaleeq:true},
 ];
 
 // ---------- پوری ایپ کا سائز (Zoom) — بڑی اسکرین/فونٹ چاہنے والوں کے لیے۔ html root پر zoom لگانے سے
@@ -31036,11 +31014,6 @@ function adjustProductCardNameWeight(weight){
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
   try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
   try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
-  // ---------- 🐛 صدام کی ہدایت (FM11SEPFR): پہلے یہ سٹائل صرف بلنگ/PO/ایڈوانس آرڈر گرڈز پر لاگو ہوتا تھا —
-  // اصل "Products" مینجمنٹ سکرین (renderProductList) کبھی اپڈیٹ نہیں ہوتی تھی، اس لیے فونٹ/موٹائی/رنگ بدلنے کا
-  // وہاں کوئی اثر نظر نہیں آتا تھا۔ اب یہاں بھی شامل کیا گیا ---------- -->
-  try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
-  try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
 }
 function adjustProductCardNameFont(fontId){
   AppState.settings.productCardNameFont = fontId || null;
@@ -31048,8 +31021,6 @@ function adjustProductCardNameFont(fontId){
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
   try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
   try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
-  try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
-  try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
 }
 function adjustProductCardNameBg(hex){
   AppState.settings.productCardNameBg = hex;
@@ -31057,8 +31028,6 @@ function adjustProductCardNameBg(hex){
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
   try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
   try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
-  try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
-  try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
 }
 function adjustProductCardNameBgIntensity(val){
   AppState.settings.productCardNameBgIntensity = Math.max(-40, Math.min(40, Number(val) || 0));
@@ -31066,8 +31035,6 @@ function adjustProductCardNameBgIntensity(val){
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
   try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
   try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
-  try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
-  try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
 }
 function adjustProductCardNameColor(hex){
   AppState.settings.productCardNameColor = hex;
@@ -31075,15 +31042,11 @@ function adjustProductCardNameColor(hex){
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
   try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
   try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
-  try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
-  try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
 }
 function resetProductCardNameColor(){
   AppState.settings.productCardNameColor = null;
   persistAllData();
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
-  try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
-  try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
 }
 function resetProductCardNameBg(){
   AppState.settings.productCardNameBg = null;
@@ -31092,8 +31055,6 @@ function resetProductCardNameBg(){
   if(picker) picker.value = '#eef2ff';
   persistAllData();
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
-  try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
-  try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(document.getElementById('globalTopSearchInput')?.value || ''); }catch(e){}
 }
 function getProductCardBgFinal(){
   const base = AppState.settings.productCardNameBg;

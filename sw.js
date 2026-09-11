@@ -2,7 +2,7 @@
 // یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
 // صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
 // ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'FM11SEPFR0813AM';
+const CACHE_VERSION = 'FM11SEPFR0649AM';
 const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
 const PRECACHE_URLS = [
@@ -15,11 +15,6 @@ const PRECACHE_URLS = [
   './icon-512.png',
   './JameelNooriNastaleeq-Regular.ttf',
   './JameelNooriNastaleeq-Kasheeda.ttf',
-  // ---------- 🆕 صدام کی ہدایت (FM11SEPFR0805AM): 4 نئے فونٹ — JameelNooriNastaleeq کی طرح root میں ---------- -->
-  './AlFars_18_Aban_Regular.ttf',
-  './Akram_Unicode_Akram_Unicode.ttf',
-  './alqalam_AlQalam_Khawar.ttf',
-  './Gandhara_Suls_Regular.ttf',
   // ---------- 🆕 صدام کی ہدایت (FM8SEPTU4): 3 نئے فونٹ — fonts/ فولڈر میں ---------- -->
   './fonts/PTSimpleBoldRuled.ttf',
   './fonts/ThuluthAlsmt.ttf',
