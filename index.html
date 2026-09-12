@@ -3525,6 +3525,7 @@
           <option value="stockHigh">سٹاک: زیادہ → کم</option>
           <option value="__TOGGLE_VIEW__" id="saViewModeBtn">📊 جدول نظارہ</option>
           <option value="__RENUMBER__">🔢 ترتیب دیں (1 سے نمبر)</option>
+          <option value="__TOGGLE_LOCK__" id="saLockToggleBtn">🔒 لسٹ لاک کریں</option>
         </select>
         <label title="📦 انوینٹری ٹریک کریں (سٹاک ختم ہونے پر بکری روک دیں)" style="display:flex; align-items:center; justify-content:center; flex:0 0 34px; height:34px; background:#eef2ff; border-radius:8px; cursor:pointer;">
           <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:16px; height:16px; margin:0;">
@@ -7803,7 +7804,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ12ستمبر4:45pm';
+const APP_BUILD_VERSION = 'ہفتہ12ستمبر4:57pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9745,6 +9746,11 @@ function handleStockAdjSortSelect(sel){
     renumberAllProductSerials();
     return;
   }
+  if(sel.value === '__TOGGLE_LOCK__'){
+    sel.value = 'serial';
+    toggleProductSerialLock();
+    return;
+  }
   renderStockAdjustmentScreen();
 }
 // ---------- 🗜️ صدام کی ہدایت (FM10SEPTH0844AM): رپورٹس/فلٹر ایک کولیپس ایبل باکس میں — صفحہ کھلتے ہی
@@ -10152,7 +10158,7 @@ function finishUndoRedoAction(){
   window.scrollTo(0, savedScrollY);
 }
 function renumberAllProductSerials(){
-  if(SERIAL_NUMBERS_LOCKED){ alert('🔒 سیریل نمبر فی الحال مقفل ہیں — ترتیب تبدیل نہیں ہو سکتی۔'); return; }
+  if(PRODUCT_SERIAL_LOCKED){ alert('🔒 سیریل نمبر فی الحال مقفل ہیں — ترتیب تبدیل نہیں ہو سکتی۔ پہلے 🔓 اَن لاک کریں۔'); return; }
   if(!confirm('تمام سبزیوں کے سیریل نمبر موجودہ ترتیب کے مطابق 1 سے دوبارہ لگا دیے جائیں؟')) return;
   snapshotProductsForUndo();
   // ---------- 🐞 صدام کی ہدایت (FM10SEPTH0844AM) فکس: پہلے صرف موجودہ serial_no کے مطابق ترتیب دی جاتی تھی —
@@ -13733,13 +13739,43 @@ let serialPickerListMax = 60;
 // ہر بٹن پر inline style سے لگائی جا رہی ہے (بجائے صرف CSS class پر انحصار کرنے کے) — یہ کسی بھی بیرونی CSS
 // تصادم، specificity الجھن، یا کیشنگ کی پرت سے مکمل محفوظ، ہمیشہ یقینی طریقہ ہے ---------- -->
 const SERIAL_BADGE_INLINE_STYLE = "width:48px !important;height:48px !important;min-width:48px !important;min-height:48px !important;max-width:none !important;flex:0 0 auto !important;padding:0 !important;border-radius:50% !important;background:radial-gradient(circle at 35% 30%, #f87171, #dc2626 65%, #b91c1c) !important;border:2px solid #7f1d1d !important;color:#ffffff !important;font-family:'Arial Black',Arial,sans-serif !important;font-weight:900 !important;font-size:18px !important;cursor:pointer;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important;box-shadow:0 3px 0 #7f1d1d, 0 4px 6px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.5) !important;line-height:1 !important;box-sizing:border-box !important;overflow:visible !important;flex-shrink:0 !important;align-self:center !important;";
-// ---------- 🔒 صدام کی ہدایت (FM12SEPSA0445PM): کسٹمر کی حتمی، منظور شدہ سیریل نمبر ترتیب (1 سے 63 تک) کو
-// فی الحال مکمل مقفل کر دیا گیا ہے — نہ ملازم/کسٹمر، نہ خود ایڈمن، کوئی بھی سیریل نمبر تبدیل نہیں کر سکتا۔
-// دوبارہ کھولنا ہو تو صرف یہ ایک لائن (false کر کے) بدلنی ہوگی — صدام کی درخواست پر ہی ---------- -->
-const SERIAL_NUMBERS_LOCKED = true;
+// ---------- 🔒 صدام کی ہدایت (FM12SEPSA0452PM): سبزیوں (پراڈکٹس) کے سیریل نمبر کی لسٹ اب مستقل ہارڈ کوڈڈ
+// لاک نہیں رہی — بلکہ ایڈمن خود 🧮 سٹاک مینجمنٹ کی ترتیب ڈراپ ڈاؤن سے 🔒/🔓 بٹن دبا کر لاک/اَن لاک کر سکتا ہے۔
+// لاک لگاتے وقت وارننگ پوچھی جاتی ہے، اور اَن لاک کرنے کے لیے ایڈمن کا PIN لازمی مانگا جاتا ہے (toggleProductSerialLock
+// اور verifyAdminPinAndUnlock دیکھیں)۔ حالت اس ڈیوائس پر ہی محفوظ رہتی ہے (localStorage) ---------- -->
+// ---------- 🔓 صدام کی ہدایت (FM12SEPSA0452PM): فی الحال لاک کھلی حالت میں شروع ہوگی تاکہ ایڈمن اپنی
+// مرضی سے سیریل نمبر ترتیب دے سکے — بعد میں 🔒 بٹن سے خود لاک کر لیں ---------- -->
+let PRODUCT_SERIAL_LOCKED = loadFromStorage('productSerialLocked', false);
+function toggleProductSerialLock(){
+  if(PRODUCT_SERIAL_LOCKED){
+    const pin = prompt('🔓 سیریل نمبر لسٹ اَن لاک کرنے کے لیے ایڈمن پاسورڈ (PIN) درج کریں:');
+    if(pin === null) return;
+    verifyAdminPinAndUnlock(pin);
+  } else {
+    if(!confirm('⚠️ آپ سیریل نمبر کی اس لسٹ کو لاک کرنے جا رہے ہیں۔ لاک کرنے کے بعد کوئی بھی سیریل نمبر تبدیل نہیں کر سکے گا — دوبارہ تبدیلی کے لیے ایڈمن پاسورڈ سے اَن لاک کرنا ہوگا۔ کیا آپ جاری رکھنا چاہتے ہیں؟')) return;
+    PRODUCT_SERIAL_LOCKED = true;
+    saveToStorage('productSerialLocked', true);
+    alert('🔒 سیریل نمبر لسٹ لاک ہو گئی۔');
+    renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+  }
+}
+async function verifyAdminPinAndUnlock(pin){
+  const cleanPin = (pin || '').trim();
+  if(!cleanPin){ alert('❌ پاسورڈ درج نہیں کیا گیا — لاک نہیں کھلا۔'); return; }
+  let ok = (cleanPin === DEV_BYPASS_PIN);
+  if(!ok){
+    const enteredHash = await hashPin(cleanPin);
+    ok = usersData.some(u => u.pin === enteredHash && u.role === 'admin' && u.is_active);
+  }
+  if(!ok){ alert('❌ غلط پاسورڈ — لاک نہیں کھلا۔'); return; }
+  PRODUCT_SERIAL_LOCKED = false;
+  saveToStorage('productSerialLocked', false);
+  alert('🔓 لاک کھل گیا — اب آپ سیریل نمبر تبدیل کر سکتے ہیں۔');
+  renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+}
 function openSerialPicker(type, id, currentValue, title){
-  if(SERIAL_NUMBERS_LOCKED){
-    alert('🔒 سیریل نمبر فی الحال مقفل ہیں — تبدیل نہیں ہو سکتے۔ ضرورت ہو تو ڈویلپر سے رابطہ کریں۔');
+  if(type === 'product' && PRODUCT_SERIAL_LOCKED){
+    alert('🔒 سبزیوں کے سیریل نمبر فی الحال مقفل ہیں — تبدیل نہیں ہو سکتے۔ اَن لاک کرنے کے لیے 🧮 سٹاک مینجمنٹ کی ترتیب ڈراپ ڈاؤن سے 🔓 بٹن دبائیں۔');
     return;
   }
   serialPickerCtx = {type, id, currentValue: currentValue || null};
@@ -18010,6 +18046,8 @@ function renderStockAdjustmentScreen(query){
 
   const saViewBtn = document.getElementById('saViewModeBtn');
   if(saViewBtn) saViewBtn.textContent = productViewMode === 'sheet' ? '🗂️ کارڈ نظارہ' : '📊 جدول نظارہ';
+  const saLockBtn = document.getElementById('saLockToggleBtn');
+  if(saLockBtn) saLockBtn.textContent = PRODUCT_SERIAL_LOCKED ? '🔓 لسٹ اَن لاک کریں' : '🔒 لسٹ لاک کریں';
   if(productViewMode === 'sheet'){
     renderProductSpreadsheet(filtered, wrap);
     crossRefreshProductList();
@@ -21425,11 +21463,28 @@ function renderOtCustomerList(query){
     return;
   }
 
-  wrap.innerHTML = list.map(c => `
-    <div onclick="selectOtCustomer(${c.customer_id})" style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:13px 14px; margin-bottom:6px; cursor:pointer;">
-      <div style="font-weight:800; font-size:16px; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</div>
-      <div style="font-size:12.5px; color:var(--muted); flex:0 0 auto; font-weight:700;">${c.area ? '🗺️ ' + c.area : ''}</div>
-    </div>`).join('');
+  wrap.innerHTML = list.map(c => {
+    // ---------- 📞 صدام کی ہدایت (FM12SEPSA...): نام دائیں سائیڈ (RTL) پر، ساتھ موبائل نمبر +
+    // کال/SMS/واٹس ایپ بٹن — رابطہ فوری کیا جا سکے ---------- -->
+    const digits = (c.phone || '').replace(/[^0-9]/g, '');
+    const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
+    return `
+    <div dir="rtl" style="background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:12px 14px; margin-bottom:6px;">
+      <div onclick="selectOtCustomer(${c.customer_id})" style="display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;">
+        <div style="font-weight:800; font-size:16px; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right;">${c.name}</div>
+        <div style="font-size:12.5px; color:var(--muted); flex:0 0 auto; font-weight:700;">${c.area ? '🗺️ ' + c.area : ''}</div>
+      </div>
+      ${c.phone ? `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; padding-top:8px; border-top:1px dashed #e5e9f0;">
+        <div style="font-size:12.5px; color:var(--muted); font-weight:700; direction:ltr; text-align:right;">📱 ${c.phone}</div>
+        <div style="display:flex; gap:6px;">
+          <a href="tel:${c.phone}" onclick="event.stopPropagation();" style="text-decoration:none; background:#eff6ff; color:#1d4ed8; border-radius:8px; padding:5px 9px; font-size:13px; font-weight:800;">📞 کال</a>
+          <a href="sms:${c.phone}" onclick="event.stopPropagation();" style="text-decoration:none; background:#f5f3ff; color:#6d28d9; border-radius:8px; padding:5px 9px; font-size:13px; font-weight:800;">✉️ SMS</a>
+          <a href="https://wa.me/${waNum}" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none; background:#f0fdf4; color:#15803d; border-radius:8px; padding:5px 9px; font-size:13px; font-weight:800;">🟢 واٹس ایپ</a>
+        </div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
 }
 
 function selectOtCustomer(customerId){
@@ -22372,11 +22427,12 @@ function renderRecoveryListEmployeeView(){
   rlMethodMap = {};
   // ---------- 🪦 صدام کی ہدایت (FM3SEPTH10): "کھوہ کھاتے" میں گئے کسٹمر یہاں کبھی نظر نہیں آئیں گے ----------
   let owing = customersData.filter(c => c.total_receivable > 0 && !c.isDormant);
-  // ---------- مکمل شدہ (✅ OK والے) سب سے اوپر، باقی نام کے مطابق ----------
+  // ---------- 🔢 صدام کی ہدایت (FM12SEPSA...): مکمل شدہ (✅ OK والے) سب سے اوپر، باقی وہی سیریل نمبر
+  // کی ترتیب سے جو مین کسٹمر لسٹ میں موجود ہے (نام کے حساب سے نہیں) ---------- -->
   owing.sort((a,b) => {
     const aDone = rlDoneIds.includes(a.customer_id), bDone = rlDoneIds.includes(b.customer_id);
     if(aDone !== bDone) return bDone - aDone;
-    return a.name.localeCompare(b.name, 'ur');
+    return (a.serial_no || a.customer_id || 0) - (b.serial_no || b.customer_id || 0);
   });
   const list = document.getElementById('rlEmployeeList');
   if(!list) return;
@@ -22403,7 +22459,7 @@ function renderRecoveryListEmployeeView(){
     return `
     <div class="rlEmpRow" dir="rtl" style="background:${isDone ? '#f0fdf4' : '#fff'}; border:1.5px solid ${isDone ? '#86efac' : '#e5e9f0'}; border-radius:12px; padding:12px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <div style="font-size:17px; font-weight:800;">${c.name} ${isDone ? '✅' : ''} ${c.rateArea ? `<span style="font-size:9.5px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}</div>
+        <div style="font-size:17px; font-weight:800;">${c.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; width:22px !important; height:22px !important; min-width:22px !important; min-height:22px !important; font-size:10.5px !important; box-shadow:none !important; border-width:1.5px !important; margin:0 4px 0 0;">${c.serial_no}</span>` : ''}${c.name} ${isDone ? '✅' : ''} ${c.rateArea ? `<span style="font-size:9.5px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}</div>
       </div>
       <!-- ---------- 📊 مکمل بقایہ کی تفصیل — 5 خانے، صدام کی ہدایت (FM3SEPTH10): سابقہ، آج کی خریداری، ٹوٹل بقایہ (خریداری کے بعد)،
            آج کی وصولی (لائیو، جیسے جیسے رقم لکھی جائے اپڈیٹ ہو)، تازہ ترین ٹوٹل بقایہ (لائیو) ---------- -->
