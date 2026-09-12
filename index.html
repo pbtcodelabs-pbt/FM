@@ -57,7 +57,7 @@
        ہر بار پیج کھلتے ہی ایک ناکام (404) نیٹ ورک درخواست جاتی تھی — سست انٹرنیٹ پر یہ قیمتی وقت اور
        بینڈوڈتھ ضائع کرتی تھی جو اصل ضروری فونٹس (Kasheeda/Regular) کے لوڈ ہونے میں تاخیر کر سکتی تھی۔
        'PDMSMultan' نام باقی جگہ فونٹ فہرستوں میں بے ضرر طور پر رہنے دیا گیا ہے — براؤزر خودکار نظرانداز کر دے گا ---------- */
-  /* ---------- ✅ صدام کی ہدایت (FM11SEPFR0828AM): 4 نئے فونٹ ایکٹیو کیے گئے — یہ فائلیں صدام نے GitHub
+  /* ---------- ✅ صدام کی ہدایت (FM12SEPSA0445PM): 4 نئے فونٹ ایکٹیو کیے گئے — یہ فائلیں صدام نے GitHub
        ریپو کے root میں (index.html کے ساتھ ہی، fonts/ فولڈر میں نہیں) اپلوڈ کی ہیں، اس لیے راستہ (path)
        بالکل اسی طرح './' سے رکھا گیا ہے جیسے اوپر Jameel Noori Nastaleeq کے لیے ہے ---------- */
   @font-face{
@@ -7803,7 +7803,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعہ11ستمبر8:28am';
+const APP_BUILD_VERSION = 'ہفتہ12ستمبر4:45pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9869,6 +9869,17 @@ function renderPackingPickerList(){
 }
 function selectPackingOption(value){
   if(!packingPickerCtx) return;
+  // ---------- 🆕 صدام کی ہدایت (FM12SEPSA0445PM): نامکمل نئی قطار کے لیے updateVariantField استعمال نہیں کرتے
+  // (وہ ہمیشہ فوراً کلاؤڈ پر بھیج دیتا ہے) — یہاں پہلے صرف میموری میں لکھتے ہیں، مکمل ہونے پر checkDraftCompletion
+  // خود ہی صحیح وقت پر محفوظ/کلاؤڈ پر بھیجے گا ---------- -->
+  if(packingPickerCtx.productId === draftNewProductId){
+    const p = productsData.find(x => x.product_id === packingPickerCtx.productId);
+    const v = p?.variants.find(x => x.variant_id === packingPickerCtx.variantId);
+    if(v) v.label = value;
+    closePackingPicker();
+    checkDraftCompletion(packingPickerCtx.productId);
+    return;
+  }
   updateVariantField(packingPickerCtx.productId, packingPickerCtx.variantId, 'label', value);
   closePackingPicker();
   const savedScrollY = window.scrollY;
@@ -10089,6 +10100,7 @@ function renderProductSpreadsheet(filtered, wrap){
       </table>
     </div>
     <div style="display:none;"></div>
+    ${draftNewProductId !== null ? `<div style="margin-top:8px; background:#fef3c7; color:#92400e; border:1.5px solid #fde68a; border-radius:9px; padding:9px 12px; font-size:12.5px; font-weight:800; text-align:center;">⚠️ نئی قطار محفوظ نہیں ہوئی — سیو ہونے کے لیے نام اور پیکنگ دونوں ضروری ہیں</div>` : ''}
   `;
   const scrollWrap = document.getElementById('stockAdjSheetScrollWrap');
   if(scrollWrap){ scrollWrap.scrollTop = savedScrollTop; scrollWrap.scrollLeft = savedScrollLeft; }
@@ -10140,6 +10152,7 @@ function finishUndoRedoAction(){
   window.scrollTo(0, savedScrollY);
 }
 function renumberAllProductSerials(){
+  if(SERIAL_NUMBERS_LOCKED){ alert('🔒 سیریل نمبر فی الحال مقفل ہیں — ترتیب تبدیل نہیں ہو سکتی۔'); return; }
   if(!confirm('تمام سبزیوں کے سیریل نمبر موجودہ ترتیب کے مطابق 1 سے دوبارہ لگا دیے جائیں؟')) return;
   snapshotProductsForUndo();
   // ---------- 🐞 صدام کی ہدایت (FM10SEPTH0844AM) فکس: پہلے صرف موجودہ serial_no کے مطابق ترتیب دی جاتی تھی —
@@ -10160,31 +10173,27 @@ function renumberAllProductSerials(){
   if(document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
   window.scrollTo(0, savedScrollY);
 }
+// ---------- 🆕 صدام کی ہدایت (FM12SEPSA0445PM) — نظرثانی: نئی سبزی شامل کرنے پر لاک نہیں لگنی چاہیے (سیریل
+// نمبر 1-63 والا لاک صرف موجودہ آئٹمز کے لیے ہے)۔ نیا آئٹم ہمیشہ سب سے آخر میں، اگلے خالی نمبر (مثلاً 64، پھر
+// 65) کے ساتھ شامل ہو — کسی موجودہ نمبر کو ہاتھ نہیں لگانا۔ اور جب تک نام + پیکنگ دونوں مکمل نہ ہوں، نئی قطار
+// کو سیریل نمبر ملنا اور محفوظ/کلاؤڈ پر جانا رکا رہے گا (خالی/ادھوری قطاریں اب کبھی محفوظ نہیں ہوں گی) ---------- -->
+let draftNewProductId = null;
 function insertProductRowAfter(afterProductId){
-  snapshotProductsForUndo();
-  const afterP = productsData.find(p => p.product_id === afterProductId);
-  const afterSerial = afterP?.serial_no || 0;
-  productsData.forEach(p => { if(p.serial_no && p.serial_no > afterSerial) p.serial_no++; });
+  if(draftNewProductId !== null){
+    alert('⚠️ پہلے پچھلی نئی قطار میں نام اور پیکنگ مکمل کریں — تب نئی سبزی شامل کر سکتے ہیں۔');
+    return;
+  }
   const newProductId = nextProductId++;
   const newVariantId = nextVariantId++;
   productsData.push({
-    product_id: newProductId, name: '', category: '', isDormant: false, serial_no: afterSerial + 1,
+    product_id: newProductId, name: '', category: '', isDormant: false, serial_no: null,
     variants: [{ variant_id: newVariantId, label:'', barcode:'NEW'+newVariantId, purchase:0, labor:0, sellLabor:0, retail:0, wholesale:0, stock:0, lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
   });
-  // ---------- 🐞 صدام کی ہدایت (FM10SEPTH0844AM) — پچھلا fix ادھورا تھا: صرف اسی صورت میں صحیح کام کرتا تھا
-  // جب جس آئٹم کے بعد + دبایا وہ خود اس پرانی فہرست میں پہلے سے موجود ہو۔ چونکہ زیادہ تر پرانے آئٹمز کبھی اس
-  // فہرست میں شامل ہی نہیں ہوئے تھے، نیا آئٹم اکثر پھر بھی غلط/آخری جگہ جا کر بیٹھتا رہا۔ اب اس پرانی، الجھی
-  // ہوئی فہرست کو ہمیشہ کے لیے خالی کر دیتے ہیں — سیریل نمبر ہی واحد، قابلِ بھروسہ ترتیب کا ذریعہ رہے گا ---------- -->
-  saveToStorage(PRODUCT_MANUAL_ORDER_KEY, []);
+  draftNewProductId = newProductId;
   saveToStorage('nextProductId', nextProductId);
   saveToStorage('nextVariantId', nextVariantId);
-  persistAllData();
-  pushProductsToCloud();
-  // ---------- 🐞 صدام کی ہدایت (FM10SEPTH0844AM) اصل فکس ملی: جب آپ Stock Adjustment سکرین پر ہوتے ہیں تو
-  // Products سکرین کا خانہ (productListWrap) موجود ہی نہیں ہوتا — پہلے renderProductList() اسی وجہ سے خرابی
-  // دے کر رک جاتا تھا، اور اس کے بعد لکھی renderStockAdjustmentScreen() والی لائن کبھی چلتی ہی نہیں تھی —
-  // یہی وہ اصل وجہ تھی کہ ➕ دبانے پر "کچھ نہیں ہوتا تھا"۔ اب پہلے موجودہ سکرین (Stock Adjustment) اپڈیٹ ہوتی
-  // ہے، اور Products سکرین صرف اسی صورت میں اپڈیٹ ہوتی ہے جب وہ واقعی موجود ہو ---------- -->
+  // ---------- ⚠️ جان بوجھ کر یہاں persistAllData()/pushProductsToCloud() نہیں بلایا — نامکمل قطار ابھی
+  // کہیں محفوظ نہیں ہوئی، صرف اسکرین پر عارضی طور پر نظر آ رہی ہے ---------- -->
   const savedScrollY = window.scrollY;
   renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
   if(document.getElementById('productListWrap')){
@@ -10197,10 +10206,37 @@ function insertProductRowAfter(afterProductId){
     window.scrollTo(0, savedScrollY);
   }, 50);
 }
+// ---------- نامکمل قطار مکمل ہوئی یا نہیں چیک کریں — نام اور پیکنگ دونوں بھرے ہوں تبھی حتمی سیریل نمبر ملے
+// گا (موجودہ سب سے بڑے نمبر کے بعد اگلا)، تبھی localStorage اور کلاؤڈ پر محفوظ ہوگی ---------- -->
+function checkDraftCompletion(productId){
+  if(draftNewProductId !== productId) return;
+  const p = productsData.find(x => x.product_id === productId);
+  if(!p) return;
+  const v = p.variants[0];
+  const nameOk = p.name && p.name.trim();
+  const packingOk = v.label && v.label.trim();
+  if(nameOk && packingOk){
+    const maxSerial = productsData.reduce((m, x) => Math.max(m, x.serial_no || 0), 0);
+    p.serial_no = maxSerial + 1;
+    draftNewProductId = null;
+    persistAllData();
+    pushProductsToCloud();
+  }
+  // ---------- نامکمل ہو تب بھی سکرین دوبارہ بنا دیں (صرف میموری سے) تاکہ ابھی لکھی/منتخب کی گئی چیز نظر آئے —
+  // محفوظ/کلاؤڈ پر بھیجنا صرف اوپر، مکمل ہونے پر ہی ہوتا ہے ---------- -->
+  const savedScrollY = window.scrollY;
+  renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+  if(document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
+  window.scrollTo(0, savedScrollY);
+}
 function updateProductName(productId, newName, inputEl){
   const p = productsData.find(x => x.product_id === productId);
   if(!p || !newName.trim()) return;
   p.name = newName.trim();
+  if(productId === draftNewProductId){
+    checkDraftCompletion(productId);
+    return;
+  }
   persistAllData();
   pushProductsToCloud();
   if(inputEl) flashSavedInput(inputEl); // ---------- 💾 صدام کی ہدایت (FM10SEPTH0530PM): محفوظ ہونے کا اشارہ ---------- -->
@@ -10221,6 +10257,7 @@ function deleteProductRowInSheet(productId){
     if(!confirm(`"${product.name || 'یہ قطار'}" کو مکمل حذف کر دیں؟ (اگر غلطی سے ہو جائے تو ↩️ سے واپس لا سکتے ہیں)`)) return;
   }
   snapshotProductsForUndo();
+  if(productId === draftNewProductId) draftNewProductId = null;
   (product.variants || []).forEach(v => idbDeleteImage('product_' + v.variant_id));
   productsData = productsData.filter(p => p.product_id !== productId);
   persistAllData();
@@ -13696,7 +13733,15 @@ let serialPickerListMax = 60;
 // ہر بٹن پر inline style سے لگائی جا رہی ہے (بجائے صرف CSS class پر انحصار کرنے کے) — یہ کسی بھی بیرونی CSS
 // تصادم، specificity الجھن، یا کیشنگ کی پرت سے مکمل محفوظ، ہمیشہ یقینی طریقہ ہے ---------- -->
 const SERIAL_BADGE_INLINE_STYLE = "width:48px !important;height:48px !important;min-width:48px !important;min-height:48px !important;max-width:none !important;flex:0 0 auto !important;padding:0 !important;border-radius:50% !important;background:radial-gradient(circle at 35% 30%, #f87171, #dc2626 65%, #b91c1c) !important;border:2px solid #7f1d1d !important;color:#ffffff !important;font-family:'Arial Black',Arial,sans-serif !important;font-weight:900 !important;font-size:18px !important;cursor:pointer;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important;box-shadow:0 3px 0 #7f1d1d, 0 4px 6px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.5) !important;line-height:1 !important;box-sizing:border-box !important;overflow:visible !important;flex-shrink:0 !important;align-self:center !important;";
+// ---------- 🔒 صدام کی ہدایت (FM12SEPSA0445PM): کسٹمر کی حتمی، منظور شدہ سیریل نمبر ترتیب (1 سے 63 تک) کو
+// فی الحال مکمل مقفل کر دیا گیا ہے — نہ ملازم/کسٹمر، نہ خود ایڈمن، کوئی بھی سیریل نمبر تبدیل نہیں کر سکتا۔
+// دوبارہ کھولنا ہو تو صرف یہ ایک لائن (false کر کے) بدلنی ہوگی — صدام کی درخواست پر ہی ---------- -->
+const SERIAL_NUMBERS_LOCKED = true;
 function openSerialPicker(type, id, currentValue, title){
+  if(SERIAL_NUMBERS_LOCKED){
+    alert('🔒 سیریل نمبر فی الحال مقفل ہیں — تبدیل نہیں ہو سکتے۔ ضرورت ہو تو ڈویلپر سے رابطہ کریں۔');
+    return;
+  }
   serialPickerCtx = {type, id, currentValue: currentValue || null};
   serialPickerListMax = 60;
   document.getElementById('serialPickerTitle').textContent = '🔢 ' + (title || 'سیریل نمبر منتخب کریں');
@@ -30603,7 +30648,7 @@ const FONT_PRESETS = [
   {id:'jameelnastaleeqkasheeda',label:'جمیل نوری نستعلیق (کشیدہ)',  family:"'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif", weight:400, isNastaleeq:true},
   // ---------- 🗑️ صدام کی ہدایت (FM11SEP): PDMS ملتان، ثلث السمط اور جمیل خوشخطی فونٹ فہرست سے ہٹا دیے گئے —
   // صدام نے ان کی فائلیں ریپو سے بھی حذف کر دی ہیں، اب صرف اوپر والے دو نستعلیق فونٹ (ریگولر/کشیدہ) باقی ہیں ---------- -->
-  // ---------- ✅ صدام کی ہدایت (FM11SEPFR0828AM): 4 نئے فونٹ فہرست میں شامل کیے گئے (اوپر @font-face بھی بنایا گیا) ---------- -->
+  // ---------- ✅ صدام کی ہدایت (FM12SEPSA0445PM): 4 نئے فونٹ فہرست میں شامل کیے گئے (اوپر @font-face بھی بنایا گیا) ---------- -->
   {id:'gandharasuls',  label:'گندھارا ثلث',   family:"'GandharaSuls','Noto Nastaliq Urdu',serif",  weight:400, isNastaleeq:true},
   {id:'akramunicode',  label:'اکرم یونیکوڈ',  family:"'AkramUnicode','Noto Nastaliq Urdu',serif",  weight:400, isNastaleeq:true},
   {id:'alqalamkhawar', label:'القلم خاور',    family:"'AlQalamKhawar','Noto Nastaliq Urdu',serif", weight:400, isNastaleeq:true},
