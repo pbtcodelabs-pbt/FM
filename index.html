@@ -7842,7 +7842,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ12ستمبر7:41pm';
+const APP_BUILD_VERSION = 'ہفتہ12ستمبر8:04pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10413,7 +10413,7 @@ function applyRole(role, name){
 // ---------- 🔔 صدام کی ہدایت (FM4SEPFR06): سبسکرپشن یاد دہانی — صرف Admin کو نظر آئے —
 // ⚠️ فی الحال ٹیسٹ کے لیے تھریشولڈ بہت بڑا (999) رکھا گیا ہے تاکہ چاہے 29 دن باقی ہوں پھر بھی نظر آئے۔
 // صدام کی تصدیق کے بعد اسے 7 کر دیا جائے گا (صرف سات دن یا اس سے کم باقی رہ جانے پر نظر آئے گا) ---------- -->
-const SUB_MARQUEE_THRESHOLD_DAYS = 999; // ---------- 🧪 ٹیسٹ موڈ — بعد میں 7 کر دیں ----------
+const SUB_MARQUEE_THRESHOLD_DAYS = 7; // ---------- 🔒 صدام کی ہدایت (FM12SEPSA): ٹیسٹ موڈ (999) ختم — اب صرف 7 دن یا اس سے کم رہ جانے پر ہی میسج چلے گا ----------
 
 // ---------- 🔁 صدام کی ہدایت (FM4SEPFR08): تین پیغامات (لاگ ان، سبسکرپشن یاد دہانی، اسکرین شاٹ یاد دہانی) —
 // اب اکٹھے نظر نہیں آتے، ایک ایک کر کے باری باری، ہمیشہ دائیں سے بائیں، بہت آہستہ رفتار سے چلتے ہیں ---------- -->
@@ -21748,38 +21748,30 @@ function renderOtCustomerList(query){
   }
 
   wrap.innerHTML = list.map(c => {
-    // ---------- 📞 صدام کی ہدایت (FM12SEPSA...): نام دائیں سائیڈ (RTL) پر، ساتھ موبائل نمبر +
-    // کال/SMS/واٹس ایپ بٹن — رابطہ فوری کیا جا سکے ---------- -->
+    // ---------- 📞 صدام کی ہدایت (FM12SEPSA0741PM): کمپیکٹ ایک لائن کارڈ — نام + علاقہ + بقایہ + فون نمبر +
+    // کال/واٹس ایپ آئیکن، سب ایک ہی پتلی لائن میں (SMS آئیکن ہٹا دیا) — تاکہ ایک صفحے پر زیادہ کسٹمر نظر آئیں ---------- -->
     const digits = (c.phone || '').replace(/[^0-9]/g, '');
     const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
-    // ---------- 🏷️📦 صدام کی ہدایت (FM12SEPSA0724PM): علاقہ کیپسول — اسلام آباد سرخ، راولپنڈی سبز
-    // (پوری ایپ کے رنگین کنونشن کے مطابق) — تاکہ فہرست میں ہی پتا چل جائے یہ کس علاقے کا کسٹمر ہے ---------- -->
     const areaBadge = c.rateArea === 'retail'
-      ? `<span style="font-size:10.5px; font-weight:800; background:#b91c1c; color:#fff; padding:2px 8px; border-radius:9px; white-space:nowrap;">🏷️ اسلام آباد</span>`
+      ? `<span style="flex:0 0 auto; font-size:9px; font-weight:800; background:#b91c1c; color:#fff; padding:1px 6px; border-radius:8px; white-space:nowrap;">اسلام آباد</span>`
       : (c.rateArea === 'wholesale'
-        ? `<span style="font-size:10.5px; font-weight:800; background:#15803d; color:#fff; padding:2px 8px; border-radius:9px; white-space:nowrap;">📦 راولپنڈی</span>`
+        ? `<span style="flex:0 0 auto; font-size:9px; font-weight:800; background:#15803d; color:#fff; padding:1px 6px; border-radius:8px; white-space:nowrap;">راولپنڈی</span>`
         : '');
-    // ---------- 💰 صدام کی ہدایت (FM12SEPSA0724PM): ٹوٹل بقایہ سامنے نظر آئے + لیجر بٹن (خوبصورت A4 رپورٹ) ---------- -->
     const bal = c.total_receivable || 0;
+    const balHtml = `<span style="flex:0 0 auto; font-size:10.5px; font-weight:800; color:${bal > 0 ? '#b91c1c' : '#94a3b8'}; white-space:nowrap;">${bal > 0 ? 'Rs.' + bal.toLocaleString() : '—'}</span>`;
+    const phoneHtml = c.phone ? `<span style="flex:0 0 auto; font-size:10px; color:var(--muted); font-weight:700; direction:ltr; white-space:nowrap;">${c.phone}</span>` : '';
+    const iconBtn = (bg, color, content, href, isLink) => isLink
+      ? `<a href="${href}" target="${href.startsWith('http') ? '_blank' : '_self'}" onclick="event.stopPropagation();" style="flex:0 0 auto; text-decoration:none; display:flex; align-items:center; justify-content:center; width:26px; height:26px; background:${bg}; color:${color}; border-radius:7px; font-size:13px;">${content}</a>`
+      : `<button type="button" onclick="event.stopPropagation(); ${content}" style="flex:0 0 auto; width:26px; height:26px; background:${bg}; color:${color}; border:none; border-radius:7px; font-size:13px; cursor:pointer; padding:0;">📒</button>`;
     return `
-    <div dir="rtl" style="background:#fff; border:1px solid #e5e9f0; border-radius:12px; padding:12px 14px; margin-bottom:6px;">
-      <div onclick="selectOtCustomer(${c.customer_id})" style="display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;">
-        <div style="font-weight:800; font-size:16px; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right;">${c.name}</div>
-        ${areaBadge}
-      </div>
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px;">
-        <div style="font-size:12.5px; font-weight:800; color:${bal > 0 ? '#b91c1c' : '#94a3b8'};">${bal > 0 ? 'بقایہ: Rs.' + bal.toLocaleString() : 'بقایہ: کوئی نہیں'}</div>
-        <button type="button" onclick="event.stopPropagation(); openCustomerLedgerReport(${c.customer_id})" style="flex:0 0 auto; background:#eef2ff; color:var(--primary-dark); border:1.5px solid var(--primary); border-radius:8px; padding:4px 10px; font-size:12px; font-weight:800; cursor:pointer;">📒 لیجر</button>
-      </div>
-      ${c.phone ? `
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; padding-top:8px; border-top:1px dashed #e5e9f0;">
-        <div style="font-size:12.5px; color:var(--muted); font-weight:700; direction:ltr; text-align:right;">📱 ${c.phone}</div>
-        <div style="display:flex; gap:6px;">
-          <a href="tel:${c.phone}" onclick="event.stopPropagation();" style="text-decoration:none; background:#eff6ff; color:#1d4ed8; border-radius:8px; padding:5px 9px; font-size:13px; font-weight:800;">📞 کال</a>
-          <a href="sms:${c.phone}" onclick="event.stopPropagation();" style="text-decoration:none; background:#f5f3ff; color:#6d28d9; border-radius:8px; padding:5px 9px; font-size:13px; font-weight:800;">✉️ SMS</a>
-          <a href="https://wa.me/${waNum}" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none; background:#f0fdf4; color:#15803d; border-radius:8px; padding:5px 9px; font-size:13px; font-weight:800;">🟢 واٹس ایپ</a>
-        </div>
-      </div>` : ''}
+    <div dir="rtl" onclick="selectOtCustomer(${c.customer_id})" style="display:flex; align-items:center; gap:5px; background:#fff; border:1px solid #e5e9f0; border-radius:9px; padding:6px 8px; margin-bottom:4px; cursor:pointer; overflow-x:auto;">
+      <div style="flex:1 1 auto; min-width:0; font-weight:800; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</div>
+      ${areaBadge}
+      ${balHtml}
+      ${phoneHtml}
+      ${iconBtn('#eef2ff', 'var(--primary-dark)', `openCustomerLedgerReport(${c.customer_id})`)}
+      ${c.phone ? iconBtn('#eff6ff', '#1d4ed8', '📞', `tel:${c.phone}`, true) : ''}
+      ${c.phone ? iconBtn('#f0fdf4', '#15803d', '🟢', `https://wa.me/${waNum}`, true) : ''}
     </div>`;
   }).join('');
 }
