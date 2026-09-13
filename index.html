@@ -5175,7 +5175,7 @@
           </div>
           <div style="display:flex; gap:6px; flex:0 0 auto;">
             <button type="button" onclick="openOtStockReport()" style="padding:9px 10px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 سٹاک رپورٹ</button>
-            <button type="button" onclick="toggleOtViewMode()" id="otViewModeBtn" style="padding:9px 10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 جدول</button>
+            <button type="button" onclick="toggleOtViewMode()" id="otViewModeBtn" style="display:none; padding:9px 10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 جدول</button>
             <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
             <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
           </div>
@@ -7968,7 +7968,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر8:00am';
+const APP_BUILD_VERSION = 'اتوار13ستمبر5:18pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21805,7 +21805,10 @@ const OT_PAGE_SIZE = 60;    // ہر صفحے پر کتنے آئٹمز دکھائ
 // ---------- 📊 صدام کی ہدایت (FM10SEPTH0844AM): Order Taking میں بھی سپریڈ شیٹ نظارہ — کم پڑھے لکھے
 // ملازم/کسٹمر کے لیے نمبر کے حساب سے آسان۔ صرف نام+پیکنگ+مقدار — کوئی قیمت نہیں، کوئی ترمیم/ایڈ کی سہولت
 // نہیں، صرف حاضر سبزیاں (otFlatCache پہلے سے صرف حاضر آئٹمز دیتا ہے) ---------- -->
-let otViewMode = loadFromStorage('otViewMode', 'card');
+// ---------- 🔒 صدام کی ہدایت (FM13SEPSU): آرڈر ٹیکنگ میں بھی کارڈ نظارہ ہمیشہ کے لیے ہٹا دیا — اب صرف جدول
+// (Table) نظارہ ہی چلے گا، جس میں سیریل نمبر (لاک شدہ، سرخ گول بیج) پہلے سے موجود تھا مگر کارڈ نظارے میں
+// کبھی نظر نہیں آتا تھا۔ یوں سٹاک مینجمنٹ/پراڈکٹس اور آرڈر ٹیکنگ — تینوں جگہ اب ایک جیسے، لاک شدہ سیریل نمبر ---------- -->
+let otViewMode = 'table';
 
 // ---------- 📦 صدام کی ہدایت (FM10SEPTH): اس وقت واقعی "باقی دستیاب" سٹاک — اصل سٹاک میں سے پہلے سے بک
 // (دوسرے پینڈنگ آرڈرز کی) مقدار، اور ابھی اسی کسٹمر کے لیے یہاں لکھی جا رہی مقدار، دونوں گھٹا کر ----------
