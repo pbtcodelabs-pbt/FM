@@ -7968,7 +7968,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر5:31pm';
+const APP_BUILD_VERSION = 'اتوار13ستمبر6:25pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10212,9 +10212,11 @@ function renderProductSpreadsheet(filtered, wrap){
   const retailW = autoColWidth('🔴 اسلام آباد', filtered.map(p => p.variants[0]?.retail||0), measNumFont, {min:44, max:90, pad:16});
   const wholesaleW = autoColWidth('🟢 راولپنڈی', filtered.map(p => p.variants[0]?.wholesale||0), measNumFont, {min:44, max:90, pad:16});
   const stockW = autoColWidth('📦 سٹاک', filtered.map(p => p.variants[0]?.stock||0), measNumFont, {min:40, max:80, pad:16});
+  const deleteW = 40; // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ڈیلیٹ بٹن ➕ سے الگ کر کے سب سے آخری کالم میں —
+  // تاکہ نئی قطار شامل کرتے وقت غلطی سے ڈیلیٹ نہ ہو جائے (پہلے دونوں بٹن ساتھ ساتھ تھے) ---------- -->
   // ---------- 🧷 صدام کی ہدایت (FM11SEPSA0303AM): ترتیب اب — چیک باکس → نام → پیکنگ (تینوں منجمد/فکسڈ، سکرول
   // کرنے پر بھی نظر آتے رہیں گے)، اس کے بعد ➕/🗑️ اور باقی سب کالم اسکرول ہوتے رہیں گے ---------- -->
-  const colWidths = [presenceW, nameW, packingW, actionW, serialW, purchaseW, laborW, sellLaborW, totalW, retailW, wholesaleW, stockW];
+  const colWidths = [presenceW, nameW, packingW, actionW, serialW, purchaseW, laborW, sellLaborW, totalW, retailW, wholesaleW, stockW, deleteW];
   const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
   const isAdmin = AppState.currentRole === 'admin';
   const rows = filtered.map((p, idx) => {
@@ -10237,9 +10239,8 @@ function renderProductSpreadsheet(filtered, wrap){
         </td>
         <td style="${tdBase}${frozenTd(1)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
         <td style="${tdBase}${frozenTd(2)}">${packingSelectHtml}</td>
-        <td style="${tdBase}${rowTd}padding:4px;"><div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+        <td style="${tdBase}${rowTd}padding:4px;"><div style="display:flex; justify-content:center;">
           <button type="button" style="width:28px;height:28px;border-radius:50%;border:none;background:#dcfce7;color:#15803d;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس کے بعد نئی خالی قطار شامل کریں" onclick="insertProductRowAfter(${p.product_id})">➕</button>
-          <button type="button" style="width:28px;height:28px;border-radius:50%;border:none;background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس قطار کو حذف کریں" onclick="deleteProductRowInSheet(${p.product_id})">🗑️</button>
         </div></td>
         <td style="${tdBase}${rowTd}"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:32px !important; height:32px !important; min-width:32px !important; min-height:32px !important; font-size:13px !important;" onclick="openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.purchase||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'purchase',this.value,this); this.closest('tr').querySelector('.shTotalPurchase').textContent=(parseFloat(this.value)||0)+(${v.labor||0});"></td>
@@ -10249,9 +10250,12 @@ function renderProductSpreadsheet(filtered, wrap){
         <td style="${tdBase}${rowTd}"><input type="number" style="${redInputStyle}" value="${v.retail||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'retail',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${greenInputStyle}" value="${v.wholesale||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'wholesale',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
+        <td style="${tdBase}${rowTd}padding:4px;"><div style="display:flex; justify-content:center;">
+          <button type="button" style="width:28px;height:28px;border-radius:50%;border:none;background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس قطار کو حذف کریں" onclick="deleteProductRowInSheet(${p.product_id})">🗑️</button>
+        </div></td>
       </tr>`;
   }).join('');
-  const headers = ['✔️','نام','پیکنگ','➕','#','💰 خرید','💪 م.خرید','💪 م.فروخت','🧮 حتمی خرید','🔴 اسلام آباد','🟢 راولپنڈی','📦 سٹاک'];
+  const headers = ['✔️','نام','پیکنگ','➕','#','💰 خرید','💪 م.خرید','💪 م.فروخت','🧮 حتمی خرید','🔴 اسلام آباد','🟢 راولپنڈی','📦 سٹاک','🗑️'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
     const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
@@ -10427,7 +10431,9 @@ function deleteProductRowInSheet(productId){
     && !(v0.label || '').trim()
     && !(v0.purchase) && !(v0.labor) && !(v0.sellLabor) && !(v0.retail) && !(v0.wholesale) && !(v0.stock);
   if(!isEmptyRow){
-    if(!confirm(`"${product.name || 'یہ قطار'}" کو مکمل حذف کر دیں؟ (اگر غلطی سے ہو جائے تو ↩️ سے واپس لا سکتے ہیں)`)) return;
+    // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): غلطی سے حذف ہونے کی شکایت پر — اب دو دفعہ تصدیق لازمی ---------- -->
+    if(!confirm(`⚠️ کیا آپ واقعی "${product.name || 'یہ قطار'}" کو حذف کرنا چاہتے ہیں؟`)) return;
+    if(!confirm(`❗ پکا؟ یہ ڈیٹا (نام/قیمتیں/سٹاک) مکمل حذف ہو جائے گا۔\n\nحذف کرنے کے لیے OK دبائیں، ورنہ Cancel کریں۔`)) return;
   }
   snapshotProductsForUndo();
   if(productId === draftNewProductId) draftNewProductId = null;
@@ -21981,7 +21987,16 @@ function selectOtCustomer(customerId){
   // دوسری/آخری تہہ حفاظت) ----------
   try{ dedupeVariantIds(); }catch(e){}
 
-  otFlatCache = getFlatVariants().sort((a, b) => a.name.localeCompare(b.name, 'ur'));
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): پہلے نام کے حساب سے (الف بائی ترتیب) سورٹ ہوتا تھا، جس سے سیریل
+  // نمبر بے ترتیب نظر آتے تھے (31 کے بعد 60، پھر 5...) — اب سیریل نمبر کے حساب سے (1 سے آخر تک) سورٹ،
+  // بالکل سٹاک مینجمنٹ/پراڈکٹس جیسی ترتیب؛ جن کا سیریل نمبر ابھی نہ ہو وہ سب سے آخر میں ---------- -->
+  otFlatCache = getFlatVariants().sort((a, b) => {
+    const sa = a.serial_no, sb = b.serial_no;
+    if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
+    if(sa == null) return 1;
+    if(sb == null) return -1;
+    return sa - sb;
+  });
   renderOtItemsPage();
 }
 
