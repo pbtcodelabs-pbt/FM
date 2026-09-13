@@ -57,29 +57,9 @@
        ہر بار پیج کھلتے ہی ایک ناکام (404) نیٹ ورک درخواست جاتی تھی — سست انٹرنیٹ پر یہ قیمتی وقت اور
        بینڈوڈتھ ضائع کرتی تھی جو اصل ضروری فونٹس (Kasheeda/Regular) کے لوڈ ہونے میں تاخیر کر سکتی تھی۔
        'PDMSMultan' نام باقی جگہ فونٹ فہرستوں میں بے ضرر طور پر رہنے دیا گیا ہے — براؤزر خودکار نظرانداز کر دے گا ---------- */
-  /* ---------- ✅ صدام کی ہدایت (FM12SEPSA0445PM): 4 نئے فونٹ ایکٹیو کیے گئے — یہ فائلیں صدام نے GitHub
-       ریپو کے root میں (index.html کے ساتھ ہی، fonts/ فولڈر میں نہیں) اپلوڈ کی ہیں، اس لیے راستہ (path)
-       بالکل اسی طرح './' سے رکھا گیا ہے جیسے اوپر Jameel Noori Nastaleeq کے لیے ہے ---------- */
-  @font-face{
-    font-family:'GandharaSuls';
-    src:url('./Gandhara_Suls_Regular.ttf') format('truetype');
-    font-weight:400; font-style:normal; font-display:swap;
-  }
-  @font-face{
-    font-family:'AkramUnicode';
-    src:url('./Akram_Unicode_Akram_Unicode.ttf') format('truetype');
-    font-weight:400; font-style:normal; font-display:swap;
-  }
-  @font-face{
-    font-family:'AlQalamKhawar';
-    src:url('./alqalam_AlQalam_Khawar.ttf') format('truetype');
-    font-weight:400; font-style:normal; font-display:swap;
-  }
-  @font-face{
-    font-family:'AlFarsAban';
-    src:url('./AlFars_18_Aban_Regular.ttf') format('truetype');
-    font-weight:400; font-style:normal; font-display:swap;
-  }
+  /* ---------- 🗑️ صدام کی ہدایت (FM13SEPSU): یہ 4 فونٹ (گندھارا ثلث، اکرم یونیکوڈ، القلم خاور، الفارس ابان)
+       خوبصورت نہیں لگے — فہرست، @font-face، اور sw.js precache تینوں جگہ سے مکمل ہٹا دیے گئے۔ اب صرف
+       Jameel Noori Nastaleeq (Regular/Kasheeda) ہی نستعلیق فونٹ کے طور پر باقی ہیں ---------- */
   *{box-sizing:border-box; margin:0; padding:0;}
   /* ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر Category والی تمام UI (Billing/Advance Orders/
   Purchase Orders/Stock Adjustment/Products کی کیٹگری ریل، ڈراپ ڈاؤن اور فلٹر) پوری ایپ سے چھپا دی
@@ -7889,7 +7869,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر7:13am';
+const APP_BUILD_VERSION = 'اتوار13ستمبر7:23am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -19640,6 +19620,49 @@ function animateAndToggleCustomer(customerId){
   }, 280);
 }
 
+// ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر/سپلائر کارڈ کو بھی آرڈر ٹیکنگ والی کمپیکٹ، راؤنڈ، 3D
+// ایک-لائن رو کی طرز پر بنایا — چوڑے/چوکور پرانے کارڈ کی جگہ؛ سب انلائن سٹائل (کسی CSS کلاس پر انحصار نہیں) ---------- -->
+function buildCompactPartyRow(opts){
+  const { id, name, phone, serial, keywords, areaBadgeHtml, balance, balanceLabelColor, rowClickJs, deleteJs, serialClickJs } = opts;
+  const digits = (phone || '').replace(/[^0-9]/g, '');
+  const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
+  const iconStyle = (grad) => `flex:0 0 27px; width:27px; height:27px; display:flex; align-items:center; justify-content:center; text-decoration:none; color:#fff; border-radius:50%; background:${grad}; box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 2px 4px -1px rgba(0,0,0,.4);`;
+  const disabledStyle = `flex:0 0 27px; width:27px; height:27px; display:flex; align-items:center; justify-content:center; color:#b8c0cc; border-radius:50%; background:#e2e8f0;`;
+  const callBtn = phone
+    ? `<a href="tel:${phone}" onclick="event.stopPropagation();" style="${iconStyle('linear-gradient(155deg,#42a5f5,#1565c0)')}">${OT_CALL_ICON_SVG}</a>`
+    : `<span style="${disabledStyle}">${OT_CALL_ICON_SVG}</span>`;
+  const waBtn = phone
+    ? `<a href="https://wa.me/${waNum}" target="_blank" onclick="event.stopPropagation();" style="${iconStyle('linear-gradient(155deg,#25d366,#128c4a)')}">${OT_WA_ICON_SVG}</a>`
+    : `<span style="${disabledStyle}">${OT_WA_ICON_SVG}</span>`;
+  const smsBtn = phone
+    ? `<a href="sms:${phone}" onclick="event.stopPropagation();" style="${iconStyle('linear-gradient(155deg,#fb923c,#c2410c)')}">${OT_SMS_ICON_SVG}</a>`
+    : `<span style="${disabledStyle}">${OT_SMS_ICON_SVG}</span>`;
+  const hasBal = balance > 0;
+  const rowBg = hasBal ? 'linear-gradient(155deg,#fdecec,#fad2d0)' : 'linear-gradient(155deg,#f4f5f6,#e6e9eb)';
+  const rowBorder = hasBal ? '#e4a19c' : '#cfd4d9';
+  const rowShadow = hasBal ? '0 3px 0 #cc7972, 0 4px 8px -2px rgba(153,27,27,.2)' : '0 3px 0 #b8bfc6, 0 4px 8px -2px rgba(0,0,0,.12)';
+  // ---------- 💰 صدام کی ہدایت (FM13SEPSU): بقایہ کیپسول اب زیادہ نمایاں — بڑا، ابھرا ہوا، سرخ (یہ رقم واپس لینی ہے) ---------- -->
+  const balBg = hasBal ? '#fee2e2' : '#f1f5f9';
+  const balColor = hasBal ? '#b91c1c' : '#64748b';
+  const balHtml = `<div style="flex:0 0 74px; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; border-radius:9px; padding:6px 4px; background:${balBg}; color:${balColor}; box-shadow:0 2px 0 rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.6);">${hasBal ? 'Rs.' + balance.toLocaleString() : '—'}</div>`;
+  const keywordHtml = keywords ? `<span style="flex:0 0 auto; font-size:9px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px;">${keywords}</span>` : '';
+  const serialHtml = `<button type="button" onclick="event.stopPropagation(); ${serialClickJs}" style="flex:0 0 auto; ${SERIAL_BADGE_INLINE_STYLE} width:20px !important; height:20px !important; min-width:20px !important; min-height:20px !important; font-size:9.5px !important; box-shadow:none !important; border-width:1.5px !important;">${serial ?? '?'}</button>`;
+  return `
+    <div dir="rtl" onclick="${rowClickJs}" style="display:flex; align-items:center; gap:4px; flex-wrap:nowrap; border-radius:13px; border:1.5px solid ${rowBorder}; padding:7px 8px; margin-bottom:6px; cursor:pointer; width:100%; box-sizing:border-box; background:${rowBg}; box-shadow:${rowShadow};">
+      ${serialHtml}
+      <div style="flex:1 1 auto; min-width:0;">
+        <div style="font-weight:900; font-size:14px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:4px;">${name} ${keywordHtml}</div>
+        ${phone ? `<div style="font-size:9px; color:#64748b; font-weight:700; direction:ltr; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${phone}</div>` : ''}
+      </div>
+      ${areaBadgeHtml || ''}
+      ${balHtml}
+      ${callBtn}
+      ${waBtn}
+      ${smsBtn}
+      <button type="button" onclick="event.stopPropagation(); ${deleteJs}" title="حذف کریں" style="flex:0 0 auto; width:20px; height:20px; border:none; border-radius:50%; background:rgba(0,0,0,.06); color:#94a3b8; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🗑️</button>
+    </div>`;
+}
+
 function renderPartyList(query = ''){
   const wrap = document.getElementById('partyListWrap');
   renderCustFilterBar();
@@ -19665,33 +19688,18 @@ function renderPartyList(query = ''){
       return;
     }
     const isAdmin = AppState.currentRole === 'admin';
-    wrap.innerHTML = filtered.map(c => `
-      <div class="partyRow ${c.total_receivable > 0 ? 'stReceivable' : 'stZero'}" id="prow-${c.customer_id}" dir="rtl">
-        <button class="prDeleteBtn" onclick="event.stopPropagation(); deleteCustomer(${c.customer_id})" title="Delete Customer">🗑️</button>
-        <div class="prTopRow">
-          <label title="${c.isDormant ? 'ٹک لگائیں — واپس حاضر موجود کریں' : 'ٹک لگائیں — کھوہ کھاتے میں بھیجیں'}" style="display:flex; align-items:center; ${isAdmin ? 'cursor:pointer;' : 'cursor:default;'} flex:0 0 auto;">
-            <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="event.stopPropagation(); animateAndToggleCustomer(${c.customer_id})" style="width:18px; height:18px; margin:0;">
-          </label>
-          <div class="prAvatar">${c.photo ? `<img src="${c.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '👤'}</div>
-          <div class="prMain" onclick="openCustomerProfile(${c.customer_id})">
-            <div class="prName"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:22px !important; height:22px !important; min-width:22px !important; min-height:22px !important; font-size:10px !important; box-shadow:none !important; border-width:1.5px !important;" onclick="event.stopPropagation(); openSerialPicker('customers', ${c.customer_id}, ${c.serial_no ?? 'null'}, '${(c.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${c.serial_no ?? '?'}</button>${c.name}
-              ${customerBoughtToday(c.customer_id) ? `<span style="font-size:9px; font-weight:700; color:#15803d; background:#dcfce7; border-radius:6px; padding:1px 5px;">🔥 آج</span>` : ''}
-              ${c.keywords ? ` <span style="font-size:9px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px;">${c.keywords}</span>` : ''}
-            </div>
-          </div>
-          <!-- ---------- 🏷️ صدام کی ہدایت (FM10SEPTH0844AM): علاقے کا کیپسول — درمیانی خالی جگہ میں، ٹیپ کر کے
-               سیدھا بدلا جا سکے (نستعلیق فونٹ خودکار — سکرین کا مقررہ فونٹ) ---------- -->
-          <button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:11px; font-weight:800; color:#5b21b6; background:#ede9fe; border:1.5px solid #c4b5fd; border-radius:20px; padding:4px 10px; cursor:pointer;">${RATE_AREA_LABELS[c.rateArea] || '❔'}</button>
-          <div class="prBalance ${c.total_receivable > 0 ? 'receivable' : 'zero'}">
-            ${c.total_receivable > 0 ? 'Rs. ' + c.total_receivable.toLocaleString() : '—'}
-          </div>
-        </div>
-        <div class="prPhone">${c.phone || 'No phone'}</div>
-        <div class="prContacts">
-          ${buildQuickContactIcons(c.phone, c.name, c.total_receivable, 'receivable')}
-        </div>
-      </div>
-    `).join('');
+    wrap.innerHTML = filtered.map(c => {
+      const areaBadgeHtml = c.rateArea
+        ? `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#fff; background:${c.rateArea==='retail'?'#b91c1c':'#15803d'}; border:none; border-radius:7px; padding:2px 5px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">${c.rateArea==='retail'?'اسلام آباد':'راولپنڈی'}</button>`
+        : `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#5b21b6; background:#ede9fe; border:1.5px solid #c4b5fd; border-radius:7px; padding:2px 5px; cursor:pointer;">❔</button>`;
+      return buildCompactPartyRow({
+        id: c.customer_id, name: c.name, phone: c.phone, serial: c.serial_no, keywords: c.keywords,
+        areaBadgeHtml, balance: c.total_receivable || 0,
+        rowClickJs: `openCustomerProfile(${c.customer_id})`,
+        deleteJs: `deleteCustomer(${c.customer_id})`,
+        serialClickJs: `openSerialPicker('customers', ${c.customer_id}, ${c.serial_no ?? 'null'}, '${(c.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`
+      });
+    }).join('');
   } else {
     let filtered = suppliersData.filter(s => partyMatchesQuery(s, query));
     // ---------- 🔎 صدام کی ہدایت (FM3SEPTH23): کم/زیادہ بقایہ کی ترتیب ----------
@@ -19709,24 +19717,13 @@ function renderPartyList(query = ''){
       wrap.innerHTML = filterBarHtml + `<div class="placeholder">کوئی سپلائر نہیں ملا</div>`;
       return;
     }
-    wrap.innerHTML = filterBarHtml + filtered.map(s => `
-      <div class="partyRow ${s.total_payable > 0 ? 'stPayable' : 'stZero'}" dir="rtl">
-        <button class="prDeleteBtn" onclick="event.stopPropagation(); deleteSupplier(${s.supplier_id})" title="سپلائر ڈیلیٹ کریں">🗑️</button>
-        <div class="prTopRow">
-          <div class="prAvatar">${s.photo ? `<img src="${s.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🏭'}</div>
-          <div class="prMain" onclick="openSupplierProfile(${s.supplier_id})">
-            <div class="prName"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:22px !important; height:22px !important; min-width:22px !important; min-height:22px !important; font-size:10px !important; box-shadow:none !important; border-width:1.5px !important;" onclick="event.stopPropagation(); openSerialPicker('suppliers', ${s.supplier_id}, ${s.serial_no ?? 'null'}, '${(s.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${s.serial_no ?? '?'}</button>${s.name}${s.keywords ? ` <span style="font-size:9px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px;">${s.keywords}</span>` : ''}</div>
-          </div>
-          <div class="prBalance ${s.total_payable > 0 ? 'payable' : 'zero'}">
-            ${s.total_payable > 0 ? 'Rs. ' + s.total_payable.toLocaleString() : '—'}
-          </div>
-        </div>
-        <div class="prPhone">${s.phone || 'نمبر درج نہیں'}</div>
-        <div class="prContacts">
-          ${buildQuickContactIcons(s.phone, s.name, s.total_payable, 'payable')}
-        </div>
-      </div>
-    `).join('');
+    wrap.innerHTML = filterBarHtml + filtered.map(s => buildCompactPartyRow({
+      id: s.supplier_id, name: s.name, phone: s.phone, serial: s.serial_no, keywords: s.keywords,
+      areaBadgeHtml: '', balance: s.total_payable || 0,
+      rowClickJs: `openSupplierProfile(${s.supplier_id})`,
+      deleteJs: `deleteSupplier(${s.supplier_id})`,
+      serialClickJs: `openSerialPicker('suppliers', ${s.supplier_id}, ${s.serial_no ?? 'null'}, '${(s.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`
+    })).join('');
   }
 }
 
@@ -21816,9 +21813,11 @@ function renderOtCustomerList(query){
         ? `<span style="flex:0 0 auto; font-size:9px; font-weight:800; padding:2px 5px; border-radius:7px; white-space:nowrap; text-align:center; color:#fff; background:#15803d; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">راولپنڈی</span>`
         : `<span style="flex:0 0 0;"></span>`);
     const bal = c.total_receivable || 0;
-    const balBg = bal > 0 ? '#dcfce7' : '#f1f5f9';
-    const balColor = bal > 0 ? '#166534' : '#64748b';
-    const balBtn = `<button type="button" onclick="event.stopPropagation(); openCustomerLedgerReport(${c.customer_id})" style="flex:0 0 60px; font-size:10.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; border:none; cursor:pointer; border-radius:8px; padding:4px 3px; background:${balBg}; color:${balColor}; box-shadow:0 2px 0 rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.5);">${bal > 0 ? 'Rs.' + bal.toLocaleString() : '—'}</button>`;
+    // ---------- 💰 صدام کی ہدایت (FM13SEPSU): بقایہ کیپسول پہلے نمایاں نہیں تھا — اب بڑا، ابھرا ہوا،
+    // سرخ رنگ (یہ رقم کسٹمر سے لینی ہے) ---------- -->
+    const balBg = bal > 0 ? '#fee2e2' : '#f1f5f9';
+    const balColor = bal > 0 ? '#b91c1c' : '#64748b';
+    const balBtn = `<button type="button" onclick="event.stopPropagation(); openCustomerLedgerReport(${c.customer_id})" style="flex:0 0 74px; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; border:none; cursor:pointer; border-radius:9px; padding:6px 4px; background:${balBg}; color:${balColor}; box-shadow:0 2px 0 rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.6);">${bal > 0 ? 'Rs.' + bal.toLocaleString() : '—'}</button>`;
     const iconStyle = (grad) => `flex:0 0 27px; width:27px; height:27px; display:flex; align-items:center; justify-content:center; text-decoration:none; color:#fff; border-radius:50%; background:${grad}; box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 2px 4px -1px rgba(0,0,0,.4);`;
     const disabledStyle = `flex:0 0 27px; width:27px; height:27px; display:flex; align-items:center; justify-content:center; color:#b8c0cc; border-radius:50%; background:#e2e8f0;`;
     const callBtn = c.phone
@@ -31124,13 +31123,8 @@ const FONT_PRESETS = [
   {id:'calibri',      label:'Calibri',         family:"'Carlito', Calibri, sans-serif",         weight:400},
   {id:'jameelnastaleeq',        label:'جمیل نوری نستعلیق',          family:"'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif",         weight:400, isNastaleeq:true},
   {id:'jameelnastaleeqkasheeda',label:'جمیل نوری نستعلیق (کشیدہ)',  family:"'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif", weight:400, isNastaleeq:true},
-  // ---------- 🗑️ صدام کی ہدایت (FM11SEP): PDMS ملتان، ثلث السمط اور جمیل خوشخطی فونٹ فہرست سے ہٹا دیے گئے —
-  // صدام نے ان کی فائلیں ریپو سے بھی حذف کر دی ہیں، اب صرف اوپر والے دو نستعلیق فونٹ (ریگولر/کشیدہ) باقی ہیں ---------- -->
-  // ---------- ✅ صدام کی ہدایت (FM12SEPSA0445PM): 4 نئے فونٹ فہرست میں شامل کیے گئے (اوپر @font-face بھی بنایا گیا) ---------- -->
-  {id:'gandharasuls',  label:'گندھارا ثلث',   family:"'GandharaSuls','Noto Nastaliq Urdu',serif",  weight:400, isNastaleeq:true},
-  {id:'akramunicode',  label:'اکرم یونیکوڈ',  family:"'AkramUnicode','Noto Nastaliq Urdu',serif",  weight:400, isNastaleeq:true},
-  {id:'alqalamkhawar', label:'القلم خاور',    family:"'AlQalamKhawar','Noto Nastaliq Urdu',serif", weight:400, isNastaleeq:true},
-  {id:'alfarsaban',    label:'الفارس ابان',   family:"'AlFarsAban','Noto Nastaliq Urdu',serif",    weight:400, isNastaleeq:true},
+  // ---------- 🗑️ صدام کی ہدایت (FM13SEPSU): گندھارا ثلث، اکرم یونیکوڈ، القلم خاور، الفارس ابان —
+  // یہ چاروں فونٹ خوبصورت نہیں لگے، فہرست سے مکمل ہٹا دیے گئے (اب کہیں بھی نظر نہیں آئیں گے) ---------- -->
 ];
 
 // ---------- پوری ایپ کا سائز (Zoom) — بڑی اسکرین/فونٹ چاہنے والوں کے لیے۔ html root پر zoom لگانے سے
