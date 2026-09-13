@@ -2901,7 +2901,7 @@
     <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایڈمن کے مینیو میں نام الگ — تاکہ الجھن نہ ہو کہ یہ ملازم والی
          "ریکوری لسٹ" جیسی ہی چیز ہے؛ دونوں ایک ہی سکرین (data-screen="recoveryList") کھولتے ہیں، مگر رول کے
          مطابق مختلف مواد نظر آتا ہے ---------- -->
-    <div class="navItem admin-only" data-screen="recoveryList" data-navkey="recoveryConfirm" data-navlabel="Recovery Confirmation" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">✅ وصولی کی تصدیق<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="recoveryList" data-navkey="recoveryConfirm" data-navlabel="Recovery Confirmation" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">💰 وصولی کھاتے اپڈیٹ<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): "روزانہ ریکوری لسٹ" پہلے صرف رپورٹس سینٹر کے اندر چھپی ہوئی تھی —
          اب اپنا الگ مینیو آئٹم، تاکہ یہ مخصوص ملازم (یوزرز سکرین کی اجازتی فہرست) کو الاٹ کی جا سکے ---------- -->
     <div class="navItem" data-screen="dailyRecovery" data-navkey="dailyRecovery" data-navlabel="Daily Recovery List" onclick="goTo('dailyRecovery')" style="background:#0D9488; color:#fff;">📋 روزانہ ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
@@ -5355,7 +5355,7 @@
            وصولی درج کرے؛ ایڈمن: صرف بھیجی گئی وصولیوں کی تصدیق کرے) — اسی لیے دونوں کا عنوان بھی الگ رکھا ہے
            تاکہ کنفیوژن نہ ہو کہ یہ ایک ہی سکرین ہے مگر مختلف چیزیں دکھا رہی ہے ---------- -->
       <div class="pageTitle admin-hide-only">💰 Recovery List — وصولی لسٹ</div>
-      <div class="pageTitle admin-only">✅ وصولی کی تصدیق — Recovery Confirmation</div>
+      <div class="pageTitle admin-only">💰 وصولی کھاتے اپڈیٹ</div>
 
       <!-- ---------- ملازم کا منظر: صرف بقایہ والے کسٹمرز، ہر ایک کے آگے وصولی کی رقم + طریقہ ادائیگی ---------- -->
       <div id="rlEmployeeView" class="admin-hide-only">
@@ -5377,7 +5377,14 @@
           <option value="highest">📈 زیادہ بقایہ پہلے</option>
           <option value="lowest">📉 کم بقایہ پہلے</option>
         </select>
-        <div id="rlEmployeeList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:70px;"></div>
+        <!-- ---------- 🔍 صدام کی ہدایت (FM13SEPSU): فونٹ/سائز چھوٹا بڑا کرنے کا کنٹرول — ساتھ ہی کارڈ کمپیکٹ کیے گئے ---------- -->
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+          <span style="font-size:11.5px; color:var(--muted); font-weight:700;">حروف کا سائز:</span>
+          <button type="button" onclick="adjustRlZoom(-10)" style="width:28px; height:28px; border-radius:7px; border:1px solid #dbe1ea; background:#fff; cursor:pointer; font-size:14px; font-weight:800;">−</button>
+          <span id="rlZoomVal" style="font-size:11.5px; font-weight:800; width:38px; text-align:center;">100%</span>
+          <button type="button" onclick="adjustRlZoom(10)" style="width:28px; height:28px; border-radius:7px; border:1px solid #dbe1ea; background:#fff; cursor:pointer; font-size:14px; font-weight:800;">+</button>
+        </div>
+        <div id="rlEmployeeList" style="display:flex; flex-direction:column; gap:6px; margin-bottom:70px;"></div>
         <div style="position:sticky; bottom:8px; padding-top:6px;">
           <button type="button" onclick="submitRecoveryList()" style="width:100%; padding:16px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">✅ آج کی وصولی جمع کریں</button>
         </div>
@@ -8009,7 +8016,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر9:23pm';
+const APP_BUILD_VERSION = 'اتوار13ستمبر9:36pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8535,7 +8542,10 @@ function renderHomeIconGrid(){
     if(!def) return null;
     const spaceIdx = def.label.indexOf(' ');
     const icon = spaceIdx > -1 ? def.label.slice(0, spaceIdx) : '📄';
-    const label = spaceIdx > -1 ? def.label.slice(spaceIdx + 1) : def.label;
+    let label = spaceIdx > -1 ? def.label.slice(spaceIdx + 1) : def.label;
+    // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایڈمن کے ہوم آئیکن پر "Recovery List" کی جگہ "وصولی کھاتے اپڈیٹ" —
+    // چونکہ ایڈمن کا کام صرف تصدیق کرنا ہے، ملازم کا نام "Recovery List" ہی رہے گا (الجھن سے بچنے کے لیے الگ نام) ---------- -->
+    if(key === 'recoveryList' && AppState.currentRole === 'admin') label = 'وصولی کھاتے اپڈیٹ';
     return {icon, label, screen:key, action:def.action || null};
   }).filter(Boolean);
 
@@ -22979,6 +22989,13 @@ function setRlAreaFilter(mode){
   });
   renderRecoveryListEmployeeView();
 }
+function adjustRlZoom(delta){
+  rlZoomPct = Math.max(70, Math.min(160, rlZoomPct + delta));
+  saveToStorage('rlZoomPct', rlZoomPct);
+  document.getElementById('rlZoomVal').textContent = rlZoomPct + '%';
+  renderRecoveryListEmployeeView();
+}
+let rlZoomPct = loadFromStorage('rlZoomPct', 100);
 function renderRecoveryListEmployeeView(){
   rlAmountMap = {};
   rlMethodMap = {};
@@ -23021,55 +23038,39 @@ function renderRecoveryListEmployeeView(){
     const noteKey = todayDateKey() + '_' + c.customer_id;
     const noteVal = dailyRecoveryNotes[noteKey] || '';
     return `
-    <div class="rlEmpRow" dir="rtl" style="background:${isDone ? '#f0fdf4' : '#fff'}; border:1.5px solid ${isDone ? '#86efac' : '#e5e9f0'}; border-radius:12px; padding:12px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <div style="font-size:17px; font-weight:800;">${c.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; width:22px !important; height:22px !important; min-width:22px !important; min-height:22px !important; font-size:10.5px !important; box-shadow:none !important; border-width:1.5px !important; margin:0 4px 0 0;">${c.serial_no}</span>` : ''}${c.name} ${isDone ? '✅' : ''} ${c.rateArea ? `<span style="font-size:9.5px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}</div>
+    <div class="rlEmpRow" dir="rtl" style="background:${isDone ? '#f0fdf4' : '#fff'}; border:1.5px solid ${isDone ? '#86efac' : '#e5e9f0'}; border-radius:10px; padding:7px 8px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:${(13*rlZoomPct/100).toFixed(1)}px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-bottom:4px;">
+        <div style="font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:3px; min-width:0;">
+          ${c.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; flex:0 0 auto; width:${(18*rlZoomPct/100).toFixed(0)}px !important; height:${(18*rlZoomPct/100).toFixed(0)}px !important; min-width:${(18*rlZoomPct/100).toFixed(0)}px !important; min-height:${(18*rlZoomPct/100).toFixed(0)}px !important; font-size:${(8.5*rlZoomPct/100).toFixed(1)}px !important; box-shadow:none !important; border-width:1.2px !important; padding:0 !important;">${c.serial_no}</span>` : ''}
+          <span style="overflow:hidden; text-overflow:ellipsis;">${c.name}</span>
+          ${isDone ? '✅' : ''}
+        </div>
+        ${c.rateArea ? `<span style="flex:0 0 auto; font-size:${(8*rlZoomPct/100).toFixed(1)}px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:5px; padding:1px 4px; white-space:nowrap;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}
       </div>
-      <!-- ---------- 📊 مکمل بقایہ کی تفصیل — 5 خانے، صدام کی ہدایت (FM3SEPTH10): سابقہ، آج کی خریداری، ٹوٹل بقایہ (خریداری کے بعد)،
-           آج کی وصولی (لائیو، جیسے جیسے رقم لکھی جائے اپڈیٹ ہو)، تازہ ترین ٹوٹل بقایہ (لائیو) ---------- -->
-      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; margin-bottom:8px;">
-        <div style="background:#f8fafc; border-radius:7px; padding:6px 4px; text-align:center;">
-          <div style="font-size:9.5px; color:var(--muted); font-weight:700;">سابقہ بقایہ</div>
-          <div style="font-size:12.5px; font-weight:800;">${dr.openingBalance.toLocaleString()}</div>
-        </div>
-        <div style="background:#fff7ed; border-radius:7px; padding:6px 4px; text-align:center;">
-          <div style="font-size:9.5px; color:#c2410c; font-weight:700;">آج کی خریداری</div>
-          <div style="font-size:12.5px; font-weight:800; color:#c2410c;">${todayGoods.toLocaleString()}</div>
-        </div>
-        <div style="background:#f8fafc; border-radius:7px; padding:6px 4px; text-align:center;">
-          <div style="font-size:9.5px; color:var(--muted); font-weight:700;">ٹوٹل بقایہ</div>
-          <div style="font-size:12.5px; font-weight:800;">${totalBalance.toLocaleString()}</div>
-        </div>
-        <div style="background:#f0fdf4; border-radius:7px; padding:6px 4px; text-align:center;">
-          <div style="font-size:9.5px; color:#15803d; font-weight:700;">آج کی وصولی</div>
-          <div id="rlTodayRec-${c.customer_id}" style="font-size:12.5px; font-weight:800; color:#15803d;">0</div>
-        </div>
-        <div style="background:#fef2f2; border-radius:7px; padding:6px 4px; text-align:center; grid-column:span 2;">
-          <div style="font-size:9.5px; color:var(--danger); font-weight:700;">تازہ ترین ٹوٹل بقایہ</div>
-          <div id="rlFinalBal-${c.customer_id}" style="font-size:13.5px; font-weight:900; color:var(--danger);">${totalBalance.toLocaleString()}</div>
-        </div>
+      <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): 5 بڑے ڈبوں کی جگہ ایک پتلی، چھوٹے فونٹ کی لائن — کمپیکٹ ---------- -->
+      <div style="display:flex; gap:3px; margin-bottom:5px; font-size:${(9*rlZoomPct/100).toFixed(1)}px; overflow-x:auto; white-space:nowrap;">
+        <div style="background:#f8fafc; border-radius:5px; padding:3px 5px; flex:0 0 auto;">سابقہ:<b>${dr.openingBalance.toLocaleString()}</b></div>
+        <div style="background:#fff7ed; color:#c2410c; border-radius:5px; padding:3px 5px; flex:0 0 auto;">آج مال:<b>${todayGoods.toLocaleString()}</b></div>
+        <div style="background:#f8fafc; border-radius:5px; padding:3px 5px; flex:0 0 auto;">ٹوٹل:<b>${totalBalance.toLocaleString()}</b></div>
+        <div style="background:#f0fdf4; color:#15803d; border-radius:5px; padding:3px 5px; flex:0 0 auto;">وصول:<b id="rlTodayRec-${c.customer_id}">0</b></div>
+        <div style="background:#fef2f2; color:var(--danger); border-radius:5px; padding:3px 5px; flex:0 0 auto;">تازہ:<b id="rlFinalBal-${c.customer_id}">${totalBalance.toLocaleString()}</b></div>
       </div>
-      <!-- ---------- 📞 فون/واٹس ایپ — فوری رابطے کے لیے، ہمیشہ فعال (صدام کی ہدایت) ---------- -->
-      ${c.phone ? `
-      <div style="display:flex; gap:8px; margin-bottom:8px;">
-        <a href="tel:${c.phone}" style="flex:1; text-align:center; padding:7px; background:#eef2ff; color:var(--primary-dark); border-radius:8px; font-size:12.5px; font-weight:800; text-decoration:none;">📞 کال کریں</a>
-        <a href="https://wa.me/${waNum}" target="_blank" style="flex:1; text-align:center; padding:7px; background:#dcfce7; color:#15803d; border-radius:8px; font-size:12.5px; font-weight:800; text-decoration:none;">📱 واٹس ایپ</a>
-      </div>` : ''}
-      <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
-        <input type="number" min="0" placeholder="وصولی کی رقم" ${isDone ? 'disabled' : ''} oninput="updateRlAmount(${c.customer_id}, this.value, ${totalBalance})"
-               style="flex:1; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;">
-        <select ${isDone ? 'disabled' : ''} onchange="rlMethodMap[${c.customer_id}] = this.value;" style="flex:0 0 130px; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      <!-- ---------- رقم + طریقہ + کال/واٹس ایپ + OK — سب ایک ہی لائن میں، کمپیکٹ ---------- -->
+      <div style="display:flex; gap:3px; align-items:center; margin-bottom:4px;">
+        <input type="number" min="0" placeholder="رقم" ${isDone ? 'disabled' : ''} oninput="updateRlAmount(${c.customer_id}, this.value, ${totalBalance})"
+               style="flex:1 1 0; min-width:0; padding:6px 4px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(12*rlZoomPct/100).toFixed(1)}px; text-align:center;">
+        <select ${isDone ? 'disabled' : ''} onchange="rlMethodMap[${c.customer_id}] = this.value;" style="flex:0 0 68px; padding:6px 2px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(9.5*rlZoomPct/100).toFixed(1)}px;">
           ${Object.keys(RECOVERY_METHODS).map(k => `<option value="${k}">${RECOVERY_METHODS[k]}</option>`).join('')}
         </select>
-      </div>
-      <!-- ---------- 📝 یادداشت/نوٹس — صدام کی ہدایت (FM3SEPTH10)، اسی دن کے لیے محفوظ رہتی ہے ---------- -->
-      <input type="text" value="${noteVal.replace(/"/g,'&quot;')}" ${isDone ? 'disabled' : ''} placeholder="📝 نوٹ لکھیں (اختیاری)..." onchange="saveDailyRecoveryNote(${c.customer_id}, this.value)" style="width:100%; padding:8px; margin-bottom:6px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px; font-family:inherit;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div id="rlRemain-${c.customer_id}" style="font-size:12.5px; color:var(--muted);">باقی بقیہ: Rs. ${totalBalance.toLocaleString()}</div>
+        ${c.phone ? `<a href="tel:${c.phone}" style="flex:0 0 auto; width:${(24*rlZoomPct/100).toFixed(0)}px; height:${(24*rlZoomPct/100).toFixed(0)}px; display:flex; align-items:center; justify-content:center; background:#eef2ff; color:var(--primary-dark); border-radius:50%; font-size:${(11*rlZoomPct/100).toFixed(1)}px; text-decoration:none;">📞</a>` : ''}
+        ${c.phone ? `<a href="https://wa.me/${waNum}" target="_blank" style="flex:0 0 auto; width:${(24*rlZoomPct/100).toFixed(0)}px; height:${(24*rlZoomPct/100).toFixed(0)}px; display:flex; align-items:center; justify-content:center; background:#dcfce7; color:#15803d; border-radius:50%; font-size:${(11*rlZoomPct/100).toFixed(1)}px; text-decoration:none;">📱</a>` : ''}
         ${isDone
-          ? `<span style="font-size:12.5px; font-weight:800; color:#15803d;">✅ ریکوری مکمل — بھیج دی گئی</span>`
-          : `<button type="button" onclick="submitSingleRecovery(${c.customer_id})" style="padding:8px 16px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:800; cursor:pointer;">✅ OK — ابھی بھیجیں</button>`}
+          ? `<span style="flex:0 0 auto; font-size:${(9*rlZoomPct/100).toFixed(1)}px; font-weight:800; color:#15803d; white-space:nowrap;">✅ بھیجی گئی</span>`
+          : `<button type="button" onclick="submitSingleRecovery(${c.customer_id})" style="flex:0 0 auto; padding:6px 10px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-size:${(10.5*rlZoomPct/100).toFixed(1)}px; font-weight:800; cursor:pointer; white-space:nowrap;">✅ OK</button>`}
       </div>
+      <!-- ---------- 📝 یادداشت/نوٹس — اختیاری، چھوٹی لائن ---------- -->
+      <input type="text" value="${noteVal.replace(/"/g,'&quot;')}" ${isDone ? 'disabled' : ''} placeholder="📝 نوٹ (اختیاری)" onchange="saveDailyRecoveryNote(${c.customer_id}, this.value)" style="width:100%; padding:4px 6px; margin-bottom:3px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(9.5*rlZoomPct/100).toFixed(1)}px; font-family:inherit; box-sizing:border-box;">
+      <div id="rlRemain-${c.customer_id}" style="font-size:${(9*rlZoomPct/100).toFixed(1)}px; color:var(--muted);">باقی بقیہ: Rs. ${totalBalance.toLocaleString()}</div>
     </div>`;
   }).join('');
 }
