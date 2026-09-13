@@ -7889,7 +7889,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر7:00am';
+const APP_BUILD_VERSION = 'اتوار13ستمبر7:13am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -27713,9 +27713,14 @@ async function pushCustomersToCloud(){
 }
 
 async function fetchCustomersFromCloud(silent){
-  // ---------- اگر اسی فون پر کوئی کسٹمر تبدیلی (نیا کسٹمر، والٹ، بقایا وغیرہ) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
-  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
-  if(AppState.settings.customersPendingSync){
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): اصل خطرناک خرابی یہیں ملی! پرانا کوڈ اگر customersPendingSync
+  // فلیگ کہیں پہلے (مثلاً براؤزر ڈیٹا صاف ہونے کے بعد پہلی بار آفلائن ناکامی پر) true پھنس جاتا تو یہ فنکشن
+  // ہمیشہ کے لیے صرف "push" کرتا رہتا — یعنی خالی/ڈیفالٹ (seed) ڈیٹا بار بار کلاؤڈ پر بھیج کر اصل محفوظ شدہ
+  // کسٹمر ڈیٹا کو اوور رائٹ کر دیتا! اب حفاظتی چیک: اگر مقامی ڈیٹا صرف وہی 3 خالی seed کسٹمر ہیں (یعنی
+  // حقیقی ڈیٹا لگتا ہی نہیں)، تو کبھی push نہ کریں — سیدھا کلاؤڈ سے pull کی کوشش کریں ---------- -->
+  const looksLikeUntouchedSeed = customersData.length <= CUSTOMERS_SEED_DATA.length &&
+    customersData.every(c => CUSTOMERS_SEED_DATA.some(s => s.customer_id === c.customer_id && s.name === c.name));
+  if(AppState.settings.customersPendingSync && !looksLikeUntouchedSeed){
     const pushed = await pushCustomersToCloud();
     if(pushed) return true;
     return false;
