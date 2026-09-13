@@ -170,6 +170,9 @@
   #loginMarqueeWrap{
     width:100%; height:32px; overflow:hidden; order:9; margin:8px 0 -6px;
     position:relative;
+    /* ---------- 🔒 صدام کی ہدایت (FM13SEPSU): بیک اپ/ری سٹور کیپسول کسی بھی کھلے ہوئے Settings/Modal کے پیچھے
+         چھپ جاتا تھا (نظر ہی نہیں آتا تھا) — z-index بہت بلند کر کے یقینی بنایا کہ یہ ہمیشہ سب سے اوپر رہے ---------- -->
+    z-index:9999;
     /* ---------- 🐞 صدام کی ہدایت (FM10SEPTH0844AM) — اصل، مستقل خرابی یہاں ملی! پرانا `100vw` +
          `calc(-50vw + 50%)` طریقہ صرف اسی وقت بالکل درست کام کرتا ہے جب پورا صفحہ سچ میں کناروں تک بالکل
          سیدھا/برابر ہو — لیکن یہ پٹی دراصل `#mobileTopbar` نامی ایک flex-wrap کنٹینر کے اندر ہے جس کی اپنی
@@ -2805,7 +2808,7 @@
       <span id="loginMarqueeText" class="loginMarqueeText"><span id="mqActivePart" class="mqPartLogin"></span></span>
       <!-- ---------- 💊 صدام کی ہدایت (FM13SEPSU): بیک اپ/ری سٹور/ورژن اپڈیٹ کے دوران مووِنگ پٹی کی جگہ
            یہ کیپسول پروگریس بار نظر آئے گا — 1% سے 100% تک بھرتا ہوا، مکمل ہونے پر ✅ نشان ---------- -->
-      <div id="mqProgressCapsule" onclick="if(window.__mqCapsuleTapAction) window.__mqCapsuleTapAction();" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center; padding:0 12px; cursor:default;">
+      <div id="mqProgressCapsule" onclick="if(window.__mqCapsuleTapAction) window.__mqCapsuleTapAction();" style="display:none; position:absolute; inset:0; z-index:9999; align-items:center; justify-content:center; padding:0 12px; cursor:default;">
         <div style="width:100%; max-width:320px; height:20px; background:rgba(255,255,255,.25); border-radius:20px; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.4);">
           <div id="mqProgressFill" style="height:100%; width:2%; background:linear-gradient(90deg,#22c55e,#16a34a); border-radius:20px; transition:width .3s ease;"></div>
           <div id="mqProgressLabel" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.5); white-space:nowrap; overflow:hidden; padding:0 6px;"></div>
@@ -7535,7 +7538,9 @@ function renderGDriveFileList(files){
     wrap.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px 10px;">No Fruit Mandi POS backup file was found in this Google account.</div>';
     return;
   }
-  wrap.innerHTML = files.map(f => {
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ہر بیک اپ فائل کے ساتھ فوراً یہ بھی دکھائیں کہ اس میں کتنے
+  // کسٹمر/پراڈکٹ/سپلائر ہیں — تاکہ صحیح (زیادہ ڈیٹا والی) فائل چننا آسان ہو، ڈاؤن لوڈ کرنے سے پہلے ہی ---------- -->
+  wrap.innerHTML = files.map((f, idx) => {
     const d = new Date(f.createdTime);
     const dateStr = isNaN(d) ? '' : d.toLocaleString('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
     return `<div onclick="selectGDriveBackupFile('${f.id}', '${f.name.replace(/'/g,"\\'")}')"
@@ -7544,10 +7549,22 @@ function renderGDriveFileList(files){
       <div style="flex:1; min-width:0;">
         <div style="font-weight:700; font-size:13px; word-break:break-all;">${f.name}</div>
         <div style="font-size:11px; color:var(--muted);">${dateStr}</div>
+        <div id="gdriveFileCounts-${idx}" style="font-size:11.5px; font-weight:800; color:var(--primary-dark); margin-top:3px;">⏳ لوڈ ہو رہا ہے...</div>
       </div>
       <span style="color:var(--primary); font-weight:700;">↻</span>
     </div>`;
   }).join('');
+  files.forEach((f, idx) => {
+    fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        const el = document.getElementById(`gdriveFileCounts-${idx}`);
+        if(!el) return;
+        if(!data || !data.customers){ el.textContent = '⚠️ پڑھا نہیں جا سکا'; return; }
+        el.textContent = `👥 ${(data.customers||[]).length} کسٹمر  •  🥬 ${(data.products||[]).length} پراڈکٹ  •  🚚 ${(data.suppliers||[]).length} سپلائر`;
+      })
+      .catch(() => { const el = document.getElementById(`gdriveFileCounts-${idx}`); if(el) el.textContent = '⚠️ لوڈ ناکام'; });
+  });
 }
 
 async function selectGDriveBackupFile(fileId, fileName){
@@ -7968,7 +7985,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر7:23pm';
+const APP_BUILD_VERSION = 'اتوار13ستمبر7:45pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -27860,6 +27877,17 @@ async function fetchCustomersFromCloud(silent){
     if(!jsonStr) return false;
     const cloudCustomers = JSON.parse(jsonStr);
     if(!Array.isArray(cloudCustomers)) return false;
+    // ---------- 🔒🔒 صدام کی ہدایت (FM13SEPSU): اصل جڑ — یہ فنکشن ہر 12 سیکنڈ بعد خودکار چلتا ہے (پولنگ) اور
+    // بغیر کسی چیک کے کلاؤڈ کا ڈیٹا مقامی ڈیٹا پر مکمل overwrite کر دیتا تھا! اگر کلاؤڈ پر پرانا/خراب/کم ڈیٹا
+    // پڑا ہو (چاہے ایک بار غلطی سے وہاں گیا ہو)، تو یہ ہر 12 سیکنڈ میں دوبارہ صحیح مقامی ڈیٹا کو مٹا کر اسی
+    // خراب ڈیٹا سے بدل دیتا — یہی وہ اصل وجہ تھی جس سے کسٹمر بار بار غائب ہوتے، بحال ہوتے، پھر چند منٹ بعد
+    // دوبارہ غائب ہو جاتے۔ اب حفاظتی اصول: اگر مقامی ڈیٹا حقیقی لگتا ہے (خالی seed سے زیادہ) اور کلاؤڈ کا
+    // ڈیٹا اس سے واضح طور پر کم ہے، تو overwrite بالکل نہ کریں — یہ مقامی ڈیٹا کو محفوظ رکھتا ہے ---------- -->
+    const localLooksReal = customersData.length > CUSTOMERS_SEED_DATA.length;
+    if(localLooksReal && cloudCustomers.length < customersData.length){
+      console.warn('⚠️ کلاؤڈ کسٹمر ڈیٹا مقامی ڈیٹا سے کم ہے — محفوظ رہنے کے لیے overwrite روک دیا گیا');
+      return false;
+    }
     customersData = cloudCustomers;
     const cloudNextId = parseInt(doc.fields?.nextCustomerId?.integerValue || '0');
     if(cloudNextId > nextCustomerId) nextCustomerId = cloudNextId;
@@ -27930,9 +27958,11 @@ async function pushSuppliersToCloud(){
 }
 
 async function fetchSuppliersFromCloud(silent){
-  // ---------- اگر اسی فون پر کوئی سپلائر تبدیلی (نیا سپلائر، ادائیگی، PO وغیرہ) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
-  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
-  if(AppState.settings.suppliersPendingSync){
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر والی خرابی یہاں بھی — اگر مقامی seed جیسا (خالی) ڈیٹا ہو
+  // تو کبھی push نہ کریں، سیدھا pull کی کوشش کریں (ورنہ سٹک فلیگ خالی ڈیٹا سے کلاؤڈ کا اصل ڈیٹا اوور رائٹ کر دیتا) ---------- -->
+  const localSuppliersLookSeed = suppliersData.length <= SUPPLIERS_SEED_DATA.length &&
+    suppliersData.every(s => SUPPLIERS_SEED_DATA.some(sd => sd.supplier_id === s.supplier_id && sd.name === s.name));
+  if(AppState.settings.suppliersPendingSync && !localSuppliersLookSeed){
     const pushed = await pushSuppliersToCloud();
     if(pushed) return true;
     return false;
@@ -27946,6 +27976,13 @@ async function fetchSuppliersFromCloud(silent){
     if(!jsonStr) return false;
     const cloudSuppliers = JSON.parse(jsonStr);
     if(!Array.isArray(cloudSuppliers)) return false;
+    // ---------- 🔒🔒 صدام کی ہدایت (FM13SEPSU): ہر 12 سیکنڈ کی خودکار پولنگ بغیر چیک کے مقامی ڈیٹا مٹا دیتی تھی —
+    // اگر مقامی ڈیٹا حقیقی لگے اور کلاؤڈ کا ڈیٹا اس سے کم ہو تو overwrite نہ کریں ---------- -->
+    const localSuppliersLookReal = suppliersData.length > SUPPLIERS_SEED_DATA.length;
+    if(localSuppliersLookReal && cloudSuppliers.length < suppliersData.length){
+      console.warn('⚠️ کلاؤڈ سپلائر ڈیٹا مقامی ڈیٹا سے کم ہے — محفوظ رہنے کے لیے overwrite روک دیا گیا');
+      return false;
+    }
     suppliersData = cloudSuppliers;
     const cloudNextId = parseInt(doc.fields?.nextSupplierId?.integerValue || '0');
     if(cloudNextId > nextSupplierId) nextSupplierId = cloudNextId;
@@ -28033,6 +28070,13 @@ async function fetchProductsFromCloud(silent){
     if(!jsonStr) return false;
     const cloudProducts = JSON.parse(jsonStr);
     if(!Array.isArray(cloudProducts)) return false;
+    // ---------- 🔒🔒 صدام کی ہدایت (FM13SEPSU): ہر 12 سیکنڈ کی خودکار پولنگ بغیر چیک کے مقامی ڈیٹا مٹا دیتی تھی —
+    // اگر مقامی ڈیٹا موجود ہو اور کلاؤڈ کا ڈیٹا اس سے کم ہو تو overwrite نہ کریں (PRODUCTS_SEED_DATA ہمیشہ
+    // خالی رہتا ہے، اس لیے یہاں 0 سے زیادہ مقامی ڈیٹا ہی "حقیقی" شمار ہوگا) ---------- -->
+    if(productsData.length > 0 && cloudProducts.length < productsData.length){
+      console.warn('⚠️ کلاؤڈ پراڈکٹ ڈیٹا مقامی ڈیٹا سے کم ہے — محفوظ رہنے کے لیے overwrite روک دیا گیا');
+      return false;
+    }
     productsData = cloudProducts;
     const cloudNextProductId = parseInt(doc.fields?.nextProductId?.integerValue || '0');
     if(cloudNextProductId > nextProductId) nextProductId = cloudNextProductId;
