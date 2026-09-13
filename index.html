@@ -2432,11 +2432,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 </head>
 <body>
-<!-- ---------- 🔄 PWA: نیا اپڈیٹ دستیاب / آف لائن اسٹیٹس ٹوسٹ ---------- -->
-<div id="updateToast">
-  <span>🔄 New update available</span>
-  <button onclick="applyPwaUpdate()">Update Now</button>
-</div>
+<!-- ---------- 🗑️ صدام کی ہدایت (FM13SEPSU): نیچے والا کالا "New update available" ٹوسٹ باکس مکمل ہٹا دیا —
+     اب نیا ورژن مارکیوی پٹی کے کیپسول میں ہی ✅ کے ساتھ نظر آتا ہے (دیکھیں mqCapsuleDone/showUpdateToast) ---------- -->
 
 <!-- ---------- 💾 Backup Reminder Toast — دن میں تین اوقات پر ایپ کھلنے پر ایک بار نظر آئے ---------- -->
 <div id="backupReminderToast">
@@ -2806,6 +2803,14 @@
          ایک ہی span (mqActivePart) کا متن اور رنگ ہر بار بدلا جاتا ہے (buildMarqueeQueue / playNextMarqueeMessage دیکھیں) ---------- -->
     <div id="loginMarqueeWrap">
       <span id="loginMarqueeText" class="loginMarqueeText"><span id="mqActivePart" class="mqPartLogin"></span></span>
+      <!-- ---------- 💊 صدام کی ہدایت (FM13SEPSU): بیک اپ/ری سٹور/ورژن اپڈیٹ کے دوران مووِنگ پٹی کی جگہ
+           یہ کیپسول پروگریس بار نظر آئے گا — 1% سے 100% تک بھرتا ہوا، مکمل ہونے پر ✅ نشان ---------- -->
+      <div id="mqProgressCapsule" onclick="if(window.__mqCapsuleTapAction) window.__mqCapsuleTapAction();" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center; padding:0 12px; cursor:default;">
+        <div style="width:100%; max-width:320px; height:20px; background:rgba(255,255,255,.25); border-radius:20px; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.4);">
+          <div id="mqProgressFill" style="height:100%; width:2%; background:linear-gradient(90deg,#22c55e,#16a34a); border-radius:20px; transition:width .3s ease;"></div>
+          <div id="mqProgressLabel" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.5); white-space:nowrap; overflow:hidden; padding:0 6px;"></div>
+        </div>
+      </div>
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px; flex:0 0 auto; width:100%; display:none;">
       <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:none;">Fruit Mandi POS</span>
@@ -3113,9 +3118,9 @@
     <div class="modalOverlay" id="cartSheetModal" onclick="if(event.target===this) closeCartSheet()">
       <div class="cartSheetBox">
         <div class="cartSheetHead">
-          <strong>🛒 Your Cart</strong>
+          <strong>🛒 آپ کا کارٹ</strong>
           <span style="display:flex; align-items:center; gap:10px;">
-            <button type="button" onclick="deleteBillingCartDraft()" style="background:#fee2e2; color:#991b1b; border:none; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">🗑️ Delete Cart</button>
+            <button type="button" onclick="deleteBillingCartDraft()" style="background:#fee2e2; color:#991b1b; border:none; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">🗑️ کارٹ صاف کریں</button>
             <span class="closeBtn" onclick="closeCartSheet()">✖</span>
           </span>
         </div>
@@ -3163,9 +3168,9 @@
             <div id="cartItemCountSummary" style="text-align:right; font-size:11.5px; font-weight:700; color:var(--muted); padding:6px 4px 0;"></div>
           </div>
 
-          <button type="button" onclick="closeCartSheet()" class="addMoreItemsBtn">➕ Add More Items</button>
+          <button type="button" onclick="closeCartSheet()" class="addMoreItemsBtn">➕ مزید آئٹم شامل کریں</button>
 
-          <button type="button" onclick="openBillPreviewBeforeComplete()" style="width:100%; margin-top:8px; padding:11px; border:1.5px dashed var(--primary); border-radius:10px; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:13px; cursor:pointer;">👁️ Preview Bill Before Completing</button>
+          <button type="button" onclick="openBillPreviewBeforeComplete()" style="width:100%; margin-top:8px; padding:11px; border:1.5px dashed var(--primary); border-radius:10px; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:13px; cursor:pointer;">👁️ مکمل کرنے سے پہلے بل دیکھیں</button>
 
           <!-- ---------- منتخب کسٹمر کا پہلا بقایہ اب نیچے Totals ٹیبل میں ہی مکمل حساب کے ساتھ نظر آتا ہے ---------- -->
 
@@ -3175,7 +3180,7 @@
           <!-- ---------- جزوی ادائیگی — کریڈٹ موڈ میں کسٹمر ابھی کچھ نقد دے رہا ہو تو یہاں درج کریں،
                باقی خودکار اس کے کھاتے میں بقایہ (Pending) چلا جائے گا ---------- -->
           <div id="amountReceivedRow" style="display:none; align-items:center; justify-content:space-between; gap:8px; margin:10px 0;">
-            <label style="font-size:12px; color:var(--muted); font-weight:600;">💵 Amount Received Now (Rs.)</label>
+            <label style="font-size:12px; color:var(--muted); font-weight:600;">💵 ابھی موصول ہونے والی رقم (Rs.)</label>
             <input type="number" id="amountReceivedInput" min="0" value="" placeholder="0" onfocus="this.select()" oninput="renderCart()"
                    style="width:110px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; text-align:center; font-size:13px;">
           </div>
@@ -3197,27 +3202,37 @@
 
           <div class="totalsBox" style="position:relative;">
             <div id="profitWatermark" class="profitWatermark" style="display:none;"></div>
-            <div class="row"><span>Subtotal</span><span id="sumSubtotal">Rs. 0</span></div>
-            <div class="row" id="sumLaborRow" style="display:none; color:#b45309;"><span>💪 مزدوری ٹوٹل</span><span id="sumLabor">Rs. 0</span></div>
-            <div class="row" id="sumDiscountRow"><span id="sumDiscountLabel">اضافی چارجز</span><span id="sumDiscount">Rs. 0</span></div>
-            <div class="row" id="sumTaxRow" style="display:none;"><span id="sumTaxLabel">Tax</span><span id="sumTax">Rs. 0</span></div>
-            <div class="row" id="sumThisBillRow" style="display:none;"><span>This Bill</span><span id="sumThisBill">Rs. 0</span></div>
-            <div class="row" id="sumPrevBalanceRow" style="display:none; color:#c2410c;"><span>⚠️ Previous Balance</span><span id="sumPrevBalance">Rs. 0</span></div>
-            <div class="grand" id="sumGrandRow"><span id="sumGrandLabel">Grand Total</span><span id="sumGrand">Rs. 0</span></div>
-            <div class="row" id="sumReceivedRow" style="display:none; color:var(--success);"><span>💵 Received Now</span><span id="sumReceived">Rs. 0</span></div>
-            <div class="row" id="sumBalanceRow" style="display:none; font-weight:800;"><span id="sumBalanceLabel">📒 Balance Due</span><span id="sumBalance">Rs. 0</span></div>
+            <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): پرانا بل بہت لمبا لگتا تھا (کئی الگ لائنیں) —
+                 اب سب تفصیلی حساب (ذیلی ٹوٹل/مزدوری/اضافی چارجز/ٹیکس/پرانا بقایہ) ایک چھوٹے سے
+                 collapsible باکس میں چھپا دیا ہے (ڈیفالٹ بند)، اور نیچے صرف تین موٹی، صاف، اردو میں
+                 دائیں طرف سے لائنیں نظر آئیں گی: ٹوٹل → وصول → بقایہ ---------- -->
+            <button type="button" dir="rtl" onclick="const b=document.getElementById('cartDetailBreakdown'); const open=b.style.display!=='none'; b.style.display=open?'none':'block'; this.querySelector('.tglArrow').textContent=open?'▾':'▴';"
+                    style="width:100%; text-align:right; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; color:var(--muted); cursor:pointer; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+              <span>تفصیلی حساب</span><span class="tglArrow">▾</span>
+            </button>
+            <div id="cartDetailBreakdown" style="display:none;" dir="rtl">
+              <div class="row"><span>ذیلی ٹوٹل</span><span id="sumSubtotal">Rs. 0</span></div>
+              <div class="row" id="sumLaborRow" style="display:none; color:#b45309;"><span>💪 مزدوری ٹوٹل</span><span id="sumLabor">Rs. 0</span></div>
+              <div class="row" id="sumDiscountRow"><span id="sumDiscountLabel">اضافی چارجز</span><span id="sumDiscount">Rs. 0</span></div>
+              <div class="row" id="sumTaxRow" style="display:none;"><span id="sumTaxLabel">ٹیکس</span><span id="sumTax">Rs. 0</span></div>
+              <div class="row" id="sumThisBillRow" style="display:none;"><span>یہ بل</span><span id="sumThisBill">Rs. 0</span></div>
+              <div class="row" id="sumPrevBalanceRow" style="display:none; color:#c2410c;"><span>⚠️ پرانا بقایہ</span><span id="sumPrevBalance">Rs. 0</span></div>
+            </div>
+            <div dir="rtl" class="grand" id="sumGrandRow" style="font-size:18px; font-weight:900; padding:8px 0;"><span id="sumGrandLabel">ٹوٹل</span><span id="sumGrand">Rs. 0</span></div>
+            <div dir="rtl" class="row" id="sumReceivedRow" style="display:none; color:var(--success); font-weight:800; font-size:14.5px;"><span>💵 وصول</span><span id="sumReceived">Rs. 0</span></div>
+            <div dir="rtl" class="row" id="sumBalanceRow" style="display:none; font-weight:900; font-size:15.5px;"><span id="sumBalanceLabel">📒 بقایہ</span><span id="sumBalance">Rs. 0</span></div>
           </div>
 
           <!-- ---------- بل سے زیادہ رقم موصول ہو تو (مثلاً 5000 کا نوٹ دیا، بل 3000 کا تھا) — واپسی رقم دکھائیں اور فیصلہ لینے دیں ---------- -->
           <div id="changeDueBox" style="display:none; background:#fff7ed; border:1px solid #fdba74; border-radius:10px; padding:10px 12px; margin-top:8px;">
-            <div style="font-size:13px; font-weight:800; color:#9a3412;">💰 Change Due: <span id="changeDueAmount">Rs. 0</span></div>
+            <div style="font-size:13px; font-weight:800; color:#9a3412;">💰 زائد رقم واپسی: <span id="changeDueAmount">Rs. 0</span></div>
             <label id="changeToWalletRow" style="display:none; align-items:center; gap:8px; margin-top:8px; font-size:12px; color:#7c2d12;">
               <input type="checkbox" id="changeToWalletChk" onchange="renderCart()">
-              Add this extra amount to customer's Wallet instead of giving cash change
+              نقد واپس کرنے کی بجائے یہ زائد رقم کسٹمر کے والٹ میں شامل کریں
             </label>
           </div>
 
-          <button class="checkoutBtn" id="checkoutBtn" disabled onclick="finalizeInvoice()">✅ Complete Bill</button>
+          <button class="checkoutBtn" id="checkoutBtn" disabled onclick="finalizeInvoice()">✅ بل مکمل کریں</button>
         </div>
       </div>
     </div>
@@ -7258,6 +7273,57 @@ function getGDriveTokenClient(){
   return gDriveTokenClient;
 }
 
+// ---------- 💊 صدام کی ہدایت (FM13SEPSU): مارکیوی پٹی پر کیپسول پروگریس بار — بیک اپ/ری سٹور/ورژن اپڈیٹ
+// تینوں کے لیے مشترکہ نظام۔ چونکہ اصل بائٹ بہ بائٹ پروگریس Google API سے نہیں ملتی، اس لیے 1% سے آہستہ
+// آہستہ خودکار بڑھتا ہے (زیادہ سے زیادہ 92% تک) اور اصل کام مکمل ہوتے ہی فوراً 100% + ✅ دکھا دیتا ہے ---------- -->
+let mqCapsuleTimer = null;
+let mqCapsulePercent = 0;
+function mqCapsuleShow(label){
+  mqCapsulePercent = 2;
+  window.__mqCapsuleTapAction = null;
+  const capsule = document.getElementById('mqProgressCapsule');
+  const textEl = document.getElementById('loginMarqueeText');
+  if(!capsule) return;
+  if(textEl) textEl.style.visibility = 'hidden';
+  capsule.style.display = 'flex';
+  document.getElementById('mqProgressFill').style.width = mqCapsulePercent + '%';
+  document.getElementById('mqProgressLabel').textContent = `${label || ''} ${mqCapsulePercent}%`;
+  clearInterval(mqCapsuleTimer);
+  mqCapsuleTimer = setInterval(() => {
+    if(mqCapsulePercent < 92){
+      mqCapsulePercent += Math.random() * 5 + 1;
+      if(mqCapsulePercent > 92) mqCapsulePercent = 92;
+      document.getElementById('mqProgressFill').style.width = mqCapsulePercent + '%';
+      document.getElementById('mqProgressLabel').textContent = `${label || ''} ${Math.round(mqCapsulePercent)}%`;
+    }
+  }, 350);
+}
+function mqCapsuleSetLabel(label){
+  const labelEl = document.getElementById('mqProgressLabel');
+  if(labelEl) labelEl.textContent = `${label || ''} ${Math.round(mqCapsulePercent)}%`;
+}
+function mqCapsuleDone(successLabel, tapAction){
+  clearInterval(mqCapsuleTimer);
+  mqCapsulePercent = 100;
+  const fill = document.getElementById('mqProgressFill');
+  const labelEl = document.getElementById('mqProgressLabel');
+  if(fill) fill.style.width = '100%';
+  if(labelEl) labelEl.textContent = '✅ ' + (successLabel || 'مکمل!');
+  window.__mqCapsuleTapAction = tapAction || null;
+  if(!tapAction){
+    setTimeout(mqCapsuleHide, 1800);
+  }
+}
+function mqCapsuleHide(){
+  clearInterval(mqCapsuleTimer);
+  mqCapsulePercent = 0;
+  window.__mqCapsuleTapAction = null;
+  const capsule = document.getElementById('mqProgressCapsule');
+  const textEl = document.getElementById('loginMarqueeText');
+  if(capsule) capsule.style.display = 'none';
+  if(textEl) textEl.style.visibility = 'visible';
+}
+
 // ---------- ☁️ Google Backup/Restore — سادہ مگر واضح پراگرس پٹی — صدام کی ہدایت (FM3SEPTH10) ----------
 function showGDriveProgress(label){
   const overlay = document.getElementById('gdriveProgressOverlay');
@@ -7266,27 +7332,61 @@ function showGDriveProgress(label){
   document.getElementById('gdriveProgressLabel').textContent = label || 'Connecting to Google...';
   document.getElementById('gdriveProgressBar').style.display = 'block';
   overlay.style.display = 'flex';
+  mqCapsuleShow(label || 'بیک اپ ہو رہا ہے');
 }
 function updateGDriveProgress(label){
   const labelEl = document.getElementById('gdriveProgressLabel');
   if(labelEl) labelEl.textContent = label;
+  mqCapsuleSetLabel(label);
 }
 function finishGDriveProgress(successLabel){
   document.getElementById('gdriveProgressIcon').textContent = '✅';
   document.getElementById('gdriveProgressBar').style.display = 'none';
   updateGDriveProgress(successLabel || 'Done!');
   setTimeout(hideGDriveProgress, 1100);
+  mqCapsuleDone(successLabel || 'بیک اپ مکمل!');
 }
 function hideGDriveProgress(){
   const overlay = document.getElementById('gdriveProgressOverlay');
   if(overlay) overlay.style.display = 'none';
+  mqCapsuleHide();
 }
 
-async function backupToGoogleDrive(){
+// ---------- ⏰ صدام کی ہدایت (FM13SEPSU): خودکار Google Drive بیک اپ — دن میں 3 مقررہ اوقات (صبح 9، دوپہر 2،
+// رات 8)۔ چونکہ یہ ویب ایپ ہے، بیک گراؤنڈ میں خود سے نہیں چل سکتی — اس لیے ہر وقت کا "کیچ اپ" رکھا گیا ہے:
+// اگر عین 9 بجے ایپ بند ہو تو 9 سے 2 کے درمیان جب بھی ایپ کھلے، وہ 9 بجے والا بیک اپ اسی وقت لے لیا جائے گا،
+// اسی طرح 2 سے 8 کے درمیان 2 بجے والا، اور 8 کے بعد رات بھر 8 بجے والا۔ ہر سلاٹ دن میں ایک ہی بار ---------- -->
+const AUTO_BACKUP_SLOTS = [9, 14, 20]; // ---------- 24 گھنٹے کی ترتیب میں: 9AM, 2PM, 8PM ----------
+let autoBackupCheckLock = false;
+function checkScheduledAutoBackup(){
+  if(autoBackupCheckLock) return;
+  if(AppState.currentRole !== 'admin') return; // ---------- بیک اپ صرف ایڈمن کے لیے معنی رکھتا ہے ----------
+  if(!navigator.onLine) return;
+  const today = todayDateKey();
+  let state = loadFromStorage('autoBackupSlotState', { date: today, done: [] });
+  if(state.date !== today){ state = { date: today, done: [] }; }
+  const nowHour = new Date().getHours();
+  // ---------- آج کے وہ سلاٹ جن کا وقت آ چکا ہے مگر ابھی نہیں ہوئے — سب سے پہلے (سب سے پرانا) پکڑیں ----------
+  const pending = AUTO_BACKUP_SLOTS.filter(h => nowHour >= h && !state.done.includes(h));
+  if(pending.length === 0) return;
+  const slot = pending[0];
+  autoBackupCheckLock = true;
+  state.done.push(slot);
+  saveToStorage('autoBackupSlotState', state);
+  try{
+    backupToGoogleDrive(true);
+  }catch(e){ console.warn('scheduled auto-backup failed', e); }
+  setTimeout(() => { autoBackupCheckLock = false; }, 5000);
+}
+// ---------- ایپ کھلتے ہی ایک بار، پھر ہر 10 منٹ بعد دوبارہ چیک (تاکہ لمبی سیشن میں اگلا سلاٹ بھی وقت پر پکڑا جائے) ---------- -->
+setTimeout(checkScheduledAutoBackup, 8000);
+setInterval(checkScheduledAutoBackup, 10 * 60 * 1000);
+
+async function backupToGoogleDrive(silent){
   const btn = document.getElementById('gdriveBackupBtn');
   const client = getGDriveTokenClient();
   if(!client){
-    alert('Could not load Google services — please check your internet connection and try again.');
+    if(!silent) alert('Could not load Google services — please check your internet connection and try again.');
     return;
   }
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
@@ -7295,7 +7395,7 @@ async function backupToGoogleDrive(){
     if(resp.error){
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
       hideGDriveProgress();
-      alert('Google Drive permission was not granted: ' + resp.error);
+      if(!silent) alert('Google Drive permission was not granted: ' + resp.error);
       return;
     }
     gDriveAccessToken = resp.access_token;
@@ -7352,14 +7452,16 @@ async function backupToGoogleDrive(){
         }
       }catch(e){ /* اگر ای میل نہ ملے تو بھی بیک اپ کامیاب ہی شمار ہوگا، صرف پیغام میں ای میل نہیں دکھے گا */ }
 
-      showBackupConfirmModal('export', fileName + ' (Google Drive)', {
-        products: productsData.length, customers: customersData.length, invoices: invoicesData.length,
-        accountEmail
-      });
-      finishGDriveProgress('✅ Backup complete!');
+      if(!silent){
+        showBackupConfirmModal('export', fileName + ' (Google Drive)', {
+          products: productsData.length, customers: customersData.length, invoices: invoicesData.length,
+          accountEmail
+        });
+      }
+      finishGDriveProgress('✅ بیک اپ مکمل!');
     }catch(err){
       hideGDriveProgress();
-      alert('Could not upload to Google Drive: ' + err.message);
+      if(!silent) alert('Could not upload to Google Drive: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
     }
@@ -7869,7 +7971,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر7:23am';
+const APP_BUILD_VERSION = 'اتوار13ستمبر7:47am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12723,7 +12825,7 @@ function renderCart(){
       .filter(v => Billing.cart.some(c => c.variant_id === v.variant_id))
       .map(v => v.category || 'Uncategorized'));
     document.getElementById('cartItemCountSummary').textContent =
-      `🧾 ${Billing.cart.length} ${Billing.cart.length === 1 ? 'item' : 'items'} in ${distinctCategories.size} ${distinctCategories.size === 1 ? 'category' : 'categories'}`;
+      `🧾 ${Billing.cart.length} آئٹم، ${distinctCategories.size} ${distinctCategories.size === 1 ? 'قسم' : 'اقسام'} میں`;
   }
 
   const subtotal = Billing.cart.reduce((sum, i) => sum + (i.qty * i.unitPrice), 0);
@@ -12749,22 +12851,22 @@ function renderCart(){
   document.getElementById('sumDiscountRow').style.display = discount > 0 ? 'flex' : 'none';
   document.getElementById('sumDiscount').textContent = `+ Rs. ${discount.toFixed(0)}`;
   document.getElementById('sumTaxRow').style.display = AppState.settings.taxEnabled ? 'flex' : 'none';
-  document.getElementById('sumTaxLabel').textContent = `Tax (${AppState.settings.taxPercent || 0}%)`;
+  document.getElementById('sumTaxLabel').textContent = `ٹیکس (${AppState.settings.taxPercent || 0}%)`;
   document.getElementById('sumTax').textContent = `Rs. ${taxAmount.toFixed(0)}`;
 
   if(previousBalance > 0){
-    // ---------- پرانا بقایہ موجود ہے — ٹیبل میں "This Bill" اور "Previous Balance" الگ دکھائیں، Grand Total دونوں کا مجموعہ ہو ----------
+    // ---------- پرانا بقایہ موجود ہے — تفصیلی حساب میں "یہ بل" اور "پرانا بقایہ" الگ دکھائیں، ٹوٹل دونوں کا مجموعہ ہو ----------
     document.getElementById('sumThisBillRow').style.display = 'flex';
     document.getElementById('sumThisBill').textContent = `Rs. ${grandTotal.toFixed(0)}`;
     document.getElementById('sumPrevBalanceRow').style.display = 'flex';
     document.getElementById('sumPrevBalance').textContent = `Rs. ${previousBalance.toFixed(0)}`;
-    document.getElementById('sumGrandLabel').textContent = 'Total Balance';
-    document.getElementById('sumBalanceLabel').textContent = '📒 Balance Due (Total)';
+    document.getElementById('sumGrandLabel').textContent = 'ٹوٹل';
+    document.getElementById('sumBalanceLabel').textContent = '📒 بقایہ';
   } else {
     document.getElementById('sumThisBillRow').style.display = 'none';
     document.getElementById('sumPrevBalanceRow').style.display = 'none';
-    document.getElementById('sumGrandLabel').textContent = 'Grand Total';
-    document.getElementById('sumBalanceLabel').textContent = '📒 Balance Due';
+    document.getElementById('sumGrandLabel').textContent = 'ٹوٹل';
+    document.getElementById('sumBalanceLabel').textContent = '📒 بقایہ';
   }
   document.getElementById('sumGrand').textContent = `Rs. ${combinedTotal.toFixed(0)}`;
 
@@ -12795,11 +12897,11 @@ function renderCart(){
       changeDueBox.style.display = 'none';
       if(Billing.counterSale){
         receivedHint.textContent = (receivedRaw > 0 && remaining > 0)
-          ? `Rs. ${remaining.toFixed(0)} short — their Name & Mobile will be asked to save this as a Pending balance.`
+          ? `Rs. ${remaining.toFixed(0)} کم ہیں — اسے بقایہ کے طور پر محفوظ کرنے کے لیے نام اور موبائل نمبر پوچھا جائے گا۔`
           : '';
       } else {
         receivedHint.textContent = receivedRaw > 0
-          ? (remaining > 0 ? `Rs. ${remaining.toFixed(0)} will remain as Pending.` : `✅ Fully paid — nothing will remain pending.`)
+          ? (remaining > 0 ? `Rs. ${remaining.toFixed(0)} بقایہ رہ جائے گا۔` : `✅ مکمل ادائیگی — کچھ بھی بقایہ نہیں رہے گا۔`)
           : '';
       }
     } else {
@@ -12808,7 +12910,7 @@ function renderCart(){
       sumBalanceRow.style.display = 'none';
       changeDueBox.style.display = 'block';
       document.getElementById('changeDueAmount').textContent = `Rs. ${changeAmt.toFixed(0)}`;
-      receivedHint.textContent = `✅ Fully paid — Rs. ${changeAmt.toFixed(0)} extra received.`;
+      receivedHint.textContent = `✅ مکمل ادائیگی — Rs. ${changeAmt.toFixed(0)} زائد موصول ہوئے۔`;
 
       const custId = document.getElementById('customerSelect')?.value;
       if(custId){
@@ -36084,14 +36186,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function showUpdateToast(){
-    const t = document.getElementById('updateToast');
-    if(t) t.classList.add('show');
+    // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): نیچے کالا ٹوسٹ باکس بالکل ختم — اب مارکیوی پٹی میں ہی
+    // ✅ "نیا ورژن تیار" دکھے گا، ٹیپ کرنے پر فوراً اپڈیٹ ہو جائے گا ---------- -->
+    mqCapsuleDone('نیا ورژن تیار — اپڈیٹ کے لیے یہاں ٹیپ کریں', () => applyPwaUpdate());
   }
 
-  // ---------- "ابھی اپڈیٹ کریں" بٹن دبانے پر — نئے ورژن کو فوراً فعال کریں ----------
+  // ---------- "ابھی اپڈیٹ کریں" — نئے ورژن کو فوراً فعال کریں ----------
   window.applyPwaUpdate = function(){
-    const t = document.getElementById('updateToast');
-    if(t) t.classList.remove('show');
+    mqCapsuleHide();
     if(newWorker){
       newWorker.postMessage('SKIP_WAITING');
     } else {
