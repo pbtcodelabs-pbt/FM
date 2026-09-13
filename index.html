@@ -7325,31 +7325,25 @@ function mqCapsuleHide(){
 }
 
 // ---------- ☁️ Google Backup/Restore — سادہ مگر واضح پراگرس پٹی — صدام کی ہدایت (FM3SEPTH10) ----------
+// ---------- 🔒 صدام کی ہدایت (FM13SEPSU): بڑا مربع پاپ اپ (بادل آئیکن + پروگریس بار) بالکل ختم — اب صرف
+// اوپر مارکیوی پٹی کا کیپسول ہی نظر آئے گا، نیچے کوئی الگ باکس/پیغام نہیں چلے گا ---------- -->
+let gdriveOpActive = false;
 function showGDriveProgress(label){
-  const overlay = document.getElementById('gdriveProgressOverlay');
-  if(!overlay) return;
-  document.getElementById('gdriveProgressIcon').textContent = '☁️';
-  document.getElementById('gdriveProgressLabel').textContent = label || 'Connecting to Google...';
-  document.getElementById('gdriveProgressBar').style.display = 'block';
-  overlay.style.display = 'flex';
+  gdriveOpActive = true;
   mqCapsuleShow(label || 'بیک اپ ہو رہا ہے');
 }
 function updateGDriveProgress(label){
-  const labelEl = document.getElementById('gdriveProgressLabel');
-  if(labelEl) labelEl.textContent = label;
   mqCapsuleSetLabel(label);
 }
 function finishGDriveProgress(successLabel){
-  document.getElementById('gdriveProgressIcon').textContent = '✅';
-  document.getElementById('gdriveProgressBar').style.display = 'none';
-  updateGDriveProgress(successLabel || 'Done!');
-  setTimeout(hideGDriveProgress, 1100);
   mqCapsuleDone(successLabel || 'بیک اپ مکمل!');
+  // ---------- 🔒 نوٹ: gdriveOpActive یہاں خودکار false نہیں کرتے — Restore کے دوران ابھی صارف نے
+  // تصدیقی پاپ اپ (Yes, Restore) دبانا ہوتا ہے، اسی دوران بھی بڑا خلاصہ پیغام نہیں آنا چاہیے۔
+  // اصل صاف کرنے کا کام proceedWithImport()/backupToGoogleDrive() کے finally میں ہوتا ہے ---------- -->
 }
 function hideGDriveProgress(){
-  const overlay = document.getElementById('gdriveProgressOverlay');
-  if(overlay) overlay.style.display = 'none';
   mqCapsuleHide();
+  gdriveOpActive = false;
 }
 
 // ---------- ⏰ صدام کی ہدایت (FM13SEPSU): خودکار Google Drive بیک اپ — دن میں 3 مقررہ اوقات (صبح 9، دوپہر 2،
@@ -7452,18 +7446,13 @@ async function backupToGoogleDrive(silent){
         }
       }catch(e){ /* اگر ای میل نہ ملے تو بھی بیک اپ کامیاب ہی شمار ہوگا، صرف پیغام میں ای میل نہیں دکھے گا */ }
 
-      if(!silent){
-        showBackupConfirmModal('export', fileName + ' (Google Drive)', {
-          products: productsData.length, customers: customersData.length, invoices: invoicesData.length,
-          accountEmail
-        });
-      }
       finishGDriveProgress('✅ بیک اپ مکمل!');
     }catch(err){
       hideGDriveProgress();
       if(!silent) alert('Could not upload to Google Drive: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
+      gdriveOpActive = false;
     }
   };
 
@@ -7659,6 +7648,7 @@ let pendingImportFileName = '';
 function cancelImportConfirm(){
   pendingImportBackup = null;
   pendingImportFileName = '';
+  gdriveOpActive = false; // ---------- 🔒 اگر یہ Google Drive ری سٹور تھا اور صارف نے منسوخ کر دیا ----------
   document.getElementById('importConfirmModal').classList.remove('show');
 }
 
@@ -7718,11 +7708,18 @@ function proceedWithImport(){
   } finally {
     pendingImportBackup = null;
     pendingImportFileName = '';
+    gdriveOpActive = false; // ---------- 🔒 بحالی مکمل (کامیاب یا ناکام) — اب اگلی بار عام طریقے سے پیغام دکھیں ----------
   }
 }
 
 // ---------- خوبصورت تصدیقی صفحہ — ڈاؤن لوڈ/امپورٹ کی کامیابی صاف صاف دکھائے ----------
 function showBackupConfirmModal(type, fileName, info){
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): Google Drive بیک اپ/ری سٹور کے دوران یہ لمبا چوڑا تصدیقی پیغام
+  // بالکل نہ دکھے — صرف اوپر مارکیوی کیپسول کا ✅ کافی ہے۔ مقامی فائل ایکسپورٹ/امپورٹ کے لیے یہ ویسے ہی رہے گا ---------- -->
+  if(gdriveOpActive && (type === 'export' || type === 'import')){
+    mqCapsuleDone(type === 'export' ? '✅ بیک اپ محفوظ ہو گیا' : '✅ ڈیٹا بحال ہو گیا');
+    return;
+  }
   const modal = document.getElementById('backupConfirmModal');
   const icon = document.getElementById('backupConfirmIcon');
   const title = document.getElementById('backupConfirmTitle');
@@ -7971,7 +7968,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر7:47am';
+const APP_BUILD_VERSION = 'اتوار13ستمبر8:00am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
