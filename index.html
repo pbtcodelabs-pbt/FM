@@ -2438,6 +2438,8 @@
   background:#eff6ff;
   color:var(--primary-dark, #1d4ed8);
 }
+} /* ---------- 🔒 صدام کی ہدایت (FM13SEPSU): @media (max-width:860px) کا closing brace غائب تھا — مہینوں سے
+     یہ اسٹائل شیٹ کا آخری حصہ تھا اس لیے براؤزر خودکار بند کر دیتے تھے، مگر یہ ہمیشہ کا خطرہ تھا — اب ٹھیک کر دیا ---------- -->
 </style>
   <!-- ---------- یہ الگ style ٹیگ خاص طور پر پرنٹ کے وقت اصل کاغذ کی چوڑائی (58mm/80mm) بتانے کے لیے ہے —
        بغیر اس کے، پرنٹ سسٹم صفحے کا سائز A4/Letter سمجھ کر رسید کو چھوٹا کر کے سکیڑ دیتا تھا،
@@ -7887,7 +7889,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر6:46am';
+const APP_BUILD_VERSION = 'اتوار13ستمبر7:00am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21803,31 +21805,39 @@ function renderOtCustomerList(query){
   }
 
   wrap.innerHTML = list.map(c => {
-    // ---------- 📞 صدام کی ہدایت (FM13SEPSU): نام کے نیچے اسی خانے میں موبائل نمبر (الگ کالم نہیں) —
-    // اصلی گول SVG آئیکن (کال/واٹس ایپ/SMS)، بقایہ اب خود ایک بٹن ہے جو لیجر کھولتا ہے (الگ 📒 آئیکن ختم) ---------- -->
+    // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): بار بار CSS کلاس والا نظام موبائل کے کچھ براؤزر پر ناکام ہو رہا تھا —
+    // اب ہر ایک چیز کا سٹائل براہ راست inline style میں لکھا ہے (کسی الگ CSS کلاس پر انحصار نہیں)، تاکہ
+    // کسی بھی وجہ سے اگر پرانا/کوئی CSS نہ چلے تب بھی یہ رو بالکل ویسی ہی نظر آئے ---------- -->
     const digits = (c.phone || '').replace(/[^0-9]/g, '');
     const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
     const areaBadge = c.rateArea === 'retail'
-      ? `<span class="otAreaBadge" style="background:#b91c1c;">اسلام آباد</span>`
+      ? `<span style="flex:0 0 auto; font-size:9px; font-weight:800; padding:2px 5px; border-radius:7px; white-space:nowrap; text-align:center; color:#fff; background:#b91c1c; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">اسلام آباد</span>`
       : (c.rateArea === 'wholesale'
-        ? `<span class="otAreaBadge" style="background:#15803d;">راولپنڈی</span>`
-        : `<span></span>`);
+        ? `<span style="flex:0 0 auto; font-size:9px; font-weight:800; padding:2px 5px; border-radius:7px; white-space:nowrap; text-align:center; color:#fff; background:#15803d; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">راولپنڈی</span>`
+        : `<span style="flex:0 0 0;"></span>`);
     const bal = c.total_receivable || 0;
-    const balBtn = `<button type="button" onclick="event.stopPropagation(); openCustomerLedgerReport(${c.customer_id})" class="otBalanceBtn ${bal > 0 ? 'otBalPositive' : 'otBalZero'}">${bal > 0 ? 'Rs.' + bal.toLocaleString() : '—'}</button>`;
+    const balBg = bal > 0 ? '#dcfce7' : '#f1f5f9';
+    const balColor = bal > 0 ? '#166534' : '#64748b';
+    const balBtn = `<button type="button" onclick="event.stopPropagation(); openCustomerLedgerReport(${c.customer_id})" style="flex:0 0 60px; font-size:10.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; border:none; cursor:pointer; border-radius:8px; padding:4px 3px; background:${balBg}; color:${balColor}; box-shadow:0 2px 0 rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.5);">${bal > 0 ? 'Rs.' + bal.toLocaleString() : '—'}</button>`;
+    const iconStyle = (grad) => `flex:0 0 27px; width:27px; height:27px; display:flex; align-items:center; justify-content:center; text-decoration:none; color:#fff; border-radius:50%; background:${grad}; box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 2px 4px -1px rgba(0,0,0,.4);`;
+    const disabledStyle = `flex:0 0 27px; width:27px; height:27px; display:flex; align-items:center; justify-content:center; color:#b8c0cc; border-radius:50%; background:#e2e8f0;`;
     const callBtn = c.phone
-      ? `<a href="tel:${c.phone}" onclick="event.stopPropagation();" class="otContactIcon otCall" style="width:27px; height:27px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;">${OT_CALL_ICON_SVG}</a>`
-      : `<span class="otContactIcon otDisabled" style="width:27px; height:27px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;">${OT_CALL_ICON_SVG}</span>`;
+      ? `<a href="tel:${c.phone}" onclick="event.stopPropagation();" style="${iconStyle('linear-gradient(155deg,#42a5f5,#1565c0)')}">${OT_CALL_ICON_SVG}</a>`
+      : `<span style="${disabledStyle}">${OT_CALL_ICON_SVG}</span>`;
     const waBtn = c.phone
-      ? `<a href="https://wa.me/${waNum}" target="_blank" onclick="event.stopPropagation();" class="otContactIcon otWa" style="width:27px; height:27px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;">${OT_WA_ICON_SVG}</a>`
-      : `<span class="otContactIcon otDisabled" style="width:27px; height:27px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;">${OT_WA_ICON_SVG}</span>`;
+      ? `<a href="https://wa.me/${waNum}" target="_blank" onclick="event.stopPropagation();" style="${iconStyle('linear-gradient(155deg,#25d366,#128c4a)')}">${OT_WA_ICON_SVG}</a>`
+      : `<span style="${disabledStyle}">${OT_WA_ICON_SVG}</span>`;
     const smsBtn = c.phone
-      ? `<a href="sms:${c.phone}" onclick="event.stopPropagation();" class="otContactIcon otSms" style="width:27px; height:27px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;">${OT_SMS_ICON_SVG}</a>`
-      : `<span class="otContactIcon otDisabled" style="width:27px; height:27px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;">${OT_SMS_ICON_SVG}</span>`;
+      ? `<a href="sms:${c.phone}" onclick="event.stopPropagation();" style="${iconStyle('linear-gradient(155deg,#fb923c,#c2410c)')}">${OT_SMS_ICON_SVG}</a>`
+      : `<span style="${disabledStyle}">${OT_SMS_ICON_SVG}</span>`;
+    const rowBg = bal > 0 ? 'linear-gradient(155deg,#e6f7ea,#c9edd4)' : 'linear-gradient(155deg,#f4f5f6,#e6e9eb)';
+    const rowBorder = bal > 0 ? '#86c99f' : '#cfd4d9';
+    const rowShadow = bal > 0 ? '0 3px 0 #5fa87d, 0 4px 8px -2px rgba(15,118,80,.2)' : '0 3px 0 #b8bfc6, 0 4px 8px -2px rgba(0,0,0,.12)';
     return `
-    <div dir="rtl" class="otRow${bal > 0 ? ' otRowHasBalance' : ''}" onclick="selectOtCustomer(${c.customer_id})">
-      <div class="otRowName">
+    <div dir="rtl" onclick="selectOtCustomer(${c.customer_id})" style="display:flex; align-items:center; gap:4px; flex-wrap:nowrap; border-radius:13px; border:1.5px solid ${rowBorder}; padding:7px 8px; margin-bottom:6px; cursor:pointer; width:100%; box-sizing:border-box; background:${rowBg}; box-shadow:${rowShadow};">
+      <div style="flex:1 1 auto; min-width:0;">
         <div style="font-weight:900; font-size:14.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</div>
-        ${c.phone ? `<div class="otPhoneNum" style="text-align:right;">${c.phone}</div>` : ''}
+        ${c.phone ? `<div style="font-size:9px; color:#64748b; font-weight:700; direction:ltr; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.phone}</div>` : ''}
       </div>
       ${areaBadge}
       ${balBtn}
