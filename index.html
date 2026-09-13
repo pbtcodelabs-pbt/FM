@@ -7968,7 +7968,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر6:25pm';
+const APP_BUILD_VERSION = 'اتوار13ستمبر7:23pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10250,7 +10250,9 @@ function renderProductSpreadsheet(filtered, wrap){
         <td style="${tdBase}${rowTd}"><input type="number" style="${redInputStyle}" value="${v.retail||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'retail',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${greenInputStyle}" value="${v.wholesale||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'wholesale',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
-        <td style="${tdBase}${rowTd}padding:4px;"><div style="display:flex; justify-content:center;">
+        <td style="${tdBase}${rowTd}padding:4px;"><div style="display:none; justify-content:center;">
+          <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): سٹاک مینجمنٹ/پراڈکٹس کی قطار ڈیلیٹ بٹن فی الحال مکمل
+               چھپا دیا گیا ہے (کوڈ/فنکشن محفوظ ہے) ---------- -->
           <button type="button" style="width:28px;height:28px;border-radius:50%;border:none;background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس قطار کو حذف کریں" onclick="deleteProductRowInSheet(${p.product_id})">🗑️</button>
         </div></td>
       </tr>`;
@@ -15549,7 +15551,7 @@ function renderProductList(query = ''){
           <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
           <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
-          <button class="productActionBtn danger" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
+          <button class="productActionBtn danger" style="display:none;" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
           <span class="chevron">▶</span>
         </div>
       </div>
@@ -16897,7 +16899,9 @@ function saveNewProduct(){
 function deleteProduct(productId){
   const product = productsData.find(p => p.product_id === productId);
   if(!product) return;
-  if(!confirm(`Delete "${product.name}" and all its variants? This cannot be undone.`)) return;
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایک ہی ٹچ سے ڈیلیٹ نہ ہو — یہاں بھی دو دفعہ تصدیق لازمی ---------- -->
+  if(!confirm(`⚠️ کیا آپ واقعی "${product.name}" اور اس کی تمام پیکنگز حذف کرنا چاہتے ہیں؟`)) return;
+  if(!confirm(`❗ پکا؟ یہ واپس نہیں آئے گا — "${product.name}" مکمل حذف ہو جائے گی۔`)) return;
   (product.variants || []).forEach(v => idbDeleteImage('product_' + v.variant_id)); // ---------- ہر ویریئنٹ کی تصویر بھی صاف کریں ----------
   productsData = productsData.filter(p => p.product_id !== productId);
   persistAllData();
@@ -18245,7 +18249,7 @@ function renderStockAdjustmentScreen(query){
         <div class="pActions">
           <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
-          <button class="productActionBtn danger" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
+          <button class="productActionBtn danger" style="display:none;" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
           <span class="chevron">▶</span>
         </div>
       </div>
@@ -19764,7 +19768,9 @@ function buildCompactPartyRow(opts){
       ${callBtn}
       ${waBtn}
       ${smsBtn}
-      <button type="button" onclick="event.stopPropagation(); ${deleteJs}" title="حذف کریں" style="flex:0 0 auto; width:20px; height:20px; border:none; border-radius:50%; background:rgba(0,0,0,.06); color:#94a3b8; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🗑️</button>
+      <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر/سپلائر کو غلطی سے حذف ہونے سے بچانے کے لیے یہ بٹن
+           فی الحال مکمل چھپا دیا گیا ہے (کوڈ/فنکشن محفوظ ہے، مستقبل میں ضرورت پڑنے پر واپس دکھایا جا سکتا ہے) ---------- -->
+      <button type="button" onclick="event.stopPropagation(); ${deleteJs}" title="حذف کریں" style="display:none; flex:0 0 auto; width:20px; height:20px; border:none; border-radius:50%; background:rgba(0,0,0,.06); color:#94a3b8; font-size:10px; cursor:pointer; align-items:center; justify-content:center;">🗑️</button>
     </div>`;
 }
 
@@ -19836,11 +19842,13 @@ function renderPartyList(query = ''){
 function deleteCustomer(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
-  let msg = `Delete customer "${c.name}"? This cannot be undone.`;
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایک ہی ٹچ سے ڈیلیٹ نہ ہو — اب یہاں بھی دو دفعہ تصدیق لازمی ---------- -->
+  let msg = `⚠️ کیا آپ واقعی "${c.name}" کو حذف کرنا چاہتے ہیں؟`;
   if(c.total_receivable > 0){
-    msg = `⚠️ "${c.name}" still has Rs. ${c.total_receivable.toLocaleString()} outstanding (they owe you). Deleting will permanently lose this record. Are you sure you want to delete?`;
+    msg = `⚠️ "${c.name}" کا Rs. ${c.total_receivable.toLocaleString()} بقایہ ابھی باقی ہے (یہ رقم آپ نے لینی ہے)۔ حذف کرنے سے یہ ریکارڈ ہمیشہ کے لیے ختم ہو جائے گا۔ کیا آپ واقعی حذف کرنا چاہتے ہیں؟`;
   }
   if(!confirm(msg)) return;
+  if(!confirm(`❗ پکا؟ یہ واپس نہیں آئے گا — "${c.name}" مکمل حذف ہو جائے گا۔`)) return;
   idbDeleteImage('customer_' + customerId);
   customersData = customersData.filter(x => x.customer_id !== customerId);
   persistAllData();
@@ -19852,11 +19860,13 @@ function deleteCustomer(customerId){
 function deleteSupplier(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
-  let msg = `Delete supplier "${s.name}"? This cannot be undone.`;
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایک ہی ٹچ سے ڈیلیٹ نہ ہو — اب یہاں بھی دو دفعہ تصدیق لازمی ---------- -->
+  let msg = `⚠️ کیا آپ واقعی "${s.name}" کو حذف کرنا چاہتے ہیں؟`;
   if(s.total_payable > 0){
-    msg = `⚠️ You still owe "${s.name}" Rs. ${s.total_payable.toLocaleString()}. Deleting will permanently lose this record. Are you sure you want to delete?`;
+    msg = `⚠️ آپ نے ابھی "${s.name}" کو Rs. ${s.total_payable.toLocaleString()} دینے ہیں۔ حذف کرنے سے یہ ریکارڈ ہمیشہ کے لیے ختم ہو جائے گا۔ کیا آپ واقعی حذف کرنا چاہتے ہیں؟`;
   }
   if(!confirm(msg)) return;
+  if(!confirm(`❗ پکا؟ یہ واپس نہیں آئے گا — "${s.name}" مکمل حذف ہو جائے گا۔`)) return;
   idbDeleteImage('supplier_' + supplierId);
   suppliersData = suppliersData.filter(x => x.supplier_id !== supplierId);
   persistAllData();
