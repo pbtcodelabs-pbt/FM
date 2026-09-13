@@ -3609,8 +3609,10 @@
         <div class="productMain">
           <div class="productToolbar" style="display:flex; gap:5px; align-items:center;">
             <input type="text" id="productSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderProductList(this.value)" style="flex:1;">
-            <button id="productsUndoBtn2" onclick="undoProductsChange()" disabled title="پچھلا عمل واپس لائیں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:1.5px solid #dbe1ea; background:#fff; font-size:16px; cursor:pointer;">↩️</button>
-            <button id="productsRedoBtn2" onclick="redoProductsChange()" disabled title="واپس لایا گیا عمل دوبارہ کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:1.5px solid #dbe1ea; background:#fff; font-size:16px; cursor:pointer;">↪️</button>
+            <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): Undo/Redo بٹن بہت زیادہ جگہ لے رہے تھے — مکمل چھپا دیے
+                 (فنکشن محفوظ ہے) تاکہ سبزیوں کی فہرست کے لیے زیادہ جگہ بچے ---------- -->
+            <button id="productsUndoBtn2" onclick="undoProductsChange()" disabled title="پچھلا عمل واپس لائیں" style="display:none; flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:1.5px solid #dbe1ea; background:#fff; font-size:16px; cursor:pointer;">↩️</button>
+            <button id="productsRedoBtn2" onclick="redoProductsChange()" disabled title="واپس لایا گیا عمل دوبارہ کریں" style="display:none; flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:1.5px solid #dbe1ea; background:#fff; font-size:16px; cursor:pointer;">↪️</button>
           </div>
           <!-- ---------- 🗜️ صدام کی ہدایت (FM10SEPTH0844AM): پرنٹ رپورٹ، CSV امپورٹ، حاضر/غیر حاضر سب ایک
                کولیپس ایبل باکس میں — صفحہ کھلتے ہی زیادہ سے زیادہ فہرست نظر آئے ---------- -->
@@ -7384,7 +7386,8 @@ function hideGDriveProgress(){
 // رات 8)۔ چونکہ یہ ویب ایپ ہے، بیک گراؤنڈ میں خود سے نہیں چل سکتی — اس لیے ہر وقت کا "کیچ اپ" رکھا گیا ہے:
 // اگر عین 9 بجے ایپ بند ہو تو 9 سے 2 کے درمیان جب بھی ایپ کھلے، وہ 9 بجے والا بیک اپ اسی وقت لے لیا جائے گا،
 // اسی طرح 2 سے 8 کے درمیان 2 بجے والا، اور 8 کے بعد رات بھر 8 بجے والا۔ ہر سلاٹ دن میں ایک ہی بار ---------- -->
-const AUTO_BACKUP_SLOTS = [9, 14, 20]; // ---------- 24 گھنٹے کی ترتیب میں: 9AM, 2PM, 8PM ----------
+const AUTO_BACKUP_SLOTS = [0, 12]; // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): پہلے 3 اوقات (9AM/2PM/8PM) تھے —
+// اب صرف 2: رات 12 بجے (00:00) اور دن 12 بجے (12:00 PM) ---------- -->
 let autoBackupCheckLock = false;
 function checkScheduledAutoBackup(){
   if(autoBackupCheckLock) return;
@@ -8016,7 +8019,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر9:36pm';
+const APP_BUILD_VERSION = 'اتوار13ستمبر10:02pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10078,8 +10081,8 @@ function handlePackingSelectChange(sel, productId, variantId){
 // ---------- 📦 صدام کی ہدایت (FM10SEPTH0844AM) — پیکنگ کی فہرست اب Modal کے طور پر، ہر آئٹم کے ساتھ اپنا
 // ✏️ اور 🗑️ بٹن (کوئی نام ٹائپ کر کے بتانے کی ضرورت نہیں) — سیریل نمبر پکر جیسا ہی، ثابت شدہ طریقہ ---------- -->
 let packingPickerCtx = null;
-function openPackingPicker(productId, variantId, currentLabel){
-  packingPickerCtx = {productId, variantId};
+function openPackingPicker(productId, variantId, currentLabel, sourceWrapId){
+  packingPickerCtx = {productId, variantId, sourceWrapId};
   renderPackingPickerList();
   document.getElementById('packingPickerModal').classList.add('show');
 }
@@ -10113,11 +10116,20 @@ function selectPackingOption(value){
     checkDraftCompletion(packingPickerCtx.productId);
     return;
   }
+  const sourceWrapId = packingPickerCtx.sourceWrapId;
   updateVariantField(packingPickerCtx.productId, packingPickerCtx.variantId, 'label', value);
   closePackingPicker();
-  const savedScrollY = window.scrollY;
-  renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
-  window.scrollTo(0, savedScrollY);
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): اصل خرابی یہیں تھی! یہ فنکشن Products اور Stock Adjustment
+  // دونوں سکرینز سے مشترکہ طور پر استعمال ہوتا ہے، مگر ہمیشہ صرف Stock Adjustment کو دوبارہ رینڈر کرتا تھا —
+  // اس لیے Products کے صفحے پر پیکنگ بدلنے کے بعد پرانی ویلیو ہی نظر آتی رہتی تھی (ڈیٹا تو صحیح محفوظ ہو چکا
+  // ہوتا تھا، بس سکرین تازہ نہیں ہوتی تھی)۔ اب صحیح سکرین کو ہی دوبارہ رینڈر کریں گے ---------- -->
+  const savedScrollY2 = window.scrollY;
+  if(sourceWrapId === 'productListWrap'){
+    renderProductList(document.getElementById('productSearchInput')?.value || '');
+  } else {
+    renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+  }
+  window.scrollTo(0, savedScrollY2);
 }
 function addNewPackingOption(){
   const val = prompt('نئی پیکنگ کا نام لکھیں:');
@@ -10146,7 +10158,11 @@ function editPackingOptionInline(oldTrimmed){
   if(changedCount > 0){ persistAllData(); pushProductsToCloud(); }
   renderPackingPickerList();
   const savedScrollY = window.scrollY;
-  renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+  if(packingPickerCtx?.sourceWrapId === 'productListWrap'){
+    renderProductList(document.getElementById('productSearchInput')?.value || '');
+  } else {
+    renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+  }
   window.scrollTo(0, savedScrollY);
 }
 function deletePackingOptionInline(trimmed){
@@ -10272,11 +10288,9 @@ function renderProductSpreadsheet(filtered, wrap){
   const retailW = autoColWidth('🔴 اسلام آباد', filtered.map(p => p.variants[0]?.retail||0), measNumFont, {min:44, max:90, pad:16});
   const wholesaleW = autoColWidth('🟢 راولپنڈی', filtered.map(p => p.variants[0]?.wholesale||0), measNumFont, {min:44, max:90, pad:16});
   const stockW = autoColWidth('📦 سٹاک', filtered.map(p => p.variants[0]?.stock||0), measNumFont, {min:40, max:80, pad:16});
-  const deleteW = 40; // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ڈیلیٹ بٹن ➕ سے الگ کر کے سب سے آخری کالم میں —
-  // تاکہ نئی قطار شامل کرتے وقت غلطی سے ڈیلیٹ نہ ہو جائے (پہلے دونوں بٹن ساتھ ساتھ تھے) ---------- -->
-  // ---------- 🧷 صدام کی ہدایت (FM11SEPSA0303AM): ترتیب اب — چیک باکس → نام → پیکنگ (تینوں منجمد/فکسڈ، سکرول
-  // کرنے پر بھی نظر آتے رہیں گے)، اس کے بعد ➕/🗑️ اور باقی سب کالم اسکرول ہوتے رہیں گے ---------- -->
-  const colWidths = [presenceW, nameW, packingW, actionW, serialW, purchaseW, laborW, sellLaborW, totalW, retailW, wholesaleW, stockW, deleteW];
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ڈیلیٹ بٹن پہلے ہی چھپا دیا گیا تھا، مگر اس کا خالی کالم/جگہ
+  // اب بھی موجود تھی (خالی خانہ نظر آ رہا تھا) — وہ کالم مکمل ہٹا دیا، جگہ باقی کالموں کو مل گئی ---------- -->
+  const colWidths = [presenceW, nameW, packingW, actionW, serialW, purchaseW, laborW, sellLaborW, totalW, retailW, wholesaleW, stockW];
   const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
   const isAdmin = AppState.currentRole === 'admin';
   const rows = filtered.map((p, idx) => {
@@ -10289,7 +10303,7 @@ function renderProductSpreadsheet(filtered, wrap){
     const rowTd = `background:${rowBg};`;
     const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
     const packingBtnStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;cursor:pointer;" + urduFont;
-    const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}')">${v.label || '❓'}</button>`;
+    const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', '${wrap.id}')">${v.label || '❓'}</button>`;
     return `
       <tr data-product-id="${p.product_id}">
         <td style="${tdBase}${frozenTd(0)}padding:2px;">
@@ -10310,14 +10324,9 @@ function renderProductSpreadsheet(filtered, wrap){
         <td style="${tdBase}${rowTd}"><input type="number" style="${redInputStyle}" value="${v.retail||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'retail',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${greenInputStyle}" value="${v.wholesale||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'wholesale',this.value,this)"></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
-        <td style="${tdBase}${rowTd}padding:4px;"><div style="display:none; justify-content:center;">
-          <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): سٹاک مینجمنٹ/پراڈکٹس کی قطار ڈیلیٹ بٹن فی الحال مکمل
-               چھپا دیا گیا ہے (کوڈ/فنکشن محفوظ ہے) ---------- -->
-          <button type="button" style="width:28px;height:28px;border-radius:50%;border:none;background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس قطار کو حذف کریں" onclick="deleteProductRowInSheet(${p.product_id})">🗑️</button>
-        </div></td>
       </tr>`;
   }).join('');
-  const headers = ['✔️','نام','پیکنگ','➕','#','💰 خرید','💪 م.خرید','💪 م.فروخت','🧮 حتمی خرید','🔴 اسلام آباد','🟢 راولپنڈی','📦 سٹاک','🗑️'];
+  const headers = ['✔️','نام','پیکنگ','➕','#','💰 خرید','💪 م.خرید','💪 م.فروخت','🧮 حتمی خرید','🔴 اسلام آباد','🟢 راولپنڈی','📦 سٹاک'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
     const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
@@ -16628,6 +16637,13 @@ function updateVariantField(productId, variantId, field, value, inputEl){
     if(field === 'stock' && (!variant.batches || variant.batches.length <= 1)){
       variant.batches = [{batchId: (variant.batches && variant.batches[0]?.batchId) || nextBatchId++, qty: variant.stock, expiryDate: variant.expiryDate || ''}];
       saveToStorage('nextBatchId', nextBatchId);
+    }
+    // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): سٹاک کی تبدیلی صرف اسی سکرین میں براہ راست DOM پیچ ہوتی ہے
+    // (توجہ/کرسر برقرار رکھنے کے لیے) — مگر دوسری سکرین (جو ابھی نظر نہیں آ رہی) بھی خاموشی سے پس منظر میں
+    // تازہ کر دیں تاکہ جب صارف وہاں جائے تو فوراً درست عدد نظر آئے، دوبارہ سرچ/ری فریش نہ کرنا پڑے ---------- -->
+    if(inputEl && inputEl.closest){
+      if(inputEl.closest('#stockAdjustmentListWrap')) crossRefreshProductList();
+      else if(inputEl.closest('#productListWrap')) crossRefreshStockAdjustment();
     }
     return;
   }
@@ -22990,7 +23006,7 @@ function setRlAreaFilter(mode){
   renderRecoveryListEmployeeView();
 }
 function adjustRlZoom(delta){
-  rlZoomPct = Math.max(70, Math.min(160, rlZoomPct + delta));
+  rlZoomPct = Math.max(80, Math.min(130, rlZoomPct + delta));
   saveToStorage('rlZoomPct', rlZoomPct);
   document.getElementById('rlZoomVal').textContent = rlZoomPct + '%';
   renderRecoveryListEmployeeView();
@@ -23047,30 +23063,35 @@ function renderRecoveryListEmployeeView(){
         </div>
         ${c.rateArea ? `<span style="flex:0 0 auto; font-size:${(8*rlZoomPct/100).toFixed(1)}px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:5px; padding:1px 4px; white-space:nowrap;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}
       </div>
-      <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): 5 بڑے ڈبوں کی جگہ ایک پتلی، چھوٹے فونٹ کی لائن — کمپیکٹ ---------- -->
-      <div style="display:flex; gap:3px; margin-bottom:5px; font-size:${(9*rlZoomPct/100).toFixed(1)}px; overflow-x:auto; white-space:nowrap;">
-        <div style="background:#f8fafc; border-radius:5px; padding:3px 5px; flex:0 0 auto;">سابقہ:<b>${dr.openingBalance.toLocaleString()}</b></div>
-        <div style="background:#fff7ed; color:#c2410c; border-radius:5px; padding:3px 5px; flex:0 0 auto;">آج مال:<b>${todayGoods.toLocaleString()}</b></div>
-        <div style="background:#f8fafc; border-radius:5px; padding:3px 5px; flex:0 0 auto;">ٹوٹل:<b>${totalBalance.toLocaleString()}</b></div>
-        <div style="background:#f0fdf4; color:#15803d; border-radius:5px; padding:3px 5px; flex:0 0 auto;">وصول:<b id="rlTodayRec-${c.customer_id}">0</b></div>
-        <div style="background:#fef2f2; color:var(--danger); border-radius:5px; padding:3px 5px; flex:0 0 auto;">تازہ:<b id="rlFinalBal-${c.customer_id}">${totalBalance.toLocaleString()}</b></div>
+      <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): "باقی بقیہ" (ادائیگی کے بعد کتنا رہ جائے گا) اب سب سے اوپر،
+           سب سے نمایاں، بڑے موٹے ہندسوں میں — یہی سب سے اہم نمبر ہے (لائیو، رقم لکھتے ہی بدلتا ہے) ---------- -->
+      <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:5px 8px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:${(10*rlZoomPct/100).toFixed(1)}px; font-weight:700; color:var(--danger);">باقی بقیہ رہ جائے گا</span>
+        <span id="rlRemain-${c.customer_id}" style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:${(17*rlZoomPct/100).toFixed(1)}px; color:var(--danger); direction:ltr;">Rs. ${totalBalance.toLocaleString()}</span>
       </div>
       <!-- ---------- رقم + طریقہ + کال/واٹس ایپ + OK — سب ایک ہی لائن میں، کمپیکٹ ---------- -->
-      <div style="display:flex; gap:3px; align-items:center; margin-bottom:4px;">
+      <div style="display:flex; gap:3px; align-items:center; margin-bottom:5px;">
         <input type="number" min="0" placeholder="رقم" ${isDone ? 'disabled' : ''} oninput="updateRlAmount(${c.customer_id}, this.value, ${totalBalance})"
-               style="flex:1 1 0; min-width:0; padding:6px 4px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(12*rlZoomPct/100).toFixed(1)}px; text-align:center;">
-        <select ${isDone ? 'disabled' : ''} onchange="rlMethodMap[${c.customer_id}] = this.value;" style="flex:0 0 68px; padding:6px 2px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(9.5*rlZoomPct/100).toFixed(1)}px;">
+               style="flex:1 1 0; min-width:0; padding:6px 4px; border:1.5px solid #dbe1ea; border-radius:6px; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:${(14*rlZoomPct/100).toFixed(1)}px; text-align:center;">
+        <select ${isDone ? 'disabled' : ''} onchange="rlMethodMap[${c.customer_id}] = this.value;" style="flex:0 0 66px; padding:6px 2px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(9.5*rlZoomPct/100).toFixed(1)}px;">
           ${Object.keys(RECOVERY_METHODS).map(k => `<option value="${k}">${RECOVERY_METHODS[k]}</option>`).join('')}
         </select>
-        ${c.phone ? `<a href="tel:${c.phone}" style="flex:0 0 auto; width:${(24*rlZoomPct/100).toFixed(0)}px; height:${(24*rlZoomPct/100).toFixed(0)}px; display:flex; align-items:center; justify-content:center; background:#eef2ff; color:var(--primary-dark); border-radius:50%; font-size:${(11*rlZoomPct/100).toFixed(1)}px; text-decoration:none;">📞</a>` : ''}
-        ${c.phone ? `<a href="https://wa.me/${waNum}" target="_blank" style="flex:0 0 auto; width:${(24*rlZoomPct/100).toFixed(0)}px; height:${(24*rlZoomPct/100).toFixed(0)}px; display:flex; align-items:center; justify-content:center; background:#dcfce7; color:#15803d; border-radius:50%; font-size:${(11*rlZoomPct/100).toFixed(1)}px; text-decoration:none;">📱</a>` : ''}
+        ${c.phone ? `<a href="tel:${c.phone}" style="flex:0 0 auto; width:${(22*rlZoomPct/100).toFixed(0)}px; height:${(22*rlZoomPct/100).toFixed(0)}px; display:flex; align-items:center; justify-content:center; background:#eef2ff; color:var(--primary-dark); border-radius:50%; font-size:${(10*rlZoomPct/100).toFixed(1)}px; text-decoration:none;">📞</a>` : ''}
+        ${c.phone ? `<a href="https://wa.me/${waNum}" target="_blank" style="flex:0 0 auto; width:${(22*rlZoomPct/100).toFixed(0)}px; height:${(22*rlZoomPct/100).toFixed(0)}px; display:flex; align-items:center; justify-content:center; background:#dcfce7; color:#15803d; border-radius:50%; font-size:${(10*rlZoomPct/100).toFixed(1)}px; text-decoration:none;">📱</a>` : ''}
         ${isDone
-          ? `<span style="flex:0 0 auto; font-size:${(9*rlZoomPct/100).toFixed(1)}px; font-weight:800; color:#15803d; white-space:nowrap;">✅ بھیجی گئی</span>`
-          : `<button type="button" onclick="submitSingleRecovery(${c.customer_id})" style="flex:0 0 auto; padding:6px 10px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-size:${(10.5*rlZoomPct/100).toFixed(1)}px; font-weight:800; cursor:pointer; white-space:nowrap;">✅ OK</button>`}
+          ? `<span style="flex:0 0 auto; font-size:${(9*rlZoomPct/100).toFixed(1)}px; font-weight:800; color:#15803d; white-space:nowrap;">✅</span>`
+          : `<button type="button" onclick="submitSingleRecovery(${c.customer_id})" style="flex:0 0 auto; padding:6px 9px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-size:${(10.5*rlZoomPct/100).toFixed(1)}px; font-weight:800; cursor:pointer; white-space:nowrap;">✅ OK</button>`}
+      </div>
+      <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): 5 ذیلی خانے مزید تنگ، ہندسے موٹے (Arial Black) — نستعلیق نہیں،
+           تاکہ رقم صاف اور واضح نظر آئے ---------- -->
+      <div style="display:flex; gap:2px; margin-bottom:5px; font-size:${(8*rlZoomPct/100).toFixed(1)}px; overflow-x:auto; white-space:nowrap;">
+        <div style="background:#f8fafc; border-radius:4px; padding:2px 4px; flex:0 0 auto;">سابقہ:<b style="font-family:'Arial Black',Arial,sans-serif; font-weight:900;">${dr.openingBalance.toLocaleString()}</b></div>
+        <div style="background:#fff7ed; color:#c2410c; border-radius:4px; padding:2px 4px; flex:0 0 auto;">آج مال:<b style="font-family:'Arial Black',Arial,sans-serif; font-weight:900;">${todayGoods.toLocaleString()}</b></div>
+        <div style="background:#f8fafc; border-radius:4px; padding:2px 4px; flex:0 0 auto;">ٹوٹل:<b style="font-family:'Arial Black',Arial,sans-serif; font-weight:900;">${totalBalance.toLocaleString()}</b></div>
+        <div style="background:#f0fdf4; color:#15803d; border-radius:4px; padding:2px 4px; flex:0 0 auto;">وصول:<b id="rlTodayRec-${c.customer_id}" style="font-family:'Arial Black',Arial,sans-serif; font-weight:900;">0</b></div>
       </div>
       <!-- ---------- 📝 یادداشت/نوٹس — اختیاری، چھوٹی لائن ---------- -->
-      <input type="text" value="${noteVal.replace(/"/g,'&quot;')}" ${isDone ? 'disabled' : ''} placeholder="📝 نوٹ (اختیاری)" onchange="saveDailyRecoveryNote(${c.customer_id}, this.value)" style="width:100%; padding:4px 6px; margin-bottom:3px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(9.5*rlZoomPct/100).toFixed(1)}px; font-family:inherit; box-sizing:border-box;">
-      <div id="rlRemain-${c.customer_id}" style="font-size:${(9*rlZoomPct/100).toFixed(1)}px; color:var(--muted);">باقی بقیہ: Rs. ${totalBalance.toLocaleString()}</div>
+      <input type="text" value="${noteVal.replace(/"/g,'&quot;')}" ${isDone ? 'disabled' : ''} placeholder="📝 نوٹ (اختیاری)" onchange="saveDailyRecoveryNote(${c.customer_id}, this.value)" style="width:100%; padding:3px 6px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(8.5*rlZoomPct/100).toFixed(1)}px; font-family:inherit; box-sizing:border-box;">
     </div>`;
   }).join('');
 }
@@ -23104,13 +23125,13 @@ function submitSingleRecovery(customerId){
 function updateRlAmount(customerId, val, totalReceivable){
   const amount = Math.max(0, parseFloat(val) || 0);
   rlAmountMap[customerId] = amount;
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): "باقی بقیہ" اب سب سے اوپر نمایاں خانے میں ہے — لیبل الگ سے
+  // ساتھ ہی لکھا ہوا ہے، اس لیے یہاں صرف رقم لکھنی ہے، دہرایا ہوا لیبل نہیں ---------- -->
   const remainEl = document.getElementById('rlRemain-' + customerId);
-  if(remainEl) remainEl.textContent = 'باقی بقیہ: Rs. ' + Math.max(0, totalReceivable - amount).toLocaleString();
-  // ---------- 📊 لائیو باکس اپڈیٹ — "آج کی وصولی" اور "تازہ ترین ٹوٹل بقایہ" (صدام کی ہدایت FM3SEPTH10) ----------
+  if(remainEl) remainEl.textContent = 'Rs. ' + Math.max(0, totalReceivable - amount).toLocaleString();
+  // ---------- 📊 لائیو باکس اپڈیٹ — "آج کی وصولی" (صدام کی ہدایت FM3SEPTH10) ----------
   const todayRecEl = document.getElementById('rlTodayRec-' + customerId);
   if(todayRecEl) todayRecEl.textContent = amount.toLocaleString();
-  const finalBalEl = document.getElementById('rlFinalBal-' + customerId);
-  if(finalBalEl) finalBalEl.textContent = Math.max(0, totalReceivable - amount).toLocaleString();
 }
 
 function submitRecoveryList(){
