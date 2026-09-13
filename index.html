@@ -1609,16 +1609,14 @@
   .walletHistoryRow{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px;}
   .walletHistoryRow .txDate{color:var(--muted); font-size:11px;}
 
-  /* ---------- 🔒 صدام کی ہدایت (FM12SEPSA): آرڈر ٹیکنگ کسٹمر لسٹ — ہر رو ایک جیسے مقررہ کالموں میں
-       (CSS Grid) تاکہ فون نمبر نہ ہونے پر بھی سب رو ایک لائن میں بالکل ٹھیک اوپر نیچے ملیں؛ آئیکن بٹن
-       پروفیشنل 3D (نیچے سیاہ سایہ، دبانے پر دب کر نیچے آنا) ---------- -->
+  /* ---------- 🔒 صدام کی ہدایت (FM13SEPSU): آرڈر ٹیکنگ کسٹمر لسٹ — CSS Grid کچھ پرانے
+       Android براؤزر/ویب ویو پر صحیح کام نہیں کرتا (نام اوپر نیچے بکھر جاتے ہیں، آئیکن بے ترتیب) —
+       اسی لیے یہاں سادہ Flexbox استعمال کیا ہے (ہر پرانے سے پرانے فون پر بھی قابلِ اعتماد) ---------- -->
   .otRow{
-    display:grid;
-    grid-template-columns: minmax(60px,1fr) 56px 72px 27px 27px 27px;
-    align-items:center; gap:4px;
+    display:flex; align-items:center; gap:4px; flex-wrap:nowrap;
     border-radius:13px; border:1.5px solid #cfd4d9;
     padding:7px 8px; margin-bottom:6px; cursor:pointer;
-    overflow:hidden; width:100%; box-sizing:border-box;
+    width:100%; box-sizing:border-box;
     background:linear-gradient(155deg,#f4f5f6,#e6e9eb);
     box-shadow:0 3px 0 #b8bfc6, 0 4px 8px -2px rgba(0,0,0,.12);
     transition:transform .06s, box-shadow .06s;
@@ -1629,11 +1627,13 @@
     box-shadow:0 3px 0 #5fa87d, 0 4px 8px -2px rgba(15,118,80,.2);
   }
   .otRow.otRowHasBalance:active{ box-shadow:0 0 0 #5fa87d, 0 2px 4px -2px rgba(15,118,80,.2); }
+  .otRowName{ flex:1 1 auto; min-width:0; }
   /* ---------- 🔒 صدام کی ہدایت (FM13SEPSU): لیجر آئیکن ختم — اب بقایہ کیپسول پر ٹیپ کرنے سے ہی لیجر کھلے گا،
        اسی لیے یہ کیپسول اب پوری طرح دبنے والا بٹن نظر آئے (بیک گراؤنڈ + سایہ) ---------- -->
-  .otAreaBadge{ font-size:9px; font-weight:800; padding:2px 5px; border-radius:7px; white-space:nowrap; text-align:center; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3); color:#fff; }
+  .otAreaBadge{ flex:0 0 auto; font-size:9px; font-weight:800; padding:2px 5px; border-radius:7px; white-space:nowrap; text-align:center; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3); color:#fff; }
   .otBalanceBtn{
-    font-size:10.5px; font-weight:900; white-space:nowrap; text-align:center; border:none; cursor:pointer;
+    flex:0 0 60px;
+    font-size:10.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; border:none; cursor:pointer;
     border-radius:8px; padding:4px 3px; box-shadow:0 2px 0 rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.5); transition:transform .06s, box-shadow .06s;
   }
   .otBalanceBtn:active{ transform:translateY(2px); box-shadow:0 0 0 rgba(0,0,0,.22); }
@@ -1642,8 +1642,8 @@
   .otPhoneNum{ font-size:9px; color:var(--muted); font-weight:700; direction:ltr; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   /* ---------- 📞💬✉️ اصلی، ابھرے ہوئے (raised/embossed) گول آئیکن بٹن — ایموجی/گولی نہیں، حقیقی SVG لوگو ---------- -->
   .otContactIcon{
-    width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    text-decoration:none; color:#fff; flex:0 0 auto;
+    width:27px; height:27px; flex:0 0 27px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    text-decoration:none; color:#fff;
     box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 2px 4px -1px rgba(0,0,0,.4);
     transition:transform .06s;
   }
@@ -7887,7 +7887,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر6:31am';
+const APP_BUILD_VERSION = 'اتوار13ستمبر6:46am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21825,7 +21825,7 @@ function renderOtCustomerList(query){
       : `<span class="otContactIcon otDisabled" style="width:27px; height:27px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;">${OT_SMS_ICON_SVG}</span>`;
     return `
     <div dir="rtl" class="otRow${bal > 0 ? ' otRowHasBalance' : ''}" onclick="selectOtCustomer(${c.customer_id})">
-      <div style="min-width:0;">
+      <div class="otRowName">
         <div style="font-weight:900; font-size:14.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</div>
         ${c.phone ? `<div class="otPhoneNum" style="text-align:right;">${c.phone}</div>` : ''}
       </div>
