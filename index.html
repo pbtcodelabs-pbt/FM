@@ -2897,7 +2897,14 @@
     <div class="navItem admin-only" data-screen="products" data-navkey="products" data-navlabel="Products" onclick="goTo('products')" style="background:#EA580C; color:#fff;">📦 پراڈکٹس<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "پرچیز آرڈر" ٹیب دوبارہ فعال — سپلائر سے خرید و اسٹاک وصولی ---------- -->
     <div class="navItem admin-only" data-screen="purchaseorders" data-navkey="purchaseorders" data-navlabel="Purchase Orders" onclick="goTo('purchaseorders')" style="background:#C026D3; color:#fff;">📦 پرچیز آرڈر<span class="navDragHandle">⠿</span></div>
-    <div class="navItem" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">💰 ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-hide-only" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">💰 ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
+    <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایڈمن کے مینیو میں نام الگ — تاکہ الجھن نہ ہو کہ یہ ملازم والی
+         "ریکوری لسٹ" جیسی ہی چیز ہے؛ دونوں ایک ہی سکرین (data-screen="recoveryList") کھولتے ہیں، مگر رول کے
+         مطابق مختلف مواد نظر آتا ہے ---------- -->
+    <div class="navItem admin-only" data-screen="recoveryList" data-navkey="recoveryConfirm" data-navlabel="Recovery Confirmation" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">✅ وصولی کی تصدیق<span class="navDragHandle">⠿</span></div>
+    <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): "روزانہ ریکوری لسٹ" پہلے صرف رپورٹس سینٹر کے اندر چھپی ہوئی تھی —
+         اب اپنا الگ مینیو آئٹم، تاکہ یہ مخصوص ملازم (یوزرز سکرین کی اجازتی فہرست) کو الاٹ کی جا سکے ---------- -->
+    <div class="navItem" data-screen="dailyRecovery" data-navkey="dailyRecovery" data-navlabel="Daily Recovery List" onclick="goTo('dailyRecovery')" style="background:#0D9488; color:#fff;">📋 روزانہ ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="" data-navkey="reports" data-navlabel="Reports" onclick="closeSidebar(); openReportCenterModal();" style="background:#2563EB; color:#fff;">📑 رپورٹس<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="settings" data-navkey="settings" data-navlabel="Settings" onclick="goTo('settings')" style="background:#CA8A04; color:#fff;">⚙️ سیٹنگز<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): Stock Adjustment دوبارہ فعال — مینیو اور یوزر اسکرین اجازت دونوں میں نظر آئے ---------- -->
@@ -3627,7 +3634,8 @@
                ہے — اب یہاں بھی وہی سیم فنکشن/ڈیٹا فعال، مکمل sync (دونوں ایک ہی productsData استعمال کرتے ہیں) ---------- -->
           <!-- ---------- 🔒 صدام کی ہدایت (FM12SEPSA0719PM): کارڈ⟷جدول ٹوگل بٹن ہائیڈ — اب ہمیشہ جدول نظارہ ہی رہے گا،
                بٹن اور فنکشن کوڈ میں محفوظ ہے، صرف display:none کیا گیا ہے ---------- -->
-          <button id="prodViewModeBtn" onclick="toggleProductViewMode('productListWrap')" style="display:none; width:100%; margin-bottom:10px; padding:10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer;">📊 جدول نظارہ</button>
+          <!-- ---------- 🔓 صدام کی ہدایت (FM13SEPSU): پراڈکٹس کا کارڈ⟷جدول ٹوگل بٹن واپس بحال ---------- -->
+          <button id="prodViewModeBtn" onclick="toggleProductViewMode('productListWrap')" style="width:100%; margin-bottom:10px; padding:10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer;">📊 جدول نظارہ</button>
 
           <div class="productList" id="productListWrap">
             <!-- JS سے product cards یہاں بنیں گی -->
@@ -5343,7 +5351,11 @@
          حساب سے ٹوٹل، اور ہر انٹری کو اصل کھاتے میں درج کرنے کے بعد "Confirm" کرنا — تب ہی customer کا بقایہ کم ہوتا ہے۔
          ===================================================================== -->
     <div class="screen" id="screen-recoveryList">
-      <div class="pageTitle">💰 Recovery List — وصولی لسٹ</div>
+      <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایڈمن اور ملازم کا منظر بالکل مختلف کام کرتا ہے (ملازم: کسٹمر سے
+           وصولی درج کرے؛ ایڈمن: صرف بھیجی گئی وصولیوں کی تصدیق کرے) — اسی لیے دونوں کا عنوان بھی الگ رکھا ہے
+           تاکہ کنفیوژن نہ ہو کہ یہ ایک ہی سکرین ہے مگر مختلف چیزیں دکھا رہی ہے ---------- -->
+      <div class="pageTitle admin-hide-only">💰 Recovery List — وصولی لسٹ</div>
+      <div class="pageTitle admin-only">✅ وصولی کی تصدیق — Recovery Confirmation</div>
 
       <!-- ---------- ملازم کا منظر: صرف بقایہ والے کسٹمرز، ہر ایک کے آگے وصولی کی رقم + طریقہ ادائیگی ---------- -->
       <div id="rlEmployeeView" class="admin-hide-only">
@@ -5353,6 +5365,18 @@
         <!-- ---------- 📋 صدام کی ہدایت (5 ستمبر): ملازم کے بھیجے گئے وصولی ریکارڈز کا مستقل ریکارڈ —
              بھیجنے کے بعد نہ ترمیم ہو سکے نہ حذف، صرف دیکھنا/دوبارہ شیئر کرنا ---------- -->
         <button type="button" onclick="openMyRecoveryRecords()" style="width:100%; padding:12px; margin-bottom:12px; background:linear-gradient(135deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.2);">📋 میری تمام وصولیوں کا ریکارڈ</button>
+        <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): علاقہ/آج کے خریدار فلٹر + بقایہ کے حساب سے ترتیب —
+             بالکل آرڈر ٹیکنگ جیسا نظام، تاکہ ریکوری والا آدمی آسانی سے اپنے علاقے کے کسٹمر چھانٹ سکے ---------- -->
+        <div style="display:flex; gap:6px; margin-bottom:8px;">
+          <button type="button" id="rlAreaFilterRetail" onclick="setRlAreaFilter('retail')" style="flex:1; padding:10px 4px; background:#b91c1c; color:#fff; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer;">🏷️ اسلام آباد</button>
+          <button type="button" id="rlAreaFilterWholesale" onclick="setRlAreaFilter('wholesale')" style="flex:1; padding:10px 4px; background:#15803d; color:#fff; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer;">📦 راولپنڈی</button>
+          <button type="button" id="rlAreaFilterToday" onclick="setRlAreaFilter('today')" style="flex:1; padding:10px 4px; background:#0369a1; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer;">🛒 آج کے خریدار</button>
+        </div>
+        <select id="rlSortSelect" onchange="renderRecoveryListEmployeeView()" style="width:100%; padding:9px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px; font-weight:700;">
+          <option value="default">🔢 ڈیفالٹ ترتیب</option>
+          <option value="highest">📈 زیادہ بقایہ پہلے</option>
+          <option value="lowest">📉 کم بقایہ پہلے</option>
+        </select>
         <div id="rlEmployeeList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:70px;"></div>
         <div style="position:sticky; bottom:8px; padding-top:6px;">
           <button type="button" onclick="submitRecoveryList()" style="width:100%; padding:16px; background:var(--primary); color:#fff; border:none; border-radius:14px; font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.2);">✅ آج کی وصولی جمع کریں</button>
@@ -5372,7 +5396,7 @@
          📋 روزانہ ریکوری لسٹ (Daily Recovery List) — صدام کی ہدایت (FM3SEPTH10):
          مکمل نستعلیق، RTL، کمپیکٹ کنٹرولز، فونٹ/زوم/الائنمنٹ سلیکٹر، پرنٹ/PDF + واٹس ایپ شیئر (تصویر کی شکل میں)۔
          ===================================================================== -->
-    <div class="screen admin-only" id="screen-dailyRecovery" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+    <div class="screen" id="screen-dailyRecovery" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="pageTitle" style="text-align:right;">📋 روزانہ ریکوری لسٹ</div>
       <div class="settingsHint" style="margin-top:-6px; text-align:right;">یہ صرف ریکوری (ادھار) کی فہرست ہے — نقد فروخت کہیں شامل نہیں ہوتی۔ "آج کا مال" صرف اسی حصے کا ہے جو آج ادھار گیا۔ "تازہ مکمل بقایہ" ہمیشہ اصل، لائیو Current Balance ہے۔</div>
 
@@ -7985,7 +8009,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار13ستمبر7:45pm';
+const APP_BUILD_VERSION = 'اتوار13ستمبر9:23pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9916,6 +9940,10 @@ function toggleLoginMoreOptions(open){
 // نظر آئے گا (Products اور Stock Adjustment دونوں سکرینز میں، چونکہ یہ ایک ہی مشترکہ ویری ایبل استعمال کرتے ہیں)۔
 // کارڈ نظارے کا اصل فنکشن/کوڈ نیچے بالکل محفوظ ہے — صرف toggle بٹن/آپشن چھپائے گئے ہیں، یہاں سے فورس 'sheet' ---------- -->
 let productViewMode = 'sheet';
+// ---------- 🔓 صدام کی ہدایت (FM13SEPSU): کسٹمر کی درخواست پر پراڈکٹس والے صفحے کا کارڈ نظارہ واپس بحال —
+// اسے سٹاک مینجمنٹ کے productViewMode سے الگ رکھا ہے (اپنا آزاد ویری ایبل) تاکہ سٹاک مینجمنٹ ہمیشہ جدول ہی
+// میں رہے، مگر پراڈکٹس کا صفحہ کارڈ⟷جدول دونوں میں جا سکے ---------- -->
+let productsPageViewMode = loadFromStorage('productsPageViewMode', 'card');
 // ---------- 🗜️ صدام کی ہدایت (FM10SEPTH0844AM): "جدول نظارہ" اور "ترتیب دیں" اب سیدھا ترتیب والے ڈراپ ڈاؤن
 // کے اندر ہی — الگ الگ بٹن لائنوں کی ضرورت نہیں۔ عام ترتیب منتخب ہو تو صرف فہرست دوبارہ ترتیب دیں، خاص آپشن
 // منتخب ہو تو اس کا اپنا عمل چلائیں اور ڈراپ ڈاؤن خودکار پرانی حالت پر واپس لے آئیں ---------- -->
@@ -10003,10 +10031,15 @@ function toggleProdOptionsPanel(){
   btn.textContent = isOpen ? '⚙️ مزید آپشنز ▾' : '⚙️ مزید آپشنز ▲';
 }
 function toggleProductViewMode(wrapId){
-  productViewMode = productViewMode === 'card' ? 'sheet' : 'card';
-  saveToStorage('productViewMode', productViewMode);
-  if(wrapId === 'productListWrap') renderProductList(document.getElementById('productSearchInput')?.value || '');
-  else renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+  if(wrapId === 'productListWrap'){
+    productsPageViewMode = productsPageViewMode === 'card' ? 'sheet' : 'card';
+    saveToStorage('productsPageViewMode', productsPageViewMode);
+    renderProductList(document.getElementById('productSearchInput')?.value || '');
+  } else {
+    productViewMode = productViewMode === 'card' ? 'sheet' : 'card';
+    saveToStorage('productViewMode', productViewMode);
+    renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+  }
 }
 // ---------- 🐞 صدام کی ہدایت (FM10SEPTH0844AM) — جدول نظارہ کی بیرونی CSS class بالکل اسی طرح ناکام ہو رہی تھی
 // جیسے سیریل بیج والی — نہ سکرول ہو رہی تھی، نہ کالم کی چوڑائی درست تھی، نہ سرخ عنوان کی پٹی نظر آ رہی تھی۔
@@ -15539,9 +15572,9 @@ function renderProductList(query = ''){
   }
 
   const prodViewBtn = document.getElementById('prodViewModeBtn');
-  if(prodViewBtn) prodViewBtn.textContent = productViewMode === 'sheet' ? '🗂️ کارڈ نظارہ' : '📊 جدول نظارہ';
+  if(prodViewBtn) prodViewBtn.textContent = productsPageViewMode === 'sheet' ? '🗂️ کارڈ نظارہ' : '📊 جدول نظارہ';
   // ---------- ✅ صدام کی ہدایت (FM10SEPTH0844AM): Stock Adjustment میں پکا ہونے کے بعد اب Products میں بھی فعال ---------- -->
-  if(productViewMode === 'sheet'){
+  if(productsPageViewMode === 'sheet'){
     renderProductSpreadsheet(filtered, wrap);
     crossRefreshStockAdjustment();
     return;
@@ -16721,9 +16754,11 @@ function openNewProductModal(productId = null){
     document.getElementById('npStock').value = '';
     renderProductPhotoPreview(null);
   }
-  // ---------- 📦 صدام کی ہدایت (FM7SEPMO14): نیا پراڈکٹ بناتے وقت پیکنگ/قیمت کا حصہ مکمل چھپا دیں ---------- -->
-  document.getElementById('npPackingSection').style.display = productId ? 'block' : 'none';
-  document.getElementById('npCreateHint').style.display = productId ? 'none' : 'block';
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): پہلے نیا پراڈکٹ بناتے وقت پیکنگ/قیمت کا حصہ چھپا دیا جاتا تھا
+  // (صرف نام لکھ کر محفوظ کرنا پڑتا تھا، پیکنگ بعد میں الگ سے شامل ہوتی تھی) — کسٹمر کی نئی ہدایت پر اب یہ
+  // ہمیشہ نظر آئے گا، تاکہ نیا پراڈکٹ بناتے وقت ہی پیکنگ/قیمت/سٹاک سب ایک ساتھ درج کیے جا سکیں ---------- -->
+  document.getElementById('npPackingSection').style.display = 'block';
+  document.getElementById('npCreateHint').style.display = 'none';
   npRecalcTotalPurchase(); // ---------- ہر بار موڈل کھلتے ہی ٹوٹل قیمتِ خرید تازہ کریں ----------
 
   document.getElementById('newProductModal').classList.add('show');
@@ -19749,7 +19784,7 @@ function animateAndToggleCustomer(customerId){
 // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر/سپلائر کارڈ کو بھی آرڈر ٹیکنگ والی کمپیکٹ، راؤنڈ، 3D
 // ایک-لائن رو کی طرز پر بنایا — چوڑے/چوکور پرانے کارڈ کی جگہ؛ سب انلائن سٹائل (کسی CSS کلاس پر انحصار نہیں) ---------- -->
 function buildCompactPartyRow(opts){
-  const { id, name, phone, serial, keywords, areaBadgeHtml, balance, balanceLabelColor, rowClickJs, deleteJs, serialClickJs } = opts;
+  const { id, name, phone, serial, keywords, areaBadgeHtml, balance, balanceLabelColor, rowClickJs, deleteJs, serialClickJs, dormantJs, isDormant } = opts;
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
   const iconStyle = (grad) => `flex:0 0 27px; width:27px; height:27px; display:flex; align-items:center; justify-content:center; text-decoration:none; color:#fff; border-radius:50%; background:${grad}; box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 2px 4px -1px rgba(0,0,0,.4);`;
@@ -19785,6 +19820,11 @@ function buildCompactPartyRow(opts){
       ${callBtn}
       ${waBtn}
       ${smsBtn}
+      <!-- ---------- 🪦 صدام کی ہدایت (FM13SEPSU): کھوہ کھاتے میں بھیجنے والا چیک باکس کمپیکٹ کارڈ ری ڈیزائن میں
+           رہ گیا تھا — واپس شامل کیا (صرف کسٹمر کے لیے، dormantJs دیا جائے تبھی نظر آئے گا) ---------- -->
+      ${dormantJs ? `<label onclick="event.stopPropagation();" title="${isDormant ? 'ٹک لگائیں — واپس حاضر موجود کریں' : 'ٹک لگائیں — کھوہ کھاتے میں بھیجیں'}" style="flex:0 0 auto; display:flex; align-items:center; cursor:pointer;">
+        <input type="checkbox" ${isDormant ? 'checked' : ''} onclick="${dormantJs}" style="width:17px; height:17px; margin:0;">
+      </label>` : ''}
       <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر/سپلائر کو غلطی سے حذف ہونے سے بچانے کے لیے یہ بٹن
            فی الحال مکمل چھپا دیا گیا ہے (کوڈ/فنکشن محفوظ ہے، مستقبل میں ضرورت پڑنے پر واپس دکھایا جا سکتا ہے) ---------- -->
       <button type="button" onclick="event.stopPropagation(); ${deleteJs}" title="حذف کریں" style="display:none; flex:0 0 auto; width:20px; height:20px; border:none; border-radius:50%; background:rgba(0,0,0,.06); color:#94a3b8; font-size:10px; cursor:pointer; align-items:center; justify-content:center;">🗑️</button>
@@ -19825,7 +19865,9 @@ function renderPartyList(query = ''){
         areaBadgeHtml, balance: c.total_receivable || 0,
         rowClickJs: `openCustomerProfile(${c.customer_id})`,
         deleteJs: `deleteCustomer(${c.customer_id})`,
-        serialClickJs: `openSerialPicker('customers', ${c.customer_id}, ${c.serial_no ?? 'null'}, '${(c.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`
+        serialClickJs: `openSerialPicker('customers', ${c.customer_id}, ${c.serial_no ?? 'null'}, '${(c.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`,
+        dormantJs: isAdmin ? `animateAndToggleCustomer(${c.customer_id})` : null,
+        isDormant: c.isDormant
       });
     }).join('');
   } else {
@@ -22926,16 +22968,34 @@ function renderRecoveryListScreen(){
 // دبانے پر فوراً وہی ایک انٹری جمع ہو جاتی ہے (پوری فہرست کا انتظار نہیں کرنا پڑتا)، اور مکمل شدہ انٹری
 // فہرست کے سب سے اوپر چلی جاتی ہے تاکہ صاف نظر آئے کہ کس کس سے آج وصولی ہو چکی ہے ----------
 let rlDoneIds = []; // ---------- آج جن کسٹمرز کی وصولی مکمل (OK) ہو چکی، انہی کی ترتیب اوپر رکھنے کے لیے ----------
+// ---------- 🔒 صدام کی ہدایت (FM13SEPSU): علاقہ/آج کے خریدار فلٹر — آرڈر ٹیکنگ جیسا نظام ---------- -->
+let rlAreaFilter = null; // null | 'retail' | 'wholesale' | 'today'
+function setRlAreaFilter(mode){
+  rlAreaFilter = (rlAreaFilter === mode) ? null : mode;
+  const map = {retail:'rlAreaFilterRetail', wholesale:'rlAreaFilterWholesale', today:'rlAreaFilterToday'};
+  Object.keys(map).forEach(k => {
+    const el = document.getElementById(map[k]);
+    if(el) el.style.opacity = (rlAreaFilter === k) ? '1' : '.55';
+  });
+  renderRecoveryListEmployeeView();
+}
 function renderRecoveryListEmployeeView(){
   rlAmountMap = {};
   rlMethodMap = {};
   // ---------- 🪦 صدام کی ہدایت (FM3SEPTH10): "کھوہ کھاتے" میں گئے کسٹمر یہاں کبھی نظر نہیں آئیں گے ----------
   let owing = customersData.filter(c => c.total_receivable > 0 && !c.isDormant);
+  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): علاقہ/آج کے خریدار فلٹر لگائیں ---------- -->
+  if(rlAreaFilter === 'retail') owing = owing.filter(c => c.rateArea === 'retail');
+  else if(rlAreaFilter === 'wholesale') owing = owing.filter(c => c.rateArea === 'wholesale');
+  else if(rlAreaFilter === 'today') owing = owing.filter(c => customerBoughtToday(c.customer_id));
   // ---------- 🔢 صدام کی ہدایت (FM12SEPSA...): مکمل شدہ (✅ OK والے) سب سے اوپر، باقی وہی سیریل نمبر
   // کی ترتیب سے جو مین کسٹمر لسٹ میں موجود ہے (نام کے حساب سے نہیں) ---------- -->
+  const sortMode = document.getElementById('rlSortSelect')?.value || 'default';
   owing.sort((a,b) => {
     const aDone = rlDoneIds.includes(a.customer_id), bDone = rlDoneIds.includes(b.customer_id);
     if(aDone !== bDone) return bDone - aDone;
+    if(sortMode === 'highest') return (b.total_receivable||0) - (a.total_receivable||0);
+    if(sortMode === 'lowest') return (a.total_receivable||0) - (b.total_receivable||0);
     return (a.serial_no || a.customer_id || 0) - (b.serial_no || b.customer_id || 0);
   });
   const list = document.getElementById('rlEmployeeList');
