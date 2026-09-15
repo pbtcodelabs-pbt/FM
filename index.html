@@ -8090,7 +8090,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل15ستمبر4:13pm';
+const APP_BUILD_VERSION = 'منگل15ستمبر4:51pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -24746,8 +24746,11 @@ function closeAdvOrderPreview(){
 function syncAdvOrderRateRow(order){
   const row = document.getElementById('aopRateApplyRow');
   if(row){
+    // ---------- 🛑 صدام کی ہدایت (FM15SEPTU0451PM): یہ ریٹ لگانے والے بٹن پہلے صرف hasRate/status پر
+    // منحصر تھے، رول چیک نہیں تھا — اسی وجہ سے آرڈر لینے والے ملازم کو بھی اپنے ہی ڈرافٹ کے پریویو میں یہ
+    // بٹن نظر آ جاتے، اور غلطی سے دبانے پر پوری قیمت/ٹوٹل بن جاتی۔ اب یہ بٹن صرف ایڈمن کو نظر آئیں گے ---------- -->
     const hasRate = order.items.some(i => i.unitPrice > 0);
-    row.style.display = (!hasRate && order.status !== 'fulfilled') ? 'flex' : 'none';
+    row.style.display = (AppState.currentRole === 'admin' && !hasRate && order.status !== 'fulfilled') ? 'flex' : 'none';
   }
   renderAdvOrderExtraCharges(order);
 }
@@ -25006,7 +25009,12 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   // دائیں سے بائیں: نمبر → نام اشیاء (سب سے چوڑا) → تعداد → نرخ → ٹوٹل۔ ہر تنگ کالم اپنے اندر موجود
   // سب سے لمبے ہندسے جتنا ہی چوڑا ہے، باقی جگہ نام اشیاء کو مل جاتی ہے ---------- -->
   const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
-  const hasRate = order.items.some(i => i.unitPrice > 0); // ---------- ریٹ لگ چکا ہو تو یہ اصل بل ہے — "ADVANCE ORDER" بینر کی ضرورت نہیں ----------
+  // ---------- 🛑 صدام کی ہدایت (FM15SEPTU0451PM): پہلے یہاں hasRate صرف ڈیٹا پر (کوئی آئٹم ریٹ > 0) منحصر تھا —
+  // یعنی ایڈمن رقم/ریٹ لگا چکا ہو تو یہی آرڈر جب ملازم (آرڈر لینے والا) اپنے ڈرافٹ یا بھیجے گئے آرڈرز میں دیکھتا
+  // تو اسے بھی مکمل قیمت اور ٹوٹل نظر آ جاتا۔ صدام کی صاف ہدایت: آرڈر لینے والے ملازم کو ہمیشہ صرف تعداد نظر
+  // آنی چاہیے — نہ ڈرافٹ میں نہ بھیجے گئے آرڈر میں — چاہے ایڈمن بل مکمل ہی کیوں نہ کر چکا ہو۔ اب قیمت/ٹوٹل صرف
+  // ایڈمن کے لیے ہی دکھائے جائیں گے، باقی سب کو ہمیشہ صرف تعداد ---------- -->
+  const hasRate = (AppState.currentRole === 'admin') && order.items.some(i => i.unitPrice > 0); // ---------- ریٹ لگ چکا ہو تو یہ اصل بل ہے — "ADVANCE ORDER" بینر کی ضرورت نہیں (صرف ایڈمن کے لیے) ----------
   let maxQtyStr = '0', maxPriceStr = '0', maxTotalStr = '0';
   order.items.forEach(it => {
     const qS = String(it.qty), pS = (it.unitPrice||0).toFixed(decimals), tS = ((it.qty||0)*(it.unitPrice||0)).toFixed(decimals);
@@ -25067,6 +25075,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   const tableH = headerH + rowHeights.reduce((a,b) => a+b, 0);
 
   let estimatedHeight = (30 + 26 + 22 + 22 + (hasRate ? 20 : 58) + 26 + 40 + 32 + 50) * scale + tableH + (charges.length * 20 * scale);
+  if(!hasRate) estimatedHeight -= (charges.length * 20 * scale); // ---------- FM15SEPTU0451PM: قیمت نہ دکھنے کی صورت میں اضافی خرچے بھی نہیں دکھتے، خالی جگہ نہ بچے ----------
   if(useA4) estimatedHeight += 80;
   if(AppState.settings.businessAddress) estimatedHeight += 16 * scale;
   if(AppState.settings.businessPhone) estimatedHeight += 16 * scale;
@@ -25192,7 +25201,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   y = tableTop + tableH + 20 * scale;
 
   // ---------- اضافی خرچے (فریٹ/شپنگ/لیبر وغیرہ) — آئٹمز ٹیبل کے بعد، گرینڈ ٹوٹل سے پہلے ----------
-  if(charges.length > 0){
+  if(hasRate && charges.length > 0){
     ctx.font = F('13px');
     charges.forEach(c => {
       ctx.textAlign = 'left';
