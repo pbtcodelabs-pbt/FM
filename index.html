@@ -8090,7 +8090,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر4:14am';
+const APP_BUILD_VERSION = 'بدھ16ستمبر4:24am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10515,15 +10515,14 @@ function renderProductSpreadsheet(filtered, wrap){
     const packingBtnStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;cursor:pointer;" + urduFont;
     const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', '${wrap.id}')">${v.label || '❓'}</button>`;
     return `
-      <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative; touch-action:pan-y;">
-        <td style="${tdBase}${frozenTd(0)}"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important;" onclick="openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button></td>
-        <td style="${tdBase}${frozenTd(1)}padding:3px;"><div style="display:flex; flex-direction:column; gap:3px; align-items:center;">
-          <button type="button" style="width:24px;height:24px;border-radius:50%;border:none;background:#dcfce7;color:#15803d;font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس کے بعد نئی خالی قطار شامل کریں" onclick="insertProductRowAfter(${p.product_id})">➕</button>
-          <!-- ---------- ✏️ صدام کی ہدایت (FM15SEPTU6): اب پاپ اپ نہیں کھلتا — نیچے ہمیشہ کھلے رہنے والے ایڈٹ
-               پینل میں اسی سبزی کی تفصیل لوڈ ہو جاتی ہے (قطار بھی نیلی ہو کر منتخب نظر آتی ہے) ---------- -->
-          ${!p.isDormant ? `<button type="button" style="width:24px;height:24px;border-radius:50%;border:none;background:#eef2ff;color:var(--primary-dark);font-size:11px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="ایڈٹ پینل میں کھولیں" onclick="selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')">✏️</button>` : ''}
+      <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative; touch-action:pan-y;" ${!p.isDormant ? `onclick="selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')"` : ''}>
+        <td style="${tdBase}${frozenTd(0)}"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important;" onclick="event.stopPropagation(); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button></td>
+        <td style="${tdBase}${frozenTd(1)}padding:3px;"><div style="display:flex; justify-content:center;">
+          <button type="button" style="width:24px;height:24px;border-radius:50%;border:none;background:#dcfce7;color:#15803d;font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس کے بعد نئی خالی قطار شامل کریں" onclick="event.stopPropagation(); insertProductRowAfter(${p.product_id})">➕</button>
         </div></td>
-        <td style="${tdBase}${frozenTd(2)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
+        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE3): ✏️ بٹن مکمل ختم — اب پوری قطار پر ٹیپ کرنے سے ہی سامنے
+             کا مستقل پینل اسی سبزی کی تفصیل دکھا دیتا ہے (قطار نیلی ہو کر منتخب نظر آتی ہے) ---------- -->
+        <td style="${tdBase}${frozenTd(2)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
         <td style="${tdBase}${frozenTd(3)}">${packingSelectHtml}</td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
       </tr>`;
@@ -10636,9 +10635,13 @@ function renumberAllProductSerials(){
 // کو سیریل نمبر ملنا اور محفوظ/کلاؤڈ پر جانا رکا رہے گا (خالی/ادھوری قطاریں اب کبھی محفوظ نہیں ہوں گی) ---------- -->
 let draftNewProductId = null;
 function insertProductRowAfter(afterProductId){
+  // ---------- 🔒🔒 صدام کی ہدایت (FM16SEPWE): اصل مسئلہ ملا — اگر پچھلی نامکمل قطار (نام/پیکنگ کے بغیر)
+  // چھوڑ دی جائے (مثلاً کوئی اور کام کرنے چلا جائے)، تو وہ ہمیشہ کے لیے پھنسی رہتی — نہ خود سیو ہوتی، نہ
+  // حذف ہونے کا کوئی راستہ (ڈیلیٹ بٹن چھپا ہے)۔ اب پرانی نامکمل قطار کو بلاک کرنے کی بجائے خودکار ہٹا کر
+  // نئی قطار بنا دیتے ہیں — خالی/نامکمل چیز کبھی مستقل نہیں رہے گی ---------- -->
   if(draftNewProductId !== null){
-    alert('⚠️ پہلے پچھلی نئی قطار میں نام اور پیکنگ مکمل کریں — تب نئی سبزی شامل کر سکتے ہیں۔');
-    return;
+    productsData = productsData.filter(x => x.product_id !== draftNewProductId);
+    draftNewProductId = null;
   }
   const newProductId = nextProductId++;
   const newVariantId = nextVariantId++;
@@ -14107,6 +14110,29 @@ function isoDaysFromToday(n){
   return d.toISOString().slice(0,10);
 }
 let productsData = loadFromStorage('products', PRODUCTS_SEED_DATA);
+// ---------- 🧹🧹 صدام کی ہدایت (FM16SEPWE): اصل مسئلہ ملا! پہلے یہ ڈیمو ڈیٹا صرف *نئے* خالی انسٹال کے لیے
+// روکا گیا تھا — مگر جن فونز پر یہ ڈیمو ڈیٹا صفائی سے پہلے ہی محفوظ ہو چکا تھا، وہاں localStorage میں یہ
+// اب بھی پڑا رہتا اور بار بار واپس نظر آتا رہتا تھا (کوڈ کی تبدیلی پرانا محفوظ شدہ ڈیٹا خودکار صاف نہیں کرتی)۔
+// اب یہ مخصوص، پہچانے ہوئے ڈیمو ناموں کو ہمیشہ کے لیے خود بخود ہٹا دیتا ہے، چاہے وہ کہیں سے بھی آ گئے ہوں ---------- -->
+const LEGACY_DEMO_PRODUCT_NAMES = ['Bio Amla Shampoo', 'Bio Amla Shampoo+Conditioner', 'Bio Tonic Oil', 'Lipton Tea', 'Olivia', 'Olivia Lotion', 'Praima', 'Sugar'];
+(function purgeLegacyDemoProducts(){
+  const before = productsData.length;
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE): پرانی، دفن شدہ نامکمل قطاریں (نہ نام نہ پیکنگ) بھی صاف کریں —
+  // یہ اکثر ری لوڈ کے بعد "?" کی شکل میں مستقل اٹکی رہتی تھیں کیونکہ draftNewProductId خود null ہو جاتا مگر
+  // خالی ریکارڈ ڈیٹا میں رہ جاتا تھا ---------- -->
+  productsData = productsData.filter(p => {
+    const isLegacyDemo = LEGACY_DEMO_PRODUCT_NAMES.includes((p.name || '').trim());
+    const v = p.variants && p.variants[0];
+    const isEmptyOrphan = !(p.name || '').trim() && !(v && (v.label || '').trim());
+    return !isLegacyDemo && !isEmptyOrphan;
+  });
+  if(productsData.length !== before){
+    saveToStorage('products', productsData);
+    if(typeof pushProductsToCloud === 'function'){
+      setTimeout(() => pushProductsToCloud(), 3000); // ---------- تھوڑی دیر بعد، تاکہ باقی ایپ پہلے لوڈ ہو جائے ----------
+    }
+  }
+})();
 // ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر — پرانا "کئی variants فی پراڈکٹ" نظام سادہ کر دیا گیا ہے۔
 // اب ہر پراڈکٹ اپنا الگ آئٹم ہے (مثلاً "ٹماٹر ٹوکری" اور "ٹماٹر شاپر" دو الگ الگ پراڈکٹ ہیں، ایک کے دو variants نہیں)۔
 // یہ صرف "ویرینٹ کی قسم" (پیکنگ کی قسم — ٹوکری/شاپر/کارٹن وغیرہ) کی ایک قابلِ ترمیم فہرست ہے، جو نیا پراڈکٹ
