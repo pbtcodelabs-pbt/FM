@@ -8084,7 +8084,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل15ستمبر3:00pm';
+const APP_BUILD_VERSION = 'منگل15ستمبر3:50pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10343,7 +10343,11 @@ function wireProductSwipeRows(tableId){
 
   table.addEventListener('pointerdown', e => {
     if(AppState.currentRole !== 'admin') return;
-    if(e.target.closest('input,select,button,a,textarea')) return; // ---------- خانوں میں لکھتے وقت سوائپ شروع نہ ہو ----------
+    // ---------- 🔒🔒 صدام کی ہدایت (FM15SEPTU5): اصل خرابی یہاں تھی! سٹاک مینجمنٹ کے تقریباً ہر خانے میں
+    // input (خرید/مزدوری/ریٹ/سٹاک) ہے، تو یہ exclusion پوری قطار پر سوائپ ہی شروع نہیں ہونے دیتا تھا —
+    // چھونے کے لیے کوئی خالی جگہ بچتی ہی نہیں تھی۔ اب صرف بٹن/لنک پر روکیں (➕/✏️/پیکنگ/سیریل) — نمبر لکھنے
+    // والے خانوں پر بھی انگلی رکھ کر سرکایا جا سکے گا، صرف ٹیپ کرنے سے اب بھی نمبر لکھنے کے لیے فوکس ہو گا ---------- -->
+    if(e.target.closest('button,a')) return;
     const row = e.target.closest('.prodSwipeRow');
     if(!row) return;
     activeRow = row; startX = e.clientX; dx = 0; dragging = true;
