@@ -2894,7 +2894,9 @@
     <div class="navItem" data-screen="returnRequest" data-navkey="returnRequest" data-navlabel="Return Request" onclick="goTo('returnRequest')" style="background:#DC2626; color:#fff;">↩️ واپسی کی درخواست<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="returnReview" data-navkey="returnReview" data-navlabel="Return Requests Review" onclick="goTo('returnReview')" style="background:#9F1239; color:#fff;">📋 واپسی کا جائزہ<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="payments" data-navkey="payments" data-navlabel="Payments" onclick="goTo('payments')" style="background:#0E7490; color:#fff;">💳 ادائیگیاں<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="products" data-navkey="products" data-navlabel="Products" onclick="goTo('products')" style="background:#EA580C; color:#fff;">📦 پراڈکٹس<span class="navDragHandle">⠿</span></div>
+    <!-- ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): "پراڈکٹس" مینیو آئٹم چھپا دیا (سٹاک مینجمنٹ اب یہی کام کرتی
+         ہے) — کوڈ محفوظ ہے، مستقبل میں ضرورت پڑنے پر واپس دکھایا جا سکتا ہے ---------- -->
+    <div class="navItem admin-only" data-screen="products" data-navkey="products" data-navlabel="Products" onclick="goTo('products')" style="display:none; background:#EA580C; color:#fff;">📦 پراڈکٹس<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "پرچیز آرڈر" ٹیب دوبارہ فعال — سپلائر سے خرید و اسٹاک وصولی ---------- -->
     <div class="navItem admin-only" data-screen="purchaseorders" data-navkey="purchaseorders" data-navlabel="Purchase Orders" onclick="goTo('purchaseorders')" style="background:#C026D3; color:#fff;">📦 پرچیز آرڈر<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-hide-only" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">💰 ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
@@ -8082,7 +8084,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل15ستمبر2:14pm';
+const APP_BUILD_VERSION = 'منگل15ستمبر2:35pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8604,6 +8606,9 @@ function renderHomeIconGrid(){
   const currentUser = usersData.find(x => x.name === AppState.currentUser?.name && x.role === AppState.currentRole);
   const assignedKeys = (currentUser && Array.isArray(currentUser.screens)) ? currentUser.screens : [];
   const myTiles = assignedKeys.map(key => {
+    // ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): "پراڈکٹس" کا ہوم آئیکن مکمل چھپا دیا (سٹاک مینجمنٹ اب وہی کام
+    // کرتی ہے) — کوڈ/فنکشن/ASSIGNABLE_SCREENS اندراج بالکل محفوظ ہے، صرف یہاں سے فلٹر کیا گیا ---------- -->
+    if(key === 'products') return null;
     const def = ASSIGNABLE_SCREENS.find(s => s.key === key);
     if(!def) return null;
     const spaceIdx = def.label.indexOf(' ');
@@ -10318,14 +10323,12 @@ function toggleProductPresenceInSheet(productId, checkboxEl){
     p.isDormant = !p.isDormant;
     persistAllData();
     pushProductsToCloud();
-    const scrollEl = document.getElementById('stockAdjSheetScrollWrap');
-    const savedTop = scrollEl ? scrollEl.scrollTop : 0;
-    const savedLeft = scrollEl ? scrollEl.scrollLeft : 0;
+    pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): تھوڑی دیر کے لیے خودکار کلاؤڈ pull روک دیں،
+    // ورنہ ابھی کی گئی تبدیلی 12 سیکنڈ کی پولنگ سے واپس پرانی حالت میں پلٹ سکتی ہے ---------- -->
+    // ---------- 🔧 renderProductSpreadsheet خود ہی اپنی سکرول پوزیشن محفوظ/بحال کرتا ہے (ہر سکرین کی اپنی الگ id) ---------- -->
     if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
     if(document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
-    const newScrollEl = document.getElementById('stockAdjSheetScrollWrap');
-    if(newScrollEl){ newScrollEl.scrollTop = savedTop; newScrollEl.scrollLeft = savedLeft; }
-  }, 220);
+  }, 100);
 }
 
 // ---------- 👉👈 صدام کی ہدایت (FM15SEPTU2): پراڈکٹس/سٹاک مینجمنٹ کی قطار بھی اب چیک باکس کی بجائے سوائپ سے
@@ -10362,11 +10365,11 @@ function wireProductSwipeRows(tableId){
     dragging = false;
     const row = activeRow;
     const productId = parseInt(row.dataset.swipeId, 10);
-    row.style.transition = 'transform .2s, opacity .2s';
+    row.style.transition = 'transform .12s, opacity .12s';
     if(Math.abs(dx) > threshold){
       row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
       row.style.opacity = '0';
-      setTimeout(() => toggleProductPresenceInSheet(productId, null), 180);
+      setTimeout(() => toggleProductPresenceInSheet(productId, null), 130);
     } else {
       row.style.transform = 'translateX(0)';
       row.style.background = origBg;
@@ -10456,11 +10459,13 @@ function renderProductSpreadsheet(filtered, wrap){
   // ---------- 🧭 صدام کی ہدایت (FM10SEPTH0530PM) فکس: پہلے ہر بار innerHTML بدلتے ہی سکرول واپس شروع
   // (دائیں/اوپر) پر چلا جاتا تھا — لکھتے ہوئے ایسا لگتا تھا کہ صفحہ "بھاگ کر" پہلے نمبر پر آ گیا۔ اب پرانا
   // سکرول پوزیشن یاد رکھ کر دوبارہ لاگو کرتے ہیں ---------- -->
-  const oldScrollEl = document.getElementById('stockAdjSheetScrollWrap');
+  const scrollWrapId = 'stockAdjSheetScrollWrap_' + wrap.id; // ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): Products اور Stock Adjustment دونوں پہلے ایک ہی id شیئر کرتے تھے —
+  // اسی لیے جو سکرین پہلے رینڈر ہوئی ہو، سوائپ ہمیشہ صرف اسی پر جڑتا (یا کبھی کسی پر بھی نہیں) — اب ہر سکرین کی اپنی الگ id ---------- -->
+  const oldScrollEl = document.getElementById(scrollWrapId);
   const savedScrollTop = oldScrollEl ? oldScrollEl.scrollTop : 0;
   const savedScrollLeft = oldScrollEl ? oldScrollEl.scrollLeft : 0;
   wrap.innerHTML = `
-    <div id="stockAdjSheetScrollWrap" style="width:100%;max-height:74vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea;">
+    <div id="${scrollWrapId}" style="width:100%;max-height:74vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea;">
       <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableW}px;table-layout:fixed;font-size:12.5px;">
         ${colgroupHtml}
         <thead>${theadHtml}</thead>
@@ -10470,9 +10475,9 @@ function renderProductSpreadsheet(filtered, wrap){
     <div style="display:none;"></div>
     ${draftNewProductId !== null ? `<div style="margin-top:8px; background:#fef3c7; color:#92400e; border:1.5px solid #fde68a; border-radius:9px; padding:9px 12px; font-size:12.5px; font-weight:800; text-align:center;">⚠️ نئی قطار محفوظ نہیں ہوئی — سیو ہونے کے لیے نام اور پیکنگ دونوں ضروری ہیں</div>` : ''}
   `;
-  const scrollWrap = document.getElementById('stockAdjSheetScrollWrap');
+  const scrollWrap = document.getElementById(scrollWrapId);
   if(scrollWrap){ scrollWrap.scrollTop = savedScrollTop; scrollWrap.scrollLeft = savedScrollLeft; }
-  wireProductSwipeRows('stockAdjSheetScrollWrap'); // ---------- 👉👈 صدام کی ہدایت (FM15SEPTU2): سوائپ ہینڈلرز جوڑیں ---------- -->
+  wireProductSwipeRows(scrollWrapId); // ---------- 👉👈 صدام کی ہدایت (FM15SEPTU2): سوائپ ہینڈلرز جوڑیں ---------- -->
 }
 // ---------- ➕ صدام کی ہدایت (FM10SEPTH0844AM): فہرست کے کسی بھی درمیانی مقام پر نئی خالی قطار — آخر تک جانے
 // کی ضرورت نہیں۔ نیچے کے سب سیریل نمبر خودکار ایک ایک آگے کھسک جاتے ہیں تاکہ نئی قطار بالکل صحیح جگہ (اسی کے
@@ -15500,7 +15505,7 @@ function animateAndTogglePresence(cardId, productId){
     const p = productsData.find(x => x.product_id === productId);
     if(!p) return;
     toggleProductPresence(productId, !!p.isDormant); // ---------- موجودہ حالت الٹ دیں ----------
-  }, 280);
+  }, 100);
 }
 
 // ---------- 🟩🟥 صدام کی ہدایت (FM4SEPFR25): راولپنڈی/اسلام آباد ریٹ + سٹاک ہمیشہ اسی رنگ سکیم میں دکھائیں —
@@ -20020,6 +20025,12 @@ function toggleCustomerActiveStatus(customerId, makeActive){
   if(!c) return;
   c.isDormant = !makeActive;
   persistAllData();
+  // ---------- 🔒🔒 صدام کی ہدایت (FM15SEPTU3): اصل جڑ ملی! یہاں کبھی کلاؤڈ پر push نہیں ہوتا تھا —
+  // صرف مقامی طور پر محفوظ ہوتا تھا۔ اگلی خودکار پولنگ (12 سیکنڈ بعد) کلاؤڈ سے پرانی (غیر حاضر نہ ہونے
+  // والی) حالت واپس کھینچ کر تبدیلی مٹا دیتی تھی — یہی وہ اصل وجہ تھی جس سے چند سبزیاں/کسٹمر غیر حاضر کرنے
+  // کے بعد سب خودکار واپس آ جاتے تھے ---------- -->
+  pushCustomersToCloud();
+  pauseCloudPolling(20000);
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
 
@@ -20030,6 +20041,8 @@ function toggleSupplierActiveStatus(supplierId, makeActive){
   if(!s) return;
   s.isDormant = !makeActive;
   persistAllData();
+  pushSuppliersToCloud(); // ---------- 🔒🔒 اسی خرابی کا فکس، سپلائرز کے لیے بھی ---------- -->
+  pauseCloudPolling(20000);
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
 function animateAndToggleSupplier(supplierId){
@@ -20039,7 +20052,7 @@ function animateAndToggleSupplier(supplierId){
     const s = suppliersData.find(x => x.supplier_id === supplierId);
     if(!s) return;
     toggleSupplierActiveStatus(supplierId, !!s.isDormant);
-  }, 280);
+  }, 100);
 }
 function wireSupplierSwipeRows(){
   document.querySelectorAll('.supSwipeRow[data-swipe-id]').forEach(row => {
@@ -20072,11 +20085,11 @@ function wireSupplierSwipeRows(){
     const endSwipe = e => {
       if(!dragging) return;
       dragging = false;
-      row.style.transition = 'transform .2s, opacity .2s';
+      row.style.transition = 'transform .12s, opacity .12s';
       if(Math.abs(dx) > threshold){
         row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
         row.style.opacity = '0';
-        setTimeout(() => animateAndToggleSupplier(supplierId), 180);
+        setTimeout(() => animateAndToggleSupplier(supplierId), 130);
       } else {
         row.style.transform = 'translateX(0)';
         hint.style.display = 'none';
@@ -20098,7 +20111,7 @@ function animateAndToggleCustomer(customerId){
     const c = customersData.find(x => x.customer_id === customerId);
     if(!c) return;
     toggleCustomerActiveStatus(customerId, !!c.isDormant); // ---------- موجودہ حالت الٹ دیں ----------
-  }, 280);
+  }, 100);
 }
 
 // ---------- 👆 صدام کی ہدایت (FM15SEPTU): چیک باکس کی جگہ سوائپ (سلائیڈ) — کسٹمر کارڈ کو بائیں یا دائیں
@@ -20135,11 +20148,11 @@ function wireCustomerSwipeRows(){
     const endSwipe = e => {
       if(!dragging) return;
       dragging = false;
-      row.style.transition = 'transform .2s, opacity .2s';
+      row.style.transition = 'transform .12s, opacity .12s';
       if(Math.abs(dx) > threshold){
         row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
         row.style.opacity = '0';
-        setTimeout(() => animateAndToggleCustomer(customerId), 180);
+        setTimeout(() => animateAndToggleCustomer(customerId), 130);
       } else {
         row.style.transform = 'translateX(0)';
         hint.style.display = 'none';
@@ -28313,7 +28326,20 @@ async function pushCustomersToCloud(){
   }
 }
 
+// ---------- ⏸️ صدام کی ہدایت (FM15SEPTU3): اصل جڑ ملی — حاضر/غیر حاضر ٹوگل کرتے وقت بھی وہی 12 سیکنڈ کی
+// خودکار پولنگ چلتی رہتی تھی۔ اگر ابھی ابھی کی گئی مقامی تبدیلی کلاؤڈ پر پہنچنے سے پہلے ہی اگلی پولنگ چل جائے
+// (کلاؤڈ ابھی پرانا ڈیٹا واپس دے) تو مقامی تبدیلی الٹ جاتی — یہی وہ وجہ تھی جس سے 9-11 سبزیاں غیر حاضر کرنے
+// کے بعد اچانک سب واپس زیرو پر آ جاتی تھیں۔ اب ہر تبدیلی کے بعد کچھ دیر کے لیے خودکار pull روک دیتے ہیں ---------- -->
+let cloudPollingPausedUntil = 0;
+function pauseCloudPolling(ms){
+  cloudPollingPausedUntil = Date.now() + ms;
+}
+function isCloudPollingPaused(){
+  return Date.now() < cloudPollingPausedUntil;
+}
+
 async function fetchCustomersFromCloud(silent){
+  if(!silent && isCloudPollingPaused()) return false; // ---------- خاموش (پس منظر) پولنگ ہی روکیں — دستی ری فریش کو نہ روکیں ----------
   // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): اصل خطرناک خرابی یہیں ملی! پرانا کوڈ اگر customersPendingSync
   // فلیگ کہیں پہلے (مثلاً براؤزر ڈیٹا صاف ہونے کے بعد پہلی بار آفلائن ناکامی پر) true پھنس جاتا تو یہ فنکشن
   // ہمیشہ کے لیے صرف "push" کرتا رہتا — یعنی خالی/ڈیفالٹ (seed) ڈیٹا بار بار کلاؤڈ پر بھیج کر اصل محفوظ شدہ
@@ -28416,6 +28442,7 @@ async function pushSuppliersToCloud(){
 }
 
 async function fetchSuppliersFromCloud(silent){
+  if(!silent && isCloudPollingPaused()) return false;
   // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر والی خرابی یہاں بھی — اگر مقامی seed جیسا (خالی) ڈیٹا ہو
   // تو کبھی push نہ کریں، سیدھا pull کی کوشش کریں (ورنہ سٹک فلیگ خالی ڈیٹا سے کلاؤڈ کا اصل ڈیٹا اوور رائٹ کر دیتا) ---------- -->
   const localSuppliersLookSeed = suppliersData.length <= SUPPLIERS_SEED_DATA.length &&
@@ -28512,6 +28539,7 @@ async function pushProductsToCloud(){
 }
 
 async function fetchProductsFromCloud(silent){
+  if(!silent && isCloudPollingPaused()) return false;
   // ---------- اگر اسی فون پر کوئی پراڈکٹ/سٹاک تبدیلی (نیا آئٹم، ریٹ، سٹاک ایڈجسٹمنٹ، فروخت وغیرہ) ابھی کلاؤڈ میں نہیں گئی
   // تو پہلے وہی بھیجیں — ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی (مثلاً ابھی کٹا ہوا سٹاک) مٹ جانے کا خطرہ ہوگا ----------
   if(AppState.settings.productsPendingSync){
