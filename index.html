@@ -8084,7 +8084,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل15ستمبر2:35pm';
+const APP_BUILD_VERSION = 'منگل15ستمبر3:00pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10338,7 +10338,7 @@ function wireProductSwipeRows(tableId){
   const table = document.getElementById(tableId);
   if(!table || table.dataset.swipeWired) return;
   table.dataset.swipeWired = '1';
-  let activeRow = null, startX = 0, dx = 0, dragging = false, origBg = '';
+  let activeRow = null, startX = 0, dx = 0, dragging = false, origBg = '', frozenTds = [];
   const threshold = 70;
 
   table.addEventListener('pointerdown', e => {
@@ -10349,16 +10349,24 @@ function wireProductSwipeRows(tableId){
     activeRow = row; startX = e.clientX; dx = 0; dragging = true;
     row.style.transition = '';
     origBg = row.style.background;
+    // ---------- 🔒🔒 صدام کی ہدایت (FM15SEPTU4): اصل خرابی یہیں تھی! نام اور پیکنگ والے خانے position:sticky
+    // ہیں (لاک/فکسڈ رہتے ہیں) — سوائپ کرتے وقت پوری قطار translate ہوتی تھی مگر یہ دو "چپکے ہوئے" خانے
+    // اپنی جگہ سے نہیں ہلتے تھے، اس لیے سلائیڈ بالکل نظر ہی نہیں آتی تھی۔ اب سوائپ کے دوران عارضی طور پر
+    // انہیں بھی عام (position:static) کر دیتے ہیں، چھوڑنے پر واپس sticky ہو جاتے ہیں ---------- -->
+    frozenTds = Array.from(row.querySelectorAll('td')).slice(0, 2);
+    frozenTds.forEach(td => { td.dataset.origPosition = td.style.position; td.style.position = 'static'; });
   });
   table.addEventListener('pointermove', e => {
     if(!dragging || !activeRow) return;
     dx = e.clientX - startX;
     if(Math.abs(dx) < 6) return;
+    activeRow.style.position = 'relative';
+    activeRow.style.zIndex = '4';
     activeRow.style.transform = `translateX(${dx}px)`;
     const productId = parseInt(activeRow.dataset.swipeId, 10);
     const p = productsData.find(x => x.product_id === productId);
     const willBeDormant = !(p && p.isDormant);
-    activeRow.style.background = willBeDormant ? 'rgba(185,28,28,.25)' : 'rgba(21,128,61,.25)';
+    activeRow.style.background = willBeDormant ? '#fecaca' : '#bbf7d0';
   });
   const endSwipe = () => {
     if(!dragging || !activeRow) return;
@@ -10374,6 +10382,8 @@ function wireProductSwipeRows(tableId){
       row.style.transform = 'translateX(0)';
       row.style.background = origBg;
     }
+    frozenTds.forEach(td => { td.style.position = td.dataset.origPosition || ''; });
+    frozenTds = [];
     activeRow = null; dx = 0;
   };
   table.addEventListener('pointerup', endSwipe);
@@ -20061,9 +20071,10 @@ function wireSupplierSwipeRows(){
     const supplierId = parseInt(row.dataset.swipeId, 10);
     const s = suppliersData.find(x => x.supplier_id === supplierId);
     const willBeDormant = !(s && s.isDormant);
-    const hint = document.createElement('div');
-    hint.style.cssText = 'position:absolute; inset:0; display:none; align-items:center; justify-content:center; border-radius:13px; font-weight:900; font-size:13px; z-index:2; pointer-events:none;';
-    row.appendChild(hint);
+    // ---------- 🔒 صدام کی ہدایت (FM15SEPTU4): اشارہ اب کارڈ کے اوپر نہیں لکھا جاتا — کارڈ کے پیچھے موجود
+    // خانے (swipeBgHint) میں، جو کارڈ سرکنے سے خالی ہونے والی جگہ میں نظر آتا ہے ---------- -->
+    const hint = row.parentElement && row.parentElement.classList.contains('swipeOuterWrap')
+      ? row.parentElement.querySelector('.swipeBgHint') : null;
 
     let startX = 0, dx = 0, dragging = false;
     const threshold = 70;
@@ -20076,11 +20087,11 @@ function wireSupplierSwipeRows(){
       dx = e.clientX - startX;
       if(Math.abs(dx) < 6) return;
       row.style.transform = `translateX(${dx}px)`;
-      hint.style.display = 'flex';
-      hint.style.background = willBeDormant ? 'rgba(185,28,28,.9)' : 'rgba(21,128,61,.9)';
-      hint.style.color = '#fff';
-      hint.textContent = willBeDormant ? '🪦 غیر فعال کریں' : '✅ حاضر کریں';
-      hint.style.opacity = Math.min(1, Math.abs(dx) / threshold);
+      if(hint){
+        hint.style.background = willBeDormant ? '#b91c1c' : '#15803d';
+        hint.textContent = willBeDormant ? '🪦 غیر فعال کریں' : '✅ حاضر کریں';
+        hint.style.opacity = Math.min(1, Math.abs(dx) / threshold);
+      }
     });
     const endSwipe = e => {
       if(!dragging) return;
@@ -20092,7 +20103,7 @@ function wireSupplierSwipeRows(){
         setTimeout(() => animateAndToggleSupplier(supplierId), 130);
       } else {
         row.style.transform = 'translateX(0)';
-        hint.style.display = 'none';
+        if(hint) hint.style.opacity = '0';
       }
       dx = 0;
     };
@@ -20124,9 +20135,10 @@ function wireCustomerSwipeRows(){
     const customerId = parseInt(row.dataset.swipeId, 10);
     const c = customersData.find(x => x.customer_id === customerId);
     const willBeDormant = !(c && c.isDormant);
-    const hint = document.createElement('div');
-    hint.style.cssText = 'position:absolute; inset:0; display:none; align-items:center; justify-content:center; border-radius:13px; font-weight:900; font-size:13px; z-index:2; pointer-events:none;';
-    row.appendChild(hint);
+    // ---------- 🔒 صدام کی ہدایت (FM15SEPTU4): اشارہ اب کارڈ کے اوپر نہیں لکھا جاتا — کارڈ کے پیچھے موجود
+    // خانے (swipeBgHint) میں، جو کارڈ سرکنے سے خالی ہونے والی جگہ میں نظر آتا ہے ---------- -->
+    const hint = row.parentElement && row.parentElement.classList.contains('swipeOuterWrap')
+      ? row.parentElement.querySelector('.swipeBgHint') : null;
 
     let startX = 0, dx = 0, dragging = false;
     const threshold = 70;
@@ -20139,11 +20151,11 @@ function wireCustomerSwipeRows(){
       dx = e.clientX - startX;
       if(Math.abs(dx) < 6) return; // ---------- ذرا سی حرکت پر کارڈ نہ کھینچے (عام ٹیپ متاثر نہ ہو) ----------
       row.style.transform = `translateX(${dx}px)`;
-      hint.style.display = 'flex';
-      hint.style.background = willBeDormant ? 'rgba(185,28,28,.9)' : 'rgba(21,128,61,.9)';
-      hint.style.color = '#fff';
-      hint.textContent = willBeDormant ? '🪦 کھوہ کھاتے میں بھیجیں' : '✅ حاضر کریں';
-      hint.style.opacity = Math.min(1, Math.abs(dx) / threshold);
+      if(hint){
+        hint.style.background = willBeDormant ? '#b91c1c' : '#15803d';
+        hint.textContent = willBeDormant ? '🪦 کھوہ کھاتے میں بھیجیں' : '✅ حاضر کریں';
+        hint.style.opacity = Math.min(1, Math.abs(dx) / threshold);
+      }
     });
     const endSwipe = e => {
       if(!dragging) return;
@@ -20155,7 +20167,7 @@ function wireCustomerSwipeRows(){
         setTimeout(() => animateAndToggleCustomer(customerId), 130);
       } else {
         row.style.transform = 'translateX(0)';
-        hint.style.display = 'none';
+        if(hint) hint.style.opacity = '0';
       }
       dx = 0;
     };
@@ -20192,8 +20204,8 @@ function buildCompactPartyRow(opts){
   const balHtml = `<div style="flex:0 0 74px; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; border-radius:9px; padding:6px 4px; background:${balBg}; color:${balColor}; box-shadow:0 2px 0 rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.6);">${hasBal ? 'Rs.' + balance.toLocaleString() : '—'}</div>`;
   const keywordHtml = keywords ? `<span style="flex:0 0 auto; font-size:9px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px;">${keywords}</span>` : '';
   const serialHtml = `<button type="button" onclick="event.stopPropagation(); ${serialClickJs}" style="flex:0 0 auto; ${SERIAL_BADGE_INLINE_STYLE} width:20px !important; height:20px !important; min-width:20px !important; min-height:20px !important; font-size:9.5px !important; box-shadow:none !important; border-width:1.5px !important;">${serial ?? '?'}</button>`;
-  return `
-    <div dir="rtl" data-swipe-id="${dormantJs ? id : ''}" class="${dormantJs ? (swipeClass || 'custSwipeRow') : ''}" onclick="${rowClickJs}" style="position:relative; display:flex; align-items:center; gap:4px; flex-wrap:nowrap; border-radius:13px; border:1.5px solid ${rowBorder}; padding:7px 8px; margin-bottom:6px; cursor:pointer; width:100%; box-sizing:border-box; background:${rowBg}; box-shadow:${rowShadow}; touch-action:pan-y;">
+  const cardHtml = `
+    <div dir="rtl" data-swipe-id="${dormantJs ? id : ''}" class="${dormantJs ? (swipeClass || 'custSwipeRow') : ''}" onclick="${rowClickJs}" style="position:relative; z-index:1; display:flex; align-items:center; gap:4px; flex-wrap:nowrap; border-radius:13px; border:1.5px solid ${rowBorder}; padding:7px 8px; margin-bottom:${dormantJs ? '0' : '6px'}; cursor:pointer; width:100%; box-sizing:border-box; background:${rowBg}; box-shadow:${rowShadow}; touch-action:pan-y;">
       ${serialHtml}
       <div style="flex:1 1 auto; min-width:0;">
         <div style="font-weight:900; font-size:14px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:4px;">${name} ${keywordHtml}</div>
@@ -20207,6 +20219,15 @@ function buildCompactPartyRow(opts){
       <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر/سپلائر کو غلطی سے حذف ہونے سے بچانے کے لیے یہ بٹن
            فی الحال مکمل چھپا دیا گیا ہے (کوڈ/فنکشن محفوظ ہے، مستقبل میں ضرورت پڑنے پر واپس دکھایا جا سکتا ہے) ---------- -->
       <button type="button" onclick="event.stopPropagation(); ${deleteJs}" title="حذف کریں" style="display:none; flex:0 0 auto; width:20px; height:20px; border:none; border-radius:50%; background:rgba(0,0,0,.06); color:#94a3b8; font-size:10px; cursor:pointer; align-items:center; justify-content:center;">🗑️</button>
+    </div>`;
+  // ---------- 🔒 صدام کی ہدایت (FM15SEPTU4): سوائپ کا اشارہ اب کارڈ کے اوپر لکھا ہوا نہیں آتا — کارڈ کے
+  // بالکل پیچھے (نیچے) ایک رنگین خانہ چھپا رہتا ہے، جو کارڈ سرکنے سے پیچھے خالی ہونے والی جگہ میں نظر آنا
+  // شروع ہوتا ہے (بالکل عام سوائپ ایپس جیسا) ---------- -->
+  if(!dormantJs) return cardHtml;
+  return `
+    <div class="swipeOuterWrap" style="position:relative; margin-bottom:6px;">
+      <div class="swipeBgHint" style="position:absolute; inset:0; border-radius:13px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:13px; color:#fff; opacity:0; z-index:0;"></div>
+      ${cardHtml}
     </div>`;
 }
 
