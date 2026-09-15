@@ -8090,7 +8090,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل15ستمبر4:51pm';
+const APP_BUILD_VERSION = 'منگل15ستمبر5:56pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10347,6 +10347,18 @@ function wireProductSwipeRows(tableId){
   let activeRow = null, startX = 0, startY = 0, dx = 0, dragging = false, lockedHorizontal = false, origBg = '', frozenTds = [];
   const threshold = 70;
 
+  // ---------- 🔴🟢 صدام کی ہدایت (FM15SEPTU0556PM): سرکاتے وقت قطار کے پیچھے خالی رہ جانے والی جگہ میں
+  // سرخ/سبز میسج بار — بتاتا ہے کہ یہ سبزی غیر حاضر سبزیوں میں منتقل ہو رہی ہے یا حاضر سبزیوں میں۔ چونکہ
+  // <tr> کے اندر آزاد <div> اوورلے درست HTML نہیں بنتا، اس لیے ایک ہی مشترکہ fixed میسج بار body میں بنا کر
+  // قطار کی اصل جگہ (getBoundingClientRect) پر رکھ دیتے ہیں — قطار خود اس کے اوپر سے سرک کر ہٹتی ہے ---------- -->
+  let hintBar = document.getElementById('prodPresenceSwipeHint');
+  if(!hintBar){
+    hintBar = document.createElement('div');
+    hintBar.id = 'prodPresenceSwipeHint';
+    hintBar.style.cssText = 'position:fixed; display:none; align-items:center; justify-content:center; font-weight:900; font-size:13px; color:#fff; z-index:3; pointer-events:none; border-radius:6px;';
+    document.body.appendChild(hintBar);
+  }
+
   // ---------- 🔒🔒 صدام کی ہدایت (FM15SEPTU0413PM): اصل خرابی یہاں نکلی! صرف Pointer Events (pointerdown/move/up)
   // پر انحصار Android WebView/TWA (Sunmi، iMin، PAX ایسے پرنٹر/POS ڈیوائسز پر) میں بھروسہ مند نہیں — بہت سی
   // پرانی/کسٹم WebView بلڈز میں یہ ایونٹس یا تو فائر نہیں ہوتیں یا ادھورے/غلط clientX دیتی ہیں، اس لیے سوائپ
@@ -10360,6 +10372,9 @@ function wireProductSwipeRows(tableId){
     dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
     frozenTds.forEach(td => { td.style.position = td.dataset.origPosition || ''; });
     frozenTds = [];
+    // ---------- 🔴🟢 FM15SEPTU0556PM: میسج بار چھپا دیں ---------- -->
+    hintBar.style.opacity = '0';
+    hintBar.style.display = 'none';
   };
 
   const onStart = e => {
@@ -10374,6 +10389,14 @@ function wireProductSwipeRows(tableId){
     activeRow = row; startX = getX(e); startY = getY(e); dx = 0; dragging = true; lockedHorizontal = false;
     row.style.transition = '';
     origBg = row.style.background;
+    // ---------- 🔴🟢 FM15SEPTU0556PM: قطار ابھی سرکی نہیں — اصل جگہ ناپ کر میسج بار وہیں فٹ کر دیں ---------- -->
+    const rowRect0 = row.getBoundingClientRect();
+    hintBar.style.left = rowRect0.left + 'px';
+    hintBar.style.top = rowRect0.top + 'px';
+    hintBar.style.width = rowRect0.width + 'px';
+    hintBar.style.height = rowRect0.height + 'px';
+    hintBar.style.display = 'flex';
+    hintBar.style.opacity = '0';
     // ---------- 🔒🔒 صدام کی ہدایت (FM15SEPTU4): اصل خرابی یہیں تھی! نام اور پیکنگ والے خانے position:sticky
     // ہیں (لاک/فکسڈ رہتے ہیں) — سوائپ کرتے وقت پوری قطار translate ہوتی تھی مگر یہ دو "چپکے ہوئے" خانے
     // اپنی جگہ سے نہیں ہلتے تھے، اس لیے سلائیڈ بالکل نظر ہی نہیں آتی تھی۔ اب سوائپ کے دوران عارضی طور پر
@@ -10403,6 +10426,10 @@ function wireProductSwipeRows(tableId){
     const p = productsData.find(x => x.product_id === productId);
     const willBeDormant = !(p && p.isDormant);
     activeRow.style.background = willBeDormant ? '#fecaca' : '#bbf7d0';
+    // ---------- 🔴🟢 FM15SEPTU0556PM: میسج بار کا رنگ/متن — کتنی دور سرکایا اس کے حساب سے نمایاں ہو ---------- -->
+    hintBar.style.background = willBeDormant ? '#b91c1c' : '#15803d';
+    hintBar.textContent = willBeDormant ? '🔴 غیر حاضر سبزیوں میں منتقل ہو رہی ہے' : '🟢 حاضر سبزیوں میں منتقل ہو رہی ہے';
+    hintBar.style.opacity = String(Math.min(1, Math.abs(dx) / threshold));
   };
 
   const endSwipe = () => {
@@ -10414,12 +10441,24 @@ function wireProductSwipeRows(tableId){
     if(wasLocked && Math.abs(finalDx) > threshold){
       row.style.transform = `translateX(${finalDx > 0 ? '120%' : '-120%'})`;
       row.style.opacity = '0';
-      setTimeout(() => toggleProductPresenceInSheet(productId, null), 130);
+      // ---------- 🔴🟢 FM15SEPTU0556PM: میسج بار قطار کے مکمل غائب ہونے تک نظر رہے، پھر ساتھ ہی ہٹے ---------- -->
+      hintBar.style.transition = 'opacity .12s';
+      hintBar.style.opacity = '1';
+      const hintToClear = hintBar;
+      setTimeout(() => {
+        toggleProductPresenceInSheet(productId, null);
+        hintToClear.style.opacity = '0';
+        hintToClear.style.display = 'none';
+      }, 130);
     } else {
       row.style.transform = 'translateX(0)';
       row.style.background = origBg;
+      hintBar.style.opacity = '0';
+      hintBar.style.display = 'none';
     }
-    resetDragState();
+    frozenTds.forEach(td => { td.style.position = td.dataset.origPosition || ''; });
+    frozenTds = [];
+    dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
   };
 
   table.addEventListener('touchstart', onStart, {passive:true});
