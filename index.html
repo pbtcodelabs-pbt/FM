@@ -8082,7 +8082,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل15ستمبر7:52am';
+const APP_BUILD_VERSION = 'منگل15ستمبر8:01am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29904,8 +29904,10 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   drawClippedHeaderCaption('نام اشیاء', colX[5], colX[6], headerItemNameX, 'right');
   drawClippedHeaderCaption('پیکنگ', colX[4], colX[5], headerPackX, headerItemAlign);
   drawClippedHeaderCaption('تعداد', colX[3], colX[4], headerQtyX, headerItemAlign);
-  drawClippedHeaderCaption('مزدوری', colX[2], colX[3], headerLaborX, headerItemAlign);
-  drawClippedHeaderCaption('قیمت', colX[1], colX[2], headerPriceX, headerItemAlign);
+  // ---------- 🔒 صدام کی ہدایت (FM15SEPTU): مزدوری کالم قیمت اور ٹوٹل کے درمیان چاہیے — اب ترتیب:
+  // نمبر → نام اشیاء → پیکنگ → تعداد → قیمت → مزدوری → ٹوٹل ---------- -->
+  drawClippedHeaderCaption('قیمت', colX[2], colX[3], headerLaborX, headerItemAlign);
+  drawClippedHeaderCaption('مزدوری', colX[1], colX[2], headerPriceX, headerItemAlign);
   drawClippedHeaderCaption('ٹوٹل', colX[0], colX[1], headerTotalX, headerItemAlign);
 
   hLineY += headerH;
@@ -30013,8 +30015,9 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
       ctx.restore();
     };
     drawClippedNum(qtyText, colX[3], colX[4], qtyX);
-    drawClippedNum(laborText, colX[2], colX[3], laborX);
-    drawClippedNum(priceText, colX[1], colX[2], priceX);
+    // ---------- 🔒 صدام کی ہدایت (FM15SEPTU): قیمت اب مزدوری کی پرانی جگہ (تعداد کے بعد) پر، مزدوری اب اس کے بعد ---------- -->
+    drawClippedNum(priceText, colX[2], colX[3], laborX);
+    drawClippedNum(laborText, colX[1], colX[2], priceX);
     drawClippedNum(totalText, colX[0], colX[1], totalX);
     ctx.font = `${itemFontWeight}${rowFontPx}px ${itemFontFamily}`; // ---------- اگلی لائن کے لیے بنیادی فونٹ واپس بحال ----------
     ctx.fillStyle = '#000';
