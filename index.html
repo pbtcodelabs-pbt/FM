@@ -8090,7 +8090,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر3:45am';
+const APP_BUILD_VERSION = 'بدھ16ستمبر4:07am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10544,13 +10544,15 @@ function renderProductSpreadsheet(filtered, wrap){
   const savedScrollTop = oldScrollEl ? oldScrollEl.scrollTop : 0;
   const savedScrollLeft = oldScrollEl ? oldScrollEl.scrollLeft : 0;
   wrap.innerHTML = `
-    ${buildVcInlinePanelHtml(wrap.id)}
-    <div id="${scrollWrapId}" style="width:100%;max-height:60vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea;">
-      <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableW}px;table-layout:fixed;font-size:12.5px;">
-        ${colgroupHtml}
-        <thead>${theadHtml}</thead>
-        <tbody>${rows}</tbody>
-      </table>
+    <div dir="ltr" style="display:flex; gap:6px; align-items:flex-start;">
+      <div style="flex:0 0 110px; width:110px;">${buildVcInlinePanelHtml(wrap.id)}</div>
+      <div id="${scrollWrapId}" style="flex:1; min-width:0; max-height:60vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea;">
+        <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableW}px;table-layout:fixed;font-size:12.5px;">
+          ${colgroupHtml}
+          <thead>${theadHtml}</thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
     </div>
     <div style="display:none;"></div>
     ${draftNewProductId !== null ? `<div style="margin-top:8px; background:#fef3c7; color:#92400e; border:1.5px solid #fde68a; border-radius:9px; padding:9px 12px; font-size:12.5px; font-weight:800; text-align:center;">⚠️ نئی قطار محفوظ نہیں ہوئی — سیو ہونے کے لیے نام اور پیکنگ دونوں ضروری ہیں</div>` : ''}
@@ -16891,37 +16893,39 @@ const VC_INLINE_FIELD_ORDER = ['purchase', 'labor', 'sellLabor', 'wholesale', 'r
 const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', labor:'vcInlineLabor', sellLabor:'vcInlineSellLabor', wholesale:'vcInlineWholesale', retail:'vcInlineRetail', stock:'vcInlineStock'};
 
 function buildVcInlinePanelHtml(){
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE): پینل اب اوپر پوری چوڑائی میں نہیں — بائیں طرف کی خالی جگہ میں
+  // ایک تنگ، عمودی (ایک کالمی) پٹی کی شکل میں، جدول کے ساتھ ساتھ (sticky) — نہ سکرول ہو، نہ اوپر/نیچے کھسکے ---------- -->
   const fieldBox = (id, label, bg, border, shadow, color) => `
-    <div style="background:${bg}; border:1px solid ${border}; border-radius:8px; padding:3px 3px; box-shadow:0 1.5px 0 ${shadow};">
-      <div style="font-size:8.5px; font-weight:800; color:${color}; margin-bottom:1px;">${label}</div>
-      <input id="${id}" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('${id.replace('vcInline','').charAt(0).toLowerCase() + id.replace('vcInline','').slice(1)}')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid ${border}; border-radius:5px; padding:3px 2px; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:13px; color:${color}; background:#fff;">
+    <div style="background:${bg}; border:1px solid ${border}; border-radius:7px; padding:2px 3px; box-shadow:0 1.5px 0 ${shadow}; margin-bottom:3px;">
+      <div style="font-size:8px; font-weight:800; color:${color}; margin-bottom:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${label}</div>
+      <input id="${id}" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('${id.replace('vcInline','').charAt(0).toLowerCase() + id.replace('vcInline','').slice(1)}')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid ${border}; border-radius:5px; padding:3px 1px; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:12px; color:${color}; background:#fff;">
     </div>`;
   return `
-    <div id="vcInlinePanel" style="background:linear-gradient(155deg,#1d4ed8,#1e3a8a); border-radius:14px; padding:10px; margin-bottom:8px;">
-      <div id="vcInlinePanelEmpty" style="text-align:center; font-weight:800; font-size:12.5px; color:#dbeafe; padding:8px;">☝️ کسی بھی سبزی کا ✏️ دبائیں — اسی کی تفصیل یہاں کھلے گی</div>
+    <div id="vcInlinePanel" style="background:linear-gradient(155deg,#1d4ed8,#1e3a8a); border-radius:12px; padding:6px; position:sticky; top:0; align-self:flex-start; max-height:calc(100vh - 220px); overflow-y:auto;">
+      <div id="vcInlinePanelEmpty" style="text-align:center; font-weight:800; font-size:10.5px; color:#dbeafe; padding:6px 2px;">☝️ ✏️ دبائیں</div>
       <div id="vcInlinePanelBody" style="display:none;">
-        <div id="vcInlinePanelName" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:15px; font-weight:900; color:#1e3a8a; background:#fff; border-radius:9px; padding:3px 8px; margin-bottom:3px; text-align:center; box-shadow:0 2px 0 rgba(0,0,0,.15);"></div>
-        <div id="vcInlinePanelPacking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:12px; font-weight:800; color:#1e3a8a; background:#dbeafe; border-radius:8px; padding:2px 8px; margin-bottom:6px; display:inline-block; box-shadow:0 2px 0 rgba(0,0,0,.1);"></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px;">
-          ${fieldBox('vcInlinePurchase', '💰 خرید قیمت', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e')}
-          ${fieldBox('vcInlineLabor', '💪 خرید مزدوری', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
-          ${fieldBox('vcInlineSellLabor', '💪 فروخت مزدوری', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
-          <div style="background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:8px; padding:3px 3px;">
-            <div style="font-size:8.5px; font-weight:800; color:#134e2c; margin-bottom:1px;">🧮 حتمی خرید</div>
-            <div id="vcInlineTotalPurchase" style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:13px; color:#134e2c; padding:3px 2px;">0</div>
+        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE): نام/پیکنگ کا عنوان یہاں سے ہٹا دیا — وہی معلومات دائیں
+             طرف جدول کی قطار میں پہلے سے نظر آ رہی ہوتی ہے، دہرانے کی ضرورت نہیں ---------- -->
+        ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e')}
+        ${fieldBox('vcInlineLabor', '💪 م.خرید', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
+        ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
+        <div style="background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:7px; padding:2px 3px; margin-bottom:3px;">
+          <div style="font-size:8px; font-weight:800; color:#134e2c; margin-bottom:1px;">🧮 حتمی</div>
+          <div id="vcInlineTotalPurchase" style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:12px; color:#134e2c; padding:3px 1px;">0</div>
+        </div>
+        ${fieldBox('vcInlineWholesale', '🟢 پنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d')}
+        ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')}
+        <div style="background:linear-gradient(155deg,#eef2ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:7px; padding:2px 3px; box-shadow:0 1.5px 0 #a5b4fc; margin-bottom:4px;">
+          <div style="font-size:8px; font-weight:800; color:#3730a3; margin-bottom:1px;">📦 سٹاک</div>
+          <input id="vcInlineStock" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('stock')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #a5b4fc; border-radius:5px; padding:3px 1px; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:12px; color:#3730a3; background:#fff;">
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:2px; background:rgba(255,255,255,.12); border-radius:7px; padding:3px;">
+          <span style="font-size:8px; color:#dbeafe; font-weight:800;">⏱️ رفتار</span>
+          <div style="display:flex; align-items:center; gap:3px;">
+            <button type="button" onclick="adjustVcInlineSpeed(150)" style="width:18px; height:18px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:11px;">−</button>
+            <span id="vcInlineSpeedVal" style="width:30px; text-align:center; font-weight:900; color:#fff; font-size:8.5px;">${(vcInlineSpeedMs/1000).toFixed(1)}س</span>
+            <button type="button" onclick="adjustVcInlineSpeed(-150)" style="width:18px; height:18px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:11px;">+</button>
           </div>
-          ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی ریٹ', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d')}
-          ${fieldBox('vcInlineRetail', '🔴 اسلام آباد ریٹ', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')}
-        </div>
-        <div style="margin-top:3px; background:linear-gradient(155deg,#eef2ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:8px; padding:3px 3px; box-shadow:0 1.5px 0 #a5b4fc;">
-          <div style="font-size:8.5px; font-weight:800; color:#3730a3; margin-bottom:1px;">📦 سٹاک</div>
-          <input id="vcInlineStock" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('stock')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #a5b4fc; border-radius:5px; padding:3px 2px; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:13px; color:#3730a3; background:#fff;">
-        </div>
-        <div style="display:flex; align-items:center; justify-content:center; gap:5px; margin-top:5px; background:rgba(255,255,255,.12); border-radius:8px; padding:3px 6px;">
-          <span style="font-size:9.5px; color:#dbeafe; font-weight:800;">⏱️ رفتار:</span>
-          <button type="button" onclick="adjustVcInlineSpeed(150)" style="width:20px; height:20px; border-radius:5px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:12px;">−</button>
-          <span id="vcInlineSpeedVal" style="width:38px; text-align:center; font-weight:900; color:#fff; font-size:10px;">${(vcInlineSpeedMs/1000).toFixed(1)} س</span>
-          <button type="button" onclick="adjustVcInlineSpeed(-150)" style="width:20px; height:20px; border-radius:5px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:12px;">+</button>
         </div>
       </div>
     </div>`;
@@ -16947,8 +16951,6 @@ function vcInlinePopulate(){
     return;
   }
   emptyEl.style.display = 'none'; bodyEl.style.display = 'block';
-  document.getElementById('vcInlinePanelName').textContent = product.name;
-  document.getElementById('vcInlinePanelPacking').textContent = variant.label || '';
   document.getElementById('vcInlinePurchase').value = variant.purchase || 0;
   document.getElementById('vcInlineLabor').value = variant.labor || 0;
   document.getElementById('vcInlineSellLabor').value = variant.sellLabor || 0;
