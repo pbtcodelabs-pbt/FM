@@ -8082,7 +8082,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل15ستمبر8:01am';
+const APP_BUILD_VERSION = 'منگل15ستمبر2:14pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10328,6 +10328,56 @@ function toggleProductPresenceInSheet(productId, checkboxEl){
   }, 220);
 }
 
+// ---------- 👉👈 صدام کی ہدایت (FM15SEPTU2): پراڈکٹس/سٹاک مینجمنٹ کی قطار بھی اب چیک باکس کی بجائے سوائپ سے
+// حاضر⟷غیر حاضر بدلتی ہے۔ <tr> کے اندر آزاد <div> اوورلے درست HTML نہیں بنتا، اس لیے یہاں پوری قطار کا
+// پس منظر رنگ (سبز/سرخ) ہی سرکاتے وقت اشارہ دیتا ہے ---------- -->
+function wireProductSwipeRows(tableId){
+  const table = document.getElementById(tableId);
+  if(!table || table.dataset.swipeWired) return;
+  table.dataset.swipeWired = '1';
+  let activeRow = null, startX = 0, dx = 0, dragging = false, origBg = '';
+  const threshold = 70;
+
+  table.addEventListener('pointerdown', e => {
+    if(AppState.currentRole !== 'admin') return;
+    if(e.target.closest('input,select,button,a,textarea')) return; // ---------- خانوں میں لکھتے وقت سوائپ شروع نہ ہو ----------
+    const row = e.target.closest('.prodSwipeRow');
+    if(!row) return;
+    activeRow = row; startX = e.clientX; dx = 0; dragging = true;
+    row.style.transition = '';
+    origBg = row.style.background;
+  });
+  table.addEventListener('pointermove', e => {
+    if(!dragging || !activeRow) return;
+    dx = e.clientX - startX;
+    if(Math.abs(dx) < 6) return;
+    activeRow.style.transform = `translateX(${dx}px)`;
+    const productId = parseInt(activeRow.dataset.swipeId, 10);
+    const p = productsData.find(x => x.product_id === productId);
+    const willBeDormant = !(p && p.isDormant);
+    activeRow.style.background = willBeDormant ? 'rgba(185,28,28,.25)' : 'rgba(21,128,61,.25)';
+  });
+  const endSwipe = () => {
+    if(!dragging || !activeRow) return;
+    dragging = false;
+    const row = activeRow;
+    const productId = parseInt(row.dataset.swipeId, 10);
+    row.style.transition = 'transform .2s, opacity .2s';
+    if(Math.abs(dx) > threshold){
+      row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
+      row.style.opacity = '0';
+      setTimeout(() => toggleProductPresenceInSheet(productId, null), 180);
+    } else {
+      row.style.transform = 'translateX(0)';
+      row.style.background = origBg;
+    }
+    activeRow = null; dx = 0;
+  };
+  table.addEventListener('pointerup', endSwipe);
+  table.addEventListener('pointercancel', endSwipe);
+  table.addEventListener('pointerleave', e => { if(dragging && e.buttons === 0) endSwipe(); });
+}
+
 function renderProductSpreadsheet(filtered, wrap){
   // ---------- 🧷 صدام کی ہدایت (FM10SEPTH0844AM) فکس: کچھ Android WebView میں `position:sticky` اکیلے
   // بھروسہ مند نہیں — پرانا `-webkit-sticky` ویلیو بھی ساتھ لگا دیا (پہلے، تاکہ جدید sticky بعد میں override
@@ -10347,7 +10397,8 @@ function renderProductSpreadsheet(filtered, wrap){
   const measUrduFont = "800 12.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measPackFont = "700 11px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measNumFont = "900 12px Arial,Helvetica,sans-serif";
-  const presenceW = 32; // ---------- ✅ صدام کی ہدایت (FM11SEPSA0303AM): حاضر/غیر حاضر چیک باکس — اب سب سے پہلا کالم ---------- -->
+  // ---------- 👉👈 صدام کی ہدایت (FM15SEPTU2): چیک باکس کالم مکمل ہٹا دیا — اب پوری قطار کو سوائپ (سرکا) کر کے
+  // حاضر⟷غیر حاضر بدلا جاتا ہے (بالکل کسٹمر لسٹ جیسا نظام)۔ اس کالم کی جگہ باقی کالموں کو مل گئی ---------- -->
   const nameW = autoColWidth('نام', filtered.map(p => p.name), measUrduFont, {min:70, max:190, pad:24});
   const packingW = autoColWidth('پیکنگ', filtered.map(p => { const v = p.variants[0]||{}; return v.label || '— منتخب —'; }), measPackFont, {min:52, max:110, pad:14});
   const actionW = 40; // ➕/✏️ آئیکن — فکسڈ (سرکل بٹن، ٹیکسٹ نہیں)
@@ -10361,8 +10412,8 @@ function renderProductSpreadsheet(filtered, wrap){
   const stockW = autoColWidth('📦 سٹاک', filtered.map(p => p.variants[0]?.stock||0), measNumFont, {min:40, max:80, pad:16});
   // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ڈیلیٹ بٹن پہلے ہی چھپا دیا گیا تھا، مگر اس کا خالی کالم/جگہ
   // اب بھی موجود تھی (خالی خانہ نظر آ رہا تھا) — وہ کالم مکمل ہٹا دیا، جگہ باقی کالموں کو مل گئی ---------- -->
-  const colWidths = [presenceW, nameW, packingW, actionW, serialW, purchaseW, laborW, sellLaborW, totalW, retailW, wholesaleW, stockW];
-  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
+  const colWidths = [nameW, packingW, actionW, serialW, purchaseW, laborW, sellLaborW, totalW, retailW, wholesaleW, stockW];
+  const rightOffsets = [0, colWidths[0]];
   const isAdmin = AppState.currentRole === 'admin';
   const rows = filtered.map((p, idx) => {
     const v = p.variants[0] || {};
@@ -10376,18 +10427,14 @@ function renderProductSpreadsheet(filtered, wrap){
     const packingBtnStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;cursor:pointer;" + urduFont;
     const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', '${wrap.id}')">${v.label || '❓'}</button>`;
     return `
-      <tr data-product-id="${p.product_id}">
-        <td style="${tdBase}${frozenTd(0)}padding:2px;">
-          <label title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="display:flex; align-items:center; justify-content:center; ${isAdmin?'cursor:pointer;':'cursor:default;'} background:#f4f6f8; border:1.5px solid #d3d8de; border-radius:11px; padding:5px;">
-            <input type="checkbox" ${p.isDormant ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onclick="toggleProductPresenceInSheet(${p.product_id}, this)" style="width:19px; height:19px; margin:0;">
-          </label>
-        </td>
-        <td style="${tdBase}${frozenTd(1)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
-        <td style="${tdBase}${frozenTd(2)}">${packingSelectHtml}</td>
+      <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative; touch-action:pan-y;">
+        <td style="${tdBase}${frozenTd(0)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
+        <td style="${tdBase}${frozenTd(1)}">${packingSelectHtml}</td>
         <td style="${tdBase}${rowTd}padding:3px;"><div style="display:flex; flex-direction:column; gap:3px; align-items:center;">
           <button type="button" style="width:26px;height:26px;border-radius:50%;border:none;background:#dcfce7;color:#15803d;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس کے بعد نئی خالی قطار شامل کریں" onclick="insertProductRowAfter(${p.product_id})">➕</button>
-          <!-- ---------- ✏️ صدام کی ہدایت (FM15SEPTU): مکمل ایڈٹ کرنے کے لیے خوبصورت پاپ اپ باکس کھولیں ---------- -->
-          <button type="button" style="width:26px;height:26px;border-radius:50%;border:none;background:#eef2ff;color:var(--primary-dark);font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="مکمل ایڈٹ باکس کھولیں" onclick="openVcEditPopup(${p.product_id}, ${v.variant_id}, '${wrap.id}')">✏️</button>
+          <!-- ---------- ✏️ صدام کی ہدایت (FM15SEPTU): مکمل ایڈٹ کرنے کے لیے خوبصورت پاپ اپ باکس کھولیں —
+               مگر غیر حاضر (dormant) سبزی پر یہ بٹن نظر نہیں آئے گا، پہلے اسے حاضر کریں تبھی ایڈٹ ممکن ہو ---------- -->
+          ${!p.isDormant ? `<button type="button" style="width:26px;height:26px;border-radius:50%;border:none;background:#eef2ff;color:var(--primary-dark);font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="مکمل ایڈٹ باکس کھولیں" onclick="openVcEditPopup(${p.product_id}, ${v.variant_id}, '${wrap.id}')">✏️</button>` : ''}
         </div></td>
         <td style="${tdBase}${rowTd}"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:32px !important; height:32px !important; min-width:32px !important; min-height:32px !important; font-size:13px !important;" onclick="openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button></td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.purchase||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'purchase',this.value,this); this.closest('tr').querySelector('.shTotalPurchase').textContent=(parseFloat(this.value)||0)+(${v.labor||0});"></td>
@@ -10399,9 +10446,9 @@ function renderProductSpreadsheet(filtered, wrap){
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
       </tr>`;
   }).join('');
-  const headers = ['✔️','نام','پیکنگ','➕','#','💰 خرید','💪 م.خرید','💪 م.فروخت','🧮 حتمی خرید','🔴 اسلام آباد','🟢 راولپنڈی','📦 سٹاک'];
+  const headers = ['نام','پیکنگ','➕','#','💰 خرید','💪 م.خرید','💪 م.فروخت','🧮 حتمی خرید','🔴 اسلام آباد','🟢 راولپنڈی','📦 سٹاک'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
-    const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
+    const frozen = i < 2 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
   }).join('') + '</tr>';
   const colgroupHtml = '<colgroup>' + colWidths.map(w => `<col style="width:${w}px;">`).join('') + '</colgroup>';
@@ -10425,6 +10472,7 @@ function renderProductSpreadsheet(filtered, wrap){
   `;
   const scrollWrap = document.getElementById('stockAdjSheetScrollWrap');
   if(scrollWrap){ scrollWrap.scrollTop = savedScrollTop; scrollWrap.scrollLeft = savedScrollLeft; }
+  wireProductSwipeRows('stockAdjSheetScrollWrap'); // ---------- 👉👈 صدام کی ہدایت (FM15SEPTU2): سوائپ ہینڈلرز جوڑیں ---------- -->
 }
 // ---------- ➕ صدام کی ہدایت (FM10SEPTH0844AM): فہرست کے کسی بھی درمیانی مقام پر نئی خالی قطار — آخر تک جانے
 // کی ضرورت نہیں۔ نیچے کے سب سیریل نمبر خودکار ایک ایک آگے کھسک جاتے ہیں تاکہ نئی قطار بالکل صحیح جگہ (اسی کے
@@ -19832,6 +19880,13 @@ function setSupplierSortMode(mode){
   saveToStorage('supplierSortMode', mode);
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
+// ---------- 🚚 صدام کی ہدایت (FM15SEPTU2): سپلائرز کا حاضر/غیر فعال ٹوگل — کسٹمر کے "کھوہ کھاتے" جیسا ---------- -->
+let supplierShowDormant = loadFromStorage('supplierShowDormant', false);
+function setSupplierShowDormant(val){
+  supplierShowDormant = val;
+  saveToStorage('supplierShowDormant', val);
+  renderPartyList(document.getElementById('partySearchInput')?.value || '');
+}
 
 // ---------- Render List (Customers یا Suppliers، tab کے مطابق) ----------
 // ---------- کمپیکٹ لسٹ رو کے لیے فون آئیکنز — بقایہ رقم ہو تو پیغام خودکار پہلے سے لکھا ہوا ہو ----------
@@ -19968,6 +20023,72 @@ function toggleCustomerActiveStatus(customerId, makeActive){
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
 }
 
+// ---------- 🚚 صدام کی ہدایت (FM15SEPTU2): سپلائر کے لیے بھی وہی حاضر/غیر فعال نظام، کسٹمر جیسا ہی ---------- -->
+function toggleSupplierActiveStatus(supplierId, makeActive){
+  if(AppState.currentRole !== 'admin'){ alert('صرف ایڈمن یہ تبدیل کر سکتا ہے'); return; }
+  const s = suppliersData.find(x => x.supplier_id === supplierId);
+  if(!s) return;
+  s.isDormant = !makeActive;
+  persistAllData();
+  renderPartyList(document.getElementById('partySearchInput')?.value || '');
+}
+function animateAndToggleSupplier(supplierId){
+  const row = document.getElementById('prow-sup-' + supplierId);
+  if(row) row.classList.add('slideOutRow');
+  setTimeout(() => {
+    const s = suppliersData.find(x => x.supplier_id === supplierId);
+    if(!s) return;
+    toggleSupplierActiveStatus(supplierId, !!s.isDormant);
+  }, 280);
+}
+function wireSupplierSwipeRows(){
+  document.querySelectorAll('.supSwipeRow[data-swipe-id]').forEach(row => {
+    if(row.dataset.swipeWired) return;
+    row.dataset.swipeWired = '1';
+    const supplierId = parseInt(row.dataset.swipeId, 10);
+    const s = suppliersData.find(x => x.supplier_id === supplierId);
+    const willBeDormant = !(s && s.isDormant);
+    const hint = document.createElement('div');
+    hint.style.cssText = 'position:absolute; inset:0; display:none; align-items:center; justify-content:center; border-radius:13px; font-weight:900; font-size:13px; z-index:2; pointer-events:none;';
+    row.appendChild(hint);
+
+    let startX = 0, dx = 0, dragging = false;
+    const threshold = 70;
+    row.addEventListener('pointerdown', e => {
+      startX = e.clientX; dragging = true; dx = 0;
+      row.style.transition = '';
+    });
+    row.addEventListener('pointermove', e => {
+      if(!dragging) return;
+      dx = e.clientX - startX;
+      if(Math.abs(dx) < 6) return;
+      row.style.transform = `translateX(${dx}px)`;
+      hint.style.display = 'flex';
+      hint.style.background = willBeDormant ? 'rgba(185,28,28,.9)' : 'rgba(21,128,61,.9)';
+      hint.style.color = '#fff';
+      hint.textContent = willBeDormant ? '🪦 غیر فعال کریں' : '✅ حاضر کریں';
+      hint.style.opacity = Math.min(1, Math.abs(dx) / threshold);
+    });
+    const endSwipe = e => {
+      if(!dragging) return;
+      dragging = false;
+      row.style.transition = 'transform .2s, opacity .2s';
+      if(Math.abs(dx) > threshold){
+        row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
+        row.style.opacity = '0';
+        setTimeout(() => animateAndToggleSupplier(supplierId), 180);
+      } else {
+        row.style.transform = 'translateX(0)';
+        hint.style.display = 'none';
+      }
+      dx = 0;
+    };
+    row.addEventListener('pointerup', endSwipe);
+    row.addEventListener('pointercancel', endSwipe);
+    row.addEventListener('pointerleave', e => { if(dragging && e.buttons === 0) endSwipe(e); });
+  });
+}
+
 // ---------- 🎬 صدام کی ہدایت (FM3SEPTH10): ٹک لگاتے ہی قطار دائیں طرف سلائیڈ ہو کر آہستہ سے غائب ہو —
 // اس کے بعد ہی اصل فہرست تبدیل ہو، تاکہ صاف نظر آئے کہ کون سا کسٹمر کہاں گیا ---------- -->
 function animateAndToggleCustomer(customerId){
@@ -19980,10 +20101,61 @@ function animateAndToggleCustomer(customerId){
   }, 280);
 }
 
+// ---------- 👆 صدام کی ہدایت (FM15SEPTU): چیک باکس کی جگہ سوائپ (سلائیڈ) — کسٹمر کارڈ کو بائیں یا دائیں
+// سرکائیں تو وہ حاضر⟷کھوہ کھاتہ کے درمیان بدل جاتا ہے۔ سرکاتے وقت کارڈ کے اوپر ہی بتا دیتا ہے کہ کیا ہونے
+// والا ہے، اور کافی دور تک سرکانے پر ہی تبدیلی ہوتی ہے (غلطی سے نہ ہو) ---------- -->
+function wireCustomerSwipeRows(){
+  document.querySelectorAll('.custSwipeRow[data-swipe-id]').forEach(row => {
+    if(row.dataset.swipeWired) return; // ---------- ایک ہی رو پر دوبارہ wire نہ ہو ----------
+    row.dataset.swipeWired = '1';
+    const customerId = parseInt(row.dataset.swipeId, 10);
+    const c = customersData.find(x => x.customer_id === customerId);
+    const willBeDormant = !(c && c.isDormant);
+    const hint = document.createElement('div');
+    hint.style.cssText = 'position:absolute; inset:0; display:none; align-items:center; justify-content:center; border-radius:13px; font-weight:900; font-size:13px; z-index:2; pointer-events:none;';
+    row.appendChild(hint);
+
+    let startX = 0, dx = 0, dragging = false;
+    const threshold = 70;
+    row.addEventListener('pointerdown', e => {
+      startX = e.clientX; dragging = true; dx = 0;
+      row.style.transition = '';
+    });
+    row.addEventListener('pointermove', e => {
+      if(!dragging) return;
+      dx = e.clientX - startX;
+      if(Math.abs(dx) < 6) return; // ---------- ذرا سی حرکت پر کارڈ نہ کھینچے (عام ٹیپ متاثر نہ ہو) ----------
+      row.style.transform = `translateX(${dx}px)`;
+      hint.style.display = 'flex';
+      hint.style.background = willBeDormant ? 'rgba(185,28,28,.9)' : 'rgba(21,128,61,.9)';
+      hint.style.color = '#fff';
+      hint.textContent = willBeDormant ? '🪦 کھوہ کھاتے میں بھیجیں' : '✅ حاضر کریں';
+      hint.style.opacity = Math.min(1, Math.abs(dx) / threshold);
+    });
+    const endSwipe = e => {
+      if(!dragging) return;
+      dragging = false;
+      row.style.transition = 'transform .2s, opacity .2s';
+      if(Math.abs(dx) > threshold){
+        row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
+        row.style.opacity = '0';
+        setTimeout(() => animateAndToggleCustomer(customerId), 180);
+      } else {
+        row.style.transform = 'translateX(0)';
+        hint.style.display = 'none';
+      }
+      dx = 0;
+    };
+    row.addEventListener('pointerup', endSwipe);
+    row.addEventListener('pointercancel', endSwipe);
+    row.addEventListener('pointerleave', e => { if(dragging && e.buttons === 0) endSwipe(e); });
+  });
+}
+
 // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر/سپلائر کارڈ کو بھی آرڈر ٹیکنگ والی کمپیکٹ، راؤنڈ، 3D
 // ایک-لائن رو کی طرز پر بنایا — چوڑے/چوکور پرانے کارڈ کی جگہ؛ سب انلائن سٹائل (کسی CSS کلاس پر انحصار نہیں) ---------- -->
 function buildCompactPartyRow(opts){
-  const { id, name, phone, serial, keywords, areaBadgeHtml, balance, balanceLabelColor, rowClickJs, deleteJs, serialClickJs, dormantJs, isDormant } = opts;
+  const { id, name, phone, serial, keywords, areaBadgeHtml, balance, balanceLabelColor, rowClickJs, deleteJs, serialClickJs, dormantJs, isDormant, swipeClass } = opts;
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
   const iconStyle = (grad) => `flex:0 0 27px; width:27px; height:27px; display:flex; align-items:center; justify-content:center; text-decoration:none; color:#fff; border-radius:50%; background:${grad}; box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 2px 4px -1px rgba(0,0,0,.4);`;
@@ -20008,7 +20180,7 @@ function buildCompactPartyRow(opts){
   const keywordHtml = keywords ? `<span style="flex:0 0 auto; font-size:9px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px;">${keywords}</span>` : '';
   const serialHtml = `<button type="button" onclick="event.stopPropagation(); ${serialClickJs}" style="flex:0 0 auto; ${SERIAL_BADGE_INLINE_STYLE} width:20px !important; height:20px !important; min-width:20px !important; min-height:20px !important; font-size:9.5px !important; box-shadow:none !important; border-width:1.5px !important;">${serial ?? '?'}</button>`;
   return `
-    <div dir="rtl" onclick="${rowClickJs}" style="display:flex; align-items:center; gap:4px; flex-wrap:nowrap; border-radius:13px; border:1.5px solid ${rowBorder}; padding:7px 8px; margin-bottom:6px; cursor:pointer; width:100%; box-sizing:border-box; background:${rowBg}; box-shadow:${rowShadow};">
+    <div dir="rtl" data-swipe-id="${dormantJs ? id : ''}" class="${dormantJs ? (swipeClass || 'custSwipeRow') : ''}" onclick="${rowClickJs}" style="position:relative; display:flex; align-items:center; gap:4px; flex-wrap:nowrap; border-radius:13px; border:1.5px solid ${rowBorder}; padding:7px 8px; margin-bottom:6px; cursor:pointer; width:100%; box-sizing:border-box; background:${rowBg}; box-shadow:${rowShadow}; touch-action:pan-y;">
       ${serialHtml}
       <div style="flex:1 1 auto; min-width:0;">
         <div style="font-weight:900; font-size:14px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:4px;">${name} ${keywordHtml}</div>
@@ -20019,11 +20191,6 @@ function buildCompactPartyRow(opts){
       ${callBtn}
       ${waBtn}
       ${smsBtn}
-      <!-- ---------- 🪦 صدام کی ہدایت (FM13SEPSU): کھوہ کھاتے میں بھیجنے والا چیک باکس کمپیکٹ کارڈ ری ڈیزائن میں
-           رہ گیا تھا — واپس شامل کیا (صرف کسٹمر کے لیے، dormantJs دیا جائے تبھی نظر آئے گا) ---------- -->
-      ${dormantJs ? `<label onclick="event.stopPropagation();" title="${isDormant ? 'ٹک لگائیں — واپس حاضر موجود کریں' : 'ٹک لگائیں — کھوہ کھاتے میں بھیجیں'}" style="flex:0 0 auto; display:flex; align-items:center; cursor:pointer;">
-        <input type="checkbox" ${isDormant ? 'checked' : ''} onclick="${dormantJs}" style="width:17px; height:17px; margin:0;">
-      </label>` : ''}
       <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر/سپلائر کو غلطی سے حذف ہونے سے بچانے کے لیے یہ بٹن
            فی الحال مکمل چھپا دیا گیا ہے (کوڈ/فنکشن محفوظ ہے، مستقبل میں ضرورت پڑنے پر واپس دکھایا جا سکتا ہے) ---------- -->
       <button type="button" onclick="event.stopPropagation(); ${deleteJs}" title="حذف کریں" style="display:none; flex:0 0 auto; width:20px; height:20px; border:none; border-radius:50%; background:rgba(0,0,0,.06); color:#94a3b8; font-size:10px; cursor:pointer; align-items:center; justify-content:center;">🗑️</button>
@@ -20069,8 +20236,10 @@ function renderPartyList(query = ''){
         isDormant: c.isDormant
       });
     }).join('');
+    wireCustomerSwipeRows(); // ---------- 👆 صدام کی ہدایت (FM15SEPTU): سوائپ ہینڈلرز نئے کارڈز پر جوڑیں ---------- -->
   } else {
-    let filtered = suppliersData.filter(s => partyMatchesQuery(s, query));
+    // ---------- 🚚 صدام کی ہدایت (FM15SEPTU2): سپلائرز میں بھی حاضر/غیر فعال فلٹر — کسٹمر جیسا ہی ---------- -->
+    let filtered = suppliersData.filter(s => partyMatchesQuery(s, query) && !!s.isDormant === !!supplierShowDormant);
     // ---------- 🔎 صدام کی ہدایت (FM3SEPTH23): کم/زیادہ بقایہ کی ترتیب ----------
     if(supplierSortMode === 'highest') filtered.sort((a,b) => (b.total_payable||0) - (a.total_payable||0));
     else if(supplierSortMode === 'lowest') filtered.sort((a,b) => (a.total_payable||0) - (b.total_payable||0));
@@ -20080,19 +20249,30 @@ function renderPartyList(query = ''){
 
     // ---------- فلٹر بار — دائیں سے بائیں (RTL) ---------- -->
     const sortBtn = (val, label) => `<button onclick="setSupplierSortMode('${val}')" style="flex:1; padding:8px 4px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer; background:${supplierSortMode===val?'var(--primary)':'#f1f5f9'}; color:${supplierSortMode===val?'#fff':'var(--text)'};">${label}</button>`;
-    const filterBarHtml = `<div dir="rtl" style="display:flex; gap:6px; margin-bottom:12px;">${sortBtn('name','🔤 نام')}${sortBtn('serial','🔢 سیریل')}${sortBtn('highest','📈 زیادہ بقایہ پہلے')}${sortBtn('lowest','📉 کم بقایہ پہلے')}</div>`;
+    const dormantCount = suppliersData.filter(s => !!s.isDormant).length;
+    const presentCount = suppliersData.filter(s => !s.isDormant).length;
+    const filterBarHtml = `<div dir="rtl" style="display:flex; gap:6px; margin-bottom:8px;">${sortBtn('name','🔤 نام')}${sortBtn('serial','🔢 سیریل')}${sortBtn('highest','📈 زیادہ بقایہ پہلے')}${sortBtn('lowest','📉 کم بقایہ پہلے')}</div>
+      <div dir="rtl" style="display:flex; gap:6px; margin-bottom:12px;">
+        <button onclick="setSupplierShowDormant(false)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${!supplierShowDormant?'#134e2c':'#f1f5f9'}; color:${!supplierShowDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🟢 حاضر سپلائرز (${presentCount})</button>
+        <button onclick="setSupplierShowDormant(true)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${supplierShowDormant?'#78350f':'#f1f5f9'}; color:${supplierShowDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🪦 غیر فعال (${dormantCount})</button>
+      </div>`;
 
     if(filtered.length === 0){
       wrap.innerHTML = filterBarHtml + `<div class="placeholder">کوئی سپلائر نہیں ملا</div>`;
       return;
     }
+    const isAdminSup = AppState.currentRole === 'admin';
     wrap.innerHTML = filterBarHtml + filtered.map(s => buildCompactPartyRow({
       id: s.supplier_id, name: s.name, phone: s.phone, serial: s.serial_no, keywords: s.keywords,
       areaBadgeHtml: '', balance: s.total_payable || 0,
       rowClickJs: `openSupplierProfile(${s.supplier_id})`,
       deleteJs: `deleteSupplier(${s.supplier_id})`,
-      serialClickJs: `openSerialPicker('suppliers', ${s.supplier_id}, ${s.serial_no ?? 'null'}, '${(s.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`
+      serialClickJs: `openSerialPicker('suppliers', ${s.supplier_id}, ${s.serial_no ?? 'null'}, '${(s.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`,
+      dormantJs: isAdminSup ? `animateAndToggleSupplier(${s.supplier_id})` : null,
+      isDormant: s.isDormant,
+      swipeClass: 'supSwipeRow'
     })).join('');
+    wireSupplierSwipeRows(); // ---------- 👉👈 صدام کی ہدایت (FM15SEPTU2): سوائپ ہینڈلرز جوڑیں ---------- -->
   }
 }
 
