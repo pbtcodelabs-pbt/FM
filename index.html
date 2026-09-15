@@ -3602,11 +3602,14 @@
     <!-- 🧮 STOCK ADJUSTMENT — manual stock/price/low-stock editing for every variant, no Purchase Order needed -->
     <div class="screen admin-only" id="screen-stockadjustment" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
 
-      <!-- ---------- 🧵 صدام کی ہدایت (FM10SEPTH0445PM): عنوان + Undo/Redo + رپورٹس ڈراپ ڈاؤن + حاضر/غیر حاضر
+      <!-- ---------- 🔠 صدام کی ہدایت (FM15SEPTU0413PM): عنوان اب اپنی الگ، موٹی (bold) لائن میں سب سے اوپر —
+           پہلے یہ دوسرے بٹنوں کے ساتھ تنگ ہو کر ایک ہی افقی لائن میں سکڑا ہوتا تھا ---------- -->
+      <div class="pageTitle" style="margin:0 0 6px; font-size:19px; font-weight:900;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
+
+      <!-- ---------- 🧵 صدام کی ہدایت (FM10SEPTH0445PM): Undo/Redo + رپورٹس ڈراپ ڈاؤن + حاضر/غیر حاضر
            سب ایک ہی لائن میں، چاہے سکرین کتنی ہی تنگ ہو — پہلے flex-wrap:wrap کی وجہ سے چھوٹی سکرین پر یہ
            2-3 قطاروں میں ٹوٹ جاتے تھے۔ اب nowrap + ضرورت پڑنے پر افقی سکرول، سب بٹن تھوڑے چھوٹے ---------- -->
       <div style="display:flex; align-items:center; gap:4px; margin-bottom:6px; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px;">
-        <div class="pageTitle" style="margin:0; flex:0 1 auto; min-width:30px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:14px;">🧮 سٹاک ایڈجسٹمنٹ</div>
         <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
           <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:5px 7px; font-size:10.5px; max-width:none; white-space:nowrap;">
             <span>📊 رپورٹس</span>
@@ -3652,7 +3655,10 @@
           </div>
         </div>
 
-        <div class="categoryRail" id="saCategoryRail">
+        <!-- ---------- 🗑️ صدام کی ہدایت (FM15SEPTU0413PM): یہ کیٹگری پٹی (سبزیاں/Uncategorized/All) سٹاک
+             مینجمنٹ میں فضول جگہ گھیر رہی تھی — تقریباً سب آئٹمز ایک ہی کیٹگری میں ہیں، اس لیے کوئی فائدہ نہیں
+             تھا۔ مکمل طور پر چھپا دی گئی (کوڈ/فنکشن محفوظ ہے، صرف display:none) ---------- -->
+        <div class="categoryRail" id="saCategoryRail" style="display:none;">
           <!-- JS سے کیٹگریز یہاں بنیں گی -->
         </div>
       </div>
@@ -8084,7 +8090,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل15ستمبر3:54pm';
+const APP_BUILD_VERSION = 'منگل15ستمبر4:13pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10338,10 +10344,25 @@ function wireProductSwipeRows(tableId){
   const table = document.getElementById(tableId);
   if(!table || table.dataset.swipeWired) return;
   table.dataset.swipeWired = '1';
-  let activeRow = null, startX = 0, dx = 0, dragging = false, origBg = '', frozenTds = [];
+  let activeRow = null, startX = 0, startY = 0, dx = 0, dragging = false, lockedHorizontal = false, origBg = '', frozenTds = [];
   const threshold = 70;
 
-  table.addEventListener('pointerdown', e => {
+  // ---------- 🔒🔒 صدام کی ہدایت (FM15SEPTU0413PM): اصل خرابی یہاں نکلی! صرف Pointer Events (pointerdown/move/up)
+  // پر انحصار Android WebView/TWA (Sunmi، iMin، PAX ایسے پرنٹر/POS ڈیوائسز پر) میں بھروسہ مند نہیں — بہت سی
+  // پرانی/کسٹم WebView بلڈز میں یہ ایونٹس یا تو فائر نہیں ہوتیں یا ادھورے/غلط clientX دیتی ہیں، اس لیے سوائپ
+  // بالکل کام نہیں کر رہا تھا چاہے کوڈ کا باقی منطق درست تھی۔ اب اصل touchstart/touchmove/touchend استعمال
+  // ہوتے ہیں (ہر موبائل براؤزر/WebView میں قابلِ بھروسہ)، اور پوائنٹر ایونٹس صرف mouse/pen کے لیے fallback
+  // کے طور پر ساتھ رکھے گئے ہیں (ڈیسک ٹاپ ٹیسٹنگ کے لیے) ---------- -->
+  const getX = e => (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+  const getY = e => (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+
+  const resetDragState = () => {
+    dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
+    frozenTds.forEach(td => { td.style.position = td.dataset.origPosition || ''; });
+    frozenTds = [];
+  };
+
+  const onStart = e => {
     if(AppState.currentRole !== 'admin') return;
     // ---------- 🔒🔒 صدام کی ہدایت (FM15SEPTU5): اصل خرابی یہاں تھی! سٹاک مینجمنٹ کے تقریباً ہر خانے میں
     // input (خرید/مزدوری/ریٹ/سٹاک) ہے، تو یہ exclusion پوری قطار پر سوائپ ہی شروع نہیں ہونے دیتا تھا —
@@ -10350,7 +10371,7 @@ function wireProductSwipeRows(tableId){
     if(e.target.closest('button,a')) return;
     const row = e.target.closest('.prodSwipeRow');
     if(!row) return;
-    activeRow = row; startX = e.clientX; dx = 0; dragging = true;
+    activeRow = row; startX = getX(e); startY = getY(e); dx = 0; dragging = true; lockedHorizontal = false;
     row.style.transition = '';
     origBg = row.style.background;
     // ---------- 🔒🔒 صدام کی ہدایت (FM15SEPTU4): اصل خرابی یہیں تھی! نام اور پیکنگ والے خانے position:sticky
@@ -10359,11 +10380,22 @@ function wireProductSwipeRows(tableId){
     // انہیں بھی عام (position:static) کر دیتے ہیں، چھوڑنے پر واپس sticky ہو جاتے ہیں ---------- -->
     frozenTds = Array.from(row.querySelectorAll('td')).slice(0, 2);
     frozenTds.forEach(td => { td.dataset.origPosition = td.style.position; td.style.position = 'static'; });
-  });
-  table.addEventListener('pointermove', e => {
+  };
+
+  const onMove = e => {
     if(!dragging || !activeRow) return;
-    dx = e.clientX - startX;
-    if(Math.abs(dx) < 6) return;
+    const x = getX(e), y = getY(e);
+    dx = x - startX;
+    const dy = y - startY;
+    // ---------- 👆↕️ صدام کی ہدایت (FM15SEPTU0413PM): پہلی چند پکسل حرکت سے فیصلہ کریں کہ یہ افقی سوائپ ہے یا
+    // عمودی سکرول — اگر عمودی حرکت زیادہ ہو تو فہرست کو عام طریقے سے سکرول ہونے دیں (سوائپ منسوخ)، صرف افقی
+    // حرکت واضح ہونے پر ہی preventDefault کر کے قطار کو سرکائیں — ورنہ اوپر نیچے سکرول کرنا مشکل ہو جاتا ---------- -->
+    if(!lockedHorizontal){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      if(Math.abs(dy) > Math.abs(dx)){ resetDragState(); return; }
+      lockedHorizontal = true;
+    }
+    if(e.cancelable) e.preventDefault();
     activeRow.style.position = 'relative';
     activeRow.style.zIndex = '4';
     activeRow.style.transform = `translateX(${dx}px)`;
@@ -10371,28 +10403,35 @@ function wireProductSwipeRows(tableId){
     const p = productsData.find(x => x.product_id === productId);
     const willBeDormant = !(p && p.isDormant);
     activeRow.style.background = willBeDormant ? '#fecaca' : '#bbf7d0';
-  });
+  };
+
   const endSwipe = () => {
-    if(!dragging || !activeRow) return;
-    dragging = false;
+    if(!dragging || !activeRow){ resetDragState(); return; }
     const row = activeRow;
     const productId = parseInt(row.dataset.swipeId, 10);
+    const wasLocked = lockedHorizontal, finalDx = dx;
     row.style.transition = 'transform .12s, opacity .12s';
-    if(Math.abs(dx) > threshold){
-      row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
+    if(wasLocked && Math.abs(finalDx) > threshold){
+      row.style.transform = `translateX(${finalDx > 0 ? '120%' : '-120%'})`;
       row.style.opacity = '0';
       setTimeout(() => toggleProductPresenceInSheet(productId, null), 130);
     } else {
       row.style.transform = 'translateX(0)';
       row.style.background = origBg;
     }
-    frozenTds.forEach(td => { td.style.position = td.dataset.origPosition || ''; });
-    frozenTds = [];
-    activeRow = null; dx = 0;
+    resetDragState();
   };
-  table.addEventListener('pointerup', endSwipe);
-  table.addEventListener('pointercancel', endSwipe);
-  table.addEventListener('pointerleave', e => { if(dragging && e.buttons === 0) endSwipe(); });
+
+  table.addEventListener('touchstart', onStart, {passive:true});
+  table.addEventListener('touchmove', onMove, {passive:false});
+  table.addEventListener('touchend', endSwipe);
+  table.addEventListener('touchcancel', endSwipe);
+  // ---------- 🖱️ mouse/pen کے لیے fallback — ٹچ ایونٹس نظرانداز کریں تاکہ ڈبل فائر نہ ہو ---------- -->
+  table.addEventListener('pointerdown', e => { if(e.pointerType === 'touch') return; onStart(e); });
+  table.addEventListener('pointermove', e => { if(e.pointerType === 'touch') return; onMove(e); });
+  table.addEventListener('pointerup', e => { if(e.pointerType === 'touch') return; endSwipe(); });
+  table.addEventListener('pointercancel', e => { if(e.pointerType === 'touch') return; endSwipe(); });
+  table.addEventListener('pointerleave', e => { if(e.pointerType === 'touch') return; if(dragging && e.buttons === 0) endSwipe(); });
 }
 
 function renderProductSpreadsheet(filtered, wrap){
@@ -24687,19 +24726,12 @@ async function openAdvOrderPreview(orderId){
   currentPreviewAdvOrderId = orderId;
   document.getElementById('advOrderPreviewModal').classList.add('show');
   syncAdvOrderStyleControls();
-  // ---------- 🚀 صدام کی ہدایت (FM3SEPTH23): بل کھلتے ہی زیرو زیرو دکھانے اور بٹن دبانے کا انتظار کرنے کے بجائے —
-  // اگر یہ آرڈر کسی ایسے محفوظ شدہ کسٹمر کا ہے جس کا ریٹ ایریا (اسلام آباد/راولپنڈی) پہلے سے سیٹ ہے، تو وہ ریٹ
-  // یہیں خودکار لگا دیں — بل پہلی ہی نظر میں صحیح قیمتوں کے ساتھ کھلے گا، اور غلطی سے زیرو پرنٹ نہیں ہوگا۔
-  // نیا/انجان کسٹمر ہو (رٹ ایریا محفوظ نہ ہو) تو پہلے کی طرح دونوں بٹن نظر آتے رہیں گے تاکہ ایڈمن خود چن سکے ---------- -->
-  if(!order.items.some(i => i.unitPrice > 0) && order.status !== 'fulfilled'){
-    const orderPhoneDigits = normalizeDigits(order.customerPhone || '');
-    const matchedCustomer = (orderPhoneDigits && customersData.find(c => normalizeDigits(c.phone) === orderPhoneDigits))
-      || customersData.find(c => (c.name || '').trim().toLowerCase() === (order.customerName || '').trim().toLowerCase());
-    if(matchedCustomer && (matchedCustomer.rateArea === 'retail' || matchedCustomer.rateArea === 'wholesale')){
-      applyRateToAdvanceOrder(orderId, matchedCustomer.rateArea);
-      setTimeout(() => { persistAllData(); pushAdvanceOrdersToCloud(); }, 0); // ---------- بھاری سیو بیک گراؤنڈ میں، بل دکھنے میں تاخیر نہ ہو ----------
-    }
-  }
+  // ---------- 🛑 صدام کی ہدایت (FM15SEPTU0413PM): پہلے یہاں محفوظ شدہ کسٹمر کے ریٹ ایریا (اسلام آباد/راولپنڈی)
+  // کی بنیاد پر خودکار ریٹ لگ جاتا تھا (FM3SEPTH23 والا فیچر) — یہی وجہ تھی کہ پریویو کھولتے ہی جس پراڈکٹ کا
+  // Stock Management میں ریٹ پہلے سے بھرا ہوتا (مثلاً بھنڈی=350) اس کی قیمت خودکار نظر آنے لگتی، جبکہ باقی
+  // آئٹمز جن کا ریٹ ابھی 0 ہے وہ 0 ہی رہتے — یہ کوئی غلط فارمولا/آئٹمز کا ٹکراؤ نہیں تھا، بلکہ یہی خودکار
+  // فیچر تھا۔ صدام کی ہدایت پر اب یہ خودکار اطلاق مکمل بند — قیمت اب صرف اسی وقت لگے گی جب ایڈمن خود
+  // "Rate لگائیں" کے دونوں بٹنوں میں سے کسی ایک کو دبائے گا (کوڈ نیچے applyRateToAdvanceOrder میں محفوظ ہے) ---------- -->
   syncAdvOrderRateRow(order);
   await new Promise(r => setTimeout(r, 100)); // ---------- modal کے نظر آنے کے بعد canvas ڈرائنگ (کچھ WebViews کے لیے ضروری) ----------
   await renderAdvOrderToCanvas(order);
