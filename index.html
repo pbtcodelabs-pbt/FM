@@ -8084,7 +8084,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل15ستمبر3:50pm';
+const APP_BUILD_VERSION = 'منگل15ستمبر3:54pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -24634,10 +24634,16 @@ function renderAdminPendingOrdersScreen(){
         ? (matchedCust.rateArea === 'wholesale' ? `<span style="font-size:10.5px; font-weight:800; background:#ede9fe; color:#5b21b6; padding:2px 7px; border-radius:8px; margin-inline-start:5px;">📦 Rawalpindi</span>` : `<span style="font-size:10.5px; font-weight:800; background:#d1fae5; color:#065f46; padding:2px 7px; border-radius:8px; margin-inline-start:5px;">🏷️ Islamabad</span>`)
         : '';
       return `
-        <div class="billCard" onclick="fulfillAdvanceOrder(${o.id})" style="cursor:pointer; padding:8px 12px; margin-bottom:5px;">
-          <div>
+        <div class="billCard" style="cursor:default; padding:8px 12px; margin-bottom:5px; flex-wrap:wrap; align-items:flex-start;">
+          <div onclick="fulfillAdvanceOrder(${o.id})" style="cursor:pointer; flex:1 1 100%;">
             <div class="bNo" style="font-size:13.5px;">🧑 ${o.customerName}${areaBadge} ${statusTag}</div>
             <div class="bMeta" style="font-size:11.5px;">${when} — ${itemCount} item(s)${hasRate ? ' — Rs. ' + advOrderTotal(o).toLocaleString() : ''}</div>
+          </div>
+          <!-- ---------- 👁️ صدام کی ہدایت (FM15SEPTU5): کوئی ایکشن (OK/ریٹ) لیے بغیر پورا بل دیکھنے کا موقع —
+               پریویو کے اندر سے ہی ایڈٹ اور ڈیلیٹ بھی ممکن (وہاں پہلے سے موجود بٹن) ---------- -->
+          <div class="billActions" style="margin-top:6px; flex:1 1 100%;" onclick="event.stopPropagation();">
+            <button class="btnPrint" onclick="openAdvOrderPreview(${o.id})" style="padding:6px 12px; font-size:11.5px;">👁️ پریویو</button>
+            <button class="removeBtn" onclick="deleteAdvanceOrder(${o.id})" style="padding:6px 12px; font-size:11.5px;">🗑️ ڈیلیٹ</button>
           </div>
         </div>`;
     }).join('');
