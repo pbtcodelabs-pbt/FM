@@ -8090,7 +8090,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر4:24am';
+const APP_BUILD_VERSION = 'بدھ16ستمبر4:44am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10344,8 +10344,13 @@ function wireProductSwipeRows(tableId){
   const table = document.getElementById(tableId);
   if(!table || table.dataset.swipeWired) return;
   table.dataset.swipeWired = '1';
-  let activeRow = null, startX = 0, startY = 0, dx = 0, dragging = false, lockedHorizontal = false, origBg = '', frozenTds = [];
-  const threshold = 70;
+  let activeRow = null, startX = 0, startY = 0, dx = 0, dragging = false, lockedHorizontal = false, origBg = '', frozenTds = [], pointerDownTime = 0;
+  const threshold = 70; // ---------- غیر حاضر → حاضر (واپس لانا) — تیز/آسان ہی رہے گا ----------
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE5): حاضر → غیر حاضر کرنا اب جان بوجھ کر مشکل/آہستہ بنایا گیا ہے —
+  // غلطی سے ہاتھ لگنے سے سبزی غائب نہ ہو۔ اس کے لیے زیادہ لمبا سرکانا اور تھوڑی دیر دبائے رکھنا (ہولڈ) دونوں
+  // ضروری ہیں۔ واپس حاضر کرنے کے موجودہ آسان طریقے میں کوئی تبدیلی نہیں ---------- -->
+  const dormantThreshold = 170;
+  const dormantMinHoldMs = 450;
 
   // ---------- 🔴🟢 صدام کی ہدایت (FM15SEPTU0556PM): سرکاتے وقت قطار کے پیچھے خالی رہ جانے والی جگہ میں
   // سرخ/سبز میسج بار — بتاتا ہے کہ یہ سبزی غیر حاضر سبزیوں میں منتقل ہو رہی ہے یا حاضر سبزیوں میں۔ چونکہ
@@ -10387,6 +10392,7 @@ function wireProductSwipeRows(tableId){
     const row = e.target.closest('.prodSwipeRow');
     if(!row) return;
     activeRow = row; startX = getX(e); startY = getY(e); dx = 0; dragging = true; lockedHorizontal = false;
+    pointerDownTime = Date.now();
     row.style.transition = '';
     origBg = row.style.background;
     // ---------- 🔴🟢 FM15SEPTU0556PM: قطار ابھی سرکی نہیں — اصل جگہ ناپ کر میسج بار وہیں فٹ کر دیں ---------- -->
@@ -10429,16 +10435,25 @@ function wireProductSwipeRows(tableId){
     // ---------- 🔴🟢 FM15SEPTU0556PM: میسج بار کا رنگ/متن — کتنی دور سرکایا اس کے حساب سے نمایاں ہو ---------- -->
     hintBar.style.background = willBeDormant ? '#b91c1c' : '#15803d';
     hintBar.textContent = willBeDormant ? '🔴 غیر حاضر سبزیوں میں منتقل ہو رہی ہے' : '🟢 حاضر سبزیوں میں منتقل ہو رہی ہے';
-    hintBar.style.opacity = String(Math.min(1, Math.abs(dx) / threshold));
+    const activeThreshold = willBeDormant ? dormantThreshold : threshold;
+    hintBar.style.opacity = String(Math.min(1, Math.abs(dx) / activeThreshold));
   };
 
   const endSwipe = () => {
     if(!dragging || !activeRow){ resetDragState(); return; }
     const row = activeRow;
     const productId = parseInt(row.dataset.swipeId, 10);
+    const p = productsData.find(x => x.product_id === productId);
+    const willBeDormant = !(p && p.isDormant);
     const wasLocked = lockedHorizontal, finalDx = dx;
+    const heldMs = Date.now() - pointerDownTime;
+    // ---------- 🔒 صدام کی ہدایت (FM16SEPWE5): غیر حاضر کرنے کے لیے زیادہ لمبا سرکانا (170px) اور کم از کم
+    // 450ms دبائے رکھنا دونوں ضروری — واپس حاضر کرنا اب بھی وہی آسان/تیز (70px) ---------- -->
+    const commitOk = willBeDormant
+      ? (Math.abs(finalDx) > dormantThreshold && heldMs >= dormantMinHoldMs)
+      : (Math.abs(finalDx) > threshold);
     row.style.transition = 'transform .12s, opacity .12s';
-    if(wasLocked && Math.abs(finalDx) > threshold){
+    if(wasLocked && commitOk){
       row.style.transform = `translateX(${finalDx > 0 ? '120%' : '-120%'})`;
       row.style.opacity = '0';
       // ---------- 🔴🟢 FM15SEPTU0556PM: میسج بار قطار کے مکمل غائب ہونے تک نظر رہے، پھر ساتھ ہی ہٹے ---------- -->
@@ -16919,20 +16934,18 @@ const VC_INLINE_FIELD_ORDER = ['purchase', 'labor', 'sellLabor', 'wholesale', 'r
 const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', labor:'vcInlineLabor', sellLabor:'vcInlineSellLabor', wholesale:'vcInlineWholesale', retail:'vcInlineRetail', stock:'vcInlineStock'};
 
 function buildVcInlinePanelHtml(){
-  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE2): مزید کمپیکٹ — چوڑائی مزید کم، ہندسے موٹے اور "Arial Narrow" فونٹ
-  // میں (تاکہ تنگ جگہ میں بھی موٹے نظر آئیں)، اردو کیپشن بھی موٹی اور سینٹر میں، نام دوبارہ اوپر (تاکہ پتا
-  // چلے کون سی سبزی سلیکٹ ہے) ---------- -->
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE4): کیپشن مزید موٹی، پورا لفظ (راولپنڈی/اسلام آباد/رفتار) نظر آئے
+  // (کاٹا ہوا نہیں) — تنگ جگہ میں فٹ کرنے کے لیے ضرورت پڑے تو دو لائنوں میں لپٹ جائے، کبھی کٹے نہیں ---------- -->
   const numFontStack = "'Arial Narrow',Arial,sans-serif";
   const fieldBox = (id, label, bg, border, shadow, color) => `
     <div style="background:${bg}; border:1px solid ${border}; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 ${shadow}; margin-bottom:2px; text-align:center;">
-      <div style="font-size:8.5px; font-weight:900; color:${color}; margin-bottom:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">${label}</div>
-      <input id="${id}" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('${id.replace('vcInline','').charAt(0).toLowerCase() + id.replace('vcInline','').slice(1)}')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid ${border}; border-radius:4px; padding:2px 1px; font-family:${numFontStack}; font-weight:900; font-size:13px; color:${color}; background:#fff;">
+      <div style="font-size:8.5px; font-weight:900; color:${color}; margin-bottom:1px; line-height:1.15; white-space:normal; word-break:break-word; text-align:center;">${label}</div>
+      <input id="${id}" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('${id.replace('vcInline','').charAt(0).toLowerCase() + id.replace('vcInline','').slice(1)}')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid ${border}; border-radius:4px; padding:3px 1px; font-family:${numFontStack}; font-weight:900; font-size:14px; color:${color}; background:#fff;">
     </div>`;
   return `
     <div id="vcInlinePanel" style="background:linear-gradient(155deg,#1d4ed8,#1e3a8a); border-radius:10px; padding:4px; position:sticky; top:0; align-self:flex-start; max-height:calc(100vh - 220px); overflow-y:auto;">
-      <div id="vcInlinePanelEmpty" style="text-align:center; font-weight:900; font-size:9.5px; color:#dbeafe; padding:5px 1px;">☝️ ✏️ دبائیں</div>
+      <div id="vcInlinePanelEmpty" style="text-align:center; font-weight:900; font-size:9.5px; color:#dbeafe; padding:5px 1px;">☝️ سبزی کو ٹچ کریں</div>
       <div id="vcInlinePanelBody" style="display:none;">
-        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE2): نام واپس اوپر — تاکہ صاف پتا چلے کون سی سبزی پر کام ہو رہا ہے ---------- -->
         <div id="vcInlinePanelName" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:11.5px; font-weight:900; color:#1e3a8a; background:#fff; border-radius:6px; padding:2px 3px; margin-bottom:2px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
         <div id="vcInlinePanelPacking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:9.5px; font-weight:800; color:#1e3a8a; background:#dbeafe; border-radius:5px; padding:1px 3px; margin-bottom:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
         ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e')}
@@ -16940,20 +16953,20 @@ function buildVcInlinePanelHtml(){
         ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
         <div style="background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px; margin-bottom:2px; text-align:center;">
           <div style="font-size:8.5px; font-weight:900; color:#134e2c; margin-bottom:1px; text-align:center;">🧮 حتمی</div>
-          <div id="vcInlineTotalPurchase" style="font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:13px; color:#134e2c; padding:2px 1px; text-align:center;">0</div>
+          <div id="vcInlineTotalPurchase" style="font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:14px; color:#134e2c; padding:3px 1px; text-align:center;">0</div>
         </div>
-        ${fieldBox('vcInlineWholesale', '🟢 پنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d')}
-        ${fieldBox('vcInlineRetail', '🔴 آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')}
+        ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d')}
+        ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')}
         <div style="background:linear-gradient(155deg,#eef2ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 #a5b4fc; margin-bottom:3px; text-align:center;">
           <div style="font-size:8.5px; font-weight:900; color:#3730a3; margin-bottom:1px; text-align:center;">📦 سٹاک</div>
-          <input id="vcInlineStock" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('stock')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #a5b4fc; border-radius:4px; padding:2px 1px; font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:13px; color:#3730a3; background:#fff;">
+          <input id="vcInlineStock" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('stock')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #a5b4fc; border-radius:4px; padding:3px 1px; font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:14px; color:#3730a3; background:#fff;">
         </div>
-        <div style="display:flex; flex-direction:column; align-items:center; gap:1px; background:rgba(255,255,255,.12); border-radius:6px; padding:2px;">
-          <span style="font-size:7.5px; color:#dbeafe; font-weight:900;">⏱️</span>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:1px; background:rgba(255,255,255,.12); border-radius:6px; padding:3px;">
+          <span style="font-size:8px; color:#dbeafe; font-weight:900; white-space:normal; text-align:center;">⏱️ رفتار</span>
           <div style="display:flex; align-items:center; gap:2px;">
-            <button type="button" onclick="adjustVcInlineSpeed(150)" style="width:16px; height:16px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:10px;">−</button>
-            <span id="vcInlineSpeedVal" style="width:26px; text-align:center; font-weight:900; color:#fff; font-size:7.5px;">${(vcInlineSpeedMs/1000).toFixed(1)}س</span>
-            <button type="button" onclick="adjustVcInlineSpeed(-150)" style="width:16px; height:16px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:10px;">+</button>
+            <button type="button" onclick="adjustVcInlineSpeed(150)" style="width:17px; height:17px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:11px;">−</button>
+            <span id="vcInlineSpeedVal" style="width:28px; text-align:center; font-weight:900; color:#fff; font-size:8px;">${(vcInlineSpeedMs/1000).toFixed(1)}س</span>
+            <button type="button" onclick="adjustVcInlineSpeed(-150)" style="width:17px; height:17px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:11px;">+</button>
           </div>
         </div>
       </div>
@@ -16982,12 +16995,14 @@ function vcInlinePopulate(){
   emptyEl.style.display = 'none'; bodyEl.style.display = 'block';
   document.getElementById('vcInlinePanelName').textContent = product.name;
   document.getElementById('vcInlinePanelPacking').textContent = variant.label || '';
-  document.getElementById('vcInlinePurchase').value = variant.purchase || 0;
-  document.getElementById('vcInlineLabor').value = variant.labor || 0;
-  document.getElementById('vcInlineSellLabor').value = variant.sellLabor || 0;
-  document.getElementById('vcInlineWholesale').value = variant.wholesale || 0;
-  document.getElementById('vcInlineRetail').value = variant.retail || 0;
-  document.getElementById('vcInlineStock').value = variant.stock || 0;
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE4): اگر رقم 0/خالی ہے تو خانہ بالکل خالی نظر آئے (0 لکھا ہوا نہ ہو) —
+  // تاکہ ہر خانے میں فوراً لکھنا شروع کیا جا سکے، پہلے 0 مٹانے کی ضرورت نہ پڑے ---------- -->
+  document.getElementById('vcInlinePurchase').value = variant.purchase || '';
+  document.getElementById('vcInlineLabor').value = variant.labor || '';
+  document.getElementById('vcInlineSellLabor').value = variant.sellLabor || '';
+  document.getElementById('vcInlineWholesale').value = variant.wholesale || '';
+  document.getElementById('vcInlineRetail').value = variant.retail || '';
+  document.getElementById('vcInlineStock').value = variant.stock || '';
   document.getElementById('vcInlineTotalPurchase').textContent = ((variant.purchase||0) + (variant.labor||0)).toLocaleString();
 }
 
