@@ -620,6 +620,25 @@
     width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent;
     border-top:6px solid var(--primary); pointer-events:none;
   }
+  /* ---------- 🔒 صدام کی ہدایت (FM17SEPTH): سٹاک ڈیٹا سکرین کے لیے عمودی (vertical) ویل — فہرست کے دائیں
+     طرف کھڑی، تاکہ دائیں ہاتھ کا انگوٹھا آسانی سے اگلی/پچھلی سبزی پر لے جا سکے۔ اوپر/نیچے تیر بٹن اسی
+     .saVegNav3dBtn کلاس سے، صرف چوڑائی/اونچائی بدلی گئی ---------- */
+  .saVegNavVerticalWrap{ display:flex; flex-direction:column; align-items:center; gap:6px; flex:0 0 46px; width:46px; }
+  .saVegNavVerticalWrap .saVegNav3dBtn{ width:42px; height:34px; }
+  .saVegNavDialTrackV{
+    display:flex; flex-direction:column; align-items:center; overflow-y:auto; overflow-x:hidden;
+    scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch;
+    width:42px; height:204px; padding:85px 0;
+    background:#fff; border:1.5px solid #c7d2fe; border-radius:8px;
+    scrollbar-width:none;
+  }
+  .saVegNavDialTrackV::-webkit-scrollbar{ display:none; }
+  .saVegNavDialTrackV .saVegNavTick{ flex:0 0 34px; }
+  .saVegNavDialPointerV{
+    position:absolute; top:50%; left:-5px; transform:translateY(-50%);
+    width:0; height:0; border-top:5px solid transparent; border-bottom:5px solid transparent;
+    border-right:6px solid var(--primary); pointer-events:none;
+  }
   /* ---------- 🟡 صدام کی ہدایت (FM16SEPWE): نیویگیٹر ویل سے منتخب سبزی کی قطار/کارڈ کو مستقل نمایاں کریں —
      پہلے صرف 1.2 سیکنڈ کے لیے چمکتی تھی پھر رنگ اڑ جاتا تھا، اب اگلی سبزی منتخب ہونے تک وہی نمایاں رہے گی
      تاکہ ہمیشہ صاف پتا چلے کہ اس وقت کون سی سبزی زیرِ کار ہے ---------- */
@@ -2160,6 +2179,9 @@
     #screen-stockadjustment .categoryRail{ padding:5px; margin-bottom:2px; }
     #screen-stockadjustment .categoryPill{ padding:5px 10px; font-size:10px; }
     #screen-stockadjustment .pageTitle{ font-size:15px; padding-bottom:4px; margin-bottom:4px; }
+    /* ---------- 🆕 صدام کی ہدایت (FM17SEPTH): موبائل پر بھی عمودی ویل فہرست کے برابر (ساتھ) رہے، اوپر نیچے
+         نہ ہو جائے — اسی لیے صرف سٹاک ڈیٹا سکرین کے لیے productsLayout واپس row پر لاک کیا ---------- */
+    #screen-stockadjustment .productsLayout{ flex-direction:row; }
 
     /* ---------- body کا overflow-y:auto واپس بحال — اسے ہٹانے سے مواد مکمل ناقابلِ رسائی ہو گیا تھا
        (پہلے کم از کم سلائیڈ کر کے نظر آ جاتا تھا)۔ اصل وجہ ابھی حل طلب ہے، دوبارہ تحقیق ضروری ---------- */
@@ -3664,7 +3686,7 @@
            والی سیریل/ترتیب ڈراپ ڈاؤن + انوینٹری چیک باکس والی لائن ختم کر کے، ترتیب اور انوینٹری ٹریک دونوں
            اسی 📊 رپورٹس مینو کے اندر شامل کر دیے گئے — درمیان کی خالی جگہ/فاصلہ بھی ختم ---------- -->
       <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; flex-wrap:nowrap;">
-        <div class="pageTitle" style="margin:0; font-size:17px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
+        <div class="pageTitle" style="margin:0; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
         <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
           <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:5px 7px; font-size:10.5px; max-width:none; white-space:nowrap;">
             <span>📊 رپورٹس</span>
@@ -3705,30 +3727,39 @@
         </div>
       </div>
 
-      <!-- ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE0857AM): سبزی نیویگیٹر — نئے سرے سے بنایا۔ ابھرے ہوئے (3D)
-           ◀▶ بٹن بالکل ویل کے ساتھ جڑے ہوئے (کونوں میں دور دور نہیں)، درمیان میں ایک حقیقی گھومنے والا ویل —
-           جتنی سبزیاں اتنے ہی نمبر والے نشان اس پر بنے ہیں، گھما کر/سوائپ کر کے یا تیر دبا کر منتخب کریں،
-           جہاں رکیں وہی نمبر نمایاں (بڑا/رنگین) ہو جاتا ہے اور نیچے فہرست میں وہی سبزی سکرول ہو کر چمک اٹھتی
-           ہے۔ تیر اور ویل کے درمیان صاف فاصلہ ہے تاکہ ویل گھماتے ہوئے غلطی سے تیر پر ہاتھ نہ لگے ---------- -->
-      <div id="saVegNavigator" style="position:sticky; top:0; z-index:6; display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; margin-bottom:6px; box-shadow:0 3px 8px rgba(0,0,0,.10);">
-        <button type="button" id="saVegNavPrevBtn" onclick="saVegNavStep(-1)" title="پچھلی سبزی" class="saVegNav3dBtn">◀</button>
-        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px;">
-          <div id="saVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
-          <div style="position:relative;">
-            <div id="saVegNavDialTrack" class="saVegNavDialTrack" onscroll="saVegNavOnDialScroll()"></div>
-            <div class="saVegNavDialPointer"></div>
-          </div>
-        </div>
-        <button type="button" id="saVegNavNextBtn" onclick="saVegNavStep(1)" title="اگلی سبزی" class="saVegNav3dBtn">▶</button>
-      </div>
+      <!-- ---------- 🔒 صدام کی ہدایت (FM17SEPTH): پرانا افقی (horizontal) ویل یہاں سے ہٹا دیا — منتخب سبزی کی
+           تفصیل اور نمبر لیبل اب نیچے موجود کمپیکٹ ڈیٹا پینل (vcInlinePanel) میں ہی نظر آتے ہیں، اس لیے یہاں
+           دہرانے کی ضرورت نہیں۔ ویل خود نیچے فہرست کے ساتھ دائیں طرف عمودی حالت میں شفٹ کر دیا گیا ہے —
+           saVegNavLabel اب بھی موجود ہے (کوڈ محفوظ) مگر پوشیدہ، تاکہ پرانا JS بغیر کسی تبدیلی کے چلتا رہے ---------- -->
+      <div id="saVegNavLabel" style="display:none;"></div>
 
-      <!-- ---------- دوسری لائن: صرف سرچ — ترتیب اور انوینٹری ٹریک اب اوپر 📊 رپورٹس مینو میں شامل ---------- -->
+      <!-- ---------- 🆕 صدام کی ہدایت (FM17SEPTH): یہاں منتخب سبزی کا کمپیکٹ ڈیٹا پینل (نام+پیکنگ+حتمی خرید
+           +خرید+مزدوری+ریٹ) — پہلے فہرست کے بائیں طرف تنگ کالم میں تھا، اب یہاں اوپر، افقی (horizontal) انداز
+           میں تاکہ کم جگہ گھیرے اور فوراً نظر آئے ---------- -->
+      <div id="stockAdjTopPanelSlot" style="margin-bottom:6px;"></div>
+
+      <!-- ---------- دوسری لائن: سرچ + نئی سبزی شامل کرنے کا ➕ بٹن — ترتیب اور انوینٹری ٹریک اب اوپر 📊 رپورٹس مینو میں شامل ---------- -->
       <div class="productToolbar" style="margin-bottom:6px; display:flex; gap:5px; align-items:center;">
         <input type="text" id="stockAdjSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderStockAdjustmentScreen(this.value)" style="flex:1;">
+        <!-- ---------- 🆕 صدام کی ہدایت (FM17SEPTH): فہرست کے ہر ایک قطار کے اندر موجود ➕ بٹن (درمیان میں نئی
+             خالی قطار بنانے والا) مکمل ہٹا دیا گیا — اب صرف یہ ایک ➕ بٹن ہے، نئی سبزی ہمیشہ فہرست کے آخری
+             سیریل نمبر پر ہی شامل ہوگی (checkDraftCompletion پہلے سے یہی کرتا ہے) ---------- -->
+        <button type="button" onclick="insertProductRowAfter()" title="نئی سبزی شامل کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:#dcfce7; color:#15803d; font-size:18px; font-weight:900; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.15);">➕</button>
       </div>
 
       <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): اوپر کا حصہ مزید کمپیکٹ — کم جگہ گھیرے، فہرست جلدی نظر آئے ---------- -->
       <div class="productsLayout">
+        <!-- ---------- 🆕 صدام کی ہدایت (FM17SEPTH): سبزی نیویگیٹر ویل — اب فہرست کے دائیں طرف، عمودی حالت
+             میں، تاکہ دائیں ہاتھ کا انگوٹھا آسانی سے اگلی/پچھلی سبزی پر لے جا سکے ---------- -->
+        <div id="saVegNavigatorV" class="saVegNavVerticalWrap">
+          <button type="button" id="saVegNavPrevBtn" onclick="saVegNavStep(-1)" title="پچھلی سبزی" class="saVegNav3dBtn">▲</button>
+          <div style="position:relative;">
+            <div id="saVegNavDialTrack" class="saVegNavDialTrackV" onscroll="saVegNavOnDialScroll()"></div>
+            <div class="saVegNavDialPointerV"></div>
+          </div>
+          <button type="button" id="saVegNavNextBtn" onclick="saVegNavStep(1)" title="اگلی سبزی" class="saVegNav3dBtn">▼</button>
+        </div>
+
         <div class="productMain">
           <div class="productList" id="stockAdjustmentListWrap">
             <!-- JS سے سبزیوں کے کارڈز یہاں بنیں گی -->
@@ -10635,13 +10666,15 @@ function renderProductSpreadsheet(filtered, wrap){
   // ہٹا دیے (صرف ڈسپلے، فنکشن پورا محفوظ ہے، updateVariantField ویسے ہی چلتا ہے) — سیریل اور ➕/✏️ بٹن اب
   // سب سے دائیں (منجمد) طرف، تاکہ صرف نام/پیکنگ/سٹاک نظر آئیں اور جدول بہت کمپیکٹ ہو جائے۔ خالی ہونے والی
   // جگہ میں اب ایک ہمیشہ کھلا رہنے والا ایڈٹ پینل ہے (نیچے دیکھیں) — پاپ اپ کی ضرورت نہیں ---------- -->
+  // ---------- 🆕 صدام کی ہدایت (FM17SEPTH): ہر قطار کا اپنا ➕ (insertProductRowAfter) کالم مکمل ہٹا دیا —
+  // نئی سبزی اب صرف اوپر ایک ہی مشترکہ ➕ بٹن سے شامل ہوگی (سرچ بار کے ساتھ)، اس لیے actionW کالم کی
+  // ضرورت نہیں رہی ---------- -->
   const serialW = 38;
-  const actionW = 34;
   const nameW = autoColWidth('نام', filtered.map(p => p.name), measUrduFont, {min:70, max:190, pad:24});
   const packingW = autoColWidth('پیکنگ', filtered.map(p => { const v = p.variants[0]||{}; return v.label || '— منتخب —'; }), measPackFont, {min:52, max:110, pad:14});
   const stockW = autoColWidth('📦 سٹاک', filtered.map(p => p.variants[0]?.stock||0), measNumFont, {min:40, max:80, pad:16});
-  const colWidths = [serialW, actionW, nameW, packingW, stockW];
-  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1], colWidths[0]+colWidths[1]+colWidths[2]];
+  const colWidths = [serialW, nameW, packingW, stockW];
+  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
   const isAdmin = AppState.currentRole === 'admin';
   const rows = filtered.map((p, idx) => {
     const v = p.variants[0] || {};
@@ -10657,19 +10690,16 @@ function renderProductSpreadsheet(filtered, wrap){
       <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative; touch-action:pan-y;" onclick="selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')">
         <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): پہلے isDormant والی قطار پر ٹیپ کرنے سے ایڈٹ پینل نہیں کھلتا تھا — حاضر/غیر حاضر نظام ہائیڈ ہونے کے بعد اب ہر قطار پر ٹیپ کام کرے گا ---------- -->
         <td style="${tdBase}${frozenTd(0)}"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important;" onclick="event.stopPropagation(); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button></td>
-        <td style="${tdBase}${frozenTd(1)}padding:3px;"><div style="display:flex; justify-content:center;">
-          <button type="button" style="width:24px;height:24px;border-radius:50%;border:none;background:#dcfce7;color:#15803d;font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس کے بعد نئی خالی قطار شامل کریں" onclick="event.stopPropagation(); insertProductRowAfter(${p.product_id})">➕</button>
-        </div></td>
         <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE3): ✏️ بٹن مکمل ختم — اب پوری قطار پر ٹیپ کرنے سے ہی سامنے
              کا مستقل پینل اسی سبزی کی تفصیل دکھا دیتا ہے (قطار نیلی ہو کر منتخب نظر آتی ہے) ---------- -->
-        <td style="${tdBase}${frozenTd(2)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
-        <td style="${tdBase}${frozenTd(3)}">${packingSelectHtml}</td>
+        <td style="${tdBase}${frozenTd(1)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
+        <td style="${tdBase}${frozenTd(2)}">${packingSelectHtml}</td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
       </tr>`;
   }).join('');
-  const headers = ['#','➕','نام','پیکنگ','📦 سٹاک'];
+  const headers = ['#','نام','پیکنگ','📦 سٹاک'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
-    const frozen = i < 4 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
+    const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
   }).join('') + '</tr>';
   const colgroupHtml = '<colgroup>' + colWidths.map(w => `<col style="width:${w}px;">`).join('') + '</colgroup>';
@@ -10682,6 +10712,14 @@ function renderProductSpreadsheet(filtered, wrap){
   const oldScrollEl = document.getElementById(scrollWrapId);
   const savedScrollTop = oldScrollEl ? oldScrollEl.scrollTop : 0;
   const savedScrollLeft = oldScrollEl ? oldScrollEl.scrollLeft : 0;
+  // ---------- 🆕 صدام کی ہدایت (FM17SEPTH): سٹاک ڈیٹا سکرین میں پینل اب فہرست کے ساتھ سائیڈ میں نہیں —
+  // اوپر ایک الگ، مستقل slot (stockAdjTopPanelSlot) میں دکھایا جاتا ہے (افقی/کمپیکٹ انداز میں)۔ Products
+  // سکرین میں کوئی slot نہیں، اس لیے وہاں پرانا سائیڈ پینل ویسے ہی برقرار ---------- -->
+  const topSlot = document.getElementById('stockAdjTopPanelSlot');
+  const useTopSlot = wrap.id === 'stockAdjustmentListWrap' && topSlot;
+  if(useTopSlot){
+    topSlot.innerHTML = buildVcInlinePanelHtml();
+  }
   wrap.innerHTML = `
     ${draftNewProductId !== null ? `<div style="margin-bottom:6px; background:#fef3c7; color:#92400e; border:1.5px solid #fde68a; border-radius:9px; padding:9px 12px; font-size:12.5px; font-weight:800; text-align:center;">⚠️ نئی قطار محفوظ نہیں ہوئی — سیو ہونے کے لیے نام اور پیکنگ دونوں ضروری ہیں</div>` : ''}
     <div dir="ltr" style="display:flex; gap:6px; align-items:flex-start; margin:0; padding:0;">
@@ -10691,7 +10729,7 @@ function renderProductSpreadsheet(filtered, wrap){
       <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE7): سبزی نیویگیٹر (ویل) شامل ہونے کے بعد پرانی منفی مارجن والی
            چال اب اس کے ساتھ ٹکرا کر نیچے گھس جاتی تھی — نیویگیٹر خود ہی فوری رسائی دیتا ہے، اس لیے یہ چال ہٹا
            دی، پینل اب سادہ طریقے سے جدول کے ساتھ برابر شروع ہوگا ---------- -->
-      <div style="flex:0 0 92px; width:92px; margin:0; padding:0; align-self:flex-start; position:relative; z-index:6;">${buildVcInlinePanelHtml(wrap.id)}</div>
+      ${useTopSlot ? '' : `<div style="flex:0 0 92px; width:92px; margin:0; padding:0; align-self:flex-start; position:relative; z-index:6;">${buildVcInlinePanelHtml()}</div>`}
       <div id="${scrollWrapId}" style="flex:1; min-width:0; max-height:60vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea; margin:0;">
         <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableW}px;table-layout:fixed;font-size:12.5px; margin:0;">
           ${colgroupHtml}
@@ -17145,42 +17183,59 @@ const VC_INLINE_FIELD_ORDER = ['stock', 'purchase', 'labor', 'sellLabor', 'whole
 const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', labor:'vcInlineLabor', sellLabor:'vcInlineSellLabor', wholesale:'vcInlineWholesale', retail:'vcInlineRetail', stock:'vcInlineStock'};
 
 function buildVcInlinePanelHtml(){
-  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE4): کیپشن مزید موٹی، پورا لفظ (راولپنڈی/اسلام آباد/رفتار) نظر آئے
-  // (کاٹا ہوا نہیں) — تنگ جگہ میں فٹ کرنے کے لیے ضرورت پڑے تو دو لائنوں میں لپٹ جائے، کبھی کٹے نہیں ---------- -->
+  // ---------- 🆕 صدام کی ہدایت (FM17SEPTH): پینل اب افقی (horizontal) اور کمپیکٹ — سٹاک ڈیٹا سکرین میں
+  // اوپر، پوری چوڑائی میں، ایک ہی لائن میں فٹ ہونے کی کوشش کرتا ہے؛ تنگ جگہ (Products سکرین کے سائیڈ کالم)
+  // میں flex-wrap خودکار نیچے لپٹ جاتا ہے — پرانی id ساری برقرار، صرف خانوں کی ترتیب/انداز بدلا ہے۔
+  // نام + پیکنگ کے فوراً سامنے 🧮 حتمی خرید (خرید+مزدوری کا مجموعہ) بولڈ/نمایاں دکھایا جاتا ہے۔
+  // مزدوری (خرید/فروخت) کا جوڑا اور ریٹ (راولپنڈی/اسلام آباد) کا جوڑا اوپر نیچے سٹیک کیے گئے ہیں ---------- -->
   const numFontStack = "'Arial Narrow',Arial,sans-serif";
-  const fieldBox = (id, label, bg, border, shadow, color) => `
-    <div style="background:${bg}; border:1px solid ${border}; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 ${shadow}; margin-bottom:2px; text-align:center;">
-      <div style="font-size:8.5px; font-weight:900; color:${color}; margin-bottom:1px; line-height:1.15; white-space:normal; word-break:break-word; text-align:center;">${label}</div>
-      <input id="${id}" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('${id.replace('vcInline','').charAt(0).toLowerCase() + id.replace('vcInline','').slice(1)}')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid ${border}; border-radius:4px; padding:3px 1px; font-family:${numFontStack}; font-weight:900; font-size:14px; color:${color}; background:#fff;">
+  const fieldBox = (id, label, bg, border, shadow, color, w) => `
+    <div style="background:${bg}; border:1px solid ${border}; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 ${shadow}; text-align:center; width:${w||44}px; box-sizing:border-box;">
+      <div style="font-size:8px; font-weight:900; color:${color}; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">${label}</div>
+      <input id="${id}" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('${id.replace('vcInline','').charAt(0).toLowerCase() + id.replace('vcInline','').slice(1)}')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid ${border}; border-radius:4px; padding:2px 1px; font-family:${numFontStack}; font-weight:900; font-size:12.5px; color:${color}; background:#fff;">
     </div>`;
+  // ---------- جوڑا (pair) — مزدوری خرید/فروخت اور راولپنڈی/اسلام آباد ایک ہی چوڑائی میں اوپر نیچے ---------- -->
+  const fieldPair = (topBox, bottomBox) => `<div style="display:flex; flex-direction:column; gap:2px;">${topBox}${bottomBox}</div>`;
   return `
-    <div id="vcInlinePanel" style="background:linear-gradient(155deg,#1d4ed8,#1e3a8a); border-radius:10px; padding:4px; margin:0; align-self:flex-start; border:1px solid transparent; box-sizing:border-box;">
-      <div id="vcInlinePanelEmpty" style="text-align:center; font-weight:900; font-size:9.5px; color:#dbeafe; padding:5px 1px;">☝️ سبزی کو ٹچ کریں</div>
+    <div id="vcInlinePanel" style="background:linear-gradient(155deg,#1d4ed8,#1e3a8a); border-radius:10px; padding:5px 6px; margin:0; box-sizing:border-box;">
+      <div id="vcInlinePanelEmpty" style="text-align:center; font-weight:900; font-size:11px; color:#dbeafe; padding:6px 2px;">☝️ سبزی کو ٹچ کریں</div>
       <div id="vcInlinePanelBody" style="display:none;">
-        <div id="vcInlinePanelName" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:11.5px; font-weight:900; color:#1e3a8a; background:#fff; border-radius:6px; padding:2px 3px; margin-bottom:2px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
-        <div id="vcInlinePanelPacking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:9.5px; font-weight:800; color:#1e3a8a; background:#dbeafe; border-radius:5px; padding:1px 3px; margin-bottom:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
-        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): سٹاک کا خانہ اب سب سے اوپر — نام/پیکنگ کے فوراً بعد،
-             خرید قیمت سے بھی پہلے — تاکہ سٹاک فوری نظر آ جائے (رائٹ سائیڈ ٹیبل میں نام/پیکنگ/سٹاک والی ترتیب کی
-             طرح) ---------- -->
-        <div style="background:linear-gradient(155deg,#eef2ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 #a5b4fc; margin-bottom:3px; text-align:center;">
-          <div style="font-size:8.5px; font-weight:900; color:#3730a3; margin-bottom:1px; text-align:center;">📦 سٹاک</div>
-          <input id="vcInlineStock" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('stock')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #a5b4fc; border-radius:4px; padding:3px 1px; font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:14px; color:#3730a3; background:#fff;">
-        </div>
-        ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e')}
-        ${fieldBox('vcInlineLabor', '💪 م.خرید', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
-        ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
-        <div style="background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px; margin-bottom:2px; text-align:center;">
-          <div style="font-size:8.5px; font-weight:900; color:#134e2c; margin-bottom:1px; text-align:center;">🧮 حتمی</div>
-          <div id="vcInlineTotalPurchase" style="font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:14px; color:#134e2c; padding:3px 1px; text-align:center;">0</div>
-        </div>
-        ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d')}
-        ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')}
-        <div style="display:flex; flex-direction:column; align-items:center; gap:1px; background:rgba(255,255,255,.12); border-radius:6px; padding:3px;">
-          <span style="font-size:8px; color:#dbeafe; font-weight:900; white-space:normal; text-align:center;">⏱️ رفتار</span>
-          <div style="display:flex; align-items:center; gap:2px;">
-            <button type="button" onclick="adjustVcInlineSpeed(150)" style="width:17px; height:17px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:11px;">−</button>
-            <span id="vcInlineSpeedVal" style="width:28px; text-align:center; font-weight:900; color:#fff; font-size:8px;">${(vcInlineSpeedMs/1000).toFixed(1)}س</span>
-            <button type="button" onclick="adjustVcInlineSpeed(-150)" style="width:17px; height:17px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:11px;">+</button>
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:5px;" dir="rtl">
+          <!-- ---------- نام + پیکنگ ---------- -->
+          <div style="min-width:64px; max-width:120px;">
+            <div id="vcInlinePanelName" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:13px; font-weight:900; color:#fff; background:rgba(255,255,255,.14); border-radius:6px; padding:2px 4px; margin-bottom:2px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+            <div id="vcInlinePanelPacking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:10px; font-weight:800; color:#1e3a8a; background:#dbeafe; border-radius:5px; padding:1px 3px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+          </div>
+          <!-- ---------- 🧮 حتمی خرید — نام/پیکنگ کے فوراً سامنے، بولڈ/نمایاں ---------- -->
+          <div style="background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:3px 6px; text-align:center; width:56px; box-sizing:border-box;">
+            <div style="font-size:8px; font-weight:900; color:#134e2c; white-space:nowrap;">🧮 حتمی خرید</div>
+            <div id="vcInlineTotalPurchase" style="font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:17px; color:#134e2c; text-align:center;">0</div>
+          </div>
+          <!-- ---------- 📦 سٹاک ---------- -->
+          <div style="background:linear-gradient(155deg,#eef2ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 #a5b4fc; text-align:center; width:44px; box-sizing:border-box;">
+            <div style="font-size:8px; font-weight:900; color:#3730a3;">📦 سٹاک</div>
+            <input id="vcInlineStock" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('stock')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #a5b4fc; border-radius:4px; padding:2px 1px; font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:12.5px; color:#3730a3; background:#fff;">
+          </div>
+          <!-- ---------- 💰 خرید ---------- -->
+          ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e')}
+          <!-- ---------- 💪 مزدوری خرید/فروخت — اوپر نیچے جوڑا ---------- -->
+          ${fieldPair(
+            fieldBox('vcInlineLabor', '💪 م.خرید', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412'),
+            fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')
+          )}
+          <!-- ---------- 🟢 راولپنڈی / 🔴 اسلام آباد — اوپر نیچے جوڑا ---------- -->
+          ${fieldPair(
+            fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d'),
+            fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')
+          )}
+          <!-- ---------- ⏱️ رفتار ---------- -->
+          <div style="display:flex; flex-direction:column; align-items:center; gap:1px; background:rgba(255,255,255,.12); border-radius:6px; padding:3px 4px;">
+            <span style="font-size:7.5px; color:#dbeafe; font-weight:900; white-space:nowrap;">⏱️ رفتار</span>
+            <div style="display:flex; align-items:center; gap:2px;">
+              <button type="button" onclick="adjustVcInlineSpeed(150)" style="width:16px; height:16px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:10px;">−</button>
+              <span id="vcInlineSpeedVal" style="width:26px; text-align:center; font-weight:900; color:#fff; font-size:8px;">${(vcInlineSpeedMs/1000).toFixed(1)}س</span>
+              <button type="button" onclick="adjustVcInlineSpeed(-150)" style="width:16px; height:16px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:10px;">+</button>
+            </div>
           </div>
         </div>
       </div>
@@ -18999,7 +19054,10 @@ function saVegNavGoToIndex(idx, _fromDialScroll){
           track.removeEventListener('scrollend', _saVegNavClearGuard);
         };
         track.addEventListener('scrollend', _saVegNavClearGuard, {once:true});
-        tickEl.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+        // ---------- 🆕 صدام کی ہدایت (FM17SEPTH): ویل اب عمودی (vertical) ہے (saVegNavDialTrackV) —
+        // اس لیے سکرول سنٹرنگ inline کی بجائے block پر ہونی چاہیے ---------- -->
+        const isVerticalTrack = track.classList.contains('saVegNavDialTrackV');
+        tickEl.scrollIntoView({behavior:'smooth', inline: isVerticalTrack ? 'nearest' : 'center', block: isVerticalTrack ? 'center' : 'nearest'});
         setTimeout(_saVegNavClearGuard, 900);
       }
     }
@@ -19050,12 +19108,16 @@ function saVegNavOnDialScroll(){
   _saVegNavScrollTimer = setTimeout(() => {
     const track = document.getElementById('saVegNavDialTrack');
     if(!track) return;
+    // ---------- 🆕 صدام کی ہدایت (FM17SEPTH): ویل اب عمودی ہے — نشان کا سب سے قریبی نمبر top/height سے
+    // معلوم کریں، پرانی left/width والی گنتی صرف افقی ویل کے لیے رہ گئی (اگر کبھی دوبارہ افقی بنے) ---------- -->
+    const isVerticalTrack = track.classList.contains('saVegNavDialTrackV');
     const rect = track.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
+    const centerPos = isVerticalTrack ? (rect.top + rect.height / 2) : (rect.left + rect.width / 2);
     let bestIdx = _saVegNavCurIdx, bestDist = Infinity;
     track.querySelectorAll('.saVegNavTick').forEach(el => {
       const r = el.getBoundingClientRect();
-      const d = Math.abs((r.left + r.width / 2) - centerX);
+      const elCenter = isVerticalTrack ? (r.top + r.height / 2) : (r.left + r.width / 2);
+      const d = Math.abs(elCenter - centerPos);
       if(d < bestDist){ bestDist = d; bestIdx = Number(el.dataset.idx); }
     });
     saVegNavGoToIndex(bestIdx, true);
