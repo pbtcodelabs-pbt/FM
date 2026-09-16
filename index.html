@@ -3603,53 +3603,67 @@
     <!-- 🧮 STOCK ADJUSTMENT — manual stock/price/low-stock editing for every variant, no Purchase Order needed -->
     <div class="screen admin-only" id="screen-stockadjustment" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
 
-      <!-- ---------- 🔠 صدام کی ہدایت (FM15SEPTU0413PM): عنوان اب اپنی الگ، موٹی (bold) لائن میں سب سے اوپر —
-           پہلے یہ دوسرے بٹنوں کے ساتھ تنگ ہو کر ایک ہی افقی لائن میں سکڑا ہوتا تھا ---------- -->
-      <div class="pageTitle" style="margin:0 0 6px; font-size:19px; font-weight:900;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
-
-      <!-- ---------- 🧵 صدام کی ہدایت (FM10SEPTH0445PM): Undo/Redo + رپورٹس ڈراپ ڈاؤن + حاضر/غیر حاضر
-           سب ایک ہی لائن میں، چاہے سکرین کتنی ہی تنگ ہو — پہلے flex-wrap:wrap کی وجہ سے چھوٹی سکرین پر یہ
-           2-3 قطاروں میں ٹوٹ جاتے تھے۔ اب nowrap + ضرورت پڑنے پر افقی سکرول، سب بٹن تھوڑے چھوٹے ---------- -->
-      <div style="display:flex; align-items:center; gap:4px; margin-bottom:6px; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px;">
+      <!-- ---------- 🔠 صدام کی ہدایت (FM16SEPWE0835AM): عنوان اور رپورٹس ڈراپ ڈاؤن اب ایک ہی لائن میں —
+           عنوان کے ساتھ جو خالی جگہ بچتی تھی وہاں اب 📊 رپورٹس بٹن آ گیا۔ پرانی الگ رپورٹس لائن اور نیچے
+           والی سیریل/ترتیب ڈراپ ڈاؤن + انوینٹری چیک باکس والی لائن ختم کر کے، ترتیب اور انوینٹری ٹریک دونوں
+           اسی 📊 رپورٹس مینو کے اندر شامل کر دیے گئے — درمیان کی خالی جگہ/فاصلہ بھی ختم ---------- -->
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; flex-wrap:nowrap;">
+        <div class="pageTitle" style="margin:0; font-size:17px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
         <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
           <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:5px 7px; font-size:10.5px; max-width:none; white-space:nowrap;">
             <span>📊 رپورٹس</span>
             <span class="categoryDropdownArrow">▾</span>
           </button>
-          <div class="categoryDropdownPanel" id="stockAdjReportsDropdownPanel" style="right:0; left:auto; min-width:150px;">
+          <div class="categoryDropdownPanel" id="stockAdjReportsDropdownPanel" style="right:0; left:auto; min-width:180px;">
             <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openStockValueReport();">📊 سٹاک</div>
             <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openLaborReport();">💪 مزدوری</div>
             <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openVegListReport();">🥬 سبزی لسٹ</div>
             <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openCustListReport();">👥 کسٹمر</div>
             <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openSupListReport();">🚚 سپلائرز</div>
+            <div style="border-top:1px solid #e5e7eb; margin:4px 0 6px; padding-top:6px 0 0;">
+              <div style="font-size:10px; font-weight:800; color:#64748b; padding:0 10px 3px;">ترتیب دیں:</div>
+              <select id="stockAdjSortFilter" onchange="handleStockAdjSortSelect(this); closeStockAdjReportsDropdown();" onclick="event.stopPropagation();" style="width:calc(100% - 20px); margin:0 10px 6px; padding:6px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:10.5px;">
+                <option value="serial">سیریل نمبر کے مطابق</option>
+                <option value="negFirst">زیادہ منفی سٹاک پہلے</option>
+                <option value="az">نام: الف → ی</option>
+                <option value="za">نام: ی → الف</option>
+                <option value="stockLow">سٹاک: کم → زیادہ</option>
+                <option value="stockHigh">سٹاک: زیادہ → کم</option>
+                <option value="__TOGGLE_VIEW__" id="saViewModeBtn" style="display:none;">📊 جدول نظارہ</option>
+                <option value="__RENUMBER__">🔢 ترتیب دیں (1 سے نمبر)</option>
+                <option value="__TOGGLE_LOCK__" id="saLockToggleBtn">🔒 لسٹ لاک کریں</option>
+              </select>
+            </div>
+            <div class="categoryDropdownItem" onclick="event.stopPropagation();">
+              <label title="📦 انوینٹری ٹریک کریں (سٹاک ختم ہونے پر بکری روک دیں)" style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:15px; height:15px; margin:0;">
+                <span style="font-size:10.5px; font-weight:700;">📦 انوینٹری ٹریک کریں</span>
+              </label>
+            </div>
+            <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
+            <div style="display:none;">
+              <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')">🟢 حاضر</button>
+              <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')">🔴 غیر حاضر</button>
+            </div>
           </div>
-        </div>
-        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — اب سب سبزیاں ہمیشہ
-             حاضر شمار ہوں گی (فنکشن/کوڈ محفوظ ہے، صرف display:none، ضرورت پڑنے پر واپس لایا جا سکتا ہے) ---------- -->
-        <div style="display:none;">
-        <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:0 0 auto; padding:5px 7px; border-radius:7px; border:none; font-size:10.5px; font-weight:800; cursor:pointer; white-space:nowrap;">🟢 حاضر</button>
-        <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:0 0 auto; padding:5px 7px; border-radius:7px; border:none; font-size:10.5px; font-weight:800; cursor:pointer; white-space:nowrap;">🔴 غیر حاضر</button>
         </div>
       </div>
 
-      <!-- ---------- دوسری لائن: سرچ ہمیشہ سامنے، ترتیب اور انوینٹری ٹریک ساتھ ہی کمپیکٹ شکل میں ---------- -->
+      <!-- ---------- 🎯 صدام کی ہدایت (FM16SEPWE0835AM): سبزی نیویگیٹر — چھوٹے ◀▶ تیر ایک ایک سبزی
+           آگے/پیچھے کرنے کے لیے، درمیان میں ویل (سلائیڈر) گھما کر بیک وقت کئی سبزیاں سکِپ کرنے کے لیے —
+           جہاں چھوڑیں وہی نمبر/سبزی نیچے فہرست میں سکرول ہو کر نمایاں ہو جاتی ہے ---------- -->
+      <div id="saVegNavigator" style="display:flex; align-items:center; gap:6px; background:#eef2ff; border:1.5px solid var(--primary); border-radius:10px; padding:6px 8px; margin-bottom:6px;">
+        <button type="button" onclick="saVegNavStep(-1)" title="پچھلی سبزی" style="flex:0 0 auto; width:32px; height:32px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:900; font-size:15px; cursor:pointer;">◀</button>
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;">
+          <div id="saVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
+          <input type="range" id="saVegNavWheel" min="1" max="1" value="1" oninput="saVegNavGoToIndex(this.value - 1)" style="width:100%; height:22px; cursor:pointer;">
+        </div>
+        <button type="button" onclick="saVegNavStep(1)" title="اگلی سبزی" style="flex:0 0 auto; width:32px; height:32px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:900; font-size:15px; cursor:pointer;">▶</button>
+      </div>
+
+      <!-- ---------- دوسری لائن: صرف سرچ — ترتیب اور انوینٹری ٹریک اب اوپر 📊 رپورٹس مینو میں شامل ---------- -->
       <div class="productToolbar" style="margin-bottom:6px; display:flex; gap:5px; align-items:center;">
         <input type="text" id="stockAdjSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderStockAdjustmentScreen(this.value)" style="flex:1;">
-        <select id="stockAdjSortFilter" onchange="handleStockAdjSortSelect(this)" style="flex:0 0 108px; padding:6px 2px; border:1px solid #dbe1ea; border-radius:8px; font-size:10px;">
-          <option value="serial">سیریل نمبر کے مطابق</option>
-          <option value="negFirst">زیادہ منفی سٹاک پہلے</option>
-          <option value="az">نام: الف → ی</option>
-          <option value="za">نام: ی → الف</option>
-          <option value="stockLow">سٹاک: کم → زیادہ</option>
-          <option value="stockHigh">سٹاک: زیادہ → کم</option>
-          <!-- ---------- 🔒 صدام کی ہدایت (FM12SEPSA0719PM): یہ آپشن ہائیڈ — اب ہمیشہ جدول نظارہ ہی رہے گا ---------- -->
-          <option value="__TOGGLE_VIEW__" id="saViewModeBtn" style="display:none;">📊 جدول نظارہ</option>
-          <option value="__RENUMBER__">🔢 ترتیب دیں (1 سے نمبر)</option>
-          <option value="__TOGGLE_LOCK__" id="saLockToggleBtn">🔒 لسٹ لاک کریں</option>
-        </select>
-        <label title="📦 انوینٹری ٹریک کریں (سٹاک ختم ہونے پر بکری روک دیں)" style="display:flex; align-items:center; justify-content:center; flex:0 0 34px; height:34px; background:#eef2ff; border-radius:8px; cursor:pointer;">
-          <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:16px; height:16px; margin:0;">
-        </label>
       </div>
 
       <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): اوپر کا حصہ مزید کمپیکٹ — کم جگہ گھیرے، فہرست جلدی نظر آئے ---------- -->
@@ -8098,7 +8112,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر6:54am';
+const APP_BUILD_VERSION = 'بدھ16ستمبر8:35am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15894,7 +15908,9 @@ function renderProductList(query = ''){
           <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
           <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
-          <button class="productActionBtn danger" style="display:none;" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
+          <!-- ---------- 🗑️ صدام کی ہدایت (FM16SEPWE0835AM): ڈیلیٹ بٹن اب صرف ایڈمن کو نظر آئے گا — پہلے مکمل
+               چھپا ہوا تھا (display:none)، اب فعال؛ فنکشن deleteProduct() میں پہلے سے دو دفعہ تصدیق موجود ہے ---------- -->
+          <button class="productActionBtn danger" style="${isAdmin ? '' : 'display:none;'}" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
           <span class="chevron">▶</span>
         </div>
       </div>
@@ -17383,7 +17399,10 @@ function deleteProduct(productId){
   productsData = productsData.filter(p => p.product_id !== productId);
   persistAllData();
   pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): پورا پراڈکٹ ڈیلیٹ ہونا فوراً کلاؤڈ میں ----------
-  renderProductList(document.getElementById('productSearchInput').value);
+  renderProductList(document.getElementById('productSearchInput')?.value || '');
+  // ---------- 🗑️ صدام کی ہدایت (FM16SEPWE0835AM): Stock Adjustment سکرین سے ڈیلیٹ کیا جائے تب بھی وہ فہرست
+  // اور نیویگیٹر (ویل) فوراً تازہ ہوں — پہلے صرف Products سکرین ری فریش ہوتی تھی ---------- -->
+  if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
   renderBillingProductGrid();
 }
 
@@ -18727,7 +18746,9 @@ function renderStockAdjustmentScreen(query){
         <div class="pActions">
           <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
-          <button class="productActionBtn danger" style="display:none;" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
+          <!-- ---------- 🗑️ صدام کی ہدایت (FM16SEPWE0835AM): ڈیلیٹ بٹن اب صرف ایڈمن کو نظر آئے گا — پہلے مکمل
+               چھپا ہوا تھا (display:none)، اب فعال؛ فنکشن deleteProduct() میں پہلے سے دو دفعہ تصدیق موجود ہے ---------- -->
+          <button class="productActionBtn danger" style="${isAdmin ? '' : 'display:none;'}" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
           <span class="chevron">▶</span>
         </div>
       </div>
@@ -18741,6 +18762,53 @@ function renderStockAdjustmentScreen(query){
 
   initCardDragReorder('stockAdjustmentListWrap');
   crossRefreshProductList();
+  syncSaVegNavigator(filtered);
+}
+
+// ---------- 🎯 صدام کی ہدایت (FM16SEPWE0835AM): سبزی نیویگیٹر — فہرست ری رینڈر ہوتے ہی ویل/تیر کو موجودہ
+// فلٹر شدہ فہرست کے ساتھ ہم آہنگ کریں (کتنی سبزیاں ہیں، لیبل میں پہلی سبزی کا نام دکھائیں) ---------- -->
+let _saVegNavList = [];
+function syncSaVegNavigator(list){
+  _saVegNavList = list || [];
+  const wheel = document.getElementById('saVegNavWheel');
+  const label = document.getElementById('saVegNavLabel');
+  if(!wheel || !label) return;
+  if(_saVegNavList.length === 0){
+    wheel.min = 1; wheel.max = 1; wheel.value = 1; wheel.disabled = true;
+    label.textContent = '— کوئی سبزی نہیں ملی —';
+    return;
+  }
+  wheel.disabled = false;
+  wheel.min = 1;
+  wheel.max = _saVegNavList.length;
+  let curIdx = Math.max(0, Math.min(_saVegNavList.length - 1, Number(wheel.value) - 1 || 0));
+  wheel.value = curIdx + 1;
+  const p = _saVegNavList[curIdx];
+  label.textContent = `${curIdx + 1}/${_saVegNavList.length} — #${p.serial_no ?? '?'} ${p.name}`;
+}
+// ---------- ایک ایک سبزی آگے/پیچھے (چھوٹے تیر کے نشان) ---------- -->
+function saVegNavStep(delta){
+  const wheel = document.getElementById('saVegNavWheel');
+  if(!wheel || _saVegNavList.length === 0) return;
+  let idx = (Number(wheel.value) - 1 || 0) + delta;
+  idx = Math.max(0, Math.min(_saVegNavList.length - 1, idx));
+  wheel.value = idx + 1;
+  saVegNavGoToIndex(idx);
+}
+// ---------- ویل گھما کر ایک ساتھ کئی سبزیاں سکِپ کریں — جہاں چھوڑیں وہی سبزی نیچے فہرست میں سکرول ہو کر نمایاں ---------- -->
+function saVegNavGoToIndex(idx){
+  idx = Math.max(0, Math.min(_saVegNavList.length - 1, Number(idx) || 0));
+  const p = _saVegNavList[idx];
+  const label = document.getElementById('saVegNavLabel');
+  if(!p) return;
+  if(label) label.textContent = `${idx + 1}/${_saVegNavList.length} — #${p.serial_no ?? '?'} ${p.name}`;
+  const cardEl = document.getElementById(`sa-pcard-${p.product_id}`);
+  if(cardEl){
+    cardEl.scrollIntoView({behavior:'smooth', block:'center'});
+    cardEl.style.transition = 'box-shadow .25s, border-color .25s';
+    cardEl.style.boxShadow = '0 0 0 3px var(--primary)';
+    setTimeout(() => { cardEl.style.boxShadow = ''; }, 1200);
+  }
 }
 
 // ---------- 🔄 FM4SEPFR25: یہاں سے Products کی فہرست بھی خودکار تازہ کریں (reentrancy guard shared) ---------- -->
