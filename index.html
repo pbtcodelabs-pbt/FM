@@ -620,6 +620,15 @@
     width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent;
     border-top:6px solid var(--primary); pointer-events:none;
   }
+  /* ---------- 🟡 صدام کی ہدایت (FM16SEPWE): نیویگیٹر ویل سے منتخب سبزی کی قطار/کارڈ کو مستقل نمایاں کریں —
+     پہلے صرف 1.2 سیکنڈ کے لیے چمکتی تھی پھر رنگ اڑ جاتا تھا، اب اگلی سبزی منتخب ہونے تک وہی نمایاں رہے گی
+     تاکہ ہمیشہ صاف پتا چلے کہ اس وقت کون سی سبزی زیرِ کار ہے ---------- */
+  .vegNavActiveRow{
+    outline:3px solid #f59e0b !important; outline-offset:-2px;
+    background:#fef3c7 !important; box-shadow:0 0 0 3px rgba(245,158,11,.35) !important;
+    scroll-margin-top:96px;
+  }
+  .vegNavActiveRow td{ background:#fef3c7 !important; }
   .screen{display:none; animation:fadeIn .25s ease;}
   .screen.active{display:block;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
@@ -8168,7 +8177,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر4:31pm';
+const APP_BUILD_VERSION = 'بدھ16ستمبر4:43pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -18853,6 +18862,10 @@ function renderStockAdjustmentScreen(query){
   if(productViewMode === 'sheet'){
     renderProductSpreadsheet(filtered, wrap);
     crossRefreshProductList();
+    // ---------- 🔒 صدام کی ہدایت (FM16SEPWE): پہلے یہاں فنکشن سے سیدھا واپس (return) ہو جاتا تھا، اس لیے
+    // نیچے موجود syncSaVegNavigator(filtered) کبھی نہیں چلتا تھا — یہی اصل وجہ تھی کہ جدول (📊) نظارے میں
+    // سبزی نیویگیٹر ویل بالکل خالی/غیر فعال نظر آتا تھا۔ اب جدول نظارے میں بھی ویل ہم آہنگ ہو گا ---------- -->
+    syncSaVegNavigator(filtered);
     return;
   }
 
@@ -18899,6 +18912,8 @@ let _saVegNavList = [];
 let _saVegNavCurIdx = 0;
 let _saVegNavScrollTimer = null;
 let _saVegNavProgrammaticScroll = false;
+let _saVegNavActiveCardEl = null;
+let _saVegNavActiveRowEl = null;
 function syncSaVegNavigator(list){
   _saVegNavList = list || [];
   const track = document.getElementById('saVegNavDialTrack');
@@ -18946,25 +18961,43 @@ function saVegNavGoToIndex(idx, _fromDialScroll){
       }
     }
   }
+  // ---------- 🟡 صدام کی ہدایت (FM16SEPWE): پچھلی منتخب قطار/کارڈ سے مستقل نمایاں رنگ ہٹائیں —
+  // اب صرف 1.2 سیکنڈ بعد رنگ اڑنے کے بجائے اگلی سبزی چننے تک یہی نمایاں رہے گی ---------- -->
+  if(_saVegNavActiveCardEl) _saVegNavActiveCardEl.classList.remove('vegNavActiveRow');
+  if(_saVegNavActiveRowEl) _saVegNavActiveRowEl.classList.remove('vegNavActiveRow');
+  // ---------- 📌 صدام کی ہدایت (FM16SEPWE): منتخب سبزی کو فہرست کی پہلی (اوپر والی) قطار میں لائیں —
+  // پہلے block:'center' سے یہ فہرست کے درمیان/نیچے کہیں بھی چلا جاتا تھا اور ہیڈر کے نیچے چھپ جاتا تھا۔
+  // scroll-margin-top (اوپر .vegNavActiveRow میں) کی بدولت یہ چپکے ہوئے ہیڈر کے عین نیچے، سب سے اوپر آئے گا ---------- -->
   const cardEl = document.getElementById(`sa-pcard-${p.product_id}`);
   if(cardEl){
-    cardEl.scrollIntoView({behavior:'smooth', block:'center'});
-    cardEl.style.transition = 'box-shadow .25s, border-color .25s';
-    cardEl.style.boxShadow = '0 0 0 3px var(--primary)';
-    setTimeout(() => { cardEl.style.boxShadow = ''; }, 1200);
+    cardEl.classList.add('vegNavActiveRow');
+    cardEl.scrollIntoView({behavior:'smooth', block:'start'});
+    _saVegNavActiveCardEl = cardEl;
+  } else {
+    _saVegNavActiveCardEl = null;
   }
-  // ---------- 📊 جدول (سپریڈشیٹ) نظارے میں بھی اسی قطار کو نمایاں کریں ---------- -->
+  // ---------- 📊 جدول (سپریڈشیٹ) نظارے میں بھی اسی قطار کو مستقل نمایاں کریں، سب سے اوپر لا کر ---------- -->
   const rowEl = document.querySelector(`tr[data-product-id="${p.product_id}"]`);
   if(rowEl){
-    rowEl.scrollIntoView({behavior:'smooth', block:'center'});
-    rowEl.style.transition = 'box-shadow .25s';
-    rowEl.style.boxShadow = 'inset 0 0 0 2px var(--primary)';
-    setTimeout(() => { rowEl.style.boxShadow = ''; }, 1200);
+    rowEl.classList.add('vegNavActiveRow');
+    rowEl.scrollIntoView({behavior:'smooth', block:'start'});
+    _saVegNavActiveRowEl = rowEl;
+  } else {
+    _saVegNavActiveRowEl = null;
   }
   // ---------- 🔒 صدام کی ہدایت (FM16SEPWE7): ویل پر نمبر منتخب کرتے ہی وہی سبزی بائیں پینل میں بھی خودکار
-  // کھل جائے — تاکہ صاف پتا چلے کہ اب اسی پر کام ہو رہا ہے، الگ سے ٹچ کرنے کی ضرورت نہ رہے ---------- -->
+  // کھل جائے — تاکہ صاف پتا چلے کہ اب اسی پر کام ہو رہا ہے، الگ سے ٹچ کرنے کی ضرورت نہ رہے۔
+  // ⚠️ صدام کی ہدایت (FM16SEPWE): پہلے یہاں selectVcInlineRow() کو براہِ راست بلایا جاتا تھا، جو پوری فہرست
+  // دوبارہ رینڈر کر دیتا تھا — اور دوبارہ رینڈر ہوتے ہی syncSaVegNavigator() پھر چل جاتا، جو پھر یہی فنکشن
+  // دوبارہ بلاتا (لامتناہی چکر بننے کا خطرہ)۔ اب صرف حالت (state) سیٹ کر کے پینل خود بھرا جاتا ہے —
+  // پوری فہرست دوبارہ نہیں بنتی، سکرول اور نمایاں رنگ دونوں محفوظ رہتے ہیں ---------- -->
   const firstVariant = p.variants && p.variants[0];
-  if(firstVariant) selectVcInlineRow(p.product_id, firstVariant.variant_id, 'stockAdjustmentListWrap');
+  if(firstVariant){
+    vcInlineSelectedId = p.product_id;
+    vcInlineSelectedVariantId = firstVariant.variant_id;
+    vcInlineSourceWrapId = 'stockAdjustmentListWrap';
+    try{ vcInlinePopulate(); }catch(e){}
+  }
 }
 // ---------- ویل کو ہاتھ سے گھمانے/سوائپ کرنے پر — رکنے کے بعد جو نمبر درمیانی نشان (پوائنٹر) کے عین نیچے آیا
 // اسے منتخب سمجھیں (بار بار پروگرامیٹک سکرول نہ چلے، اس لیے _fromDialScroll=true بھیجا جاتا ہے) ---------- -->
@@ -22921,6 +22954,8 @@ let _otVegNavList = [];
 let _otVegNavCurIdx = 0;
 let _otVegNavScrollTimer = null;
 let _otVegNavProgrammaticScroll = false;
+let _otVegNavActiveCardEl = null;
+let _otVegNavActiveRowEl = null;
 function syncOtVegNavigator(list){
   _otVegNavList = list || [];
   const track = document.getElementById('otVegNavDialTrack');
@@ -22965,21 +23000,30 @@ function otVegNavGoToIndex(idx, _fromDialScroll){
       }
     }
   }
-  // ---------- کارڈ نظارے میں نمایاں کریں ---------- -->
+  // ---------- 🟡 صدام کی ہدایت (FM16SEPWE): پچھلی منتخب قطار/کارڈ سے مستقل نمایاں رنگ ہٹائیں —
+  // اب صرف 1.2 سیکنڈ بعد رنگ اڑنے کے بجائے اگلی سبزی چننے تک یہی نمایاں رہے گی ---------- -->
+  if(_otVegNavActiveCardEl) _otVegNavActiveCardEl.classList.remove('vegNavActiveRow');
+  if(_otVegNavActiveRowEl) _otVegNavActiveRowEl.classList.remove('vegNavActiveRow');
+  // ---------- 📌 صدام کی ہدایت (FM16SEPWE): منتخب سبزی کو فہرست کی پہلی (اوپر والی) قطار میں لائیں —
+  // پہلے block:'center' سے یہ فہرست کے درمیان/نیچے کہیں بھی (مثلاً 63 یا 80 نمبر کی جگہ) چلا جاتا تھا۔
+  // scroll-margin-top (اوپر .vegNavActiveRow میں) کی بدولت یہ اوپر والے ہیڈرز/بار کے عین نیچے، سب سے
+  // اوپر آئے گا، اور ہیڈرز نہیں چھپیں گے ---------- -->
   const cardEl = document.querySelector(`.otItemRow[data-variant-id="${v.variant_id}"]`);
   if(cardEl){
-    cardEl.scrollIntoView({behavior:'smooth', block:'center'});
-    cardEl.style.transition = 'box-shadow .25s, border-color .25s';
-    cardEl.style.boxShadow = '0 0 0 3px var(--primary)';
-    setTimeout(() => { cardEl.style.boxShadow = ''; }, 1200);
+    cardEl.classList.add('vegNavActiveRow');
+    cardEl.scrollIntoView({behavior:'smooth', block:'start'});
+    _otVegNavActiveCardEl = cardEl;
+  } else {
+    _otVegNavActiveCardEl = null;
   }
-  // ---------- جدول نظارے میں بھی اسی قطار کو نمایاں کریں ---------- -->
+  // ---------- جدول نظارے میں بھی اسی قطار کو مستقل نمایاں کریں، سب سے اوپر لا کر ---------- -->
   const rowEl = document.querySelector(`tr[data-variant-id="${v.variant_id}"]`);
   if(rowEl){
-    rowEl.scrollIntoView({behavior:'smooth', block:'center'});
-    rowEl.style.transition = 'box-shadow .25s';
-    rowEl.style.boxShadow = 'inset 0 0 0 2px var(--primary)';
-    setTimeout(() => { rowEl.style.boxShadow = ''; }, 1200);
+    rowEl.classList.add('vegNavActiveRow');
+    rowEl.scrollIntoView({behavior:'smooth', block:'start'});
+    _otVegNavActiveRowEl = rowEl;
+  } else {
+    _otVegNavActiveRowEl = null;
   }
 }
 function otVegNavOnDialScroll(){
