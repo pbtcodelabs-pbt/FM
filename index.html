@@ -8090,7 +8090,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر5:05am';
+const APP_BUILD_VERSION = 'بدھ16ستمبر5:18am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10492,7 +10492,12 @@ function renderProductSpreadsheet(filtered, wrap){
   // ---------- 🧷 صدام کی ہدایت (FM10SEPTH0844AM) فکس: کچھ Android WebView میں `position:sticky` اکیلے
   // بھروسہ مند نہیں — پرانا `-webkit-sticky` ویلیو بھی ساتھ لگا دیا (پہلے، تاکہ جدید sticky بعد میں override
   // کر سکے) — ہیڈر اور منجمد کالم دونوں اب زیادہ پکے سے چپکے رہیں گے ---------- -->
-  const thBase = "position:-webkit-sticky;position:sticky;top:0;background:#134e2c;color:#fff;font-weight:800;font-size:11px;padding:6px 3px;white-space:nowrap;text-align:center;border-left:1px solid rgba(255,255,255,.15);box-sizing:border-box;";
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM): سٹاک والے کالم کی کیپشن (📦 سٹاک) پہلے صرف thBase کے
+  // top:0 پر انحصار کرتی تھی، بغیر z-index کے — جبکہ باقی 4 منجمد کالم (نام/پیکنگ/سیریل/➕) کو z-index:12
+  // بھی ملتا تھا۔ کچھ Android WebView میں z-index کے بغیر sticky ہیڈر نیچے سکرول ہوتے مواد کے پیچھے چھپ جاتا
+  // ہے — اب ہر ہیڈر سیل کو یکساں z-index:10 مل گیا (منجمد کالموں کا z-index:12 پھر بھی اوپر رہے گا) تاکہ سٹاک
+  // کی کیپشن بھی نام/پیکنگ کی طرح پکی اپنی جگہ (اوپر) چپکی رہے، سکرول کرنے پر غائب نہ ہو ---------- -->
+  const thBase = "position:-webkit-sticky;position:sticky;top:0;z-index:10;background:#134e2c;color:#fff;font-weight:800;font-size:11px;padding:6px 3px;white-space:nowrap;text-align:center;border-left:1px solid rgba(255,255,255,.15);box-sizing:border-box;";
   const tdBase = "padding:3px 2px;border-bottom:1px solid #eef1f5;border-left:1px solid #eef1f5;text-align:center;vertical-align:middle;box-sizing:border-box;";
   const numFont = "font-family:Arial,Helvetica,sans-serif;";
   const urduFont = "font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;";
@@ -10562,7 +10567,7 @@ function renderProductSpreadsheet(filtered, wrap){
       <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE6): پینل کو اوپر، حاضر/غیر حاضر ٹیب بٹنوں کی سیدھ میں لے جانے کے
            لیے منفی margin-top — چونکہ وہ ٹیب/فلٹر لائنیں اس جدول کے wrap سے باہر (اوپر) رینڈر ہوتی ہیں، صرف
            پینل کو ہی اوپر کھینچنا پڑتا ہے، جدول اپنی جگہ رہتا ہے ---------- -->
-      <div style="flex:0 0 92px; width:92px; margin:-118px 0 0 0; padding:0; align-self:flex-start; position:relative; z-index:6;">${buildVcInlinePanelHtml(wrap.id)}</div>
+      <div style="flex:0 0 92px; width:92px; margin:-70px 0 0 0; padding:0; align-self:flex-start; position:relative; z-index:6;">${buildVcInlinePanelHtml(wrap.id)}</div>
       <div id="${scrollWrapId}" style="flex:1; min-width:0; max-height:60vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea; margin:0;">
         <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableW}px;table-layout:fixed;font-size:12.5px; margin:0;">
           ${colgroupHtml}
