@@ -8098,7 +8098,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر6:48am';
+const APP_BUILD_VERSION = 'بدھ16ستمبر6:54am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16954,7 +16954,10 @@ let vcInlineSelectedVariantId = null;
 let vcInlineSourceWrapId = null;
 let vcInlineAdvanceTimer = null;
 let vcInlineSpeedMs = loadFromStorage('vcEditSpeedMs', 600);
-const VC_INLINE_FIELD_ORDER = ['purchase', 'labor', 'sellLabor', 'wholesale', 'retail', 'stock'];
+// ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM3): سٹاک باکس اوپر منتقل ہونے کے بعد اب آٹو-ایڈوانس کرسر کی
+// ترتیب بھی اسی نئی بصری ترتیب سے ملا دی — سب سے پہلے سٹاک، پھر خرید، م.خرید، م.فروخت (حتمی خانہ خود کار/لاک
+// ہے، کرسر اس میں کبھی نہیں جاتا)، پھر راولپنڈی، آخر میں اسلام آباد پر رک جاتا ہے ---------- -->
+const VC_INLINE_FIELD_ORDER = ['stock', 'purchase', 'labor', 'sellLabor', 'wholesale', 'retail'];
 const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', labor:'vcInlineLabor', sellLabor:'vcInlineSellLabor', wholesale:'vcInlineWholesale', retail:'vcInlineRetail', stock:'vcInlineStock'};
 
 function buildVcInlinePanelHtml(){
@@ -17046,7 +17049,7 @@ function vcInlineScheduleAdvance(field){
 
 function vcInlineMoveToNextField(currentField){
   const idx = VC_INLINE_FIELD_ORDER.indexOf(currentField);
-  if(idx === -1 || idx === VC_INLINE_FIELD_ORDER.length - 1) return; // ---------- سٹاک کے بعد کرسر رک جاتا ہے ----------
+  if(idx === -1 || idx === VC_INLINE_FIELD_ORDER.length - 1) return; // ---------- اب آخری خانہ اسلام آباد ہے — اسی کے بعد کرسر رک جاتا ہے (FM16SEPWE0518AM3) ----------
   const nextEl = document.getElementById(VC_INLINE_ID_MAP[VC_INLINE_FIELD_ORDER[idx + 1]]);
   if(nextEl){ nextEl.focus(); nextEl.select(); }
 }
