@@ -587,6 +587,39 @@
   #globalLogoutBtn{position:fixed; top:10px; inset-inline-end:10px; z-index:400; background:var(--danger,#dc2626); border:none; color:#fff; width:42px; height:42px; border-radius:12px; font-size:19px; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center;}
   #globalSearchBar{display:none;}
   #sidebarOverlay{display:none;}
+  /* ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE0857AM): سبزی نیویگیٹر ویل — ابھرے ہوئے 3D تیر بٹن + حقیقی گھومنے
+     والا نمبر ویل (اسکرول/سوائپ سے چلنے والا)، لائنوں اور نمبروں کے ساتھ ---------- */
+  .saVegNav3dBtn{
+    flex:0 0 auto; width:38px; height:38px; border:none; border-radius:10px;
+    background:linear-gradient(180deg, var(--primary), var(--primary-dark));
+    color:#fff; font-weight:900; font-size:16px; cursor:pointer;
+    box-shadow:0 3px 0 rgba(0,0,0,.28), 0 4px 6px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .08s, box-shadow .08s;
+  }
+  .saVegNav3dBtn:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.35); }
+  .saVegNav3dBtn:disabled{ opacity:.45; cursor:default; }
+  .saVegNavDialTrack{
+    display:flex; align-items:flex-end; overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    height:34px; padding:0 calc(50% - 15px);
+    background:#fff; border:1.5px solid #c7d2fe; border-radius:8px;
+    scrollbar-width:none; direction:ltr;
+  }
+  .saVegNavDialTrack::-webkit-scrollbar{ display:none; }
+  .saVegNavTick{
+    flex:0 0 30px; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center;
+    justify-content:flex-end; gap:2px; color:#94a3b8; font-weight:700; font-size:9.5px;
+    cursor:pointer; user-select:none; padding-bottom:3px; font-family:Arial,Helvetica,sans-serif;
+  }
+  .saVegNavTick .tickLine{ width:2px; height:9px; background:#cbd5e1; border-radius:1px; }
+  .saVegNavTick.active{ color:var(--primary-dark); font-size:13px; font-weight:900; }
+  .saVegNavTick.active .tickLine{ width:3px; height:16px; background:var(--primary); }
+  .saVegNavDialPointer{
+    position:absolute; top:-5px; left:50%; transform:translateX(-50%);
+    width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent;
+    border-top:6px solid var(--primary); pointer-events:none;
+  }
   .screen{display:none; animation:fadeIn .25s ease;}
   .screen.active{display:block;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
@@ -3649,16 +3682,21 @@
         </div>
       </div>
 
-      <!-- ---------- 🎯 صدام کی ہدایت (FM16SEPWE0835AM): سبزی نیویگیٹر — چھوٹے ◀▶ تیر ایک ایک سبزی
-           آگے/پیچھے کرنے کے لیے، درمیان میں ویل (سلائیڈر) گھما کر بیک وقت کئی سبزیاں سکِپ کرنے کے لیے —
-           جہاں چھوڑیں وہی نمبر/سبزی نیچے فہرست میں سکرول ہو کر نمایاں ہو جاتی ہے ---------- -->
-      <div id="saVegNavigator" style="display:flex; align-items:center; gap:6px; background:#eef2ff; border:1.5px solid var(--primary); border-radius:10px; padding:6px 8px; margin-bottom:6px;">
-        <button type="button" onclick="saVegNavStep(-1)" title="پچھلی سبزی" style="flex:0 0 auto; width:32px; height:32px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:900; font-size:15px; cursor:pointer;">◀</button>
-        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;">
+      <!-- ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE0857AM): سبزی نیویگیٹر — نئے سرے سے بنایا۔ ابھرے ہوئے (3D)
+           ◀▶ بٹن بالکل ویل کے ساتھ جڑے ہوئے (کونوں میں دور دور نہیں)، درمیان میں ایک حقیقی گھومنے والا ویل —
+           جتنی سبزیاں اتنے ہی نمبر والے نشان اس پر بنے ہیں، گھما کر/سوائپ کر کے یا تیر دبا کر منتخب کریں،
+           جہاں رکیں وہی نمبر نمایاں (بڑا/رنگین) ہو جاتا ہے اور نیچے فہرست میں وہی سبزی سکرول ہو کر چمک اٹھتی
+           ہے۔ تیر اور ویل کے درمیان صاف فاصلہ ہے تاکہ ویل گھماتے ہوئے غلطی سے تیر پر ہاتھ نہ لگے ---------- -->
+      <div id="saVegNavigator" style="display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; margin-bottom:6px; box-shadow:inset 0 1px 3px rgba(0,0,0,.06);">
+        <button type="button" id="saVegNavPrevBtn" onclick="saVegNavStep(-1)" title="پچھلی سبزی" class="saVegNav3dBtn">◀</button>
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px;">
           <div id="saVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
-          <input type="range" id="saVegNavWheel" min="1" max="1" value="1" oninput="saVegNavGoToIndex(this.value - 1)" style="width:100%; height:22px; cursor:pointer;">
+          <div style="position:relative;">
+            <div id="saVegNavDialTrack" class="saVegNavDialTrack" onscroll="saVegNavOnDialScroll()"></div>
+            <div class="saVegNavDialPointer"></div>
+          </div>
         </div>
-        <button type="button" onclick="saVegNavStep(1)" title="اگلی سبزی" style="flex:0 0 auto; width:32px; height:32px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:900; font-size:15px; cursor:pointer;">▶</button>
+        <button type="button" id="saVegNavNextBtn" onclick="saVegNavStep(1)" title="اگلی سبزی" class="saVegNav3dBtn">▶</button>
       </div>
 
       <!-- ---------- دوسری لائن: صرف سرچ — ترتیب اور انوینٹری ٹریک اب اوپر 📊 رپورٹس مینو میں شامل ---------- -->
@@ -8112,7 +8150,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر8:35am';
+const APP_BUILD_VERSION = 'بدھ16ستمبر9:04am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10589,11 +10627,12 @@ function renderProductSpreadsheet(filtered, wrap){
   const savedScrollTop = oldScrollEl ? oldScrollEl.scrollTop : 0;
   const savedScrollLeft = oldScrollEl ? oldScrollEl.scrollLeft : 0;
   wrap.innerHTML = `
+    ${draftNewProductId !== null ? `<div style="margin-bottom:6px; background:#fef3c7; color:#92400e; border:1.5px solid #fde68a; border-radius:9px; padding:9px 12px; font-size:12.5px; font-weight:800; text-align:center;">⚠️ نئی قطار محفوظ نہیں ہوئی — سیو ہونے کے لیے نام اور پیکنگ دونوں ضروری ہیں</div>` : ''}
     <div dir="ltr" style="display:flex; gap:6px; align-items:flex-start; margin:0; padding:0;">
       <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE6): پینل کو اوپر، حاضر/غیر حاضر ٹیب بٹنوں کی سیدھ میں لے جانے کے
            لیے منفی margin-top — چونکہ وہ ٹیب/فلٹر لائنیں اس جدول کے wrap سے باہر (اوپر) رینڈر ہوتی ہیں، صرف
            پینل کو ہی اوپر کھینچنا پڑتا ہے، جدول اپنی جگہ رہتا ہے ---------- -->
-      <div style="flex:0 0 92px; width:92px; margin:-70px 0 0 0; padding:0; align-self:flex-start; position:relative; z-index:6;">${buildVcInlinePanelHtml(wrap.id)}</div>
+      <div style="flex:0 0 92px; width:92px; margin:${draftNewProductId !== null ? '0' : '-70px'} 0 0 0; padding:0; align-self:flex-start; position:relative; z-index:6;">${buildVcInlinePanelHtml(wrap.id)}</div>
       <div id="${scrollWrapId}" style="flex:1; min-width:0; max-height:60vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea; margin:0;">
         <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableW}px;table-layout:fixed;font-size:12.5px; margin:0;">
           ${colgroupHtml}
@@ -10602,8 +10641,6 @@ function renderProductSpreadsheet(filtered, wrap){
         </table>
       </div>
     </div>
-    <div style="display:none;"></div>
-    ${draftNewProductId !== null ? `<div style="margin-top:8px; background:#fef3c7; color:#92400e; border:1.5px solid #fde68a; border-radius:9px; padding:9px 12px; font-size:12.5px; font-weight:800; text-align:center;">⚠️ نئی قطار محفوظ نہیں ہوئی — سیو ہونے کے لیے نام اور پیکنگ دونوں ضروری ہیں</div>` : ''}
   `;
   const scrollWrap = document.getElementById(scrollWrapId);
   if(scrollWrap){ scrollWrap.scrollTop = savedScrollTop; scrollWrap.scrollLeft = savedScrollLeft; }
@@ -10699,6 +10736,13 @@ function insertProductRowAfter(afterProductId){
     variants: [{ variant_id: newVariantId, label:'', barcode:'NEW'+newVariantId, purchase:0, labor:0, sellLabor:0, retail:0, wholesale:0, stock:0, lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
   });
   draftNewProductId = newProductId;
+  // ---------- 🔝 صدام کی ہدایت (FM16SEPWE0857AM): نئی خالی قطار ہمیشہ فہرست کے بالکل اوپر (پہلے نمبر پر) نظر
+  // آئے — پہلے "ہاتھ سے ترتیب" (manual order) میں نیا آئٹم شامل نہ ہونے کی وجہ سے یہ سب سے نیچے چلی جاتی تھی،
+  // اب اسے خود منینول ترتیب کی فہرست میں سب سے اوپر ڈال دیتے ہیں ---------- -->
+  try{
+    const mOrder = loadFromStorage(PRODUCT_MANUAL_ORDER_KEY, []) || [];
+    saveToStorage(PRODUCT_MANUAL_ORDER_KEY, [newProductId, ...mOrder.filter(id => id !== newProductId)]);
+  }catch(e){ console.warn('manual order top-insert failed', e); }
   saveToStorage('nextProductId', nextProductId);
   saveToStorage('nextVariantId', nextVariantId);
   // ---------- ⚠️ جان بوجھ کر یہاں persistAllData()/pushProductsToCloud() نہیں بلایا — نامکمل قطار ابھی
@@ -11313,6 +11357,15 @@ function goTo(screenName, _isHistoryNav){
   // یوزر تبدیلیاں (نیا ملازم، PIN، اسکرین اجازت وغیرہ) تازہ منگوا لیں ----------
   if(screenName === 'users' && AppState.currentRole === 'admin'){
     fetchUsersFromCloud();
+  }
+
+  // ---------- 🧹 صدام کی ہدایت (FM16SEPWE0857AM): "نئی قطار محفوظ نہیں ہوئی" پیغام اسکرین چھوڑنے پر خودکار
+  // غائب — اگر Products/Stock Adjustment سے کہیں اور جا رہے ہیں اور ایک ادھوری (بغیر نام/پیکنگ) خالی قطار
+  // پیچھے چھوڑی جا رہی ہو تو وہ خاموشی سے ہٹا دیں، پیغام بھی ساتھ ہی غائب ہو جائے گا ---------- -->
+  if(screenName !== currentScreenName && draftNewProductId !== null &&
+     (currentScreenName === 'products' || currentScreenName === 'stockadjustment')){
+    productsData = productsData.filter(x => x.product_id !== draftNewProductId);
+    draftNewProductId = null;
   }
 
   // ---------- ہسٹری صرف اُس وقت اپڈیٹ کریں جب یہ ایک عام (نئی) نیویگیشن ہو، Back/Forward بٹن سے نہ ہو،
@@ -13441,6 +13494,33 @@ async function openBillPreviewBeforeComplete(){
 
 function finalizeInvoice(){
   if(Billing.cart.length === 0) return;
+
+  // ---------- 💰 صدام کی ہدایت (FM16SEPWE0857AM): بل بننے سے پہلے کارٹ کے ہر آئٹم کی خرید قیمت، مزدوری خرید،
+  // مزدوری فروخت، راولپنڈی ریٹ اور اسلام آباد ریٹ — یہ سب خانے بھرے ہونے لازمی ہیں، ورنہ بل نہیں بنے گا اور
+  // بتایا جائے گا کہ کس سبزی کا کون سا خانہ خالی ہے (سٹاک زیرو والا چیک پہلے سے موجود ہے، یہ اس کے علاوہ ہے) ---------- -->
+  {
+    const REQUIRED_PRICE_FIELDS = [
+      {field:'purchase',  label:'💰 خرید قیمت'},
+      {field:'labor',     label:'💪 مزدوری خرید'},
+      {field:'sellLabor', label:'💪 مزدوری فروخت'},
+      {field:'wholesale', label:'🟢 راولپنڈی ریٹ'},
+      {field:'retail',    label:'🔴 اسلام آباد ریٹ'},
+    ];
+    for(const item of Billing.cart){
+      let variant = null, product = null;
+      for(const p of productsData){
+        const v = p.variants.find(vv => vv.variant_id === item.variant_id);
+        if(v){ variant = v; product = p; break; }
+      }
+      if(!variant) continue;
+      for(const rf of REQUIRED_PRICE_FIELDS){
+        if(!variant[rf.field]){
+          alert(`⚠️ "${product.name}" میں ${rf.label} کا خانہ خالی ہے — پہلے یہ خانہ بھریں، پھر بل بنے گا۔`);
+          return;
+        }
+      }
+    }
+  }
 
   const custId = document.getElementById('customerSelect').value;
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
@@ -18765,43 +18845,59 @@ function renderStockAdjustmentScreen(query){
   syncSaVegNavigator(filtered);
 }
 
-// ---------- 🎯 صدام کی ہدایت (FM16SEPWE0835AM): سبزی نیویگیٹر — فہرست ری رینڈر ہوتے ہی ویل/تیر کو موجودہ
-// فلٹر شدہ فہرست کے ساتھ ہم آہنگ کریں (کتنی سبزیاں ہیں، لیبل میں پہلی سبزی کا نام دکھائیں) ---------- -->
+// ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE0857AM): سبزی نیویگیٹر — فہرست ری رینڈر ہوتے ہی نمبر ویل کو موجودہ
+// فلٹر شدہ فہرست کے ساتھ ہم آہنگ کریں (کتنی سبزیاں ہیں، ہر ایک کا اپنا نمبر والا نشان ویل پر بنائیں) ---------- -->
 let _saVegNavList = [];
+let _saVegNavCurIdx = 0;
+let _saVegNavScrollTimer = null;
+let _saVegNavProgrammaticScroll = false;
 function syncSaVegNavigator(list){
   _saVegNavList = list || [];
-  const wheel = document.getElementById('saVegNavWheel');
+  const track = document.getElementById('saVegNavDialTrack');
   const label = document.getElementById('saVegNavLabel');
-  if(!wheel || !label) return;
+  const prevBtn = document.getElementById('saVegNavPrevBtn');
+  const nextBtn = document.getElementById('saVegNavNextBtn');
+  if(!track || !label) return;
   if(_saVegNavList.length === 0){
-    wheel.min = 1; wheel.max = 1; wheel.value = 1; wheel.disabled = true;
+    track.innerHTML = '';
     label.textContent = '— کوئی سبزی نہیں ملی —';
+    if(prevBtn) prevBtn.disabled = true;
+    if(nextBtn) nextBtn.disabled = true;
     return;
   }
-  wheel.disabled = false;
-  wheel.min = 1;
-  wheel.max = _saVegNavList.length;
-  let curIdx = Math.max(0, Math.min(_saVegNavList.length - 1, Number(wheel.value) - 1 || 0));
-  wheel.value = curIdx + 1;
-  const p = _saVegNavList[curIdx];
-  label.textContent = `${curIdx + 1}/${_saVegNavList.length} — #${p.serial_no ?? '?'} ${p.name}`;
+  if(prevBtn) prevBtn.disabled = false;
+  if(nextBtn) nextBtn.disabled = false;
+  const keepIdx = Math.max(0, Math.min(_saVegNavList.length - 1, _saVegNavCurIdx || 0));
+  track.innerHTML = _saVegNavList.map((p, i) => `<div class="saVegNavTick" data-idx="${i}" onclick="saVegNavGoToIndex(${i})"><span class="tickLine"></span><span>${i + 1}</span></div>`).join('');
+  saVegNavGoToIndex(keepIdx);
 }
-// ---------- ایک ایک سبزی آگے/پیچھے (چھوٹے تیر کے نشان) ---------- -->
+// ---------- ایک ایک سبزی آگے/پیچھے (ابھرے ہوئے تیر بٹن) ---------- -->
 function saVegNavStep(delta){
-  const wheel = document.getElementById('saVegNavWheel');
-  if(!wheel || _saVegNavList.length === 0) return;
-  let idx = (Number(wheel.value) - 1 || 0) + delta;
-  idx = Math.max(0, Math.min(_saVegNavList.length - 1, idx));
-  wheel.value = idx + 1;
+  if(_saVegNavList.length === 0) return;
+  let idx = Math.max(0, Math.min(_saVegNavList.length - 1, (_saVegNavCurIdx || 0) + delta));
   saVegNavGoToIndex(idx);
 }
-// ---------- ویل گھما کر ایک ساتھ کئی سبزیاں سکِپ کریں — جہاں چھوڑیں وہی سبزی نیچے فہرست میں سکرول ہو کر نمایاں ---------- -->
-function saVegNavGoToIndex(idx){
+// ---------- ویل گھما کر/سوائپ کر کے یا نمبر پر ٹیپ کر کے کسی بھی سبزی پر جائیں — جہاں رکیں وہی نمبر نمایاں
+// ہو جاتا ہے اور نیچے فہرست (کارڈ یا جدول، دونوں نظاروں) میں وہی سبزی سکرول ہو کر چمک اٹھتی ہے ---------- -->
+function saVegNavGoToIndex(idx, _fromDialScroll){
   idx = Math.max(0, Math.min(_saVegNavList.length - 1, Number(idx) || 0));
+  _saVegNavCurIdx = idx;
   const p = _saVegNavList[idx];
   const label = document.getElementById('saVegNavLabel');
   if(!p) return;
   if(label) label.textContent = `${idx + 1}/${_saVegNavList.length} — #${p.serial_no ?? '?'} ${p.name}`;
+  const track = document.getElementById('saVegNavDialTrack');
+  if(track){
+    track.querySelectorAll('.saVegNavTick').forEach(el => el.classList.toggle('active', Number(el.dataset.idx) === idx));
+    if(!_fromDialScroll){
+      const tickEl = track.querySelector(`.saVegNavTick[data-idx="${idx}"]`);
+      if(tickEl){
+        _saVegNavProgrammaticScroll = true;
+        tickEl.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+        setTimeout(() => { _saVegNavProgrammaticScroll = false; }, 350);
+      }
+    }
+  }
   const cardEl = document.getElementById(`sa-pcard-${p.product_id}`);
   if(cardEl){
     cardEl.scrollIntoView({behavior:'smooth', block:'center'});
@@ -18809,6 +18905,33 @@ function saVegNavGoToIndex(idx){
     cardEl.style.boxShadow = '0 0 0 3px var(--primary)';
     setTimeout(() => { cardEl.style.boxShadow = ''; }, 1200);
   }
+  // ---------- 📊 جدول (سپریڈشیٹ) نظارے میں بھی اسی قطار کو نمایاں کریں ---------- -->
+  const rowEl = document.querySelector(`tr[data-product-id="${p.product_id}"]`);
+  if(rowEl){
+    rowEl.scrollIntoView({behavior:'smooth', block:'center'});
+    rowEl.style.transition = 'box-shadow .25s';
+    rowEl.style.boxShadow = 'inset 0 0 0 2px var(--primary)';
+    setTimeout(() => { rowEl.style.boxShadow = ''; }, 1200);
+  }
+}
+// ---------- ویل کو ہاتھ سے گھمانے/سوائپ کرنے پر — رکنے کے بعد جو نمبر درمیانی نشان (پوائنٹر) کے عین نیچے آیا
+// اسے منتخب سمجھیں (بار بار پروگرامیٹک سکرول نہ چلے، اس لیے _fromDialScroll=true بھیجا جاتا ہے) ---------- -->
+function saVegNavOnDialScroll(){
+  if(_saVegNavProgrammaticScroll) return;
+  clearTimeout(_saVegNavScrollTimer);
+  _saVegNavScrollTimer = setTimeout(() => {
+    const track = document.getElementById('saVegNavDialTrack');
+    if(!track) return;
+    const rect = track.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    let bestIdx = _saVegNavCurIdx, bestDist = Infinity;
+    track.querySelectorAll('.saVegNavTick').forEach(el => {
+      const r = el.getBoundingClientRect();
+      const d = Math.abs((r.left + r.width / 2) - centerX);
+      if(d < bestDist){ bestDist = d; bestIdx = Number(el.dataset.idx); }
+    });
+    saVegNavGoToIndex(bestIdx, true);
+  }, 130);
 }
 
 // ---------- 🔄 FM4SEPFR25: یہاں سے Products کی فہرست بھی خودکار تازہ کریں (reentrancy guard shared) ---------- -->
@@ -22781,15 +22904,24 @@ function renderOtItemsPage(){
       </div>
       <!-- ---------- 📦 صدام کی ہدایت (FM10SEPTH): دستیاب سٹاک — یہاں سے مقدار بڑھاتے ہی فوراً کم ہوتا نظر آئے گا ---------- -->
       <div style="text-align:left; font-size:11.5px; font-weight:800; color:#134e2c;">📦 سٹاک: <span data-ot-stock-for="${v.variant_id}">${otAvailableStock(v.variant_id)}</span></div>
-      <!-- ---------- ✅ چیک باکس + ➖➕ — صدام کی ہدایت: + دائیں (سیدھے ہاتھ) پر، − بائیں پر ---------- -->
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" style="width:40px; height:40px; border:none; border-radius:9px; background:#dcfce7; color:#15803d; font-size:20px; font-weight:800; cursor:pointer; padding:0; flex:0 0 auto;">+</button>
-        <span class="otQtyText" style="flex:1 1 auto; text-align:center; font-size:17px; font-weight:800;">${qty}</span>
-        <button type="button" onclick="changeOtQty(this, ${v.variant_id}, -1)" style="width:40px; height:40px; border:none; border-radius:9px; background:#fee2e2; color:#b91c1c; font-size:20px; font-weight:800; cursor:pointer; padding:0; flex:0 0 auto;">−</button>
-        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(this, ${v.variant_id})" style="width:20px; height:20px; margin:0; flex:0 0 auto; cursor:pointer;">
+      <!-- ---------- ✅🎯 صدام کی ہدایت (FM16SEPWE): چیک باکس + ➖➕ (+ دائیں، − بائیں) اب سٹاک ایڈجسٹمنٹ جیسے
+           نمبر-ویل کے ساتھ جڑے ہوئے — ویل گھما کر براہ راست مطلوبہ مقدار پر جائیں، یا ➕➖ سے ایک ایک نمبر ---------- -->
+      <div style="display:flex; flex-direction:column; gap:3px;">
+        <div style="text-align:center; font-size:10.5px; font-weight:800; color:var(--primary-dark);">مقدار: <span class="otQtyText">${qty}</span></div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button type="button" onclick="changeOtQty(this, ${v.variant_id}, 1)" class="saVegNav3dBtn" style="width:36px; height:36px; font-size:18px; background:linear-gradient(180deg,#22c55e,#15803d); box-shadow:0 3px 0 #14532d, 0 4px 6px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35);">+</button>
+          <div style="position:relative; flex:1; min-width:0;">
+            <div id="otQtyDial-${v.variant_id}" class="saVegNavDialTrack" onscroll="onOtQtyWheelScroll(${v.variant_id})" style="height:30px;">${buildOtQtyWheelTicks(v.variant_id)}</div>
+            <div class="saVegNavDialPointer"></div>
+          </div>
+          <button type="button" onclick="changeOtQty(this, ${v.variant_id}, -1)" class="saVegNav3dBtn" style="width:36px; height:36px; font-size:18px; background:linear-gradient(180deg,#ef4444,#b91c1c); box-shadow:0 3px 0 #7f1d1d, 0 4px 6px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35);">−</button>
+          <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOtItem(this, ${v.variant_id})" style="width:20px; height:20px; margin:0; flex:0 0 auto; cursor:pointer;">
+        </div>
       </div>
     </div>`;
   }).join('');
+  // ---------- ہر رو کے نمبر-ویل کو موجودہ مقدار پر درست پوزیشن پر لے جائیں (بغیر اینیمیشن، فوری) ---------- -->
+  pageItems.forEach(v => positionOtQtyWheelInstant(v.variant_id));
 
   renderOtPager();
 }
@@ -22966,8 +23098,78 @@ function changeOtQty(btnEl, variantId, delta){
   const vid = Number(row.dataset.variantId);
   const current = otQtyMap[vid] || 0;
   const next = Math.max(0, current + delta);
-  otQtyMap[vid] = next;
-  applyOtRowState(row, vid, next > 0);
+  setOtQtyDirect(vid, next);
+}
+
+// ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE): آرڈر ٹیکنگ میں مقدار کے لیے وہی نمبر-ویل جو سٹاک ایڈجسٹمنٹ کے
+// سبزی نیویگیٹر میں بنایا تھا — ➕➖ بٹن ویل کے بالکل ساتھ جڑے، ویل گھما کر/سوائپ کر کے یا نمبر پر ٹیپ کر کے
+// براہ راست مطلوبہ مقدار پر جائیں؛ ہر آئٹم کی اپنی الگ ویل، ایک دوسرے سے آزاد ---------- -->
+function otQtyWheelMax(variantId){
+  const cur = Number(otQtyMap[variantId]) || 0;
+  return Math.max(30, cur + 10);
+}
+function buildOtQtyWheelTicks(variantId){
+  const max = otQtyWheelMax(variantId);
+  let html = '';
+  for(let i = 0; i <= max; i++){
+    html += `<div class="saVegNavTick" data-idx="${i}" onclick="setOtQtyDirect(${variantId}, ${i})"><span class="tickLine"></span><span>${i}</span></div>`;
+  }
+  return html;
+}
+let _otQtyWheelScrollTimers = {};
+let _otQtyWheelProgrammatic = {};
+// ---------- صفحہ کھلتے ہی، بغیر کسی اینیمیشن کے، ویل کو موجودہ مقدار کی صحیح جگہ پر رکھیں ---------- -->
+function positionOtQtyWheelInstant(variantId){
+  const track = document.getElementById('otQtyDial-' + variantId);
+  if(!track) return;
+  const qty = Number(otQtyMap[variantId]) || 0;
+  const tickEl = track.querySelector(`.saVegNavTick[data-idx="${qty}"]`);
+  if(tickEl) track.scrollLeft = tickEl.offsetLeft - (track.clientWidth / 2) + (tickEl.clientWidth / 2);
+  track.querySelectorAll('.saVegNavTick').forEach(el => el.classList.toggle('active', Number(el.dataset.idx) === qty));
+}
+function scrollOtQtyWheelTo(variantId, qty){
+  const track = document.getElementById('otQtyDial-' + variantId);
+  if(!track) return;
+  const maxTick = track.querySelectorAll('.saVegNavTick').length - 1;
+  if(qty > maxTick) track.innerHTML = buildOtQtyWheelTicks(variantId);
+  track.querySelectorAll('.saVegNavTick').forEach(el => el.classList.toggle('active', Number(el.dataset.idx) === qty));
+  const tickEl = track.querySelector(`.saVegNavTick[data-idx="${qty}"]`);
+  if(tickEl){
+    _otQtyWheelProgrammatic[variantId] = true;
+    tickEl.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+    setTimeout(() => { _otQtyWheelProgrammatic[variantId] = false; }, 350);
+  }
+}
+// ---------- ➕➖ بٹن یا نمبر پر ٹیپ کرنے سے مقدار براہ راست سیٹ کریں ---------- -->
+function setOtQtyDirect(variantId, qty, _fromWheelScroll){
+  const row = document.querySelector(`.otItemRow[data-variant-id="${variantId}"]`);
+  qty = Math.max(0, Math.round(Number(qty) || 0));
+  otQtyMap[variantId] = qty;
+  if(row) applyOtRowState(row, variantId, qty > 0);
+  const track = document.getElementById('otQtyDial-' + variantId);
+  if(track){
+    track.querySelectorAll('.saVegNavTick').forEach(el => el.classList.toggle('active', Number(el.dataset.idx) === qty));
+    if(!_fromWheelScroll) scrollOtQtyWheelTo(variantId, qty);
+  }
+}
+// ---------- ویل کو ہاتھ سے گھمانے/سوائپ کرنے پر — رکنے کے بعد جو نمبر درمیانی نشان کے عین نیچے آیا اسے
+// منتخب سمجھیں (ہر آئٹم کا اپنا الگ ٹائمر/فلیگ، تاکہ ایک ویل دوسرے کو متاثر نہ کرے) ---------- -->
+function onOtQtyWheelScroll(variantId){
+  if(_otQtyWheelProgrammatic[variantId]) return;
+  clearTimeout(_otQtyWheelScrollTimers[variantId]);
+  _otQtyWheelScrollTimers[variantId] = setTimeout(() => {
+    const track = document.getElementById('otQtyDial-' + variantId);
+    if(!track) return;
+    const rect = track.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    let bestIdx = 0, bestDist = Infinity;
+    track.querySelectorAll('.saVegNavTick').forEach(el => {
+      const r = el.getBoundingClientRect();
+      const d = Math.abs((r.left + r.width / 2) - centerX);
+      if(d < bestDist){ bestDist = d; bestIdx = Number(el.dataset.idx); }
+    });
+    setOtQtyDirect(variantId, bestIdx, true);
+  }, 130);
 }
 
 function renderOtPager(){
