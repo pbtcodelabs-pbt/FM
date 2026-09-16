@@ -6274,6 +6274,11 @@
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📅 Today's Sale Report</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Bills, sales, payments, expenses &amp; best-sellers for today</div>
       </button>
+      <!-- ---------- 📊 صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ ---------- -->
+      <button onclick="closeReportCenterModal(); openDailyStockProfitReport();" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📊 روزانہ سٹاک/منافع رپورٹ</div>
+        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">سیریل، نام، پیکنگ، پرانا/آج کا شامل/ٹوٹل/فروخت شدہ/باقی سٹاک، اور آج کا منافع — ہر سبزی کی لائن میں</div>
+      </button>
       <!-- ---------- 📋 روزانہ ریکوری لسٹ — صدام کی ہدایت (FM3SEPTH10) ---------- -->
       <button onclick="closeReportCenterModal(); goTo('dailyRecovery');" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📋 روزانہ ریکوری لسٹ — Daily Recovery List</div>
@@ -8163,7 +8168,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر4:21pm';
+const APP_BUILD_VERSION = 'بدھ16ستمبر4:31pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -14280,6 +14285,27 @@ const LEGACY_DEMO_PRODUCT_NAMES = ['Bio Amla Shampoo', 'Bio Amla Shampoo+Conditi
     }
   }
 })();
+
+// ---------- 📊 صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ کے لیے — "پرانا سٹاک" اور "آج شامل کیا
+// گیا سٹاک" جاننے کے لیے ہر دن کی شروعات پر موجودہ سٹاک کی تصویر (snapshot) محفوظ کرتے ہیں۔ اس کے بعد جب بھی
+// سٹاک بڑھایا جائے (نیا مال آئے) تو وہ اضافہ الگ سے گنا جاتا ہے۔ نوٹ: یہ نظام آج سے شروع ہو رہا ہے — گزرے
+// دنوں کا "پرانا سٹاک" دوبارہ نہیں بن سکتا کیونکہ وہ ڈیٹا پہلے کبھی محفوظ نہیں ہوا تھا ---------- -->
+let dailyStockSnapshot = loadFromStorage('dailyStockSnapshot', {date: '', opening: {}, added: {}});
+function ensureDailyStockSnapshot(){
+  const today = todayDateKey();
+  if(dailyStockSnapshot.date === today) return;
+  const opening = {};
+  productsData.forEach(p => (p.variants || []).forEach(v => { opening[v.variant_id] = v.stock || 0; }));
+  dailyStockSnapshot = {date: today, opening, added: {}};
+  saveToStorage('dailyStockSnapshot', dailyStockSnapshot);
+}
+ensureDailyStockSnapshot();
+function recordStockAddedToday(variantId, deltaQty){
+  ensureDailyStockSnapshot();
+  if(deltaQty <= 0) return;
+  dailyStockSnapshot.added[variantId] = (dailyStockSnapshot.added[variantId] || 0) + deltaQty;
+  saveToStorage('dailyStockSnapshot', dailyStockSnapshot);
+}
 // ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر — پرانا "کئی variants فی پراڈکٹ" نظام سادہ کر دیا گیا ہے۔
 // اب ہر پراڈکٹ اپنا الگ آئٹم ہے (مثلاً "ٹماٹر ٹوکری" اور "ٹماٹر شاپر" دو الگ الگ پراڈکٹ ہیں، ایک کے دو variants نہیں)۔
 // یہ صرف "ویرینٹ کی قسم" (پیکنگ کی قسم — ٹوکری/شاپر/کارٹن وغیرہ) کی ایک قابلِ ترمیم فہرست ہے، جو نیا پراڈکٹ
@@ -16990,6 +17016,12 @@ function updateVariantField(productId, variantId, field, value, inputEl){
   // نمبر کی بجائے متن (string) کے طور پر محفوظ ہوتی تھی، جس سے خرید+مزدوری کا خودکار جمع (ٹوٹل) کبھی کبھار
   // غلط (رقموں کا جوڑ لگانے کی بجائے آپس میں جُڑ جانا، مثلاً 200+50 کی بجائے "20050") ہو سکتا تھا ---------- -->
   const numericFields = ['purchase','labor','sellLabor','retail','wholesale','stock','lowStockAt'];
+  // ---------- 📊 صدام کی ہدایت (FM16SEPWE9): سٹاک بڑھنے پر (نیا مال آنے پر) وہ اضافہ "آج شامل کیا گیا سٹاک" میں گنیں ---------- -->
+  if(field === 'stock'){
+    const oldStock = variant.stock || 0;
+    const newStock = parseFloat(value) || 0;
+    if(newStock > oldStock) recordStockAddedToday(variantId, newStock - oldStock);
+  }
   variant[field] = numericFields.includes(field) ? parseFloat(value) || 0 : value;
 
   // TODO: یہاں product_variants table میں UPDATE query چلے گی
@@ -35250,6 +35282,18 @@ function closeReportPreview(){
 }
 
 // ---------- 📅 Today's Sale Report — کیٹگری کی ضرورت نہیں (پراڈکٹ کیٹگری بیسڈ نہیں)، سیدھا پریویو کھلتی ہے ----------
+// ---------- 📊 صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ ---------- -->
+function openDailyStockProfitReport(){
+  currentReportType = 'stockprofit';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = "📊 روزانہ سٹاک/منافع رپورٹ";
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+
 function openTodaySaleReport(){
   currentReportType = 'todaysale';
   currentReportCategories = [];
@@ -35466,6 +35510,7 @@ async function renderReportToCanvas(){
   if(!canvas || !currentReportType) return;
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
+  if(currentReportType === 'stockprofit'){ await renderDailyStockProfitReportToCanvas(); return; } // ---------- صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ — اپنا الگ لے آؤٹ ---------- -->
   const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
@@ -36182,6 +36227,215 @@ async function renderTodaySaleReportToCanvas(){
 // بجائے وہ حصہ ہٹا کر نام کا باقی (لاطینی) حصہ دکھایا جاتا ہے — مکمل غائب ہونے سے بہتر ہے۔
 // نوٹ: یہ صرف PDF پرنٹ پر لاگو ہے — اسکرین، تھرمل پرنٹ اور WhatsApp شیئر میں اردو ہمیشہ ٹھیک نظر آتی ہے
 // (وہ کینوس/ڈیوائس کے اپنے فونٹ استعمال کرتے ہیں، جو مکمل یونیکوڈ سپورٹ کرتا ہے) ----------
+// ---------- 📊 صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ — سیریل، نام، پیکنگ، پرانا سٹاک، آج شامل
+// کیا گیا، ٹوٹل، آج فروخت شدہ، باقی سٹاک، اور آج کا منافع (آج کے تمام بلوں سے اکٹھا)۔ نوٹ: "پرانا سٹاک"/
+// "آج شامل کیا گیا" کا حساب آج سے شروع ہونے والی روزانہ تصویر (snapshot) پر مبنی ہے — گزرے دنوں کا ڈیٹا
+// دوبارہ نہیں بن سکتا کیونکہ وہ پہلے کبھی محفوظ نہیں ہوا تھا ---------- -->
+async function renderDailyStockProfitReportToCanvas(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  ensureDailyStockSnapshot();
+  const useA4 = AppState.settings.reportPrintStyle === 'a4';
+  const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+  const ctx = canvas.getContext('2d');
+
+  const todayStr = toLocalDateStr(new Date());
+  const todayInvoices = (invoicesData || []).filter(inv => inv.created_at && toLocalDateStr(new Date(inv.created_at)) === todayStr);
+
+  // ---------- ہر ویریئنٹ کے لیے آج فروخت شدہ مقدار اور آج کا منافع اکٹھا کریں (خرید+مزدوری = لاگت) ---------- -->
+  const soldQtyMap = {}, profitMap = {};
+  todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
+    if(!it.variant_id) return;
+    soldQtyMap[it.variant_id] = (soldQtyMap[it.variant_id] || 0) + (it.qty || 0);
+  }));
+  const rows = [];
+  let totalProfitToday = 0;
+  productsData.filter(p => !p.isDormant).forEach(p => {
+    const v = p.variants && p.variants[0];
+    if(!v) return;
+    const opening = dailyStockSnapshot.opening[v.variant_id] ?? (v.stock || 0);
+    const added = dailyStockSnapshot.added[v.variant_id] || 0;
+    const total = opening + added;
+    const sold = soldQtyMap[v.variant_id] || 0;
+    const remaining = v.stock || 0;
+    const cost = (v.purchase || 0) + (v.labor || 0);
+    const profit = (v.retail || v.wholesale || 0) > 0 ? sold * ((v.retail || v.wholesale || 0) - cost) : sold * ((v.retail||0) - cost);
+    // ---------- زیادہ درست منافع: ہر بل کی اپنی unitPrice سے (بجائے صرف موجودہ ریٹ کے) ---------- -->
+    let realProfit = 0;
+    todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
+      if(it.variant_id === v.variant_id) realProfit += (it.qty || 0) * ((it.unitPrice || 0) - cost);
+    }));
+    totalProfitToday += realProfit;
+    rows.push({serial: p.serial_no ?? '?', name: p.name, label: v.label || '', opening, added, total, sold, remaining, profit: realProfit});
+  });
+  rows.sort((a,b) => (a.serial === '?' ? 9999 : a.serial) - (b.serial === '?' ? 9999 : b.serial));
+
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
+  const bold = AppState.settings.reportBoldItems !== false;
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
+  const fontFam = selectedFontPreset.family;
+  try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
+
+  const base = useA4 ? 2.1 : 1.5;
+  const fsTitle = Math.round(15 * base * fontScale);
+  const fsSubtitle = Math.round(12 * base * fontScale);
+  const fsSmall = Math.round(9 * base * fontScale);
+  const fsHeader = Math.round(8.5 * base * fontScale);
+  const fsItem = Math.round(9 * base * fontScale);
+
+  const margin = useA4 ? 40 : 6;
+  const tableLeft = margin, tableRight = pxWidth - margin;
+  const totalW = tableRight - tableLeft;
+  const baseRowH = Math.round(fsItem * 2.6 * rowScaleSetting);
+  const headerRowH = Math.round(fsHeader * 2.8 * rowScaleSetting);
+
+  // ---------- کالمز: # | نام(+پیکنگ) | پرانا | +آج | ٹوٹل | فروخت | باقی | منافع ---------- -->
+  const wSerial = Math.round(totalW * 0.06);
+  const wNum = Math.round(totalW * 0.105);
+  const wName = totalW - wSerial - wNum*6;
+  const cols = [
+    {key:'serial', label:'#', width:wSerial},
+    {key:'name', label:'نام/پیکنگ', width:wName},
+    {key:'opening', label:'پرانا', width:wNum},
+    {key:'added', label:'+آج', width:wNum},
+    {key:'total', label:'ٹوٹل', width:wNum},
+    {key:'sold', label:'فروخت', width:wNum},
+    {key:'remaining', label:'باقی', width:wNum},
+    {key:'profit', label:'منافع', width:wNum},
+  ];
+  let cxPos = tableLeft;
+  cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
+  const colTextX = (c) => c.x + c.width/2;
+
+  const fitCenteredLines = (text, maxWidth, basePx, weight) => {
+    const w = weight ? weight + ' ' : '';
+    const minPx = Math.max(Math.round(basePx * 0.55), 7);
+    let px = basePx;
+    ctx.font = `${w}${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > minPx){ px -= 1; ctx.font = `${w}${px}px ${fontFam}`; }
+    return {text, px, weight:w};
+  };
+  const nameFit = fitCenteredLines(AppState.settings.businessName || 'صدام حسین فروٹ منڈی', totalW, fsTitle, 'bold');
+  const phoneFit = AppState.settings.businessPhone ? fitCenteredLines(AppState.settings.businessPhone, totalW, fsSmall) : null;
+  const titleFit = fitCenteredLines('روزانہ سٹاک/منافع رپورٹ', totalW, fsSubtitle, 'bold');
+
+  let headerBandH = useA4 ? 90 : 56;
+  let bodyTop = headerBandH + headerRowH;
+  const estimatedHeight = bodyTop + (rows.length * baseRowH) + Math.round(fsSubtitle * 3) + 30;
+
+  canvas.width = pxWidth;
+  canvas.height = Math.max(estimatedHeight, 300);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  // ---------- گول کونے (راؤنڈ کارنر) باڈر پورے صفحے کے گرد ---------- -->
+  const rr = useA4 ? 14 : 8;
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(margin/2 + rr, margin/2);
+  ctx.arcTo(pxWidth - margin/2, margin/2, pxWidth - margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(pxWidth - margin/2, canvas.height - margin/2, margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(margin/2, canvas.height - margin/2, margin/2, margin/2, rr);
+  ctx.arcTo(margin/2, margin/2, pxWidth - margin/2, margin/2, rr);
+  ctx.closePath(); ctx.stroke();
+
+  let y = useA4 ? 24 : 14;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#1a1a1a';
+  ctx.font = `${nameFit.weight}${nameFit.px}px ${fontFam}`;
+  y += nameFit.px;
+  ctx.fillText(nameFit.text, pxWidth/2, y);
+  if(phoneFit){ y += Math.round(fsSmall * 1.6); ctx.font = `${fsSmall}px ${fontFam}`; ctx.fillText(phoneFit.text, pxWidth/2, y); }
+  y += Math.round(fsSubtitle * 1.7);
+  ctx.font = `${titleFit.weight}${titleFit.px}px ${fontFam}`;
+  ctx.fillText(titleFit.text, pxWidth/2, y);
+  y += Math.round(fsSmall * 1.8);
+  ctx.font = `${fsSmall}px ${fontFam}`;
+  const now = new Date();
+  const dstr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(-2)}`;
+  ctx.fillText(dstr, pxWidth/2, y);
+  y += 8;
+
+  // ---------- ٹیبل ہیڈر ---------- -->
+  const rc = getReceiptColor();
+  const headerTop = y;
+  ctx.fillStyle = rc.bg;
+  ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.3;
+  ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
+  ctx.fillStyle = '#0f172a';
+  ctx.textAlign = 'center';
+  cols.forEach(c => {
+    ctx.font = `bold ${fsHeader}px ${fontFam}`;
+    ctx.save(); ctx.beginPath(); ctx.rect(c.x, headerTop, c.width, headerRowH); ctx.clip();
+    ctx.fillText(c.label, colTextX(c), headerTop + headerRowH/2 + fsHeader*0.32);
+    ctx.restore();
+    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
+  y = headerTop + headerRowH;
+
+  const fitCellFont = (text, maxWidth, basePx) => {
+    let px = basePx; ctx.font = `${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > 6){ px -= 1; ctx.font = `${px}px ${fontFam}`; }
+    return px;
+  };
+
+  if(rows.length === 0){
+    ctx.strokeStyle = '#475569'; ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, baseRowH);
+    ctx.fillStyle = '#64748b'; ctx.font = `${fsItem}px ${fontFam}`; ctx.textAlign = 'center';
+    ctx.fillText('کوئی سبزی نہیں ملی', pxWidth/2, y + baseRowH/2 + fsItem*0.32);
+    y += baseRowH;
+  } else {
+    rows.forEach((r, idx) => {
+      const rh = baseRowH;
+      ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#f1f5f9';
+      ctx.fillRect(tableLeft, y, totalW, rh);
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+      ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
+      cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
+      ctx.beginPath(); ctx.moveTo(tableRight+0.5, y); ctx.lineTo(tableRight+0.5, y+rh); ctx.stroke();
+      ctx.fillStyle = '#1a1a1a'; ctx.textAlign = 'center';
+      cols.forEach(c => {
+        let txt;
+        if(c.key === 'serial') txt = String(r.serial);
+        else if(c.key === 'name') txt = null; // ---------- خاص طور پر نیچے دو لائنوں میں ---------- -->
+        else txt = String(r[c.key]);
+        if(c.key === 'name'){
+          const px1 = fitCellFont(r.name, c.width-6, fsItem);
+          ctx.font = `${bold ? 'bold ' : ''}${px1}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(r.name, colTextX(c), y + rh/2 - 3);
+          ctx.font = `${Math.round(px1*0.8)}px ${fontFam}`;
+          ctx.fillStyle = '#64748b';
+          ctx.fillText(r.label, colTextX(c), y + rh/2 + Math.round(px1*0.85));
+          ctx.restore();
+          ctx.fillStyle = '#1a1a1a';
+        } else {
+          if(c.key === 'profit') ctx.fillStyle = r.profit >= 0 ? '#065f2b' : '#991b1b';
+          const px2 = fitCellFont(txt, c.width-4, fsItem);
+          ctx.font = `${px2}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(txt, colTextX(c), y + rh/2 + fsItem*0.32);
+          ctx.restore();
+          ctx.fillStyle = '#1a1a1a';
+        }
+      });
+      y += rh;
+    });
+  }
+
+  // ---------- نیچے: آج کا کل منافع ---------- -->
+  y += Math.round(fsSubtitle * 0.7);
+  ctx.textAlign = 'center';
+  ctx.font = `bold ${Math.round(fsSubtitle*1.15)}px ${fontFam}`;
+  ctx.fillStyle = totalProfitToday >= 0 ? '#065f2b' : '#991b1b';
+  ctx.fillText(`آج کا کل منافع: Rs. ${Math.round(totalProfitToday).toLocaleString()}`, pxWidth/2, y);
+
+  const scrollWrapEnd = document.getElementById('reportCanvasScrollWrap');
+  if(scrollWrapEnd) scrollWrapEnd.scrollTop = 0;
+}
+
 function stripUnrenderableForPdf(text){
   const cleaned = String(text || '').replace(/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g, '').replace(/\s+/g, ' ').trim();
   return cleaned || '(Urdu name)';
