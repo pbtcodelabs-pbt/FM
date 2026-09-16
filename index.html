@@ -3696,7 +3696,7 @@
            جتنی سبزیاں اتنے ہی نمبر والے نشان اس پر بنے ہیں، گھما کر/سوائپ کر کے یا تیر دبا کر منتخب کریں،
            جہاں رکیں وہی نمبر نمایاں (بڑا/رنگین) ہو جاتا ہے اور نیچے فہرست میں وہی سبزی سکرول ہو کر چمک اٹھتی
            ہے۔ تیر اور ویل کے درمیان صاف فاصلہ ہے تاکہ ویل گھماتے ہوئے غلطی سے تیر پر ہاتھ نہ لگے ---------- -->
-      <div id="saVegNavigator" style="display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; margin-bottom:6px; box-shadow:inset 0 1px 3px rgba(0,0,0,.06);">
+      <div id="saVegNavigator" style="position:sticky; top:0; z-index:6; display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; margin-bottom:6px; box-shadow:0 3px 8px rgba(0,0,0,.10);">
         <button type="button" id="saVegNavPrevBtn" onclick="saVegNavStep(-1)" title="پچھلی سبزی" class="saVegNav3dBtn">◀</button>
         <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px;">
           <div id="saVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
@@ -5312,35 +5312,41 @@
 
       <!-- STEP 2: آئٹمز منتخب کریں — ٹک لگائیں، تعداد لگائیں، صفحہ بدلیں -->
       <div id="otStepItems" style="display:none; --otFw:700;">
-        <div id="otTopBar" style="position:sticky; top:0; z-index:5; background:var(--bg); padding:8px 4px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:2px solid var(--primary); margin-bottom:8px;">
-          <div style="min-width:0;">
-            <div style="font-weight:800; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="otTopCustName"></div>
-            <div style="font-size:12px; color:var(--muted);" id="otTopCustArea"></div>
+        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0451PM): اوپر والا بار اور سبزی نیویگیٹر ویل اب ایک ہی
+             چپکنے والے (sticky) گروپ میں — پہلے ویل صرف بار کے نیچے سادہ فہرست میں تھا، اس لیے سکرول کرتے ہی
+             نظروں سے غائب ہو جاتا تھا۔ اب دونوں مستقل اوپر چپکے رہیں گے تاکہ سکرول کرتے ہوئے ہر وقت نظر آئے
+             کہ کون سی سبزی نمایاں/سلیکٹ ہو رہی ہے ---------- -->
+        <div id="otStickyHead" style="position:sticky; top:0; z-index:6; background:var(--bg); padding-bottom:2px;">
+          <div id="otTopBar" style="background:var(--bg); padding:8px 4px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:2px solid var(--primary); margin-bottom:8px;">
+            <div style="min-width:0;">
+              <div style="font-weight:800; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="otTopCustName"></div>
+              <div style="font-size:12px; color:var(--muted);" id="otTopCustArea"></div>
+            </div>
+            <div style="display:flex; gap:6px; flex:0 0 auto;">
+              <button type="button" onclick="openOtStockReport()" style="padding:9px 10px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 سٹاک رپورٹ</button>
+              <button type="button" onclick="toggleOtViewMode()" id="otViewModeBtn" style="display:none; padding:9px 10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 جدول</button>
+              <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
+              <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
+            </div>
           </div>
-          <div style="display:flex; gap:6px; flex:0 0 auto;">
-            <button type="button" onclick="openOtStockReport()" style="padding:9px 10px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 سٹاک رپورٹ</button>
-            <button type="button" onclick="toggleOtViewMode()" id="otViewModeBtn" style="display:none; padding:9px 10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 جدول</button>
-            <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
-            <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
+          <!-- ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE8): آرڈر ٹیکنگ میں بھی وہی سبزی نیویگیٹر (3D اگلا/پچھلا بٹن
+               + نمبر ویل) — اسی سٹاک مینجمنٹ والے سسٹم سے، منتخب سبزی خودکار نمایاں ہو کر سکرول ہو جاتی ہے ---------- -->
+          <div id="otVegNavigator" style="display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; box-shadow:inset 0 1px 3px rgba(0,0,0,.06);">
+            <button type="button" id="otVegNavPrevBtn" onclick="otVegNavStep(-1)" title="پچھلی سبزی" class="saVegNav3dBtn">◀</button>
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px;">
+              <div id="otVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
+              <div style="position:relative;">
+                <div id="otVegNavDialTrack" class="saVegNavDialTrack" onscroll="otVegNavOnDialScroll()"></div>
+                <div class="saVegNavDialPointer"></div>
+              </div>
+            </div>
+            <button type="button" id="otVegNavNextBtn" onclick="otVegNavStep(1)" title="اگلی سبزی" class="saVegNav3dBtn">▶</button>
           </div>
         </div>
-        <div id="otBoldSliderRow" style="display:flex; align-items:center; gap:10px; background:#eef2ff; border:1.5px solid #c7d2fe; border-radius:10px; padding:8px 12px; margin-bottom:10px;">
+        <div id="otBoldSliderRow" style="display:flex; align-items:center; gap:10px; background:#eef2ff; border:1.5px solid #c7d2fe; border-radius:10px; padding:8px 12px; margin:10px 0;">
           <span style="font-size:12.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap;">پتلا</span>
           <input type="range" id="otBoldSlider" min="400" max="900" step="50" value="700" oninput="setOtItemsFontWeight(this.value)" style="flex:1;">
           <span style="font-size:12.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap;">موٹا</span>
-        </div>
-        <!-- ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE8): آرڈر ٹیکنگ میں بھی وہی سبزی نیویگیٹر (3D اگلا/پچھلا بٹن
-             + نمبر ویل) — اسی سٹاک مینجمنٹ والے سسٹم سے، منتخب سبزی خودکار نمایاں ہو کر سکرول ہو جاتی ہے ---------- -->
-        <div id="otVegNavigator" style="display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; margin-bottom:8px; box-shadow:inset 0 1px 3px rgba(0,0,0,.06);">
-          <button type="button" id="otVegNavPrevBtn" onclick="otVegNavStep(-1)" title="پچھلی سبزی" class="saVegNav3dBtn">◀</button>
-          <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px;">
-            <div id="otVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
-            <div style="position:relative;">
-              <div id="otVegNavDialTrack" class="saVegNavDialTrack" onscroll="otVegNavOnDialScroll()"></div>
-              <div class="saVegNavDialPointer"></div>
-            </div>
-          </div>
-          <button type="button" id="otVegNavNextBtn" onclick="otVegNavStep(1)" title="اگلی سبزی" class="saVegNav3dBtn">▶</button>
         </div>
         <!-- ---------- 🔍 صدام کی ہدایت (FM15SEPTU): آئٹم لسٹ کے لیے سرچ بار — سیریل نمبر یا نام (جزوی لفظ)
              دونوں سے تلاش، جامع (comprehensive) — بالکل کسٹمر سرچ بار جیسی ---------- -->
@@ -8177,7 +8183,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر4:51pm';
+const APP_BUILD_VERSION = 'بدھ16ستمبر5:56pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -18955,9 +18961,21 @@ function saVegNavGoToIndex(idx, _fromDialScroll){
     if(!_fromDialScroll){
       const tickEl = track.querySelector(`.saVegNavTick[data-idx="${idx}"]`);
       if(tickEl){
+        // ---------- 🐞 صدام کی ہدایت (FM16SEPWE0451PM): پرانا فکس 350ms بعد ہی گارڈ ہٹا دیتا تھا — دور والے
+        // نمبر (مثلاً 30) پر جاتے ہوئے اصل سکرول اس سے زیادہ وقت لیتی، تو گارڈ ہٹنے کے بعد ابھی جاری سکرول
+        // کا ایونٹ آ کر غلط، پڑوسی نمبر (29) پر واپس لے جاتا۔ اب اصل سکرول رکنے کا انتظار (scrollend) کیا
+        // جاتا ہے، اور صرف بیک اپ کے طور پر ایک لمبی مہلت (900ms) رکھی گئی ہے ---------- -->
         _saVegNavProgrammaticScroll = true;
+        let _saVegNavGuardCleared = false;
+        const _saVegNavClearGuard = () => {
+          if(_saVegNavGuardCleared) return;
+          _saVegNavGuardCleared = true;
+          _saVegNavProgrammaticScroll = false;
+          track.removeEventListener('scrollend', _saVegNavClearGuard);
+        };
+        track.addEventListener('scrollend', _saVegNavClearGuard, {once:true});
         tickEl.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-        setTimeout(() => { _saVegNavProgrammaticScroll = false; }, 350);
+        setTimeout(_saVegNavClearGuard, 900);
       }
     }
   }
@@ -22994,9 +23012,19 @@ function otVegNavGoToIndex(idx, _fromDialScroll){
     if(!_fromDialScroll){
       const tickEl = track.querySelector(`.saVegNavTick[data-idx="${idx}"]`);
       if(tickEl){
+        // ---------- 🐞 صدام کی ہدایت (FM16SEPWE0451PM): وہی فکس یہاں بھی — 350ms کی بجائے اصل سکرول رکنے
+        // (scrollend) کا انتظار، لمبی مہلت (900ms) صرف بیک اپ کے طور پر ---------- -->
         _otVegNavProgrammaticScroll = true;
+        let _otVegNavGuardCleared = false;
+        const _otVegNavClearGuard = () => {
+          if(_otVegNavGuardCleared) return;
+          _otVegNavGuardCleared = true;
+          _otVegNavProgrammaticScroll = false;
+          track.removeEventListener('scrollend', _otVegNavClearGuard);
+        };
+        track.addEventListener('scrollend', _otVegNavClearGuard, {once:true});
         tickEl.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-        setTimeout(() => { _otVegNavProgrammaticScroll = false; }, 350);
+        setTimeout(_otVegNavClearGuard, 900);
       }
     }
   }
