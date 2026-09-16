@@ -1226,8 +1226,9 @@
   .rateBadgeStock{background:#334155;}
   .productHead .pMeta{font-size:12px; color:var(--muted); margin-top:2px;}
   .productHead .pActions{display:flex; flex-direction:column; align-items:center; gap:6px; flex:0 0 auto;}
-  /* ---------- 🔲 غیر حاضر/حاضر چیک باکس — نام سے پہلے، ایڈٹ بٹن سے واضح فاصلے پر (صدام کی ہدایت FM3SEPTH12) ---------- */
-  .productHead .pPresenceCheck{display:flex; align-items:center; flex:0 0 auto;}
+  /* ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر چیک باکس مکمل ہائیڈ — سب سبزیاں اب ہمیشہ
+     حاضر شمار ہوں گی (HTML/فنکشن محفوظ ہے، صرف CSS سے چھپایا گیا) ---------- */
+  .productHead .pPresenceCheck{display:none;}
   .variantCount{background:#eef2ff; color:var(--primary-dark); font-size:12px; padding:3px 10px; border-radius:20px; font-weight:600;}
   .productActionBtn{border:none; background:#f1f5f9; color:var(--text); width:26px; height:26px; border-radius:8px; font-size:12px; cursor:pointer; flex:0 0 auto;}
   .productActionBtn.danger{background:#fef2f2; color:var(--danger);}
@@ -3623,8 +3624,12 @@
             <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openSupListReport();">🚚 سپلائرز</div>
           </div>
         </div>
+        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — اب سب سبزیاں ہمیشہ
+             حاضر شمار ہوں گی (فنکشن/کوڈ محفوظ ہے، صرف display:none، ضرورت پڑنے پر واپس لایا جا سکتا ہے) ---------- -->
+        <div style="display:none;">
         <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:0 0 auto; padding:5px 7px; border-radius:7px; border:none; font-size:10.5px; font-weight:800; cursor:pointer; white-space:nowrap;">🟢 حاضر</button>
         <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:0 0 auto; padding:5px 7px; border-radius:7px; border:none; font-size:10.5px; font-weight:800; cursor:pointer; white-space:nowrap;">🔴 غیر حاضر</button>
+        </div>
       </div>
 
       <!-- ---------- دوسری لائن: سرچ ہمیشہ سامنے، ترتیب اور انوینٹری ٹریک ساتھ ہی کمپیکٹ شکل میں ---------- -->
@@ -3690,7 +3695,8 @@
               <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import Products</button>
               <input type="file" id="productCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handleProductCsvFileSelect(event)">
             </div>
-            <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
+            <div style="display:none; gap:8px; margin-bottom:12px;">
               <button id="prodPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:1; padding:9px; border-radius:9px; border:none; font-size:12.5px; font-weight:800; cursor:pointer;">🟢 حاضر سبزیاں</button>
               <button id="prodPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:1; padding:9px; border-radius:9px; border:none; font-size:12.5px; font-weight:800; cursor:pointer;">🔴 غیر حاضر سبزیاں</button>
             </div>
@@ -6551,7 +6557,8 @@
           <h3 style="margin:0; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">🥬 سبزیوں کی پرنٹ لسٹ</h3>
           <span onclick="closeVegListReport()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
         </div>
-        <div id="vegListFilterZone" style="display:flex; gap:8px; justify-content:center; margin-bottom:10px; flex-wrap:wrap;">
+        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
+        <div id="vegListFilterZone" style="display:none; gap:8px; justify-content:center; margin-bottom:10px; flex-wrap:wrap;">
           <button class="pscToggleBtn vegListModeBtn" data-mode="present" onclick="setVegListMode('present')">🟢 حاضر سبزیاں</button>
           <button class="pscToggleBtn vegListModeBtn" data-mode="absent" onclick="setVegListMode('absent')">🔴 غیر حاضر سبزیاں</button>
           <button class="pscToggleBtn vegListModeBtn" data-mode="both" onclick="setVegListMode('both')">⚪ دونوں</button>
@@ -6599,7 +6606,8 @@
           <h3 style="margin:0; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">👥 کسٹمر کی پرنٹ لسٹ</h3>
           <span onclick="closeCustListReport()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
         </div>
-        <div style="display:flex; gap:8px; justify-content:center; margin-bottom:10px; flex-wrap:wrap;">
+        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
+        <div style="display:none; gap:8px; justify-content:center; margin-bottom:10px; flex-wrap:wrap;">
           <button class="pscToggleBtn custListModeBtn" data-mode="present" onclick="setCustListMode('present')">🟢 حاضر کسٹمر</button>
           <button class="pscToggleBtn custListModeBtn" data-mode="absent" onclick="setCustListMode('absent')">🔴 غیر حاضر کسٹمر</button>
           <button class="pscToggleBtn custListModeBtn" data-mode="both" onclick="setCustListMode('both')">⚪ دونوں</button>
@@ -8090,7 +8098,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر5:18am';
+const APP_BUILD_VERSION = 'بدھ16ستمبر6:48am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10341,6 +10349,9 @@ function toggleProductPresenceInSheet(productId, checkboxEl){
 // حاضر⟷غیر حاضر بدلتی ہے۔ <tr> کے اندر آزاد <div> اوورلے درست HTML نہیں بنتا، اس لیے یہاں پوری قطار کا
 // پس منظر رنگ (سبز/سرخ) ہی سرکاتے وقت اشارہ دیتا ہے ---------- -->
 function wireProductSwipeRows(tableId){
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — سوائپ سے غیر حاضر کرنے کا
+  // یہ گیسچر فی الحال بند (فنکشن/کوڈ محفوظ ہے، صرف یہاں سے فوری return) ---------- -->
+  return;
   const table = document.getElementById(tableId);
   if(!table || table.dataset.swipeWired) return;
   table.dataset.swipeWired = '1';
@@ -10535,7 +10546,8 @@ function renderProductSpreadsheet(filtered, wrap){
     const packingBtnStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;cursor:pointer;" + urduFont;
     const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', '${wrap.id}')">${v.label || '❓'}</button>`;
     return `
-      <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative; touch-action:pan-y;" ${!p.isDormant ? `onclick="selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')"` : ''}>
+      <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative; touch-action:pan-y;" onclick="selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')">
+        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): پہلے isDormant والی قطار پر ٹیپ کرنے سے ایڈٹ پینل نہیں کھلتا تھا — حاضر/غیر حاضر نظام ہائیڈ ہونے کے بعد اب ہر قطار پر ٹیپ کام کرے گا ---------- -->
         <td style="${tdBase}${frozenTd(0)}"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important;" onclick="event.stopPropagation(); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button></td>
         <td style="${tdBase}${frozenTd(1)}padding:3px;"><div style="display:flex; justify-content:center;">
           <button type="button" style="width:24px;height:24px;border-radius:50%;border:none;background:#dcfce7;color:#15803d;font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.15);" title="اس کے بعد نئی خالی قطار شامل کریں" onclick="event.stopPropagation(); insertProductRowAfter(${p.product_id})">➕</button>
@@ -12071,8 +12083,10 @@ function downloadCsvFile(csvText, fileName){
 // کبھی نظر نہیں آئیں گی — صرف Products مینجمنٹ سکرین میں دیکھی/واپس لائی جا سکتی ہیں ----------
 function getFlatVariants(){
   const flat = [];
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — اب کوئی سبزی بلنگ/آرڈر
+  // ٹیکنگ سے باہر نہیں رہے گی، چاہے isDormant کچھ بھی ہو (اصل شرط نیچے comment میں محفوظ ہے) ---------- -->
   productsData.forEach(p => {
-    if(p.isDormant) return;
+    // if(p.isDormant) return;
     p.variants.forEach(v => {
       flat.push({
         variant_id: v.variant_id,
@@ -15828,8 +15842,10 @@ function renderProductList(query = ''){
   // کرنے کے باوجود وہ نظر نہیں آتی تھی (کہیں ملتی ہی نہیں تھی، نہ حاضر میں نہ غیر حاضر میں بیک وقت)۔
   // اب جیسے ہی کچھ سرچ کریں، حاضر/غیر حاضر اور کیٹگری دونوں فلٹر نظرانداز ہو جاتے ہیں — تلاش کیا ہوا آئٹم
   // ہمیشہ نظر آئے گا، چاہے وہ کہیں بھی پڑا ہو، تاکہ آپ اسے فوراً ڈھونڈ کر ڈیلیٹ/درست کر سکیں ---------- -->
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر فلٹر مکمل ہائیڈ — اب تمام سبزیاں (حاضر +
+  // غیر حاضر دونوں) ہمیشہ فہرست میں شامل رہیں گی (اصل شرط اوپر comment میں محفوظ ہے) ---------- -->
   if(query === ''){
-    filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
+    // filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
     if(activeProductCategory !== 'all'){
       filtered = filtered.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activeProductCategory);
     }
@@ -16956,6 +16972,13 @@ function buildVcInlinePanelHtml(){
       <div id="vcInlinePanelBody" style="display:none;">
         <div id="vcInlinePanelName" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:11.5px; font-weight:900; color:#1e3a8a; background:#fff; border-radius:6px; padding:2px 3px; margin-bottom:2px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
         <div id="vcInlinePanelPacking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:9.5px; font-weight:800; color:#1e3a8a; background:#dbeafe; border-radius:5px; padding:1px 3px; margin-bottom:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): سٹاک کا خانہ اب سب سے اوپر — نام/پیکنگ کے فوراً بعد،
+             خرید قیمت سے بھی پہلے — تاکہ سٹاک فوری نظر آ جائے (رائٹ سائیڈ ٹیبل میں نام/پیکنگ/سٹاک والی ترتیب کی
+             طرح) ---------- -->
+        <div style="background:linear-gradient(155deg,#eef2ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 #a5b4fc; margin-bottom:3px; text-align:center;">
+          <div style="font-size:8.5px; font-weight:900; color:#3730a3; margin-bottom:1px; text-align:center;">📦 سٹاک</div>
+          <input id="vcInlineStock" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('stock')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #a5b4fc; border-radius:4px; padding:3px 1px; font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:14px; color:#3730a3; background:#fff;">
+        </div>
         ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e')}
         ${fieldBox('vcInlineLabor', '💪 م.خرید', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
         ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
@@ -16965,10 +16988,6 @@ function buildVcInlinePanelHtml(){
         </div>
         ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d')}
         ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')}
-        <div style="background:linear-gradient(155deg,#eef2ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 #a5b4fc; margin-bottom:3px; text-align:center;">
-          <div style="font-size:8.5px; font-weight:900; color:#3730a3; margin-bottom:1px; text-align:center;">📦 سٹاک</div>
-          <input id="vcInlineStock" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('stock')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #a5b4fc; border-radius:4px; padding:3px 1px; font-family:'Arial Narrow',Arial,sans-serif; font-weight:900; font-size:14px; color:#3730a3; background:#fff;">
-        </div>
         <div style="display:flex; flex-direction:column; align-items:center; gap:1px; background:rgba(255,255,255,.12); border-radius:6px; padding:3px;">
           <span style="font-size:8px; color:#dbeafe; font-weight:900; white-space:normal; text-align:center;">⏱️ رفتار</span>
           <div style="display:flex; align-items:center; gap:2px;">
@@ -18634,8 +18653,9 @@ function renderStockAdjustmentScreen(query){
   });
   // ---------- 🔍 صدام کی ہدایت (5 ستمبر) اہم فکس: سرچ کرتے وقت حاضر/غیر حاضر اور کیٹگری فلٹر نظرانداز —
   // تلاش کیا ہوا آئٹم ہمیشہ نظر آئے، چاہے وہ کہیں بھی پڑا ہو (Products سکرین کی طرح) ---------- -->
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر فلٹر مکمل ہائیڈ — سب سبزیاں ہمیشہ نظر آئیں ---------- -->
   if(q === ''){
-    filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
+    // filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
     if(activeProductCategory !== 'all'){
       filtered = filtered.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activeProductCategory);
     }
@@ -19068,7 +19088,8 @@ function setVegListMode(mode){
 function buildVegListRows(){
   const rows = [];
   productsData
-    .filter(p => vegListMode === 'both' ? true : (!!p.isDormant === (vegListMode === 'absent')))
+    // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر فلٹر مکمل ہائیڈ — ہمیشہ سب سبزیاں (دونوں) ---------- -->
+    .filter(p => true)
     .sort((a,b) => (a.serial_no||0) - (b.serial_no||0))
     .forEach(p => {
       (p.variants || []).forEach(v => {
@@ -19453,7 +19474,8 @@ function setCustListMode(mode){
 }
 function buildCustListRows(){
   return customersData
-    .filter(c => custListMode === 'both' ? true : (!!c.isDormant === (custListMode === 'absent')))
+    // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر فلٹر مکمل ہائیڈ — ہمیشہ سب کسٹمر (دونوں) ---------- -->
+    .filter(c => true)
     .sort((a,b) => (a.serial_no||a.customer_id||0) - (b.serial_no||b.customer_id||0))
     .map(c => ({ serial: c.serial_no || c.customer_id, name: c.name, phone: c.phone || '', balance: c.total_receivable || 0 }));
 }
@@ -20142,7 +20164,8 @@ function renderCustFilterBar(){
         <input type="checkbox" ${f.todayOnly?'checked':''} onchange="setCustFilter('todayOnly', this.checked)" style="margin:0;"> 🔥 آج کے خریدار
       </label>
     </div>
-    <div style="display:flex; gap:6px;">
+    <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/کھوہ کھاتے فلٹر مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
+    <div style="display:none; gap:6px;">
       <button onclick="setCustFilter('showDormant', false)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${!f.showDormant?'#134e2c':'#f1f5f9'}; color:${!f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🟢 حاضر موجود (${customersData.filter(c => !c.isDormant).length})</button>
       <button onclick="setCustFilter('showDormant', true)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${f.showDormant?'#78350f':'#f1f5f9'}; color:${f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🪦 کھوہ کھاتے (${customersData.filter(c => !!c.isDormant).length})</button>
     </div>
@@ -20158,7 +20181,8 @@ function setCustFilter(key, val){
 // ---------- فہرست پر فلٹر + ترتیب لاگو کریں — ہر جگہ (Customers/Recovery/Order Taking) اسی سے گزریں ----------
 function applyCustomerCategorization(list){
   const f = customerFilterState;
-  let out = list.filter(c => !!c.isDormant === !!f.showDormant);
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/کھوہ کھاتے فلٹر مکمل ہائیڈ — ہمیشہ سب کسٹمر ---------- -->
+  let out = list.slice();
   if(f.area !== 'all') out = out.filter(c => c.rateArea === f.area);
   if(f.todayOnly) out = out.filter(c => customerBoughtToday(c.customer_id));
   if(f.sort === 'highest') out.sort((a,b) => (b.total_receivable||0) - (a.total_receivable||0));
@@ -20407,14 +20431,15 @@ function renderPartyList(query = ''){
         rowClickJs: `openCustomerProfile(${c.customer_id})`,
         deleteJs: `deleteCustomer(${c.customer_id})`,
         serialClickJs: `openSerialPicker('customers', ${c.customer_id}, ${c.serial_no ?? 'null'}, '${(c.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`,
-        dormantJs: isAdmin ? `animateAndToggleCustomer(${c.customer_id})` : null,
+        // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر سوائپ مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
+        dormantJs: null,
         isDormant: c.isDormant
       });
     }).join('');
     wireCustomerSwipeRows(); // ---------- 👆 صدام کی ہدایت (FM15SEPTU): سوائپ ہینڈلرز نئے کارڈز پر جوڑیں ---------- -->
   } else {
-    // ---------- 🚚 صدام کی ہدایت (FM15SEPTU2): سپلائرز میں بھی حاضر/غیر فعال فلٹر — کسٹمر جیسا ہی ---------- -->
-    let filtered = suppliersData.filter(s => partyMatchesQuery(s, query) && !!s.isDormant === !!supplierShowDormant);
+    // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر فعال فلٹر مکمل ہائیڈ — ہمیشہ سب سپلائرز ---------- -->
+    let filtered = suppliersData.filter(s => partyMatchesQuery(s, query));
     // ---------- 🔎 صدام کی ہدایت (FM3SEPTH23): کم/زیادہ بقایہ کی ترتیب ----------
     if(supplierSortMode === 'highest') filtered.sort((a,b) => (b.total_payable||0) - (a.total_payable||0));
     else if(supplierSortMode === 'lowest') filtered.sort((a,b) => (a.total_payable||0) - (b.total_payable||0));
@@ -20426,8 +20451,9 @@ function renderPartyList(query = ''){
     const sortBtn = (val, label) => `<button onclick="setSupplierSortMode('${val}')" style="flex:1; padding:8px 4px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer; background:${supplierSortMode===val?'var(--primary)':'#f1f5f9'}; color:${supplierSortMode===val?'#fff':'var(--text)'};">${label}</button>`;
     const dormantCount = suppliersData.filter(s => !!s.isDormant).length;
     const presentCount = suppliersData.filter(s => !s.isDormant).length;
+    // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر فعال فلٹر بار مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
     const filterBarHtml = `<div dir="rtl" style="display:flex; gap:6px; margin-bottom:8px;">${sortBtn('name','🔤 نام')}${sortBtn('serial','🔢 سیریل')}${sortBtn('highest','📈 زیادہ بقایہ پہلے')}${sortBtn('lowest','📉 کم بقایہ پہلے')}</div>
-      <div dir="rtl" style="display:flex; gap:6px; margin-bottom:12px;">
+      <div dir="rtl" style="display:none; gap:6px; margin-bottom:12px;">
         <button onclick="setSupplierShowDormant(false)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${!supplierShowDormant?'#134e2c':'#f1f5f9'}; color:${!supplierShowDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🟢 حاضر سپلائرز (${presentCount})</button>
         <button onclick="setSupplierShowDormant(true)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${supplierShowDormant?'#78350f':'#f1f5f9'}; color:${supplierShowDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🪦 غیر فعال (${dormantCount})</button>
       </div>`;
@@ -20443,7 +20469,8 @@ function renderPartyList(query = ''){
       rowClickJs: `openSupplierProfile(${s.supplier_id})`,
       deleteJs: `deleteSupplier(${s.supplier_id})`,
       serialClickJs: `openSerialPicker('suppliers', ${s.supplier_id}, ${s.serial_no ?? 'null'}, '${(s.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`,
-      dormantJs: isAdminSup ? `animateAndToggleSupplier(${s.supplier_id})` : null,
+      // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر فعال سوائپ مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
+      dormantJs: null,
       isDormant: s.isDormant,
       swipeClass: 'supSwipeRow'
     })).join('');
@@ -22517,7 +22544,8 @@ function renderOtCustomerList(query){
   const todayStr = todayDateKey();
 
   const list = customersData.filter(c => {
-    if(c.isDormant) return false; // ---------- 🪦 صدام کی ہدایت (FM3SEPTH10): کھوہ کھاتے والے آرڈر ٹیکنگ میں کبھی نظر نہیں آئیں گے ----------
+    // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — کھوہ کھاتے بھی اب آرڈر ٹیکنگ میں نظر آئیں گے ----------
+    // if(c.isDormant) return false;
     if(otAreaFilter === 'retail' && c.rateArea !== 'retail') return false;
     if(otAreaFilter === 'wholesale' && c.rateArea !== 'wholesale') return false;
     if(otAreaFilter === 'today' && !customerBoughtToday(c.customer_id)) return false;
@@ -23561,8 +23589,8 @@ let rlZoomPct = loadFromStorage('rlZoomPct', 100);
 function renderRecoveryListEmployeeView(){
   rlAmountMap = {};
   rlMethodMap = {};
-  // ---------- 🪦 صدام کی ہدایت (FM3SEPTH10): "کھوہ کھاتے" میں گئے کسٹمر یہاں کبھی نظر نہیں آئیں گے ----------
-  let owing = customersData.filter(c => c.total_receivable > 0 && !c.isDormant);
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — کھوہ کھاتے والے کسٹمر بھی اب ریکوری لسٹ میں نظر آئیں گے ----------
+  let owing = customersData.filter(c => c.total_receivable > 0);
   // ---------- 🔍 صدام کی ہدایت (FM15SEPTU): نام یا سیریل نمبر سے سرچ ---------- -->
   const rlQ = (document.getElementById('rlCustSearch')?.value || '').trim().toLowerCase();
   if(rlQ){
@@ -28135,7 +28163,8 @@ function renderRrCustomerList(query){
   if(!wrap) return;
   const q = (query || '').trim().toLowerCase();
   const list = customersData.filter(c => {
-    if(c.isDormant) return false;
+    // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ ----------
+    // if(c.isDormant) return false;
     if(!q) return true;
     return (c.name || '').toLowerCase().includes(q) || (c.phone || '').includes(q);
   }).sort((a, b) => a.name.localeCompare(b.name, 'ur'));
@@ -28173,7 +28202,8 @@ function renderRrItemGrid(query){
   if(!wrap) return;
   const q = (query || '').trim().toLowerCase();
   const rows = [];
-  productsData.filter(p => !p.isDormant).sort((a,b) => (a.serial_no||0) - (b.serial_no||0)).forEach(p => {
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ ----------
+  productsData.sort((a,b) => (a.serial_no||0) - (b.serial_no||0)).forEach(p => {
     (p.variants || []).forEach(v => {
       const fullName = p.name + (v.label && v.label !== p.name ? ' ' + v.label : '');
       if(q && !fullName.toLowerCase().includes(q)) return;
