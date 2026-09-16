@@ -8177,7 +8177,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر4:43pm';
+const APP_BUILD_VERSION = 'بدھ16ستمبر4:51pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -35393,7 +35393,7 @@ function syncReportStyleControls(){
       fontSelect.innerHTML = FONT_PRESETS.map(f => `<option value="${f.id}">${f.label}</option>`).join('');
       fontSelect.dataset.filled = '1';
     }
-    fontSelect.value = AppState.settings.reportFontId || 'segoe';
+    fontSelect.value = AppState.settings.reportFontId || 'jameelnastaleeqkasheeda';
   }
 
   const rSwatchWrap = document.getElementById('rpscColorSwatches');
@@ -35575,7 +35575,7 @@ async function renderReportToCanvas(){
   const showStock = currentReportType === 'inventory' || !!AppState.settings.reportShowStockQty;
   const decimals = AppState.settings.reportPriceDecimals ?? 0; // ---------- بل کی طرح — رپورٹ کی قیمتوں کے ڈیسیمل پوائنٹس کنٹرول ----------
 
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی ----------
   try{
     await document.fonts.load(`bold 20px ${fontFam}`);
@@ -35650,8 +35650,9 @@ async function renderReportToCanvas(){
     ];
   }
   cols[0].label = 'Item';
-  let cxPos = tableLeft;
-  cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
+  // ---------- ð ØµØ¯Ø§Ù Ú©Û ÛØ¯Ø§ÛØª (FM16SEPWE10): Ú©Ø§ÙÙÚ Ù¾ÙÙÛ Ø¨Ø§ÛÛÚ (Ø§ÙÚ¯ÙØ´) Ø³Ú Ø³Û Ø´Ø±ÙØ¹ ÛÙ Ú©Ø± Ø¯Ø§ÛÛÛÚº Ø·Ø±Ù Ø¬Ø§ØªÛ ØªÛÛ Ø§Ø¨ Ø¯Ø§ÛÛÛ Ø³Û Ø´Ø±ÙØ¹ Ú©ÛØ§ Ø¬Ø§ØªØ§ ÛÛ Ù Ø¨Ø§ÛÛÚº Ø¬Ø§ Ú©Ø± (Ø§Ø±Ø¯Ù RTL Ø·Ø±Ø²), Ù¾ÙÙØ§ Ú©Ø§ÙÙ (ÙØ«ÙØ§Ù #) Ø§Ø¨ Ø³Ø¨ Ø³Û Ø¯Ø§ÛÛÛ ÙØ¸Ø± Ø¢Ø¦Û Ú¯Ø§ ---------- -->
+  let cxPos = tableRight;
+  cols.forEach(c => { cxPos -= c.width; c.x = cxPos; });
   // ---------- اگر کسی کالم کا لیبل ممکنہ طور پر دو لائنوں میں جا سکتا ہو (جیسے Purchase/Selling یا In Stock) تو
   // ہیڈر کی قطار پہلے سے ہی اتنی اونچی رکھیں کہ زوم بڑھانے پر بھی متن نہ ٹکرائے/نہ کٹے ----------
   if(cols.some(c => c.twoLine || /[\/ ]/.test(c.label))){
@@ -35947,7 +35948,7 @@ async function renderTodaySaleReportToCanvas(){
   const bold = AppState.settings.reportBoldItems !== false;
   const align = AppState.settings.reportAlign || 'left';
   const decimals = AppState.settings.reportPriceDecimals ?? 0;
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی ----------
   try{
     await document.fonts.load(`bold 20px ${fontFam}`);
@@ -35987,8 +35988,9 @@ async function renderTodaySaleReportToCanvas(){
     {key:'name', label:'Item', width: totalW - qtyW},
     {key:'qty', label:'Qty Sold', width: qtyW},
   ];
-  let cxPos = tableLeft;
-  cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
+  // ---------- ð ØµØ¯Ø§Ù Ú©Û ÛØ¯Ø§ÛØª (FM16SEPWE10): Ú©Ø§ÙÙÚ Ù¾ÙÙÛ Ø¨Ø§ÛÛÚ (Ø§ÙÚ¯ÙØ´) Ø³Ú Ø³Û Ø´Ø±ÙØ¹ ÛÙ Ú©Ø± Ø¯Ø§ÛÛÛÚº Ø·Ø±Ù Ø¬Ø§ØªÛ ØªÛÛ Ø§Ø¨ Ø¯Ø§ÛÛÛ Ø³Û Ø´Ø±ÙØ¹ Ú©ÛØ§ Ø¬Ø§ØªØ§ ÛÛ Ù Ø¨Ø§ÛÛÚº Ø¬Ø§ Ú©Ø± (Ø§Ø±Ø¯Ù RTL Ø·Ø±Ø²), Ù¾ÙÙØ§ Ú©Ø§ÙÙ (ÙØ«ÙØ§Ù #) Ø§Ø¨ Ø³Ø¨ Ø³Û Ø¯Ø§ÛÛÛ ÙØ¸Ø± Ø¢Ø¦Û Ú¯Ø§ ---------- -->
+  let cxPos = tableRight;
+  cols.forEach(c => { cxPos -= c.width; c.x = cxPos; });
   const colTextX = (c) => align === 'center' ? c.x + c.width/2 : (align === 'right' ? c.x + c.width - 6 : c.x + 6);
   const colTextAlign = align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left');
   // ---------- "Qty Sold" جیسے دو لفظوں والے ہیڈر بھی زوم بڑھانے پر نہ ٹکرائیں — پہلے سے جگہ رکھ لیں ----------
@@ -36312,12 +36314,15 @@ async function renderDailyStockProfitReportToCanvas(){
     totalProfitToday += realProfit;
     rows.push({serial: p.serial_no ?? '?', name: p.name, label: v.label || '', opening, added, total, sold, remaining, profit: realProfit});
   });
-  rows.sort((a,b) => (a.serial === '?' ? 9999 : a.serial) - (b.serial === '?' ? 9999 : b.serial));
+  // ---------- 🏆 صدام کی ہدایت (FM16SEPWE11): سیریل نمبر کے حساب سے ترتیب کے بجائے اب سب سے زیادہ منافع
+  // والی سبزی سب سے اوپر، اور سب سے کم (یا نقصان والی) سبزی سب سے آخر میں — یعنی آج کے منافع کے حساب سے
+  // Descending ترتیب؛ سیریل نمبر کا اب کوئی عمل دخل نہیں ---------- -->
+  rows.sort((a,b) => b.profit - a.profit);
 
   const fontScale = (AppState.settings.reportFontScale || 100) / 100;
   const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
   const bold = AppState.settings.reportBoldItems !== false;
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.family;
   try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
 
@@ -36348,8 +36353,9 @@ async function renderDailyStockProfitReportToCanvas(){
     {key:'remaining', label:'باقی', width:wNum},
     {key:'profit', label:'منافع', width:wNum},
   ];
-  let cxPos = tableLeft;
-  cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
+  // ---------- ð ØµØ¯Ø§Ù Ú©Û ÛØ¯Ø§ÛØª (FM16SEPWE10): Ú©Ø§ÙÙÚ Ù¾ÙÙÛ Ø¨Ø§ÛÛÚ (Ø§ÙÚ¯ÙØ´) Ø³Ú Ø³Û Ø´Ø±ÙØ¹ ÛÙ Ú©Ø± Ø¯Ø§ÛÛÛÚº Ø·Ø±Ù Ø¬Ø§ØªÛ ØªÛÛ Ø§Ø¨ Ø¯Ø§ÛÛÛ Ø³Û Ø´Ø±ÙØ¹ Ú©ÛØ§ Ø¬Ø§ØªØ§ ÛÛ Ù Ø¨Ø§ÛÛÚº Ø¬Ø§ Ú©Ø± (Ø§Ø±Ø¯Ù RTL Ø·Ø±Ø²), Ù¾ÙÙØ§ Ú©Ø§ÙÙ (ÙØ«ÙØ§Ù #) Ø§Ø¨ Ø³Ø¨ Ø³Û Ø¯Ø§ÛÛÛ ÙØ¸Ø± Ø¢Ø¦Û Ú¯Ø§ ---------- -->
+  let cxPos = tableRight;
+  cols.forEach(c => { cxPos -= c.width; c.x = cxPos; });
   const colTextX = (c) => c.x + c.width/2;
 
   const fitCenteredLines = (text, maxWidth, basePx, weight) => {
@@ -36692,7 +36698,7 @@ async function renderDiarySummaryReportToCanvas(){
   const align = AppState.settings.reportAlign || 'left';
   const decimals = AppState.settings.reportPriceDecimals ?? 0;
   const fmt = (n) => Number(n||0).toFixed(decimals);
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی ----------
   try{
     await document.fonts.load(`bold 20px ${fontFam}`);
