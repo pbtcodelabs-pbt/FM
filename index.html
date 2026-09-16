@@ -602,19 +602,19 @@
   .saVegNavDialTrack{
     display:flex; align-items:flex-end; overflow-x:auto; overflow-y:hidden;
     scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
-    height:34px; padding:0 calc(50% - 15px);
+    height:40px; padding:0 calc(50% - 17px);
     background:#fff; border:1.5px solid #c7d2fe; border-radius:8px;
     scrollbar-width:none; direction:ltr;
   }
   .saVegNavDialTrack::-webkit-scrollbar{ display:none; }
   .saVegNavTick{
-    flex:0 0 30px; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center;
-    justify-content:flex-end; gap:2px; color:#94a3b8; font-weight:700; font-size:9.5px;
-    cursor:pointer; user-select:none; padding-bottom:3px; font-family:Arial,Helvetica,sans-serif;
+    flex:0 0 34px; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center;
+    justify-content:flex-end; gap:2px; color:#334155; font-weight:900; font-size:12px;
+    cursor:pointer; user-select:none; padding-bottom:4px; font-family:'Arial Black',Arial,Helvetica,sans-serif;
   }
   .saVegNavTick .tickLine{ width:2px; height:9px; background:#cbd5e1; border-radius:1px; }
-  .saVegNavTick.active{ color:var(--primary-dark); font-size:13px; font-weight:900; }
-  .saVegNavTick.active .tickLine{ width:3px; height:16px; background:var(--primary); }
+  .saVegNavTick.active{ color:#fff; font-size:15px; font-weight:900; background:var(--primary); border-radius:6px; padding:1px 4px 4px; }
+  .saVegNavTick.active .tickLine{ width:3px; height:16px; background:#fff; }
   .saVegNavDialPointer{
     position:absolute; top:-5px; left:50%; transform:translateX(-50%);
     width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent;
@@ -5320,6 +5320,19 @@
           <input type="range" id="otBoldSlider" min="400" max="900" step="50" value="700" oninput="setOtItemsFontWeight(this.value)" style="flex:1;">
           <span style="font-size:12.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap;">موٹا</span>
         </div>
+        <!-- ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE8): آرڈر ٹیکنگ میں بھی وہی سبزی نیویگیٹر (3D اگلا/پچھلا بٹن
+             + نمبر ویل) — اسی سٹاک مینجمنٹ والے سسٹم سے، منتخب سبزی خودکار نمایاں ہو کر سکرول ہو جاتی ہے ---------- -->
+        <div id="otVegNavigator" style="display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; margin-bottom:8px; box-shadow:inset 0 1px 3px rgba(0,0,0,.06);">
+          <button type="button" id="otVegNavPrevBtn" onclick="otVegNavStep(-1)" title="پچھلی سبزی" class="saVegNav3dBtn">◀</button>
+          <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px;">
+            <div id="otVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
+            <div style="position:relative;">
+              <div id="otVegNavDialTrack" class="saVegNavDialTrack" onscroll="otVegNavOnDialScroll()"></div>
+              <div class="saVegNavDialPointer"></div>
+            </div>
+          </div>
+          <button type="button" id="otVegNavNextBtn" onclick="otVegNavStep(1)" title="اگلی سبزی" class="saVegNav3dBtn">▶</button>
+        </div>
         <!-- ---------- 🔍 صدام کی ہدایت (FM15SEPTU): آئٹم لسٹ کے لیے سرچ بار — سیریل نمبر یا نام (جزوی لفظ)
              دونوں سے تلاش، جامع (comprehensive) — بالکل کسٹمر سرچ بار جیسی ---------- -->
         <input type="text" id="otItemSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderOtItemsPage()"
@@ -8150,7 +8163,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ16ستمبر9:04am';
+const APP_BUILD_VERSION = 'بدھ16ستمبر4:21pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10632,7 +10645,10 @@ function renderProductSpreadsheet(filtered, wrap){
       <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE6): پینل کو اوپر، حاضر/غیر حاضر ٹیب بٹنوں کی سیدھ میں لے جانے کے
            لیے منفی margin-top — چونکہ وہ ٹیب/فلٹر لائنیں اس جدول کے wrap سے باہر (اوپر) رینڈر ہوتی ہیں، صرف
            پینل کو ہی اوپر کھینچنا پڑتا ہے، جدول اپنی جگہ رہتا ہے ---------- -->
-      <div style="flex:0 0 92px; width:92px; margin:${draftNewProductId !== null ? '0' : '-70px'} 0 0 0; padding:0; align-self:flex-start; position:relative; z-index:6;">${buildVcInlinePanelHtml(wrap.id)}</div>
+      <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE7): سبزی نیویگیٹر (ویل) شامل ہونے کے بعد پرانی منفی مارجن والی
+           چال اب اس کے ساتھ ٹکرا کر نیچے گھس جاتی تھی — نیویگیٹر خود ہی فوری رسائی دیتا ہے، اس لیے یہ چال ہٹا
+           دی، پینل اب سادہ طریقے سے جدول کے ساتھ برابر شروع ہوگا ---------- -->
+      <div style="flex:0 0 92px; width:92px; margin:0; padding:0; align-self:flex-start; position:relative; z-index:6;">${buildVcInlinePanelHtml(wrap.id)}</div>
       <div id="${scrollWrapId}" style="flex:1; min-width:0; max-height:60vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea; margin:0;">
         <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableW}px;table-layout:fixed;font-size:12.5px; margin:0;">
           ${colgroupHtml}
@@ -18913,6 +18929,10 @@ function saVegNavGoToIndex(idx, _fromDialScroll){
     rowEl.style.boxShadow = 'inset 0 0 0 2px var(--primary)';
     setTimeout(() => { rowEl.style.boxShadow = ''; }, 1200);
   }
+  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE7): ویل پر نمبر منتخب کرتے ہی وہی سبزی بائیں پینل میں بھی خودکار
+  // کھل جائے — تاکہ صاف پتا چلے کہ اب اسی پر کام ہو رہا ہے، الگ سے ٹچ کرنے کی ضرورت نہ رہے ---------- -->
+  const firstVariant = p.variants && p.variants[0];
+  if(firstVariant) selectVcInlineRow(p.product_id, firstVariant.variant_id, 'stockAdjustmentListWrap');
 }
 // ---------- ویل کو ہاتھ سے گھمانے/سوائپ کرنے پر — رکنے کے بعد جو نمبر درمیانی نشان (پوائنٹر) کے عین نیچے آیا
 // اسے منتخب سمجھیں (بار بار پروگرامیٹک سکرول نہ چلے، اس لیے _fromDialScroll=true بھیجا جاتا ہے) ---------- -->
@@ -22862,6 +22882,92 @@ function backToOtCustomer(){
 // خرابی — پچھلے آئٹم کی تعداد بڑھتے رہنا — کی اصل وجہ یہی تھی، اب مکمل ختم) ----------
 // ---------- 🔍 صدام کی ہدایت (FM15SEPTU): آئٹم لسٹ کی جامع سرچ — سیریل نمبر (پورا یا جزوی) یا نام
 // (کوئی بھی لفظ، کہیں بھی) — دونوں طریقوں سے فوراً مل جائے ---------- -->
+// ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE8): آرڈر ٹیکنگ کا سبزی نیویگیٹر — بالکل سٹاک مینجمنٹ جیسا،
+// منتخب نمبر پر اسی آئٹم کی قطار/کارڈ خودکار نمایاں ہو کر سکرول ہو جاتا ہے (یہاں کوئی الگ ایڈٹ پینل نہیں،
+// صرف تلاش/نشاندہی کے لیے) ---------- -->
+let _otVegNavList = [];
+let _otVegNavCurIdx = 0;
+let _otVegNavScrollTimer = null;
+let _otVegNavProgrammaticScroll = false;
+function syncOtVegNavigator(list){
+  _otVegNavList = list || [];
+  const track = document.getElementById('otVegNavDialTrack');
+  const label = document.getElementById('otVegNavLabel');
+  const prevBtn = document.getElementById('otVegNavPrevBtn');
+  const nextBtn = document.getElementById('otVegNavNextBtn');
+  if(!track || !label) return;
+  if(_otVegNavList.length === 0){
+    track.innerHTML = '';
+    label.textContent = '— کوئی سبزی نہیں ملی —';
+    if(prevBtn) prevBtn.disabled = true;
+    if(nextBtn) nextBtn.disabled = true;
+    return;
+  }
+  if(prevBtn) prevBtn.disabled = false;
+  if(nextBtn) nextBtn.disabled = false;
+  const keepIdx = Math.max(0, Math.min(_otVegNavList.length - 1, _otVegNavCurIdx || 0));
+  track.innerHTML = _otVegNavList.map((v, i) => `<div class="saVegNavTick" data-idx="${i}" onclick="otVegNavGoToIndex(${i})"><span class="tickLine"></span><span>${i + 1}</span></div>`).join('');
+  otVegNavGoToIndex(keepIdx);
+}
+function otVegNavStep(delta){
+  if(_otVegNavList.length === 0) return;
+  let idx = Math.max(0, Math.min(_otVegNavList.length - 1, (_otVegNavCurIdx || 0) + delta));
+  otVegNavGoToIndex(idx);
+}
+function otVegNavGoToIndex(idx, _fromDialScroll){
+  idx = Math.max(0, Math.min(_otVegNavList.length - 1, Number(idx) || 0));
+  _otVegNavCurIdx = idx;
+  const v = _otVegNavList[idx];
+  const label = document.getElementById('otVegNavLabel');
+  if(!v) return;
+  if(label) label.textContent = `${idx + 1}/${_otVegNavList.length} — #${v.serial_no ?? '?'} ${v.name}`;
+  const track = document.getElementById('otVegNavDialTrack');
+  if(track){
+    track.querySelectorAll('.saVegNavTick').forEach(el => el.classList.toggle('active', Number(el.dataset.idx) === idx));
+    if(!_fromDialScroll){
+      const tickEl = track.querySelector(`.saVegNavTick[data-idx="${idx}"]`);
+      if(tickEl){
+        _otVegNavProgrammaticScroll = true;
+        tickEl.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+        setTimeout(() => { _otVegNavProgrammaticScroll = false; }, 350);
+      }
+    }
+  }
+  // ---------- کارڈ نظارے میں نمایاں کریں ---------- -->
+  const cardEl = document.querySelector(`.otItemRow[data-variant-id="${v.variant_id}"]`);
+  if(cardEl){
+    cardEl.scrollIntoView({behavior:'smooth', block:'center'});
+    cardEl.style.transition = 'box-shadow .25s, border-color .25s';
+    cardEl.style.boxShadow = '0 0 0 3px var(--primary)';
+    setTimeout(() => { cardEl.style.boxShadow = ''; }, 1200);
+  }
+  // ---------- جدول نظارے میں بھی اسی قطار کو نمایاں کریں ---------- -->
+  const rowEl = document.querySelector(`tr[data-variant-id="${v.variant_id}"]`);
+  if(rowEl){
+    rowEl.scrollIntoView({behavior:'smooth', block:'center'});
+    rowEl.style.transition = 'box-shadow .25s';
+    rowEl.style.boxShadow = 'inset 0 0 0 2px var(--primary)';
+    setTimeout(() => { rowEl.style.boxShadow = ''; }, 1200);
+  }
+}
+function otVegNavOnDialScroll(){
+  if(_otVegNavProgrammaticScroll) return;
+  clearTimeout(_otVegNavScrollTimer);
+  _otVegNavScrollTimer = setTimeout(() => {
+    const track = document.getElementById('otVegNavDialTrack');
+    if(!track) return;
+    const rect = track.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    let bestIdx = _otVegNavCurIdx, bestDist = Infinity;
+    track.querySelectorAll('.saVegNavTick').forEach(el => {
+      const r = el.getBoundingClientRect();
+      const d = Math.abs((r.left + r.width / 2) - centerX);
+      if(d < bestDist){ bestDist = d; bestIdx = Number(el.dataset.idx); }
+    });
+    otVegNavGoToIndex(bestIdx, true);
+  }, 130);
+}
+
 function getOtFilteredItems(){
   const q = (document.getElementById('otItemSearchInput')?.value || '').trim().toLowerCase();
   if(!q) return otFlatCache;
@@ -22877,6 +22983,7 @@ function renderOtItemsPage(){
   const btn = document.getElementById('otViewModeBtn');
   if(btn) btn.textContent = otViewMode === 'table' ? '🗂️ کارڈ' : '📊 جدول';
   const items = getOtFilteredItems();
+  syncOtVegNavigator(items); // ---------- 🎯 صدام کی ہدایت (FM16SEPWE8): نیویگیٹر ویل کو موجودہ فہرست سے ہم آہنگ کریں ---------- -->
   if(otViewMode === 'table'){
     document.getElementById('otPager').style.display = 'none';
     renderOtItemsTable(list);
@@ -22974,7 +23081,7 @@ function renderOtItemsTable(wrap){
     // باقی سفید رہ جاتے تھے) ---------- -->
     const rowTd = `background:${rowBg};`;
     return `
-      <tr>
+      <tr data-variant-id="${v.variant_id}">
         <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default !important;pointer-events:none !important;margin:0 !important;">${v.serial_no ?? '?'}</span></td>
         <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13.5px;font-weight:var(--otFw,700);">${pName}</td>
         <td style="${tdBase}${rowTd}${urduFont}font-size:11.5px;">${v.label || ''}</td>
