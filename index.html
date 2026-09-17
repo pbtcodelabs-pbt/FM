@@ -8273,7 +8273,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر8:12am';
+const APP_BUILD_VERSION = 'جمعرات17ستمبر8:27am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -19306,9 +19306,25 @@ function syncSaVegNavigator(list){
   }
   if(prevBtn) prevBtn.disabled = false;
   if(nextBtn) nextBtn.disabled = false;
-  const keepIdx = Math.max(0, Math.min(_saVegNavList.length - 1, _saVegNavCurIdx || 0));
+  // ---------- 🔒🔒 صدام کی ہدایت (17 ستمبر، اصل جڑ کا فکس): اصل بگ یہیں تھا — پہلے یہاں ہمیشہ نیویگیٹر
+  // کا اپنا پرانا انڈیکس (_saVegNavCurIdx، جو ہمیشہ 0 پر رہتا تھا کیونکہ نیچے جدول میں قطار ٹچ کرنے سے یہ
+  // کبھی نہیں بدلتا تھا) لے کر saVegNavGoToIndex() کو بلایا جاتا تھا — اور وہ فنکشن الٹا vcInlineSelectedId
+  // کو اسی پرانے انڈیکس (0 نمبر سبزی) پر واپس سیٹ کر دیتا اور جدول کو زبردستی اسی قطار پر سکرول کر دیتا۔
+  // یعنی جدول میں نیچے کسی بھی قطار پر ٹیپ کریں، یہ فنکشن ری-رینڈر کے فوراً بعد چل کر سلیکشن کو ہمیشہ پہلی
+  // سبزی (مثلاً ادرک) پر واپس پٹخ دیتا — اسی وجہ سے نہ کبھی صحیح سبزی اوپر پینل میں آتی، نہ اوپر کا ہیڈر
+  // ساکت رہتا (زبردستی سکرول کی وجہ سے اوپر کی طرف کھسک جاتا)۔ اب اگر کوئی سبزی پہلے سے منتخب ہے
+  // (vcInlineSelectedId، یعنی صارف نے ابھی جو قطار ٹیپ کی) تو نیویگیٹر خود اسی کے مطابق ہم آہنگ ہوگا —
+  // الٹا سلیکشن کو نیویگیٹر کے مطابق نہیں بدلا جائے گا ---------- -->
+  let keepIdx = Math.max(0, Math.min(_saVegNavList.length - 1, _saVegNavCurIdx || 0));
+  if(vcInlineSelectedId !== null){
+    const selIdx = _saVegNavList.findIndex(p => p.product_id === vcInlineSelectedId);
+    if(selIdx !== -1) keepIdx = selIdx;
+  }
   track.innerHTML = _saVegNavList.map((p, i) => `<div class="saVegNavTick" data-idx="${i}" onclick="saVegNavGoToIndex(${i})"><span class="tickLine"></span><span>${i + 1}</span></div>`).join('');
-  saVegNavGoToIndex(keepIdx);
+  // ---------- 🔒 اگر انڈیکس پہلے سے وہی ہے (کچھ بدلا ہی نہیں) تو دوبارہ سکرول اینیمیشن نہ چلائیں —
+  // صرف لیبل/ٹِک ہی تازہ ہوں، تاکہ ہر معمولی ری-رینڈر پر جدول/ویل خواہ مخواہ نہ ہلے ---------- -->
+  const alreadyThere = keepIdx === _saVegNavCurIdx;
+  saVegNavGoToIndex(keepIdx, alreadyThere, alreadyThere);
 }
 // ---------- ایک ایک سبزی آگے/پیچھے (ابھرے ہوئے تیر بٹن) ---------- -->
 function saVegNavStep(delta){
@@ -19343,7 +19359,7 @@ function scrollIntoOwnContainer(containerEl, targetEl, vertical){
     containerEl.scrollTo({left: Math.max(0, containerEl.scrollLeft + delta), behavior:'smooth'});
   }
 }
-function saVegNavGoToIndex(idx, _fromDialScroll){
+function saVegNavGoToIndex(idx, _fromDialScroll, _skipRowScroll){
   idx = Math.max(0, Math.min(_saVegNavList.length - 1, Number(idx) || 0));
   _saVegNavCurIdx = idx;
   const p = _saVegNavList[idx];
@@ -19389,7 +19405,8 @@ function saVegNavGoToIndex(idx, _fromDialScroll){
   const cardEl = document.getElementById(`sa-pcard-${p.product_id}`);
   if(cardEl){
     cardEl.classList.add('vegNavActiveRow');
-    cardEl.scrollIntoView({behavior:'smooth', block:'start'});
+    // ---------- 🔒 اگر یہ صرف ری-سنک ہے (سبزی پہلے سے وہی منتخب تھی، کچھ بدلا نہیں) تو دوبارہ سکرول نہ کریں ---------- -->
+    if(!_skipRowScroll) cardEl.scrollIntoView({behavior:'smooth', block:'start'});
     _saVegNavActiveCardEl = cardEl;
   } else {
     _saVegNavActiveCardEl = null;
@@ -19401,9 +19418,13 @@ function saVegNavGoToIndex(idx, _fromDialScroll){
   const rowEl = document.querySelector(`tr[data-product-id="${p.product_id}"]`);
   if(rowEl){
     rowEl.classList.add('vegNavActiveRow');
-    const sheetScrollWrap = rowEl.closest('div[id^="stockAdjSheetScrollWrap_"]');
-    if(sheetScrollWrap) scrollIntoOwnContainer(sheetScrollWrap, rowEl, true);
-    else rowEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+    // ---------- 🔒 اگر یہ صرف ری-سنک ہے (سبزی پہلے سے وہی منتخب تھی) تو دوبارہ سکرول نہ کریں — ہر ٹیپ پر
+    // خواہ مخواہ جدول کا اندرونی سکرول نہ ہلے ---------- -->
+    if(!_skipRowScroll){
+      const sheetScrollWrap = rowEl.closest('div[id^="stockAdjSheetScrollWrap_"]');
+      if(sheetScrollWrap) scrollIntoOwnContainer(sheetScrollWrap, rowEl, true);
+      else rowEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
     _saVegNavActiveRowEl = rowEl;
   } else {
     _saVegNavActiveRowEl = null;
