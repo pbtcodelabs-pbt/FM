@@ -8306,7 +8306,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر9:09am';
+const APP_BUILD_VERSION = 'جمعرات17ستمبر9:19am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10291,16 +10291,26 @@ function toggleStockAdjReportsDropdown(e){
   if(!wrap || !panel) return;
   if(wrap.classList.contains('open')){ closeStockAdjReportsDropdown(); return; }
   const btn = wrap.querySelector('.categoryDropdownBtn');
-  const r = btn ? btn.getBoundingClientRect() : {bottom:60,right:window.innerWidth,left:0};
+  const r = btn ? btn.getBoundingClientRect() : {bottom:60, left:8, right:200};
   document.body.appendChild(panel);
   panel.style.position = 'fixed';
-  panel.style.top = (r.bottom + 6) + 'px';
-  panel.style.right = Math.max(6, window.innerWidth - r.right) + 'px';
-  panel.style.left = 'auto';
   panel.style.zIndex = '9999';
   panel.style.opacity = '1';
   panel.style.transform = 'translateY(0)';
   panel.style.pointerEvents = 'auto';
+  panel.style.top = (r.bottom + 6) + 'px';
+  // ---------- 🐞🐞 صدام کی ہدایت (17 ستمبر، صبح 9:15) اصل جڑ کا فکس: یہ بٹن RTL فلیکس کی وجہ سے سکرین کے
+  // بائیں کنارے پر ہے، مگر پرانا حساب ہمیشہ بٹن کے دائیں کنارے سے (r.right سے) پینل کو الٹی طرف کھولتا تھا —
+  // جو صرف اس وقت ٹھیک کام کرتا جب بٹن سکرین کے دائیں طرف ہو۔ اب بٹن کے بائیں کنارے (r.left) سے پینل کھولا
+  // جاتا ہے اور سکرین کی دونوں طرف کی حدود کے اندر ہی رکھا جاتا ہے — بٹن سکرین کے کسی بھی کنارے پر ہو، پینل
+  // اور اس کے تمام رپورٹ نام ہمیشہ مکمل، صاف نظر آئیں گے، کبھی نہیں کٹیں گے ---------- -->
+  const margin = 8;
+  const panelWidth = panel.offsetWidth || 240;
+  let left = r.left;
+  if(left + panelWidth > window.innerWidth - margin) left = window.innerWidth - margin - panelWidth;
+  if(left < margin) left = margin;
+  panel.style.left = left + 'px';
+  panel.style.right = 'auto';
   wrap.classList.add('open');
 }
 function closeStockAdjReportsDropdown(){
@@ -37215,9 +37225,20 @@ async function renderMandiSaleRecordToCanvas(){
   const phoneFit = AppState.settings.businessPhone ? fitCenteredLines(AppState.settings.businessPhone, totalW, fsSmall) : null;
   const titleFit = fitCenteredLines('منڈی سیل ریکارڈ (برائے منشی)', totalW, fsSubtitle, 'bold');
 
-  let headerBandH = useA4 ? 90 : 56;
-  let bodyTop = headerBandH + headerRowH;
-  const estimatedHeight = bodyTop + (rows.length * baseRowH) + Math.round(fsSubtitle * 2) + 30;
+  // ---------- 🐞🐞 صدام کی ہدایت (17 ستمبر، صبح 9:15) اصل جڑ کا فکس: کینوس کی اونچائی (canvas.height) پہلے
+  // ہیڈر کے لیے ایک اندازاً/فکسڈ نمبر (56/90) فرض کر کے طے کی جاتی تھی — جبکہ اصل ہیڈر (کاروباری نام + فون +
+  // عنوان + تاریخ، سب اپنے فونٹ سائز کے حساب سے) عام طور پر اس اندازے سے کہیں زیادہ جگہ لیتا، خاص طور پر جب
+  // فونٹ زوم بڑا ہو یا فون نمبر بھی ساتھ ہو۔ نتیجہ: کینوس مطلوبہ سے چھوٹا بن جاتا، اور سب سے نیچے کی
+  // قطار (آخری لائن) کینوس کی حد سے باہر جا کر کٹ جاتی/بالکل نظر نہ آتی۔ اب ہیڈر کی اصل اونچائی وہی حساب
+  // لگا کر نکالی جاتی ہے جو نیچے ڈرائنگ میں استعمال ہوتا ہے — کینوس ہمیشہ بالکل ٹھیک، مکمل اونچائی کا بنے گا ---------- -->
+  let headerContentH = useA4 ? 24 : 14;
+  headerContentH += nameFit.px;
+  if(phoneFit) headerContentH += Math.round(fsSmall * 1.6);
+  headerContentH += Math.round(fsSubtitle * 1.7);
+  headerContentH += Math.round(fsSmall * 1.8);
+  headerContentH += 8;
+  let bodyTop = headerContentH + headerRowH;
+  const estimatedHeight = bodyTop + (rows.length * baseRowH) + 50;
 
   canvas.width = pxWidth;
   canvas.height = Math.max(estimatedHeight, 300);
