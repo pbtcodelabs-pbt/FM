@@ -8307,7 +8307,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر12:57pm';
+const APP_BUILD_VERSION = 'جمعرات17ستمبر07:53pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11737,6 +11737,27 @@ function goTo(screenName, _isHistoryNav){
     renderOrderTakingScreen();
     fetchAdvanceOrdersFromCloud(true);
     startAdvanceOrdersPolling();
+    // ---------- 🔧 فکس (17 ستمبر): آرڈر ٹیکنگ سکرین پر جاتے ہی پراڈکٹس/ریٹ لسٹ بھی کلاؤڈ سے تازہ منگوائیں —
+    // پہلے یہ سکرین صرف Advance Orders سنک کرتی تھی، پراڈکٹس کبھی نہیں — اس لیے ایڈمن کی لاک کی ہوئی/تبدیل شدہ
+    // لسٹ سیلزمین کو Order Taking میں نظر نہیں آتی تھی جب تک وہ خود Billing/Products سکرین نہ کھولے۔
+    // اب بالکل Billing سکرین جیسا ہی fetch + ہر 12 سیکنڈ خودکار پولنگ، اور اگر آئٹمز پیج پہلے سے کھلا ہو
+    // (کسٹمر منتخب ہو چکا ہو) تو تازہ ڈیٹا کے ساتھ وہ پیج بھی فوراً دوبارہ بن جائے گا ---------- -->
+    fetchProductsFromCloud(true).then(added => {
+      if(added){
+        otFlatCache = getFlatVariants().sort((a, b) => {
+          const sa = a.serial_no, sb = b.serial_no;
+          if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
+          if(sa == null) return 1;
+          if(sb == null) return -1;
+          return sa - sb;
+        });
+        const itemsStep = document.getElementById('otStepItems');
+        if(itemsStep && itemsStep.style.display !== 'none' && typeof renderOtItemsPage === 'function'){
+          renderOtItemsPage();
+        }
+      }
+    });
+    startProductsPolling();
   }
   // ---------- ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواست/جائزہ — بالکل Order Taking جیسا sync ---------- -->
   if(screenName === 'returnRequest'){
