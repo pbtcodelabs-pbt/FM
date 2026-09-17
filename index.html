@@ -625,7 +625,9 @@
      .saVegNav3dBtn کلاس سے، صرف چوڑائی/اونچائی بدلی گئی ---------- */
   /* ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح): ویل مزید صاف/کمپیکٹ — لمبی عمودی لائنیں ہٹا کر چھوٹی افقی
      ٹِک لائنیں، ہندسے پہلے سے بولڈ/بڑے، چوڑائی کم (46→36px)، اور فہرست کے ساتھ برابر (نیچے کی طرف تھوڑا شفٹ) ---------- */
-  .saVegNavVerticalWrap{ display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 36px; width:36px; margin-top:22px; }
+  <!-- ---------- 🆕 صدام کی ہدایت (17 ستمبر، رات 2): اوپر/نیچے تیر بٹن اب یہاں نہیں (➕ لائن میں شفٹ ہو گئے) —
+     اس لیے margin-top کم کر کے ویل کو تھوڑا اوپر کر دیا ---------- */
+  .saVegNavVerticalWrap{ display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 36px; width:36px; margin-top:6px; }
   .saVegNavVerticalWrap .saVegNav3dBtn{ width:34px; height:30px; }
   .saVegNavDialTrackV{
     display:flex; flex-direction:column; align-items:center; overflow-y:auto; overflow-x:hidden;
@@ -3747,31 +3749,44 @@
            میں تاکہ کم جگہ گھیرے اور فوراً نظر آئے ---------- -->
       <div id="stockAdjTopPanelSlot" style="margin-bottom:6px;"></div>
 
-      <!-- ---------- دوسری لائن: سرچ + نئی سبزی شامل کرنے کا ➕ بٹن — ترتیب اور انوینٹری ٹریک اب اوپر 📊 رپورٹس مینو میں شامل ---------- -->
-      <div class="productToolbar" style="margin-bottom:6px; display:flex; gap:5px; align-items:center;">
-        <input type="text" id="stockAdjSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderStockAdjustmentScreen(this.value)" style="flex:1;">
+      <!-- ---------- دوسری لائن: سرچ + ➕ نئی سبزی + 💾 محفوظ + ✏️ ترمیم + 🗑️ حذف + ▲▼ اگلی/پچھلی سبزی —
+           صدام کی ہدایت (17 ستمبر، رات 2): سیو/ایڈٹ/ڈیلیٹ بٹن نیچے نمبر خانوں والی لائن سے ہٹا کر یہاں ➕ کے
+           ساتھ لے آئے، اور ویل کے اوپر/نیچے تیر بٹن بھی یہیں سب سے آگے (کونے پر) شفٹ کر دیے — ویل کی جگہ اب
+           صرف خالی نمبر ٹریک کی ہے ---------- -->
+      <!-- ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): بٹن دوبارہ ترتیب دیے — بائیں سے دائیں: 🗑️ حذف (سب سے
+           الگ/باہر، تاکہ غلطی سے نہ دبے) ← ◀ پچھلی ← ▶ اگلی ← ✏️ ترمیم ← 💾 محفوظ ← ➕ نیا۔ سب بٹن اب ایک جیسی
+           اونچائی/چوڑائی (38px)، درمیان میں فاصلہ بھی بڑھا دیا (4px → 8px) تاکہ ایک بٹن دبانے سے دوسرا غلطی سے
+           نہ دب جائے ---------- -->
+      <div class="productToolbar" style="margin-bottom:6px; display:flex; gap:8px; align-items:center; flex-wrap:nowrap;">
+        <input type="text" id="stockAdjSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderStockAdjustmentScreen(this.value)" style="flex:1 1 auto; min-width:0;">
         <!-- ---------- 🆕 صدام کی ہدایت (FM17SEPTH): فہرست کے ہر ایک قطار کے اندر موجود ➕ بٹن (درمیان میں نئی
              خالی قطار بنانے والا) مکمل ہٹا دیا گیا — اب صرف یہ ایک ➕ بٹن ہے، نئی سبزی ہمیشہ فہرست کے آخری
              سیریل نمبر پر ہی شامل ہوگی (checkDraftCompletion پہلے سے یہی کرتا ہے) ---------- -->
-        <button type="button" onclick="vcInlineStartAdd()" title="نئی سبزی شامل کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:#dcfce7; color:#15803d; font-size:18px; font-weight:900; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.15);">➕</button>
+        <button type="button" onclick="vcInlineStartAdd()" title="نئی سبزی شامل کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:#dcfce7; color:#15803d; font-size:17px; font-weight:900; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.15);">➕</button>
+        <button type="button" onclick="vcInlinePanelSave(this)" title="محفوظ کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg,#34d95a,#16a34a); color:#fff; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">💾</button>
+        <button type="button" onclick="vcInlinePanelEdit()" title="سبزی میں ترمیم کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg,#60a5fa,#2563eb); color:#fff; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">✏️</button>
+        <button type="button" id="saVegNavNextBtn" onclick="saVegNavStep(1)" title="اگلی سبزی" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg, var(--primary), var(--primary-dark)); color:#fff; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">▶</button>
+        <button type="button" id="saVegNavPrevBtn" onclick="saVegNavStep(-1)" title="پچھلی سبزی" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg, var(--primary), var(--primary-dark)); color:#fff; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">◀</button>
+        <button type="button" onclick="vcInlinePanelDelete()" title="سبزی حذف کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg,#f87171,#b91c1c); color:#fff; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2); margin-right:16px;">🗑️</button>
       </div>
       </div><!-- /#stockAdjStickyHeader -->
 
       <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): اوپر کا حصہ مزید کمپیکٹ — کم جگہ گھیرے، فہرست جلدی نظر آئے ---------- -->
       <div class="productsLayout">
-        <!-- ---------- 🆕 صدام کی ہدایت (FM17SEPTH): سبزی نیویگیٹر ویل — اب فہرست کے دائیں طرف، عمودی حالت
-             میں، تاکہ دائیں ہاتھ کا انگوٹھا آسانی سے اگلی/پچھلی سبزی پر لے جا سکے ---------- -->
-        <div id="saVegNavigatorV" class="saVegNavVerticalWrap">
-          <button type="button" id="saVegNavPrevBtn" onclick="saVegNavStep(-1)" title="پچھلی سبزی" class="saVegNav3dBtn">▲</button>
+        <!-- ---------- 🆕 صدام کی ہدایت (17 ستمبر، رات 2): سبزی نیویگیٹر ویل — اب صرف خالی نمبر ٹریک، اوپر/نیچے
+             تیر بٹن اوپر ➕ والی لائن میں شفٹ ہو چکے ہیں۔ ویل خود تھوڑا اوپر کر دیا (margin-top کم کر کے) ---------- -->
+        <!-- ---------- 🗑️ صدام کی ہدایت (17 ستمبر، صبح 6): دائیں طرف کی عمودی "ویل پکر" (نمبر ٹریک) مکمل
+             ہٹا دی گئی — اب اس کی جگہ خالی نہیں رہے گی، نیچے فہرست پوری چوڑائی میں پھیل جائے گی
+             (کوڈ/فنکشن محفوظ ہیں، صرف display:none) ---------- -->
+        <div id="saVegNavigatorV" class="saVegNavVerticalWrap" style="display:none;">
           <div style="position:relative;">
             <div id="saVegNavDialTrack" class="saVegNavDialTrackV" onscroll="saVegNavOnDialScroll()"></div>
             <div class="saVegNavDialPointerV"></div>
           </div>
-          <button type="button" id="saVegNavNextBtn" onclick="saVegNavStep(1)" title="اگلی سبزی" class="saVegNav3dBtn">▼</button>
         </div>
 
-        <div class="productMain">
-          <div class="productList" id="stockAdjustmentListWrap">
+        <div class="productMain" style="width:100%; flex:1 1 100%;">
+          <div class="productList" id="stockAdjustmentListWrap" style="width:100%;">
             <!-- JS سے سبزیوں کے کارڈز یہاں بنیں گی -->
           </div>
         </div>
@@ -8247,7 +8262,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر5:56am';
+const APP_BUILD_VERSION = 'جمعرات17ستمبر7:30am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -17222,6 +17237,25 @@ let vcInlineSpeedMs = loadFromStorage('vcEditSpeedMs', 600);
 // ہے، کرسر اس میں کبھی نہیں جاتا)، پھر راولپنڈی، آخر میں اسلام آباد پر رک جاتا ہے ---------- -->
 const VC_INLINE_FIELD_ORDER = ['stock', 'purchase', 'labor', 'sellLabor', 'wholesale', 'retail'];
 const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', labor:'vcInlineLabor', sellLabor:'vcInlineSellLabor', wholesale:'vcInlineWholesale', retail:'vcInlineRetail', stock:'vcInlineStock'};
+// ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): 📦 سٹاک چھوڑا جا سکتا ہے (خالی/زیرو دونوں ٹھیک)، مگر باقی
+// یہ 5 خانے — 💰 خرید، 💪 م.خرید، 💪 م.فروخت، 🟢 راولپنڈی، 🔴 اسلام آباد — سب لکھے ہونے چاہئیں تبھی سبزی
+// "مکمل" شمار ہوگی، تبھی ◀▶ سے اگلی سبزی پر جایا جا سکے گا ---------- -->
+const VC_INLINE_REQUIRED_FIELDS = [
+  {field:'purchase', label:'💰 خرید قیمت'},
+  {field:'labor', label:'💪 مزدوری خرید'},
+  {field:'sellLabor', label:'💪 مزدوری فروخت'},
+  {field:'wholesale', label:'🟢 راولپنڈی ریٹ'},
+  {field:'retail', label:'🔴 اسلام آباد ریٹ'}
+];
+function vcInlineCheckRequiredFields(){
+  if(vcInlineSelectedId === null) return {ok:true};
+  for(const {field, label} of VC_INLINE_REQUIRED_FIELDS){
+    const el = document.getElementById(VC_INLINE_ID_MAP[field]);
+    if(!el) continue;
+    if(String(el.value).trim() === '') return {ok:false, field, label, el};
+  }
+  return {ok:true};
+}
 
 // ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح): بڑی تبدیلی — پینل اب واضح دو لائنوں میں: پہلی لائن صرف
 // نام (بولڈ) + پیکنگ + 🧮 حتمی خرید؛ دوسری لائن باقی سب خانے (سٹاک/خرید/مزدوری/ریٹ/رفتار) — تاکہ پینل کی
@@ -17229,6 +17263,11 @@ const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', labor:'vcInlineLabor', se
 // کوئی پرانی سبزی منتخب نہیں ہوتی، فہرست کی نچلی قطاروں کو ہاتھ نہیں لگایا جاتا، محفوظ کرتے ہی خودکار
 // اگلا سیریل نمبر ملتا ہے (vcInlineStartAdd / vcInlineSaveNew دیکھیں) ---------- -->
 let vcInlineAddMode = false;
+// ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): جب بھی نئی سبزی منتخب ہو (فہرست میں ٹچ کر کے یا ◀▶ تیر
+// سے) تو کرسر خودکار پہلے 📦 سٹاک والے خانے میں جا کر رک جائے — جب تک اس میں کچھ نہ لکھا جائے، کرسر وہیں
+// کھڑا رہے۔ یہ flag صرف اسی وقت true کیا جاتا ہے جب سبزی واقعی بدلی ہو، عام دوبارہ رینڈر (مثلاً سرچ لکھتے
+// وقت) پر فوکس نہیں چھینا جاتا ---------- -->
+let vcInlineFocusStockPending = false;
 function buildVcInlinePanelHtml(){
   const numFontStack = "'Arial Narrow',Arial,sans-serif";
   const urduFont = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif";
@@ -17274,27 +17313,26 @@ function buildVcInlinePanelHtml(){
         </div>
       </div>
 
-      <!-- ---------- منتخب سبزی کی تفصیل — پہلی لائن: نام کے اندر ہی پیکنگ شامل (مثلاً "پیاز فی کلو")، نام کا
-           خانہ اب تنگ (max-width) ہے۔ پیکنگ بدلنے کا بٹن اب صرف چھوٹا آئیکن (📦▾) ہے۔ رفتار (⏱️) کنٹرول بھی
-           اسی پہلی لائن میں الگ سے، تاکہ نیچے والی لائن صرف نمبر خانوں اور 💾✏️🗑️ کے لیے خالی رہے —
-           صدام کی ہدایت (17 ستمبر، رات) ---------- -->
+      <!-- ---------- منتخب سبزی کی تفصیل — پہلی لائن: نام (بڑا/بولڈ، بچی ہوئی ساری خالی جگہ لیتا ہے، نام کے
+           اندر ہی پیکنگ شامل مثلاً "پیاز فی کلو") → پیکنگ بٹن → رفتار کنٹرول، دونوں سب سے بائیں (نام کے ساتھ
+           والی خالی جگہ میں نہیں) — 💾✏️🗑️ اب یہاں نہیں بلکہ اوپر ➕ والی لائن میں ہیں (سرچ بار کے ساتھ)
+           — صدام کی ہدایت (17 ستمبر، رات 2) ---------- -->
       <div id="vcInlinePanelBody" style="display:${showBody ? 'block':'none'};">
-        <div style="display:flex; align-items:center; gap:5px; margin-bottom:4px;" dir="rtl">
-          <div id="vcInlinePanelName" style="flex:0 1 auto; max-width:120px; min-width:0; font-family:${urduFont}; font-size:13.5px; font-weight:900; color:#fff; background:rgba(255,255,255,.14); border-radius:6px; padding:4px 6px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
-          <button type="button" id="vcInlinePanelPacking" onclick="vcInlineOpenPackingPicker()" title="پیکنگ بدلیں / نئی شامل کریں" style="flex:0 0 auto; font-family:${urduFont}; font-size:12px; font-weight:800; color:#1e3a8a; background:#dbeafe; border:1px solid #93c5fd; border-radius:5px; padding:4px 7px; text-align:center; white-space:nowrap; cursor:pointer;">📦▾</button>
-          <div style="flex:1 1 auto;"></div>
-          <div style="display:flex; flex-direction:column; align-items:center; gap:1px; background:rgba(255,255,255,.12); border-radius:6px; padding:3px 5px; flex:0 0 auto;">
-            <span style="font-size:7px; color:#dbeafe; font-weight:900; white-space:nowrap;">⏱️ رفتار</span>
-            <div style="display:flex; align-items:center; gap:2px;">
-              <button type="button" onclick="adjustVcInlineSpeed(150)" style="width:16px; height:16px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:10px;">−</button>
-              <span id="vcInlineSpeedVal" style="width:26px; text-align:center; font-weight:900; color:#fff; font-size:8px;">${(vcInlineSpeedMs/1000).toFixed(1)}س</span>
-              <button type="button" onclick="adjustVcInlineSpeed(-150)" style="width:16px; height:16px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:10px;">+</button>
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;" dir="rtl">
+          <div id="vcInlinePanelName" style="flex:1 1 auto; min-width:0; font-family:${urduFont}; font-size:18px; font-weight:900; color:#fff; background:rgba(255,255,255,.14); border-radius:7px; padding:7px 8px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+          <button type="button" id="vcInlinePanelPacking" onclick="vcInlineOpenPackingPicker()" title="پیکنگ بدلیں / نئی شامل کریں" style="flex:0 0 auto; font-family:${urduFont}; font-size:13px; font-weight:800; color:#1e3a8a; background:#dbeafe; border:1px solid #93c5fd; border-radius:6px; padding:6px 9px; text-align:center; white-space:nowrap; cursor:pointer;">📦▾</button>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:2px; background:rgba(255,255,255,.12); border-radius:7px; padding:4px 6px; flex:0 0 auto;">
+            <span style="font-size:8.5px; color:#dbeafe; font-weight:900; white-space:nowrap;">⏱️ رفتار</span>
+            <div style="display:flex; align-items:center; gap:7px;">
+              <button type="button" onclick="adjustVcInlineSpeed(150)" style="width:23px; height:23px; border-radius:5px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:14px;">−</button>
+              <span id="vcInlineSpeedVal" style="min-width:32px; text-align:center; font-weight:900; color:#fff; font-size:11px;">${(vcInlineSpeedMs/1000).toFixed(1)}س</span>
+              <button type="button" onclick="adjustVcInlineSpeed(-150)" style="width:23px; height:23px; border-radius:5px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:14px;">+</button>
             </div>
           </div>
         </div>
-        <!-- ---------- دوسری لائن: سٹاک → خرید → م.خرید → م.فروخت → 🧮 حتمی خرید → راولپنڈی → اسلام آباد →
-             💾 محفوظ → ✏️ ترمیم → 🗑️ حذف — سب ایک ہی لائن میں، اوپر نیچے سٹیک نہیں؛ اگر تنگ سکرین پر پوری
-             لائن نہ سمائے تو خانے سکڑنے کی بجائے افقی سکرول ہو جائے گی (وہی لائن ٹوٹے بغیر) ---------- -->
+        <!-- ---------- دوسری لائن: سٹاک → خرید → م.خرید → م.فروخت → 🧮 حتمی خرید → راولپنڈی → اسلام آباد —
+             صرف نمبر خانے، اوپر نیچے سٹیک نہیں؛ اگر تنگ سکرین پر پوری لائن نہ سمائے تو خانے سکڑنے کی بجائے
+             افقی سکرول ہو جائے گی (وہی لائن ٹوٹے بغیر) ---------- -->
         <div style="display:flex; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; align-items:center; gap:5px; padding-bottom:2px;" dir="rtl">
           ${fieldBox('vcInlineStock', '📦 سٹاک', 'linear-gradient(155deg,#eef2ff,#e0e7ff)', '#c7d2fe', '#a5b4fc', '#3730a3')}
           ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e')}
@@ -17306,19 +17344,25 @@ function buildVcInlinePanelHtml(){
           </div>
           ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d')}
           ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')}
-          <button type="button" onclick="vcInlinePanelSave(this)" title="محفوظ کریں" style="flex:0 0 auto; width:34px; height:34px; border-radius:8px; border:none; background:linear-gradient(180deg,#34d95a,#16a34a); color:#fff; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">💾</button>
-          <button type="button" onclick="vcInlinePanelEdit()" title="سبزی میں ترمیم کریں" style="flex:0 0 auto; width:34px; height:34px; border-radius:8px; border:none; background:linear-gradient(180deg,#60a5fa,#2563eb); color:#fff; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">✏️</button>
-          <button type="button" onclick="vcInlinePanelDelete()" title="سبزی حذف کریں" style="flex:0 0 auto; width:34px; height:34px; border-radius:8px; border:none; background:linear-gradient(180deg,#f87171,#b91c1c); color:#fff; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">🗑️</button>
         </div>
       </div>
     </div>`;
 }
 
-// ---------- 🆕 صدام کی ہدایت (17 ستمبر، رات): مستقل پینل کی لائن میں 💾/✏️/🗑️ بٹن — 💾 صرف تسلی کے لیے
-// (ہر خانہ ویسے بھی لکھتے ہی خودکار محفوظ ہو جاتا ہے)، ✏️ پوری سبزی کا نام/تصویر/کیٹگری ایڈٹ کرنے کا Modal
-// کھولتا ہے، 🗑️ اسی ایڈمن پاسورڈ والے تصدیقی نظام سے حذف کرتا ہے جو باقی جگہ استعمال ہوتا ہے ---------- -->
+// ---------- 🆕 صدام کی ہدایت (17 ستمبر، رات): 💾/✏️/🗑️ بٹن اب پینل میں نہیں — اوپر ➕ والی لائن میں
+// (سرچ بار کے ساتھ)۔ 💾 صرف تسلی کے لیے (ہر خانہ ویسے بھی لکھتے ہی خودکار محفوظ ہو جاتا ہے)، ✏️ پوری سبزی
+// کا نام/تصویر/کیٹگری ایڈٹ کرنے کا Modal کھولتا ہے، 🗑️ اسی ایڈمن پاسورڈ والے تصدیقی نظام سے حذف کرتا ہے
+// جو باقی جگہ استعمال ہوتا ہے ---------- -->
 function vcInlinePanelSave(btnEl){
   if(vcInlineSelectedId === null) return;
+  // ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): اگر خرید/مزدوری/ریٹ میں سے کوئی خانہ خالی ہو تو 💾 پر
+  // صرف تنبیہ دیں، جھوٹی ✅ کامیابی نہ دکھائیں (سٹاک خالی ہو تو کوئی مسئلہ نہیں) ---------- -->
+  const check = vcInlineCheckRequiredFields();
+  if(!check.ok){
+    alert(`⚠️ یہ سبزی مکمل محفوظ نہیں ہوگی، پہلے یہ خانہ بھریں: ${check.label}`);
+    if(check.el){ check.el.focus({preventScroll:true}); check.el.select(); }
+    return;
+  }
   persistAllData();
   pushProductsToCloud();
   if(btnEl){
@@ -17405,6 +17449,7 @@ function selectVcInlineRow(productId, variantId, sourceWrapId){
   vcInlineSelectedId = productId;
   vcInlineSelectedVariantId = variantId;
   vcInlineSourceWrapId = sourceWrapId;
+  vcInlineFocusStockPending = true; // ---------- نئی سبزی چنی گئی — کرسر سٹاک والے خانے میں جائے گا ---------- -->
   // ---------- منتخب قطار کو نیلا کرنے کے لیے صرف اسی سکرین کو دوبارہ رینڈر (اسکرول محفوظ رہتا ہے) ---------- -->
   const savedScrollY = saveMainScrollY();
   if(sourceWrapId === 'productListWrap') renderProductList(document.getElementById('productSearchInput')?.value || '');
@@ -17444,6 +17489,14 @@ function vcInlinePopulate(){
   document.getElementById('vcInlineRetail').value = variant.retail || '';
   document.getElementById('vcInlineStock').value = variant.stock || '';
   document.getElementById('vcInlineTotalPurchase').textContent = ((variant.purchase||0) + (variant.labor||0)).toLocaleString();
+  // ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): سبزی بدلنے پر کرسر خودکار 📦 سٹاک کے خانے میں ---------- -->
+  if(vcInlineFocusStockPending){
+    vcInlineFocusStockPending = false;
+    setTimeout(() => {
+      const stockEl = document.getElementById('vcInlineStock');
+      if(stockEl){ stockEl.focus({preventScroll:true}); stockEl.select(); }
+    }, 40);
+  }
 }
 
 function vcInlineScheduleAdvance(field){
@@ -19195,6 +19248,14 @@ function syncSaVegNavigator(list){
 // ---------- ایک ایک سبزی آگے/پیچھے (ابھرے ہوئے تیر بٹن) ---------- -->
 function saVegNavStep(delta){
   if(_saVegNavList.length === 0) return;
+  // ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): جب تک موجودہ سبزی کے تمام ضروری خانے (خرید/مزدوری/ریٹ)
+  // نہ بھریں، ◀▶ سے اگلی/پچھلی سبزی پر جانے نہ دیں — نامکمل خانے پر کرسر واپس لے جا کر بتا دیں ---------- -->
+  const check = vcInlineCheckRequiredFields();
+  if(!check.ok){
+    alert(`⚠️ پہلے یہ خانہ بھریں: ${check.label}`);
+    if(check.el){ check.el.focus({preventScroll:true}); check.el.select(); }
+    return;
+  }
   let idx = Math.max(0, Math.min(_saVegNavList.length - 1, (_saVegNavCurIdx || 0) + delta));
   saVegNavGoToIndex(idx);
 }
@@ -19293,6 +19354,7 @@ function saVegNavGoToIndex(idx, _fromDialScroll){
     vcInlineSelectedId = p.product_id;
     vcInlineSelectedVariantId = firstVariant.variant_id;
     vcInlineSourceWrapId = 'stockAdjustmentListWrap';
+    vcInlineFocusStockPending = true; // ---------- ◀▶ سے اگلی/پچھلی سبزی پر کرسر بھی سٹاک میں جائے ---------- -->
     try{ vcInlinePopulate(); }catch(e){}
   }
 }
