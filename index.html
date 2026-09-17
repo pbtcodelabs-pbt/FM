@@ -3693,13 +3693,12 @@
            عنوان کے ساتھ جو خالی جگہ بچتی تھی وہاں اب 📊 رپورٹس بٹن آ گیا۔ پرانی الگ رپورٹس لائن اور نیچے
            والی سیریل/ترتیب ڈراپ ڈاؤن + انوینٹری چیک باکس والی لائن ختم کر کے، ترتیب اور انوینٹری ٹریک دونوں
            اسی 📊 رپورٹس مینو کے اندر شامل کر دیے گئے — درمیان کی خالی جگہ/فاصلہ بھی ختم ---------- -->
-      <!-- ---------- 🔒🔒 صدام کی ہدایت (17 ستمبر، صبح 8:00) حتمی فکس: position:sticky بار بار Android
-           WebView میں بے بھروسہ نکلا (پہلے -webkit-sticky fallback بھی لگایا تھا، پھر بھی غائب ہو جاتا تھا)۔
-           اب مکمل طور پر position:fixed پر منتقل کر دیا — یہ سکرول سے مکمل آزاد ہے، کبھی غائب/سلائیڈ نہیں ہو
-           سکتا، چاہے کیسے بھی سکرول کریں یا کوئی رو منتخب کریں۔ نیچے فہرست پر یہ نہ چڑھے اس کے لیے ایک خالی
-           spacer div (stockAdjHeaderSpacer) رکھا گیا ہے جس کی اونچائی JS (ResizeObserver) خودکار، ہمیشہ صحیح
-           رکھتا ہے — پینل کا سائز (خالی/منتخب/نئی سبزی) بدلنے پر بھی خودکار ایڈجسٹ ہو جائے گا ---------- -->
-      <div id="stockAdjStickyHeader" style="position:fixed; top:var(--mobileTopbarH, 190px); left:0; right:0; z-index:40; background:var(--bg,#f4f6f5); padding:2px 14px 6px; box-sizing:border-box;">
+      <!-- ---------- 🔒 صدام کی ہدایت (17 ستمبر، صبح): عنوان، پینل اور سرچ/➕ بار اب سب مل کر ایک "سٹکی" بلاک —
+           فہرست جتنی بھی سکرول ہو، یہ اوپر ہی چپکے رہیں گے، کبھی غائب نہیں ہوں گے ---------- -->
+      <!-- ---------- 🔙 صدام کی ہدایت (17 ستمبر، صبح 8:10): position:fixed کی کوشش نے مزید خرابی کر دی
+           (اوپر والے مارکی/بینر کے ساتھ اوورلیپ، جدول کا سبز ہیڈر الگ چپک گیا) — واپس position:sticky پر
+           لوٹا دیا، جو پہلے زیادہ تر صحیح کام کر رہا تھا ---------- -->
+      <div id="stockAdjStickyHeader" style="position:-webkit-sticky; position:sticky; top:0; z-index:40; background:var(--bg,#f4f6f5); padding-top:2px;">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; flex-wrap:nowrap;">
         <div class="pageTitle" style="margin:0; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
         <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
@@ -3779,10 +3778,6 @@
         </div>
       </div>
       </div><!-- /#stockAdjStickyHeader -->
-      <!-- ---------- 🔒 صدام کی ہدایت (17 ستمبر، صبح 8:00): اوپر والا ہیڈر اب position:fixed ہے، اس لیے یہ
-           خالی spacer div اتنی ہی جگہ نیچے کی فہرست میں چھوڑ دیتی ہے (JS خودکار اونچائی سیٹ کرتا ہے) تاکہ
-           فکسڈ ہیڈر نیچے کی رو/بٹنوں کے اوپر نہ چڑھے ---------- -->
-      <div id="stockAdjHeaderSpacer" style="height:220px;"></div>
 
       <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): اوپر کا حصہ مزید کمپیکٹ — کم جگہ گھیرے، فہرست جلدی نظر آئے ---------- -->
       <div class="productsLayout">
@@ -8278,7 +8273,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر8:05am';
+const APP_BUILD_VERSION = 'جمعرات17ستمبر8:12am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11421,33 +11416,6 @@ if(window.ResizeObserver){
     new ResizeObserver(() => syncMobileTopbarHeight()).observe(topbarEl);
   }
 }
-
-// ---------- 🔒🔒 صدام کی ہدایت (17 ستمبر، صبح 8:00): سٹاک ایڈجسٹمنٹ کا اوپر والا ہیڈر (سرچ+پینل+بٹن)
-// position:sticky سے position:fixed پر منتقل کیا گیا — sticky Android WebView میں بار بار غائب ہو جاتا تھا۔
-// fixed ہیڈر نیچے spacer div (stockAdjHeaderSpacer) کی اونچائی خودکار ہمیشہ ہیڈر کی اصل اونچائی جتنی رکھی
-// جاتی ہے (ResizeObserver سے) — پینل کا سائز بدلنے (خالی/منتخب/نئی سبزی) پر بھی فوراً خودکار ایڈجسٹ ---------- -->
-function syncStockAdjHeaderSpacer(){
-  const hdr = document.getElementById('stockAdjStickyHeader');
-  const spacer = document.getElementById('stockAdjHeaderSpacer');
-  if(!hdr || !spacer) return;
-  spacer.style.height = hdr.offsetHeight + 'px';
-}
-if(window.ResizeObserver){
-  const attachStockAdjHeaderObserver = () => {
-    const hdr = document.getElementById('stockAdjStickyHeader');
-    if(hdr && !hdr.dataset.roAttached){
-      hdr.dataset.roAttached = '1';
-      new ResizeObserver(() => syncStockAdjHeaderSpacer()).observe(hdr);
-      syncStockAdjHeaderSpacer();
-    }
-  };
-  attachStockAdjHeaderObserver();
-  // ---------- محفوظ بیک اپ: اگر کبھی ہیڈر بعد میں بنے/ری پلیس ہو تو بھی مبصر جڑ جائے ---------- -->
-  document.addEventListener('click', () => setTimeout(attachStockAdjHeaderObserver, 50), true);
-}
-window.addEventListener('resize', () => requestAnimationFrame(syncStockAdjHeaderSpacer));
-setTimeout(syncStockAdjHeaderSpacer, 900);
-setTimeout(syncStockAdjHeaderSpacer, 2500);
 
 
 // ---------- لاگ ان کرنے والے سیلزمین کی مخصوص اجازت شدہ اسکرینز پر .perm-allowed کلاس لگائیں —
