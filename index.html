@@ -8307,7 +8307,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر9:45am';
+const APP_BUILD_VERSION = 'جمعرات17ستمبر11:00am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -17615,8 +17615,11 @@ function vcInlineScheduleAdvance(field){
     const l = parseFloat(document.getElementById('vcInlineLabor').value) || 0;
     document.getElementById('vcInlineTotalPurchase').textContent = (p + l).toLocaleString();
   }
+  // ---------- 🔒 17 ستمبر، 11:00 AM فکس: خودکار ٹائمر سے اگلے خانے میں کرسر لے جانا بند کر دیا گیا —
+  // یہی وہ وجہ تھی جس سے صارف کسی خانے میں لکھتے لکھتے رک کر سوچتا تو کرسر خودکار اگلے خانے میں "بھاگ"
+  // جاتا تھا (کبھی آگے، کبھی قطار بدل کر اوپر/نیچے)۔ ڈیٹا اب بھی ہر حرف پر فوراً محفوظ ہوتا ہے (اوپر
+  // vcInlineCommit)، بس کرسر اب خود بخود کہیں نہیں جائے گا — صارف خود ٹچ کر کے اگلے خانے میں جائے گا ---------- -->
   clearTimeout(vcInlineAdvanceTimer);
-  vcInlineAdvanceTimer = setTimeout(() => vcInlineMoveToNextField(field), vcInlineSpeedMs);
 }
 
 function vcInlineMoveToNextField(currentField){
