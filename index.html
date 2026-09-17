@@ -1069,6 +1069,39 @@
   .categoryDropdownItem.active .cdiPencil{ background:rgba(255,255,255,.25); color:#fff; }
   .categoryDropdownItem .cdiPencil:active{ transform:scale(.88); }
 
+  /* ---------- 🎨 صدام کی ہدایت (17 ستمبر، صبح): سٹاک ایڈجسٹمنٹ کا "📊 رپورٹس" ڈراپ ڈاؤن —
+       پہلے RTL فلیکس کی وجہ سے بٹن سکرین کے بائیں کنارے پر چلا جاتا تھا اور پینل right:0 کی وجہ سے
+       مزید بائیں طرف، سکرین سے باہر کٹ کر نظر آتا تھا۔ اب پینل بٹن کے بائیں کنارے سے دائیں طرف کھلتا ہے
+       (سکرین کے اندر ہی رہتا ہے)، نوری نستعلیق فونٹ اور ہلکی/گہری سبز زیبرا کلرنگ کے ساتھ ---------- */
+  #stockAdjReportsDropdownPanel{
+    left:0; right:auto; top:calc(100% + 6px);
+    min-width:220px; max-width:min(280px, calc(100vw - 26px));
+    font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;
+    padding:7px; border:1px solid rgba(15,118,110,.18); border-radius:14px;
+    background:#fbfffc; box-shadow:0 14px 32px rgba(6,60,40,.28);
+  }
+  #stockAdjReportsDropdownPanel .categoryDropdownItem{
+    font-size:15.5px; font-weight:700; line-height:1.5; padding:11px 13px; border-radius:10px;
+    margin-bottom:4px; direction:rtl; text-align:right; box-shadow:0 1px 2px rgba(6,60,40,.06);
+  }
+  #stockAdjReportsDropdownPanel .categoryDropdownItem .cdiName{ display:block; white-space:normal; }
+  #stockAdjReportsDropdownPanel .categoryDropdownItem:nth-child(odd){ background:#e3f7ea; color:#0b4a35; }
+  #stockAdjReportsDropdownPanel .categoryDropdownItem:nth-child(even){ background:#bdeccd; color:#073b26; }
+  #stockAdjReportsDropdownPanel .categoryDropdownItem:active{ transform:scale(.97); filter:brightness(.96); }
+  #stockAdjReportsDropdownPanel .stockAdjReportsSortBlock{
+    border-top:1.5px dashed #bfe3cf; margin:5px 2px 7px; padding-top:8px;
+  }
+  #stockAdjReportsDropdownPanel .stockAdjReportsSortLabel{
+    font-size:12.5px; font-weight:800; color:#0f766e; padding:0 4px 5px; text-align:right;
+  }
+  #stockAdjReportsDropdownPanel #stockAdjSortFilter{
+    width:100%; margin:0; padding:9px 8px; border:1.5px solid #bfe3cf; border-radius:10px;
+    font-size:13.5px; font-weight:700; font-family:inherit; color:#0b4a35; background:#f3fdf7; direction:rtl;
+  }
+  #stockAdjReportsDropdownPanel .categoryDropdownItem:last-of-type{
+    background:#eafaf0; color:#0b4a35; margin-bottom:0;
+  }
+
   /* --- پراڈکٹ گرڈ: کارڈز ایک دوسرے کے قریب قریب، کم سے کم فاصلہ، زیادہ سے زیادہ ایک نظر میں نظر آئیں --- */
   .productGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); align-items:start; align-content:start; gap:12px; max-height:480px; overflow-y:auto; padding:4px;}
   .productGridCard{
@@ -3706,16 +3739,16 @@
             <span>📊 رپورٹس</span>
             <span class="categoryDropdownArrow">▾</span>
           </button>
-          <div class="categoryDropdownPanel" id="stockAdjReportsDropdownPanel" style="right:0; left:auto; min-width:180px;">
-            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openStockValueReport();">📊 سٹاک</div>
-            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openLaborReport();">💪 مزدوری</div>
-            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openVegListReport();">🥬 سبزی لسٹ</div>
-            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openCustListReport();">👥 کسٹمر</div>
-            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openSupListReport();">🚚 سپلائرز</div>
-            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openMandiSaleRecordReport();">🧾 منڈی سیل ریکارڈ (برائے منشی)</div>
-            <div style="border-top:1px solid #e5e7eb; margin:4px 0 6px; padding-top:6px 0 0;">
-              <div style="font-size:10px; font-weight:800; color:#64748b; padding:0 10px 3px;">ترتیب دیں:</div>
-              <select id="stockAdjSortFilter" onchange="handleStockAdjSortSelect(this); closeStockAdjReportsDropdown();" onclick="event.stopPropagation();" style="width:calc(100% - 20px); margin:0 10px 6px; padding:6px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:10.5px;">
+          <div class="categoryDropdownPanel" id="stockAdjReportsDropdownPanel">
+            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openStockValueReport();">📊 سٹاک</span></div>
+            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openLaborReport();">💪 مزدوری</span></div>
+            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openVegListReport();">🥬 سبزی لسٹ</span></div>
+            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openCustListReport();">👥 کسٹمر</span></div>
+            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openSupListReport();">🚚 سپلائرز</span></div>
+            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openMandiSaleRecordReport();">🧾 منڈی سیل ریکارڈ (برائے منشی)</span></div>
+            <div class="stockAdjReportsSortBlock">
+              <div class="stockAdjReportsSortLabel">ترتیب دیں:</div>
+              <select id="stockAdjSortFilter" onchange="handleStockAdjSortSelect(this); closeStockAdjReportsDropdown();" onclick="event.stopPropagation();">
                 <option value="serial">سیریل نمبر کے مطابق</option>
                 <option value="negFirst">زیادہ منفی سٹاک پہلے</option>
                 <option value="az">نام: الف → ی</option>
@@ -3728,9 +3761,9 @@
               </select>
             </div>
             <div class="categoryDropdownItem" onclick="event.stopPropagation();">
-              <label title="📦 انوینٹری ٹریک کریں (سٹاک ختم ہونے پر بکری روک دیں)" style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:15px; height:15px; margin:0;">
-                <span style="font-size:10.5px; font-weight:700;">📦 انوینٹری ٹریک کریں</span>
+              <label title="📦 انوینٹری ٹریک کریں (سٹاک ختم ہونے پر بکری روک دیں)" style="display:flex; align-items:center; gap:8px; cursor:pointer; width:100%;">
+                <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:16px; height:16px; margin:0; accent-color:#0f766e;">
+                <span class="cdiName">📦 انوینٹری ٹریک کریں</span>
               </label>
             </div>
             <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
@@ -8273,7 +8306,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر8:27am';
+const APP_BUILD_VERSION = 'جمعرات17ستمبر9:09am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -19182,9 +19215,13 @@ function renderStockAdjustmentScreen(query){
   const sortMode = document.getElementById('stockAdjSortFilter')?.value || 'serial';
 
   const queryIsNumeric = q !== '' && /^\d+$/.test(q);
+  // ---------- 🔍 صدام کی ہدایت (17 ستمبر، صبح 9:03): پہلے نمبر لکھنے پر صرف سیریل نمبر سے تلاش ہوتی تھی،
+  // نام بالکل نظرانداز ہو جاتا تھا — اب نمبر لکھنے پر سیریل نمبر (مکمل ملاپ) اور نام (اگر نام میں وہی
+  // ہندسے آئیں) دونوں سے تلاش ہوگی، اور حروف لکھنے پر ہمیشہ کی طرح نام سے ---------- -->
   let filtered = productsData.filter(p => {
-    if(queryIsNumeric) return String(p.serial_no || '') === q;
-    return p.name.toLowerCase().includes(q);
+    const nameMatch = p.name.toLowerCase().includes(q);
+    const serialMatch = queryIsNumeric && String(p.serial_no || '') === q;
+    return nameMatch || serialMatch;
   });
   // ---------- 🔍 صدام کی ہدایت (5 ستمبر) اہم فکس: سرچ کرتے وقت حاضر/غیر حاضر اور کیٹگری فلٹر نظرانداز —
   // تلاش کیا ہوا آئٹم ہمیشہ نظر آئے، چاہے وہ کہیں بھی پڑا ہو (Products سکرین کی طرح) ---------- -->
@@ -19320,7 +19357,7 @@ function syncSaVegNavigator(list){
     const selIdx = _saVegNavList.findIndex(p => p.product_id === vcInlineSelectedId);
     if(selIdx !== -1) keepIdx = selIdx;
   }
-  track.innerHTML = _saVegNavList.map((p, i) => `<div class="saVegNavTick" data-idx="${i}" onclick="saVegNavGoToIndex(${i})"><span class="tickLine"></span><span>${i + 1}</span></div>`).join('');
+  track.innerHTML = _saVegNavList.map((p, i) => `<div class="saVegNavTick" data-idx="${i}" onclick="saVegNavGoToIndex(${i}, false, false, true)"><span class="tickLine"></span><span>${i + 1}</span></div>`).join('');
   // ---------- 🔒 اگر انڈیکس پہلے سے وہی ہے (کچھ بدلا ہی نہیں) تو دوبارہ سکرول اینیمیشن نہ چلائیں —
   // صرف لیبل/ٹِک ہی تازہ ہوں، تاکہ ہر معمولی ری-رینڈر پر جدول/ویل خواہ مخواہ نہ ہلے ---------- -->
   const alreadyThere = keepIdx === _saVegNavCurIdx;
@@ -19338,7 +19375,7 @@ function saVegNavStep(delta){
     return;
   }
   let idx = Math.max(0, Math.min(_saVegNavList.length - 1, (_saVegNavCurIdx || 0) + delta));
-  saVegNavGoToIndex(idx);
+  saVegNavGoToIndex(idx, false, false, true);
 }
 // ---------- ویل گھما کر/سوائپ کر کے یا نمبر پر ٹیپ کر کے کسی بھی سبزی پر جائیں — جہاں رکیں وہی نمبر نمایاں
 // ہو جاتا ہے اور نیچے فہرست (کارڈ یا جدول، دونوں نظاروں) میں وہی سبزی سکرول ہو کر چمک اٹھتی ہے ---------- -->
@@ -19359,7 +19396,7 @@ function scrollIntoOwnContainer(containerEl, targetEl, vertical){
     containerEl.scrollTo({left: Math.max(0, containerEl.scrollLeft + delta), behavior:'smooth'});
   }
 }
-function saVegNavGoToIndex(idx, _fromDialScroll, _skipRowScroll){
+function saVegNavGoToIndex(idx, _fromDialScroll, _skipRowScroll, _focusStock){
   idx = Math.max(0, Math.min(_saVegNavList.length - 1, Number(idx) || 0));
   _saVegNavCurIdx = idx;
   const p = _saVegNavList[idx];
@@ -19436,11 +19473,17 @@ function saVegNavGoToIndex(idx, _fromDialScroll, _skipRowScroll){
   // دوبارہ بلاتا (لامتناہی چکر بننے کا خطرہ)۔ اب صرف حالت (state) سیٹ کر کے پینل خود بھرا جاتا ہے —
   // پوری فہرست دوبارہ نہیں بنتی، سکرول اور نمایاں رنگ دونوں محفوظ رہتے ہیں ---------- -->
   const firstVariant = p.variants && p.variants[0];
+  // ---------- 🐛 صدام کی ہدایت (17 ستمبر، صبح 9:03) اصل جڑ کا فکس: پہلے یہاں ہر بار (سرچ باکس میں ٹائپ
+  // کرنے پر بھی، کیونکہ ہر حرف پر renderStockAdjustmentScreen → syncSaVegNavigator → یہی فنکشن چلتا تھا)
+  // vcInlineFocusStockPending بلا شرط true ہو جاتا اور 40ms بعد کرسر زبردستی 📦 سٹاک کے خانے میں چلا جاتا —
+  // اسی وجہ سے سرچ باکس میں ایک حرف لکھتے ہی کی بورڈ نمبر پیڈ میں بدل جاتا اور آگے لکھنا ناممکن ہو جاتا۔
+  // اب یہ صرف اسی وقت ہو گا جب ◀▶ بٹن سے خود صارف اگلی/پچھلی سبزی پر گیا ہو (_focusStock=true کے ساتھ) —
+  // سرچ/ری-رینڈر/ویل سکرول/نمبر ٹیپ پر خودکار فوکس نہیں چھینا جائے گا ---------- -->
   if(firstVariant){
     vcInlineSelectedId = p.product_id;
     vcInlineSelectedVariantId = firstVariant.variant_id;
     vcInlineSourceWrapId = 'stockAdjustmentListWrap';
-    vcInlineFocusStockPending = true; // ---------- ◀▶ سے اگلی/پچھلی سبزی پر کرسر بھی سٹاک میں جائے ---------- -->
+    if(_focusStock) vcInlineFocusStockPending = true; // ---------- ◀▶ بٹن، ویل سوائپ، یا نمبر پر ٹیپ — تینوں سے سبزی بدلنے پر کرسر سٹاک میں جائے؛ صرف خودکار ری-رینڈر/سرچ سے نہیں ---------- -->
     try{ vcInlinePopulate(); }catch(e){}
   }
 }
@@ -19464,7 +19507,7 @@ function saVegNavOnDialScroll(){
       const d = Math.abs(elCenter - centerPos);
       if(d < bestDist){ bestDist = d; bestIdx = Number(el.dataset.idx); }
     });
-    saVegNavGoToIndex(bestIdx, true);
+    saVegNavGoToIndex(bestIdx, true, false, true);
   }, 130);
 }
 
