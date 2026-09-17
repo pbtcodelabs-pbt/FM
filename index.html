@@ -8247,7 +8247,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر5:04am';
+const APP_BUILD_VERSION = 'جمعرات17ستمبر5:56am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10692,10 +10692,11 @@ function renderProductSpreadsheet(filtered, wrap){
   const packingW = autoColWidth('پیکنگ', filtered.map(p => { const v = p.variants[0]||{}; return v.label || '— منتخب —'; }), measPackFont, {min:52, max:110, pad:14});
   const stockW = autoColWidth('📦 سٹاک', filtered.map(p => p.variants[0]?.stock||0), measNumFont, {min:40, max:80, pad:16});
   const isAdmin = AppState.currentRole === 'admin';
-  // ---------- 🗑️ صدام کی ہدایت (17 ستمبر، صبح): ڈیلیٹ بٹن دوبارہ نمایاں — سب سے آخر (بائیں) طرف، صرف ایڈمن
-  // کو نظر آئے، دبانے پر ایڈمن پاسورڈ (PIN) لازمی مانگا جاتا ہے (confirmAdminPinForDelete دیکھیں) ---------- -->
-  const deleteW = isAdmin ? 34 : 0;
-  const colWidths = isAdmin ? [serialW, nameW, packingW, stockW, deleteW] : [serialW, nameW, packingW, stockW];
+  // ---------- 🗑️ صدام کی ہدایت (17 ستمبر، رات): فہرست کی ہر قطار میں الگ سے ڈیلیٹ بٹن ہٹا دیا — اب حذف کرنے
+  // کا واحد راستہ اوپر والے مستقل پینل کا 🗑️ بٹن ہے (منتخب سبزی کے لیے)، جو پہلے تصدیق پھر ایڈمن پاسورڈ مانگتا
+  // ہے (deleteProduct دیکھیں)۔ اس لیے کالم/فنکشن یہاں سے نکال دیا (فنکشن deleteProductRowInSheet محفوظ ہے،
+  // بس اب کہیں سے نہیں بلایا جاتا) ---------- -->
+  const colWidths = [serialW, nameW, packingW, stockW];
   const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
   const rows = filtered.map((p, idx) => {
     const v = p.variants[0] || {};
@@ -10716,10 +10717,9 @@ function renderProductSpreadsheet(filtered, wrap){
         <td style="${tdBase}${frozenTd(1)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
         <td style="${tdBase}${frozenTd(2)}">${packingSelectHtml}</td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
-        ${isAdmin ? `<td style="${tdBase}${rowTd}"><button type="button" onclick="event.stopPropagation(); deleteProductRowInSheet(${p.product_id})" title="حذف کریں" style="width:28px; height:28px; border-radius:7px; border:none; background:#fee2e2; color:#b91c1c; font-size:14px; font-weight:900; cursor:pointer;">🗑️</button></td>` : ''}
       </tr>`;
   }).join('');
-  const headers = isAdmin ? ['#','نام','پیکنگ','📦 سٹاک','🗑️'] : ['#','نام','پیکنگ','📦 سٹاک'];
+  const headers = ['#','نام','پیکنگ','📦 سٹاک'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
     const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
@@ -17274,32 +17274,17 @@ function buildVcInlinePanelHtml(){
         </div>
       </div>
 
-      <!-- ---------- منتخب سبزی کی تفصیل — پہلی لائن: صرف نام+پیکنگ (پیکنگ اب فہرست والے ڈراپ ڈاؤن/Modal کے
-           ساتھ مکمل منسلک بٹن ہے — ✏️➕🗑️ سب اسی ایک جگہ سے) — صدام کی ہدایت (17 ستمبر، شام) ---------- -->
+      <!-- ---------- منتخب سبزی کی تفصیل — پہلی لائن: نام کے اندر ہی پیکنگ شامل (مثلاً "پیاز فی کلو")، نام کا
+           خانہ اب تنگ (max-width) ہے۔ پیکنگ بدلنے کا بٹن اب صرف چھوٹا آئیکن (📦▾) ہے۔ رفتار (⏱️) کنٹرول بھی
+           اسی پہلی لائن میں الگ سے، تاکہ نیچے والی لائن صرف نمبر خانوں اور 💾✏️🗑️ کے لیے خالی رہے —
+           صدام کی ہدایت (17 ستمبر، رات) ---------- -->
       <div id="vcInlinePanelBody" style="display:${showBody ? 'block':'none'};">
         <div style="display:flex; align-items:center; gap:5px; margin-bottom:4px;" dir="rtl">
-          <div id="vcInlinePanelName" style="flex:1 1 auto; min-width:0; font-family:${urduFont}; font-size:14.5px; font-weight:900; color:#fff; background:rgba(255,255,255,.14); border-radius:6px; padding:4px 6px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
-          <button type="button" id="vcInlinePanelPacking" onclick="vcInlineOpenPackingPicker()" title="پیکنگ بدلیں / نئی شامل کریں" style="flex:0 0 auto; font-family:${urduFont}; font-size:10.5px; font-weight:800; color:#1e3a8a; background:#dbeafe; border:1px solid #93c5fd; border-radius:5px; padding:4px 8px; text-align:center; white-space:nowrap; cursor:pointer;"></button>
-        </div>
-        <!-- ---------- دوسری لائن: صدام کی ترتیب کے مطابق — سٹاک → خرید → م.خرید/م.فروخت → 🧮 حتمی خرید →
-             راولپنڈی/اسلام آباد (اب سب سے آخر/بائیں) → رفتار ---------- -->
-        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:5px;" dir="rtl">
-          ${fieldBox('vcInlineStock', '📦 سٹاک', 'linear-gradient(155deg,#eef2ff,#e0e7ff)', '#c7d2fe', '#a5b4fc', '#3730a3')}
-          ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e')}
-          <div style="display:flex; flex-direction:column; gap:2px;">
-            ${fieldBox('vcInlineLabor', '💪 م.خرید', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 48)}
-            ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 48)}
-          </div>
-          <div style="flex:0 0 auto; background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px 8px; text-align:center;">
-            <div style="font-size:7.5px; font-weight:900; color:#134e2c; white-space:nowrap;">🧮 حتمی خرید</div>
-            <div id="vcInlineTotalPurchase" style="font-family:${numFontStack}; font-weight:900; font-size:17px; color:#134e2c; text-align:center;">0</div>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:2px;">
-            ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d')}
-            ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')}
-          </div>
-          <div style="display:flex; flex-direction:column; align-items:center; gap:1px; background:rgba(255,255,255,.12); border-radius:6px; padding:3px 4px;">
-            <span style="font-size:7.5px; color:#dbeafe; font-weight:900; white-space:nowrap;">⏱️ رفتار</span>
+          <div id="vcInlinePanelName" style="flex:0 1 auto; max-width:120px; min-width:0; font-family:${urduFont}; font-size:13.5px; font-weight:900; color:#fff; background:rgba(255,255,255,.14); border-radius:6px; padding:4px 6px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+          <button type="button" id="vcInlinePanelPacking" onclick="vcInlineOpenPackingPicker()" title="پیکنگ بدلیں / نئی شامل کریں" style="flex:0 0 auto; font-family:${urduFont}; font-size:12px; font-weight:800; color:#1e3a8a; background:#dbeafe; border:1px solid #93c5fd; border-radius:5px; padding:4px 7px; text-align:center; white-space:nowrap; cursor:pointer;">📦▾</button>
+          <div style="flex:1 1 auto;"></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:1px; background:rgba(255,255,255,.12); border-radius:6px; padding:3px 5px; flex:0 0 auto;">
+            <span style="font-size:7px; color:#dbeafe; font-weight:900; white-space:nowrap;">⏱️ رفتار</span>
             <div style="display:flex; align-items:center; gap:2px;">
               <button type="button" onclick="adjustVcInlineSpeed(150)" style="width:16px; height:16px; border-radius:4px; border:none; background:#fff; cursor:pointer; font-weight:900; font-size:10px;">−</button>
               <span id="vcInlineSpeedVal" style="width:26px; text-align:center; font-weight:900; color:#fff; font-size:8px;">${(vcInlineSpeedMs/1000).toFixed(1)}س</span>
@@ -17307,8 +17292,48 @@ function buildVcInlinePanelHtml(){
             </div>
           </div>
         </div>
+        <!-- ---------- دوسری لائن: سٹاک → خرید → م.خرید → م.فروخت → 🧮 حتمی خرید → راولپنڈی → اسلام آباد →
+             💾 محفوظ → ✏️ ترمیم → 🗑️ حذف — سب ایک ہی لائن میں، اوپر نیچے سٹیک نہیں؛ اگر تنگ سکرین پر پوری
+             لائن نہ سمائے تو خانے سکڑنے کی بجائے افقی سکرول ہو جائے گی (وہی لائن ٹوٹے بغیر) ---------- -->
+        <div style="display:flex; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; align-items:center; gap:5px; padding-bottom:2px;" dir="rtl">
+          ${fieldBox('vcInlineStock', '📦 سٹاک', 'linear-gradient(155deg,#eef2ff,#e0e7ff)', '#c7d2fe', '#a5b4fc', '#3730a3')}
+          ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e')}
+          ${fieldBox('vcInlineLabor', '💪 م.خرید', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
+          ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412')}
+          <div style="flex:0 0 auto; background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px 8px; text-align:center;">
+            <div style="font-size:7.5px; font-weight:900; color:#134e2c; white-space:nowrap;">🧮 حتمی خرید</div>
+            <div id="vcInlineTotalPurchase" style="font-family:${numFontStack}; font-weight:900; font-size:17px; color:#134e2c; text-align:center;">0</div>
+          </div>
+          ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d')}
+          ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c')}
+          <button type="button" onclick="vcInlinePanelSave(this)" title="محفوظ کریں" style="flex:0 0 auto; width:34px; height:34px; border-radius:8px; border:none; background:linear-gradient(180deg,#34d95a,#16a34a); color:#fff; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">💾</button>
+          <button type="button" onclick="vcInlinePanelEdit()" title="سبزی میں ترمیم کریں" style="flex:0 0 auto; width:34px; height:34px; border-radius:8px; border:none; background:linear-gradient(180deg,#60a5fa,#2563eb); color:#fff; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">✏️</button>
+          <button type="button" onclick="vcInlinePanelDelete()" title="سبزی حذف کریں" style="flex:0 0 auto; width:34px; height:34px; border-radius:8px; border:none; background:linear-gradient(180deg,#f87171,#b91c1c); color:#fff; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2);">🗑️</button>
+        </div>
       </div>
     </div>`;
+}
+
+// ---------- 🆕 صدام کی ہدایت (17 ستمبر، رات): مستقل پینل کی لائن میں 💾/✏️/🗑️ بٹن — 💾 صرف تسلی کے لیے
+// (ہر خانہ ویسے بھی لکھتے ہی خودکار محفوظ ہو جاتا ہے)، ✏️ پوری سبزی کا نام/تصویر/کیٹگری ایڈٹ کرنے کا Modal
+// کھولتا ہے، 🗑️ اسی ایڈمن پاسورڈ والے تصدیقی نظام سے حذف کرتا ہے جو باقی جگہ استعمال ہوتا ہے ---------- -->
+function vcInlinePanelSave(btnEl){
+  if(vcInlineSelectedId === null) return;
+  persistAllData();
+  pushProductsToCloud();
+  if(btnEl){
+    const orig = btnEl.textContent;
+    btnEl.textContent = '✅';
+    setTimeout(() => { btnEl.textContent = orig; }, 900);
+  }
+}
+function vcInlinePanelEdit(){
+  if(vcInlineSelectedId === null) return;
+  openNewProductModal(vcInlineSelectedId);
+}
+function vcInlinePanelDelete(){
+  if(vcInlineSelectedId === null) return;
+  deleteProduct(vcInlineSelectedId);
 }
 
 // ---------- 🆕 نئی سبزی شامل کرنے کا موڈ شروع کریں — کوئی پرانی سبزی منتخب نہیں رہتی، پینل خالی خانوں
@@ -17404,8 +17429,12 @@ function vcInlinePopulate(){
     return;
   }
   emptyEl.style.display = 'none'; bodyEl.style.display = 'block';
-  document.getElementById('vcInlinePanelName').textContent = product.name;
-  document.getElementById('vcInlinePanelPacking').textContent = (variant.label || '— منتخب —') + ' ▾';
+  // ---------- 🆕 صدام کی ہدایت (17 ستمبر، رات): نام کے خانے میں اب پیکنگ بھی ساتھ ہی لکھی جاتی ہے
+  // (مثلاً "پیاز فی کلو") — تاکہ نام اور پیکنگ ایک ہی جگہ ملا کر نظر آئیں۔ پیکنگ بدلنے کا بٹن اب صرف
+  // چھوٹا آئیکن ہے (📦▾)، سلیکشن اسی سے ہوتی رہے گی ---------- -->
+  document.getElementById('vcInlinePanelName').textContent = product.name + (variant.label ? ' ' + variant.label : '');
+  document.getElementById('vcInlinePanelPacking').textContent = '📦▾';
+  document.getElementById('vcInlinePanelPacking').title = 'پیکنگ: ' + (variant.label || '— منتخب —') + ' (بدلنے کے لیے دبائیں)';
   // ---------- 🔒 صدام کی ہدایت (FM16SEPWE4): اگر رقم 0/خالی ہے تو خانہ بالکل خالی نظر آئے (0 لکھا ہوا نہ ہو) —
   // تاکہ ہر خانے میں فوراً لکھنا شروع کیا جا سکے، پہلے 0 مٹانے کی ضرورت نہ پڑے ---------- -->
   document.getElementById('vcInlinePurchase').value = variant.purchase || '';
@@ -19171,6 +19200,23 @@ function saVegNavStep(delta){
 }
 // ---------- ویل گھما کر/سوائپ کر کے یا نمبر پر ٹیپ کر کے کسی بھی سبزی پر جائیں — جہاں رکیں وہی نمبر نمایاں
 // ہو جاتا ہے اور نیچے فہرست (کارڈ یا جدول، دونوں نظاروں) میں وہی سبزی سکرول ہو کر چمک اٹھتی ہے ---------- -->
+// ---------- 🔒🔒 صدام کی ہدایت (17 ستمبر، رات): اصل وجہ ملی — نیچے ویل/قطار پر جاتے وقت native
+// scrollIntoView() صرف اپنے قریبی سکرول کنٹینر کو نہیں بلکہ اوپر تک تمام scrollable ancestors (بشمول
+// پورا #mainArea) کو بھی سکرول کر دیتا تھا — اسی وجہ سے اوپر والا گرِڈ/پینل اور جدول کی سبز کیپشن لائن
+// اپنی جگہ سے "بھاگ کر" اوپر چلی جاتی تھی۔ اب صرف مطلوبہ کنٹینر کا اپنا scrollTop/scrollLeft براہ راست سیٹ
+// کیا جاتا ہے (Element.scrollTo کبھی بھی ancestors کو نہیں ہلاتا) — باقی پورا صفحہ بالکل ساکت رہتا ہے ---------- -->
+function scrollIntoOwnContainer(containerEl, targetEl, vertical){
+  if(!containerEl || !targetEl) return;
+  const cRect = containerEl.getBoundingClientRect();
+  const tRect = targetEl.getBoundingClientRect();
+  if(vertical){
+    const delta = (tRect.top - cRect.top) - (cRect.height/2 - tRect.height/2);
+    containerEl.scrollTo({top: Math.max(0, containerEl.scrollTop + delta), behavior:'smooth'});
+  } else {
+    const delta = (tRect.left - cRect.left) - (cRect.width/2 - tRect.width/2);
+    containerEl.scrollTo({left: Math.max(0, containerEl.scrollLeft + delta), behavior:'smooth'});
+  }
+}
 function saVegNavGoToIndex(idx, _fromDialScroll){
   idx = Math.max(0, Math.min(_saVegNavList.length - 1, Number(idx) || 0));
   _saVegNavCurIdx = idx;
@@ -19198,9 +19244,11 @@ function saVegNavGoToIndex(idx, _fromDialScroll){
         };
         track.addEventListener('scrollend', _saVegNavClearGuard, {once:true});
         // ---------- 🆕 صدام کی ہدایت (FM17SEPTH): ویل اب عمودی (vertical) ہے (saVegNavDialTrackV) —
-        // اس لیے سکرول سنٹرنگ inline کی بجائے block پر ہونی چاہیے ---------- -->
+        // اس لیے سکرول سنٹرنگ inline کی بجائے block پر ہونی چاہیے۔
+        // 🔒 صدام کی ہدایت (17 ستمبر، رات): scrollIntoView() کی بجائے اب اپنا scrollIntoOwnContainer() —
+        // صرف track خود ہلتا ہے، باہر کا صفحہ بالکل ساکت رہتا ہے ---------- -->
         const isVerticalTrack = track.classList.contains('saVegNavDialTrackV');
-        tickEl.scrollIntoView({behavior:'smooth', inline: isVerticalTrack ? 'nearest' : 'center', block: isVerticalTrack ? 'center' : 'nearest'});
+        scrollIntoOwnContainer(track, tickEl, isVerticalTrack);
         setTimeout(_saVegNavClearGuard, 900);
       }
     }
@@ -19220,11 +19268,16 @@ function saVegNavGoToIndex(idx, _fromDialScroll){
   } else {
     _saVegNavActiveCardEl = null;
   }
-  // ---------- 📊 جدول (سپریڈشیٹ) نظارے میں بھی اسی قطار کو مستقل نمایاں کریں، سب سے اوپر لا کر ---------- -->
+  // ---------- 📊 جدول (سپریڈشیٹ) نظارے میں بھی اسی قطار کو مستقل نمایاں کریں، سب سے اوپر لا کر —
+  // 🔒 صدام کی ہدایت (17 ستمبر، رات): اہم فکس — پہلے یہاں rowEl.scrollIntoView() پورے #mainArea کو بھی
+  // سکرول کر دیتا تھا (اوپر والا گرِڈ اور جدول کی سبز کیپشن لائن اپنی جگہ سے بھاگ جاتی تھی)۔ اب صرف جدول کا
+  // اپنا اندرونی سکرول کنٹینر (stockAdjSheetScrollWrap_...) ہلتا ہے — باقی پورا صفحہ بالکل ساکت/پکا رہتا ہے ---------- -->
   const rowEl = document.querySelector(`tr[data-product-id="${p.product_id}"]`);
   if(rowEl){
     rowEl.classList.add('vegNavActiveRow');
-    rowEl.scrollIntoView({behavior:'smooth', block:'start'});
+    const sheetScrollWrap = rowEl.closest('div[id^="stockAdjSheetScrollWrap_"]');
+    if(sheetScrollWrap) scrollIntoOwnContainer(sheetScrollWrap, rowEl, true);
+    else rowEl.scrollIntoView({behavior:'smooth', block:'nearest'});
     _saVegNavActiveRowEl = rowEl;
   } else {
     _saVegNavActiveRowEl = null;
