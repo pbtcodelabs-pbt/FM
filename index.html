@@ -3709,6 +3709,7 @@
             <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openVegListReport();">🥬 سبزی لسٹ</div>
             <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openCustListReport();">👥 کسٹمر</div>
             <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openSupListReport();">🚚 سپلائرز</div>
+            <div class="categoryDropdownItem" onclick="closeStockAdjReportsDropdown(); openMandiSaleRecordReport();">🧾 منڈی سیل ریکارڈ (برائے منشی)</div>
             <div style="border-top:1px solid #e5e7eb; margin:4px 0 6px; padding-top:6px 0 0;">
               <div style="font-size:10px; font-weight:800; color:#64748b; padding:0 10px 3px;">ترتیب دیں:</div>
               <select id="stockAdjSortFilter" onchange="handleStockAdjSortSelect(this); closeStockAdjReportsDropdown();" onclick="event.stopPropagation();" style="width:calc(100% - 20px); margin:0 10px 6px; padding:6px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:10.5px;">
@@ -3749,29 +3750,29 @@
            میں تاکہ کم جگہ گھیرے اور فوراً نظر آئے ---------- -->
       <div id="stockAdjTopPanelSlot" style="margin-bottom:6px;"></div>
 
-      <!-- ---------- دوسری لائن: سرچ + ➕ نئی سبزی + 💾 محفوظ + ✏️ ترمیم + 🗑️ حذف + ▲▼ اگلی/پچھلی سبزی —
-           صدام کی ہدایت (17 ستمبر، رات 2): سیو/ایڈٹ/ڈیلیٹ بٹن نیچے نمبر خانوں والی لائن سے ہٹا کر یہاں ➕ کے
-           ساتھ لے آئے، اور ویل کے اوپر/نیچے تیر بٹن بھی یہیں سب سے آگے (کونے پر) شفٹ کر دیے — ویل کی جگہ اب
-           صرف خالی نمبر ٹریک کی ہے ---------- -->
-      <!-- ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): بٹن دوبارہ ترتیب دیے — بائیں سے دائیں: 🗑️ حذف (سب سے
-           الگ/باہر، تاکہ غلطی سے نہ دبے) ← ◀ پچھلی ← ▶ اگلی ← ✏️ ترمیم ← 💾 محفوظ ← ➕ نیا۔ سب بٹن اب ایک جیسی
-           اونچائی/چوڑائی (38px)، درمیان میں فاصلہ بھی بڑھا دیا (4px → 8px) تاکہ ایک بٹن دبانے سے دوسرا غلطی سے
-           نہ دب جائے ---------- -->
-      <div class="productToolbar" style="margin-bottom:6px; display:flex; gap:7px; align-items:center; flex-wrap:nowrap;">
+      <!-- ---------- دوسری لائن: سرچ بار اپنی الگ، پوری چوڑائی کی لائن میں ---------- -->
+      <div class="productToolbar" style="margin-bottom:6px; display:flex; gap:7px; align-items:center;">
         <input type="text" id="stockAdjSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderStockAdjustmentScreen(this.value)" style="flex:1 1 auto; min-width:0;">
-        <!-- ---------- 🆕 صدام کی ہدایت (FM17SEPTH): فہرست کے ہر ایک قطار کے اندر موجود ➕ بٹن (درمیان میں نئی
-             خالی قطار بنانے والا) مکمل ہٹا دیا گیا — اب صرف یہ ایک ➕ بٹن ہے، نئی سبزی ہمیشہ فہرست کے آخری
-             سیریل نمبر پر ہی شامل ہوگی (checkDraftCompletion پہلے سے یہی کرتا ہے) ---------- -->
-        <!-- ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 7): ➕ بٹن پہلے بالکل فلیٹ (بغیر گریڈینٹ/شیڈو) تھا —
-             اب باقی سب بٹنوں جیسا 3D گریڈینٹ+شیڈو لگا دیا ---------- -->
-        <button type="button" onclick="vcInlineStartAdd()" title="نئی سبزی شامل کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg,#6ee7a0,#16a34a); color:#fff; font-size:17px; font-weight:900; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">➕</button>
-        <button type="button" onclick="vcInlinePanelSave(this)" title="محفوظ کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg,#34d95a,#16a34a); color:#fff; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">💾</button>
-        <button type="button" onclick="vcInlinePanelEdit()" title="سبزی میں ترمیم کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg,#60a5fa,#2563eb); color:#fff; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">✏️</button>
-        <button type="button" id="saVegNavNextBtn" onclick="saVegNavStep(1)" title="اگلی سبزی" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg, var(--primary), var(--primary-dark)); color:#fff; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">▶</button>
-        <button type="button" id="saVegNavPrevBtn" onclick="saVegNavStep(-1)" title="پچھلی سبزی" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg, var(--primary), var(--primary-dark)); color:#fff; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">◀</button>
-        <!-- ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 7): ڈیلیٹ بٹن باقی بٹنوں سے مزید الگ — اب بڑا فاصلہ
-             (28px) تاکہ غلطی سے بالکل نہ دبے، سب سے آخری کونے پر ---------- -->
-        <button type="button" onclick="vcInlinePanelDelete()" title="سبزی حذف کریں" style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; border:none; background:linear-gradient(180deg,#f87171,#b91c1c); color:#fff; font-size:16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15); margin-right:28px;">🗑️</button>
+      </div>
+      <!-- ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 8) مکمل نظرِ ثانی: بٹن سرچ بار سے الگ اپنی مکمل چوڑی
+           لائن میں — 🗑️ حذف بالکل بائیں کونے پر اکیلا (غلطی سے نہ دبے)، باقی 5 بٹن (◀ ▶ ✏️ 💾 ➕) برابر
+           تقسیم ہو کر بچی ہوئی ساری چوڑائی لیتے ہیں (پہلے سب فکس 38px تھے، خالی جگہ ضائع ہوتی تھی)۔
+           ہر بٹن کے اندر آئیکن/کیپشن مکمل سینٹرلائز (flex align+justify:center) — پہلے کوئی صریح سینٹرنگ
+           نہیں تھی تو چوڑائی بڑھنے پر آئیکن ایک طرف کو چپک جاتا۔ ◀/▶ کے پرانے سادہ متن نشان اب صاف SVG
+           شیورون آئیکن سے بدل دیے ---------- -->
+      <div dir="ltr" style="display:flex; gap:10px; align-items:stretch; margin-bottom:6px;">
+        <button type="button" onclick="vcInlinePanelDelete()" title="سبزی حذف کریں" style="flex:0 0 46px; height:42px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:none; background:linear-gradient(180deg,#f87171,#b91c1c); color:#fff; font-size:17px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">🗑️</button>
+        <div style="display:flex; gap:6px; flex:1 1 auto; min-width:0;">
+          <button type="button" id="saVegNavPrevBtn" onclick="saVegNavStep(-1)" title="پچھلی سبزی" style="flex:1 1 0; min-width:0; height:42px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:none; background:linear-gradient(180deg, var(--primary), var(--primary-dark)); color:#fff; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"></polyline></svg>
+          </button>
+          <button type="button" id="saVegNavNextBtn" onclick="saVegNavStep(1)" title="اگلی سبزی" style="flex:1 1 0; min-width:0; height:42px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:none; background:linear-gradient(180deg, var(--primary), var(--primary-dark)); color:#fff; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+          </button>
+          <button type="button" onclick="vcInlinePanelEdit()" title="سبزی میں ترمیم کریں" style="flex:1 1 0; min-width:0; height:42px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:none; background:linear-gradient(180deg,#60a5fa,#2563eb); color:#fff; font-size:17px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">✏️</button>
+          <button type="button" onclick="vcInlinePanelSave(this)" title="محفوظ کریں" style="flex:1 1 0; min-width:0; height:42px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:none; background:linear-gradient(180deg,#34d95a,#16a34a); color:#fff; font-size:17px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">💾</button>
+          <button type="button" onclick="vcInlineStartAdd()" title="نئی سبزی شامل کریں" style="flex:1 1 0; min-width:0; height:42px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:none; background:linear-gradient(180deg,#6ee7a0,#16a34a); color:#fff; font-size:18px; font-weight:900; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">➕</button>
+        </div>
       </div>
       </div><!-- /#stockAdjStickyHeader -->
 
@@ -5398,6 +5399,9 @@
             </div>
             <div style="display:flex; gap:6px; flex:0 0 auto;">
               <button type="button" onclick="openOtStockReport()" style="padding:9px 10px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 سٹاک رپورٹ</button>
+              <!-- ---------- 🧾 صدام کی ہدایت (17 ستمبر، صبح 7:35): "منڈی سیل ریکارڈ (برائے منشی)" — منشی/مزدور
+                   (غیر ایڈمن) کے لیے یہاں سے بھی کھلے، بالکل ایڈمن کی سٹاک ایڈجسٹمنٹ ← 📊 رپورٹس ڈراپ ڈاؤن جیسی رپورٹ ---------- -->
+              <button type="button" onclick="openMandiSaleRecordReport()" style="padding:9px 10px; background:#0f766e; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">🧾 منڈی سیل ریکارڈ</button>
               <button type="button" onclick="toggleOtViewMode()" id="otViewModeBtn" style="display:none; padding:9px 10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 جدول</button>
               <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
               <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
@@ -8266,7 +8270,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر6:58am';
+const APP_BUILD_VERSION = 'جمعرات17ستمبر7:38am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10730,7 +10734,7 @@ function renderProductSpreadsheet(filtered, wrap){
     return `
       <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative; touch-action:pan-y;" onclick="selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')">
         <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): پہلے isDormant والی قطار پر ٹیپ کرنے سے ایڈٹ پینل نہیں کھلتا تھا — حاضر/غیر حاضر نظام ہائیڈ ہونے کے بعد اب ہر قطار پر ٹیپ کام کرے گا ---------- -->
-        <td style="${tdBase}${frozenTd(0)}"><button type="button" class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important;" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}'); openSerialPicker('product', ${p.product_id}, ${p.serial_no ?? 'null'}, '${(p.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')">${p.serial_no ?? '?'}</button></td>
+        <td style="${tdBase}${frozenTd(0)}"><button type="button" class="serialBadgeBtn" data-serial-pid="${p.product_id}" data-serial-vid="${v.variant_id}" data-serial-val="${p.serial_no ?? ''}" data-serial-name="${(p.name||'').replace(/"/g,'&quot;')}" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important;">${p.serial_no ?? '?'}</button></td>
         <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE3): ✏️ بٹن مکمل ختم — اب پوری قطار پر ٹیپ کرنے سے ہی سامنے
              کا مستقل پینل اسی سبزی کی تفصیل دکھا دیتا ہے (قطار نیلی ہو کر منتخب نظر آتی ہے) ---------- -->
         <td style="${tdBase}${frozenTd(1)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
@@ -10785,7 +10789,45 @@ function renderProductSpreadsheet(filtered, wrap){
   const scrollWrap = document.getElementById(scrollWrapId);
   if(scrollWrap){ scrollWrap.scrollTop = savedScrollTop; scrollWrap.scrollLeft = savedScrollLeft; }
   wireProductSwipeRows(scrollWrapId); // ---------- 👉👈 صدام کی ہدایت (FM15SEPTU2): سوائپ ہینڈلرز جوڑیں ---------- -->
+  wireSerialBadgeLongPress(scrollWrapId); // ---------- 🔴⏱️ صدام کی ہدایت (17 ستمبر، صبح): سیریل بیج پر عام ٹیپ سے قطار منتخب ہو (اوپر پینل میں جائے)، سیریل نمبر ایڈٹ کرنے کا Modal اب صرف تھوڑی دیر (لگ بھگ 1 سیکنڈ) دبائے رکھنے سے کھلے ---------- -->
   if(vcInlineSelectedId !== null) vcInlinePopulate(); // ---------- ری رینڈر کے بعد بھی منتخب سبزی کی تفصیل پینل میں برقرار رہے ---------- -->
+}
+// ---------- 🔴⏱️ صدام کی ہدایت (17 ستمبر، صبح): سیریل بیج پر عام (فوری) ٹیپ اب صرف قطار منتخب کرتا ہے
+// (پہلے سے موجود <tr onclick> تک بلبلا کر پہنچتا ہے، چونکہ بیج کا اپنا onclick/stopPropagation ہٹا دیا گیا) —
+// سیریل نمبر ایڈٹ کرنے کا Modal اب صرف ~800ms دبائے رکھنے (لانگ پریس) سے کھلتا ہے، تاکہ زیادہ تر پکے ہو چکے
+// سیریل نمبروں کو غلطی سے چھیڑنے کا امکان ختم ہو جائے ---------- -->
+function wireSerialBadgeLongPress(scrollWrapId){
+  const root = document.getElementById(scrollWrapId);
+  if(!root) return;
+  const LONG_PRESS_MS = 800;
+  root.querySelectorAll('.serialBadgeBtn[data-serial-pid]').forEach(btn => {
+    let timer = null, fired = false;
+    const clearTimer = () => { if(timer){ clearTimeout(timer); timer = null; } };
+    const start = (e) => {
+      fired = false;
+      clearTimer();
+      timer = setTimeout(() => {
+        fired = true;
+        timer = null;
+        if(navigator.vibrate){ try{ navigator.vibrate(30); }catch(err){} }
+        const pid = Number(btn.dataset.serialPid);
+        const vid = Number(btn.dataset.serialVid);
+        const rawSerial = btn.dataset.serialVal;
+        const serial = rawSerial === '' ? null : Number(rawSerial);
+        const pname = btn.dataset.serialName || '';
+        openSerialPicker('product', pid, serial, pname + ' کا سیریل نمبر');
+      }, LONG_PRESS_MS);
+    };
+    btn.addEventListener('pointerdown', start);
+    btn.addEventListener('pointerup', clearTimer);
+    btn.addEventListener('pointerleave', clearTimer);
+    btn.addEventListener('pointercancel', clearTimer);
+    // ---------- لانگ پریس مکمل ہونے کے بعد جو click ایونٹ خودکار فائر ہوتا ہے، اسے روک دیں تاکہ قطار
+    // منتخب ہونے کے ساتھ ساتھ سیریل Modal بھی نہ کھلے (دونوں الگ الگ ردعمل ہیں، ایک ساتھ نہیں) ---------- -->
+    btn.addEventListener('click', (e) => {
+      if(fired){ e.preventDefault(); e.stopPropagation(); fired = false; }
+    }, true);
+  });
 }
 // ---------- ➕ صدام کی ہدایت (FM10SEPTH0844AM): فہرست کے کسی بھی درمیانی مقام پر نئی خالی قطار — آخر تک جانے
 // کی ضرورت نہیں۔ نیچے کے سب سیریل نمبر خودکار ایک ایک آگے کھسک جاتے ہیں تاکہ نئی قطار بالکل صحیح جگہ (اسی کے
@@ -35980,6 +36022,7 @@ async function renderReportToCanvas(){
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'stockprofit'){ await renderDailyStockProfitReportToCanvas(); return; } // ---------- صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ — اپنا الگ لے آؤٹ ---------- -->
+  if(currentReportType === 'mandisale'){ await renderMandiSaleRecordToCanvas(); return; } // ---------- صدام کی ہدایت (17 ستمبر، صبح 7:35): منڈی سیل ریکارڈ (برائے منشی) — اپنا الگ لے آؤٹ ---------- -->
   const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
@@ -36955,14 +36998,12 @@ async function renderDailyStockProfitReportToCanvas(){
     });
   }
 
-  // ---------- 🧮 صدام کی ہدایت (17 ستمبر، رات): جدول کے بالکل آخر میں ہر ہندسوں والے کالم کا مجموعہ
-  // (پرانا/آج/ٹوٹل/فروخت/باقی/منافع سب کا ٹوٹل) ایک الگ نمایاں "ٹوٹل" لائن میں آنا چاہیے ---------- -->
+  // ---------- 🧮 صدام کی ہدایت (17 ستمبر، صبح 7:29): پہلے ہر کالم (پرانا/آج/ٹوٹل/فروخت/باقی) کا ٹوٹل بھی
+  // دکھا رہا تھا — وہ الگ الگ سبزیوں کی تقسیم ہے، ان کا جمع کرنا بےمعنی ہے۔ اب صرف سب سے آخری کالم یعنی
+  // "منافع" کا ٹوٹل ہی اس لائن میں آئے گا، باقی خانے خالی رہیں گے ---------- -->
   if(rows.length > 0){
-    const totals = {opening:0, added:0, total:0, sold:0, remaining:0, profit:0};
-    rows.forEach(r => {
-      totals.opening += r.opening; totals.added += r.added; totals.total += r.total;
-      totals.sold += r.sold; totals.remaining += r.remaining; totals.profit += r.profit;
-    });
+    let totalProfitSum = 0;
+    rows.forEach(r => { totalProfitSum += r.profit; });
     const trh = Math.round(baseRowH * 1.05);
     ctx.fillStyle = rc.bg;
     ctx.fillRect(tableLeft, y, totalW, trh);
@@ -36976,8 +37017,9 @@ async function renderDailyStockProfitReportToCanvas(){
       let txt, ff;
       if(c.key === 'serial'){ txt = ''; ff = fontFam; }
       else if(c.key === 'name'){ txt = 'ٹوٹل'; ff = fontFam; }
-      else { txt = String(Math.round(totals[c.key])); ff = numFontFam; }
-      ctx.fillStyle = c.key === 'profit' ? (totals.profit >= 0 ? '#065f2b' : '#991b1b') : '#0f172a';
+      else if(c.key === 'profit'){ txt = String(Math.round(totalProfitSum)); ff = numFontFam; }
+      else { txt = ''; ff = numFontFam; }
+      ctx.fillStyle = c.key === 'profit' ? (totalProfitSum >= 0 ? '#065f2b' : '#991b1b') : '#0f172a';
       const px3 = fitCellFont(txt, c.width-4, fsItem, ff);
       ctx.font = `bold ${px3}px ${ff}`;
       ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, trh); ctx.clip();
@@ -36998,6 +37040,248 @@ async function renderDailyStockProfitReportToCanvas(){
   if(scrollWrapEnd) scrollWrapEnd.scrollTop = 0;
   const previewBoxScEnd = scrollWrapEnd ? scrollWrapEnd.closest('.invoicePreviewBox') : null;
   if(previewBoxScEnd) previewBoxScEnd.scrollTop = 0;
+}
+
+// ---------- 🧾 صدام کی ہدایت (17 ستمبر، صبح 7:35): "منڈی سیل ریکارڈ (برائے منشی)" — منشی/مزدور (غیر ایڈمن)
+// کے لیے بھی کھلنے والی سادہ رپورٹ، کوئی قیمت/منافع نہیں دکھاتی — صرف سیریل، نام/پیکنگ، کل کا بقایہ (پرانا)،
+// آج لوڈڈ، ٹوٹل، آج سیل، بچا ہوا سٹاک۔ "آج سیل" اسی طرح صرف ایڈمن کے فائنل کیے/پرنٹ کیے بلوں (invoicesData)
+// سے آتا ہے — منشی کا ڈرافٹ یا صرف صدام کو بھیجا گیا آرڈر (ابھی تک فائنل نہیں) اس میں شامل نہیں ہوتا، بالکل
+// روزانہ سٹاک/منافع رپورٹ جیسا ہی حساب (renderDailyStockProfitReportToCanvas دیکھیں)۔ سب سے زیادہ بچا ہوا
+// سٹاک والی سبزی سب سے اوپر (Descending)، اور "بچا ہوا سٹاک" کالم باقیوں سے موٹا/بڑا دکھایا جاتا ہے ---------- -->
+async function renderMandiSaleRecordToCanvas(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  ensureDailyStockSnapshot();
+  const useA4 = AppState.settings.reportPrintStyle === 'a4';
+  const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+  const ctx = canvas.getContext('2d');
+
+  const todayStr = toLocalDateStr(new Date());
+  const todayInvoices = (invoicesData || []).filter(inv => inv.created_at && toLocalDateStr(new Date(inv.created_at)) === todayStr);
+  const soldQtyMap = {};
+  todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
+    if(!it.variant_id) return;
+    soldQtyMap[it.variant_id] = (soldQtyMap[it.variant_id] || 0) + (it.qty || 0);
+  }));
+  const rows = [];
+  productsData.filter(p => !p.isDormant).forEach(p => {
+    const v = p.variants && p.variants[0];
+    if(!v) return;
+    const opening = dailyStockSnapshot.opening[v.variant_id] ?? (v.stock || 0);
+    const added = dailyStockSnapshot.added[v.variant_id] || 0;
+    const total = opening + added;
+    const sold = soldQtyMap[v.variant_id] || 0;
+    const remaining = v.stock || 0;
+    rows.push({serial: p.serial_no ?? '?', name: p.name, label: v.label || '', opening, added, total, sold, remaining});
+  });
+  // ---------- سب سے زیادہ بچا ہوا سٹاک سب سے اوپر ---------- -->
+  rows.sort((a,b) => b.remaining - a.remaining);
+
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
+  const bold = AppState.settings.reportBoldItems !== false;
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
+  const fontFam = selectedFontPreset.family;
+  const numberPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportNumberFontId) || FONT_PRESETS.find(f => f.id === 'tahoma');
+  const numFontFam = numberPreset.family;
+  try{ await document.fonts.load(`13px ${numFontFam}`); }catch(e){}
+  try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
+  const digitAlign = AppState.settings.reportAlign || 'left';
+  const alignForCol = (key) => key === 'name' ? 'right' : digitAlign;
+  const xForCol = (c, align) => {
+    const pad = Math.max(3, Math.round(c.width * 0.04));
+    if(align === 'right') return c.x + c.width - pad;
+    if(align === 'left') return c.x + pad;
+    return c.x + c.width/2;
+  };
+
+  const base = useA4 ? 2.1 : 1.5;
+  const fsTitle = Math.round(15 * base * fontScale);
+  const fsSubtitle = Math.round(12 * base * fontScale);
+  const fsSmall = Math.round(9 * base * fontScale);
+  const fsHeader = Math.round(8.5 * base * fontScale);
+  const fsItem = Math.round(9 * base * fontScale);
+
+  const margin = useA4 ? 40 : 6;
+  const tableLeft = margin, tableRight = pxWidth - margin;
+  const totalW = tableRight - tableLeft;
+  const baseRowH = Math.round(fsItem * 2.6 * rowScaleSetting);
+  const headerRowH = Math.round(fsHeader * 2.8 * rowScaleSetting);
+
+  // ---------- کالمز: # | نام(+پیکنگ) | کل کا بقایہ | آج لوڈڈ | ٹوٹل | آج سیل | بچا ہوا سٹاک —
+  // نام کا کالم سب سے بڑی سبزی کے نام جتنا خودکار چوڑا، باقی چوڑائی 5 ہندسوں والے کالموں میں برابر تقسیم ---------- -->
+  const wSerial = Math.round(totalW * 0.06);
+  ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
+  let maxNameTextW = 0;
+  rows.forEach(r => {
+    const w = ctx.measureText(r.name).width;
+    if(w > maxNameTextW) maxNameTextW = w;
+  });
+  const namePad = Math.max(10, Math.round(fsItem * 0.9));
+  const minNameW = Math.round(totalW * 0.16);
+  const maxNameW = Math.round(totalW * 0.42);
+  let wName = Math.min(maxNameW, Math.max(minNameW, Math.round(maxNameTextW + namePad)));
+  const wNum = Math.round((totalW - wSerial - wName) / 5);
+  wName = totalW - wSerial - wNum * 5;
+
+  const cols = [
+    {key:'serial', label:'#', width:wSerial},
+    {key:'name', label:'نام/پیکنگ', width:wName},
+    {key:'opening', label:'کل کا بقایہ', width:wNum},
+    {key:'added', label:'آج لوڈڈ', width:wNum},
+    {key:'total', label:'ٹوٹل', width:wNum},
+    {key:'sold', label:'آج سیل', width:wNum},
+    {key:'remaining', label:'بچا سٹاک', width:wNum},
+  ];
+  let cxPos = tableRight;
+  cols.forEach(c => { cxPos -= c.width; c.x = cxPos; });
+
+  const fitCenteredLines = (text, maxWidth, basePx, weight) => {
+    const w = weight ? weight + ' ' : '';
+    const minPx = Math.max(Math.round(basePx * 0.55), 7);
+    let px = basePx;
+    ctx.font = `${w}${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > minPx){ px -= 1; ctx.font = `${w}${px}px ${fontFam}`; }
+    return {text, px, weight:w};
+  };
+  const nameFit = fitCenteredLines(AppState.settings.businessName || 'صدام حسین فروٹ منڈی', totalW, fsTitle, 'bold');
+  const phoneFit = AppState.settings.businessPhone ? fitCenteredLines(AppState.settings.businessPhone, totalW, fsSmall) : null;
+  const titleFit = fitCenteredLines('منڈی سیل ریکارڈ (برائے منشی)', totalW, fsSubtitle, 'bold');
+
+  let headerBandH = useA4 ? 90 : 56;
+  let bodyTop = headerBandH + headerRowH;
+  const estimatedHeight = bodyTop + (rows.length * baseRowH) + Math.round(fsSubtitle * 2) + 30;
+
+  canvas.width = pxWidth;
+  canvas.height = Math.max(estimatedHeight, 300);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  const rr = useA4 ? 14 : 8;
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(margin/2 + rr, margin/2);
+  ctx.arcTo(pxWidth - margin/2, margin/2, pxWidth - margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(pxWidth - margin/2, canvas.height - margin/2, margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(margin/2, canvas.height - margin/2, margin/2, margin/2, rr);
+  ctx.arcTo(margin/2, margin/2, pxWidth - margin/2, margin/2, rr);
+  ctx.closePath(); ctx.stroke();
+
+  let y = useA4 ? 24 : 14;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#1a1a1a';
+  ctx.font = `${nameFit.weight}${nameFit.px}px ${fontFam}`;
+  y += nameFit.px;
+  ctx.fillText(nameFit.text, pxWidth/2, y);
+  if(phoneFit){ y += Math.round(fsSmall * 1.6); ctx.font = `${fsSmall}px ${fontFam}`; ctx.fillText(phoneFit.text, pxWidth/2, y); }
+  y += Math.round(fsSubtitle * 1.7);
+  ctx.font = `${titleFit.weight}${titleFit.px}px ${fontFam}`;
+  ctx.fillText(titleFit.text, pxWidth/2, y);
+  y += Math.round(fsSmall * 1.8);
+  ctx.font = `${fsSmall}px ${fontFam}`;
+  const now = new Date();
+  const dstr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(-2)}`;
+  ctx.fillText(dstr, pxWidth/2, y);
+  y += 8;
+
+  const rc = getReceiptColor();
+  const headerTop = y;
+  ctx.fillStyle = rc.bg;
+  ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.3;
+  ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
+  ctx.fillStyle = '#0f172a';
+  cols.forEach(c => {
+    const align = alignForCol(c.key);
+    ctx.textAlign = align;
+    ctx.font = `bold ${fsHeader}px ${fontFam}`;
+    ctx.save(); ctx.beginPath(); ctx.rect(c.x, headerTop, c.width, headerRowH); ctx.clip();
+    ctx.fillText(c.label, xForCol(c, align), headerTop + headerRowH/2 + fsHeader*0.32);
+    ctx.restore();
+    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
+  y = headerTop + headerRowH;
+
+  const fitCellFont = (text, maxWidth, basePx, ff) => {
+    const fam = ff || fontFam;
+    let px = basePx;
+    ctx.font = `${px}px ${fam}`;
+    let w = ctx.measureText(text).width;
+    if(w > maxWidth && w > 0){
+      px = Math.max(3, px * (maxWidth / w) * 0.94);
+      ctx.font = `${px}px ${fam}`;
+      w = ctx.measureText(text).width;
+    }
+    let guard = 0;
+    while(w > maxWidth && px > 3 && guard < 40){ px -= 0.5; ctx.font = `${px}px ${fam}`; w = ctx.measureText(text).width; guard++; }
+    return px;
+  };
+
+  if(rows.length === 0){
+    ctx.strokeStyle = '#475569'; ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, baseRowH);
+    ctx.fillStyle = '#64748b'; ctx.font = `${fsItem}px ${fontFam}`; ctx.textAlign = 'center';
+    ctx.fillText('کوئی سبزی نہیں ملی', pxWidth/2, y + baseRowH/2 + fsItem*0.32);
+    y += baseRowH;
+  } else {
+    rows.forEach((r, idx) => {
+      const rh = baseRowH;
+      ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#f1f5f9';
+      ctx.fillRect(tableLeft, y, totalW, rh);
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+      ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
+      cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
+      ctx.beginPath(); ctx.moveTo(tableRight+0.5, y); ctx.lineTo(tableRight+0.5, y+rh); ctx.stroke();
+      ctx.fillStyle = '#1a1a1a';
+      cols.forEach(c => {
+        const align = alignForCol(c.key);
+        ctx.textAlign = align;
+        const tx = xForCol(c, align);
+        if(c.key === 'name'){
+          const px1 = fitCellFont(r.name, c.width-6, fsItem, fontFam);
+          ctx.font = `${bold ? 'bold ' : ''}${px1}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(r.name, tx, y + rh/2 - 3);
+          ctx.font = `${Math.round(px1*0.8)}px ${fontFam}`;
+          ctx.fillStyle = '#64748b';
+          ctx.fillText(r.label, tx, y + rh/2 + Math.round(px1*0.85));
+          ctx.restore();
+          ctx.fillStyle = '#1a1a1a';
+        } else {
+          const txt = String(r[c.key]);
+          // ---------- 🔴 صدام کی ہدایت: "بچا ہوا سٹاک" کالم باقیوں سے موٹا/بڑا نظر آئے ---------- -->
+          const isRemaining = c.key === 'remaining';
+          const basePxForCell = isRemaining ? Math.round(fsItem * 1.28) : fsItem;
+          const px2 = fitCellFont(txt, c.width-4, basePxForCell, numFontFam);
+          ctx.font = `${isRemaining ? '900' : '400'} ${px2}px ${numFontFam}`;
+          ctx.fillStyle = isRemaining ? '#134e2c' : '#1a1a1a';
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(txt, tx, y + rh/2 + fsItem*0.32);
+          ctx.restore();
+          ctx.fillStyle = '#1a1a1a';
+        }
+      });
+      y += rh;
+    });
+  }
+
+  const scrollWrapEnd2 = document.getElementById('reportCanvasScrollWrap');
+  if(scrollWrapEnd2) scrollWrapEnd2.scrollTop = 0;
+  const previewBoxScEnd2 = scrollWrapEnd2 ? scrollWrapEnd2.closest('.invoicePreviewBox') : null;
+  if(previewBoxScEnd2) previewBoxScEnd2.scrollTop = 0;
+}
+
+// ---------- 🧾 صدام کی ہدایت: "منڈی سیل ریکارڈ" رپورٹ کھولنا — پرانی reportPreviewModal انفراسٹرکچر ہی
+// استعمال ہوتی ہے (بالکل روزانہ سٹاک/منافع رپورٹ جیسا)، تاکہ فونٹ/زوم/A4 پرنٹ/شیئر سب پہلے سے تیار نظام
+// خودکار مل جائے ---------- -->
+function openMandiSaleRecordReport(){
+  currentReportType = 'mandisale';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = "🧾 منڈی سیل ریکارڈ (برائے منشی)";
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
 }
 
 function stripUnrenderableForPdf(text){
@@ -37715,7 +37999,7 @@ async function shareReportPdf(){
   if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
   await renderReportToCanvas();
   const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : currentReportType === 'stockprofit' ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -37745,7 +38029,7 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : currentReportType === 'stockprofit' ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
     window.open(pdf.output('bloburl'), '_blank');
     return;
   }
