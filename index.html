@@ -8307,7 +8307,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات17ستمبر07:53pm';
+const APP_BUILD_VERSION = 'جمعہ18ستمبر11:40am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -23720,7 +23720,7 @@ function renderOtItemsTable(wrap){
           <!-- ---------- 🖐️ صدام کی ہدایت (FM11SEP): مقدار کے خانے اور سٹاک کالم کی حد کے درمیان فاصلہ، اور +/− بٹنوں
                کے درمیان بھی زیادہ فاصلہ — تاکہ الگ الگ آسانی سے دبائے جا سکیں ---------- -->
           <div style="display:flex; align-items:center; justify-content:center; gap:9px; padding-inline-end:6px;">
-            <input type="text" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setOtQtyDirect(${v.variant_id}, this.value, this)" style="width:42px;box-sizing:border-box;padding:5px 2px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:7px;font-size:12.5px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);">
+            <input type="text" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setOtQtyTableManual(${v.variant_id}, this.value, this)" style="width:42px;box-sizing:border-box;padding:5px 2px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:7px;font-size:12.5px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);">
             <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, 1)" style="width:27px;height:27px;border:none;border-radius:7px;background:#dcfce7;color:#15803d;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #86efac;">+</button>
             <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, -1)" style="width:27px;height:27px;border:none;border-radius:7px;background:#fee2e2;color:#b91c1c;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #fca5a5;">−</button>
           </div>
@@ -23745,10 +23745,18 @@ function renderOtItemsTable(wrap){
     </div>
   `;
 }
-// ---------- جدول میں براہ راست مقدار لکھنا — بالکل وہی otQtyMap/otCheckedMap استعمال ہوتے ہیں جو کارڈ نظارہ
+// ---------- 🐞 صدام کی ہدایت (FM18SEPFR): اصل خرابی — یہ فنکشن اور نیچے موجود ویل والا setOtQtyDirect(...)
+// دونوں کا نام ایک جیسا "setOtQtyDirect" تھا۔ جاوا اسکرپٹ میں ایک ہی نام کے دو function ہوں تو بعد والا
+// (ویل والا) پہلے والے کو مکمل ختم/اووررائٹ کر دیتا ہے — اس لیے جدول (Table View) میں مقدار ہاتھ سے ٹائپ کرنے پر
+// اصل میں ویل والا فنکشن چلتا تھا، جو صرف .otItemRow کلاس والی قطار ڈھونڈتا ہے (وہ صرف کارڈ ویو میں ہوتی ہے،
+// جدول کی <tr> میں نہیں ہوتی) — قطار نہ ملنے پر otCheckedMap کبھی true نہیں ہوتا تھا، اس لیے وہ آئٹم آرڈر میں
+// شامل ہی نہ ہوتا اور "کم از کم ایک چیز کو ٹک کر کے تعداد لگائیں" کی خرابی آ جاتی تھی۔ اب اس فنکشن کا نام الگ
+// (setOtQtyTableManual) رکھ دیا گیا ہے تاکہ دونوں فنکشن آزادانہ، بغیر ٹکراؤ کے کام کریں — جدول میں ہاتھ سے
+// لکھی مقدار براہ راست اپنا otCheckedMap/otQtyMap سیٹ کرتی ہے، .otItemRow ڈھونڈنے کی ضرورت ہی نہیں۔
+// جدول میں براہ راست مقدار لکھنا — بالکل وہی otQtyMap/otCheckedMap استعمال ہوتے ہیں جو کارڈ نظارہ
 // استعمال کرتا ہے، اس لیے آرڈر مکمل/بھیجنے کا سارا نظام بغیر کسی تبدیلی کے کام کرتا ہے۔
 // 🔢 صدام کی ہدایت: اب پوائنٹ والی مقدار (0.5 = آدھی، 1.25 = سوا، 2.5 = ڈھائی وغیرہ) بھی لکھی جا سکتی ہے ---------- -->
-function setOtQtyDirect(variantId, value, inputEl){
+function setOtQtyTableManual(variantId, value, inputEl){
   let qty = parseFloat(String(value).replace(',', '.'));
   if(!isFinite(qty) || qty < 0) qty = 0;
   qty = Math.round(qty * 100) / 100;
