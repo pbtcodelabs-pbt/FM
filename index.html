@@ -8320,7 +8320,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ19ستمبر07:59am';
+const APP_BUILD_VERSION = 'ہفتہ19ستمبر09:05am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12775,7 +12775,7 @@ function renderVariantChooserList(productId){
   // "کاٹ کر" نکالا جاتا تھا — اگر پہلی پیکنگ کا نام غلطی سے مین نام جیسا ہی رکھا گیا ہو (جیسے "ادرک" کی
   // پیکنگ کا نام بھی "ادرک" ہو) تو یہ صاف نظر نہیں آتا تھا، لگتا "ادرک" خود ایک پیکنگ ہے۔ اب سیدھا
   // v.label (پیکنگ کا اپنا محفوظ شدہ نام) استعمال ہوتا ہے، اور اوپر مین نام بولڈ/درمیان میں الگ سے نظر آتا ہے ---------- -->
-  let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0 6px 0 0;">${product.serial_no}</span>` : ''}${product.name}</div>`;
+  let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:40px !important; height:40px !important; min-width:40px !important; min-height:40px !important; font-size:16px !important; margin:0 6px 0 0; cursor:default;">${product.serial_no}</span>` : ''}${product.name}</div>`;
 
   html += flat.map(v => {
     const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
@@ -17638,7 +17638,10 @@ function vcInlinePopulate(){
   // ---------- 🆕 صدام کی ہدایت (17 ستمبر، دوپہر): نام کے ساتھ سرخ گول سیریل نمبر بیج بھی دکھائیں —
   // بالکل نیچے جدول والے سرخ بیج جیسا — تاکہ فوراً پتہ چل جائے کہ کس سیریل نمبر کی سبزی پر کام ہو رہا ہے ---------- -->
   document.getElementById('vcInlinePanelName').innerHTML =
-    (product.serial_no ? `<span class="serialBadgeBtn" style="width:27px !important; height:27px !important; min-width:27px !important; min-height:27px !important; font-size:12px !important; margin:0 !important; cursor:default;">${product.serial_no}</span>` : '')
+    // ---------- 🔴 صدام کی ہدایت (19 ستمبر، صبح): پہلے یہ بیج صرف .serialBadgeBtn کلاس پر منحصر تھا اور مدھم/چھوٹا
+    // نظر آتا تھا — اب نیچے جدول والے بیج کا وہی مکمل SERIAL_BADGE_INLINE_STYLE براہ راست یہاں بھی لگا دیا گیا
+    // ہے، تاکہ رنگ/سائز/سٹائل بالکل ایک جیسا، گہرا سرخ اور صاف نظر آئے، کسی CSS تصادم کا امکان ہی نہ رہے ---------- -->
+    (product.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; margin:0 !important; cursor:default;">${product.serial_no}</span>` : '')
     + `<span style="flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${product.name + (variant.label ? ' ' + variant.label : '')}</span>`;
   document.getElementById('vcInlinePanelPacking').textContent = '📦▾';
   document.getElementById('vcInlinePanelPacking').title = 'پیکنگ: ' + (variant.label || '— منتخب —') + ' (بدلنے کے لیے دبائیں)';
@@ -22537,7 +22540,7 @@ function renderPoVariantChooserList(productId){
   const list = document.getElementById('poChooseVariantList');
   const product = productsData.find(p=>p.product_id===productId);
 
-  let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product?.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0 6px 0 0;">${product.serial_no}</span>` : ''}${product?.name || ''}</div>`;
+  let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product?.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:40px !important; height:40px !important; min-width:40px !important; min-height:40px !important; font-size:16px !important; margin:0 6px 0 0; cursor:default;">${product.serial_no}</span>` : ''}${product?.name || ''}</div>`;
 
   html += flat.map(v => {
     const cartItem = poCart.find(c => c.variant_id === v.variant_id);
@@ -23010,7 +23013,7 @@ function renderAdvOrderVariantChooserList(productId){
   const product = productsData.find(p=>p.product_id===productId);
   const advIsAdmin = document.body.classList.contains('role-admin');
 
-  let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product?.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0 6px 0 0;">${product.serial_no}</span>` : ''}${product?.name || ''}</div>`;
+  let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product?.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:40px !important; height:40px !important; min-width:40px !important; min-height:40px !important; font-size:16px !important; margin:0 6px 0 0; cursor:default;">${product.serial_no}</span>` : ''}${product?.name || ''}</div>`;
 
   html += flat.map(v => {
     const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
