@@ -66,17 +66,15 @@
   گئی ہے — کوڈ ڈیلیٹ نہیں کیا گیا، صرف display:none کیا گیا ہے ---------- */
   #billingCategoryDropdownWrap, #advOrderCategoryDropdownWrap, #categoryRail, #poCategoryRail,
   #stockAdjCategoryFilter{ display:none !important; }
-  /* ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر پرنٹنگ صرف 58/80mm تھرمل (بلوٹوتھ/فاسٹ ٹیکسٹ) اور
-  WhatsApp شیئر تک محدود کر دی گئی ہے — A4/PDF پرنٹنگ اور Android کا یونیورسل پرنٹ ڈائیلاگ (window.print()
-  کے ذریعے) پوری ایپ سے (بل، ایڈوانس آرڈر، پرچیز آرڈر، رپورٹس) چھپا دیا گیا ہے۔ کوڈ ڈیلیٹ نہیں کیا گیا ---------- */
+  /* ---------- 🍇 Fruit Mandi POS: صدام کی ہدایت پر پہلے پرنٹنگ صرف 58/80mm تھرمل (بلوٹوتھ/فاسٹ ٹیکسٹ) اور
+  WhatsApp شیئر تک محدود کر دی گئی تھی — A4/PDF پرنٹنگ اب بھی چھپی رہے گی۔ لیکن صدام کی نئی ہدایت (FM19SEPSA)
+  پر Android کا یونیورسل پرنٹ ڈائیلاگ (Thermer/RawBT پرنٹ سروس کے لیے استعمال ہوتا ہے) اور یونیورسل شیئر بٹن
+  اب جان بوجھ کر دوبارہ نظر آنے دیے گئے ہیں (نیچے .triPrintRow کے تین بٹنوں میں) — اس لیے یہ دونوں لسٹ ہٹا دی
+  گئیں، صرف A4-متعلقہ سلیکٹرز باقی ہیں ---------- */
   #pscOrientRow, #aopscOrientRow, #popscOrientRow, #rpscOrientRow,
   #pscA4ShareRow, #aopA4ShareRow, #poA4ShareRow, #rpA4ShareRow,
   .pscCompactRow:has(#pscA4Chk), .pscCompactRow:has(#aopscA4Chk),
-  .pscCompactRow:has(#popscA4Chk), .pscCompactRow:has(#rpscA4Chk),
-  button[onclick^="printCurrentInvoice"], button[onclick^="printAdvOrderPreview"],
-  button[onclick^="printPoPreview"], button[onclick^="printCurrentReport"],
-  button[onclick^="shareInvoiceUniversal"], button[onclick^="shareAdvOrderUniversal"],
-  button[onclick^="sharePoUniversal"], button[onclick^="shareReportUniversal"]
+  .pscCompactRow:has(#popscA4Chk), .pscCompactRow:has(#rpscA4Chk)
   { display:none !important; }
   body{font-family:var(--font); font-weight:var(--font-weight); background:linear-gradient(180deg, #f6f9f4 0%, var(--bg) 18%, #eef3ea 100%); color:var(--text); height:100vh; overflow:hidden;}
 
@@ -1892,6 +1890,14 @@
   .pscCheckLabel input{width:15px; height:15px;}
   .previewActions{display:flex; gap:6px; padding:8px 14px;}
   .previewActions button{flex:1; padding:8px; border:none; border-radius:8px; font-weight:600; font-size:12.5px; cursor:pointer;}
+  /* ---------- 🖨️ صدام کی ہدایت (FM19SEPSA): پرنٹ/شیئر کے تین بٹن — ہر جگہ ایک جیسا، برابر چوڑائی، تھری ڈی سٹائل ---------- */
+  .triPrintRow{display:flex; gap:8px; padding:8px 14px;}
+  .triPrintBtn{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:46px; padding:8px 4px; border:none; border-radius:12px; font-weight:800; font-size:11px; line-height:1.25; cursor:pointer; color:#fff; text-align:center; transition:transform .08s ease, box-shadow .08s ease;}
+  .triPrintBtn .triIcon{font-size:17px; line-height:1;}
+  .triPrintBtn:active{transform:translateY(3px); box-shadow:none !important;}
+  .triBtnDirect{background:linear-gradient(180deg,#38bdf8,#0284c7); box-shadow:0 4px 0 #075985, 0 6px 10px rgba(2,132,199,.35);}
+  .triBtnMain{background:linear-gradient(180deg,#14b8a6,#0f766e); box-shadow:0 4px 0 #0b4a45, 0 6px 10px rgba(15,118,110,.35);}
+  .triBtnShare{background:linear-gradient(180deg,#4ade80,#16a34a); box-shadow:0 4px 0 #14532d, 0 6px 10px rgba(22,163,74,.35);}
 
   /* ===================== SETTINGS SCREEN ===================== */
   .settingsWrap{display:flex; flex-direction:column; gap:16px; max-width:640px;}
@@ -4482,10 +4488,10 @@
             </div>
           </div>
         </div>
-        <div style="display:flex; gap:8px; padding:10px 14px 14px;">
-          <button type="button" style="flex:1; padding:12px 4px; background:#e0f2fe; color:#075985; border:none; border-radius:10px; font-weight:800; font-size:12.5px; cursor:pointer;" onclick="generateAndBluetoothPrintRecoveryPoster()">🔵 بلوٹوتھ<br>پرنٹ</button>
-          <button type="button" style="flex:1; padding:12px 4px; background:#eef2ff; color:var(--primary-dark); border:none; border-radius:10px; font-weight:800; font-size:12.5px; cursor:pointer;" onclick="generateAndPrintRecoveryPoster()">🖨️ پرنٹ<br>کریں</button>
-          <button type="button" style="flex:1; padding:12px 4px; background:#dcfce7; color:#15803d; border:none; border-radius:10px; font-weight:800; font-size:12.5px; cursor:pointer;" onclick="generateAndShareRecoveryPoster()">📤 واٹس ایپ<br>شیئر</button>
+        <div class="triPrintRow" style="padding:10px 14px 14px;">
+          <button type="button" class="triPrintBtn triBtnDirect" onclick="generateAndBluetoothPrintRecoveryPoster()"><span class="triIcon">🔵</span>براہ راست</button>
+          <button type="button" class="triPrintBtn triBtnMain" onclick="generateAndPrintRecoveryPoster()"><span class="triIcon">🖨️</span>تھرمر/RawBT پرنٹ</button>
+          <button type="button" class="triPrintBtn triBtnShare" onclick="generateAndShareRecoveryPoster()"><span class="triIcon">📤</span>شیئر</button>
         </div>
       </div>
     </div>
@@ -5290,10 +5296,10 @@
              ترتیب سے آزمائیں: 1) براہ راست بلوٹوتھ (بغیر ایپ کے، چھوٹا بٹن)، 2) تھرمر/RawBT پرنٹ
              (Android پرنٹ ڈائیلاگ، بیچ میں بڑا بٹن — یہی اصل کام کرنے والا آپشن ہے)، 3) یونیورسل شیئر
              (اگر اوپر دونوں کام نہ کریں تو شیئر شیٹ میں سے تھرمر/RawBT منتخب کر کے پرنٹ کریں) ---------- -->
-        <div class="previewActions" id="pscBtPrintRow" style="padding-top:0; gap:6px;">
-          <button style="flex:0 0 21%; background:#e0f2fe; color:#075985; padding:7px 2px; font-size:10px; line-height:1.3; border:none; border-radius:8px; font-weight:700; cursor:pointer;" onclick="printViaWebBluetooth('invoiceCanvas')">🔵<br>براہ راست</button>
-          <button style="flex:1.4; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; padding:9px 4px; font-size:12.5px; border:none; border-radius:8px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.18);" onclick="printCurrentInvoice()">🖨️ تھرمر/RawBT<br>پرنٹ</button>
-          <button style="flex:0 0 21%; background:#eef2ff; color:var(--primary-dark); padding:7px 2px; font-size:10px; line-height:1.3; border:none; border-radius:8px; font-weight:700; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;" onclick="shareInvoiceUniversal()"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>شیئر</button>
+        <div class="triPrintRow" id="pscBtPrintRow">
+          <button type="button" class="triPrintBtn triBtnDirect" onclick="printViaWebBluetooth('invoiceCanvas')"><span class="triIcon">🔵</span>براہ راست</button>
+          <button type="button" class="triPrintBtn triBtnMain" onclick="printCurrentInvoice()"><span class="triIcon">🖨️</span>تھرمر/RawBT پرنٹ</button>
+          <button type="button" class="triPrintBtn triBtnShare" onclick="shareInvoiceUniversal()"><span class="triIcon">📤</span>شیئر</button>
         </div>
         <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
         <div class="previewActions" id="pscA4ShareRow" style="padding-top:0; display:none;">
@@ -5974,13 +5980,13 @@
         </div>
 
         <div class="previewActions">
-          <button class="btnPrint" onclick="printAdvOrderPreview()">🖨️ Print</button>
           <button class="btnWhatsapp" onclick="shareAdvOrderWhatsapp()">📱 WhatsApp</button>
-          <button class="btnHistory" onclick="shareAdvOrderUniversal()" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share More</button>
         </div>
-        <!-- ---------- تھرمل رول کے لیے — بغیر کسی اضافی ایپ کے سیدھا بلوٹوتھ پرنٹر سے پرنٹ — A4 پر یہ متعلقہ نہیں ---------- -->
-        <div class="previewActions" id="aopBtPrintRow" style="padding-top:0;">
-          <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('advOrderCanvas')">🔵 براہ راست بلوٹوتھ پرنٹ آزمائیں (بغیر ایپ کے)</button>
+        <!-- ---------- 🖨️ صدام کی ہدایت (FM19SEPSA): تین پرنٹ/شیئر آپشن ایک لائن میں، برابر چوڑائی ---------- -->
+        <div class="triPrintRow" id="aopBtPrintRow">
+          <button type="button" class="triPrintBtn triBtnDirect" onclick="printViaWebBluetooth('advOrderCanvas')"><span class="triIcon">🔵</span>براہ راست</button>
+          <button type="button" class="triPrintBtn triBtnMain" onclick="printAdvOrderPreview()"><span class="triIcon">🖨️</span>تھرمر/RawBT پرنٹ</button>
+          <button type="button" class="triPrintBtn triBtnShare" onclick="shareAdvOrderUniversal()"><span class="triIcon">📤</span>شیئر</button>
         </div>
         <div class="previewActions" style="padding-top:0;">
           <button style="background:#fef9c3; color:#854d0e; flex:1;" onclick="printAdvOrderFastText()">⚡ Fast Print (Simple Text — No Fonts/Images)</button>
@@ -6058,12 +6064,13 @@
           <canvas id="poCanvas"></canvas>
         </div>
         <div class="previewActions">
-          <button class="btnPrint" onclick="printPoPreview()">🖨️ Print</button>
           <button class="btnWhatsapp" onclick="sharePoWhatsapp()">📱 WhatsApp</button>
-          <button class="btnHistory" onclick="sharePoUniversal()" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share More</button>
         </div>
-        <div class="previewActions" id="poBtPrintRow" style="padding-top:0;">
-          <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('poCanvas')">🔵 براہ راست بلوٹوتھ پرنٹ آزمائیں (بغیر ایپ کے)</button>
+        <!-- ---------- 🖨️ صدام کی ہدایت (FM19SEPSA): تین پرنٹ/شیئر آپشن ایک لائن میں، برابر چوڑائی ---------- -->
+        <div class="triPrintRow" id="poBtPrintRow">
+          <button type="button" class="triPrintBtn triBtnDirect" onclick="printViaWebBluetooth('poCanvas')"><span class="triIcon">🔵</span>براہ راست</button>
+          <button type="button" class="triPrintBtn triBtnMain" onclick="printPoPreview()"><span class="triIcon">🖨️</span>تھرمر/RawBT پرنٹ</button>
+          <button type="button" class="triPrintBtn triBtnShare" onclick="sharePoUniversal()"><span class="triIcon">📤</span>شیئر</button>
         </div>
         <div class="previewActions" style="padding-top:0;">
           <button style="background:#fef9c3; color:#854d0e; flex:1;" onclick="printPoFastText()">⚡ Fast Print (Simple Text — No Fonts/Images)</button>
@@ -6663,13 +6670,14 @@
       <canvas id="reportCanvas"></canvas>
     </div>
     <div class="previewActions">
-      <button class="btnPrint" onclick="printCurrentReport()">🖨️ Print</button>
       <button class="btnWhatsapp" onclick="shareReportWhatsapp()">📱 WhatsApp</button>
-      <button class="btnHistory" onclick="shareReportUniversal()" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share More</button>
     </div>
-    <!-- ---------- تھرمل رول کے لیے — بغیر کسی اضافی ایپ کے سیدھا بلوٹوتھ پرنٹر سے پرنٹ — A4 پر یہ متعلقہ نہیں (PDF راستہ استعمال ہوتا ہے) ---------- -->
-    <div class="previewActions" id="rpBtPrintRow" style="padding-top:0;">
-      <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('reportCanvas')">🔵 براہ راست بلوٹوتھ پرنٹ آزمائیں (بغیر ایپ کے)</button>
+    <!-- ---------- 🖨️ صدام کی ہدایت (FM19SEPSA): تین پرنٹ/شیئر آپشن ایک لائن میں، برابر چوڑائی —
+    یہی رپورٹ پریویو سکرین ہر قسم کی رپورٹ (سیل وائز وغیرہ) کے لیے مشترکہ استعمال ہوتی ہے ---------- -->
+    <div class="triPrintRow" id="rpBtPrintRow">
+      <button type="button" class="triPrintBtn triBtnDirect" onclick="printViaWebBluetooth('reportCanvas')"><span class="triIcon">🔵</span>براہ راست</button>
+      <button type="button" class="triPrintBtn triBtnMain" onclick="printCurrentReport()"><span class="triIcon">🖨️</span>تھرمر/RawBT پرنٹ</button>
+      <button type="button" class="triPrintBtn triBtnShare" onclick="shareReportUniversal()"><span class="triIcon">📤</span>شیئر</button>
     </div>
     <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
     <div class="previewActions" id="rpA4ShareRow" style="padding-top:0; display:none;">
@@ -8311,7 +8319,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ19ستمبر05:20am';
+const APP_BUILD_VERSION = 'ہفتہ19ستمبر06:52am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -25077,10 +25085,11 @@ function openReportImagePreview(canvases, opts){
   _reportPreviewBluetoothCanvas = opts.bluetoothCanvas || null;
 
   const actionsWrap = document.getElementById('reportImagePreviewActions');
+  actionsWrap.className = 'triPrintRow';
   actionsWrap.innerHTML = `
-    <button type="button" onclick="printReportImagePreview()" style="flex:1; padding:12px; background:#eef2ff; color:var(--primary-dark); border:none; border-radius:10px; font-weight:800; font-size:13.5px; cursor:pointer;">🖨️ پرنٹ کریں</button>
-    ${_reportPreviewBluetoothCanvas ? `<button type="button" onclick="printReportImagePreviewViaBluetooth()" style="flex:1; padding:12px; background:#e0f2fe; color:#075985; border:none; border-radius:10px; font-weight:800; font-size:13.5px; cursor:pointer;">🔵 بلوٹوتھ پرنٹ</button>` : ''}
-    <button type="button" onclick="shareReportImagePreview()" style="flex:1; padding:12px; background:#dcfce7; color:#15803d; border:none; border-radius:10px; font-weight:800; font-size:13.5px; cursor:pointer;">📤 شیئر/واٹس ایپ</button>
+    ${_reportPreviewBluetoothCanvas ? `<button type="button" class="triPrintBtn triBtnDirect" onclick="printReportImagePreviewViaBluetooth()"><span class="triIcon">🔵</span>براہ راست</button>` : ''}
+    <button type="button" class="triPrintBtn triBtnMain" onclick="printReportImagePreview()"><span class="triIcon">🖨️</span>تھرمر/RawBT پرنٹ</button>
+    <button type="button" class="triPrintBtn triBtnShare" onclick="shareReportImagePreview()"><span class="triIcon">📤</span>شیئر/واٹس ایپ</button>
   `;
   document.getElementById('reportImagePreviewModal').classList.add('show');
 }
