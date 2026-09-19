@@ -3537,7 +3537,7 @@
       </div>
     </div>
 
-    <div class="modalOverlay" id="packingPickerModal" onclick="if(event.target===this) closePackingPicker()">
+    <div class="modalOverlay" id="packingPickerModal" style="z-index:980;" onclick="if(event.target===this) closePackingPicker()">
       <div class="modalBox" style="max-width:380px; max-height:80vh; display:flex; flex-direction:column;">
         <h3 style="margin-top:0; margin-bottom:8px;">📦 پیکنگ منتخب کریں</h3>
         <div id="packingPickerListWrap" style="flex:1; overflow-y:auto;"></div>
@@ -5427,7 +5427,12 @@
         <!-- ---------- 🔓 صدام کی ہدایت (FM15SEPTU): سرچ بار واپس بحال — فلٹر بٹنوں کے ساتھ ہی، تاکہ سکرول کیے
              بغیر ٹائپ کر کے سیدھا کسٹمر مل جائے (سیریل نمبر یا نام دونوں سے) ---------- -->
         <!-- ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): منشی/آرڈر لینے والے کو یہیں سے نیا کسٹمر شامل کرنے کی اجازت ---------- -->
-        <button type="button" onclick="openOtNewCustomer()" style="width:86%; max-width:340px; display:block; margin:0 auto 10px; padding:11px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15);">➕ نیا کسٹمر شامل کریں</button>
+        <!-- ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): "نیا سٹاک" اور "نیا کسٹمر" دونوں بٹن ہوم پیج پر —
+             ایک ہی لائن میں برابر تقسیم، نیا سٹاک دائیں طرف، نیا کسٹمر بائیں طرف ---------- -->
+        <div style="display:flex; gap:8px; width:86%; max-width:340px; margin:0 auto 10px;" dir="rtl">
+          <button type="button" onclick="openOtAddStockModal()" style="flex:1; padding:11px 4px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:12px; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">➕ نیا سٹاک ایڈ کریں</button>
+          <button type="button" onclick="openOtNewCustomer()" style="flex:1; padding:11px 4px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:12px; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">➕ نیا کسٹمر ایڈ کریں</button>
+        </div>
         <input type="text" id="otCustSearch" placeholder="🔍 کسٹمر کا نام یا سیریل نمبر لکھیں" oninput="renderOtCustomerList(this.value)"
                style="width:86%; max-width:340px; display:block; margin:0 auto 10px; padding:11px; border:2px solid var(--primary); border-radius:12px; font-size:14.5px; font-weight:800; text-align:center; box-sizing:border-box;">
         <div style="display:flex; gap:6px; margin-bottom:10px;">
@@ -5445,18 +5450,18 @@
              نظروں سے غائب ہو جاتا تھا۔ اب دونوں مستقل اوپر چپکے رہیں گے تاکہ سکرول کرتے ہوئے ہر وقت نظر آئے
              کہ کون سی سبزی نمایاں/سلیکٹ ہو رہی ہے ---------- -->
         <div id="otStickyHead" style="position:sticky; top:0; z-index:6; background:var(--bg); padding-bottom:2px;">
-          <div id="otTopBar" style="background:var(--bg); padding:8px 4px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:2px solid var(--primary); margin-bottom:8px;">
+          <!-- ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): کسٹمر کا نام اب اپنی مکمل، الگ، موٹی لائن میں —
+               پہلے بٹنوں کے ساتھ ایک ہی لائن میں دب/چھپ جاتا تھا، اب ہمیشہ صاف مکمل نظر آئے گا ---------- -->
+          <div id="otTopBar" style="background:var(--bg); padding:8px 4px 4px; display:flex; flex-direction:column; gap:5px; border-bottom:2px solid var(--primary); margin-bottom:8px;">
             <div style="min-width:0;">
-              <div style="font-weight:800; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="otTopCustName"></div>
+              <div style="font-weight:900; font-size:17px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="otTopCustName"></div>
               <div style="font-size:12px; color:var(--muted);" id="otTopCustArea"></div>
             </div>
-            <div style="display:flex; gap:6px; flex:0 0 auto;">
+            <div style="display:flex; gap:6px; flex:0 0 auto; flex-wrap:wrap; justify-content:flex-end;">
               <button type="button" onclick="openOtStockReport()" style="padding:9px 10px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 سٹاک رپورٹ</button>
               <!-- ---------- 🧾 صدام کی ہدایت (17 ستمبر، صبح 7:35): "منڈی سیل ریکارڈ (برائے منشی)" — منشی/مزدور
                    (غیر ایڈمن) کے لیے یہاں سے بھی کھلے، بالکل ایڈمن کی سٹاک ایڈجسٹمنٹ ← 📊 رپورٹس ڈراپ ڈاؤن جیسی رپورٹ ---------- -->
               <button type="button" onclick="openMandiSaleRecordReport()" style="padding:9px 10px; background:#0f766e; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">🧾 منڈی سیل ریکارڈ</button>
-              <!-- ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): منشی/آرڈر لینے والے کے لیے یہیں سے نیا سٹاک فیڈ کرنے کی سہولت ---------- -->
-              <button type="button" onclick="openOtAddStockModal()" style="padding:9px 10px; background:#b45309; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">➕ نیا سٹاک</button>
               <button type="button" onclick="toggleOtViewMode()" id="otViewModeBtn" style="display:none; padding:9px 10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 جدول</button>
               <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
               <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
@@ -8344,7 +8349,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ19ستمبر05:32pm';
+const APP_BUILD_VERSION = 'ہفتہ19ستمبر06:05pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -23430,7 +23435,7 @@ function renderOtAddStockList(query){
       ${p.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; margin:0; cursor:default;">${p.serial_no}</span>` : ''}
       <div style="flex:1; min-width:0; text-align:right;">
         <div style="font-weight:800; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
-        <div style="font-size:11px; color:var(--muted);">موجودہ سٹاک: <span id="otAddStockCur-${v.variant_id}">${v.stock || 0}</span></div>
+        <div style="display:inline-block; margin-top:4px; padding:3px 10px; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:8px; font-size:12px; font-weight:800; color:#1e3a8a;">موجودہ سٹاک: <span id="otAddStockCur-${v.variant_id}" style="font-weight:900; font-size:13px;">${v.stock || 0}</span></div>
       </div>
       <button type="button" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', 'otAddStockListWrap')" style="flex:0 0 70px; padding:6px 4px; border:1px solid #93c5fd; background:#dbeafe; color:#1e3a8a; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📦 ${v.label || '—'}</button>
       <input type="number" id="otAddStockQty-${v.variant_id}" placeholder="+مقدار" min="0" style="width:64px; padding:6px; border:1.5px solid #86efac; border-radius:7px; text-align:center; font-size:13px; box-sizing:border-box;">
