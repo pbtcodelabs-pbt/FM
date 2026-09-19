@@ -3743,6 +3743,8 @@
       <div id="stockAdjStickyHeader" style="position:-webkit-sticky; position:sticky; top:0; z-index:40; background:var(--bg,#f4f6f5); padding-top:2px;">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; flex-wrap:nowrap;">
         <div class="pageTitle" style="margin:0; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
+        <!-- ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): منشی نے فیڈ کیا سٹاک — ایڈمن یہاں سے دیکھ سکے ---------- -->
+        <button type="button" onclick="openMunshiStockLogReport()" style="flex:0 0 auto; padding:5px 8px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی کا شامل کردہ سٹاک</button>
         <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
           <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:5px 7px; font-size:10.5px; max-width:none; white-space:nowrap;">
             <span>📊 رپورٹس</span>
@@ -3756,6 +3758,7 @@
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openCustListReport();">👥 کسٹمر</span></div>
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openSupListReport();">🚚 سپلائرز</span></div>
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openMandiSaleRecordReport();">🧾 منڈی سیل ریکارڈ (برائے منشی)</span></div>
+            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openMunshiStockLogReport();">🧑‍🌾 منشی کا شامل کردہ سٹاک</span></div>
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openDailyStockProfitReport();">🧾 منڈی سیل ریکارڈ (برائے ایڈمن)</span></div>
             <div class="stockAdjReportsSortBlock">
               <div class="stockAdjReportsSortLabel">ترتیب دیں:</div>
@@ -6647,6 +6650,26 @@
         </div>
         <button type="button" class="pscMoreToggleBtn" id="rpscMoreToggleBtn" onclick="togglePscMoreOptions('rpscMoreWrap','rpscMoreToggleBtn')">⚙️ More ▾</button>
       </div>
+      <!-- ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): "منشی کا شامل کردہ سٹاک" رپورٹ کی تاریخ فلٹر بار —
+           صرف اسی رپورٹ کے لیے نظر آتی ہے ---------- -->
+      <div id="munshiLogFilterWrap" style="display:none; padding:6px 8px 2px;">
+        <div style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;">
+          <button type="button" id="mlfBtn-today" class="pscToggleBtn" onclick="setMunshiLogFilter('today')">آج</button>
+          <button type="button" id="mlfBtn-yesterday" class="pscToggleBtn" onclick="setMunshiLogFilter('yesterday')">کل</button>
+          <button type="button" id="mlfBtn-week" class="pscToggleBtn" onclick="setMunshiLogFilter('week')">یہ ہفتہ</button>
+          <button type="button" id="mlfBtn-lastweek" class="pscToggleBtn" onclick="setMunshiLogFilter('lastweek')">پچھلا ہفتہ</button>
+          <button type="button" id="mlfBtn-month" class="pscToggleBtn" onclick="setMunshiLogFilter('month')">یہ مہینہ</button>
+          <button type="button" id="mlfBtn-lastmonth" class="pscToggleBtn" onclick="setMunshiLogFilter('lastmonth')">پچھلا مہینہ</button>
+          <button type="button" id="mlfBtn-all" class="pscToggleBtn" onclick="setMunshiLogFilter('all')">تمام</button>
+          <button type="button" id="mlfBtn-custom" class="pscToggleBtn" onclick="setMunshiLogFilter('custom')">📅 کسٹم تاریخ</button>
+        </div>
+        <div id="munshiLogCustomRangeWrap" style="display:none; align-items:center; justify-content:center; gap:6px; margin-top:6px;">
+          <input type="date" id="munshiLogFromDate" style="padding:6px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:12px;">
+          <span style="font-size:11px; color:var(--muted);">سے</span>
+          <input type="date" id="munshiLogToDate" style="padding:6px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:12px;">
+          <button type="button" class="pscToggleBtn" onclick="applyMunshiLogCustomRange()">لاگو کریں</button>
+        </div>
+      </div>
       <div class="pscMoreWrap" id="rpscMoreWrap">
         <div class="pscCompactRow">
           <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
@@ -7477,6 +7500,8 @@ function persistAllData(){
   if(typeof nextAdvOrderId !== 'undefined') saveToStorage('nextAdvOrderId', nextAdvOrderId);
   if(typeof recoveryListData !== 'undefined') saveToStorage('recoveryList', recoveryListData);
   if(typeof nextRecoveryId !== 'undefined') saveToStorage('nextRecoveryId', nextRecoveryId);
+  if(typeof munshiStockLogData !== 'undefined') saveToStorage('munshiStockLog', munshiStockLogData);
+  if(typeof nextMunshiLogId !== 'undefined') saveToStorage('nextMunshiLogId', nextMunshiLogId);
   if(typeof paymentsData !== 'undefined') saveToStorage('payments', paymentsData);
   if(typeof nextPaymentId !== 'undefined') saveToStorage('nextPaymentId', nextPaymentId);
   if(typeof diaryData !== 'undefined') saveToStorage('diary', diaryData);
@@ -8349,7 +8374,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ19ستمبر06:05pm';
+const APP_BUILD_VERSION = 'ہفتہ19ستمبر06:50pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11686,6 +11711,7 @@ function goTo(screenName, _isHistoryNav){
   stopPendingBillsPolling();
   stopFinancePolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7) ----------
   stopApprovalRequestsPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 8) ----------
+  stopMunshiLogPolling(); // ---------- ☁️ صدام کی ہدایت (19 ستمبر، شام): منشی سٹاک لاگ ---------- -->
 
   if(screenName === 'dashboard') {
     renderDashboard();
@@ -11758,6 +11784,10 @@ function goTo(screenName, _isHistoryNav){
     // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): Stock Adjustment سکرین پر جاتے ہی تازہ ترین سٹاک منگوائیں ----------
     fetchProductsFromCloud(false);
     startProductsPolling();
+    // ---------- ☁️ صدام کی ہدایت (19 ستمبر، شام): منشی کا شامل کردہ سٹاک لاگ بھی خاموشی سے تازہ منگوا لیں
+    // تاکہ رپورٹ بٹن دباتے ہی دوسرے فون کا ریکارڈ بھی موجود ہو ---------- -->
+    fetchMunshiStockLogFromCloud(true);
+    startMunshiLogPolling();
   }
   if(screenName === 'purchaseorders'){
     renderPurchaseOrdersScreen();
@@ -18389,6 +18419,11 @@ let nextReturnId = loadFromStorage('nextReturnId', 1);
 // ایڈمن اصل کھاتے میں اندراج کے بعد تصدیق (Confirm) کرتا ہے، تب جا کر customer.total_receivable کم ہوتا ہے ----------
 let recoveryListData = loadFromStorage('recoveryList', []);
 let nextRecoveryId = loadFromStorage('nextRecoveryId', 1);
+// ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): منشی/آرڈر لینے والے کے "نیا سٹاک" فارم سے ہر بار جو سٹاک فیڈ ہو،
+// اس کا ایک مستقل، وقت کے ساتھ الگ الگ اندراج والا لاگ — تاکہ ایڈمن بعد میں دیکھ سکے کہ کب، کیا، کتنا شامل ہوا
+// (ایک ہی دن میں دو دفعہ اندراج ہو تو دونوں علیحدہ علیحدہ نظر آئیں، مدغم نہ ہوں) ---------- -->
+let munshiStockLogData = loadFromStorage('munshiStockLog', []);
+let nextMunshiLogId = loadFromStorage('nextMunshiLogId', 1);
 
 const SUPPLIERS_SEED_DATA = [
   {supplier_id:1, name:'Unilever Pakistan', phone:'923001112223', address:'Karachi', keywords:'', total_payable:12500},
@@ -21463,6 +21498,10 @@ function getDateRangeForKey(key, customFrom, customTo){
   const today = startOfDay(now);
   switch(key){
     case 'today': return {from: today, to: new Date(today.getTime() + 86400000 - 1)};
+    case 'yesterday': {
+      const from = new Date(today.getTime() - 86400000);
+      return {from, to: new Date(from.getTime() + 86400000 - 1)};
+    }
     case 'week': {
       const from = new Date(today); from.setDate(today.getDate() - today.getDay());
       return {from, to: new Date(from.getTime() + 7*86400000 - 1)};
@@ -23450,8 +23489,22 @@ function otAddStockCommit(productId, variantId){
   const v = p?.variants.find(x => x.variant_id === variantId);
   if(!v) return;
   v.stock = (Number(v.stock) || 0) + qty;
+  // ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): ہر اندراج اپنے وقت کے ساتھ الگ لاگ میں محفوظ —
+  // اگر ایک ہی سبزی دن میں دو دفعہ فیڈ ہو تو دونوں الگ الگ اندراج کے طور پر رہیں گی، مدغم نہیں ہوں گی ---------- -->
+  munshiStockLogData.push({
+    id: nextMunshiLogId++,
+    ts: Date.now(),
+    product_id: productId,
+    variant_id: variantId,
+    serial_no: p.serial_no ?? null,
+    name: p.name,
+    label: v.label || '',
+    qty: qty,
+    by: (AppState.currentUser && AppState.currentUser.name) || ''
+  });
   persistAllData();
   pushProductsToCloud();
+  pushMunshiStockLogToCloud();
   input.value = '';
   const curEl = document.getElementById(`otAddStockCur-${variantId}`);
   if(curEl) curEl.textContent = v.stock;
@@ -23828,8 +23881,11 @@ function renderOtItemsPage(){
         <span class="serialBadgeBtn" style="cursor:default;">${v.serial_no ?? '?'}</span>
         <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:var(--otFw,700); flex:1; text-align:right; line-height:1.4; cursor:pointer;" onclick="toggleOtItemFromRow(this, ${v.variant_id})">${v.name}</div>
       </div>
-      <!-- ---------- 📦 صدام کی ہدایت (FM10SEPTH): دستیاب سٹاک — یہاں سے مقدار بڑھاتے ہی فوراً کم ہوتا نظر آئے گا ---------- -->
-      <div style="text-align:left; font-size:11.5px; font-weight:800; color:#134e2c;">📦 سٹاک: <span data-ot-stock-for="${v.variant_id}">${otAvailableStock(v.variant_id)}</span></div>
+      <!-- ---------- 📦 صدام کی ہدایت (FM10SEPTH): دستیاب سٹاک — یہاں سے مقدار بڑھاتے ہی فوراً کم ہوتا نظر آئے گا ----------
+           🔴 صدام کی ہدایت (19 ستمبر، شام): پہلے یہ باریک، بغیر بیک گراؤنڈ لکھائی تھی — اب واضح بیک گراؤنڈ باکس میں ---------- -->
+      <div style="display:flex; justify-content:flex-end;">
+        <div style="display:inline-block; padding:4px 12px; background:linear-gradient(180deg,#dcfce7,#bbf7d0); border:1.5px solid #16a34a; border-radius:9px; font-size:13px; font-weight:900; color:#134e2c;">📦 سٹاک: <span data-ot-stock-for="${v.variant_id}" style="font-size:14px;">${otAvailableStock(v.variant_id)}</span></div>
+      </div>
       <!-- ---------- ✅🎯 صدام کی ہدایت (FM16SEPWE): چیک باکس + ➖➕ (+ دائیں، − بائیں) اب سٹاک ایڈجسٹمنٹ جیسے
            نمبر-ویل کے ساتھ جڑے ہوئے — ویل گھما کر براہ راست مطلوبہ مقدار پر جائیں، یا ➕➖ سے ایک ایک نمبر ---------- -->
       <div style="display:flex; flex-direction:column; gap:3px;">
@@ -29724,6 +29780,78 @@ function startRecoveryListPolling(){
 }
 function stopRecoveryListPolling(){
   if(recoveryListPollTimer){ clearInterval(recoveryListPollTimer); recoveryListPollTimer = null; }
+}
+
+/* =====================================================================
+   ☁️ MUNSHI STOCK LOG — Firestore Sync (منشی/آرڈر لینے والے کے فون سے فیڈ کردہ
+   ہر سٹاک اندراج، بالکل RECOVERY LIST جیسا "صرف نئے شامل کریں" pattern —
+   تاکہ ایڈمن کے فون پر بھی وہی مکمل، وقت کے ساتھ الگ الگ ریکارڈ نظر آئے) ----------
+   ===================================================================== */
+const MUNSHI_LOG_DOC_PATH = 'shopData/munshiStockLog';
+let munshiLogPollTimer = null;
+
+async function pushMunshiStockLogToCloud(){
+  // ---------- پہلے کلاؤڈ کے ساتھ ضم کر لیں — تاکہ کسی دوسرے فون کا ریکارڈ اوور رائٹ ہو کر ضائع نہ ہو ---------- -->
+  await fetchMunshiStockLogFromCloud(true);
+  saveToStorage('munshiStockLog', munshiStockLogData);
+  saveToStorage('nextMunshiLogId', nextMunshiLogId);
+  try{
+    await authFirestoreFetch(`${MUNSHI_LOG_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(munshiStockLogData) },
+          nextMunshiLogId: { integerValue: String(nextMunshiLogId) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+  }catch(e){
+    // ---------- آف لائن — اگلی بار انٹرنیٹ ملتے ہی sync ہو جائے گا ----------
+  }
+}
+
+async function fetchMunshiStockLogFromCloud(silent){
+  try{
+    const res = await authFirestoreFetch(`${MUNSHI_LOG_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404) return false;
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    let addedAny = false;
+    if(jsonStr){
+      const cloudList = JSON.parse(jsonStr);
+      if(Array.isArray(cloudList)){
+        const localIds = new Set(munshiStockLogData.map(x => x.id));
+        cloudList.forEach(entry => {
+          if(!localIds.has(entry.id)){ munshiStockLogData.push(entry); addedAny = true; }
+        });
+      }
+    }
+    const cloudNextId = parseInt(doc.fields?.nextMunshiLogId?.integerValue || '0');
+    if(cloudNextId > nextMunshiLogId){ nextMunshiLogId = cloudNextId; addedAny = true; }
+    if(addedAny){
+      saveToStorage('munshiStockLog', munshiStockLogData);
+      saveToStorage('nextMunshiLogId', nextMunshiLogId);
+    }
+    if(addedAny && !silent && document.getElementById('reportPreviewModal')?.classList.contains('show') && currentReportType === 'munshistocklog'){
+      renderReportToCanvas();
+    }
+    return addedAny;
+  }catch(e){
+    return false;
+  }
+}
+
+function startMunshiLogPolling(){
+  stopMunshiLogPolling();
+  munshiLogPollTimer = setInterval(() => {
+    fetchMunshiStockLogFromCloud(false);
+  }, 12000);
+}
+function stopMunshiLogPolling(){
+  if(munshiLogPollTimer){ clearInterval(munshiLogPollTimer); munshiLogPollTimer = null; }
 }
 
 /* =====================================================================
@@ -36372,10 +36500,14 @@ function renderReportHeaderCells(ctx, cols, headerTop, headerRowH, colTextAlign,
 async function renderReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas || !currentReportType) return;
+  // ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): تاریخ فلٹر بار صرف "منشی کا شامل کردہ سٹاک" رپورٹ پر نظر آئے ---------- -->
+  const mlfWrap = document.getElementById('munshiLogFilterWrap');
+  if(mlfWrap) mlfWrap.style.display = (currentReportType === 'munshistocklog') ? 'block' : 'none';
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'stockprofit'){ await renderDailyStockProfitReportToCanvas(); return; } // ---------- صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ — اپنا الگ لے آؤٹ ---------- -->
   if(currentReportType === 'mandisale'){ await renderMandiSaleRecordToCanvas(); return; } // ---------- صدام کی ہدایت (17 ستمبر، صبح 7:35): منڈی سیل ریکارڈ (برائے منشی) — اپنا الگ لے آؤٹ ---------- -->
+  if(currentReportType === 'munshistocklog'){ await renderMunshiStockLogToCanvas(); return; } // ---------- صدام کی ہدایت (19 ستمبر، شام): منشی کا شامل کردہ سٹاک — اپنا الگ لے آؤٹ ---------- -->
   const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
@@ -37635,6 +37767,302 @@ function openMandiSaleRecordReport(){
   setTimeout(() => renderReportToCanvas(), 100);
 }
 
+/* =====================================================================
+   🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): "منشی کا شامل کردہ سٹاک" رپورٹ —
+   منشی/آرڈر لینے والے نے جو بھی سٹاک اپنے فون سے فیڈ کیا، ہر اندراج اپنے وقت
+   کے ساتھ الگ الگ (کبھی مدغم نہیں) — تاریخ کے فلٹر (آج/کل/ہفتہ/مہینہ/کسٹم) کے ساتھ
+   ===================================================================== */
+let munshiLogFilterState = { key: 'today', customFrom: '', customTo: '' };
+
+function syncMunshiLogFilterButtons(){
+  ['today','yesterday','week','lastweek','month','lastmonth','all','custom'].forEach(k => {
+    const btn = document.getElementById('mlfBtn-' + k);
+    if(btn) btn.classList.toggle('active', munshiLogFilterState.key === k);
+  });
+  const customWrap = document.getElementById('munshiLogCustomRangeWrap');
+  if(customWrap) customWrap.style.display = munshiLogFilterState.key === 'custom' ? 'flex' : 'none';
+}
+function setMunshiLogFilter(key){
+  munshiLogFilterState.key = key;
+  syncMunshiLogFilterButtons();
+  if(key !== 'custom') renderReportToCanvas();
+}
+function applyMunshiLogCustomRange(){
+  const from = document.getElementById('munshiLogFromDate')?.value;
+  const to = document.getElementById('munshiLogToDate')?.value;
+  if(!from || !to){ alert('⚠️ پہلے دونوں تاریخیں کیلنڈر سے منتخب کریں'); return; }
+  munshiLogFilterState.customFrom = from;
+  munshiLogFilterState.customTo = to;
+  munshiLogFilterState.key = 'custom';
+  syncMunshiLogFilterButtons();
+  renderReportToCanvas();
+}
+function getMunshiLogFilteredRows(){
+  const range = munshiLogFilterState.key === 'all' ? null : getDateRangeForKey(munshiLogFilterState.key, munshiLogFilterState.customFrom, munshiLogFilterState.customTo);
+  let rows = (munshiStockLogData || []).slice();
+  if(range) rows = rows.filter(r => isDateInRange(r.ts, range));
+  rows.sort((a,b) => b.ts - a.ts); // ---------- تازہ ترین اندراج سب سے اوپر ---------- -->
+  return rows;
+}
+
+function openMunshiStockLogReport(){
+  currentReportType = 'munshistocklog';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = "🧑‍🌾 منشی کا شامل کردہ سٹاک";
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  munshiLogFilterState = { key: 'today', customFrom: '', customTo: '' };
+  syncMunshiLogFilterButtons();
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  // ---------- کھلتے ہی خاموشی سے کلاؤڈ سے تازہ ترین لاگ منگوائیں — تاکہ دوسرے فون سے فیڈ کیا گیا سٹاک بھی نظر آئے ---------- -->
+  fetchMunshiStockLogFromCloud(true).then(() => setTimeout(() => renderReportToCanvas(), 100));
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+
+async function renderMunshiStockLogToCanvas(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  const useA4 = AppState.settings.reportPrintStyle === 'a4';
+  const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+  const ctx = canvas.getContext('2d');
+
+  const rows = getMunshiLogFilteredRows();
+  const totalQty = rows.reduce((s,r) => s + (Number(r.qty)||0), 0);
+
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
+  const bold = AppState.settings.reportBoldItems !== false;
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
+  const fontFam = selectedFontPreset.family;
+  const numberPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportNumberFontId) || FONT_PRESETS.find(f => f.id === 'tahoma');
+  const numFontFam = numberPreset.family;
+  try{ await document.fonts.load(`13px ${numFontFam}`); }catch(e){}
+  try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
+  const digitAlign = AppState.settings.reportAlign || 'left';
+  const alignForCol = (key) => key === 'name' ? 'right' : digitAlign;
+  const xForCol = (c, align) => {
+    const pad = Math.max(3, Math.round(c.width * 0.04));
+    if(align === 'right') return c.x + c.width - pad;
+    if(align === 'left') return c.x + pad;
+    return c.x + c.width/2;
+  };
+
+  const base = useA4 ? 2.1 : 1.5;
+  const fsTitle = Math.round(15 * base * fontScale);
+  const fsSubtitle = Math.round(12 * base * fontScale);
+  const fsSmall = Math.round(9 * base * fontScale);
+  const fsHeader = Math.round(8.5 * base * fontScale);
+  const fsItem = Math.round(9 * base * fontScale);
+
+  const margin = useA4 ? 40 : 6;
+  const tableLeft = margin, tableRight = pxWidth - margin;
+  const totalW = tableRight - tableLeft;
+  const baseRowH = Math.round(fsItem * 2.6 * rowScaleSetting);
+  const headerRowH = Math.round(fsHeader * 2.8 * rowScaleSetting);
+
+  // ---------- کالمز: # | نام/پیکنگ | مقدار | تاریخ/وقت — نام کا کالم باقی بچی ہوئی چوڑائی خود لے لیتا ہے ---------- -->
+  const wSerial = Math.round(totalW * 0.07);
+  const wQty = Math.round(totalW * 0.15);
+  const wDateTime = Math.round(totalW * 0.26);
+  const wName = totalW - wSerial - wQty - wDateTime;
+
+  const cols = [
+    {key:'serial', label:'#', width:wSerial},
+    {key:'name', label:'نام/پیکنگ', width:wName},
+    {key:'qty', label:'مقدار', width:wQty},
+    {key:'datetime', label:'تاریخ/وقت', width:wDateTime},
+  ];
+  let cxPos = tableRight;
+  cols.forEach(c => { cxPos -= c.width; c.x = cxPos; });
+
+  const fmtDt = (ts) => {
+    const d = new Date(ts);
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    let hh = d.getHours(); const ap = hh>=12?'PM':'AM'; hh = hh%12; if(hh===0) hh=12;
+    const hhStr = String(hh).padStart(2,'0');
+    const min = String(d.getMinutes()).padStart(2,'0');
+    return `${dd}/${mm} ${hhStr}:${min}${ap}`;
+  };
+
+  const fitCenteredLines = (text, maxWidth, basePx, weight) => {
+    const w = weight ? weight + ' ' : '';
+    const minPx = Math.max(Math.round(basePx * 0.55), 7);
+    let px = basePx;
+    ctx.font = `${w}${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > minPx){ px -= 1; ctx.font = `${w}${px}px ${fontFam}`; }
+    return {text, px, weight:w};
+  };
+  const filterLabels = {today:'آج', yesterday:'کل', week:'یہ ہفتہ', lastweek:'پچھلا ہفتہ', month:'یہ مہینہ', lastmonth:'پچھلا مہینہ', all:'تمام ریکارڈ'};
+  let rangeLabelText = filterLabels[munshiLogFilterState.key] || 'کسٹم تاریخ';
+  if(munshiLogFilterState.key === 'custom' && munshiLogFilterState.customFrom && munshiLogFilterState.customTo){
+    rangeLabelText = `${munshiLogFilterState.customFrom} تا ${munshiLogFilterState.customTo}`;
+  }
+  const nameFit = fitCenteredLines(AppState.settings.businessName || 'صدام حسین فروٹ منڈی', totalW, fsTitle, 'bold');
+  const phoneFit = AppState.settings.businessPhone ? fitCenteredLines(AppState.settings.businessPhone, totalW, fsSmall) : null;
+  const titleFit = fitCenteredLines('🧑‍🌾 منشی کا شامل کردہ سٹاک', totalW, fsSubtitle, 'bold');
+  const rangeFit = fitCenteredLines(`دورانیہ: ${rangeLabelText}`, totalW, fsSmall, 'bold');
+
+  let headerContentH = useA4 ? 24 : 14;
+  headerContentH += nameFit.px;
+  if(phoneFit) headerContentH += Math.round(fsSmall * 1.6);
+  headerContentH += Math.round(fsSubtitle * 1.7);
+  headerContentH += Math.round(fsSmall * 1.8);
+  headerContentH += Math.round(fsSmall * 1.8);
+  headerContentH += 8;
+  let bodyTop = headerContentH + headerRowH;
+  const footerH = Math.round(fsSmall * 2.4);
+  const estimatedHeight = bodyTop + (Math.max(rows.length,1) * baseRowH) + footerH + 50;
+
+  canvas.width = pxWidth;
+  canvas.height = Math.max(estimatedHeight, 300);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  const rr = useA4 ? 14 : 8;
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(margin/2 + rr, margin/2);
+  ctx.arcTo(pxWidth - margin/2, margin/2, pxWidth - margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(pxWidth - margin/2, canvas.height - margin/2, margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(margin/2, canvas.height - margin/2, margin/2, margin/2, rr);
+  ctx.arcTo(margin/2, margin/2, pxWidth - margin/2, margin/2, rr);
+  ctx.closePath(); ctx.stroke();
+
+  let y = useA4 ? 24 : 14;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#1a1a1a';
+  ctx.font = `${nameFit.weight}${nameFit.px}px ${fontFam}`;
+  y += nameFit.px;
+  ctx.fillText(nameFit.text, pxWidth/2, y);
+  if(phoneFit){ y += Math.round(fsSmall * 1.6); ctx.font = `${fsSmall}px ${fontFam}`; ctx.fillText(phoneFit.text, pxWidth/2, y); }
+  y += Math.round(fsSubtitle * 1.7);
+  ctx.font = `${titleFit.weight}${titleFit.px}px ${fontFam}`;
+  ctx.fillText(titleFit.text, pxWidth/2, y);
+  y += Math.round(fsSmall * 1.8);
+  ctx.font = `${rangeFit.weight}${rangeFit.px}px ${fontFam}`;
+  ctx.fillStyle = '#0f766e';
+  ctx.fillText(rangeFit.text, pxWidth/2, y);
+  ctx.fillStyle = '#1a1a1a';
+  y += Math.round(fsSmall * 1.8);
+  ctx.font = `${fsSmall}px ${fontFam}`;
+  const now = new Date();
+  const dstr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(-2)}`;
+  ctx.fillText(dstr, pxWidth/2, y);
+  y += 8;
+
+  const rc = getReceiptColor();
+  const headerTop = y;
+  ctx.fillStyle = rc.bg;
+  ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.3;
+  ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
+  ctx.fillStyle = '#0f172a';
+  cols.forEach(c => {
+    const align = alignForCol(c.key);
+    ctx.textAlign = align;
+    ctx.font = `bold ${fsHeader}px ${fontFam}`;
+    ctx.save(); ctx.beginPath(); ctx.rect(c.x, headerTop, c.width, headerRowH); ctx.clip();
+    ctx.fillText(c.label, xForCol(c, align), headerTop + headerRowH/2 + fsHeader*0.32);
+    ctx.restore();
+    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
+  y = headerTop + headerRowH;
+
+  const fitCellFont = (text, maxWidth, basePx, ff) => {
+    const fam = ff || fontFam;
+    let px = basePx;
+    ctx.font = `${px}px ${fam}`;
+    let w = ctx.measureText(text).width;
+    if(w > maxWidth && w > 0){
+      px = Math.max(3, px * (maxWidth / w) * 0.94);
+      ctx.font = `${px}px ${fam}`;
+      w = ctx.measureText(text).width;
+    }
+    let guard = 0;
+    while(w > maxWidth && px > 3 && guard < 40){ px -= 0.5; ctx.font = `${px}px ${fam}`; w = ctx.measureText(text).width; guard++; }
+    return px;
+  };
+
+  if(rows.length === 0){
+    ctx.strokeStyle = '#475569'; ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, baseRowH);
+    ctx.fillStyle = '#64748b'; ctx.font = `${fsItem}px ${fontFam}`; ctx.textAlign = 'center';
+    ctx.fillText('اس دورانیے میں کوئی اندراج نہیں ملا', pxWidth/2, y + baseRowH/2 + fsItem*0.32);
+    y += baseRowH;
+  } else {
+    rows.forEach((r, idx) => {
+      const rh = baseRowH;
+      ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#f1f5f9';
+      ctx.fillRect(tableLeft, y, totalW, rh);
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+      ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
+      cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
+      ctx.beginPath(); ctx.moveTo(tableRight+0.5, y); ctx.lineTo(tableRight+0.5, y+rh); ctx.stroke();
+      ctx.fillStyle = '#1a1a1a';
+      cols.forEach(c => {
+        const align = alignForCol(c.key);
+        ctx.textAlign = align;
+        const tx = xForCol(c, align);
+        if(c.key === 'serial'){
+          const txt = String(idx+1);
+          const px2 = fitCellFont(txt, c.width-4, fsItem, numFontFam);
+          ctx.font = `${px2}px ${numFontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(txt, tx, y + rh/2 + fsItem*0.32);
+          ctx.restore();
+        } else if(c.key === 'name'){
+          const px1 = fitCellFont(r.name, c.width-6, fsItem, fontFam);
+          ctx.font = `${bold ? 'bold ' : ''}${px1}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(r.name, tx, y + rh/2 - 3);
+          if(r.label){
+            ctx.font = `${Math.round(px1*0.8)}px ${fontFam}`;
+            ctx.fillStyle = '#64748b';
+            ctx.fillText(r.label, tx, y + rh/2 + Math.round(px1*0.85));
+            ctx.fillStyle = '#1a1a1a';
+          }
+          ctx.restore();
+        } else if(c.key === 'qty'){
+          const txt = String(r.qty);
+          const basePxForCell = Math.round(fsItem * 1.2);
+          const px2 = fitCellFont(txt, c.width-4, basePxForCell, numFontFam);
+          ctx.font = `900 ${px2}px ${numFontFam}`;
+          ctx.fillStyle = '#134e2c';
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(txt, tx, y + rh/2 + fsItem*0.32);
+          ctx.restore();
+          ctx.fillStyle = '#1a1a1a';
+        } else {
+          const txt = fmtDt(r.ts);
+          const px2 = fitCellFont(txt, c.width-4, Math.round(fsItem*0.92), numFontFam);
+          ctx.font = `${px2}px ${numFontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(txt, tx, y + rh/2 + fsItem*0.32);
+          ctx.restore();
+        }
+      });
+      y += rh;
+    });
+  }
+
+  // ---------- نیچے کل خلاصہ لائن — اس دورانیے میں کل کتنا سٹاک شامل ہوا ---------- -->
+  ctx.fillStyle = rc.bg;
+  ctx.fillRect(tableLeft, y, totalW, footerH);
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.3;
+  ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, footerH);
+  ctx.fillStyle = '#0f172a';
+  ctx.textAlign = 'center';
+  ctx.font = `bold ${fsHeader}px ${fontFam}`;
+  ctx.fillText(`کل اندراجات: ${rows.length}   |   کل شامل کردہ سٹاک: ${totalQty}`, pxWidth/2, y + footerH/2 + fsHeader*0.32);
+  y += footerH;
+
+  const scrollWrapEnd3 = document.getElementById('reportCanvasScrollWrap');
+  if(scrollWrapEnd3) scrollWrapEnd3.scrollTop = 0;
+  const previewBoxScEnd3 = scrollWrapEnd3 ? scrollWrapEnd3.closest('.invoicePreviewBox') : null;
+  if(previewBoxScEnd3) previewBoxScEnd3.scrollTop = 0;
+}
+
 function stripUnrenderableForPdf(text){
   const cleaned = String(text || '').replace(/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g, '').replace(/\s+/g, ' ').trim();
   return cleaned || '(Urdu name)';
@@ -38350,7 +38778,7 @@ async function shareReportPdf(){
   if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
   await renderReportToCanvas();
   const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -38380,7 +38808,7 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
     window.open(pdf.output('bloburl'), '_blank');
     return;
   }
