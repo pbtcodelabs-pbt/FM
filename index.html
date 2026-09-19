@@ -3327,13 +3327,16 @@
           <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin:10px 0;">
             <label style="font-size:12px; color:var(--muted); font-weight:600;">➕ اضافی چارجز</label>
             <div style="display:flex; align-items:center; gap:6px;">
+              <!-- ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): "منشیانہ" آپشن مکمل ختم — کلائنٹس اب منشیانہ کو
+                   بطور پراڈکٹ ٹوٹل سے پہلے ہی بل میں شامل کرتے ہیں، الگ سے یہاں دکھانے کی ضرورت نہیں ---------- -->
               <select id="extraChargeTypeSelect" onchange="renderCart()" style="padding:7px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
-                <option value="منشیانہ">منشیانہ</option>
                 <option value="ریڑھی/رکشہ">ریڑھی/رکشہ</option>
                 <option value="بائیک">بائیک</option>
                 <option value="کوچ">کوچ</option>
               </select>
-              <input type="number" id="discountInput" min="0" value="170" onfocus="this.select()" oninput="renderCart()"
+              <!-- ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): ڈیفالٹ 170 روپے ختم — اب خالی/0 سے شروع، خودکار جمع نہیں ہوگی،
+                   صرف تب جمع ہوگی جب خود کوئی رقم لکھی جائے ---------- -->
+              <input type="number" id="discountInput" min="0" value="" placeholder="0" onfocus="this.select()" oninput="renderCart()"
                      style="width:70px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; text-align:center; font-size:13px;">
             </div>
           </div>
@@ -5423,6 +5426,8 @@
         </div>
         <!-- ---------- 🔓 صدام کی ہدایت (FM15SEPTU): سرچ بار واپس بحال — فلٹر بٹنوں کے ساتھ ہی، تاکہ سکرول کیے
              بغیر ٹائپ کر کے سیدھا کسٹمر مل جائے (سیریل نمبر یا نام دونوں سے) ---------- -->
+        <!-- ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): منشی/آرڈر لینے والے کو یہیں سے نیا کسٹمر شامل کرنے کی اجازت ---------- -->
+        <button type="button" onclick="openOtNewCustomer()" style="width:86%; max-width:340px; display:block; margin:0 auto 10px; padding:11px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15);">➕ نیا کسٹمر شامل کریں</button>
         <input type="text" id="otCustSearch" placeholder="🔍 کسٹمر کا نام یا سیریل نمبر لکھیں" oninput="renderOtCustomerList(this.value)"
                style="width:86%; max-width:340px; display:block; margin:0 auto 10px; padding:11px; border:2px solid var(--primary); border-radius:12px; font-size:14.5px; font-weight:800; text-align:center; box-sizing:border-box;">
         <div style="display:flex; gap:6px; margin-bottom:10px;">
@@ -5450,6 +5455,8 @@
               <!-- ---------- 🧾 صدام کی ہدایت (17 ستمبر، صبح 7:35): "منڈی سیل ریکارڈ (برائے منشی)" — منشی/مزدور
                    (غیر ایڈمن) کے لیے یہاں سے بھی کھلے، بالکل ایڈمن کی سٹاک ایڈجسٹمنٹ ← 📊 رپورٹس ڈراپ ڈاؤن جیسی رپورٹ ---------- -->
               <button type="button" onclick="openMandiSaleRecordReport()" style="padding:9px 10px; background:#0f766e; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">🧾 منڈی سیل ریکارڈ</button>
+              <!-- ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): منشی/آرڈر لینے والے کے لیے یہیں سے نیا سٹاک فیڈ کرنے کی سہولت ---------- -->
+              <button type="button" onclick="openOtAddStockModal()" style="padding:9px 10px; background:#b45309; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">➕ نیا سٹاک</button>
               <button type="button" onclick="toggleOtViewMode()" id="otViewModeBtn" style="display:none; padding:9px 10px; background:#134e2c; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 جدول</button>
               <button type="button" id="otBackTopBtn" onclick="otBackButtonClick()" style="padding:9px 10px; background:#fff; border:2px solid var(--primary); color:var(--primary); border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">◀ کسٹمر</button>
               <button type="button" onclick="openOtReview()" style="padding:9px 14px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap;">✅ آرڈر مکمل</button>
@@ -5523,6 +5530,23 @@
           <!-- ---------- 🏠 ہوم پیج پر واپس — صدام کی ہدایت (FM3SEPTH10): پہلے یہاں سے واپس جانے کا کوئی راستہ نہیں تھا ---------- -->
           <button type="button" onclick="goTo(AppState.currentRole==='customer' ? 'customerHome' : 'home')" style="padding:13px; background:#f1f5f9; border:none; color:#334155; border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">🏠 ہوم پیج</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ---------- ➕ صدام کی ہدایت (19 ستمبر، شام): منشی/آرڈر لینے والے کے لیے "نیا سٹاک شامل کرو" فارم —
+         موجودہ سبزی کی پیکنگ بدل سکے، سٹاک فیڈ کر سکے، اور بالکل نئی سبزی بھی شامل کر سکے ---------- -->
+    <div class="modalOverlay" id="otAddStockModal" onclick="if(event.target===this) closeOtAddStockModal()">
+      <div class="modalBox" style="max-width:460px; max-height:90vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+        <h3 style="margin-top:0;">➕ نیا سٹاک شامل کرو</h3>
+        <div dir="rtl" style="display:flex; gap:6px; margin-bottom:10px; background:#eafbf0; border:1.5px dashed #15803d; border-radius:10px; padding:8px;">
+          <input type="text" id="otAddStockNewName" placeholder="🥬 نئی سبزی کا نام" style="flex:1; min-width:0; padding:8px; border:1px solid #86efac; border-radius:8px; font-size:13px; text-align:center; box-sizing:border-box;">
+          <input type="text" id="otAddStockNewPacking" placeholder="📦 پیکنگ ▾" readonly onclick="otAddStockOpenNewPackingPicker()" style="flex:0 0 90px; padding:8px; border:1px solid #86efac; border-radius:8px; font-size:12px; text-align:center; cursor:pointer; box-sizing:border-box;">
+          <button type="button" onclick="otAddStockCreateNewVeg()" title="نئی سبزی شامل کریں" style="flex:0 0 42px; border:none; border-radius:8px; background:#16a34a; color:#fff; font-size:18px; font-weight:900; cursor:pointer;">➕</button>
+        </div>
+        <input type="text" id="otAddStockSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر" oninput="renderOtAddStockList(this.value)"
+               style="width:100%; padding:10px; border:2px solid var(--primary); border-radius:10px; font-size:13.5px; font-weight:700; text-align:center; margin-bottom:10px; box-sizing:border-box;">
+        <div id="otAddStockListWrap"></div>
+        <button type="button" onclick="closeOtAddStockModal()" style="width:100%; margin-top:6px; padding:12px; background:#f1f5f9; border:none; color:#334155; border-radius:10px; font-weight:800; cursor:pointer;">✖ بند کریں</button>
       </div>
     </div>
 
@@ -8320,7 +8344,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'ہفتہ19ستمبر09:05am';
+const APP_BUILD_VERSION = 'ہفتہ19ستمبر05:32pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10430,7 +10454,9 @@ function selectPackingOption(value){
   // ---------- 🆕 صدام کی ہدایت (17 ستمبر، شام): اوپر والے کمپیکٹ پینل میں "نئی سبزی شامل کریں" کے دوران —
   // ابھی کوئی پراڈکٹ/ویرینٹ بنا ہی نہیں، صرف vcAddPacking خانے میں منتخب کردہ ویلیو لکھ دیں ---------- -->
   if(packingPickerCtx.isNewDraft){
-    const inp = document.getElementById('vcAddPacking');
+    // ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): اب یہ ڈرافٹ موڈ آرڈر ٹیکنگ کے "نیا سٹاک" فارم سے بھی
+    // استعمال ہوتا ہے — وہاں ہدف خانہ vcAddPacking نہیں بلکہ targetInputId میں دیا جاتا ہے ---------- -->
+    const inp = document.getElementById(packingPickerCtx.targetInputId || 'vcAddPacking');
     if(inp) inp.value = value;
     closePackingPicker();
     return;
@@ -10456,6 +10482,9 @@ function selectPackingOption(value){
   const savedScrollY2 = saveMainScrollY();
   if(sourceWrapId === 'productListWrap'){
     renderProductList(document.getElementById('productSearchInput')?.value || '');
+  } else if(sourceWrapId === 'otAddStockListWrap'){
+    // ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): "نیا سٹاک" فارم سے پیکنگ بدلی جائے تو اسی فہرست کو دوبارہ بنائیں ---------- -->
+    renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || '');
   } else {
     renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
   }
@@ -12477,7 +12506,7 @@ function deleteBillingCartDraft(){
   const custSel = document.getElementById('customerSelect');
   if(custSel) custSel.value = '';
   const discountEl = document.getElementById('discountInput');
-  if(discountEl) discountEl.value = 170; // ---------- FM4SEPFR25: اضافی چارجز کی ڈیفالٹ رقم 170 ----------
+  if(discountEl) discountEl.value = ''; // ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): ڈیفالٹ 170 ختم — اب خالی ----------
   const receivedEl = document.getElementById('amountReceivedInput');
   if(receivedEl) receivedEl.value = '';
   Billing.counterSale = true;
@@ -13503,7 +13532,7 @@ function renderCart(){
   document.getElementById('sumSubtotal').textContent = `Rs. ${subtotal.toFixed(0)}`;
   document.getElementById('sumLaborRow').style.display = laborTotal > 0 ? 'flex' : 'none';
   document.getElementById('sumLabor').textContent = `+ Rs. ${laborTotal.toFixed(0)}`;
-  const extraChargeType = document.getElementById('extraChargeTypeSelect')?.value || 'منشیانہ';
+  const extraChargeType = document.getElementById('extraChargeTypeSelect')?.value || 'ریڑھی/رکشہ';
   document.getElementById('sumDiscountLabel').textContent = `➕ اضافی چارجز (${extraChargeType})`;
   document.getElementById('sumDiscountRow').style.display = discount > 0 ? 'flex' : 'none';
   document.getElementById('sumDiscount').textContent = `+ Rs. ${discount.toFixed(0)}`;
@@ -13940,7 +13969,7 @@ function finalizeInvoice(){
   }
 
   Billing.cart = [];
-  document.getElementById('discountInput').value = 170; // ---------- FM4SEPFR25: اضافی چارجز کی ڈیفالٹ رقم 170 ----------
+  document.getElementById('discountInput').value = ''; // ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): ڈیفالٹ 170 ختم — اب خالی ----------
   document.getElementById('amountReceivedInput').value = '';
   document.getElementById('changeToWalletChk').checked = false;
   renderCart();
@@ -13985,7 +14014,7 @@ function submitBillForApproval(customer, method, subtotal){
   pendingBillsData.unshift(pending);
 
   Billing.cart = [];
-  document.getElementById('discountInput').value = 170; // ---------- FM4SEPFR25: اضافی چارجز کی ڈیفالٹ رقم 170 ----------
+  document.getElementById('discountInput').value = ''; // ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): ڈیفالٹ 170 ختم — اب خالی ----------
   renderCart();
   renderBillingProductGrid();
   document.getElementById('customerSelect').value = '';
@@ -17447,11 +17476,11 @@ function buildVcInlinePanelHtml(){
           <input id="vcAddPacking" type="text" placeholder="📦 پیکنگ ▾" readonly onclick="vcAddOpenPackingPicker()" style="flex:0 0 84px; box-sizing:border-box; border:1px solid #a5b4fc; border-radius:6px; padding:6px 3px; font-family:${urduFont}; font-weight:700; font-size:11.5px; text-align:center; background:#fff; cursor:pointer;">
         </div>
         <div style="display:flex; flex-wrap:wrap; align-items:center; gap:5px;" dir="rtl">
-          ${plainBox('vcAddStock','📦 سٹاک','linear-gradient(155deg,#eef2ff,#e0e7ff)','#c7d2fe','#a5b4fc','#3730a3', 56)}
-          ${plainBox('vcAddPurchase','💰 خرید','linear-gradient(155deg,#fef9e7,#fef3c7)','#fde68a','#f9d976','#92400e', 56)}
-          ${plainBox('vcAddLabor','💪 م.خرید','linear-gradient(155deg,#fff1eb,#ffe4d5)','#fdba95','#fbb08a','#9a3412', 48)}
-          ${plainBox('vcAddWholesale','🟢 راولپنڈی','linear-gradient(155deg,#eafbf0,#d5f5e0)','#86efac','#6fd696','#15803d', 56)}
-          ${plainBox('vcAddRetail','🔴 اسلام آباد','linear-gradient(155deg,#fdecec,#fad2d0)','#fca5a5','#f28b87','#b91c1c', 56)}
+          ${plainBox('vcAddStock','📦 سٹاک','linear-gradient(155deg,#eef2ff,#e0e7ff)','#c7d2fe','#a5b4fc','#3730a3', 64)}
+          ${plainBox('vcAddPurchase','💰 خرید','linear-gradient(155deg,#fef9e7,#fef3c7)','#fde68a','#f9d976','#92400e', 64)}
+          ${plainBox('vcAddLabor','💪 م.خرید','linear-gradient(155deg,#fff1eb,#ffe4d5)','#fdba95','#fbb08a','#9a3412', 64)}
+          ${plainBox('vcAddWholesale','🟢 راولپنڈی','linear-gradient(155deg,#eafbf0,#d5f5e0)','#86efac','#6fd696','#15803d', 64)}
+          ${plainBox('vcAddRetail','🔴 اسلام آباد','linear-gradient(155deg,#fdecec,#fad2d0)','#fca5a5','#f28b87','#b91c1c', 64)}
         </div>
         <div style="display:flex; gap:10px; margin-top:7px;">
           <button type="button" onclick="vcInlineSaveNew()" style="flex:1 1 auto; max-width:220px; padding:9px; background:linear-gradient(180deg,#34d95a,#16a34a); color:#fff; border:none; border-radius:9px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 6px rgba(0,0,0,.15);">💾 محفوظ کریں</button>
@@ -17480,16 +17509,18 @@ function buildVcInlinePanelHtml(){
              صرف نمبر خانے، اوپر نیچے سٹیک نہیں؛ اگر تنگ سکرین پر پوری لائن نہ سمائے تو خانے سکڑنے کی بجائے
              افقی سکرول ہو جائے گی (وہی لائن ٹوٹے بغیر) ---------- -->
         <div style="display:flex; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; align-items:center; gap:5px; padding-bottom:2px;" dir="rtl">
-          ${fieldBox('vcInlineStock', '📦 سٹاک', 'linear-gradient(155deg,#eef2ff,#e0e7ff)', '#c7d2fe', '#a5b4fc', '#3730a3', 56)}
-          ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e', 56)}
-          ${fieldBox('vcInlineLabor', '💪 م.خرید', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 48)}
-          ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 48)}
-          <div style="flex:0 0 auto; background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px 8px; text-align:center; min-width:56px; box-sizing:border-box;">
+          ${fieldBox('vcInlineStock', '📦 سٹاک', 'linear-gradient(155deg,#eef2ff,#e0e7ff)', '#c7d2fe', '#a5b4fc', '#3730a3', 64)}
+          ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e', 64)}
+          ${fieldBox('vcInlineLabor', '💪 م.خرید', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 64)}
+          ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 64)}
+          <!-- ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): سب خانے اب برابر چوڑے (64px) — چار ہندسے بھی
+               کبھی نہیں کٹیں گے، صاف ستھرے نظر آئیں گے ---------- -->
+          <div style="flex:0 0 auto; background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px 8px; text-align:center; width:64px; min-width:64px; box-sizing:border-box;">
             <div style="font-size:7.5px; font-weight:900; color:#134e2c; white-space:nowrap;">🧮 حتمی خرید</div>
             <div id="vcInlineTotalPurchase" style="font-family:${numFontStack}; font-weight:900; font-size:17px; color:#134e2c; text-align:center;">0</div>
           </div>
-          ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d', 56)}
-          ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c', 56)}
+          ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d', 64)}
+          ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c', 64)}
         </div>
       </div>
     </div>`;
@@ -23347,6 +23378,119 @@ function updateOtStockCell(variantId){
   });
 }
 
+// =====================================================================
+//   ➕ نیا سٹاک شامل کرو — منشی/آرڈر لینے والے کے لیے، آرڈر ٹیکنگ سکرین سے سیدھا
+//   سٹاک فیڈ کرنے کی سہولت (صدام کی ہدایت 19 ستمبر، شام)۔ موجودہ سبزی کی پیکنگ بدل
+//   سکتا ہے، سٹاک جمع کر سکتا ہے (نیا سٹاک ہمیشہ موجودہ سٹاک میں جمع ہوتا ہے، اوور رائٹ
+//   نہیں ہوتا)، اور بالکل نئی سبزی بھی شامل کر سکتا ہے۔ سٹاک فیڈ ہوتے ہی نیچے آرڈر ٹیکنگ
+//   کی اصل فہرست (سٹاک کالم) میں بھی فوراً نظر آ جاتا ہے (updateOtStockCell کے ذریعے)۔
+// =====================================================================
+function openOtAddStockModal(){
+  const nameEl = document.getElementById('otAddStockNewName');
+  const packEl = document.getElementById('otAddStockNewPacking');
+  const searchEl = document.getElementById('otAddStockSearchInput');
+  if(nameEl) nameEl.value = '';
+  if(packEl) packEl.value = '';
+  if(searchEl) searchEl.value = '';
+  renderOtAddStockList('');
+  document.getElementById('otAddStockModal').classList.add('show');
+}
+function closeOtAddStockModal(){
+  document.getElementById('otAddStockModal').classList.remove('show');
+}
+function otAddStockOpenNewPackingPicker(){
+  packingPickerCtx = { isNewDraft:true, targetInputId:'otAddStockNewPacking' };
+  renderPackingPickerList();
+  document.getElementById('packingPickerModal').classList.add('show');
+}
+// ---------- productsData میں سٹاک بدلنے کے بعد otFlatCache (آرڈر ٹیکنگ کا اپنا کیشڈ ڈیٹا) کو بھی ہم آہنگ کریں ---------- -->
+function otSyncFlatCacheStock(variantId){
+  const cached = otFlatCache.find(f => f.variant_id === variantId);
+  if(!cached) return;
+  for(const p of productsData){
+    const v = p.variants.find(x => x.variant_id === variantId);
+    if(v){ cached.stock = v.stock; return; }
+  }
+}
+function renderOtAddStockList(query){
+  const wrap = document.getElementById('otAddStockListWrap');
+  if(!wrap) return;
+  const q = (query || '').trim().toLowerCase();
+  const rows = [];
+  productsData.slice().sort((a,b) => (a.serial_no||0) - (b.serial_no||0)).forEach(p => {
+    if(q && !p.name.toLowerCase().includes(q) && String(p.serial_no ?? '').indexOf(q) === -1) return;
+    (p.variants || []).forEach(v => rows.push({p, v}));
+  });
+  if(rows.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="text-align:center; padding:16px 0; color:var(--muted);">کوئی سبزی نہیں ملی</div>`;
+    return;
+  }
+  wrap.innerHTML = rows.map(({p, v}) => `
+    <div style="display:flex; align-items:center; gap:6px; background:#fff; border:1.5px solid #e5e9f0; border-radius:10px; padding:8px; margin-bottom:7px;" dir="rtl">
+      ${p.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; margin:0; cursor:default;">${p.serial_no}</span>` : ''}
+      <div style="flex:1; min-width:0; text-align:right;">
+        <div style="font-weight:800; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
+        <div style="font-size:11px; color:var(--muted);">موجودہ سٹاک: <span id="otAddStockCur-${v.variant_id}">${v.stock || 0}</span></div>
+      </div>
+      <button type="button" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', 'otAddStockListWrap')" style="flex:0 0 70px; padding:6px 4px; border:1px solid #93c5fd; background:#dbeafe; color:#1e3a8a; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📦 ${v.label || '—'}</button>
+      <input type="number" id="otAddStockQty-${v.variant_id}" placeholder="+مقدار" min="0" style="width:64px; padding:6px; border:1.5px solid #86efac; border-radius:7px; text-align:center; font-size:13px; box-sizing:border-box;">
+      <button type="button" onclick="otAddStockCommit(${p.product_id}, ${v.variant_id})" title="سٹاک جمع کریں" style="flex:0 0 40px; height:36px; border:none; border-radius:7px; background:#16a34a; color:#fff; font-size:16px; font-weight:900; cursor:pointer;">✅</button>
+    </div>`).join('');
+}
+function otAddStockCommit(productId, variantId){
+  const input = document.getElementById(`otAddStockQty-${variantId}`);
+  const qty = parseFloat(input?.value);
+  if(!qty || qty <= 0){ alert('⚠️ پہلے مقدار لکھیں'); return; }
+  const p = productsData.find(x => x.product_id === productId);
+  const v = p?.variants.find(x => x.variant_id === variantId);
+  if(!v) return;
+  v.stock = (Number(v.stock) || 0) + qty;
+  persistAllData();
+  pushProductsToCloud();
+  input.value = '';
+  const curEl = document.getElementById(`otAddStockCur-${variantId}`);
+  if(curEl) curEl.textContent = v.stock;
+  otSyncFlatCacheStock(variantId);
+  updateOtStockCell(variantId); // ---------- نیچے آرڈر ٹیکنگ کی اصل فہرست (سٹاک کالم) میں فوری اپڈیٹ ---------- -->
+}
+function otAddStockCreateNewVeg(){
+  const name = (document.getElementById('otAddStockNewName')?.value || '').trim();
+  if(!name){ alert('⚠️ سبزی کا نام لکھیں'); document.getElementById('otAddStockNewName')?.focus(); return; }
+  const packing = (document.getElementById('otAddStockNewPacking')?.value || '').trim();
+  const newProductId = nextProductId++;
+  const newVariantId = nextVariantId++;
+  const maxSerial = productsData.reduce((m,x) => Math.max(m, x.serial_no || 0), 0);
+  const savedSerial = maxSerial + 1;
+  productsData.push({
+    product_id: newProductId, name, category:'', isDormant:false, serial_no: savedSerial,
+    variants:[{ variant_id:newVariantId, label:packing, barcode:'NEW'+newVariantId, purchase:0, labor:0, sellLabor:0, retail:0, wholesale:0, stock:0, lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
+  });
+  saveToStorage('nextProductId', nextProductId);
+  saveToStorage('nextVariantId', nextVariantId);
+  persistAllData();
+  pushProductsToCloud();
+  document.getElementById('otAddStockNewName').value = '';
+  document.getElementById('otAddStockNewPacking').value = '';
+  // ---------- otFlatCache (آرڈر ٹیکنگ کی اصل فہرست کا ڈیٹا) کو بھی دوبارہ بنائیں تاکہ نئی سبزی فوراً وہاں نظر آئے ---------- -->
+  otFlatCache = getFlatVariants().sort((a, b) => {
+    const sa = a.serial_no, sb = b.serial_no;
+    if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
+    if(sa == null) return 1;
+    if(sb == null) return -1;
+    return sa - sb;
+  });
+  renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || '');
+  try{ renderOtItemsPage(); }catch(e){}
+  alert(`✅ "${name}" شامل ہو گئی — سیریل نمبر #${savedSerial}`);
+}
+
+// ---------- 🆕 منشی/آرڈر لینے والے کے لیے یہیں سے نیا کسٹمر شامل کرنے کی سہولت (صدام کی ہدایت 19 ستمبر، شام) —
+// وہی مکمل فارم جو ایڈمن استعمال کرتا ہے (نام/فون-واٹس ایپ/پتہ/علاقہ وغیرہ) ---------- -->
+function openOtNewCustomer(){
+  currentPartyTab = 'customers';
+  openNewPartyModal();
+}
+
 function renderOrderTakingScreen(){
   otCustomer = null;
   otQtyMap = {};
@@ -26217,14 +26361,24 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   // ٹوٹل کالم بالکل نہ دکھائیں — صرف نمبر، نام اشیاء اور تعداد۔ ریٹ لگتے ہی (اصل بل بنتے وقت) دونوں کالم واپس آ جاتے ہیں ---------- -->
   const priceW = hasRate ? Math.max(Math.round(42 * scale), ctx.measureText(maxPriceStr).width + colPad) : 0;
   const totalW = hasRate ? Math.max(Math.round(46 * scale), ctx.measureText(maxTotalStr).width + colPad) : 0;
-  const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
+  // ---------- 🔴 صدام کی ہدایت (19 ستمبر، دوپہر): نام اشیاء کا کالم اب سب سے لمبے نام جتنا ہی چوڑا — باقی
+  // بچ جانے والی خالی جگہ نمبر/تعداد/قیمت/ٹوٹل (فعال) خانوں پر برابر تقسیم، ایک طرف خالی پٹی نہیں چھوڑی جاتی ---------- -->
+  ctx.font = `${Math.round(18*scale)}px ${itemWeight} ${canvasFontFamily}`;
+  let maxAdvItemStr = '';
+  order.items.forEach(it => { if(ctx.measureText(it.name).width > ctx.measureText(maxAdvItemStr).width) maxAdvItemStr = it.name; });
+  const itemW = Math.max(Math.round(60*scale), Math.round(ctx.measureText(maxAdvItemStr).width) + colPad);
+  const leftoverAdvW = Math.max(0, (tableRight - tableLeft) - noW - qtyW - priceW - totalW - itemW);
+  const activeAdvCols = 2 + (hasRate ? 2 : 0);
+  const extraAdvPerCol = Math.floor(leftoverAdvW / activeAdvCols);
+  const noW2 = noW + extraAdvPerCol, qtyW2 = qtyW + extraAdvPerCol + (leftoverAdvW - extraAdvPerCol*activeAdvCols);
+  const priceW2 = hasRate ? priceW + extraAdvPerCol : 0, totalW2 = hasRate ? totalW + extraAdvPerCol : 0;
   const colX = [
-    tableLeft,                                     // 0: ٹوٹل شروع
-    tableLeft + totalW,                            // 1: نرخ شروع
-    tableLeft + totalW + priceW,                   // 2: تعداد شروع
-    tableLeft + totalW + priceW + qtyW,             // 3: نام اشیاء شروع (چوڑا)
-    tableLeft + totalW + priceW + qtyW + itemW,     // 4: نمبر شروع
-    tableRight                                      // 5: دائیں کنارہ
+    tableLeft,                                      // 0: ٹوٹل شروع
+    tableLeft + totalW2,                            // 1: نرخ شروع
+    tableLeft + totalW2 + priceW2,                  // 2: تعداد شروع
+    tableLeft + totalW2 + priceW2 + qtyW2,           // 3: نام اشیاء شروع (چوڑا)
+    tableLeft + totalW2 + priceW2 + qtyW2 + itemW,   // 4: نمبر شروع
+    tableRight                                       // 5: دائیں کنارہ
   ];
   const rowH = Math.round(30 * scale * rowScaleSetting), headerH = Math.round(28 * scale * rowScaleSetting);
 
@@ -26567,14 +26721,26 @@ async function renderPoToCanvas(){
     costW = Math.max(costW, measureCtx.measureText(fmt(item.cost)).width + padX);
     totalW = Math.max(totalW, measureCtx.measureText(fmt(item.qty*item.cost)).width + padX);
   });
-  const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - costW - totalW;
+  // ---------- 🔴 صدام کی ہدایت (19 ستمبر، دوپہر): Item کالم اب سب سے لمبے نام جتنا ہی چوڑا — باقی بچ جانے
+  // والی خالی جگہ #/Qty/Cost/Total (فعال) خانوں پر برابر تقسیم، Variant کالم کو اپنی مکمل ضرورت کی جگہ ملتی
+  // ہے مگر اضافی حصہ نہیں ملتا ---------- -->
+  let maxPoItemStr = '';
+  po.items.forEach(item => {
+    const base = splitItemNamePacking(item.name, item.label).baseName;
+    if(measureCtx.measureText(base).width > measureCtx.measureText(maxPoItemStr).width) maxPoItemStr = base;
+  });
+  const itemW = Math.max(Math.round(60*scale), Math.round(measureCtx.measureText(maxPoItemStr).width) + padX);
+  const leftoverPoW = Math.max(0, (tableRight - tableLeft) - noW - variantW - qtyW - costW - totalW - itemW);
+  const extraPoPerCol = Math.floor(leftoverPoW / 4);
+  const noW2 = noW + extraPoPerCol, qtyW2 = qtyW + extraPoPerCol, costW2 = costW + extraPoPerCol,
+        totalW2 = totalW + extraPoPerCol + (leftoverPoW - extraPoPerCol*4);
   const colX = [
     tableLeft,
-    tableLeft + noW,
-    tableLeft + noW + itemW,
-    tableLeft + noW + itemW + variantW,
-    tableLeft + noW + itemW + variantW + qtyW,
-    tableLeft + noW + itemW + variantW + qtyW + costW,
+    tableLeft + noW2,
+    tableLeft + noW2 + itemW,
+    tableLeft + noW2 + itemW + variantW,
+    tableLeft + noW2 + itemW + variantW + qtyW2,
+    tableLeft + noW2 + itemW + variantW + qtyW2 + costW2,
     tableRight
   ];
 
@@ -27856,6 +28022,12 @@ function saveNewParty(){
   else pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): نیا/ترمیم شدہ سپلائر فوراً کلاؤڈ میں ----------
   closeNewPartyModal();
   renderPartyList();
+  // ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): آرڈر ٹیکنگ سکرین سے نیا کسٹمر شامل ہوا ہو تو یہیں کی
+  // کسٹمر فہرست بھی فوراً تازہ کریں، تاکہ نیا کسٹمر فوراً منتخب کیا جا سکے ---------- -->
+  const otCustStep = document.getElementById('otStepCustomer');
+  if(otCustStep && otCustStep.style.display !== 'none'){
+    try{ renderOtCustomerList(document.getElementById('otCustSearch')?.value || ''); }catch(e){}
+  }
 }
 
 // ---------- Wallet Deposit/Redeem Modal ----------
@@ -31201,27 +31373,36 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   let maxPackStr = '';
   invoice.items.forEach(it => { const l = it.label || ''; if(ctx.measureText(l).width > ctx.measureText(maxPackStr).width) maxPackStr = l; });
   const packW = maxPackStr ? Math.max(Math.round(38 * fscale), ctx.measureText(maxPackStr).width + Math.round(14*fscale)) : Math.round(38*fscale);
-  // ---------- 🐛 صدام کی ہدایت (FM3SEPTH26): پہلے نام اشیاء کالم صرف سب سے لمبے نام جتنا چوڑا رہتا تھا اور
-  // بچ جانے والی خالی جگہ بائیں کنارے پر خالی رہ جاتی تھی — اصل پرنٹ پر یہ ایک طرف خالی، دوسری طرف بھرا
-  // ہوا، غیر متناسب/غیر خوبصورت نظر آتا تھا۔ اب نام کا کالم ہمیشہ بقیہ پوری جگہ (remainderW) لیتا ہے
-  // تاکہ ٹیبل ہمیشہ کاغذ کی پوری چوڑائی (دونوں کناروں پر برابر 8px مارجن) تک پھیلے، بالکل درمیان میں،
-  // پیشہ ورانہ اور خوبصورت طریقے سے — نہ کوئی کالم غیر ضروری تنگ، نہ کوئی خالی جگہ ---------- -->
-  ctx.font = `bold ${Math.round(18*fscale)}px ${canvasFontFamily}`;
+  // ---------- 🔴 صدام کی ہدایت (19 ستمبر، دوپہر): پرانی سوچ (FM3SEPTH26) الٹ دی گئی — نام اشیاء کا کالم اب
+  // صرف سب سے لمبے نام جتنا ہی چوڑا رہتا ہے (خالی جگہ اپنے اندر نہیں رکھتا)، اور پیکنگ کا کالم بھی اپنی
+  // ضرورت جتنا۔ جو خالی جگہ بچتی ہے وہ اب ایک طرف "مردہ" نہیں چھوڑی جاتی — نمبر/تعداد/قیمت/مزدوری/ٹوٹل
+  // (یعنی نام اور پیکنگ کے علاوہ باقی سب) خانوں پر برابر برابر بانٹ دی جاتی ہے، تاکہ ٹیبل پوری چوڑائی تک
+  // پھیلے اور کوئی ایک خالی پٹی نظر نہ آئے ---------- -->
+  ctx.font = `${AppState.settings.printBoldItems === false ? '' : 'bold '}${Math.round(18*fscale)}px ${itemFontFamily}`;
   const itemPad = Math.round(16 * fscale);
-  const remainderW = (tableRight - tableLeft0) - noW - qtyW - priceW - totalW - laborW - packW;
-  // ---------- 6 ستمبر: نام اشیاء کا کالم کبھی بھی بہت تنگ نہ ہو (کم از کم 100px جتنا) — نام ایک دوسرے پر نہ چڑھیں ---------- -->
-  const itemW = Math.max(Math.round(100*fscale), remainderW);
-  // ---------- نام کالم بقیہ پوری جگہ لیتا ہے، اس لیے ٹیبل ہمیشہ tableLeft0 سے tableRight تک پورا پھیلا رہتا ہے ---------- -->
-  const tableLeft = tableRight - (noW + itemW + packW + qtyW + laborW + priceW + totalW);
+  let maxItemStr = '';
+  invoice.items.forEach(it => {
+    const base = splitItemNamePacking(it.name, it.label).baseName;
+    if(ctx.measureText(base).width > ctx.measureText(maxItemStr).width) maxItemStr = base;
+  });
+  // ---------- نام اشیاء کا کالم کبھی بھی بہت تنگ نہ ہو (کم از کم 100px جتنا) — نام ایک دوسرے پر نہ چڑھیں ---------- -->
+  const itemWTight = Math.max(Math.round(100*fscale), Math.round(ctx.measureText(maxItemStr).width) + itemPad);
+  // ---------- بچ جانے والی خالی جگہ — نام اور پیکنگ کے علاوہ باقی 5 خانوں (نمبر/تعداد/قیمت/مزدوری/ٹوٹل) پر برابر تقسیم ---------- -->
+  const leftoverW = Math.max(0, (tableRight - tableLeft0) - noW - qtyW - priceW - totalW - laborW - packW - itemWTight);
+  const extraPerNarrowCol = Math.floor(leftoverW / 5);
+  const itemW = itemWTight;
+  const noW2 = noW + extraPerNarrowCol, qtyW2 = qtyW + extraPerNarrowCol, priceW2 = priceW + extraPerNarrowCol,
+        totalW2 = totalW + extraPerNarrowCol, laborW2 = laborW + (leftoverW - extraPerNarrowCol*5) + extraPerNarrowCol;
+  const tableLeft = tableRight - (noW2 + itemW + packW + qtyW2 + laborW2 + priceW2 + totalW2);
   const colX = [
-    tableLeft,                                                          // 0: ٹوٹل شروع (سب سے بائیں)
-    tableLeft + totalW,                                                 // 1: قیمت شروع
-    tableLeft + totalW + priceW,                                        // 2: مزدوری شروع
-    tableLeft + totalW + priceW + laborW,                               // 3: تعداد شروع
-    tableLeft + totalW + priceW + laborW + qtyW,                        // 4: پیکنگ شروع (NEW — 6 ستمبر)
-    tableLeft + totalW + priceW + laborW + qtyW + packW,                // 5: نام اشیاء شروع
-    tableLeft + totalW + priceW + laborW + qtyW + packW + itemW,        // 6: نمبر شروع (سب سے دائیں)
-    tableRight                                                           // 7: دائیں کنارہ
+    tableLeft,                                                             // 0: ٹوٹل شروع (سب سے بائیں)
+    tableLeft + totalW2,                                                   // 1: قیمت شروع
+    tableLeft + totalW2 + priceW2,                                         // 2: مزدوری شروع
+    tableLeft + totalW2 + priceW2 + laborW2,                               // 3: تعداد شروع
+    tableLeft + totalW2 + priceW2 + laborW2 + qtyW2,                       // 4: پیکنگ شروع (NEW — 6 ستمبر)
+    tableLeft + totalW2 + priceW2 + laborW2 + qtyW2 + packW,               // 5: نام اشیاء شروع
+    tableLeft + totalW2 + priceW2 + laborW2 + qtyW2 + packW + itemW,       // 6: نمبر شروع (سب سے دائیں)
+    tableRight                                                              // 7: دائیں کنارہ
   ];
   const rowScale = (AppState.settings.printRowScale || 100) / 100; // ---------- پرنٹ پریویو میں لائیو ↕ Row کنٹرول سے ----------
   const rowH = Math.round(24 * rowScale), headerH = Math.round(22 * rowScale);
