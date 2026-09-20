@@ -329,13 +329,24 @@
   /* ---------- 🐞 صدام کی ہدایت (FM6SEPSU7): سبسکرپشن والے تین ڈبے (Free Trial/Expires/Remaining) بہت اونچے
        (اوپر سے نیچے چوڑے) تھے — لیبل اور قدر الگ الگ لائن میں تھے۔ اب باریک پٹی: لیبل + قدر ایک ہی لائن میں،
        پیڈنگ اور مارجن بہت کم — تاکہ نیچے کے آئیکنز کے لیے زیادہ جگہ خالی ہو ---------- */
-  .subBoxRow{display:flex; gap:5px; margin-bottom:6px; padding:4px 5px; border-radius:9px; background:linear-gradient(135deg, #fdf6e3, #f9ecc9); border:1px solid #eaddb0;}
-  .subBox{flex:1; padding:3px 3px; border-radius:7px; text-align:center; background:#eef2ff; display:flex; align-items:baseline; justify-content:center; gap:3px; white-space:nowrap; overflow:hidden;}
+  #homeTopControlsRow{display:flex; align-items:center; gap:6px; margin-bottom:5px;}
+  .subBoxRow{display:flex; gap:4px; margin-bottom:0; padding:3px 4px; border-radius:8px; background:linear-gradient(135deg, #fdf6e3, #f9ecc9); border:1px solid #eaddb0; flex:1; min-width:0;}
+  .subBox{flex:1; padding:2px 2px; border-radius:6px; text-align:center; background:#eef2ff; display:flex; align-items:baseline; justify-content:center; gap:2px; white-space:nowrap; overflow:hidden;}
   .subBox#subBoxStart{background:#e0f2fe;}
   .subBox#subBoxEnd{background:#fef3c7;}
   .subBox#subBoxDays{background:#dcfce7;}
-  .subBoxLabel{font-size:7.5px; font-weight:700; text-transform:uppercase; opacity:.75; flex:0 0 auto;}
-  .subBoxVal{font-size:9.5px; font-weight:800; flex:0 0 auto; overflow:hidden; text-overflow:ellipsis;}
+  .subBoxLabel{font-size:6.5px; font-weight:700; text-transform:uppercase; opacity:.75; flex:0 0 auto;}
+  .subBoxVal{font-size:8.5px; font-weight:800; flex:0 0 auto; overflow:hidden; text-overflow:ellipsis;}
+  /* ---------- ✏️ صدام کی ہدایت (FM20SEPSU1140AM): آئیکن ترتیب بدلیں بٹن اب سبسکرپشن پٹی کی بائیں جانب،
+       ایک ہی لائن میں، چھوٹا اور خوبصورت گول آئیکن بٹن — پوری چوڑائی کی لائن ختم، نیچے زیادہ جگہ خالی ---------- */
+  .homeEditModeToggle{
+    flex:0 0 auto; width:30px; height:30px; padding:0; border:none; border-radius:10px;
+    background:linear-gradient(155deg, #f59e0b, #d97706); color:#fff; font-size:14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 6px rgba(217,119,6,.4), inset 0 1px 0 rgba(255,255,255,.3);
+  }
+  .homeEditModeToggle.active{background:linear-gradient(155deg, #16a34a, #15803d); box-shadow:0 2px 6px rgba(21,128,61,.45), inset 0 1px 0 rgba(255,255,255,.3);}
+  .homeEditModeToggle:active{transform:translateY(1px);}
 
   /* --- 🔔 Role Toast — لاگ ان کے بعد چند سیکنڈ کے لیے نظر آئے --- */
   .roleToast{
@@ -3091,10 +3102,15 @@
       </div>
 
       <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں (صرف Admin کو نظر آئیں) ---------- -->
-      <div class="subBoxRow admin-only" id="subBoxRow" style="display:none;">
-        <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
-        <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
-        <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
+      <!-- ---------- ✏️ صدام کی ہدایت (FM20SEPSU1140AM): آئیکن ترتیب بدلیں بٹن یہاں، سبسکرپشن پٹی کے ساتھ
+           ایک ہی لائن میں — نیچے اپنی پوری لائن اب ختم (دیکھیں #homeTopControlsRow) ---------- -->
+      <div id="homeTopControlsRow">
+        <div class="subBoxRow admin-only" id="subBoxRow" style="display:none;">
+          <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
+          <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
+          <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
+        </div>
+        <button class="homeEditModeToggle admin-only" id="homeEditModeToggle" onclick="toggleHomeEditMode()" title="آئیکن ترتیب بدلیں">✏️</button>
       </div>
 
       <!-- ---------- 🎁 روزانہ ایک بار، ہلکا سا چمکتا/حرکت کرتا یاد دہانی Toast — کوئی بٹن نہیں، خود بخود 4.5 سیکنڈ میں غائب ---------- -->
@@ -3146,10 +3162,6 @@
         </button>
       </div>
       <input type="file" id="localRestoreFileInput" accept=".json,application/json" style="display:none;" onchange="importBackupData(event); this.value='';">
-
-      <!-- ---------- ✏️ صدام کی ہدایت (FM7SEPMO): پہلے ✖ ہمیشہ نظر آتا تھا جو گڑبڑ لگتا تھا — اب صرف اسی وقت
-           نظر آئے گا جب یہ "ترتیب بدلیں" بٹن دبایا جائے، عام حالت میں ہوم پیج بالکل صاف رہے ---------- -->
-      <button class="homeEditModeToggle admin-only" id="homeEditModeToggle" onclick="toggleHomeEditMode()">✏️ آئیکن ترتیب بدلیں</button>
 
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — Admin کے لیے اب انہی کی منتخب کردہ Shortcut اسکرینیں،
            Salesman کے لیے اسے Assign کی گئی اسکرینیں ---------- -->
@@ -8398,7 +8410,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار20ستمبر08:22am';
+const APP_BUILD_VERSION = 'اتوار20ستمبر11:42am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8899,7 +8911,8 @@ function renderHomeIconGrid(){
   if(!grid) return;
   const editBtn = document.getElementById('homeEditModeToggle');
   if(editBtn){
-    editBtn.textContent = homeEditMode ? '✅ مکمل ہو گیا' : '✏️ آئیکن ترتیب بدلیں';
+    editBtn.textContent = homeEditMode ? '✅' : '✏️'; // ---------- صدام کی ہدایت (FM20SEPSU1140AM): اب چھوٹا گول آئیکن بٹن ہے، صرف آئیکن بدلتا ہے (لمبا لفظ نہیں) ----------
+    editBtn.title = homeEditMode ? 'مکمل ہو گیا' : 'آئیکن ترتیب بدلیں';
     editBtn.classList.toggle('active', homeEditMode);
   }
   const tileHtml = (t) => `
