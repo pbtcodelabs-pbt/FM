@@ -3631,6 +3631,13 @@
             <label class="npFieldLabel">🧮 ٹوٹل قیمتِ خرید (خودکار)</label>
             <input type="text" id="npTotalPurchase" value="0" readonly style="background:#f1f5f9; font-weight:800; color:var(--primary-dark);">
           </div>
+          <!-- ---------- 🔵 صدام کی ہدایت (FM20SEPSU06): "مزدوری فروخت" کا خانہ یہاں موجود ہی نہیں تھا —
+               بل بننے کے وقت (finalizeInvoice) یہ لازمی خانہ مانگتا تھا مگر سبزی شامل کرتے وقت بھرنے کی جگہ
+               ہی نہیں تھی۔ اب یہیں شامل ---------- -->
+          <div class="npFieldWrap npFieldFull">
+            <label class="npFieldLabel">💪 مزدوری فروخت (Sell Labor)</label>
+            <input type="number" id="npSellLabor" placeholder="0">
+          </div>
           <div class="npFieldWrap">
             <label class="npFieldLabel" style="color:#b91c1c;">🔴 اسلام آباد ریٹ</label>
             <input type="number" id="npRetail" placeholder="0">
@@ -3777,6 +3784,7 @@
         <div class="pageTitle" style="margin:0; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
         <!-- ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): منشی نے فیڈ کیا سٹاک — ایڈمن یہاں سے دیکھ سکے ---------- -->
         <button type="button" onclick="openMunshiStockLogReport()" style="flex:0 0 auto; padding:5px 8px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی کا شامل کردہ سٹاک</button>
+        <button type="button" id="stockAdjManualRefreshBtn" onclick="manualRefreshStockFromCloud()" title="کلاؤڈ سے ابھی تازہ ترین سٹاک منگوائیں" style="flex:0 0 auto; padding:5px 8px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🔄 تازہ کریں</button>
         <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
           <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:5px 7px; font-size:10.5px; max-width:none; white-space:nowrap;">
             <span>📊 رپورٹس</span>
@@ -8410,7 +8418,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار20ستمبر12:59pm';
+const APP_BUILD_VERSION = 'اتوار20ستمبر03:06pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -13888,6 +13896,9 @@ function finalizeInvoice(){
       for(const rf of REQUIRED_PRICE_FIELDS){
         if(!variant[rf.field]){
           alert(`⚠️ "${product.name}" میں ${rf.label} کا خانہ خالی ہے — پہلے یہ خانہ بھریں، پھر بل بنے گا۔`);
+          // ---------- 🔵 صدام کی ہدایت (FM20SEPSU06): خالی خانے کا پیغام بند ہوتے ہی سیدھا اسی سبزی کے
+          // Edit فارم میں لے جائیں — صارف کو خود سٹاک مینجمنٹ میں جا کر ڈھونڈنا نہ پڑے ---------- -->
+          try{ openNewProductModal(product.product_id); }catch(e){ /* موڈل دستیاب نہ ہو تو خاموشی سے نظرانداز */ }
           return;
         }
       }
@@ -16431,15 +16442,28 @@ function crossRefreshStockAdjustment(){
 // ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح): چیک کریں کیا صارف اس وقت Products/Stock Adjustment کے کسی
 // خانے (اوپر والا نیلا پینل یا نیچے جدول) میں لکھ رہا ہے — اگر ہاں تو خودکار/بیک گراؤنڈ ری رینڈر روک دیں،
 // تاکہ کرسر بیچ میں سے کبھی نہ اچھلے ---------- -->
+let lastProductInputActivityTs = 0;
+// ---------- 🐛 صدام کی ہدایت (FM20SEPSU02): فکس — صرف خانے میں کرسر ہونا (focus) کافی نہیں، پچھلے 4
+// سیکنڈ میں واقعی کچھ ٹائپ ہوا ہو تبھی روکیں — ورنہ ایک دفعہ خانے کو چھونے بھر سے یہ سکرین ہمیشہ کے لیے
+// خودکار تازہ کاری کھو دیتی تھی (منشی کا فیڈ کیا سٹاک ایڈمن کو کبھی نظر نہ آتا) ---------- -->
+document.addEventListener('input', function(e){
+  const ae = e.target;
+  if(!ae || !ae.tagName) return;
+  const tag = ae.tagName.toUpperCase();
+  if(tag !== 'INPUT' && tag !== 'TEXTAREA') return;
+  const isProductField = (ae.id && ae.id.indexOf('vcInline') === 0) || (ae.id && ae.id.indexOf('vcAdd') === 0) ||
+    (ae.closest && (ae.closest('#stockAdjustmentListWrap') || ae.closest('#productListWrap')));
+  if(isProductField) lastProductInputActivityTs = Date.now();
+}, true);
 function isTypingInProductScreens(){
   const ae = document.activeElement;
   if(!ae || !ae.tagName) return false;
   const tag = ae.tagName.toUpperCase();
   if(tag !== 'INPUT' && tag !== 'TEXTAREA') return false;
-  if(ae.id && ae.id.indexOf('vcInline') === 0) return true;
-  if(ae.id && ae.id.indexOf('vcAdd') === 0) return true;
-  if(ae.closest && (ae.closest('#stockAdjustmentListWrap') || ae.closest('#productListWrap'))) return true;
-  return false;
+  const isProductField = (ae.id && ae.id.indexOf('vcInline') === 0) || (ae.id && ae.id.indexOf('vcAdd') === 0) ||
+    (ae.closest && (ae.closest('#stockAdjustmentListWrap') || ae.closest('#productListWrap')));
+  if(!isProductField) return false;
+  return (Date.now() - lastProductInputActivityTs) < 4000; // ---------- صرف حالیہ 4 سیکنڈ کی واقعی ٹائپنگ ---------- -->
 }
 
 // ---------- 📏 صدام کی ہدایت (4 ستمبر): روزمرہ استعمال ہونے والی 6 فیلڈز — اب ہر کارڈ میں براہ راست،
@@ -16595,6 +16619,38 @@ function syncVariantFromBatches(v){
 // فوراً نہیں گھٹاتا (اصل کٹوتی صرف حتمی بل بننے پر ہوتی ہے)، بلکہ الگ سے یاد رکھتا ہے کہ کتنی مقدار پہلے
 // سے کسی پینڈنگ آرڈر میں جا چکی ہے، تاکہ "باقی دستیاب سٹاک" = v.stock - v.reserved ہر جگہ درست، ریل ٹائم
 // نظر آئے — بغیر اصل انوینٹری کو دو بار کاٹے ---------- -->
+// ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): variant_id سے اس پراڈکٹ کا پکا سیریل نمبر تلاش کریں —
+// پرنٹ پر سبزی کے نام کے ساتھ یہی نمبر گول بیج میں دکھایا جاتا ہے ---------- -->
+function getSerialNoForVariantId(variantId){
+  if(variantId === null || variantId === undefined) return null;
+  for(const p of productsData){
+    if(p.variants && p.variants.some(v => v.variant_id === variantId)) return (p.serial_no ?? null);
+  }
+  return null;
+}
+// ---------- 🔴 صدام کی ہدایت (FM20SEPSU03): سیریل نمبر کا گول رنگین بیج — سٹاک صفحے کے سرخ بیج جیسا ہی انداز۔
+// ctx.save()/restore() میں لپٹا ہوا ہے، اس لیے باقی پرنٹ ڈرائنگ (فونٹ/رنگ/الائنمنٹ) پر کوئی اثر نہیں پڑتا ---------- -->
+function drawSerialBadge(ctx, cx, cy, radius, serialNo){
+  // ---------- 🔵 صدام کی ہدایت (FM20SEPSU05): تھرمل پرنٹر پر گہرا/بھرا ہوا سرخ دائرہ کالے رنگ کا موٹا دھبہ بن کر
+  // زیادہ سیاہی/ربن خرچ کرتا تھا — اب صرف باریک لکیر والا خالی (بغیر بھرائی کے) دائرہ، سیریل نمبر صاف پڑھا جائے،
+  // سیاہی کم سے کم استعمال ہو (سکرین پر نظر آنے والا بھرا سرخ بیج — SERIAL_BADGE_INLINE_STYLE — جوں کا توں رہے گا،
+  // یہ صرف پرنٹ کینوس کے لیے ہے) ---------- -->
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI*2);
+  ctx.lineWidth = Math.max(1, radius*0.11);
+  ctx.strokeStyle = '#000000';
+  ctx.stroke();
+  ctx.fillStyle = '#000000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const numStr = String(serialNo);
+  const baseFontPx = radius*1.15;
+  const fontPx = numStr.length >= 3 ? baseFontPx*0.72 : numStr.length === 2 ? baseFontPx*0.88 : baseFontPx;
+  ctx.font = `700 ${Math.max(6, Math.round(fontPx))}px Arial, sans-serif`;
+  ctx.fillText(numStr, cx, cy + Math.round(radius*0.05));
+  ctx.restore();
+}
 function findVariantByVariantId(variantId){
   for(const p of productsData){
     const v = p.variants.find(vv => vv.variant_id === variantId);
@@ -17907,6 +17963,7 @@ function openNewProductModal(productId = null){
     document.getElementById('npVariant').value = v.label || '';
     document.getElementById('npPurchase').value = v.purchase || '';
     document.getElementById('npLabor').value = v.labor || '';
+    document.getElementById('npSellLabor').value = v.sellLabor || '';
     document.getElementById('npRetail').value = v.retail || '';
     document.getElementById('npWholesale').value = v.wholesale || '';
     document.getElementById('npStock').value = v.stock || '';
@@ -17921,6 +17978,7 @@ function openNewProductModal(productId = null){
     document.getElementById('npVariant').value = '';
     document.getElementById('npPurchase').value = '';
     document.getElementById('npLabor').value = '';
+    document.getElementById('npSellLabor').value = '';
     document.getElementById('npRetail').value = '';
     document.getElementById('npWholesale').value = '';
     document.getElementById('npStock').value = '';
@@ -18026,6 +18084,7 @@ function saveNewProduct(){
   const variantLabel = document.getElementById('npVariant').value.trim(); // ---------- ویرینٹ (پیکنگ کی قسم) — نام کے ساتھ جُڑ کر کارڈ پر نظر آئے گا ----------
   const purchase = Number(document.getElementById('npPurchase').value) || 0;
   const labor = Number(document.getElementById('npLabor').value) || 0; // ---------- 💪 مزدوری — صدام کی ہدایت (FM3SEPTH10) ----------
+  const sellLabor = Number(document.getElementById('npSellLabor').value) || 0; // ---------- 💪 مزدوری فروخت — صدام کی ہدایت (FM20SEPSU06) ----------
   const retail = Number(document.getElementById('npRetail').value) || 0;
   const wholesale = Number(document.getElementById('npWholesale').value) || 0;
   const stock = Number(document.getElementById('npStock').value) || 0; // ---------- اسٹاک خالی چھوڑا ہو تو بھی 0 کے ساتھ محفوظ ہو جائے ----------
@@ -18033,6 +18092,23 @@ function saveNewProduct(){
   if(!name){
     alert('Please enter product name.');
     return;
+  }
+
+  // ---------- 🔒 صدام کی ہدایت (FM20SEPSU06): سبزی اسی وقت محفوظ ہو جب اس کے تمام قیمت والے خانے بھرے ہوں —
+  // خرید قیمت، مزدوری خرید، مزدوری فروخت، راولپنڈی ریٹ، اسلام آباد ریٹ — ورنہ بل بننے کے وقت پتا چلتا تھا۔
+  // صرف سٹاک اس شرط سے باہر ہے (وہ آرڈر ٹیکنگ کے ذریعے الگ سے فیڈ ہوتا ہے) ---------- -->
+  const NP_REQUIRED_FIELDS = [
+    {val: purchase,  label: '💰 خرید قیمت'},
+    {val: labor,     label: '💪 مزدوری خرید'},
+    {val: sellLabor, label: '💪 مزدوری فروخت'},
+    {val: wholesale, label: '🟢 راولپنڈی ریٹ'},
+    {val: retail,    label: '🔴 اسلام آباد ریٹ'},
+  ];
+  for(const rf of NP_REQUIRED_FIELDS){
+    if(!rf.val){
+      alert(`⚠️ ${rf.label} کا خانہ خالی ہے — پہلے یہ خانہ بھریں، پھر سبزی محفوظ ہوگی۔ (صرف سٹاک کا خانہ خالی چھوڑا جا سکتا ہے)`);
+      return;
+    }
   }
 
   // ---------- بارکوڈ دیا گیا ہو تو چیک کریں کہ یہ کہیں پہلے سے کسی اور ویرینٹ پر محفوظ تو نہیں — ورنہ اسکین کرتے وقت غلط آئٹم مل سکتا ہے ----------
@@ -18058,6 +18134,7 @@ function saveNewProduct(){
         product.variants[0].label = variantLabel;
         product.variants[0].purchase = purchase;
         product.variants[0].labor = labor;
+        product.variants[0].sellLabor = sellLabor;
         product.variants[0].retail = retail;
         product.variants[0].wholesale = wholesale;
         product.variants[0].stock = stock;
@@ -18082,11 +18159,11 @@ function saveNewProduct(){
       const dupVariant = existingProduct.variants.find(v => (v.label || '').trim().toLowerCase() === variantLabel.trim().toLowerCase());
       if(dupVariant){
         if(!confirm(`"${name}" میں "${variantLabel || 'بغیر پیکنگ'}" پہلے سے موجود ہے۔ کیا آپ اسی کی قیمتیں/سٹاک نئی قدروں سے بدلنا چاہتے ہیں؟`)) return;
-        Object.assign(dupVariant, {barcode, purchase, labor, retail, wholesale, stock});
+        Object.assign(dupVariant, {barcode, purchase, labor, sellLabor, retail, wholesale, stock});
         if(npProductPhotoDataUrl) dupVariant.image = npProductPhotoDataUrl;
       } else {
         existingProduct.variants.push({
-          variant_id: nextVariantId++, label: variantLabel, barcode, purchase, labor, retail, wholesale, stock,
+          variant_id: nextVariantId++, label: variantLabel, barcode, purchase, labor, sellLabor, retail, wholesale, stock,
           lowStockAt: 5, location: '', expiryDate: '', image: npProductPhotoDataUrl || null
         });
       }
@@ -18105,7 +18182,7 @@ function saveNewProduct(){
     product_id: nextProductId++,
     name, category,
     variants: [
-      {variant_id: nextVariantId++, label: variantLabel, barcode, purchase, labor, retail, wholesale, stock, lowStockAt:5, location:'', expiryDate:'', image: npProductPhotoDataUrl || null}
+      {variant_id: nextVariantId++, label: variantLabel, barcode, purchase, labor, sellLabor, retail, wholesale, stock, lowStockAt:5, location:'', expiryDate:'', image: npProductPhotoDataUrl || null}
     ]
   };
   productsData.push(newProduct);
@@ -26445,9 +26522,18 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   // تو اسے بھی مکمل قیمت اور ٹوٹل نظر آ جاتا۔ صدام کی صاف ہدایت: آرڈر لینے والے ملازم کو ہمیشہ صرف تعداد نظر
   // آنی چاہیے — نہ ڈرافٹ میں نہ بھیجے گئے آرڈر میں — چاہے ایڈمن بل مکمل ہی کیوں نہ کر چکا ہو۔ اب قیمت/ٹوٹل صرف
   // ایڈمن کے لیے ہی دکھائے جائیں گے، باقی سب کو ہمیشہ صرف تعداد ---------- -->
-  const hasRate = (AppState.currentRole === 'admin') && order.items.some(i => i.unitPrice > 0); // ---------- ریٹ لگ چکا ہو تو یہ اصل بل ہے — "ADVANCE ORDER" بینر کی ضرورت نہیں (صرف ایڈمن کے لیے) ----------
+  // ---------- 🔵 صدام کی ہدایت (FM20SEPSU04): پرنٹ میں سبزیوں کی قطاریں ہمیشہ سبزی کے پکے سیریل نمبر کے
+  // Ascending حساب سے چھپیں — چاہے منشی/ملازم نے جس ترتیب میں بھی فیڈ کی ہوں۔ صرف پرنٹ کاپی — اصل order.items
+  // (ترمیم، سٹاک ریزرویشن، کلاؤڈ سِنک) بالکل اسی ترتیب میں رہے گا جس میں فیڈ ہوا تھا ---------- -->
+  const printOrderItems = [...order.items].sort((a, b) => {
+    const sa = getSerialNoForVariantId(a.variant_id), sb = getSerialNoForVariantId(b.variant_id);
+    const na = (sa === null || sa === undefined) ? Infinity : sa;
+    const nb = (sb === null || sb === undefined) ? Infinity : sb;
+    return na - nb;
+  });
+  const hasRate = (AppState.currentRole === 'admin') && printOrderItems.some(i => i.unitPrice > 0); // ---------- ریٹ لگ چکا ہو تو یہ اصل بل ہے — "ADVANCE ORDER" بینر کی ضرورت نہیں (صرف ایڈمن کے لیے) ----------
   let maxQtyStr = '0', maxPriceStr = '0', maxTotalStr = '0';
-  order.items.forEach(it => {
+  printOrderItems.forEach(it => {
     const qS = String(it.qty), pS = (it.unitPrice||0).toFixed(decimals), tS = ((it.qty||0)*(it.unitPrice||0)).toFixed(decimals);
     if(qS.length > maxQtyStr.length) maxQtyStr = qS;
     if(pS.length > maxPriceStr.length) maxPriceStr = pS;
@@ -26457,7 +26543,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   // اب نمبروں کا فونٹ Invoice جتنا موٹا/بڑا (18px) ہے، اس لیے کالمز بھی اسی حساب سے تھوڑے چوڑے ناپے جائیں گے ---------- -->
   ctx.font = `bold ${Math.round(18*scale)}px ${canvasFontFamily}`;
   const colPad = Math.round(20 * scale);
-  const noW = Math.max(Math.round(26 * scale), ctx.measureText(String(order.items.length)).width + colPad);
+  const noW = Math.max(Math.round(26 * scale), ctx.measureText(String(printOrderItems.length)).width + colPad);
   const qtyW = Math.max(Math.round(36 * scale), ctx.measureText(maxQtyStr).width + colPad);
   // ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): جب تک ریٹ نہ لگا ہو (خالص Order Taking/Advance Order) نرخ اور
   // ٹوٹل کالم بالکل نہ دکھائیں — صرف نمبر، نام اشیاء اور تعداد۔ ریٹ لگتے ہی (اصل بل بنتے وقت) دونوں کالم واپس آ جاتے ہیں ---------- -->
@@ -26467,8 +26553,12 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   // بچ جانے والی خالی جگہ نمبر/تعداد/قیمت/ٹوٹل (فعال) خانوں پر برابر تقسیم، ایک طرف خالی پٹی نہیں چھوڑی جاتی ---------- -->
   ctx.font = `${Math.round(18*scale)}px ${itemWeight} ${canvasFontFamily}`;
   let maxAdvItemStr = '';
-  order.items.forEach(it => { if(ctx.measureText(it.name).width > ctx.measureText(maxAdvItemStr).width) maxAdvItemStr = it.name; });
-  const itemW = Math.max(Math.round(60*scale), Math.round(ctx.measureText(maxAdvItemStr).width) + colPad);
+  printOrderItems.forEach(it => { if(ctx.measureText(it.name).width > ctx.measureText(maxAdvItemStr).width) maxAdvItemStr = it.name; });
+  // ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): سبزی کے نام کے ساتھ اس کا پکا سیریل نمبر ایک گول رنگین بیج میں —
+  // نام اشیاء کالم کی چوڑائی میں اس بیج کے لیے بھی جگہ ریزرو کرنی ہے ---------- -->
+  const serialBadgeD = Math.max(14, Math.min(24, Math.round(20 * scale)));
+  const serialBadgeGap = Math.round(5 * scale);
+  const itemW = Math.max(Math.round(60*scale), Math.round(ctx.measureText(maxAdvItemStr).width) + colPad + serialBadgeD + serialBadgeGap);
   const leftoverAdvW = Math.max(0, (tableRight - tableLeft) - noW - qtyW - priceW - totalW - itemW);
   const activeAdvCols = 2 + (hasRate ? 2 : 0);
   const extraAdvPerCol = Math.floor(leftoverAdvW / activeAdvCols);
@@ -26494,7 +26584,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
   // ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): لمبے نام کاٹنے کی بجائے دوسری لائن میں نیچے شفٹ — اسی لیے
   // تعداد ٹیبل کی اونچائی (tableH) ہر آئٹم کی اصل ضرورت کے مطابق پہلے سے حساب کی جاتی ہے ---------- -->
   ctx.font = FItem('18px');
-  const maxItemWidthPre = itemW - 8;
+  const maxItemWidthPre = itemW - 8 - serialBadgeD - serialBadgeGap;
   const lineHPre = Math.round(20 * scale * rowScaleSetting);
   const wrapAdvItemNamePre = (text) => {
     if(ctx.measureText(text).width <= maxItemWidthPre) return [text];
@@ -26511,7 +26601,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
     if(line2 !== words.slice(i).join(' ')) line2 = line2.trim() + '…';
     return [line1, line2];
   };
-  const itemLines = order.items.map(item => wrapAdvItemNamePre(item.name));
+  const itemLines = printOrderItems.map(item => wrapAdvItemNamePre(item.name));
   const rowHeights = itemLines.map(lines => lines.length > 1 ? rowH + lineHPre : rowH);
   const tableH = headerH + rowHeights.reduce((a,b) => a+b, 0);
 
@@ -26605,7 +26695,7 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
 
   ctx.font = FItem('18px');
   const lineH = lineHPre; // ---------- اوپر پہلے ہی حساب ہو چکی — دوسری لائن کی اونچائی ----------
-  order.items.forEach((item, idx) => {
+  printOrderItems.forEach((item, idx) => {
     const thisRowH = rowHeights[idx];
     const lines = itemLines[idx];
     const firstBaseline = hLineY + (lines.length > 1 ? lineH : rowH) - 9 * scale;
@@ -26617,9 +26707,15 @@ async function _renderAdvOrderToCanvasInner(order, canvasEl){
     ctx.beginPath();
     ctx.rect(colX[3], hLineY, colX[4] - colX[3], thisRowH);
     ctx.clip();
-    ctx.fillText(lines[0], colX[4]-4, firstBaseline);
-    if(lines[1]) ctx.fillText(lines[1], colX[4]-4, firstBaseline + lineH);
+    // ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): سبزی کے پکے سیریل نمبر کے لیے دائیں طرف جگہ چھوڑی ---------- -->
+    ctx.fillText(lines[0], colX[4]-4-serialBadgeD-serialBadgeGap, firstBaseline);
+    if(lines[1]) ctx.fillText(lines[1], colX[4]-4-serialBadgeD-serialBadgeGap, firstBaseline + lineH);
     ctx.restore();
+    // ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): سبزی کا پکا سیریل نمبر — نام کے ساتھ، گول رنگین بیج میں ----------
+    const _advRowSerialNo = getSerialNoForVariantId(item.variant_id);
+    if(_advRowSerialNo !== null && _advRowSerialNo !== undefined){
+      drawSerialBadge(ctx, colX[4]-4-serialBadgeD/2, hLineY + thisRowH/2, serialBadgeD/2, _advRowSerialNo);
+    }
     const drawAdvClippedNum = (text, x1, x2, textX) => {
       ctx.textAlign = align;
       ctx.save();
@@ -30193,6 +30289,23 @@ async function fetchProductsFromCloud(silent){
   }
 }
 
+// ---------- 🔄 صدام کی ہدایت (FM20SEPSU02): دستی "تازہ کریں" بٹن — pending تبدیلی ہو تو پہلے بھیجیں،
+// پھر کلاؤڈ سے یقینی تازہ ڈیٹا منگوا کر سکرین دوبارہ بنائیں (ٹائپنگ گارڈ کو نظرانداز کر کے، چونکہ یہ خود
+// صارف کا دبایا ہوا بٹن ہے) ---------- -->
+async function manualRefreshStockFromCloud(){
+  const btn = document.getElementById('stockAdjManualRefreshBtn');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
+  try{
+    if(AppState.settings.productsPendingSync){ await pushProductsToCloud(); }
+    const ok = await fetchProductsFromCloud(true);
+    renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+    if(btn){ btn.textContent = ok ? '✅ تازہ ہو گیا' : '⚠️ آف لائن/ناکام'; }
+  }catch(e){
+    if(btn){ btn.textContent = '⚠️ ناکام'; }
+  }
+  setTimeout(() => { if(btn){ btn.disabled = false; btn.textContent = '🔄 تازہ کریں'; } }, 1800);
+}
+
 // ---------- Products/Stock Adjustment/Purchase Orders/Billing اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
 function startProductsPolling(){
   stopProductsPolling();
@@ -31559,8 +31672,12 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     const base = splitItemNamePacking(it.name, it.label).baseName;
     if(ctx.measureText(base).width > ctx.measureText(maxItemStr).width) maxItemStr = base;
   });
+  // ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): سبزی کے نام کے ساتھ اس کا پکا سیریل نمبر ایک گول رنگین بیج میں —
+  // نام اشیاء کالم کی چوڑائی میں اس بیج کے لیے بھی جگہ ریزرو کرنی ہے ---------- -->
+  const serialBadgeD = Math.max(14, Math.min(24, Math.round(20 * fscale)));
+  const serialBadgeGap = Math.round(5 * fscale);
   // ---------- نام اشیاء کا کالم کبھی بھی بہت تنگ نہ ہو (کم از کم 100px جتنا) — نام ایک دوسرے پر نہ چڑھیں ---------- -->
-  const itemWTight = Math.max(Math.round(100*fscale), Math.round(ctx.measureText(maxItemStr).width) + itemPad);
+  const itemWTight = Math.max(Math.round(100*fscale), Math.round(ctx.measureText(maxItemStr).width) + itemPad + serialBadgeD + serialBadgeGap);
   // ---------- بچ جانے والی خالی جگہ — نام اور پیکنگ کے علاوہ باقی 5 خانوں (نمبر/تعداد/قیمت/مزدوری/ٹوٹل) پر برابر تقسیم ---------- -->
   const leftoverW = Math.max(0, (tableRight - tableLeft0) - noW - qtyW - priceW - totalW - laborW - packW - itemWTight);
   const extraPerNarrowCol = Math.floor(leftoverW / 5);
@@ -31675,7 +31792,15 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // اصل invoice.items (اور اسٹاک/سیلز کا حساب) اسی ترتیب میں رہے گا جس میں اصل میں شامل ہوئے تھے ----------
   const printItems = AppState.settings.printSortAlpha
     ? [...invoice.items].sort((a, b) => a.name.localeCompare(b.name))
-    : invoice.items;
+    // ---------- 🔵 صدام کی ہدایت (FM20SEPSU04): حروفِ تہجی ترتیب آف ہو تو بھی پرنٹ رینڈم/فیڈنگ کی ترتیب میں نہیں،
+    // بلکہ ہمیشہ سبزی کے اپنے پکے سیریل نمبر کے Ascending حساب سے ہو — چاہے کیشیئر/منشی نے جس ترتیب میں بھی
+    // آئٹم شامل کیے ہوں۔ صرف پرنٹ کے لیے عارضی کاپی — اصل invoice.items (اسٹاک/سیلز کا حساب) اسی ترتیب میں رہے گا ---------- -->
+    : [...invoice.items].sort((a, b) => {
+        const sa = getSerialNoForVariantId(a.variant_id), sb = getSerialNoForVariantId(b.variant_id);
+        const na = (sa === null || sa === undefined) ? Infinity : sa;
+        const nb = (sb === null || sb === undefined) ? Infinity : sb;
+        return na - nb;
+      });
 
   // ---------- آئٹمز ٹیبل — مکمل باریک ٹھوس گرڈ (باکس والا)، ہر کالم پر عمودی لائن، ہر آئٹم پر افقی لائن ----------
   // کالمز کی ترتیب: #  |  Item  |  Variant  |  Qty  |  Price  |  Total
@@ -31743,14 +31868,14 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // ---------- ہر آئٹم کی لائن — سیریل نمبر کے ساتھ ----------
   const itemFontWeight = AppState.settings.printBoldItems === false ? '' : 'bold ';
   const itemAlign = 'right'; // ---------- 🔁 صدام کی ہدایت (FM3SEPTH23): اردو نام اب دائیں طرف الائن ----------
-  const itemNameX = headerItemNameX;
+  const itemNameX = headerItemNameX - serialBadgeD - serialBadgeGap; // ---------- 🔵 سیریل بیج کے لیے دائیں طرف جگہ چھوڑی ----------
   // ---------- Center/Right منتخب ہو تو مقدار/قیمت/ٹوٹل کالمز بھی اپنے اپنے کالم میں اسی طرف آئیں ----------
   const qtyX = headerQtyX;
   const laborX = headerLaborX;
   const priceX = headerPriceX;
   const totalX = headerTotalX;
   ctx.font = F(itemFontWeight + '18px');
-  const maxItemWidth = itemW - 8;
+  const maxItemWidth = itemW - 8 - serialBadgeD - serialBadgeGap;
   const rowFontPx = Math.round(18 * fscale);
   // ---------- 🔤 صدام کی ہدایت (FM3SEPTH23): نمبر/تعداد/قیمت/ٹوٹل — چاروں ایک ہی، یکساں موٹے فونٹ سائز میں —
   // کالم کی چوڑائی پہلے ہی اسی سائز کے مطابق ناپی جا چکی ہے، اس لیے عام طور پر سکڑنے کی ضرورت نہیں پڑے گی —
@@ -31806,6 +31931,11 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     ctx.clip();
     ctx.fillText(displayName, itemNameX, rowBaseline);
     ctx.restore();
+    // ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): سبزی کا پکا سیریل نمبر — نام کے ساتھ، گول رنگین بیج میں ----------
+    const _rowSerialNo = getSerialNoForVariantId(item.variant_id);
+    if(_rowSerialNo !== null && _rowSerialNo !== undefined){
+      drawSerialBadge(ctx, headerItemNameX - serialBadgeD/2, hLineY + rowH/2, serialBadgeD/2, _rowSerialNo);
+    }
     // ---------- 📦 پیکنگ کالم — نام اشیاء اور تعداد کے درمیان، ہلکے (غیر بولڈ) فونٹ میں، درمیان میں ----------
     if(packLabel){
       ctx.save();
@@ -37858,7 +37988,16 @@ function getMunshiLogFilteredRows(){
   const range = munshiLogFilterState.key === 'all' ? null : getDateRangeForKey(munshiLogFilterState.key, munshiLogFilterState.customFrom, munshiLogFilterState.customTo);
   let rows = (munshiStockLogData || []).slice();
   if(range) rows = rows.filter(r => isDateInRange(r.ts, range));
-  rows.sort((a,b) => b.ts - a.ts); // ---------- تازہ ترین اندراج سب سے اوپر ---------- -->
+  // ---------- ✏️ صدام کی ہدایت (FM20SEPSU): اب ہمیشہ سیریل نمبر کی پکی/مستقل ترتیب میں (1 سے 70 تک) —
+  // منشی نے چاہے جس ترتیب سے فیڈ کیا ہو (پہلے 20 نمبر، پھر 5 نمبر)، رپورٹ میں ہمیشہ سیریل نمبر کے حساب سے
+  // ایک، دو، تین... ہی نظر آئے گا۔ سیریل نمبر نہ ہو تو سب سے آخر میں، اور ایک ہی سیریل کی دو الگ اندراج ہوں
+  // (دن میں دو دفعہ فیڈ) تو ان کے درمیان پرانی اندراج پہلے ---------- -->
+  rows.sort((a,b) => {
+    const sa = (a.serial_no === null || a.serial_no === undefined) ? Infinity : a.serial_no;
+    const sb = (b.serial_no === null || b.serial_no === undefined) ? Infinity : b.serial_no;
+    if(sa !== sb) return sa - sb;
+    return a.ts - b.ts;
+  });
   return rows;
 }
 
