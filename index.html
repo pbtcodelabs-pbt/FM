@@ -8410,7 +8410,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار20ستمبر11:42am';
+const APP_BUILD_VERSION = 'اتوار20ستمبر12:59pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9111,7 +9111,8 @@ function buildDevChatMessage(){
   if(devChatContext === 'subscription'){
     // ---------- اگر کیلکولیٹر سے دن/قیمت منتخب ہوں تو پیغام میں شامل کریں، ورنہ عام دلچسپی کا پیغام بھیجیں ----------
     if(selectedPlanDays && selectedPlanPrice){
-      return `Sir, I want to subscribe your Fruit Mandi POS application for ${selectedPlanDays} days at the price of Rs. ${selectedPlanPrice.toLocaleString()} in accordance with your package plan.\n\nMy Device ID:\n${uid}`;
+      // ---------- ✏️ صدام کی ہدایت (FM20SEPSU12): اردو پیغام — فروٹ منڈی کا نام واضح ہو تاکہ ڈویلپر کو پتہ چلے یہ کس ایپ کی درخواست ہے ----------
+      return `محترم ڈویلپر السلام علیکم ورحمتہ اللہ وبرکاتہ \n\nمیں فروٹ منڈی ایپ ${selectedPlanDays} دن کے لیے Rs. ${selectedPlanPrice.toLocaleString()} میں سبسکرائب کرنا چاہتا ہوں۔\n\nمیری UID...یہ ہے\n\n${uid}\n\n\nمجھے سبسکرپشن کوڈ بھیج دیں`;
     }
     return buildAdInquiryMessage();
   }
@@ -9141,7 +9142,9 @@ function sendTroubleSubscribingMessage(){
 // "package plan" کا پرانا فرض شدہ حوالہ ہٹا دیا، چونکہ اب کوئی پیڈ پیکج پلان دکھایا نہیں جاتا ----------
 function buildAdInquiryMessage(){
   const uid = getOrCreateDeviceUID();
-  return `Sir, I saw your app's advertisement and I like it. Please guide me on how I can get this app and what the subscription charges are — I'd like to subscribe.\n\nMy Device ID:\n${uid}`;
+  // ---------- ✏️ صدام کی ہدایت (FM20SEPSU12): اردو میں، فروٹ منڈی ایپ کا نام واضح — تاکہ ڈویلپر کو فوراً پتہ چل جائے
+  // یہ پیغام کس ایپ کی طرف سے آیا ہے (پہلے صرف انگریزی میں تھا اور ایپ کا نام مینشن نہیں ہوتا تھا) ---------- -->
+  return `محترم ڈویلپر السلام علیکم ورحمتہ اللہ وبرکاتہ \n\nمیں فروٹ منڈی ایپ استعمال کرنا چاہتا ہوں\n\nمیری UID...یہ ہے\n\n${uid}\n\n\nمجھے سبسکرپشن کوڈ بھیج دیں`;
 }
 
 function sendDevChat(channel){
@@ -13136,16 +13139,17 @@ function renderBillingProductGrid(){
 
     return `
       <div class="productGridCard billingListRow ${outOfStockClass} ${lowStockClass} ${isHot ? 'pgLocked' : ''}" data-product-id="${p.product_id}" ${rowOnClick}
-           dir="rtl" style="height:auto; overflow:visible; display:flex; flex-direction:column; gap:6px; background:#fff; border:1.5px solid ${qtyInCartForBadge > 0 ? 'var(--primary)' : '#e5e9f0'}; border-radius:10px; padding:8px 9px; max-width:100%; box-shadow:0 2px 6px rgba(41,29,10,.08);">
+           dir="rtl" style="height:auto; overflow:visible; display:flex; flex-direction:column; gap:6px; background:${getBillingCardBgFinal()}; border:1.5px solid ${qtyInCartForBadge > 0 ? 'var(--primary)' : '#e5e9f0'}; border-radius:10px; padding:8px 9px; max-width:100%; box-shadow:0 2px 6px rgba(41,29,10,.08);">
         <div style="display:flex; flex-direction:column; gap:2px;">
-          <div style="display:flex; align-items:center; justify-content:center; gap:6px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:900; text-align:center; line-height:1.35;">
+          <!-- ---------- 🏷️ صدام کی ہدایت (FM20SEPSU): بلنگ کارڈ کا نام اب Card ٹیب کی سیٹنگز (سائز/موٹائی/فونٹ/رنگ) سے جڑا ہوا ---------- -->
+          <div style="display:flex; align-items:center; justify-content:center; gap:6px; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || '\'JameelNooriNastaleeqKasheeda\',\'JameelNooriNastaleeq\',\'PDMSMultan\',\'Noto Nastaliq Urdu\',serif'}; font-size:${AppState.settings.productCardNameSize || 16}px; font-weight:${AppState.settings.productCardNameWeight || 900}; text-align:center; line-height:1.35; color:${getProductCardTextColorFinal(false)};">
             ${p.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0;">${p.serial_no}</span>` : ''}
             <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${isHot ? '🔥 ' : ''}${p.name}</span>${qtyBadgeHtml}
           </div>
           <div style="font-size:11px; font-weight:800; color:${outOfStockClass ? 'var(--danger)' : lowStockClass ? 'var(--warning)' : 'var(--muted)'}; text-align:center;">${stockNote}</div>
         </div>
         <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
-          <div style="font-size:13px; font-weight:800; color:var(--primary-dark); flex:0 0 auto;">${priceLabel}</div>
+          <div style="font-size:13px; font-weight:800; color:${getProductCardTextColorFinal(false)}; flex:0 0 auto;">${priceLabel}</div>
           ${scaleBadgeHtml}
           <div style="display:flex; align-items:center; gap:5px; flex:1 1 auto; justify-content:flex-end;">
             ${actionAreaHtml}
@@ -33888,6 +33892,14 @@ function resetProductCardNameBg(){
   if(picker) picker.value = '#eef2ff';
   persistAllData();
   try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+}
+function getBillingCardBgFinal(){
+  // ---------- بلنگ سکرین کے اصل پراڈکٹ کارڈ (ٹماٹر وغیرہ) — کچھ سیٹ نہ ہو تو ڈیفالٹ سفید، ورنہ صارف کا منتخب کردہ رنگ ----------
+  const base = AppState.settings.productCardNameBg;
+  const intensity = AppState.settings.productCardNameBgIntensity || 0;
+  if(!base && !intensity) return '#fff';
+  const effectiveBase = base || '#ffffff';
+  return intensity ? shiftColorLightness(effectiveBase, intensity) : effectiveBase;
 }
 function getProductCardBgFinal(){
   const base = AppState.settings.productCardNameBg;
