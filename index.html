@@ -8419,7 +8419,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'اتوار20ستمبر03:21pm';
+const APP_BUILD_VERSION = 'پیر21ستمبر04:31am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -23593,7 +23593,7 @@ function renderOtAddStockList(query){
       ${p.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; margin:0; cursor:default;">${p.serial_no}</span>` : ''}
       <div style="flex:1; min-width:0; text-align:right;">
         <div style="font-weight:800; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
-        <div style="display:inline-block; margin-top:4px; padding:3px 10px; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:8px; font-size:12px; font-weight:800; color:#1e3a8a;">موجودہ سٹاک: <span id="otAddStockCur-${v.variant_id}" style="font-weight:900; font-size:13px;">${v.stock || 0}</span></div>
+        <div style="display:inline-block; margin-top:4px; padding:3px 10px; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:8px; font-size:12px; font-weight:800; color:#1e3a8a;">موجودہ سٹاک: <span id="otAddStockCur-${v.variant_id}" style="font-weight:900; font-size:13px;">${Math.max(0, (Number(v.stock)||0) - (Number(v.reserved)||0))}</span></div>
       </div>
       <button type="button" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', 'otAddStockListWrap')" style="flex:0 0 70px; padding:6px 4px; border:1px solid #93c5fd; background:#dbeafe; color:#1e3a8a; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📦 ${v.label || '—'}</button>
       <input type="number" id="otAddStockQty-${v.variant_id}" placeholder="+مقدار" min="0" style="width:64px; padding:6px; border:1.5px solid #86efac; border-radius:7px; text-align:center; font-size:13px; box-sizing:border-box;">
@@ -23623,10 +23623,13 @@ function otAddStockCommit(productId, variantId){
   });
   persistAllData();
   pushProductsToCloud();
+  pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02): منشی نے ابھی سٹاک ایڈ کیا — 20 سیکنڈ
+  // خودکار پول روکیں، ورنہ 12-سیکنڈ پولنگ یہ تازہ تبدیلی واپس پرانی حالت میں پلٹ سکتی ہے (وہی خرابی جو
+  // toggleProductPresenceInSheet میں پہلے پکڑی گئی تھی) ---------- -->
   pushMunshiStockLogToCloud();
   input.value = '';
   const curEl = document.getElementById(`otAddStockCur-${variantId}`);
-  if(curEl) curEl.textContent = v.stock;
+  if(curEl) curEl.textContent = Math.max(0, (Number(v.stock)||0) - (Number(v.reserved)||0));
   otSyncFlatCacheStock(variantId);
   updateOtStockCell(variantId); // ---------- نیچے آرڈر ٹیکنگ کی اصل فہرست (سٹاک کالم) میں فوری اپڈیٹ ---------- -->
 }
@@ -24453,6 +24456,7 @@ async function openOtReview(){
   }
   reserveOrderStock(itemsForSave);
   pushProductsToCloud(); // ---------- ⚡ بک شدہ سٹاک فوراً کلاؤڈ پر، تاکہ دوسرا ملازم بھی ریل ٹائم دستیاب سٹاک دیکھے ---------- -->
+  pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02): اسی طرح یہاں بھی خودکار پول 20 سیکنڈ روکیں ---------- -->
   if(otSavedOrderId){
     const existing = advanceOrdersData.find(o => o.id === otSavedOrderId);
     if(existing) existing.items = itemsForSave;
@@ -24835,6 +24839,7 @@ function deleteMyDraftOrder(orderId){
   if(!confirm('کیا آپ واقعی یہ ڈرافٹ آرڈر حذف کرنا چاہتے ہیں؟')) return;
   releaseOrderStock(order.items);
   pushProductsToCloud();
+  pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02) ---------- -->
   advanceOrdersData = advanceOrdersData.filter(o => o.id !== orderId);
   persistAllData();
   pushAdvanceOrdersToCloud();
@@ -25988,6 +25993,7 @@ function deleteAdvanceOrder(orderId){
   if(delOrder && delOrder.status !== 'fulfilled'){
     releaseOrderStock(delOrder.items);
     pushProductsToCloud();
+    pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02) ---------- -->
   }
   advanceOrdersData = advanceOrdersData.filter(o => o.id !== orderId);
   persistAllData();
@@ -26043,6 +26049,7 @@ function fulfillAdvanceOrder(orderId){
   if(order.status !== 'fulfilled'){
     releaseOrderStock(order.items);
     pushProductsToCloud();
+    pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02) ---------- -->
   }
 
   order.status = 'fulfilled';
@@ -31932,9 +31939,12 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     ctx.clip();
     ctx.fillText(displayName, itemNameX, rowBaseline);
     ctx.restore();
-    // ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): سبزی کا پکا سیریل نمبر — نام کے ساتھ، گول رنگین بیج میں ----------
+    // ---------- 🔵 صدام کی ہدایت (FM21SEPMO01): یہ فائنل بل ہے جو براہِ راست کسٹمر کو جاتا ہے — کسٹمر کو سبزی کا
+    // اندرونی سیریل نمبر دکھانے کی ضرورت نہیں، صرف نام/پیکنگ۔ بیج صرف اندرونی رپورٹس (ایڈوانس آرڈر، منشی سٹاک لاگ)
+    // میں رہے گا — یہاں سے صرف چھپایا ہے، فنکشن/ڈیٹا جوں کا توں محفوظ ہے، دوبارہ چاہیں تو true کر دیں ---------- -->
+    const SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL = false;
     const _rowSerialNo = getSerialNoForVariantId(item.variant_id);
-    if(_rowSerialNo !== null && _rowSerialNo !== undefined){
+    if(SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL && _rowSerialNo !== null && _rowSerialNo !== undefined){
       drawSerialBadge(ctx, headerItemNameX - serialBadgeD/2, hLineY + rowH/2, serialBadgeD/2, _rowSerialNo);
     }
     // ---------- 📦 پیکنگ کالم — نام اشیاء اور تعداد کے درمیان، ہلکے (غیر بولڈ) فونٹ میں، درمیان میں ----------

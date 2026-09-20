@@ -2,13 +2,22 @@
 // یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
 // صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
 // ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'FM20SEPSU0321PM';
+const CACHE_VERSION = 'FM21SEPMO0431AM';
 const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
-const PRECACHE_URLS = [
+// ---------- 🔒🆕 صدام کی ہدایت (FM21SEPMO03): آف لائن نہ چلنے کی اصل جڑ یہاں ملی — پہلے تمام فائلیں
+// ایک ہی فہرست میں تھیں اور ہر ایک کی precache ناکامی خاموشی سے نظرانداز (صرف console.warn) ہو جاتی تھی۔
+// اگر کمزور/ٹوٹے نیٹ ورک کے دوران خود index.html ہی کیش ہونے میں ناکام رہے، تب بھی install "کامیاب" مان کر
+// self.skipWaiting() چل جاتا، پرانا (مکمل/درست) کیش صاف ہو جاتا، اور نیا ورژن قبضہ لے لیتا — نتیجہ: اگلی
+// بار آف لائن کھولنے پر خالی/ٹوٹا صفحہ۔ اب فائلیں دو حصوں میں: CRITICAL (ایپ شیل — ان کی ناکامی پوری
+// اپڈیٹ کو منسوخ کر دے، پرانا/کام کرتا ورژن جوں کا توں فعال رہے) اور OPTIONAL (فونٹ/آئیکن/CDN — ناکامی پر
+// صرف وارننگ، اپڈیٹ نہ رکے) ---------- -->
+const CRITICAL_URLS = [
   './',
   './index.html',
-  './manifest.json',
+  './manifest.json'
+];
+const OPTIONAL_URLS = [
   './favicon-32.png',
   './icon-180.png',
   './icon-192.png',
@@ -32,15 +41,22 @@ const PRECACHE_URLS = [
 // (ری لوڈ اب صارف کے لکھنا بند کرنے تک انتظار کرتا ہے، نئے ورژن کا لوڈ ہونا خودکار ہی رہتا ہے) ---------- -->
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return Promise.all(
-        PRECACHE_URLS.map((url) =>
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // ---------- CRITICAL: addAll() — ایک بھی ناکام ہو تو پوری install ناکام، پرانا SW/کیش فعال رہے ---------- -->
+      await cache.addAll(CRITICAL_URLS);
+      // ---------- OPTIONAL: ہر فائل الگ سے، ناکامی صرف وارننگ (اپڈیٹ نہ رکے) ---------- -->
+      await Promise.all(
+        OPTIONAL_URLS.map((url) =>
           cache.add(url).catch((err) => {
-            console.warn('Precache failed for', url, err);
+            console.warn('Precache failed for (optional)', url, err);
           })
         )
       );
     }).then(() => self.skipWaiting())
+    .catch((err) => {
+      console.warn('⚠️ اہم فائلوں کی precache ناکام — یہ اپڈیٹ منسوخ، پرانا ورژن فعال رہے گا:', err);
+      throw err; // ---------- install event کو باقاعدہ ناکام ہونے دیں تاکہ browser پرانی/فعال SW برقرار رکھے ---------- -->
+    })
   );
 });
 
@@ -96,7 +112,16 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
         }
         return res;
-      }).catch(() => cached);
+      }).catch(() => {
+        if (cached) return cached;
+        // ---------- 🛟 صدام کی ہدایت (FM21SEPMO03): نیٹ ورک ناکام اور یہی مخصوص فائل کیش میں بھی نہیں —
+        // اگر یہ صفحہ کھولنے کی درخواست ہے تو خالی/ٹوٹا صفحہ دکھانے کی بجائے کم از کم ایپ شیل
+        // (index.html) دکھا دیں، تاکہ ایپ بہرحال کھلے ---------- -->
+        if (req.mode === 'navigate' || req.destination === 'document') {
+          return caches.match('./index.html');
+        }
+        return undefined;
+      });
       return cached || networkFetch;
     })
   );
