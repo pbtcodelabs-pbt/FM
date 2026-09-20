@@ -3781,11 +3781,26 @@
            (اوپر والے مارکی/بینر کے ساتھ اوورلیپ، جدول کا سبز ہیڈر الگ چپک گیا) — واپس position:sticky پر
            لوٹا دیا، جو پہلے زیادہ تر صحیح کام کر رہا تھا ---------- -->
       <div id="stockAdjStickyHeader" style="position:-webkit-sticky; position:sticky; top:0; z-index:40; background:var(--bg,#f4f6f5); padding-top:2px;">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; flex-wrap:nowrap;">
-        <div class="pageTitle" style="margin:0; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
-        <!-- ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): منشی نے فیڈ کیا سٹاک — ایڈمن یہاں سے دیکھ سکے ---------- -->
-        <button type="button" onclick="openMunshiStockLogReport()" style="flex:0 0 auto; padding:5px 8px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی کا شامل کردہ سٹاک</button>
-        <button type="button" id="stockAdjManualRefreshBtn" onclick="manualRefreshStockFromCloud()" title="کلاؤڈ سے ابھی تازہ ترین سٹاک منگوائیں" style="flex:0 0 auto; padding:5px 8px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🔄 تازہ کریں</button>
+      <!-- ---------- 🔧 صدام کی ہدایت (FM21SEPMO04): یہ لائن (عنوان + 3 بٹن) تنگ فون سکرین پر دونوں کناروں سے
+           کٹ رہی تھی — دو وجوہات: (1) عنوان والے div میں min-width:0 نہیں تھا تو وہ سکڑ کر "..." نہیں دکھاتا تھا
+           (flexbox کا ڈیفالٹ min-width:auto)، (2) عنوان کو سب سے چھوٹا سکیڑنے کے بعد بھی باقی 3 بٹن اتنے تنگ ہو
+           سکتے ہیں کہ بہت چھوٹی/زیادہ فونٹ سائز والی سکرین پر پھر بھی جگہ کم پڑ جائے۔ دونوں کا حل: عنوان کو
+           min-width:0 دیا (اب صحیح سکڑے گا)، اور پوری لائن کو افقی سکرول کے قابل بنا دیا (بالکل اسی طرز پر جیسے
+           باقی رپورٹ بٹن لائنوں میں پہلے سے ہے) — اب اگر پھر بھی جگہ کم پڑے تو بٹن کٹنے کی بجائے سائیڈ پر سکرول
+           ہو کر نظر آ جائیں گے، کبھی غائب/کٹے نہیں رہیں گے ---------- -->
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px; flex-wrap:nowrap;">
+        <!-- ---------- 🔧 عنوان + منشی + تازہ کریں — تینوں ایک اندرونی افقی-سکرول ڈبے میں (دروپ ڈاؤن پینل باہر
+             رکھا ہے تاکہ overflow سے کبھی نہ کٹے) ---------- -->
+        <div style="display:flex; align-items:center; gap:6px; flex:1 1 auto; min-width:0; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;">
+          <!-- ---------- 🔧 صدام کی ہدایت (FM21SEPMO04): عنوان سکڑ کر صرف "..." رہ جاتا تھا (بمشکل پڑھا جاتا) —
+               اسی جگہ سکرین کے مینیو/ہیڈر سے پہلے ہی پتا ہے کہ یہ سٹاک ایڈجسٹمنٹ سکرین ہے، اس لیے یہاں سے
+               عنوان چھپا دیا (ہٹایا نہیں، کوڈ محفوظ) — اب باقی 3 بٹن کھلی جگہ میں پورے صاف نظر آئیں گے ---------- -->
+          <div class="pageTitle" style="display:none; margin:0; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; min-width:0; flex:1 1 auto;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
+
+          <!-- ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): منشی نے فیڈ کیا سٹاک — ایڈمن یہاں سے دیکھ سکے ---------- -->
+          <button type="button" onclick="openMunshiStockLogReport()" style="flex:0 0 auto; padding:5px 8px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی کا شامل کردہ سٹاک</button>
+          <button type="button" id="stockAdjManualRefreshBtn" onclick="manualRefreshStockFromCloud()" title="کلاؤڈ سے ابھی تازہ ترین سٹاک منگوائیں" style="flex:0 0 auto; padding:5px 8px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🔄 تازہ کریں</button>
+        </div>
         <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
           <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:5px 7px; font-size:10.5px; max-width:none; white-space:nowrap;">
             <span>📊 رپورٹس</span>
@@ -8419,7 +8434,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر21ستمبر04:31am';
+const APP_BUILD_VERSION = 'پیر21ستمبر04:46am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
