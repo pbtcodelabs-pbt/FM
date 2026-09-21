@@ -8434,7 +8434,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر21ستمبر04:46am';
+const APP_BUILD_VERSION = 'پیر21ستمبر05:05am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -22994,6 +22994,10 @@ let advOrderCart = []; // {variant_id, name, qty, unitPrice, note}
 let editingAdvOrderId = null; // null = نیا آرڈر، ورنہ موجودہ آرڈر ایڈٹ ہو رہا ہے
 let advOrderListFilter = 'all'; // 'all' | 'pending' | 'fulfilled'
 let adminOrderFilter = 'pending'; // 'pending' | 'fulfilled' — صرف ایڈمن کی سکرین کے لیے (FM12SEPSA07:19PM)
+// ---------- 🔒 صدام کی ہدایت (FM21SEPMO04): پینڈنگ آرڈرز سکرین — علاقہ/آج کے خریدار فلٹر + بل رقم/تاریخ ترتیب ---------- -->
+let adminPendingAreaFilter = null; // null | 'retail' (اسلام آباد) | 'wholesale' (راولپنڈی)
+let adminPendingTodayOnly = false; // صرف آج کے آرڈرز
+let adminPendingSort = 'default'; // 'default' | 'amountHigh' | 'amountLow' | 'dateNew' | 'dateOld'
 let advOrderMeta = {customerName:'', customerPhone:'', note:''}; // ---------- جب تک ریویو شیٹ بند ہو، کسٹمر کی تفصیل یہاں محفوظ رہے ----------
 let activeAdvOrderCategory = 'all';
 let activeAdvOrderGridSearch = '';
@@ -25994,6 +25998,20 @@ function setAdminOrderFilter(f){
   renderAdminPendingOrdersScreen();
 }
 
+// ---------- 🔒 صدام کی ہدایت (FM21SEPMO04): دوبارہ اسی بٹن پر ٹیپ کرنے سے فلٹر ہٹ جائے (ریکوری لسٹ جیسا) ---------- -->
+function setAdminPendingAreaFilter(mode){
+  adminPendingAreaFilter = (adminPendingAreaFilter === mode) ? null : mode;
+  renderAdminPendingOrdersScreen();
+}
+function toggleAdminPendingToday(){
+  adminPendingTodayOnly = !adminPendingTodayOnly;
+  renderAdminPendingOrdersScreen();
+}
+function setAdminPendingSort(v){
+  adminPendingSort = v;
+  renderAdminPendingOrdersScreen();
+}
+
 function deleteAdvanceOrder(orderId){
   // ---------- 🔒 صدام کی ہدایت (FM4SEPFR30): آرڈر ٹیکنگ والا ملازم اپنا بھیجا ہوا آرڈر کبھی ڈیلیٹ نہ کر سکے —
   // صرف ایڈمن (صدام) ہی پینڈنگ آرڈر ڈیلیٹ کر سکتا ہے، تاکہ ملازم کے پاس ہمیشہ اپنے بھیجے آرڈرز کا مکمل ریکارڈ رہے ---------- -->
@@ -26174,9 +26192,43 @@ function renderAdminPendingOrdersScreen(){
 
   // ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ملازم کے ڈرافٹ آرڈرز یہاں نظر نہیں آئیں گے — صرف وہ آرڈرز
   // جو ملازم نے حتمی طور پر بھیج دیے ہیں (isDraft !== true) ---------- -->
-  const pending = advanceOrdersData.filter(o => o.status !== 'fulfilled' && o.isDraft !== true);
-  if(pending.length === 0){
+  const allPending = advanceOrdersData.filter(o => o.status !== 'fulfilled' && o.isDraft !== true);
+
+  // ---------- 🔒 صدام کی ہدایت (FM21SEPMO04): علاقہ (اسلام آباد/راولپنڈی) + آج کے خریدار فلٹر + بل رقم/تاریخ
+  // ترتیب — بالکل ریکوری لسٹ سکرین جیسا نظام ---------- -->
+  const pendingFilterBarHtml = `
+    <div style="display:flex; gap:6px; margin-bottom:8px;">
+      <button type="button" onclick="setAdminPendingAreaFilter('retail')" style="flex:1; padding:9px 4px; background:#b91c1c; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer; opacity:${adminPendingAreaFilter==='retail'?'1':'.55'};">🏷️ اسلام آباد</button>
+      <button type="button" onclick="setAdminPendingAreaFilter('wholesale')" style="flex:1; padding:9px 4px; background:#15803d; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer; opacity:${adminPendingAreaFilter==='wholesale'?'1':'.55'};">📦 راولپنڈی</button>
+      <button type="button" onclick="toggleAdminPendingToday()" style="flex:1; padding:9px 4px; background:#0369a1; color:#fff; border:none; border-radius:10px; font-size:11px; font-weight:800; cursor:pointer; opacity:${adminPendingTodayOnly?'1':'.55'};">🛒 آج کے خریدار</button>
+    </div>
+    <select onchange="setAdminPendingSort(this.value)" style="width:100%; padding:9px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px; font-weight:700;">
+      <option value="default" ${adminPendingSort==='default'?'selected':''}>🔢 ڈیفالٹ ترتیب</option>
+      <option value="amountHigh" ${adminPendingSort==='amountHigh'?'selected':''}>📈 زیادہ بل پہلے</option>
+      <option value="amountLow" ${adminPendingSort==='amountLow'?'selected':''}>📉 کم بل پہلے</option>
+      <option value="dateNew" ${adminPendingSort==='dateNew'?'selected':''}>🆕 نیا آرڈر پہلے</option>
+      <option value="dateOld" ${adminPendingSort==='dateOld'?'selected':''}>⏳ پرانا آرڈر پہلے</option>
+    </select>`;
+
+  if(allPending.length === 0){
     wrap.innerHTML = `<div class="placeholder">فی الحال کوئی پینڈنگ آرڈر موجود نہیں</div>`;
+    return;
+  }
+
+  let pending = allPending;
+  if(adminPendingAreaFilter){
+    pending = pending.filter(o => {
+      const mc = customersData.find(c => c.name.toLowerCase() === o.customerName.toLowerCase());
+      return mc && mc.rateArea === adminPendingAreaFilter;
+    });
+  }
+  if(adminPendingTodayOnly){
+    const todayStr = todayDateKey();
+    pending = pending.filter(o => (o.createdAt || '').split('T')[0] === todayStr);
+  }
+
+  if(pending.length === 0){
+    wrap.innerHTML = pendingFilterBarHtml + `<div class="placeholder">اس فلٹر کے مطابق کوئی آرڈر موجود نہیں</div>`;
     return;
   }
 
@@ -26188,7 +26240,19 @@ function renderAdminPendingOrdersScreen(){
     groups[emp].push(o);
   });
 
-  wrap.innerHTML = Object.keys(groups).sort().map(emp => {
+  // ---------- 🔒 صدام کی ہدایت (FM21SEPMO04): منتخب ترتیب ہر ملازم کے گروپ کے اندر لگائیں (گروپ بندی برقرار) ---------- -->
+  if(adminPendingSort !== 'default'){
+    const sortFn = (a,b) => {
+      if(adminPendingSort === 'amountHigh') return advOrderTotal(b) - advOrderTotal(a);
+      if(adminPendingSort === 'amountLow') return advOrderTotal(a) - advOrderTotal(b);
+      if(adminPendingSort === 'dateNew') return new Date(b.createdAt) - new Date(a.createdAt);
+      if(adminPendingSort === 'dateOld') return new Date(a.createdAt) - new Date(b.createdAt);
+      return 0;
+    };
+    Object.keys(groups).forEach(emp => groups[emp].sort(sortFn));
+  }
+
+  wrap.innerHTML = pendingFilterBarHtml + Object.keys(groups).sort().map(emp => {
     const orders = groups[emp];
     const empTotal = orders.reduce((s,o) => s + advOrderTotal(o), 0);
     const rows = orders.map(o => {
