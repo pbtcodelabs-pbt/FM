@@ -2,7 +2,7 @@
 // یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
 // صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
 // ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'FM21SEPMO0505AM';
+const CACHE_VERSION = 'FM21SEPMO0630AM';
 const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
 // ---------- 🔒🆕 صدام کی ہدایت (FM21SEPMO03): آف لائن نہ چلنے کی اصل جڑ یہاں ملی — پہلے تمام فائلیں
@@ -42,8 +42,16 @@ const OPTIONAL_URLS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
+      // ---------- 🔒🆕 صدام کی ہدایت (FM21SEPMO06): "نیا ورژن اپ لوڈ کے بعد بھی پرانا ٹائم شو ہو رہا ہے" کی
+      // اصل جڑ — یہ addAll() فائل کے نام سے فیچ کرتا تھا (بغیر cache:'reload' کے)، جس کی وجہ سے اگر براؤزر کی
+      // اپنی HTTP کیش (GitHub Pages Cache-Control ہیڈر کی بنا پر) ابھی تک index.html/manifest.json کو "تازہ"
+      // سمجھ رہی ہو، تو یہ خود بخود وہی پرانی کاپی استعمال کر لیتا — چاہے سرور پر نئی فائل موجود ہو۔ نتیجہ: SW
+      // درست طریقے سے اپڈیٹ/ایکٹیویٹ/ری لوڈ تو ہو جاتا، مگر کیش میں پرانا مواد ہی بند ہو جاتا، تو صفحہ ری لوڈ
+      // کے بعد بھی پرانا ورژن دکھتا رہتا۔ فکس: cache:'reload' — ہمیشہ براہ راست سرور سے تازہ فائل منگوائیں،
+      // براؤزر کی HTTP کیش کو نظرانداز کریں (پلے رائٹ سے حقیقی GitHub-Pages-جیسی Cache-Control ہیڈر کے ساتھ
+      // ٹیسٹ کر کے یہ بگ پہلے دوبارہ پیدا کیا گیا، پھر اسی فکس سے حل ہوا) ---------- -->
       // ---------- CRITICAL: addAll() — ایک بھی ناکام ہو تو پوری install ناکام، پرانا SW/کیش فعال رہے ---------- -->
-      await cache.addAll(CRITICAL_URLS);
+      await cache.addAll(CRITICAL_URLS.map((url) => new Request(url, { cache: 'reload' })));
       // ---------- OPTIONAL: ہر فائل الگ سے، ناکامی صرف وارننگ (اپڈیٹ نہ رکے) ---------- -->
       await Promise.all(
         OPTIONAL_URLS.map((url) =>
@@ -106,7 +114,10 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(req).then((cached) => {
-      const networkFetch = fetch(req).then((res) => {
+      // ---------- 🔒 صدام کی ہدایت (FM21SEPMO06): یہاں بھی وہی HTTP-کیش بگ — بیک گراؤنڈ میں تازہ کاپی لانے
+      // کی یہ کوشش پہلے req کو براہ راست fetch کرتی تھی، جو براؤزر کی اپنی HTTP کیش سے پرانا جواب دوبارہ لا
+      // سکتی تھی۔ اب cache:'reload' سے ہمیشہ سرور سے حقیقی تازہ کاپی ہی آئے گی ---------- -->
+      const networkFetch = fetch(req.url, { cache: 'reload' }).then((res) => {
         if (res && res.status === 200) {
           const resClone = res.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
