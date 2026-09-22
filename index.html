@@ -3788,24 +3788,27 @@
            min-width:0 دیا (اب صحیح سکڑے گا)، اور پوری لائن کو افقی سکرول کے قابل بنا دیا (بالکل اسی طرز پر جیسے
            باقی رپورٹ بٹن لائنوں میں پہلے سے ہے) — اب اگر پھر بھی جگہ کم پڑے تو بٹن کٹنے کی بجائے سائیڈ پر سکرول
            ہو کر نظر آ جائیں گے، کبھی غائب/کٹے نہیں رہیں گے ---------- -->
-      <!-- ---------- 🔧 صدام کی ہدایت (FM22SEPTU0M): افقی سکرول والا طریقہ اصل موبائل پر (نستعلیق فونٹ کی
-           چوڑائی کی وجہ سے) پھر بھی منشی بٹن کو کنارے سے کٹا ہوا دکھا رہا تھا — سکرول کی بجائے اب wrap: اگر
-           منشی+تازہ کریں ایک لائن میں نہ سمائیں تو خودکار دوسری لائن پر چلے جائیں گے، کبھی کٹیں گے نہیں ---------- -->
-      <div style="display:flex; align-items:flex-start; gap:6px; margin-bottom:6px; flex-wrap:nowrap;">
+      <!-- ---------- 🔒 صدام کی ہدایت (FM22SEPTU08): پچھلا wrap والا حل مسترد — صدام کی صاف ہدایت: یہ بٹن
+           کسی صورت دوسری لائن میں نہیں جانے چاہئیں، ہمیشہ ایک ہی لائن میں رہیں۔ نیا حل: سکرول یا wrap پر
+           انحصار کرنے کی بجائے بٹن خود اتنے کمپیکٹ (چھوٹا فونٹ/پیڈنگ + منشی کا لیبل مختصر) کر دیے کہ حقیقی
+           نستعلیق فونٹ کے ساتھ بھی تینوں آرام سے ایک لائن میں سما جائیں — overflow-x:auto صرف حفاظتی تحفظ کے
+           طور پر برقرار رکھا (نارمل حالت میں کبھی متحرک نہیں ہوگا) ---------- -->
+      <div style="display:flex; align-items:center; gap:4px; margin-bottom:10px; flex-wrap:nowrap;">
         <!-- ---------- 🔧 عنوان + منشی + تازہ کریں — تینوں ایک اندرونی ڈبے میں (دروپ ڈاؤن پینل باہر
              رکھا ہے تاکہ overflow سے کبھی نہ کٹے) ---------- -->
-        <div style="display:flex; align-items:center; gap:6px; flex:1 1 auto; min-width:0; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:4px; flex:1 1 auto; min-width:0; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;">
           <!-- ---------- 🔧 صدام کی ہدایت (FM21SEPMO04): عنوان سکڑ کر صرف "..." رہ جاتا تھا (بمشکل پڑھا جاتا) —
                اسی جگہ سکرین کے مینیو/ہیڈر سے پہلے ہی پتا ہے کہ یہ سٹاک ایڈجسٹمنٹ سکرین ہے، اس لیے یہاں سے
                عنوان چھپا دیا (ہٹایا نہیں، کوڈ محفوظ) — اب باقی 3 بٹن کھلی جگہ میں پورے صاف نظر آئیں گے ---------- -->
           <div class="pageTitle" style="display:none; margin:0; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; min-width:0; flex:1 1 auto;">🧮 سٹاک ایڈجسٹمنٹ / سٹاک ڈیٹا</div>
 
-          <!-- ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): منشی نے فیڈ کیا سٹاک — ایڈمن یہاں سے دیکھ سکے ---------- -->
-          <button type="button" onclick="openMunshiStockLogReport()" style="flex:0 0 auto; padding:5px 8px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی کا شامل کردہ سٹاک</button>
-          <button type="button" id="stockAdjManualRefreshBtn" onclick="manualRefreshStockFromCloud()" title="کلاؤڈ سے ابھی تازہ ترین سٹاک منگوائیں" style="flex:0 0 auto; padding:5px 8px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:10px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🔄 تازہ کریں</button>
+          <!-- ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): منشی نے فیڈ کیا سٹاک — ایڈمن یہاں سے دیکھ سکے۔
+               🔒 FM22SEPTU08: لیبل "منشی کا شامل کردہ سٹاک" سے مختصر کر کے "منشی سٹاک" — مکمل وضاحت title میں ---------- -->
+          <button type="button" onclick="openMunshiStockLogReport()" title="🧑‍🌾 منشی کا شامل کردہ سٹاک دیکھیں" style="flex:0 0 auto; padding:4px 6px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:9px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی سٹاک</button>
+          <button type="button" id="stockAdjManualRefreshBtn" onclick="manualRefreshStockFromCloud()" title="کلاؤڈ سے ابھی تازہ ترین سٹاک منگوائیں" style="flex:0 0 auto; padding:4px 6px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:9px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🔄 تازہ کریں</button>
         </div>
         <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
-          <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:5px 7px; font-size:10.5px; max-width:none; white-space:nowrap;">
+          <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:4px 6px; font-size:9.5px; max-width:none; white-space:nowrap;">
             <span>📊 رپورٹس</span>
             <span class="categoryDropdownArrow">▾</span>
           </button>
@@ -8448,7 +8451,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل22ستمبر06:57am';
+const APP_BUILD_VERSION = 'منگل22ستمبر08:09am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8857,12 +8860,20 @@ function renderHomeUnfinishedCartCard(){
   }
   const itemCount = Billing.cart.reduce((s,i) => s + i.qty, 0);
   const total = Billing.cart.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+  // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): یہ کارٹ اگر کسی Pending Order سے لوڈ ہوا ہے تو کسٹمر کے نام کے ساتھ
+  // واضح یاد دہانی رہے — بل ابھی فائنل نہیں ہوا، ریٹ خالی ہوں تو وہ بھی بتا دیں — تاکہ یہ پیلا کارڈ اس وقت تک
+  // ہر جگہ نظر آتا رہے جب تک بل واقعی پرنٹ/مکمل نہ ہو جائے ---------- -->
+  const srcOrder = Billing.sourceAdvanceOrderId ? advanceOrdersData.find(o => o.id === Billing.sourceAdvanceOrderId) : null;
+  const titleLine = srcOrder
+    ? `🛒 Pending Order — ${srcOrder.customerName} (${Billing.cart.length} item(s), Qty ${itemCount})`
+    : `🛒 Unfinished Bill — ${Billing.cart.length} item(s), Qty ${itemCount}`;
+  const hasZeroRate = Billing.cart.some(i => !i.unitPrice || i.unitPrice <= 0);
   card.style.display = 'block';
   card.innerHTML = `
     <div onclick="goTo('billing'); openCartSheet();" style="margin:10px 0; padding:14px 16px; border-radius:14px; background:linear-gradient(135deg,#fef3c7,#fde68a); border:1.5px solid #f59e0b; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px;">
       <div>
-        <div style="font-weight:800; font-size:14px; color:#78350f;">🛒 Unfinished Bill — ${Billing.cart.length} item(s), Qty ${itemCount}</div>
-        <div style="font-size:12px; color:#92400e; margin-top:2px;">Rs. ${total.toLocaleString()} — tap to continue</div>
+        <div style="font-weight:800; font-size:14px; color:#78350f;">${titleLine}</div>
+        <div style="font-size:12px; color:#92400e; margin-top:2px;">${hasZeroRate ? '⏳ ریٹ ابھی لگنا باقی ہے — ' : ''}Rs. ${total.toLocaleString()} — tap to continue</div>
       </div>
       <span style="font-size:20px;">→</span>
     </div>`;
@@ -12594,6 +12605,9 @@ const Billing = {
   saleMode: loadFromStorage('billingSaleModeDraft', 'retail'), // 'retail' | 'wholesale'
   paymentMethod: loadFromStorage('billingPaymentMethodDraft', 'cash'), // 'cash' | 'wallet' | 'credit' | 'mixed'
   counterSale: loadFromStorage('billingCounterSaleDraft', true), // true = فوری نقد کاؤنٹر سیل (کوئی کسٹمر درکار نہیں) | false = کسٹمر اکاؤنٹ پر Pending
+  // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): اگر موجودہ کارٹ کسی Pending Order (منشی کے آرڈر) سے لوڈ ہوا ہے تو اس کا id —
+  // ریفریش سے بھی برقرار رہے۔ صرف finalizeInvoice() میں بل واقعی مکمل ہونے پر اس Pending Order کو fulfilled مارک کیا جائے گا ---------- -->
+  sourceAdvanceOrderId: loadFromStorage('billingSourceAdvOrderIdDraft', null),
 };
 
 // ---------- کارٹ کا موجودہ ڈرافٹ محفوظ کریں — کسی بھی تبدیلی کے بعد بلایا جاتا ہے تاکہ رفریش/کریش سے ضائع نہ ہو ----------
@@ -12602,6 +12616,7 @@ function saveBillingCartDraft(){
   saveToStorage('billingSaleModeDraft', Billing.saleMode);
   saveToStorage('billingPaymentMethodDraft', Billing.paymentMethod);
   saveToStorage('billingCounterSaleDraft', Billing.counterSale);
+  saveToStorage('billingSourceAdvOrderIdDraft', Billing.sourceAdvanceOrderId);
   const custSel = document.getElementById('customerSelect');
   saveToStorage('billingCustomerDraft', custSel ? custSel.value : '');
 }
@@ -12609,12 +12624,14 @@ function saveBillingCartDraft(){
 function clearBillingCartDraft(){
   saveToStorage('billingCartDraft', []);
   saveToStorage('billingCustomerDraft', '');
+  saveToStorage('billingSourceAdvOrderIdDraft', null);
 }
 // ---------- "🗑️ Delete Cart" بٹن — صارف خود چاہے تو پورا کارٹ صاف کر دے (صرف رفریش کرنے سے کبھی خالی نہیں ہونا چاہیے) ----------
 function deleteBillingCartDraft(){
   if(Billing.cart.length === 0){ closeCartSheet(); return; }
   if(!confirm('Delete this entire cart? This cannot be undone.')) return;
   Billing.cart = [];
+  Billing.sourceAdvanceOrderId = null; // ---------- 🔒 FM22SEPTU: کارٹ خود ڈیلیٹ کیا تو Pending Order کا ربط بھی ختم — وہ آرڈر خود Pending میں محفوظ رہے گا ----------
   clearBillingCartDraft();
   const custSel = document.getElementById('customerSelect');
   if(custSel) custSel.value = '';
@@ -14044,6 +14061,13 @@ function finalizeInvoice(){
       {field:'retail',    label:'🔴 اسلام آباد ریٹ'},
     ];
     for(const item of Billing.cart){
+      // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): اس مخصوص بل لائن کی اپنی فروخت قیمت بھی زیرو/خالی نہیں ہونی چاہیے —
+      // یہ Pending Order (منشی کے بھیجے آرڈر) سے آیا ہو سکتا ہے جہاں ابھی تک کوئی ریٹ نہیں لگایا گیا — پروڈکٹ کا
+      // اپنا محفوظ شدہ ریٹ نیچے چیک ہوتا ہے، مگر اس بل کی اپنی قیمت الگ سے یہاں چیک ضروری ہے ---------- -->
+      if(!item.unitPrice || item.unitPrice <= 0){
+        alert(`⚠️ "${item.name}" کی فروخت قیمت (ریٹ) نہیں لگی — پہلے اس کا ریٹ لگائیں، پھر بل بنے گا۔`);
+        return;
+      }
       let variant = null, product = null;
       for(const p of productsData){
         const v = p.variants.find(vv => vv.variant_id === item.variant_id);
@@ -14150,6 +14174,23 @@ function finalizeInvoice(){
       if(v){ deductVariantStock(v, item.qty); v.salesCount = (v.salesCount || 0) + item.qty; } // TODO: DB میں product_variants.current_stock -= qty
     });
   });
+
+  // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): اگر یہ بل کسی Pending Order (منشی کے بھیجے آرڈر) سے لوڈ ہوا تھا، تو اب —
+  // اور صرف اب، جب بل واقعی مکمل/فائنل ہو چکا اور پرنٹ کے لیے تیار ہے — اس آرڈر کو "fulfilled" مارک کریں۔ پہلے یہ
+  // fulfillAdvanceOrder() میں، صرف بلنگ میں لوڈ کرتے ہی (ٹیپ کرتے ہی) مارک ہو جاتا تھا، چاہے بل کبھی مکمل نہ ہو —
+  // اس وجہ سے آرڈر Pending لسٹ سے قبل از وقت غائب ہو جاتا تھا۔ اب جب تک بل واقعی فائنل نہ ہو (یہاں تک نہ پہنچے)،
+  // آرڈر Pending میں نظر آتا رہے گا ---------- -->
+  if(Billing.sourceAdvanceOrderId){
+    const srcOrder = advanceOrdersData.find(o => o.id === Billing.sourceAdvanceOrderId);
+    if(srcOrder && srcOrder.status !== 'fulfilled'){
+      srcOrder.status = 'fulfilled';
+      srcOrder.fulfilledAt = new Date().toISOString();
+      srcOrder.fulfilledInvoiceId = invoice.invoice_id; // ---------- یہ Pending Order آخرکار کس بل میں تبدیل ہوا — ٹریسنگ کے لیے ----------
+      pushAdvanceOrdersToCloud();
+      if(typeof renderAdvanceOrdersScreen === 'function') renderAdvanceOrdersScreen();
+    }
+    Billing.sourceAdvanceOrderId = null;
+  }
 
   // ---------- پیمنٹ خودکار "Credit" ہے تو پہلے کسٹمر کے والٹ سے خودکار رقم کاٹیں، پھر صارف کا درج کردہ نقد بھی کاٹیں،
   // باقی بچی رقم ہی اصل بقایہ (Pending) میں جائے ----------
@@ -14258,6 +14299,7 @@ function submitBillForApproval(customer, method, subtotal){
   pendingBillsData.unshift(pending);
 
   Billing.cart = [];
+  Billing.sourceAdvanceOrderId = null; // ---------- 🔒 FM22SEPTU: سیلزمین کا بل منظوری کی قطار میں گیا، حتمی فائنل نہیں ہوا — Pending Order کا ربط یہاں ختم، وہ آرڈر خود Pending میں محفوظ رہے گا ----------
   document.getElementById('discountInput').value = ''; // ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): ڈیفالٹ 170 ختم — اب خالی ----------
   renderCart();
   renderBillingProductGrid();
@@ -26209,12 +26251,16 @@ function deleteAdvanceOrder(orderId){
   if(!confirm('Delete this advance order? This cannot be undone.')) return;
   const delOrder = advanceOrdersData.find(o => o.id === orderId);
   // ---------- 📦 صدام کی ہدایت (FM10SEPTH): آرڈر ڈیلیٹ ہونے پر بک شدہ سٹاک واپس دستیاب سٹاک میں شامل کریں
-  // (اگر پہلے سے Fulfill/بل بن چکا ہو تو وہ ریزرویشن پہلے ہی fulfillAdvanceOrder میں خارج ہو چکی ہوتی ہے) ---------- -->
-  if(delOrder && delOrder.status !== 'fulfilled'){
+  // (اگر پہلے سے Fulfill/بل بن چکا ہو تو وہ ریزرویشن پہلے ہی fulfillAdvanceOrder میں خارج ہو چکی ہوتی ہے) ----------
+  // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): !delOrder.stockReleased بھی چیک کریں — اگر ایڈمن نے یہ آرڈر بلنگ میں
+  // لوڈ کیا تھا (ریزرویشن پہلے ہی خارج ہو چکی) مگر بل مکمل کیے بغیر سیدھا ڈیلیٹ کر دیا، تو دوبارہ خارج نہ ہو ---------- -->
+  if(delOrder && delOrder.status !== 'fulfilled' && !delOrder.stockReleased){
     releaseOrderStock(delOrder.items);
     pushProductsToCloud();
     pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02) ---------- -->
   }
+  // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): یہی آرڈر موجودہ بلنگ کارٹ کا منبع تھا تو وہ ربط بھی ختم کریں ----------
+  if(Billing.sourceAdvanceOrderId === orderId) Billing.sourceAdvanceOrderId = null;
   advanceOrdersData = advanceOrdersData.filter(o => o.id !== orderId);
   persistAllData();
   pushAdvanceOrdersToCloud(); // ---------- کلاؤڈ پر بھی خودکار اپڈیٹ ----------
@@ -26266,17 +26312,23 @@ function fulfillAdvanceOrder(orderId){
 
   // ---------- 📦 صدام کی ہدایت (FM10SEPTH): اب یہ آرڈر اصل بلنگ میں جا رہا ہے (جہاں finalizeInvoice خود
   // اصل v.stock کاٹے گا) — اس لیے یہاں صرف "بک شدہ" ریزرویشن خارج کریں، تاکہ سٹاک دوہرا نہ کٹے ---------- -->
-  if(order.status !== 'fulfilled'){
+  // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): order.stockReleased سے گارڈ کیا تاکہ اگر ایڈمن یہی آرڈر دوبارہ ٹیپ
+  // کرے (پہلی بار بل مکمل کیے بغیر واپس آ گیا ہو) تو ریزرویشن دوبارہ خارج ہو کر دوسرے آرڈرز کا سٹاک خراب نہ کرے ---------- -->
+  if(order.status !== 'fulfilled' && !order.stockReleased){
     releaseOrderStock(order.items);
+    order.stockReleased = true;
     pushProductsToCloud();
     pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02) ---------- -->
   }
 
-  order.status = 'fulfilled';
-  order.fulfilledAt = new Date().toISOString();
+  // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): پہلے یہاں فوراً order.status='fulfilled' ہو جاتا تھا — یعنی صرف بلنگ
+  // میں لوڈ کرتے ہی (ٹیپ کرتے ہی) آرڈر "مکمل" مارک ہو کر Pending لسٹ سے غائب ہو جاتا، چاہے بل کبھی فائنل نہ ہوا
+  // ہو (ریٹ نہ لگا ہو، پرنٹ نہ نکلا ہو، بیچ میں کوئی غلطی ہو گئی ہو)۔ اب status یہیں نہیں بدلتا — صرف finalizeInvoice()
+  // کے اندر، جب بل واقعی مکمل ہو کر پرنٹ کے لیے تیار ہو جائے، تب یہ آرڈر "fulfilled" مارک ہوگا اور Pending سے ہٹے
+  // گا۔ یہاں صرف یہ نشان چھوڑتے ہیں کہ موجودہ بلنگ کارٹ کس Pending Order سے آیا ہے (ہوم پیج کے پیلے کارڈ میں بھی
+  // اسی نشان سے کسٹمر کا نام نظر آئے گا، جب تک بل مکمل نہ ہو) ---------- -->
+  Billing.sourceAdvanceOrderId = order.id;
   persistAllData();
-  pushAdvanceOrdersToCloud();
-  renderAdvanceOrdersScreen();
   if(typeof closeAdvOrderPreview === 'function') closeAdvOrderPreview(); // ---------- پریویو کے اندر سے فُل فِل کیا ہو تو موڈل بھی بند ہو جائے ----------
 
   goTo('billing');
