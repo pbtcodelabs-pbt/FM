@@ -1386,8 +1386,12 @@
   .vcInlineFieldsRow{display:flex; gap:6px; overflow-x:auto; overflow-y:hidden; padding:7px 8px 9px; -webkit-overflow-scrolling:touch; scrollbar-width:thin; direction:rtl; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;}
   /* ---------- 🎨 صدام کی ہدایت (5 ستمبر): ہر خانہ اپنے رنگین، ابھرے ہوئے (embossed) بیک گراؤنڈ کے ساتھ —
        ایک اچھے، الگ بٹن جیسا نظر آئے، سب کی اونچائی برابر، تنگ چوڑائی (زیادہ جگہ نہ گھیرے) ---------- */
-  .vcInlineFieldsRow .vcFieldWrap{flex:0 0 auto; width:66px; border-radius:10px; padding:5px 4px; box-shadow:0 2px 4px rgba(41,29,10,.12), inset 0 1px 0 rgba(255,255,255,.6);}
-  .vcInlineFieldsRow .vcFieldWrap.vcRateWrap{width:78px;}
+  .vcInlineFieldsRow .vcFieldWrap{flex:0 0 auto; width:72px; border-radius:10px; padding:5px 4px; box-shadow:0 2px 4px rgba(41,29,10,.12), inset 0 1px 0 rgba(255,255,255,.6);}
+  .vcInlineFieldsRow .vcFieldWrap.vcRateWrap{width:82px;}
+  /* ---------- 🔴 صدام کی ہدایت (22 ستمبر): م.خرید کا خانہ حذف — بچی ہوئی جگہ خرید (5-6 ڈجٹ کے لیے چوڑا) اور
+       حتمی خرید کو دی گئی، باقی خانے بھی تھوڑے چوڑے ---------- */
+  .vcInlineFieldsRow .vcFieldWrap.vcPurchaseWrap{width:94px;}
+  .vcInlineFieldsRow .vcFieldWrap.vcTotalWrap{width:86px;}
   .vcInlineFieldsRow .vcFieldLabel{font-size:10.5px; font-weight:800; color:#57534e; text-transform:none; letter-spacing:0; margin-bottom:3px; display:block; white-space:nowrap; text-align:center; font-family:inherit;}
   .vcInlineFieldsRow input{width:100%; height:34px; padding:4px 2px; border:1.5px solid rgba(0,0,0,.08); border-radius:7px; font-size:14px; font-weight:800; text-align:center; font-family:inherit; box-sizing:border-box;}
   .vcFieldLabel{font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; margin-bottom:4px; display:block;}
@@ -5513,6 +5517,12 @@
           <button type="button" onclick="openOtAddStockModal()" style="flex:1; padding:11px 4px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:12px; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">➕ نیا سٹاک ایڈ کریں</button>
           <button type="button" onclick="openOtNewCustomer()" style="flex:1; padding:11px 4px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:12px; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">➕ نیا کسٹمر ایڈ کریں</button>
         </div>
+        <!-- ---------- 🟢🔴 صدام کی ہدایت (22 ستمبر): منشی خود بھی یہیں سے سبزیاں حاضر/غیر حاضر کر سکے —
+             بالکل ایڈمن والا نظام، اسی سلائیڈ (سوائپ) طریقے سے ---------- -->
+        <div style="display:flex; gap:8px; width:86%; max-width:340px; margin:0 auto 10px;" dir="rtl">
+          <button type="button" id="otPresenceBtnPresent" onclick="openOtPresenceModal('present')" style="flex:1; padding:10px 4px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:12px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">🟢 حاضر سبزیاں</button>
+          <button type="button" id="otPresenceBtnAbsent" onclick="openOtPresenceModal('absent')" style="flex:1; padding:10px 4px; background:linear-gradient(180deg,#ef4444,#b91c1c); color:#fff; border:none; border-radius:12px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">🔴 غیر حاضر سبزیاں</button>
+        </div>
         <input type="text" id="otCustSearch" placeholder="🔍 کسٹمر کا نام یا سیریل نمبر لکھیں" oninput="renderOtCustomerList(this.value)"
                style="width:86%; max-width:340px; display:block; margin:0 auto 10px; padding:11px; border:2px solid var(--primary); border-radius:12px; font-size:14.5px; font-weight:800; text-align:center; box-sizing:border-box;">
         <div style="display:flex; gap:6px; margin-bottom:10px;">
@@ -5636,6 +5646,18 @@
              تبھی سٹاک زیرو ہوگا (zeroAllStock) ---------- -->
         <button type="button" onclick="zeroAllStock()" style="width:100%; margin-top:8px; padding:11px; background:linear-gradient(180deg,#dc2626,#7f1d1d); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">🧹 سٹاک زیرو کریں (نیا سٹاک فیڈ کرنے سے پہلے)</button>
         <button type="button" onclick="closeOtAddStockModal()" style="width:100%; margin-top:6px; padding:12px; background:#f1f5f9; border:none; color:#334155; border-radius:10px; font-weight:800; cursor:pointer;">✖ بند کریں</button>
+      </div>
+    </div>
+
+    <!-- ---------- 🟢🔴 صدام کی ہدایت (22 ستمبر): منشی کے لیے حاضر/غیر حاضر سبزی فہرست — سلائیڈ کر کے حالت بدلیں ---------- -->
+    <div class="modalOverlay" id="otPresenceModal" onclick="if(event.target===this) closeOtPresenceModal()">
+      <div class="modalBox" style="max-width:460px; max-height:90vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+        <h3 id="otPresenceModalTitle" style="margin-top:0;">🟢 حاضر سبزیاں</h3>
+        <div dir="rtl" style="text-align:center; font-size:12px; font-weight:700; color:var(--muted); background:#f8fafc; border-radius:8px; padding:6px 8px; margin-bottom:10px;">➡️⬅️ سبزی کی قطار کو انگلی سے سرکائیں (سلائیڈ کریں) تاکہ اس کی حالت بدل جائے</div>
+        <input type="text" id="otPresenceSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر" oninput="renderOtPresenceList(this.value)"
+               style="width:100%; padding:10px; border:2px solid var(--primary); border-radius:10px; font-size:13.5px; font-weight:700; text-align:center; margin-bottom:10px; box-sizing:border-box;">
+        <div id="otPresenceListWrap"></div>
+        <button type="button" onclick="closeOtPresenceModal()" style="width:100%; margin-top:6px; padding:12px; background:#f1f5f9; border:none; color:#334155; border-radius:10px; font-weight:800; cursor:pointer;">✖ بند کریں</button>
       </div>
     </div>
 
@@ -8459,7 +8481,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل22ستمبر12:30pm';
+const APP_BUILD_VERSION = 'منگل22ستمبر01:40pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16725,24 +16747,23 @@ function buildInlineFieldsRow(productId, v){
   const themeBase = AppState.settings.productCardNameBg || null;
   const shade = (lightness) => themeBase ? shiftColorLightness(themeBase, lightness) : null;
   const purchaseBg = shade(38) || '#eef2ff';
-  const laborBg = shade(30) || '#fff7ed';
   const totalBg = shade(20) || '#f1f5f9';
+  // ---------- 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" کا خانہ ہمیشہ کے لیے ختم کر دیا گیا — اب اسے یہاں سے
+  // ایڈٹ نہیں کیا جا سکتا۔ پرانی محفوظ شدہ v.labor رقم (اگر کسی سبزی میں پہلے سے موجود ہے) ضائع نہیں کی گئی —
+  // "🧮 حتمی خرید" میں ویسے ہی شامل رہے گی (باقی رپورٹس سے مطابقت برقرار رہے) — بس اسے data-labor میں منجمد
+  // (frozen) رکھ کر vcRecalcTotalPurchase تک پہنچایا جاتا ہے، چونکہ اب کوئی لائیو ان پٹ باکس موجود نہیں ---------- -->
   return `
-    <div class="vcInlineFieldsRow" dir="rtl">
-      <div class="vcFieldWrap" style="background:${purchaseBg};">
+    <div class="vcInlineFieldsRow" dir="rtl" data-labor="${v.labor || 0}">
+      <div class="vcFieldWrap vcPurchaseWrap" style="background:${purchaseBg};">
         <span class="vcFieldLabel">💰 خرید</span>
         <input type="number" value="${v.purchase || ''}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value); vcRecalcTotalPurchase(this)" oninput="vcRecalcTotalPurchase(this)">
       </div>
-      <div class="vcFieldWrap" style="background:${laborBg};">
-        <span class="vcFieldLabel">💪 م.خرید</span>
-        <input type="number" value="${v.labor || ''}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'labor',this.value); vcRecalcTotalPurchase(this)" oninput="vcRecalcTotalPurchase(this)">
-      </div>
-      <!-- ---------- 💪 صدام کی ہدایت: مزدوری خرید اور مزدوری فروخت ساتھ ساتھ ---------- -->
+      <!-- ---------- 💪 صدام کی ہدایت (22 ستمبر): مزدوری فروخت — جوں کا توں، ہارون کسٹمر کے بل میں درست لگ رہی ہے ---------- -->
       <div class="vcFieldWrap" style="background:#fffbeb;">
         <span class="vcFieldLabel" style="color:#b45309;">💪 م.فروخت</span>
         <input type="number" value="${v.sellLabor || ''}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'sellLabor',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fff; border-color:#fcd34d; color:#b45309;">
       </div>
-      <div class="vcFieldWrap" style="background:${totalBg};">
+      <div class="vcFieldWrap vcTotalWrap" style="background:${totalBg};">
         <span class="vcFieldLabel">🧮 حتمی خرید</span>
         <input type="text" class="vcTotalPurchaseField" value="${totalPurchase.toLocaleString()}" readonly style="background:#fff; font-weight:900; color:var(--primary-dark);">
       </div>
@@ -17680,18 +17701,22 @@ function vcRecalcTotalPurchase(inputEl){
   if(!row) return;
   const inputs = row.querySelectorAll('input[type="number"]');
   const purchase = Number(inputs[0]?.value) || 0;
-  const labor = Number(inputs[1]?.value) || 0;
+  // ---------- 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" کا لائیو ان پٹ باکس ختم — اب پرانی منجمد رقم
+  // row کے data-labor سے ملتی ہے (اگر کبھی موجود تھی)، تاکہ "🧮 حتمی خرید" باقی رپورٹس سے مطابقت میں رہے ---------- -->
+  const labor = Number(row.dataset.labor) || 0;
   const totalEl = row.querySelector('.vcTotalPurchaseField');
   if(totalEl) totalEl.value = (purchase + labor).toLocaleString();
 }
-// ---------- 💪 صدام کی ہدایت (FM4SEPFR30): مزدوری فروخت یا ریٹ بدلتے ہی نیچے "مؤثر ریٹ" فوراً تازہ دکھائیں ---------- -->
+// ---------- 💪 صدام کی ہدایت (FM4SEPFR30): مزدوری فروخت یا ریٹ بدلتے ہی نیچے "مؤثر ریٹ" فوراً تازہ دکھائیں ----------
+// 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" باکس ہٹنے سے یہاں انڈیکس ایک نمبر پیچھے کھسک گئے (اب [1]=م.فروخت،
+// [2]=اسلام آباد، [3]=راولپنڈی) ---------- -->
 function vcRecalcEffectiveRates(inputEl){
   const row = inputEl && inputEl.closest ? inputEl.closest('.vcInlineFieldsRow') : null;
   if(!row) return;
   const inputs = row.querySelectorAll('input[type="number"]');
-  const sellLabor = Number(inputs[2]?.value) || 0;
-  const retail = Number(inputs[3]?.value) || 0;
-  const wholesale = Number(inputs[4]?.value) || 0;
+  const sellLabor = Number(inputs[1]?.value) || 0;
+  const retail = Number(inputs[2]?.value) || 0;
+  const wholesale = Number(inputs[3]?.value) || 0;
   const isbEl = row.querySelector('.vcEffIsb');
   const rwpEl = row.querySelector('.vcEffRwp');
   if(isbEl) isbEl.textContent = (retail + sellLabor).toLocaleString();
@@ -23873,6 +23898,138 @@ function otSyncFlatCacheStock(variantId){
     if(v){ cached.stock = v.stock; return; }
   }
 }
+
+// =====================================================================
+// 🟢🔴 صدام کی ہدایت (22 ستمبر): منشی/آرڈر لینے والا خود بھی آرڈر ٹیکنگ سکرین سے سبزیاں حاضر/غیر حاضر کر
+// سکے — بالکل ایڈمن والا سلائیڈ (سوائپ) نظام، مگر یہاں ایڈمن کی پابندی نہیں (toggleProductPresence اور
+// toggleProductPresenceInSheet جان بوجھ کر صرف ایڈمن کے لیے ہی رہیں گے — یہ الگ، نیا فنکشن ہے) ---------- -->
+let otPresenceFilterMode = 'present';
+function updateOtPresenceButtonLabels(){
+  const presentCount = productsData.filter(p => !p.isDormant).length;
+  const absentCount = productsData.filter(p => p.isDormant).length;
+  const pBtn = document.getElementById('otPresenceBtnPresent');
+  const aBtn = document.getElementById('otPresenceBtnAbsent');
+  if(pBtn) pBtn.textContent = `🟢 حاضر سبزیاں (${presentCount})`;
+  if(aBtn) aBtn.textContent = `🔴 غیر حاضر سبزیاں (${absentCount})`;
+}
+function openOtPresenceModal(mode){
+  otPresenceFilterMode = mode;
+  const title = document.getElementById('otPresenceModalTitle');
+  if(title) title.textContent = mode === 'present' ? '🟢 حاضر سبزیاں — سرکا کر غیر حاضر کریں' : '🔴 غیر حاضر سبزیاں — سرکا کر واپس حاضر کریں';
+  const searchEl = document.getElementById('otPresenceSearchInput');
+  if(searchEl) searchEl.value = '';
+  renderOtPresenceList('');
+  document.getElementById('otPresenceModal').classList.add('show');
+}
+function closeOtPresenceModal(){
+  document.getElementById('otPresenceModal').classList.remove('show');
+}
+function renderOtPresenceList(query){
+  const wrap = document.getElementById('otPresenceListWrap');
+  if(!wrap) return;
+  const q = (query || '').trim().toLowerCase();
+  const list = productsData
+    .filter(p => !!p.isDormant === (otPresenceFilterMode === 'absent'))
+    .filter(p => !q || p.name.toLowerCase().includes(q) || String(p.serial_no ?? '').indexOf(q) !== -1)
+    .sort((a,b) => (a.serial_no||0) - (b.serial_no||0));
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="text-align:center; padding:16px 0; color:var(--muted);">${otPresenceFilterMode === 'absent' ? '✅ فی الحال کوئی سبزی غیر حاضر نہیں' : 'کوئی سبزی نہیں ملی'}</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(p => `
+    <div class="otPresenceSwipeRow" data-swipe-pid="${p.product_id}" style="display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid #e5e9f0; border-radius:10px; padding:11px 10px; margin-bottom:7px; touch-action:pan-y; user-select:none; -webkit-user-select:none;" dir="rtl">
+      ${p.serial_no ? `<span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; margin:0; cursor:default; pointer-events:none;">${p.serial_no}</span>` : ''}
+      <div style="flex:1; min-width:0; text-align:right; font-weight:800; font-size:14px; pointer-events:none;">${p.name}</div>
+      <div style="font-size:16px; pointer-events:none;">${otPresenceFilterMode === 'present' ? '⬅️' : '➡️'}</div>
+    </div>`).join('');
+  wireOtPresenceSwipeRows();
+}
+// ---------- سادہ سوائپ گیسچر — ایڈمن والے prodSwipeRow جیسا ہی احساس، مگر یہاں سادہ flex قطاریں ہیں
+// (sticky کالم منجمد کرنے کی ضرورت نہیں) ---------- -->
+function wireOtPresenceSwipeRows(){
+  const wrap = document.getElementById('otPresenceListWrap');
+  if(!wrap || wrap.dataset.swipeWired) return;
+  wrap.dataset.swipeWired = '1';
+  let activeRow = null, startX = 0, startY = 0, dx = 0, dragging = false, lockedHorizontal = false, pointerDownTime = 0;
+  const easyThreshold = 70; // ---------- غیر حاضر → حاضر: تیز/آسان ---------- -->
+  const hardThreshold = 170; // ---------- حاضر → غیر حاضر: جان بوجھ کر مشکل — غلطی سے نہ ہو ---------- -->
+  const hardMinHoldMs = 450;
+  const getX = e => (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+  const getY = e => (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+  const resetRow = () => {
+    if(activeRow){
+      activeRow.style.transition = 'transform .15s, background .15s';
+      activeRow.style.transform = '';
+      activeRow.style.background = '#fff';
+    }
+    dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
+  };
+  const onStart = e => {
+    const row = e.target.closest('.otPresenceSwipeRow');
+    if(!row || !wrap.contains(row)) return;
+    activeRow = row; startX = getX(e); startY = getY(e); dx = 0; dragging = true; lockedHorizontal = false;
+    pointerDownTime = Date.now();
+    row.style.transition = '';
+  };
+  const onMove = e => {
+    if(!dragging || !activeRow) return;
+    const x = getX(e), y = getY(e);
+    dx = x - startX; const dy = y - startY;
+    if(!lockedHorizontal){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      if(Math.abs(dy) > Math.abs(dx)){ resetRow(); return; }
+      lockedHorizontal = true;
+    }
+    if(e.cancelable) e.preventDefault();
+    activeRow.style.transform = `translateX(${dx}px)`;
+    const willBeAbsent = otPresenceFilterMode === 'present';
+    activeRow.style.background = willBeAbsent ? '#fecaca' : '#bbf7d0';
+  };
+  const onEnd = () => {
+    if(!dragging || !activeRow){ resetRow(); return; }
+    const row = activeRow;
+    const productId = parseInt(row.dataset.swipePid, 10);
+    const willBeAbsent = otPresenceFilterMode === 'present';
+    const heldMs = Date.now() - pointerDownTime;
+    const commitOk = lockedHorizontal && (willBeAbsent
+      ? (Math.abs(dx) > hardThreshold && heldMs >= hardMinHoldMs)
+      : (Math.abs(dx) > easyThreshold));
+    if(commitOk){
+      row.style.transition = 'opacity .15s';
+      row.style.opacity = '0.15';
+      setTimeout(() => { otTogglePresence(productId); }, 110);
+      dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
+    } else {
+      resetRow();
+    }
+  };
+  wrap.addEventListener('touchstart', onStart, {passive:true});
+  wrap.addEventListener('touchmove', onMove, {passive:false});
+  wrap.addEventListener('touchend', onEnd);
+  wrap.addEventListener('touchcancel', resetRow);
+  wrap.addEventListener('pointerdown', onStart);
+  wrap.addEventListener('pointermove', onMove);
+  wrap.addEventListener('pointerup', onEnd);
+}
+function otTogglePresence(productId){
+  const p = productsData.find(x => x.product_id === productId);
+  if(!p) return;
+  p.isDormant = !p.isDormant;
+  persistAllData();
+  pushProductsToCloud();
+  pauseCloudPolling(20000); // ---------- تھوڑی دیر خودکار pull روکیں تاکہ ابھی کی تبدیلی 12-سیکنڈ پولنگ سے واپس نہ پلٹے ---------- -->
+  otFlatCache = applyManualCardOrder(getFlatVariants().sort((a, b) => {
+    const sa = a.serial_no, sb = b.serial_no;
+    if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
+    if(sa == null) return 1;
+    if(sb == null) return -1;
+    return sa - sb;
+  }));
+  renderOtPresenceList(document.getElementById('otPresenceSearchInput')?.value || '');
+  updateOtPresenceButtonLabels();
+  try{ renderOtItemsPage(); }catch(e){}
+  try{ renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || ''); }catch(e){}
+}
 function renderOtAddStockList(query){
   const wrap = document.getElementById('otAddStockListWrap');
   if(!wrap) return;
@@ -23976,6 +24133,7 @@ function renderOrderTakingScreen(){
   otPage = 0;
   otReviewItems = [];
   otSavedOrderId = null;
+  updateOtPresenceButtonLabels(); // ---------- 🟢🔴 حاضر/غیر حاضر بٹنوں پر تعداد ابھی تازہ رکھیں ---------- -->
 
   const s1 = document.getElementById('otStepCustomer');
   const s2 = document.getElementById('otStepItems');
@@ -30691,6 +30849,7 @@ async function fetchProductsFromCloud(silent){
       if(currentScreenName === 'orderTaking'){
         const itemsStep = document.getElementById('otStepItems');
         if(itemsStep && itemsStep.style.display !== 'none' && typeof renderOtItemsPage === 'function') renderOtItemsPage();
+        if(typeof updateOtPresenceButtonLabels === 'function') updateOtPresenceButtonLabels();
       }
     }
     return true;
@@ -30716,12 +30875,14 @@ async function manualRefreshStockFromCloud(){
   setTimeout(() => { if(btn){ btn.disabled = false; btn.textContent = '🔄 تازہ کریں (کلاؤڈ سے سٹاک منگوائیں)'; } }, 1800);
 }
 
-// ---------- Products/Stock Adjustment/Purchase Orders/Billing اسکرین پر ہوں تو ہر 12 سیکنڈ بعد خودکار تازہ کاری ----------
+// ---------- Products/Stock Adjustment/Purchase Orders/Billing/Order Taking اسکرین پر ہوں تو خودکار تازہ کاری —
+// ---------- ⚡ صدام کی ہدایت (22 ستمبر): پہلے 12 سیکنڈ تھی، اب 5 سیکنڈ — تاکہ منشی کا فیڈ کردہ سٹاک/سبزی
+// حاضر-غیر حاضر تبدیلی سٹاک مینجمنٹ، آرڈر ٹیکنگ اور بلنگ تینوں پر تقریباً فوری نظر آئے ---------- -->
 function startProductsPolling(){
   stopProductsPolling();
   productsPollTimer = setInterval(() => {
     fetchProductsFromCloud(false);
-  }, 12000);
+  }, 5000);
 }
 function stopProductsPolling(){
   if(productsPollTimer){ clearInterval(productsPollTimer); productsPollTimer = null; }
