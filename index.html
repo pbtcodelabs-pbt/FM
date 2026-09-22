@@ -3794,7 +3794,10 @@
            کسی صورت کٹ نہیں سکتا، چاہے فونٹ جتنا بھی چوڑا ہو۔ "🧑‍🌾 منشی کا شامل کردہ سٹاک" پہلے سے اسی رپورٹس
            ڈراپ ڈاؤن میں ایک انٹری کے طور پر موجود تھا (نیچے دیکھیں) اس لیے اوپر والا اس کا بٹن فالتو تھا — چھپا
            دیا (کوڈ محفوظ)۔ "🔄 تازہ کریں" کو بھی اسی ڈراپ ڈاؤن کے اندر پہلی انٹری کے طور پر منتقل کر دیا ---------- -->
-      <div style="display:flex; align-items:center; gap:4px; margin-bottom:10px; flex-wrap:nowrap;">
+      <!-- ---------- 🔒 صدام کی ہدایت (22 ستمبر، صبح 8:47): اب چونکہ لائن میں صرف ایک ہی بٹن بچا ہے، خالی جگہ
+           بہت زیادہ بچ رہی تھی — صدام نے وہ خالی جگہ اسی 📊 رپورٹس بٹن کو دینے کو کہا: بٹن اب پوری لائن جتنا
+           لمبا، درمیان میں، اور نمایاں/واضح (بڑا فونٹ + موٹی پیڈنگ) ---------- -->
+      <div style="display:flex; align-items:center; justify-content:center; gap:4px; margin-bottom:10px; flex-wrap:nowrap;">
         <!-- ---------- 🔧 عنوان + منشی — اب مکمل طور پر چھپے ہوئے (کوڈ محفوظ)، اوپر کی لائن میں صرف رپورٹس بٹن
              نظر آئے گا تاکہ کبھی کوئی overflow/کٹنے کا امکان ہی نہ رہے ---------- -->
         <div style="display:none; align-items:center; gap:4px; flex:1 1 auto; min-width:0; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;">
@@ -3807,8 +3810,8 @@
                🔒 FM22SEPTU09: یہ بٹن اب مکمل چھپا دیا — نیچے ڈراپ ڈاؤن میں وہی عمل پہلے سے ایک انٹری کے طور پر موجود ہے ---------- -->
           <button type="button" onclick="openMunshiStockLogReport()" title="🧑‍🌾 منشی کا شامل کردہ سٹاک دیکھیں" style="flex:0 0 auto; padding:4px 6px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:9px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی سٹاک</button>
         </div>
-        <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0 0 auto;">
-          <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="padding:4px 6px; font-size:9.5px; max-width:none; white-space:nowrap;">
+        <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:1 1 auto; max-width:480px;">
+          <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="width:100%; justify-content:center; padding:11px 14px; font-size:14.5px; font-weight:900; max-width:none; white-space:nowrap; border-radius:11px;">
             <span>📊 رپورٹس</span>
             <span class="categoryDropdownArrow">▾</span>
           </button>
@@ -8456,7 +8459,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل22ستمبر08:39am';
+const APP_BUILD_VERSION = 'منگل22ستمبر09:20am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10952,7 +10955,7 @@ function renderProductSpreadsheet(filtered, wrap){
              کا مستقل پینل اسی سبزی کی تفصیل دکھا دیتا ہے (قطار نیلی ہو کر منتخب نظر آتی ہے) ---------- -->
         <td style="${tdBase}${frozenTd(1)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
         <td style="${tdBase}${frozenTd(2)}">${packingSelectHtml}</td>
-        <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
+        <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)">${(v.reserved||0) > 0 ? `<div style="font-size:8.5px;font-weight:800;color:#c2410c;line-height:1.2;margin-top:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:100%;" title="پینڈنگ بلوں میں بک شدہ مقدار — اصل سٹاک نمبر متاثر نہیں">🔖بک:${v.reserved}</div>` : ''}</td>
       </tr>`;
   }).join('');
   const headers = ['#','نام','پیکنگ','📦 سٹاک'];
@@ -13265,7 +13268,10 @@ function renderBillingProductTable(grid){
   const serialWBl = autoColWidth('#', flat.map(v => v.serial_no ?? '?'), measNumFontBl, {min:32, max:48, pad:14});
   const nameWBl = autoColWidth('نام', flat.map(v => (productsData.find(p => p.product_id === v.product_id)?.name) || v.name), measUrduFontBl, {min:70, max:190, pad:24});
   const packWBl = autoColWidth('پیکنگ', flat.map(v => v.label || ''), measPackFontBl, {min:40, max:90, pad:14});
-  const stockWBl = autoColWidth('سٹاک', flat.map(v => v.stock), measNumFontBl, {min:36, max:64, pad:14});
+  // ---------- 🔗 صدام کی ہدایت (22 ستمبر): منشی جیسے ہی آرڈر صدام حسین کو بھیجے (پینڈنگ بنے) اسی وقت اس کا سٹاک
+  // v.reserved میں بک ہو جاتا ہے (reserveOrderStock) — یہاں بلنگ ٹیبل میں اب خام v.stock کی بجائے "دستیاب"
+  // (v.stock - v.reserved) دکھایا جائے گا، بالکل اسی طرح جیسے آرڈر ٹیکنگ سکرین پر otAvailableStock() کرتا ہے ---------- -->
+  const stockWBl = autoColWidth('سٹاک', flat.map(v => Math.max(0, (v.stock||0) - (v.reserved||0))), measNumFontBl, {min:36, max:64, pad:14});
   let qtyWBl = Math.max(96, autoColWidth('مقدار', flat.map(v => { const ci = Billing.cart.find(c => c.variant_id === v.variant_id); return ci ? ci.qty : ''; }), measNumFontBl, {min:30, max:60, pad:10}) + 66);
   // ---------- خالی بچی سکرین کی چوڑائی "مقدار" کالم کو دے دیں (بالکل آرڈر ٹیکنگ جدول جیسا) ---------- -->
   const blAvailW = (grid.clientWidth || grid.offsetWidth || 0) - 4;
@@ -13281,14 +13287,17 @@ function renderBillingProductTable(grid){
     const rowBg = checked ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : (idx % 2 === 0 ? '#ffffff' : '#dde6e2');
     const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
     const pName = (productsData.find(p => p.product_id === v.product_id)?.name) || v.name;
-    const stockColor = v.stock <= 0 ? '#b91c1c' : '#134e2c';
+    // ---------- 🔗 صدام کی ہدایت (22 ستمبر): خام سٹاک نہیں، "دستیاب" سٹاک (v.stock - v.reserved) دکھائیں — منشی
+    // کے بھیجے پینڈنگ بل فوراً یہاں جھلکیں، تاکہ بل ایڈٹ کرتے وقت پتا چل سکے کہ یہ چیز فی الحال کتنی بچی ہے ---------- -->
+    const available = Math.max(0, (v.stock||0) - (v.reserved||0));
+    const stockColor = available <= 0 ? '#b91c1c' : '#134e2c';
     const rowTd = `background:${rowBg};`;
     return `
       <tr data-variant-id="${v.variant_id}">
         <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default !important;pointer-events:none !important;margin:0 !important;">${v.serial_no ?? '?'}</span></td>
         <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13.5px;font-weight:${AppState.settings.productCardNameWeight || 700};">${pName}</td>
         <td style="${tdBase}${rowTd}${urduFont}font-size:11.5px;">${v.label || ''}</td>
-        <td style="${tdBase}${rowTd}font-weight:900;color:${stockColor};" data-bill-stock-for="${v.variant_id}">${v.stock}</td>
+        <td style="${tdBase}${rowTd}font-weight:900;color:${stockColor};" data-bill-stock-for="${v.variant_id}">${available}</td>
         <td style="${tdBase}${rowTd}padding:4px 3px;">
           <div style="display:flex; align-items:center; justify-content:center; gap:9px; padding-inline-end:6px;">
             <input type="text" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setBillQtyTableManual(${v.variant_id}, this.value, this)" style="width:42px;box-sizing:border-box;padding:5px 2px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:7px;font-size:12.5px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);">
@@ -13324,9 +13333,12 @@ function setBillQtyTableManual(variantId, value, inputEl){
   qty = Math.round(qty * 100) / 100;
   const product = getFlatVariants().find(p => p.variant_id === variantId);
   if(!product) return;
-  if(qty > 0 && AppState.settings.trackInventory && qty > product.stock){
-    alert(`❌ صرف ${Math.max(product.stock, 0)} سٹاک موجود ہے — سیٹنگز میں "Track Inventory" آن ہے، اس لیے اس سے زیادہ فروخت نہیں ہو سکتی۔`);
-    qty = Math.max(product.stock, 0);
+  // ---------- 🔗 صدام کی ہدایت (22 ستمبر): Track Inventory کی حد اب خام stock نہیں، "دستیاب" (stock - reserved) کے
+  // خلاف چیک ہو — منشی کے بھیجے پینڈنگ بلوں میں بک شدہ مقدار کو یہاں دوبارہ فروخت نہ ہونے دیں ---------- -->
+  const availableQtyBl = Math.max(0, (product.stock||0) - (product.reserved||0));
+  if(qty > 0 && AppState.settings.trackInventory && qty > availableQtyBl){
+    alert(`❌ صرف ${availableQtyBl} سٹاک موجود ہے — سیٹنگز میں "Track Inventory" آن ہے، اس لیے اس سے زیادہ فروخت نہیں ہو سکتی۔`);
+    qty = availableQtyBl;
   }
   const existing = Billing.cart.find(c => c.variant_id === variantId);
   if(qty <= 0){
@@ -13368,8 +13380,10 @@ function addToCart(variantId){
   const qtyAlreadyInCart = existing ? existing.qty : 0;
 
   // ---------- Track Inventory (Settings) آن ہو تو دستیاب سٹاک سے زیادہ کارٹ میں شامل نہیں ہونے دیں گے ----------
-  if(AppState.settings.trackInventory && (qtyAlreadyInCart + 1) > product.stock){
-    alert(`❌ Only ${Math.max(product.stock, 0)} in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
+  // ---------- 🔗 صدام کی ہدایت (22 ستمبر): خام product.stock نہیں، "دستیاب" (stock - reserved) کے خلاف چیک کریں ---------- -->
+  const availableAddBl = Math.max(0, (product.stock||0) - (product.reserved||0));
+  if(AppState.settings.trackInventory && (qtyAlreadyInCart + 1) > availableAddBl){
+    alert(`❌ Only ${availableAddBl} in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
     return;
   }
 
@@ -13494,8 +13508,10 @@ function addReverseCalcToCart(){
   if(resultGrams <= 0) return;
 
   // ---------- Track Inventory آن ہو تو یہاں بھی دستیاب سٹاک سے زیادہ شامل نہ ہو ----------
-  if(AppState.settings.trackInventory && resultGrams > v.stock){
-    alert(`❌ Only ${Math.max(v.stock, 0)}g in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
+  // ---------- 🔗 صدام کی ہدایت (22 ستمبر): خام v.stock نہیں، "دستیاب" (stock - reserved) کے خلاف چیک کریں ---------- -->
+  const availableGramsBl = Math.max(0, (v.stock||0) - (v.reserved||0));
+  if(AppState.settings.trackInventory && resultGrams > availableGramsBl){
+    alert(`❌ Only ${availableGramsBl}g in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
     return;
   }
 
@@ -13630,8 +13646,10 @@ function changeQty(variantId, delta){
   if(!item) return;
   if(delta > 0 && AppState.settings.trackInventory){
     const product = getFlatVariants().find(p => p.variant_id === variantId);
-    if(product && (item.qty + delta) > product.stock){
-      alert(`❌ Only ${Math.max(product.stock, 0)} in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
+    // ---------- 🔗 صدام کی ہدایت (22 ستمبر): خام product.stock نہیں، "دستیاب" (stock - reserved) کے خلاف چیک کریں ---------- -->
+    const availableChgBl = product ? Math.max(0, (product.stock||0) - (product.reserved||0)) : 0;
+    if(product && (item.qty + delta) > availableChgBl){
+      alert(`❌ Only ${availableChgBl} in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
       return;
     }
   }
@@ -14129,12 +14147,19 @@ function finalizeInvoice(){
   const method = (Billing.counterSale && !isWalkInPartial) ? 'cash' : 'credit';
 
   // ---------- اسٹاک کی جانچ: صرف اُس وقت روکیں جب "Track Inventory" آن ہو — ورنہ سٹاک مائنس میں جانے کی اجازت ہے ----------
+  // ---------- 🔗🔒 صدام کی ہدایت (22 ستمبر): یہ حتمی/آخری چیک ہے — بل فائنل ہونے سے عین پہلے۔ اب خام v.stock
+  // کی بجائے "دستیاب" (v.stock - v.reserved) کے خلاف چیک کریں، تاکہ منشی کے بھیجے دوسرے پینڈنگ آرڈرز میں پہلے
+  // سے بک شدہ مقدار اس نئے/الگ بل میں دوبارہ فروخت نہ ہو (بالکل وہی مسئلہ جو صدام نے بیان کیا — بل فائنل کرتے
+  // وقت ریئل ٹائم میں پتا چلنا چاہیے کہ چیز ختم ہو چکی ہے)۔ نوٹ: اگر یہی کارٹ کسی پینڈنگ آرڈر کو fulfillAdvanceOrder
+  // سے لوڈ کر کے بنایا گیا ہو تو اُس آرڈر کی اپنی ریزرویشن وہیں پہلے ہی خارج ہو چکی ہوتی ہے — اس لیے یہاں دوہرا
+  // شمار نہیں ہوگا، صرف باقی/دوسرے پینڈنگ آرڈرز کا بک شدہ سٹاک شمار ہوگا ---------- -->
   if(AppState.settings.trackInventory){
     const flatVariants = getFlatVariants();
     for(const item of Billing.cart){
       const v = flatVariants.find(f => f.variant_id === item.variant_id);
-      if(v && item.qty > v.stock){
-        alert(`"${item.name}" is low on stock (available: ${v.stock}). Please reduce quantity.`);
+      const availableFinalizeBl = v ? Math.max(0, (v.stock||0) - (v.reserved||0)) : 0;
+      if(v && item.qty > availableFinalizeBl){
+        alert(`"${item.name}" is low on stock (available: ${availableFinalizeBl}). Please reduce quantity.`);
         return;
       }
     }
@@ -16722,6 +16747,10 @@ function buildInlineFieldsRow(productId, v){
         <input type="number" value="${v.stock || ''}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value,this)" style="background:#fff;">
         <div class="vcStockTag vcLowStockTagCls" style="display:${(!isNegative && v.stock <= v.lowStockAt) ? 'block' : 'none'}; color:#b45309; font-size:8.5px;">⚠️ کم</div>
         <div class="vcStockTag vcNegStockTagCls" style="display:${isNegative ? 'block' : 'none'}; color:var(--danger); font-size:8.5px;">❌ منفی</div>
+        <!-- ---------- 🔗 صدام کی ہدایت (22 ستمبر): اصل (v.stock) نمبر جان بوجھ کر نہیں بدلا — یہ ٹیگ صرف اطلاع کے
+        لیے، بتاتا ہے کتنی مقدار منشی کے بھیجے پینڈنگ بلوں میں پہلے سے بک ہے (v.reserved)، تاکہ صدام حسین کو غلط
+        فہمی نہ ہو کہ سٹاک کیوں دستیاب سے کم لگ رہا ہے — اصل سٹاک نمبر ٹائپ/تبدیل کرنے پر کوئی اثر نہیں ---------- -->
+        <div class="vcStockTag" style="display:${(v.reserved||0) > 0 ? 'block' : 'none'}; color:#c2410c; font-size:8.5px;" title="پینڈنگ بلوں میں بک شدہ مقدار">🔖 بک: ${v.reserved||0}</div>
       </div>
     </div>`;
 }
