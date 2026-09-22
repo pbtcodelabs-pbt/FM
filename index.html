@@ -8459,7 +8459,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل22ستمبر09:45am';
+const APP_BUILD_VERSION = 'منگل22ستمبر12:30pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11924,13 +11924,13 @@ function goTo(screenName, _isHistoryNav){
     // (کسٹمر منتخب ہو چکا ہو) تو تازہ ڈیٹا کے ساتھ وہ پیج بھی فوراً دوبارہ بن جائے گا ---------- -->
     fetchProductsFromCloud(true).then(added => {
       if(added){
-        otFlatCache = getFlatVariants().sort((a, b) => {
+        otFlatCache = applyManualCardOrder(getFlatVariants().sort((a, b) => {
           const sa = a.serial_no, sb = b.serial_no;
           if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
           if(sa == null) return 1;
           if(sb == null) return -1;
           return sa - sb;
-        });
+        }));
         const itemsStep = document.getElementById('otStepItems');
         if(itemsStep && itemsStep.style.display !== 'none' && typeof renderOtItemsPage === 'function'){
           renderOtItemsPage();
@@ -13250,6 +13250,9 @@ function renderBillingProductTable(grid){
   }
   // ---------- 🔼 سیریل نمبر کے حساب سے Ascending ترتیب — سب سے چھوٹا سیریل نمبر سب سے اوپر ---------- -->
   flat.sort((a,b) => (a.serial_no ?? Infinity) - (b.serial_no ?? Infinity));
+  // ---------- 🔗 صدام کی ہدایت (22 ستمبر): اگر ایڈمن نے سٹاک مینجمنٹ میں دستی (ڈریگ) ترتیب دی ہو تو یہاں بھی
+  // بالکل وہی ترتیب لاگو ہو — سیریل نمبر کی ترتیب صرف اس وقت جب کوئی دستی ترتیب موجود نہ ہو ---------- -->
+  flat = applyManualCardOrder(flat);
 
   if(flat.length === 0){
     grid.style.display = 'grid';
@@ -15006,6 +15009,8 @@ function toggleProductSerialLock(){
     if(!confirm('⚠️ آپ سیریل نمبر کی اس لسٹ کو لاک کرنے جا رہے ہیں۔ لاک کرنے کے بعد کوئی بھی سیریل نمبر تبدیل نہیں کر سکے گا — دوبارہ تبدیلی کے لیے ایڈمن پاسورڈ سے اَن لاک کرنا ہوگا۔ کیا آپ جاری رکھنا چاہتے ہیں؟')) return;
     PRODUCT_SERIAL_LOCKED = true;
     saveToStorage('productSerialLocked', true);
+    // ---------- ☁️🔗 صدام کی ہدایت (22 ستمبر): لاک حالت بھی کلاؤڈ پر بھیجیں تاکہ منشی/بلنگ ٹیبل کو بھی معلوم ہو ---------- -->
+    try{ pushProductsToCloud(); }catch(e){}
     alert('🔒 سیریل نمبر لسٹ لاک ہو گئی۔');
     renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
   }
@@ -15037,6 +15042,8 @@ async function verifyAdminPinAndUnlock(pin){
   if(!ok){ alert('❌ غلط پاسورڈ — لاک نہیں کھلا۔'); return; }
   PRODUCT_SERIAL_LOCKED = false;
   saveToStorage('productSerialLocked', false);
+  // ---------- ☁️🔗 صدام کی ہدایت (22 ستمبر): اَن لاک حالت بھی کلاؤڈ پر بھیجیں ---------- -->
+  try{ pushProductsToCloud(); }catch(e){}
   alert('🔓 لاک کھل گیا — اب آپ سیریل نمبر تبدیل کر سکتے ہیں۔');
   renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
 }
@@ -16552,6 +16559,9 @@ function onCardDragEnd(){
     // ---------- دوسری سکرین (Products/Stock Adjustment) بھی فوراً نئی ترتیب سے تازہ ہو جائے ---------- -->
     try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('productSearchInput')?.value || ''); }catch(e){}
     try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(); }catch(e){}
+    // ---------- ☁️🔗 صدام کی ہدایت (22 ستمبر): نئی دستی ترتیب فوراً کلاؤڈ پر بھیجیں — ورنہ صرف اسی فون پر رہتی
+    // اور منشی/بلنگ ٹیبل پر کبھی نہ پہنچتی (یہی اصل وجہ تھی سیریل نمبر الگ الگ نظر آنے کی) ---------- -->
+    try{ pushProductsToCloud(); }catch(e){}
   }catch(err){ console.warn('onCardDragEnd failed', err); }
   document.removeEventListener('pointermove', onCardDragMove);
   document.removeEventListener('pointerup', onCardDragEnd);
@@ -20090,13 +20100,13 @@ async function zeroAllStock(){
   // ---------- جو بھی سکرین اس وقت کھلی ہو وہیں فوراً نظر آئے — سٹاک مینجمنٹ، پراڈکٹس، اور آرڈر ٹیکنگ (منشی) ---------- -->
   if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
   if(document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
-  otFlatCache = getFlatVariants().sort((a, b) => {
+  otFlatCache = applyManualCardOrder(getFlatVariants().sort((a, b) => {
     const sa = a.serial_no, sb = b.serial_no;
     if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
     if(sa == null) return 1;
     if(sb == null) return -1;
     return sa - sb;
-  });
+  }));
   try{ renderOtItemsPage(); }catch(e){}
   if(document.getElementById('otAddStockListWrap')) renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || '');
 }
@@ -23940,13 +23950,13 @@ function otAddStockCreateNewVeg(){
   document.getElementById('otAddStockNewName').value = '';
   document.getElementById('otAddStockNewPacking').value = '';
   // ---------- otFlatCache (آرڈر ٹیکنگ کی اصل فہرست کا ڈیٹا) کو بھی دوبارہ بنائیں تاکہ نئی سبزی فوراً وہاں نظر آئے ---------- -->
-  otFlatCache = getFlatVariants().sort((a, b) => {
+  otFlatCache = applyManualCardOrder(getFlatVariants().sort((a, b) => {
     const sa = a.serial_no, sb = b.serial_no;
     if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
     if(sa == null) return 1;
     if(sb == null) return -1;
     return sa - sb;
-  });
+  }));
   renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || '');
   try{ renderOtItemsPage(); }catch(e){}
   alert(`✅ "${name}" شامل ہو گئی — سیریل نمبر #${savedSerial}`);
@@ -24118,13 +24128,13 @@ function selectOtCustomer(customerId){
   // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): پہلے نام کے حساب سے (الف بائی ترتیب) سورٹ ہوتا تھا، جس سے سیریل
   // نمبر بے ترتیب نظر آتے تھے (31 کے بعد 60، پھر 5...) — اب سیریل نمبر کے حساب سے (1 سے آخر تک) سورٹ،
   // بالکل سٹاک مینجمنٹ/پراڈکٹس جیسی ترتیب؛ جن کا سیریل نمبر ابھی نہ ہو وہ سب سے آخر میں ---------- -->
-  otFlatCache = getFlatVariants().sort((a, b) => {
+  otFlatCache = applyManualCardOrder(getFlatVariants().sort((a, b) => {
     const sa = a.serial_no, sb = b.serial_no;
     if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
     if(sa == null) return 1;
     if(sb == null) return -1;
     return sa - sb;
-  });
+  }));
   renderOtItemsPage();
 }
 
@@ -30582,6 +30592,10 @@ async function pushProductsToCloud(){
   saveToStorage('nextProductId', nextProductId);
   saveToStorage('nextVariantId', nextVariantId);
   try{
+    // ---------- 🔗🔒 صدام کی ہدایت (22 ستمبر): دستی ترتیب (ڈریگ) اور سیریل لاک حالت پہلے صرف اسی فون پر
+    // (localStorage) محفوظ رہتی تھی — اسی لیے منشی کے فون اور بلنگ ٹیبل پر ترتیب الگ ہو جاتی تھی۔ اب یہ دونوں
+    // پراڈکٹس کے ساتھ ہی کلاؤڈ میں بھیجی جائیں گی ---------- -->
+    const manualOrderForCloud = loadFromStorage(PRODUCT_MANUAL_ORDER_KEY, []) || [];
     const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -30590,7 +30604,9 @@ async function pushProductsToCloud(){
           json: { stringValue: JSON.stringify(productsData) },
           nextProductId: { integerValue: String(nextProductId) },
           nextVariantId: { integerValue: String(nextVariantId) },
-          updatedAt: { integerValue: String(Date.now()) }
+          updatedAt: { integerValue: String(Date.now()) },
+          manualOrder: { stringValue: JSON.stringify(manualOrderForCloud) },
+          serialLocked: { booleanValue: !!PRODUCT_SERIAL_LOCKED }
         }
       })
     });
@@ -30635,10 +30651,32 @@ async function fetchProductsFromCloud(silent){
     if(cloudNextProductId > nextProductId) nextProductId = cloudNextProductId;
     const cloudNextVariantId = parseInt(doc.fields?.nextVariantId?.integerValue || '0');
     if(cloudNextVariantId > nextVariantId) nextVariantId = cloudNextVariantId;
+    // ---------- 🔗🔒 صدام کی ہدایت (22 ستمبر): دستی ترتیب اور سیریل لاک بھی کلاؤڈ سے پڑھ کر اسی فون پر لاگو کریں —
+    // اب ایڈمن کی طے کی ہوئی ترتیب سٹاک مینجمنٹ، آرڈر ٹیکنگ (منشی) اور بلنگ ٹیبل — تینوں پر بالکل ایک جیسی رہے گی ---------- -->
+    const cloudManualOrderStr = doc.fields?.manualOrder?.stringValue;
+    if(cloudManualOrderStr){
+      try{
+        const cloudManualOrder = JSON.parse(cloudManualOrderStr);
+        if(Array.isArray(cloudManualOrder)) saveToStorage(PRODUCT_MANUAL_ORDER_KEY, cloudManualOrder);
+      }catch(e){}
+    }
+    if(typeof doc.fields?.serialLocked?.booleanValue === 'boolean'){
+      PRODUCT_SERIAL_LOCKED = doc.fields.serialLocked.booleanValue;
+      saveToStorage('productSerialLocked', PRODUCT_SERIAL_LOCKED);
+    }
     saveProductsLight();
     saveToStorage('nextProductId', nextProductId);
     saveToStorage('nextVariantId', nextVariantId);
     await hydratePhotosFromIndexedDB(); // ---------- کلاؤڈ سے آیا ڈیٹا تصویروں کے بغیر ہے — اسی فون کی IndexedDB سے واپس جوڑ دیں ----------
+    // ---------- 🔗 آرڈر ٹیکنگ (منشی) کا کیش بھی نئے ڈیٹا + تازہ دستی ترتیب کے ساتھ ابھی دوبارہ بنا لیں — تاکہ یہ
+    // کبھی پرانی ترتیب پر نہ رہے، چاہے صارف اس وقت کسی بھی سکرین پر ہو ---------- -->
+    otFlatCache = applyManualCardOrder(getFlatVariants().sort((a, b) => {
+      const sa = a.serial_no, sb = b.serial_no;
+      if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
+      if(sa == null) return 1;
+      if(sb == null) return -1;
+      return sa - sb;
+    }));
     // ---------- 🔒🔒 صدام کی ہدایت (17 ستمبر، صبح): اصل وجہ ملی — یہی 12 سیکنڈ والی خودکار پولنگ ہر بار پورا
     // پینل/جدول از سرِ نو بنا دیتی تھی، چاہے صارف اسی وقت کسی خانے میں لکھ رہا ہو — جس سے کرسر اچانک کہیں اور
     // "بھاگ" جاتا۔ اب اگر صارف واقعی کسی خانے میں لکھ رہا ہو (فوکس وہاں موجود ہو) تو یہ خودکار ری رینڈر عارضی
@@ -30648,6 +30686,12 @@ async function fetchProductsFromCloud(silent){
       if(typeof renderProductList === 'function' && document.getElementById('productListWrap') && !userTyping) renderProductList(document.getElementById('productSearchInput')?.value || '');
       if(typeof renderStockAdjustmentScreen === 'function' && document.getElementById('stockAdjustmentListWrap') && !userTyping) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
       if(typeof renderBillingProductGrid === 'function' && currentScreenName === 'billing') renderBillingProductGrid();
+      // ---------- 🔗 اگر اس وقت منشی آرڈر ٹیکنگ سکرین پر ہی موجود ہو (آئٹمز والا صفحہ کھلا ہو) تو تازہ ترتیب کے
+      // ساتھ فوراً دوبارہ دکھائیں — بالکل Billing گرڈ جیسا ---------- -->
+      if(currentScreenName === 'orderTaking'){
+        const itemsStep = document.getElementById('otStepItems');
+        if(itemsStep && itemsStep.style.display !== 'none' && typeof renderOtItemsPage === 'function') renderOtItemsPage();
+      }
     }
     return true;
   }catch(e){
@@ -34149,7 +34193,9 @@ function renderHomeSettingsPanel(){
   const isAdmin = document.body.classList.contains('role-admin');
   const intensity = AppState.settings.themeIntensity || 0;
 
-  const backupRowHtml = isAdmin ? `
+  // ---------- 🔓 صدام کی ہدایت (22 ستمبر): بیک اپ/ریسٹور بٹن پہلے صرف ایڈمن رول کو نظر آتے تھے — منشی کے
+  // Settings پینل میں یہ سیکشن بالکل غائب تھا۔ اب دونوں رولز پر بالکل ایک جیسا سیکشن دکھایا جائے گا ---------- -->
+  const backupRowHtml = `
     <!-- ---------- 💾 صدام کی ہدایت (FM20SEPSU0759AM): لوکل بیک اپ/ریسٹور بٹن ہوم پیج سے ہٹا کر یہیں
          ⚙️ Settings پینل کے اندر، Google Drive والے گروپ کے ساتھ، الگ الگ صاف لیبل کے ساتھ شامل کیے گئے ---------- -->
     <div class="hsBackupSectionLabel">☁️ Google Drive</div>
@@ -34161,7 +34207,7 @@ function renderHomeSettingsPanel(){
     <div class="hsBackupRow">
       <div class="hsBackupBtn" onclick="exportBackupData(); closeHomeSettingsPanel();">💾<span>Backup</span></div>
       <div class="hsBackupBtn" onclick="document.getElementById('localRestoreFileInput').click(); closeHomeSettingsPanel();">📥<span>Restore</span></div>
-    </div>` : '';
+    </div>`;
 
   const tabBarHtml = `
     <div class="hsTabBar">
