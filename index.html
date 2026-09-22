@@ -1436,6 +1436,12 @@
   #newProductModal input[type="number"]::-webkit-outer-spin-button,
   #newProductModal input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
   #newProductModal input[type="number"]{ -moz-appearance:textfield; }
+  /* ---------- 🔴 صدام کی ہدایت (22 ستمبر): اوپر والے پینل (vcInlinePanel) کے چھوٹے خانوں میں +/- تیر
+       (اسپنر) چھپا دیں — یہ خودکار تیر استعمال نہیں ہوتے مگر خانے کی قیمتی جگہ کھا جاتے ہیں، جس سے ہندسے
+       سکڑ کر کٹ جاتے تھے ---------- */
+  #vcInlinePanel input[type="number"]::-webkit-outer-spin-button,
+  #vcInlinePanel input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  #vcInlinePanel input[type="number"]{ -moz-appearance:textfield; }
   .fieldRow{display:flex; gap:10px;}
   .fieldRow input{flex:1;}
 
@@ -8481,7 +8487,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل22ستمبر02:05pm';
+const APP_BUILD_VERSION = 'منگل22ستمبر02:40pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -17873,7 +17879,7 @@ function buildVcInlinePanelHtml(){
   const showAdd = vcInlineAddMode;
   const showBody = !vcInlineAddMode && vcInlineSelectedId !== null;
   return `
-    <div id="vcInlinePanel" style="background:linear-gradient(155deg,#1d4ed8,#1e3a8a); border-radius:10px; padding:5px 6px; margin:0; box-sizing:border-box;">
+    <div id="vcInlinePanel" style="background:linear-gradient(155deg,#1d4ed8,#1e3a8a); border-radius:10px; padding:5px 6px; margin:0; box-sizing:border-box; overflow:hidden;">
       <!-- ---------- خالی حالت — کوئی سبزی منتخب نہیں، یہیں ➕ سے نئی سبزی شروع ہوتی ہے ---------- -->
       <div id="vcInlinePanelEmpty" style="display:${showEmpty ? 'flex':'none'}; align-items:center; justify-content:space-between; gap:8px; padding:4px 3px;">
         <span style="font-weight:900; font-size:11px; color:#dbeafe;">☝️ سبزی کو ٹچ کریں</span>
@@ -17887,13 +17893,13 @@ function buildVcInlinePanelHtml(){
           <input id="vcAddName" type="text" placeholder="🥬 نئی سبزی کا نام" style="flex:1 1 auto; min-width:0; box-sizing:border-box; border:1px solid #a5b4fc; border-radius:6px; padding:6px; font-family:${urduFont}; font-weight:900; font-size:13.5px; text-align:center; background:#fff;">
           <input id="vcAddPacking" type="text" placeholder="📦 پیکنگ ▾" readonly onclick="vcAddOpenPackingPicker()" style="flex:0 0 84px; box-sizing:border-box; border:1px solid #a5b4fc; border-radius:6px; padding:6px 3px; font-family:${urduFont}; font-weight:700; font-size:11.5px; text-align:center; background:#fff; cursor:pointer;">
         </div>
-        <!-- ---------- 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" خانہ یہاں سے بھی ہمیشہ کے لیے حذف — خرید کا خانہ
-             5-6 ڈجٹ کے لیے چوڑا (92px)، بقیہ خانے بچی ہوئی جگہ میں تھوڑے چوڑے (69px) ---------- -->
-        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:5px;" dir="rtl">
-          ${plainBox('vcAddStock','📦 سٹاک','linear-gradient(155deg,#eef2ff,#e0e7ff)','#c7d2fe','#a5b4fc','#3730a3', 69)}
-          ${plainBox('vcAddPurchase','💰 خرید','linear-gradient(155deg,#fef9e7,#fef3c7)','#fde68a','#f9d976','#92400e', 92)}
-          ${plainBox('vcAddWholesale','🟢 راولپنڈی','linear-gradient(155deg,#eafbf0,#d5f5e0)','#86efac','#6fd696','#15803d', 69)}
-          ${plainBox('vcAddRetail','🔴 اسلام آباد','linear-gradient(155deg,#fdecec,#fad2d0)','#fca5a5','#f28b87','#b91c1c', 69)}
+        <!-- ---------- 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" خانہ یہاں سے بھی ہمیشہ کے لیے حذف — باقی خانے
+             5 ڈجٹ کے لیے ناپ کر چوڑے کیے (سکرول کی ضرورت نہیں، یہاں پہلے سے کم خانے ہیں تو جگہ کافی ہے) ---------- -->
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;" dir="rtl">
+          ${plainBox('vcAddStock','📦 سٹاک','linear-gradient(155deg,#eef2ff,#e0e7ff)','#c7d2fe','#a5b4fc','#3730a3', 50)}
+          ${plainBox('vcAddPurchase','💰 خرید','linear-gradient(155deg,#fef9e7,#fef3c7)','#fde68a','#f9d976','#92400e', 50)}
+          ${plainBox('vcAddWholesale','🟢 راولپنڈی','linear-gradient(155deg,#eafbf0,#d5f5e0)','#86efac','#6fd696','#15803d', 50)}
+          ${plainBox('vcAddRetail','🔴 اسلام آباد','linear-gradient(155deg,#fdecec,#fad2d0)','#fca5a5','#f28b87','#b91c1c', 50)}
         </div>
         <div style="display:flex; gap:10px; margin-top:7px;">
           <button type="button" onclick="vcInlineSaveNew()" style="flex:1 1 auto; max-width:220px; padding:9px; background:linear-gradient(180deg,#34d95a,#16a34a); color:#fff; border:none; border-radius:9px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 6px rgba(0,0,0,.15);">💾 محفوظ کریں</button>
@@ -17918,21 +17924,22 @@ function buildVcInlinePanelHtml(){
             </div>
           </div>
         </div>
-        <!-- ---------- دوسری لائن: سٹاک → خرید → م.فروخت → 🧮 حتمی خرید → راولپنڈی → اسلام آباد —
-             صرف نمبر خانے، اوپر نیچے سٹیک نہیں؛ اگر تنگ سکرین پر پوری لائن نہ سمائے تو خانے سکڑنے کی بجائے
-             افقی سکرول ہو جائے گی (وہی لائن ٹوٹے بغیر)
-             🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" خانہ ہمیشہ کے لیے حذف — خرید کا خانہ اب 5-6 ڈجٹ کے لیے
-             چوڑا (92px)، حتمی خرید بھی بڑی رقم دکھانے کے لیے چوڑی (84px)، باقی خانے بھی تھوڑے چوڑے (69px) ---------- -->
-        <div style="display:flex; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; align-items:center; gap:5px; padding-bottom:2px;" dir="rtl">
-          ${fieldBox('vcInlineStock', '📦 سٹاک', 'linear-gradient(155deg,#eef2ff,#e0e7ff)', '#c7d2fe', '#a5b4fc', '#3730a3', 69)}
-          ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e', 92)}
-          ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 69)}
-          <div style="flex:0 0 auto; background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px 8px; text-align:center; width:84px; min-width:84px; box-sizing:border-box;">
+        <!-- ---------- دوسری لائن: سٹاک → خرید → م.فروخت → 🧮 حتمی خرید → راولپنڈی → اسلام آباد
+             🔴 صدام کی ہدایت (22 ستمبر — دوسری اصلاح): پچھلی بار خانے اتنے بڑے کر دیے تھے کہ پوری قطار سکرول پر
+             چلی گئی اور پینل سے باہر نکل گئی — غلط تھا۔ اب خانوں کی چوڑائی حساب لگا کر متعین کی گئی ہے (ہر خانے
+             میں لکھے ہندسوں کی اصل پکسل چوڑائی ناپ کر) تاکہ سب خانے ایک ہی لائن میں، بغیر سکرول، پورے نظر آئیں:
+             سٹاک/خرید/راولپنڈی/اسلام آباد = 5 ڈجٹ، م.فروخت = 2 ڈجٹ (چھوٹا)، حتمی خرید = 5 ڈجٹ (کوما سمیت)۔
+             +/- تیر (اسپنر) بھی چھپا دیے تاکہ ہندسوں کے لیے پوری جگہ ملے (اوپر CSS میں) ---------- -->
+        <div style="display:flex; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; align-items:center; gap:4px; padding-bottom:2px;" dir="rtl">
+          ${fieldBox('vcInlineStock', '📦 سٹاک', 'linear-gradient(155deg,#eef2ff,#e0e7ff)', '#c7d2fe', '#a5b4fc', '#3730a3', 50)}
+          ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e', 50)}
+          ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 30)}
+          <div style="flex:0 0 auto; background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px 4px; text-align:center; width:66px; min-width:66px; box-sizing:border-box;">
             <div style="font-size:7.5px; font-weight:900; color:#134e2c; white-space:nowrap;">🧮 حتمی خرید</div>
             <div id="vcInlineTotalPurchase" style="font-family:${numFontStack}; font-weight:900; font-size:17px; color:#134e2c; text-align:center;">0</div>
           </div>
-          ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d', 69)}
-          ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c', 69)}
+          ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d', 50)}
+          ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c', 50)}
         </div>
       </div>
     </div>`;
