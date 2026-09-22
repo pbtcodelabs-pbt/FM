@@ -8459,7 +8459,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل22ستمبر09:20am';
+const APP_BUILD_VERSION = 'منگل22ستمبر09:45am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10929,12 +10929,15 @@ function renderProductSpreadsheet(filtered, wrap){
   const nameW = autoColWidth('نام', filtered.map(p => p.name), measUrduFont, {min:70, max:190, pad:24});
   const packingW = autoColWidth('پیکنگ', filtered.map(p => { const v = p.variants[0]||{}; return v.label || '— منتخب —'; }), measPackFont, {min:52, max:110, pad:14});
   const stockW = autoColWidth('📦 سٹاک', filtered.map(p => p.variants[0]?.stock||0), measNumFont, {min:40, max:80, pad:16});
+  // ---------- 🔖 صدام کی ہدایت (22 ستمبر، صبح): پہلے بکنگ کی مقدار سٹاک خانے کے نیچے ایک باریک بیج میں چھپی
+  // ہوتی تھی (پڑھنا مشکل) — اب سٹاک کے فوراً بعد اپنا علیحدہ، صاف نظر آنے والا کالم ---------- -->
+  const bookingW = autoColWidth('🔖 بکنگ', filtered.map(p => p.variants[0]?.reserved||0), measNumFont, {min:40, max:80, pad:16});
   const isAdmin = AppState.currentRole === 'admin';
   // ---------- 🗑️ صدام کی ہدایت (17 ستمبر، رات): فہرست کی ہر قطار میں الگ سے ڈیلیٹ بٹن ہٹا دیا — اب حذف کرنے
   // کا واحد راستہ اوپر والے مستقل پینل کا 🗑️ بٹن ہے (منتخب سبزی کے لیے)، جو پہلے تصدیق پھر ایڈمن پاسورڈ مانگتا
   // ہے (deleteProduct دیکھیں)۔ اس لیے کالم/فنکشن یہاں سے نکال دیا (فنکشن deleteProductRowInSheet محفوظ ہے،
   // بس اب کہیں سے نہیں بلایا جاتا) ---------- -->
-  const colWidths = [serialW, nameW, packingW, stockW];
+  const colWidths = [serialW, nameW, packingW, stockW, bookingW];
   const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
   const rows = filtered.map((p, idx) => {
     const v = p.variants[0] || {};
@@ -10955,10 +10958,13 @@ function renderProductSpreadsheet(filtered, wrap){
              کا مستقل پینل اسی سبزی کی تفصیل دکھا دیتا ہے (قطار نیلی ہو کر منتخب نظر آتی ہے) ---------- -->
         <td style="${tdBase}${frozenTd(1)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
         <td style="${tdBase}${frozenTd(2)}">${packingSelectHtml}</td>
-        <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)">${(v.reserved||0) > 0 ? `<div style="font-size:8.5px;font-weight:800;color:#c2410c;line-height:1.2;margin-top:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:100%;" title="پینڈنگ بلوں میں بک شدہ مقدار — اصل سٹاک نمبر متاثر نہیں">🔖بک:${v.reserved}</div>` : ''}</td>
+        <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
+        <!-- ---------- 🔖 صدام کی ہدایت (22 ستمبر): بکنگ (v.reserved) صرف دکھانے کے لیے — جان بوجھ کر input نہیں
+        بنایا، تاکہ منشی کے پینڈنگ آرڈرز کا نظام غلطی سے دستی تبدیلی سے خراب نہ ہو (یہ نمبر خود بخود اپڈیٹ ہوتا ہے) ---------- -->
+        <td style="${tdBase}${rowTd}"><div style="width:100%;box-sizing:border-box;padding:6px 2px;border-radius:11px;font-size:13px;font-weight:900;text-align:center;${numFont}background:${(v.reserved||0)>0 ? '#ffedd5' : '#f1f5f9'};color:${(v.reserved||0)>0 ? '#c2410c' : '#94a3b8'};border:1.5px solid ${(v.reserved||0)>0 ? '#fdba74' : '#e2e8f0'};">${v.reserved||0}</div></td>
       </tr>`;
   }).join('');
-  const headers = ['#','نام','پیکنگ','📦 سٹاک'];
+  const headers = ['#','نام','پیکنگ','📦 سٹاک','🔖 بکنگ'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
     const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
