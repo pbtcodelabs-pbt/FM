@@ -8445,7 +8445,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر21ستمبر11:51pm';
+const APP_BUILD_VERSION = 'منگل22ستمبر06:35am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12733,6 +12733,10 @@ function submitManualBarcode(){
 let activeBillingCategory = 'all';
 let activeBillingSearch = '';
 let customCardOrder = []; // یوزر کی دستی ڈریگ سے طے شدہ ترتیب (اب product_ids کی صورت میں — پراڈکٹ کی سطح پر)
+// ---------- 🆕📊 صدام کی ہدایت (FM22SEPTU0B): بلنگ سکرین کا پرانا کارڈ گرڈ سٹائل اب بند — اس کی جگہ آرڈر
+// ٹیکنگ کے "جدول" نظارے جیسی ہی سیریل نمبر کی ترتیب سے مکمل فہرست۔ کارڈ کا کوڈ حذف نہیں کیا گیا، صرف
+// billingViewMode='table' کی وجہ سے اب چلتا نہیں — نیچے renderBillingProductGrid() کا آغاز دیکھیں ---------- -->
+let billingViewMode = 'table';
 
 function renderBillingCategoryRail(){
   const panel = document.getElementById('billingCategoryDropdownPanel');
@@ -13037,6 +13041,9 @@ document.addEventListener('click', (e) => {
 function renderBillingProductGrid(){
   const grid = document.getElementById('billingProductGrid');
   if(!grid) return;
+  // ---------- 🆕📊 صدام کی ہدایت (FM22SEPTU0B): جدول نظارہ فعال ہو تو یہیں سے نئی ٹیبل رینڈر کر کے رک جائیں —
+  // نیچے والا پرانا کارڈ گرڈ کوڈ حذف نہیں کیا گیا، صرف اب تک کبھی نہیں چلتا (billingViewMode ہمیشہ 'table') ---------- -->
+  if(billingViewMode === 'table'){ renderBillingProductTable(grid); return; }
 
   let flat = getFlatVariants();
   if(activeBillingCategory !== 'all'){
@@ -13192,6 +13199,126 @@ function renderBillingProductGrid(){
         </div>
       </div>`;
   }).join('');
+}
+
+// ---------- 🆕📊 صدام کی ہدایت (FM22SEPTU0B): بلنگ سکرین کا نیا جدول نظارہ — بالکل آرڈر ٹیکنگ کے "جدول" نظارے
+// (renderOtItemsTable) جیسا ہی: #(سرخ گول بیج) → نام → پیکنگ → سٹاک → مقدار۔ سیریل نمبر کے حساب سے ترتیب،
+// ہر ویریئنٹ اپنی الگ قطار (کئی پیکنگ والی سبزی کے لیے "Choose" بٹن کی ضرورت نہیں رہی)۔ + بٹن addToCart() اور
+// − بٹن changeQty() کو براہ راست بلاتے ہیں — وہی فنکشن جو کارڈ گرڈ استعمال کرتا تھا، اس لیے بل (Billing.cart)
+// اور renderCart() کا سارا نظام بغیر کسی تبدیلی کے، فوراً اسی طرح کام کرتا ہے ---------- -->
+function renderBillingProductTable(grid){
+  let flat = getFlatVariants();
+  if(activeBillingCategory !== 'all'){
+    flat = flat.filter(v => v.category === activeBillingCategory);
+  }
+  if(activeBillingSearch){
+    flat = flat.filter(v => v.name.toLowerCase().includes(activeBillingSearch) || v.barcode.includes(activeBillingSearch));
+  }
+  // ---------- 🔼 سیریل نمبر کے حساب سے Ascending ترتیب — سب سے چھوٹا سیریل نمبر سب سے اوپر ---------- -->
+  flat.sort((a,b) => (a.serial_no ?? Infinity) - (b.serial_no ?? Infinity));
+
+  if(flat.length === 0){
+    grid.style.display = 'grid';
+    if(activeBillingSearch){
+      grid.innerHTML = `
+        <div class="productGridCard" style="grid-column:1/-1; height:auto; flex-direction:row; align-items:center; justify-content:center; gap:10px; cursor:pointer; padding:14px;" onclick="openQuickAddPrefilled('${activeBillingSearch.replace(/'/g,"\\'")}')">
+          <span style="font-size:20px;">➕</span>
+          <span class="pgName" style="font-size:12px; color:var(--text); white-space:normal; text-shadow:none;">"${activeBillingSearch}" not found — tap to add as new item</span>
+        </div>`;
+    } else {
+      grid.innerHTML = `<div class="placeholder" style="grid-column:1/-1;">No items in this category</div>`;
+    }
+    return;
+  }
+
+  const thBase = "position:-webkit-sticky;position:sticky;top:0;z-index:14;background:rgba(19,78,44,.93);backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);color:#fff;font-weight:800;font-size:11px;padding:6px 3px;white-space:nowrap;text-align:center;border-left:1px solid rgba(255,255,255,.15);box-sizing:border-box;";
+  const tdBase = "padding:4px 3px;border-bottom:1.5px solid #dbe1ea;border-left:1px solid #eef1f5;text-align:center;vertical-align:middle;box-sizing:border-box;font-weight:700;";
+  const urduFont = "font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;";
+  const measUrduFontBl = "700 13.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
+  const measPackFontBl = "700 11.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
+  const measNumFontBl = "900 12.5px Arial,Helvetica,sans-serif";
+  const serialWBl = autoColWidth('#', flat.map(v => v.serial_no ?? '?'), measNumFontBl, {min:32, max:48, pad:14});
+  const nameWBl = autoColWidth('نام', flat.map(v => (productsData.find(p => p.product_id === v.product_id)?.name) || v.name), measUrduFontBl, {min:70, max:190, pad:24});
+  const packWBl = autoColWidth('پیکنگ', flat.map(v => v.label || ''), measPackFontBl, {min:40, max:90, pad:14});
+  const stockWBl = autoColWidth('سٹاک', flat.map(v => v.stock), measNumFontBl, {min:36, max:64, pad:14});
+  let qtyWBl = Math.max(96, autoColWidth('مقدار', flat.map(v => { const ci = Billing.cart.find(c => c.variant_id === v.variant_id); return ci ? ci.qty : ''; }), measNumFontBl, {min:30, max:60, pad:10}) + 66);
+  // ---------- خالی بچی سکرین کی چوڑائی "مقدار" کالم کو دے دیں (بالکل آرڈر ٹیکنگ جدول جیسا) ---------- -->
+  const blAvailW = (grid.clientWidth || grid.offsetWidth || 0) - 4;
+  const blPreliminaryTotal = serialWBl + nameWBl + packWBl + stockWBl + qtyWBl;
+  if(blAvailW > blPreliminaryTotal){ qtyWBl += (blAvailW - blPreliminaryTotal); }
+  const colWidths = [serialWBl, nameWBl, packWBl, stockWBl, qtyWBl];
+  const rightOffsets = [0, colWidths[0]];
+
+  const rows = flat.map((v, idx) => {
+    const cartItem = Billing.cart.find(c => c.variant_id === v.variant_id);
+    const qty = cartItem ? cartItem.qty : 0;
+    const checked = qty > 0;
+    const rowBg = checked ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : (idx % 2 === 0 ? '#ffffff' : '#dde6e2');
+    const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
+    const pName = (productsData.find(p => p.product_id === v.product_id)?.name) || v.name;
+    const stockColor = v.stock <= 0 ? '#b91c1c' : '#134e2c';
+    const rowTd = `background:${rowBg};`;
+    return `
+      <tr data-variant-id="${v.variant_id}">
+        <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default !important;pointer-events:none !important;margin:0 !important;">${v.serial_no ?? '?'}</span></td>
+        <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13.5px;font-weight:${AppState.settings.productCardNameWeight || 700};">${pName}</td>
+        <td style="${tdBase}${rowTd}${urduFont}font-size:11.5px;">${v.label || ''}</td>
+        <td style="${tdBase}${rowTd}font-weight:900;color:${stockColor};" data-bill-stock-for="${v.variant_id}">${v.stock}</td>
+        <td style="${tdBase}${rowTd}padding:4px 3px;">
+          <div style="display:flex; align-items:center; justify-content:center; gap:9px; padding-inline-end:6px;">
+            <input type="text" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setBillQtyTableManual(${v.variant_id}, this.value, this)" style="width:42px;box-sizing:border-box;padding:5px 2px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:7px;font-size:12.5px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);">
+            <button type="button" onclick="addToCart(${v.variant_id})" style="width:27px;height:27px;border:none;border-radius:7px;background:#dcfce7;color:#15803d;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #86efac;">+</button>
+            <button type="button" onclick="changeQty(${v.variant_id}, -1)" style="width:27px;height:27px;border:none;border-radius:7px;background:#fee2e2;color:#b91c1c;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #fca5a5;">−</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+  const headers = ['#','نام','پیکنگ','سٹاک','مقدار'];
+  const theadHtml = '<tr>' + headers.map((h,i) => {
+    const frozen = i < 2 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:16;` : '';
+    return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
+  }).join('') + '</tr>';
+  const colgroupHtml = '<colgroup>' + colWidths.map(w => `<col style="width:${w}px;">`).join('') + '</colgroup>';
+  const totalTableWBl = colWidths.reduce((a,b) => a+b, 0);
+  grid.style.display = 'block';
+  grid.innerHTML = `
+    <div style="width:100%;max-height:74vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1.5px solid #cbd5e1;box-shadow:0 3px 10px rgba(0,0,0,.1);">
+      <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableWBl}px;table-layout:fixed;font-size:12.5px;">
+        ${colgroupHtml}
+        <thead>${theadHtml}</thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+// ---------- ہاتھ سے مقدار لکھنے پر — 0/خالی ہو تو بل سے نکال دیں، ورنہ Track Inventory آن ہو تو حد چیک کر کے
+// شامل/اپڈیٹ کریں۔ بالکل وہی Billing.cart استعمال ہوتا ہے جو +/- بٹن استعمال کرتے ہیں، اس لیے بل اوپر فوراً اپڈیٹ ---------- -->
+function setBillQtyTableManual(variantId, value, inputEl){
+  let qty = parseFloat(String(value).replace(',', '.'));
+  if(!isFinite(qty) || qty < 0) qty = 0;
+  qty = Math.round(qty * 100) / 100;
+  const product = getFlatVariants().find(p => p.variant_id === variantId);
+  if(!product) return;
+  if(qty > 0 && AppState.settings.trackInventory && qty > product.stock){
+    alert(`❌ صرف ${Math.max(product.stock, 0)} سٹاک موجود ہے — سیٹنگز میں "Track Inventory" آن ہے، اس لیے اس سے زیادہ فروخت نہیں ہو سکتی۔`);
+    qty = Math.max(product.stock, 0);
+  }
+  const existing = Billing.cart.find(c => c.variant_id === variantId);
+  if(qty <= 0){
+    Billing.cart = Billing.cart.filter(c => c.variant_id !== variantId);
+  } else if(existing){
+    existing.qty = qty;
+  } else {
+    const price = Billing.saleMode === 'retail' ? product.retail : product.wholesale;
+    Billing.cart.push({variant_id: variantId, name: product.name, label: product.label || '', qty, unitPrice: price, unit: product.unit || 'pcs', laborPerUnit: product.sellLabor || 0});
+  }
+  if(inputEl){
+    inputEl.value = qty || '';
+    inputEl.style.borderColor = qty > 0 ? 'var(--primary)' : '#dbe1ea';
+    flashSavedInput(inputEl);
+  }
+  renderCart();
+  renderBillingProductGrid();
 }
 
 // ---------- Barcode scan اسی input سے ہینڈل ہوگا (Enter دبانے پر پہلی exact match شامل ہو) ----------
@@ -37596,19 +37723,19 @@ async function renderDailyStockProfitReportToCanvas(){
     const sold = soldQtyMap[v.variant_id] || 0;
     const remaining = v.stock || 0;
     const cost = (v.purchase || 0) + (v.labor || 0);
-    const profit = (v.retail || v.wholesale || 0) > 0 ? sold * ((v.retail || v.wholesale || 0) - cost) : sold * ((v.retail||0) - cost);
+    const salePrice = v.retail || v.wholesale || 0;
+    const profitRate = salePrice - cost; // ---------- 🆕 صدام کی ہدایت (22 ستمبر): شرح منافع — فی یونٹ منافع (فروخت − خرید) ---------- -->
     // ---------- زیادہ درست منافع: ہر بل کی اپنی unitPrice سے (بجائے صرف موجودہ ریٹ کے) ---------- -->
     let realProfit = 0;
     todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
       if(it.variant_id === v.variant_id) realProfit += (it.qty || 0) * ((it.unitPrice || 0) - cost);
     }));
     totalProfitToday += realProfit;
-    rows.push({serial: p.serial_no ?? '?', name: p.name, label: v.label || '', opening, added, total, sold, remaining, profit: realProfit});
+    rows.push({serial: p.serial_no ?? '?', name: p.name, label: v.label || '', opening, added, total, sold, remaining, cost, salePrice, profitRate, profit: realProfit});
   });
-  // ---------- 🏆 صدام کی ہدایت (FM16SEPWE11): سیریل نمبر کے حساب سے ترتیب کے بجائے اب سب سے زیادہ منافع
-  // والی سبزی سب سے اوپر، اور سب سے کم (یا نقصان والی) سبزی سب سے آخر میں — یعنی آج کے منافع کے حساب سے
-  // Descending ترتیب؛ سیریل نمبر کا اب کوئی عمل دخل نہیں ---------- -->
-  rows.sort((a,b) => b.profit - a.profit);
+  // ---------- 🔄 صدام کی ہدایت (22 ستمبر): واپس سیریل نمبر کی Ascending ترتیب پر — سب سے چھوٹا سیریل نمبر سب
+  // سے اوپر (منافع کے حساب سے Descending ترتیب والی پرانی ہدایت FM16SEPWE11 اب منسوخ) ---------- -->
+  rows.sort((a,b) => (a.serial === '?' ? Infinity : a.serial) - (b.serial === '?' ? Infinity : b.serial));
 
   const fontScale = (AppState.settings.reportFontScale || 100) / 100;
   const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
@@ -37616,17 +37743,19 @@ async function renderDailyStockProfitReportToCanvas(){
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.family;
   // ---------- 🔤🔢 صدام کی ہدایت (16 ستمبر، شام): نام/پیکنگ اور ہیڈر لیبل ہمیشہ منتخب شدہ اردو فونٹ (نستعلیق/کشیدہ وغیرہ)
-  // میں رہیں گے، مگر خالص ہندسوں والے خانے (پرانا/آج/ٹوٹل/فروخت/باقی/منافع کی قدریں) ایک صاف انگریزی/لاطینی
-  // فونٹ میں دکھائے جائیں گے — نستعلیق فونٹس میں ہندسے اکثر ٹوٹے پھوٹے یا غلط شکل میں نظر آتے ہیں ---------- -->
+  // میں رہیں گے، مگر خالص ہندسوں والے خانے ایک صاف انگریزی/لاطینی فونٹ میں دکھائے جائیں گے — نستعلیق فونٹس میں
+  // ہندسے اکثر ٹوٹے پھوٹے یا غلط شکل میں نظر آتے ہیں ---------- -->
   const numberPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportNumberFontId) || FONT_PRESETS.find(f => f.id === 'tahoma');
   const numFontFam = numberPreset.family;
   try{ await document.fonts.load(`13px ${numFontFam}`); }catch(e){}
   try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
   // ---------- ⬅➡ صدام کی ہدایت (16 ستمبر، شام): اوپر کے ⬅ ↔ ➡ بٹنوں (reportAlign) کا اطلاق اب اس رپورٹ پر بھی ہوتا ہے —
-  // نام/پیکنگ کالم ہمیشہ رائٹ الائن (اردو) رہے گا، باقی تمام ہندسوں والے کالم (# سمیت) صارف کے منتخب کردہ
-  // الائنمنٹ (بائیں/درمیان/دائیں) کے مطابق بنیں گے ---------- -->
+  // نام/پیکنگ کالم ہمیشہ رائٹ الائن (اردو) رہے گا، باقی تمام ہندسوں والے کالم صارف کے منتخب کردہ الائنمنٹ
+  // (بائیں/درمیان/دائیں) کے مطابق بنیں گے ---------- -->
   const digitAlign = AppState.settings.reportAlign || 'left';
-  const alignForCol = (key) => key === 'name' ? 'right' : digitAlign;
+  // ---------- 🆕 صدام کی ہدایت (22 ستمبر): پیکنگ کالم میں بھی اردو الفاظ (کلو/پیٹی وغیرہ) ہوتے ہیں، ہندسے نہیں —
+  // اس لیے یہ بھی نام کی طرح ہمیشہ دائیں طرف (اردو طرز) ہی رہے گا ---------- -->
+  const alignForCol = (key) => (key === 'name' || key === 'packing') ? 'right' : digitAlign;
   const xForCol = (c, align) => {
     const pad = Math.max(3, Math.round(c.width * 0.04));
     if(align === 'right') return c.x + c.width - pad;
@@ -37647,11 +37776,11 @@ async function renderDailyStockProfitReportToCanvas(){
   const baseRowH = Math.round(fsItem * 2.6 * rowScaleSetting);
   const headerRowH = Math.round(fsHeader * 2.8 * rowScaleSetting);
 
-  // ---------- کالمز: # | نام(+پیکنگ) | پرانا | +آج | ٹوٹل | فروخت | باقی | منافع ---------- -->
-  // ---------- 📏 صدام کی ہدایت (17 ستمبر، صبح): نام کا کالم مقررہ فیصد کی بجائے سب سے بڑی سبزی کے نام
-  // جتنا خودکار چوڑا ہو (اوپر سے نیچے تک اسی کی لائن اکیلی جتنی چاہیے)، باقی بچنے والی/کم پڑنے والی چوڑائی
-  // باقی 6 ہندسوں والے کالموں میں برابر تقسیم ہو جائے — تاکہ پرنٹ میں کبھی ایک طرف خالی جگہ نہ بچے ---------- -->
-  const wSerial = Math.round(totalW * 0.06);
+  // ---------- 🆕 صدام کی ہدایت (22 ستمبر): نیا کالم ڈھانچہ — سیریل نمبر اب علیحدہ کالم نہیں، نام کے ساتھ ہی
+  // گول سرخ بیج میں (drawSerialBadge، بالکل منشی سٹاک لاگ رپورٹ جیسا)؛ پیکنگ اپنے مکمل علیحدہ کالم میں؛
+  // کالمز: نام(+بیج) | پیکنگ | حاضر سٹاک | قیمت خرید | قیمت فروخت | شرح منافع | تعداد فروخت | باقی سٹاک | منافع ---------- -->
+  const badgeD = Math.max(12, Math.min(22, Math.round(fsItem * 1.3)));
+  const badgeGap = Math.round(fsItem * 0.28);
   ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
   let maxNameTextW = 0;
   rows.forEach(r => {
@@ -37660,19 +37789,30 @@ async function renderDailyStockProfitReportToCanvas(){
   });
   const namePad = Math.max(10, Math.round(fsItem * 0.9));
   const minNameW = Math.round(totalW * 0.15);
-  const maxNameW = Math.round(totalW * 0.44);
-  let wName = Math.min(maxNameW, Math.max(minNameW, Math.round(maxNameTextW + namePad)));
-  const wNum = Math.round((totalW - wSerial - wName) / 6);
-  wName = totalW - wSerial - wNum * 6; // ---------- گول کرنے سے بچی/بڑھی چوڑائی نام کے کالم میں جذب ---------- -->
+  const maxNameW = Math.round(totalW * 0.34);
+  let wName = Math.min(maxNameW, Math.max(minNameW, Math.round(maxNameTextW + namePad + badgeD + badgeGap)));
+
+  // ---------- 📦 پیکنگ کالم بھی خودکار چوڑا — "پیکنگ" لفظ اور سب سے لمبی پیکنگ ویلیو، دونوں کبھی نہ کٹیں ---------- -->
+  ctx.font = `bold ${fsHeader}px ${fontFam}`;
+  let maxPackTextW = ctx.measureText('پیکنگ').width;
+  ctx.font = `${fsItem}px ${fontFam}`;
+  rows.forEach(r => { const w = ctx.measureText(r.label || '').width; if(w > maxPackTextW) maxPackTextW = w; });
+  const minPackW = Math.round(totalW * 0.08);
+  const maxPackW = Math.round(totalW * 0.18);
+  let wPack = Math.min(maxPackW, Math.max(minPackW, Math.round(maxPackTextW + namePad)));
+
+  const wNum = Math.round((totalW - wName - wPack) / 7);
+  wName = totalW - wPack - wNum * 7; // ---------- گول کرنے سے بچی/بڑھی چوڑائی نام کے کالم میں جذب ---------- -->
 
   const cols = [
-    {key:'serial', label:'#', width:wSerial},
-    {key:'name', label:'نام/پیکنگ', width:wName},
-    {key:'opening', label:'پرانا', width:wNum},
-    {key:'added', label:'+آج', width:wNum},
-    {key:'total', label:'ٹوٹل', width:wNum},
-    {key:'sold', label:'فروخت', width:wNum},
-    {key:'remaining', label:'باقی', width:wNum},
+    {key:'name', label:'نام', width:wName},
+    {key:'packing', label:'پیکنگ', width:wPack},
+    {key:'total', label:'حاضر سٹاک', width:wNum},
+    {key:'cost', label:'قیمت خرید', width:wNum},
+    {key:'salePrice', label:'قیمت فروخت', width:wNum},
+    {key:'profitRate', label:'شرح منافع', width:wNum},
+    {key:'sold', label:'تعداد فروخت', width:wNum},
+    {key:'remaining', label:'باقی سٹاک', width:wNum},
     {key:'profit', label:'منافع', width:wNum},
   ];
   // ---------- ð ØµØ¯Ø§Ù Ú©Û ÛØ¯Ø§ÛØª (FM16SEPWE10): Ú©Ø§ÙÙÚ Ù¾ÙÙÛ Ø¨Ø§ÛÛÚ (Ø§ÙÚ¯ÙØ´) Ø³Ú Ø³Û Ø´Ø±ÙØ¹ ÛÙ Ú©Ø± Ø¯Ø§ÛÛÛÚº Ø·Ø±Ù Ø¬Ø§ØªÛ ØªÛÛ Ø§Ø¨ Ø¯Ø§ÛÛÛ Ø³Û Ø´Ø±ÙØ¹ Ú©ÛØ§ Ø¬Ø§ØªØ§ ÛÛ Ù Ø¨Ø§ÛÛÚº Ø¬Ø§ Ú©Ø± (Ø§Ø±Ø¯Ù RTL Ø·Ø±Ø²), Ù¾ÙÙØ§ Ú©Ø§ÙÙ (ÙØ«ÙØ§Ù #) Ø§Ø¨ Ø³Ø¨ Ø³Û Ø¯Ø§ÛÛÛ ÙØ¸Ø± Ø¢Ø¦Û Ú¯Ø§ ---------- -->
@@ -37789,21 +37929,28 @@ async function renderDailyStockProfitReportToCanvas(){
         const align = alignForCol(c.key);
         ctx.textAlign = align;
         const tx = xForCol(c, align);
-        let txt;
-        if(c.key === 'serial') txt = String(r.serial);
-        else if(c.key === 'name') txt = null; // ---------- خاص طور پر نیچے دو لائنوں میں ---------- -->
-        else txt = String(r[c.key]);
+        // ---------- 🆕 صدام کی ہدایت (22 ستمبر): نام کالم میں اب گول سرخ سیریل بیج (نام کے دائیں طرف، متن اس
+        // سے بائیں طرف کھسک کر) — علیحدہ # کالم ختم؛ پیکنگ اپنے علیحدہ کالم میں (پہلے نام کے نیچے دوسری
+        // لائن میں ہوتی تھی) ---------- -->
         if(c.key === 'name'){
-          const px1 = fitCellFont(r.name, c.width-6, fsItem, fontFam);
+          const nameTx = tx - badgeD - badgeGap;
+          const px1 = fitCellFont(r.name, c.width - 6 - badgeD - badgeGap, fsItem, fontFam);
           ctx.font = `${bold ? 'bold ' : ''}${px1}px ${fontFam}`;
           ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
-          ctx.fillText(r.name, tx, y + rh/2 - 3);
-          ctx.font = `${Math.round(px1*0.8)}px ${fontFam}`;
-          ctx.fillStyle = '#64748b';
-          ctx.fillText(r.label, tx, y + rh/2 + Math.round(px1*0.85));
+          ctx.fillText(r.name, nameTx, y + rh/2 + fsItem*0.32);
           ctx.restore();
-          ctx.fillStyle = '#1a1a1a';
+          if(r.serial !== '?' && r.serial != null){
+            drawSerialBadge(ctx, tx - badgeD/2, y + rh/2, badgeD/2, r.serial);
+          }
+        } else if(c.key === 'packing'){
+          const packTxt = r.label || '';
+          const px1p = fitCellFont(packTxt, c.width-6, fsItem, fontFam);
+          ctx.font = `${px1p}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(packTxt, tx, y + rh/2 + fsItem*0.32);
+          ctx.restore();
         } else {
+          const txt = String(r[c.key]);
           if(c.key === 'profit') ctx.fillStyle = r.profit >= 0 ? '#065f2b' : '#991b1b';
           const px2 = fitCellFont(txt, c.width-4, fsItem, numFontFam);
           ctx.font = `${px2}px ${numFontFam}`;
