@@ -8481,7 +8481,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'منگل22ستمبر01:40pm';
+const APP_BUILD_VERSION = 'منگل22ستمبر02:05pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -14103,13 +14103,14 @@ async function openBillPreviewBeforeComplete(){
 function finalizeInvoice(){
   if(Billing.cart.length === 0) return;
 
-  // ---------- 💰 صدام کی ہدایت (FM16SEPWE0857AM): بل بننے سے پہلے کارٹ کے ہر آئٹم کی خرید قیمت، مزدوری خرید،
+  // ---------- 💰 صدام کی ہدایت (FM16SEPWE0857AM): بل بننے سے پہلے کارٹ کے ہر آئٹم کی خرید قیمت،
   // مزدوری فروخت، راولپنڈی ریٹ اور اسلام آباد ریٹ — یہ سب خانے بھرے ہونے لازمی ہیں، ورنہ بل نہیں بنے گا اور
-  // بتایا جائے گا کہ کس سبزی کا کون سا خانہ خالی ہے (سٹاک زیرو والا چیک پہلے سے موجود ہے، یہ اس کے علاوہ ہے) ---------- -->
+  // بتایا جائے گا کہ کس سبزی کا کون سا خانہ خالی ہے (سٹاک زیرو والا چیک پہلے سے موجود ہے، یہ اس کے علاوہ ہے)
+  // 🔴 صدام کی ہدایت (22 ستمبر): "💪 مزدوری خرید" کا خانہ ہی حذف کر دیا گیا ہے — اب یہاں لازمی فہرست میں شامل
+  // نہیں، ورنہ نئی/خالی-لیبر سبزیوں کا بل کبھی نہ بنتا (خانہ بھرنے کی کوئی جگہ ہی باقی نہیں رہی) ---------- -->
   {
     const REQUIRED_PRICE_FIELDS = [
       {field:'purchase',  label:'💰 خرید قیمت'},
-      {field:'labor',     label:'💪 مزدوری خرید'},
       {field:'sellLabor', label:'💪 مزدوری فروخت'},
       {field:'wholesale', label:'🟢 راولپنڈی ریٹ'},
       {field:'retail',    label:'🔴 اسلام آباد ریٹ'},
@@ -17814,16 +17815,17 @@ let vcInlineSourceWrapId = null;
 let vcInlineAdvanceTimer = null;
 let vcInlineSpeedMs = loadFromStorage('vcEditSpeedMs', 600);
 // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM3): سٹاک باکس اوپر منتقل ہونے کے بعد اب آٹو-ایڈوانس کرسر کی
-// ترتیب بھی اسی نئی بصری ترتیب سے ملا دی — سب سے پہلے سٹاک، پھر خرید، م.خرید، م.فروخت (حتمی خانہ خود کار/لاک
-// ہے، کرسر اس میں کبھی نہیں جاتا)، پھر راولپنڈی، آخر میں اسلام آباد پر رک جاتا ہے ---------- -->
-const VC_INLINE_FIELD_ORDER = ['stock', 'purchase', 'labor', 'sellLabor', 'wholesale', 'retail']; // ---------- 🔒 صدام کی ہدایت (17 ستمبر، دوپہر — اصلاح): ترتیب اب سٹاک → خرید → م.خرید → م.فروخت → راولپنڈی → سب سے آخر میں اسلام آباد ----------
-const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', labor:'vcInlineLabor', sellLabor:'vcInlineSellLabor', wholesale:'vcInlineWholesale', retail:'vcInlineRetail', stock:'vcInlineStock'};
+// ترتیب بھی اسی نئی بصری ترتیب سے ملا دی — سب سے پہلے سٹاک، پھر خرید، م.فروخت (حتمی خانہ خود کار/لاک
+// ہے، کرسر اس میں کبھی نہیں جاتا)، پھر راولپنڈی، آخر میں اسلام آباد پر رک جاتا ہے
+// 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" (labor) خانہ مکمل حذف — نہ کرسر اب اس میں جاتا ہے، نہ یہ لازمی ہے ---------- -->
+const VC_INLINE_FIELD_ORDER = ['stock', 'purchase', 'sellLabor', 'wholesale', 'retail']; // ---------- 🔒 صدام کی ہدایت (22 ستمبر — اصلاح): ترتیب اب سٹاک → خرید → م.فروخت → راولپنڈی → سب سے آخر میں اسلام آباد ----------
+const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', sellLabor:'vcInlineSellLabor', wholesale:'vcInlineWholesale', retail:'vcInlineRetail', stock:'vcInlineStock'};
 // ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): 📦 سٹاک چھوڑا جا سکتا ہے (خالی/زیرو دونوں ٹھیک)، مگر باقی
-// یہ 5 خانے — 💰 خرید، 💪 م.خرید، 💪 م.فروخت، 🟢 راولپنڈی، 🔴 اسلام آباد — سب لکھے ہونے چاہئیں تبھی سبزی
-// "مکمل" شمار ہوگی، تبھی ◀▶ سے اگلی سبزی پر جایا جا سکے گا ---------- -->
+// یہ 4 خانے — 💰 خرید، 💪 م.فروخت، 🟢 راولپنڈی، 🔴 اسلام آباد — سب لکھے ہونے چاہئیں تبھی سبزی
+// "مکمل" شمار ہوگی، تبھی ◀▶ سے اگلی سبزی پر جایا جا سکے گا
+// 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" حذف ہونے کے بعد اب لازمی نہیں — ورنہ نئی سبزی کبھی "مکمل" شمار نہ ہوتی ---------- -->
 const VC_INLINE_REQUIRED_FIELDS = [
   {field:'purchase', label:'💰 خرید قیمت'},
-  {field:'labor', label:'💪 مزدوری خرید'},
   {field:'sellLabor', label:'💪 مزدوری فروخت'},
   {field:'wholesale', label:'🟢 راولپنڈی ریٹ'},
   {field:'retail', label:'🔴 اسلام آباد ریٹ'}
@@ -17852,13 +17854,17 @@ let vcInlineFocusStockPending = false;
 function buildVcInlinePanelHtml(){
   const numFontStack = "'Arial Narrow',Arial,sans-serif";
   const urduFont = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif";
+  // ---------- 🔴 صدام کی ہدایت (22 ستمبر) اہم فکس: پہلے یہاں flex-shrink کنٹرول نہیں تھا — چوڑائی (width)
+  // لکھنے کے باوجود تنگ سکرین پر سب خانے خودکار سکڑ کر برابر ہو جاتے تھے (خرید کا نیا چوڑا خانہ بھی سکڑ کر
+  // پرانے سائز پر آ جاتا)۔ اب flex:0 0 auto — خانے اپنی اصل چوڑائی پر رہیں گے، ضرورت پڑنے پر قطار افقی
+  // سکرول ہو گی (جیسا نیچے کمنٹ میں پہلے سے لکھا تھا) ---------- -->
   const fieldBox = (id, label, bg, border, shadow, color, w) => `
-    <div style="background:${bg}; border:1px solid ${border}; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 ${shadow}; text-align:center; width:${w||42}px; box-sizing:border-box;">
+    <div style="flex:0 0 auto; background:${bg}; border:1px solid ${border}; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 ${shadow}; text-align:center; width:${w||42}px; box-sizing:border-box;">
       <div style="font-size:7.5px; font-weight:900; color:${color}; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">${label}</div>
       <input id="${id}" type="number" onfocus="clearTimeout(vcInlineAdvanceTimer);" oninput="vcInlineScheduleAdvance('${id.replace('vcInline','').charAt(0).toLowerCase() + id.replace('vcInline','').slice(1)}')" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid ${border}; border-radius:4px; padding:2px 1px; font-family:${numFontStack}; font-weight:900; font-size:13.5px; color:${color}; background:#fff;">
     </div>`;
   const plainBox = (id, label, bg, border, shadow, color, w) => `
-    <div style="background:${bg}; border:1px solid ${border}; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 ${shadow}; text-align:center; width:${w||42}px; box-sizing:border-box;">
+    <div style="flex:0 0 auto; background:${bg}; border:1px solid ${border}; border-radius:6px; padding:2px; box-shadow:0 1.5px 0 ${shadow}; text-align:center; width:${w||42}px; box-sizing:border-box;">
       <div style="font-size:7.5px; font-weight:900; color:${color}; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">${label}</div>
       <input id="${id}" type="number" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid ${border}; border-radius:4px; padding:2px 1px; font-family:${numFontStack}; font-weight:900; font-size:13.5px; color:${color}; background:#fff;">
     </div>`;
@@ -17881,12 +17887,13 @@ function buildVcInlinePanelHtml(){
           <input id="vcAddName" type="text" placeholder="🥬 نئی سبزی کا نام" style="flex:1 1 auto; min-width:0; box-sizing:border-box; border:1px solid #a5b4fc; border-radius:6px; padding:6px; font-family:${urduFont}; font-weight:900; font-size:13.5px; text-align:center; background:#fff;">
           <input id="vcAddPacking" type="text" placeholder="📦 پیکنگ ▾" readonly onclick="vcAddOpenPackingPicker()" style="flex:0 0 84px; box-sizing:border-box; border:1px solid #a5b4fc; border-radius:6px; padding:6px 3px; font-family:${urduFont}; font-weight:700; font-size:11.5px; text-align:center; background:#fff; cursor:pointer;">
         </div>
+        <!-- ---------- 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" خانہ یہاں سے بھی ہمیشہ کے لیے حذف — خرید کا خانہ
+             5-6 ڈجٹ کے لیے چوڑا (92px)، بقیہ خانے بچی ہوئی جگہ میں تھوڑے چوڑے (69px) ---------- -->
         <div style="display:flex; flex-wrap:wrap; align-items:center; gap:5px;" dir="rtl">
-          ${plainBox('vcAddStock','📦 سٹاک','linear-gradient(155deg,#eef2ff,#e0e7ff)','#c7d2fe','#a5b4fc','#3730a3', 64)}
-          ${plainBox('vcAddPurchase','💰 خرید','linear-gradient(155deg,#fef9e7,#fef3c7)','#fde68a','#f9d976','#92400e', 64)}
-          ${plainBox('vcAddLabor','💪 م.خرید','linear-gradient(155deg,#fff1eb,#ffe4d5)','#fdba95','#fbb08a','#9a3412', 64)}
-          ${plainBox('vcAddWholesale','🟢 راولپنڈی','linear-gradient(155deg,#eafbf0,#d5f5e0)','#86efac','#6fd696','#15803d', 64)}
-          ${plainBox('vcAddRetail','🔴 اسلام آباد','linear-gradient(155deg,#fdecec,#fad2d0)','#fca5a5','#f28b87','#b91c1c', 64)}
+          ${plainBox('vcAddStock','📦 سٹاک','linear-gradient(155deg,#eef2ff,#e0e7ff)','#c7d2fe','#a5b4fc','#3730a3', 69)}
+          ${plainBox('vcAddPurchase','💰 خرید','linear-gradient(155deg,#fef9e7,#fef3c7)','#fde68a','#f9d976','#92400e', 92)}
+          ${plainBox('vcAddWholesale','🟢 راولپنڈی','linear-gradient(155deg,#eafbf0,#d5f5e0)','#86efac','#6fd696','#15803d', 69)}
+          ${plainBox('vcAddRetail','🔴 اسلام آباد','linear-gradient(155deg,#fdecec,#fad2d0)','#fca5a5','#f28b87','#b91c1c', 69)}
         </div>
         <div style="display:flex; gap:10px; margin-top:7px;">
           <button type="button" onclick="vcInlineSaveNew()" style="flex:1 1 auto; max-width:220px; padding:9px; background:linear-gradient(180deg,#34d95a,#16a34a); color:#fff; border:none; border-radius:9px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 6px rgba(0,0,0,.15);">💾 محفوظ کریں</button>
@@ -17911,22 +17918,21 @@ function buildVcInlinePanelHtml(){
             </div>
           </div>
         </div>
-        <!-- ---------- دوسری لائن: سٹاک → خرید → م.خرید → م.فروخت → 🧮 حتمی خرید → راولپنڈی → اسلام آباد —
+        <!-- ---------- دوسری لائن: سٹاک → خرید → م.فروخت → 🧮 حتمی خرید → راولپنڈی → اسلام آباد —
              صرف نمبر خانے، اوپر نیچے سٹیک نہیں؛ اگر تنگ سکرین پر پوری لائن نہ سمائے تو خانے سکڑنے کی بجائے
-             افقی سکرول ہو جائے گی (وہی لائن ٹوٹے بغیر) ---------- -->
+             افقی سکرول ہو جائے گی (وہی لائن ٹوٹے بغیر)
+             🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" خانہ ہمیشہ کے لیے حذف — خرید کا خانہ اب 5-6 ڈجٹ کے لیے
+             چوڑا (92px)، حتمی خرید بھی بڑی رقم دکھانے کے لیے چوڑی (84px)، باقی خانے بھی تھوڑے چوڑے (69px) ---------- -->
         <div style="display:flex; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; align-items:center; gap:5px; padding-bottom:2px;" dir="rtl">
-          ${fieldBox('vcInlineStock', '📦 سٹاک', 'linear-gradient(155deg,#eef2ff,#e0e7ff)', '#c7d2fe', '#a5b4fc', '#3730a3', 64)}
-          ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e', 64)}
-          ${fieldBox('vcInlineLabor', '💪 م.خرید', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 64)}
-          ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 64)}
-          <!-- ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): سب خانے اب برابر چوڑے (64px) — چار ہندسے بھی
-               کبھی نہیں کٹیں گے، صاف ستھرے نظر آئیں گے ---------- -->
-          <div style="flex:0 0 auto; background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px 8px; text-align:center; width:64px; min-width:64px; box-sizing:border-box;">
+          ${fieldBox('vcInlineStock', '📦 سٹاک', 'linear-gradient(155deg,#eef2ff,#e0e7ff)', '#c7d2fe', '#a5b4fc', '#3730a3', 69)}
+          ${fieldBox('vcInlinePurchase', '💰 خرید', 'linear-gradient(155deg,#fef9e7,#fef3c7)', '#fde68a', '#f9d976', '#92400e', 92)}
+          ${fieldBox('vcInlineSellLabor', '💪 م.فروخت', 'linear-gradient(155deg,#fff1eb,#ffe4d5)', '#fdba95', '#fbb08a', '#9a3412', 69)}
+          <div style="flex:0 0 auto; background:linear-gradient(155deg,#e3ebe5,#d3e0d6); border:1px solid #c7d3c9; border-radius:6px; padding:2px 8px; text-align:center; width:84px; min-width:84px; box-sizing:border-box;">
             <div style="font-size:7.5px; font-weight:900; color:#134e2c; white-space:nowrap;">🧮 حتمی خرید</div>
             <div id="vcInlineTotalPurchase" style="font-family:${numFontStack}; font-weight:900; font-size:17px; color:#134e2c; text-align:center;">0</div>
           </div>
-          ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d', 64)}
-          ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c', 64)}
+          ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d', 69)}
+          ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c', 69)}
         </div>
       </div>
     </div>`;
@@ -18012,7 +18018,7 @@ function vcInlineSaveNew(){
   const savedSerial = maxSerial + 1;
   productsData.push({
     product_id: newProductId, name, category:'', isDormant:false, serial_no: savedSerial,
-    variants:[{ variant_id:newVariantId, label:packing, barcode:'NEW'+newVariantId, purchase:num('vcAddPurchase'), labor:num('vcAddLabor'), sellLabor:0, retail:num('vcAddRetail'), wholesale:num('vcAddWholesale'), stock:num('vcAddStock'), lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
+    variants:[{ variant_id:newVariantId, label:packing, barcode:'NEW'+newVariantId, purchase:num('vcAddPurchase'), labor:0, sellLabor:0, retail:num('vcAddRetail'), wholesale:num('vcAddWholesale'), stock:num('vcAddStock'), lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
   });
   saveToStorage('nextProductId', nextProductId);
   saveToStorage('nextVariantId', nextVariantId);
@@ -18085,7 +18091,6 @@ function vcInlinePopulate(){
   // ---------- 🔒 صدام کی ہدایت (FM16SEPWE4): اگر رقم 0/خالی ہے تو خانہ بالکل خالی نظر آئے (0 لکھا ہوا نہ ہو) —
   // تاکہ ہر خانے میں فوراً لکھنا شروع کیا جا سکے، پہلے 0 مٹانے کی ضرورت نہ پڑے ---------- -->
   document.getElementById('vcInlinePurchase').value = variant.purchase || '';
-  document.getElementById('vcInlineLabor').value = variant.labor || '';
   document.getElementById('vcInlineSellLabor').value = variant.sellLabor || '';
   document.getElementById('vcInlineWholesale').value = variant.wholesale || '';
   document.getElementById('vcInlineRetail').value = variant.retail || '';
@@ -18103,9 +18108,13 @@ function vcInlinePopulate(){
 
 function vcInlineScheduleAdvance(field){
   vcInlineCommit(field, document.getElementById(VC_INLINE_ID_MAP[field]).value);
-  if(field === 'purchase' || field === 'labor'){
+  // ---------- 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" کا لائیو ان پٹ باکس ختم — پرانی منجمد رقم اب براہ راست
+  // منتخب شدہ variant سے ملتی ہے (productsData)، تاکہ "🧮 حتمی خرید" باقی رپورٹس سے مطابقت میں رہے ---------- -->
+  if(field === 'purchase'){
     const p = parseFloat(document.getElementById('vcInlinePurchase').value) || 0;
-    const l = parseFloat(document.getElementById('vcInlineLabor').value) || 0;
+    const product = productsData.find(pr => pr.product_id === vcInlineSelectedId);
+    const variant = product?.variants.find(v => v.variant_id === vcInlineSelectedVariantId);
+    const l = variant?.labor || 0;
     document.getElementById('vcInlineTotalPurchase').textContent = (p + l).toLocaleString();
   }
   // ---------- 🔒 17 ستمبر، دوپہر: خودکار کرسر — ہر حرف پر ٹائمر ری سیٹ ہوتا ہے، صارف کے رکنے کے (منتخب
