@@ -1344,9 +1344,9 @@
   .rateBadgeStock{background:#334155;}
   .productHead .pMeta{font-size:12px; color:var(--muted); margin-top:2px;}
   .productHead .pActions{display:flex; flex-direction:column; align-items:center; gap:6px; flex:0 0 auto;}
-  /* ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر چیک باکس مکمل ہائیڈ — سب سبزیاں اب ہمیشہ
-     حاضر شمار ہوں گی (HTML/فنکشن محفوظ ہے، صرف CSS سے چھپایا گیا) ---------- */
-  .productHead .pPresenceCheck{display:none;}
+  /* ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر چیک باکس دوبارہ بحال — کسٹمر نے یہ فیچر دوبارہ
+     مانگا، اس لیے FM16SEPWE0518AM2 کا یہ ہائیڈ یہاں واپس لیا گیا ---------- */
+  .productHead .pPresenceCheck{display:flex; align-items:center; flex:0 0 auto;}
   .variantCount{background:#eef2ff; color:var(--primary-dark); font-size:12px; padding:3px 10px; border-radius:20px; font-weight:600;}
   .productActionBtn{border:none; background:#f1f5f9; color:var(--text); width:26px; height:26px; border-radius:8px; font-size:12px; cursor:pointer; flex:0 0 auto;}
   .productActionBtn.danger{background:#fef2f2; color:var(--danger);}
@@ -3836,10 +3836,17 @@
                 <span class="cdiName">📦 انوینٹری ٹریک کریں</span>
               </label>
             </div>
-            <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
-            <div style="display:none;">
-              <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')">🟢 حاضر</button>
-              <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')">🔴 غیر حاضر</button>
+            <!-- ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر نظام دوبارہ بحال (FM16SEPWE0518AM2 والا ہائیڈ واپس لیا) ---------- -->
+            <div style="display:flex; gap:6px; padding:4px 0;">
+              <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer;">🟢 حاضر</button>
+              <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer;">🔴 غیر حاضر</button>
+            </div>
+            <!-- ---------- 🆕🔒 صدام کی ہدایت (FM21SEPMO0N): سٹاک زیرو کرنے کے دو بٹن — منشی کا رپورٹ چیک کرنے کے
+                 بعد اس کا سٹاک زیرو کرنے کے لیے، اور ایڈمن کا اپنا عمومی زیرو بٹن۔ دونوں ایک ہی محفوظ فنکشن
+                 (zeroAllStock) بلاتے ہیں — دو وارننگ + ایڈمن پن، تینوں پاس ہوں تبھی سٹاک زیرو ہوگا ---------- -->
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px; padding-top:8px; border-top:1.5px dashed #fca5a5;">
+              <button type="button" onclick="closeStockAdjReportsDropdown(); zeroAllStock();" style="padding:9px; background:linear-gradient(180deg,#dc2626,#7f1d1d); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:11.5px; cursor:pointer;">🧑‍🌾 منشی کا سٹاک زیرو کریں (نیا سٹاک فیڈ کرنے سے پہلے)</button>
+              <button type="button" onclick="closeStockAdjReportsDropdown(); zeroAllStock();" style="padding:9px; background:linear-gradient(180deg,#dc2626,#7f1d1d); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:11.5px; cursor:pointer;">🔑 ایڈمن: تمام سٹاک زیرو کریں</button>
             </div>
           </div>
         </div>
@@ -3937,8 +3944,8 @@
               <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import Products</button>
               <input type="file" id="productCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handleProductCsvFileSelect(event)">
             </div>
-            <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
-            <div style="display:none; gap:8px; margin-bottom:12px;">
+            <!-- ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر نظام دوبارہ بحال (FM16SEPWE0518AM2 والا ہائیڈ واپس لیا) ---------- -->
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
               <button id="prodPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:1; padding:9px; border-radius:9px; border:none; font-size:12.5px; font-weight:800; cursor:pointer;">🟢 حاضر سبزیاں</button>
               <button id="prodPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:1; padding:9px; border-radius:9px; border:none; font-size:12.5px; font-weight:800; cursor:pointer;">🔴 غیر حاضر سبزیاں</button>
             </div>
@@ -5610,6 +5617,10 @@
         <input type="text" id="otAddStockSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر" oninput="renderOtAddStockList(this.value)"
                style="width:100%; padding:10px; border:2px solid var(--primary); border-radius:10px; font-size:13.5px; font-weight:700; text-align:center; margin-bottom:10px; box-sizing:border-box;">
         <div id="otAddStockListWrap"></div>
+        <!-- ---------- 🆕🔒 صدام کی ہدایت (FM21SEPMO0N): منشی/آرڈر لینے والے کے لیے یہیں سے بھی سٹاک زیرو کرنے
+             کا بٹن — نیا سٹاک فیڈ کرنے سے پہلے پرانا سٹاک صاف کرنا ہو تو۔ دو وارننگ + ایڈمن PIN، تینوں پاس ہوں
+             تبھی سٹاک زیرو ہوگا (zeroAllStock) ---------- -->
+        <button type="button" onclick="zeroAllStock()" style="width:100%; margin-top:8px; padding:11px; background:linear-gradient(180deg,#dc2626,#7f1d1d); color:#fff; border:none; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer;">🧹 سٹاک زیرو کریں (نیا سٹاک فیڈ کرنے سے پہلے)</button>
         <button type="button" onclick="closeOtAddStockModal()" style="width:100%; margin-top:6px; padding:12px; background:#f1f5f9; border:none; color:#334155; border-radius:10px; font-weight:800; cursor:pointer;">✖ بند کریں</button>
       </div>
     </div>
@@ -6887,8 +6898,8 @@
           <h3 style="margin:0; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">🥬 سبزیوں کی پرنٹ لسٹ</h3>
           <span onclick="closeVegListReport()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
         </div>
-        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
-        <div id="vegListFilterZone" style="display:none; gap:8px; justify-content:center; margin-bottom:10px; flex-wrap:wrap;">
+        <!-- ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر نظام دوبارہ بحال (FM16SEPWE0518AM2 والا ہائیڈ واپس لیا) ---------- -->
+        <div id="vegListFilterZone" style="display:flex; gap:8px; justify-content:center; margin-bottom:10px; flex-wrap:wrap;">
           <button class="pscToggleBtn vegListModeBtn" data-mode="present" onclick="setVegListMode('present')">🟢 حاضر سبزیاں</button>
           <button class="pscToggleBtn vegListModeBtn" data-mode="absent" onclick="setVegListMode('absent')">🔴 غیر حاضر سبزیاں</button>
           <button class="pscToggleBtn vegListModeBtn" data-mode="both" onclick="setVegListMode('both')">⚪ دونوں</button>
@@ -8434,7 +8445,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'پیر21ستمبر06:30am';
+const APP_BUILD_VERSION = 'پیر21ستمبر11:51pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10712,9 +10723,8 @@ function toggleProductPresenceInSheet(productId, checkboxEl){
 // حاضر⟷غیر حاضر بدلتی ہے۔ <tr> کے اندر آزاد <div> اوورلے درست HTML نہیں بنتا، اس لیے یہاں پوری قطار کا
 // پس منظر رنگ (سبز/سرخ) ہی سرکاتے وقت اشارہ دیتا ہے ---------- -->
 function wireProductSwipeRows(tableId){
-  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — سوائپ سے غیر حاضر کرنے کا
-  // یہ گیسچر فی الحال بند (فنکشن/کوڈ محفوظ ہے، صرف یہاں سے فوری return) ---------- -->
-  return;
+  // ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر نظام دوبارہ بحال — سوائپ گیسچر واپس فعال
+  // (FM16SEPWE0518AM2 والا early-return ہٹا دیا گیا) ---------- -->
   const table = document.getElementById(tableId);
   if(!table || table.dataset.swipeWired) return;
   table.dataset.swipeWired = '1';
@@ -10916,7 +10926,8 @@ function renderProductSpreadsheet(filtered, wrap){
     const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', '${wrap.id}')">${v.label || '❓'}</button>`;
     return `
       <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative; touch-action:pan-y;" onclick="selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')">
-        <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): پہلے isDormant والی قطار پر ٹیپ کرنے سے ایڈٹ پینل نہیں کھلتا تھا — حاضر/غیر حاضر نظام ہائیڈ ہونے کے بعد اب ہر قطار پر ٹیپ کام کرے گا ---------- -->
+        <!-- ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر نظام دوبارہ بحال — selectVcInlineRow میں
+             کوئی isDormant شرط نہیں، اس لیے ہر قطار پر ٹیپ پہلے کی طرح کام کرتا رہے گا ---------- -->
         <td style="${tdBase}${frozenTd(0)}"><button type="button" class="serialBadgeBtn" data-serial-pid="${p.product_id}" data-serial-vid="${v.variant_id}" data-serial-val="${p.serial_no ?? ''}" data-serial-name="${(p.name||'').replace(/"/g,'&quot;')}" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important;">${p.serial_no ?? '?'}</button></td>
         <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE3): ✏️ بٹن مکمل ختم — اب پوری قطار پر ٹیپ کرنے سے ہی سامنے
              کا مستقل پینل اسی سبزی کی تفصیل دکھا دیتا ہے (قطار نیلی ہو کر منتخب نظر آتی ہے) ---------- -->
@@ -12545,10 +12556,10 @@ function downloadCsvFile(csvText, fileName){
 // کبھی نظر نہیں آئیں گی — صرف Products مینجمنٹ سکرین میں دیکھی/واپس لائی جا سکتی ہیں ----------
 function getFlatVariants(){
   const flat = [];
-  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — اب کوئی سبزی بلنگ/آرڈر
-  // ٹیکنگ سے باہر نہیں رہے گی، چاہے isDormant کچھ بھی ہو (اصل شرط نیچے comment میں محفوظ ہے) ---------- -->
+  // ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر نظام دوبارہ بحال — غیر حاضر سبزیاں پھر سے
+  // بلنگ/آرڈر ٹیکنگ سے باہر (FM16SEPWE0518AM2 والا ہائیڈ واپس لیا گیا) ---------- -->
   productsData.forEach(p => {
-    // if(p.isDormant) return;
+    if(p.isDormant) return;
     p.variants.forEach(v => {
       flat.push({
         variant_id: v.variant_id,
@@ -16374,10 +16385,10 @@ function renderProductList(query = ''){
   // کرنے کے باوجود وہ نظر نہیں آتی تھی (کہیں ملتی ہی نہیں تھی، نہ حاضر میں نہ غیر حاضر میں بیک وقت)۔
   // اب جیسے ہی کچھ سرچ کریں، حاضر/غیر حاضر اور کیٹگری دونوں فلٹر نظرانداز ہو جاتے ہیں — تلاش کیا ہوا آئٹم
   // ہمیشہ نظر آئے گا، چاہے وہ کہیں بھی پڑا ہو، تاکہ آپ اسے فوراً ڈھونڈ کر ڈیلیٹ/درست کر سکیں ---------- -->
-  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر فلٹر مکمل ہائیڈ — اب تمام سبزیاں (حاضر +
-  // غیر حاضر دونوں) ہمیشہ فہرست میں شامل رہیں گی (اصل شرط اوپر comment میں محفوظ ہے) ---------- -->
+  // ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر فلٹر دوبارہ بحال (FM16SEPWE0518AM2 والا ہائیڈ واپس
+  // لیا گیا) — سیریل نمبر پر کوئی اثر نہیں، صرف فہرست میں دکھانا/چھپانا بدلتا ہے ---------- -->
   if(query === ''){
-    // filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
+    filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
     if(activeProductCategory !== 'all'){
       filtered = filtered.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activeProductCategory);
     }
@@ -19509,9 +19520,9 @@ function renderStockAdjustmentScreen(query){
   });
   // ---------- 🔍 صدام کی ہدایت (5 ستمبر) اہم فکس: سرچ کرتے وقت حاضر/غیر حاضر اور کیٹگری فلٹر نظرانداز —
   // تلاش کیا ہوا آئٹم ہمیشہ نظر آئے، چاہے وہ کہیں بھی پڑا ہو (Products سکرین کی طرح) ---------- -->
-  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر فلٹر مکمل ہائیڈ — سب سبزیاں ہمیشہ نظر آئیں ---------- -->
+  // ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر فلٹر دوبارہ بحال (FM16SEPWE0518AM2 والا ہائیڈ واپس لیا) ---------- -->
   if(q === ''){
-    // filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
+    filtered = filtered.filter(p => !!p.isDormant === (productPresenceFilter === 'absent'));
     if(activeProductCategory !== 'all'){
       filtered = filtered.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activeProductCategory);
     }
@@ -19831,6 +19842,51 @@ function resetAllNegativeStockToZero(){
   persistAllData();
   pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): منفی سٹاک زیرو ہونا فوراً کلاؤڈ میں ----------
   renderStockAdjustmentScreen();
+}
+
+// ---------- 🆕🔒 صدام کی ہدایت (FM21SEPMO0N): سٹاک زیرو کرنے کے لیے علیحدہ PIN تصدیقی فنکشن — بالکل وہی نظام
+// جو سبزی حذف کرنے کے لیے استعمال ہوتا ہے (confirmAdminPinForDelete) لیکن سٹاک زیرو کرنے کے مخصوص الفاظ کے
+// ساتھ، تاکہ حذف والے پیغام سے الجھن نہ ہو ---------- -->
+async function confirmAdminPinForStockZero(){
+  const pin = prompt('🔒 سٹاک زیرو کرنے کے لیے ایڈمن پاسورڈ (PIN) درج کریں:');
+  if(pin === null) return false;
+  const cleanPin = (pin || '').trim();
+  if(!cleanPin){ alert('❌ پاسورڈ درج نہیں کیا گیا — سٹاک زیرو نہیں ہوا۔'); return false; }
+  let ok = (cleanPin === DEV_BYPASS_PIN);
+  if(!ok){
+    const enteredHash = await hashPin(cleanPin);
+    ok = usersData.some(u => u.pin === enteredHash && u.role === 'admin' && u.is_active);
+  }
+  if(!ok){ alert('❌ غلط پاسورڈ — سٹاک زیرو نہیں ہوا۔'); return false; }
+  return true;
+}
+// ---------- 🆕🔴 صدام کی ہدایت (FM21SEPMO0N): تمام سبزیوں کا پورا سٹاک زیرو کرنے کا محفوظ فنکشن — منشی کے نیا
+// سٹاک فیڈ کرنے سے پہلے (آرڈر ٹیکنگ سکرین)، اور ایڈمن کے اپنے سٹاک مینجمنٹ صفحے سے — تینوں بٹن یہی ایک محفوظ
+// فنکشن بلاتے ہیں۔ ترتیب: (1) پہلی خطرے کی وارننگ، (2) آخری تصدیق، (3) ایڈمن PIN — تینوں پاس ہوں تبھی سٹاک
+// زیرو ہوگا، ورنہ کچھ نہیں بدلتا۔ سیریل نمبر، نام، قیمتیں، حاضر/غیر حاضر حالت — کچھ بھی نہیں چھیڑا جاتا،
+// صرف ہر variant کا stock=0 کیا جاتا ہے ---------- -->
+async function zeroAllStock(){
+  if(!confirm('⚠️ خبردار! آپ تمام سبزیوں کا پورا سٹاک زیرو کرنے لگے ہیں۔ اس سے موجودہ سارا سٹاک ختم ہو جائے گا اور یہ واپس نہیں آئے گا۔ کیا آپ جاری رکھنا چاہتے ہیں؟')) return;
+  if(!confirm('❗ آخری تصدیق: کیا آپ واقعی سارا سٹاک زیرو کرنا چاہتے ہیں؟ اس کے بعد واپسی ممکن نہیں — "OK" دبائیں تو سٹاک زیرو ہو جائے گا۔')) return;
+  const pinOk = await confirmAdminPinForStockZero();
+  if(!pinOk) return;
+  getLiveVariantList().forEach(item => { item.variant.stock = 0; });
+  persistAllData();
+  pushProductsToCloud();
+  pauseCloudPolling(20000); // ---------- 🔒 خودکار کلاؤڈ pull تھوڑی دیر روکیں، ورنہ 12-سیکنڈ پولنگ یہ تازہ تبدیلی پلٹ سکتی ہے ---------- -->
+  alert('✅ تمام سٹاک زیرو ہو گیا۔');
+  // ---------- جو بھی سکرین اس وقت کھلی ہو وہیں فوراً نظر آئے — سٹاک مینجمنٹ، پراڈکٹس، اور آرڈر ٹیکنگ (منشی) ---------- -->
+  if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
+  if(document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
+  otFlatCache = getFlatVariants().sort((a, b) => {
+    const sa = a.serial_no, sb = b.serial_no;
+    if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
+    if(sa == null) return 1;
+    if(sb == null) return -1;
+    return sa - sb;
+  });
+  try{ renderOtItemsPage(); }catch(e){}
+  if(document.getElementById('otAddStockListWrap')) renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || '');
 }
 
 /* =====================================================================
@@ -20156,8 +20212,9 @@ function setVegListMode(mode){
 function buildVegListRows(){
   const rows = [];
   productsData
-    // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر فلٹر مکمل ہائیڈ — ہمیشہ سب سبزیاں (دونوں) ---------- -->
-    .filter(p => true)
+    // ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر فلٹر دوبارہ بحال (FM16SEPWE0518AM2 والا ہائیڈ واپس
+    // لیا گیا) — present=صرف حاضر، absent=صرف غیر حاضر، both=دونوں ---------- -->
+    .filter(p => vegListMode === 'both' ? true : (vegListMode === 'present' ? !p.isDormant : !!p.isDormant))
     .sort((a,b) => (a.serial_no||0) - (b.serial_no||0))
     .forEach(p => {
       (p.variants || []).forEach(v => {
