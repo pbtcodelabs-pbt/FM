@@ -6677,15 +6677,20 @@
       <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">دورانیہ منتخب کریں — کوڈ بن کر نیچے نظر آئے گا، اسی وقت WhatsApp پر شیئر کر سکتے ہیں۔ خالی چھوڑیں تو کوئی بھی ڈیوائس اسے ایک بار استعمال کر سکے گی۔</div>
       <!-- ---------- 👤 صدام کی ہدایت (FM3SEPTH10): کسٹمر کا نام بھی ساتھ محفوظ ہو — بعد میں فہرست میں پہچانا جا سکے ---------- -->
       <input type="text" id="giftCodeNameInput" placeholder="کسٹمر کا نام (مثلاً: احمد فروٹ شاپ)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-      <select id="giftCodeDaysInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      <select id="giftCodeDaysInput" onchange="toggleCustomGiftDaysInput()" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
         <option value="7">7 دن (Free Trial جتنا)</option>
         <option value="30" selected>30 دن (1 مہینہ)</option>
         <option value="90">90 دن (3 مہینے)</option>
         <option value="180">180 دن (6 مہینے)</option>
         <option value="365">365 دن (1 سال)</option>
         <option value="lifetime">🌟 Lifetime (ہمیشہ کے لیے)</option>
+        <option value="custom">✍️ Custom Days (اپنی مرضی کے دن لکھیں)</option>
       </select>
-      <input type="text" id="giftCodeUidInput" placeholder="مخصوص Device UID (اختیاری — خالی چھوڑ سکتے ہیں)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      <!-- ---------- ✍️ صدام کی ہدایت (نئی تجویز): کسی بھی عدد کے دن دینے کے لیے — مثلاً 3، 10، 15، 42 دن،
+      جب پرانے کسٹمر کی سبسکرپشن جزوی طور پر باقی ہو اور اسے صرف اتنے ہی دن کا نیا کوڈ دینا ہو ---------- -->
+      <input type="number" id="giftCodeCustomDaysInput" min="1" placeholder="دنوں کی تعداد لکھیں (مثلاً 15)" style="display:none; width:100%; padding:9px; margin-bottom:8px; border:1.5px solid var(--primary); border-radius:8px; font-size:13px;">
+      <input type="text" id="giftCodeUidInput" placeholder="مخصوص Device UID (اختیاری — خالی چھوڑ سکتے ہیں)" style="width:100%; padding:9px; margin-bottom:4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      <div class="settingsHint" style="margin-top:0; margin-bottom:8px; font-size:11px;">ℹ️ یہ خانہ صرف اس وقت بھریں جب کوڈ کسی ایک مخصوص فون کے لیے لاک کرنا ہو۔ خالی چھوڑنے پر بھی، جیسے ہی کسٹمر کوڈ لگائے گا، اس کی ڈیوائس کی UID خودکار محفوظ ہو جائے گی — کسی کو میسج کر کے UID پہلے سے لینے کی ضرورت نہیں۔ اسی خودکار UID کی بدولت کریش/دوبارہ انسٹال ہونے پر بھی سبسکرپشن خودکار بحال ہو جاتی ہے، دوبارہ کوڈ نہیں مانگنا پڑتا۔</div>
       <button class="testPrintBtn" style="background:#dcfce7; color:#15803d;" onclick="generateGiftCode()">🎁 Generate Code</button>
       <div id="giftCodeResultWrap" style="display:none; margin-top:10px; background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:12px; text-align:center;">
         <div id="giftCodeResultText" style="font-size:20px; font-weight:900; letter-spacing:2px; color:#15803d;"></div>
@@ -8486,7 +8491,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ23ستمبر04:17pm';
+const APP_BUILD_VERSION = 'بدھ23ستمبر07:00pm';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8506,6 +8511,7 @@ const DEV_BYPASS_PIN = '927153';
 //       match /trials/{docId}   { allow read, write: if request.auth != null; }
 //       match /licenses/{docId} { allow read: if true; allow write: if request.auth != null; }
 //       match /shopData/{docId} { allow read, write: if request.auth != null; }
+//       match /devices/{docId}  { allow read, write: if request.auth != null; } // ---------- ☁️ نئی سبسکرپشن ریسٹور کے لیے ضروری ----------
 //     }
 //   }
 // اور Firebase Console → Authentication → Sign-in method میں "Anonymous" کو Enable کرنا نہ بھولیں ----------
@@ -8671,6 +8677,51 @@ async function checkAndLockTrialOnline(){
   persistAllData();
 }
 
+// ---------- ☁️ صدام کی ہدایت (نئی تجویز): پیڈ سبسکرپشن کی expiry کو بھی UID کے خلاف Firestore کے
+// devices/{uid} میں محفوظ رکھیں — تاکہ ایپ 10 دفعہ crash/reinstall ہو، UID وہی رہے (fingerprint سے بنتی ہے)،
+// اور Firestore سے صحیح expiry خودکار واپس مل جائے۔ صارف کو دوبارہ کوڈ نہ مانگنا پڑے ---------- -->
+async function syncSubscriptionToCloud(){
+  const uid = AppState.settings.deviceUID;
+  if(!uid || AppState.settings.isOnFreeTrial) return; // ---------- صرف پیڈ سبسکرپشن کلاؤڈ میں محفوظ ہوگی، فری ٹرائل نہیں ----------
+  try{
+    await authFirestoreFetch(`devices/${encodeURIComponent(uid)}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          subscriptionExpiry: { stringValue: String(AppState.settings.subscriptionExpiry || '') },
+          subscriptionActivatedOn: { stringValue: String(AppState.settings.subscriptionActivatedOn || '') },
+          lastActivationCode: { stringValue: String(AppState.settings.lastActivationCode || '') },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+  }catch(e){ /* آف لائن — کوئی مسئلہ نہیں، اگلی بار activation/سنک پر دوبارہ کوشش ہوگی */ }
+}
+
+// ---------- ☁️ ایپ کھلتے ہی چیک کریں: اگر اس UID کے خلاف Firestore میں پیڈ سبسکرپشن کی expiry موجود ہو
+// (یعنی پہلے کبھی کوڈ لگایا جا چکا تھا) مگر مقامی سٹوریج خالی ہو (crash/reinstall/data clear کی وجہ سے)،
+// تو خودکار اسے واپس بحال کر دیں — صارف کو دوبارہ کوڈ نہ مانگنا پڑے ---------- -->
+async function restoreSubscriptionFromCloud(){
+  if(AppState.settings.subscriptionExpiry) return; // ---------- مقامی طور پر پہلے سے موجود ہو تو کچھ کرنے کی ضرورت نہیں ----------
+  const uid = AppState.settings.deviceUID;
+  if(!uid) return;
+  try{
+    const res = await authFirestoreFetch(`devices/${encodeURIComponent(uid)}?key=${FIREBASE_API_KEY}`);
+    if(res.status !== 200) return; // ---------- کبھی کوئی پیڈ سبسکرپشن اس UID پر تھی ہی نہیں ----------
+    const doc = await res.json();
+    const data = _parseFirestoreFields(doc.fields || {});
+    if(!data.subscriptionExpiry) return;
+    AppState.settings.subscriptionExpiry = data.subscriptionExpiry;
+    AppState.settings.subscriptionActivatedOn = data.subscriptionActivatedOn || '';
+    AppState.settings.lastActivationCode = data.lastActivationCode || '';
+    AppState.settings.isOnFreeTrial = false;
+    persistAllData();
+    if(typeof setupLoginScreen === 'function') setupLoginScreen();
+    if(typeof renderSubscriptionBanner === 'function') renderSubscriptionBanner();
+  }catch(e){ /* آف لائن — اگلی بار انٹرنیٹ ملنے پر دوبارہ کوشش ہوگی */ }
+}
+
 // ---------- 📡 ادائیگی شدہ سبسکرپشن کو ہر بار ایپ کھلنے پر آن لائن دوبارہ چیک کریں — اگر Developer نے
 // Code Builder سے کوڈ منسوخ (Revoke) کر دیا ہو تو صارف کی ایپ فوراً بند ہو جائے (دور سے کنٹرول) ----------
 async function resyncLicenseOnline(){
@@ -8759,14 +8810,19 @@ async function activateSubscription(code){
   // request.auth لازمی ہے۔ اب authFirestoreFetch استعمال کیا ہے (نیچے دیکھیں لائسنس رول کی تازہ تجویز) ---------- -->
   try{
     const updateRes = await authFirestoreFetch(
-      `licenses/${encodeURIComponent(trimmedCode)}?updateMask.fieldPaths=activatedAt&updateMask.fieldPaths=expiresAt&key=${FIREBASE_API_KEY}`,
+      `licenses/${encodeURIComponent(trimmedCode)}?updateMask.fieldPaths=activatedAt&updateMask.fieldPaths=expiresAt&updateMask.fieldPaths=activatedByUid&key=${FIREBASE_API_KEY}`,
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fields: {
             activatedAt: { integerValue: String(Date.now()) },
-            expiresAt: { integerValue: String(base.getTime()) }
+            expiresAt: { integerValue: String(base.getTime()) },
+            // ---------- 📱 اب یہ کوڈ اصل میں جس ڈیوائس نے activate کیا اس کی UID بھی محفوظ کر لیتے ہیں —
+            // چاہے کوڈ بناتے وقت boundUid خالی چھوڑا گیا ہو (یعنی "کوئی بھی ڈیوائس")۔ اسی UID سے Developer
+            // Panel کی فہرست میں پتا چلے گا کہ یہ کوڈ اصل میں کس فون پر لگا، اور یہی UID خودکار
+            // devices/{uid} ریسٹور کے لیے بھی استعمال ہوتی ہے ---------- -->
+            activatedByUid: { stringValue: String(uid) }
           }
         })
       }
@@ -8781,6 +8837,7 @@ async function activateSubscription(code){
   AppState.settings.isOnFreeTrial = false;
   AppState.settings.lastActivationCode = trimmedCode; // ---------- Remote Revoke کے لیے یاد رکھیں ----------
   persistAllData();
+  try{ await syncSubscriptionToCloud(); }catch(e){ /* آف لائن ہو تو اگلی بار sync ہو جائے گا */ }
   return {success:true, expiry: newExpiryStr, daysGranted: daysNum};
 }
 
@@ -34969,11 +35026,30 @@ function generateRandomGiftCode(){
   }
   return code;
 }
+// ---------- ✍️ صدام کی ہدایت (نئی تجویز): "Custom Days" منتخب ہونے پر عدد لکھنے کا خانہ دکھائیں ---------- -->
+function toggleCustomGiftDaysInput(){
+  const isCustom = document.getElementById('giftCodeDaysInput').value === 'custom';
+  document.getElementById('giftCodeCustomDaysInput').style.display = isCustom ? 'block' : 'none';
+}
+
 async function generateGiftCode(){
-  const daysVal = document.getElementById('giftCodeDaysInput').value;
+  const daysSelectVal = document.getElementById('giftCodeDaysInput').value;
   const uidVal = document.getElementById('giftCodeUidInput').value.trim();
   const nameVal = document.getElementById('giftCodeNameInput').value.trim(); // ---------- 👤 صدام کی ہدایت (FM3SEPTH10) ----------
-  const isLifetime = daysVal === 'lifetime';
+  const isLifetime = daysSelectVal === 'lifetime';
+  const isCustom = daysSelectVal === 'custom';
+
+  // ---------- ✍️ Custom Days منتخب ہو تو عدد والے خانے سے پڑھیں، ورنہ عام ڈراپ ڈاؤن سے ---------- -->
+  let daysVal = daysSelectVal;
+  if(isCustom){
+    const customDays = parseInt(document.getElementById('giftCodeCustomDaysInput').value, 10);
+    if(!customDays || customDays < 1){
+      alert('⚠️ براہ کرم دنوں کی درست تعداد لکھیں (کم از کم 1)۔');
+      return;
+    }
+    daysVal = String(customDays);
+  }
+
   const code = generateRandomGiftCode();
 
   const fields = {
@@ -35087,6 +35163,24 @@ function renderIssuedCodesList(){
     const statusLabel = isRevoked ? '🚫 معطل شدہ' : (isUsed ? '✅ استعمال شدہ' : '🟢 فعال — استعمال کا منتظر');
     const statusColor = isRevoked ? '#b91c1c' : (isUsed ? '#15803d' : '#c2410c');
     const durationLabel = it.lifetime ? '🌟 Lifetime' : `${it.days || '?'} دن`;
+
+    // ---------- ⏳ صدام کی ہدایت (نئی تجویز): استعمال شدہ کوڈ کی اصل، ریل ٹائم ایکسپائری یہاں دکھائیں —
+    // it.expiresAt وہی وقت ہے جو activateSubscription نے اصل activation پر لکھا تھا ---------- -->
+    let expiryLine = '';
+    if(isUsed && !isRevoked){
+      if(it.lifetime){
+        expiryLine = `<div style="font-size:12px; font-weight:800; color:#15803d; margin-bottom:6px;">🌟 Lifetime — کبھی ختم نہیں ہوگا</div>`;
+      }else if(it.expiresAt){
+        const daysLeft = Math.ceil((Number(it.expiresAt) - Date.now()) / 86400000);
+        const expDateStr = new Date(Number(it.expiresAt)).toLocaleDateString('en-GB');
+        let tierColor = '#15803d', tierIcon = '✅';
+        if(daysLeft <= 0){ tierColor = '#b91c1c'; tierIcon = '❌'; }
+        else if(daysLeft <= 7){ tierColor = '#c2410c'; tierIcon = '⏳'; }
+        const daysText = daysLeft <= 0 ? 'میعاد ختم ہو چکی' : `${daysLeft} دن باقی`;
+        expiryLine = `<div style="font-size:12px; font-weight:800; color:${tierColor}; margin-bottom:6px;">${tierIcon} ${daysText} — ختم ہوگا: ${expDateStr}</div>`;
+      }
+    }
+
     return `
     <div style="background:#fff; border:1.5px solid #e5e9f0; border-radius:10px; padding:10px 12px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
@@ -35094,8 +35188,10 @@ function renderIssuedCodesList(){
         <div style="font-size:11px; font-weight:800; color:${statusColor};">${statusLabel}</div>
       </div>
       <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">
-        👤 ${it.customerName || 'نام درج نہیں'} • ⏱️ ${durationLabel}${it.boundUid ? ' • 🔒 UID: '+it.boundUid : ' • 🔓 کوئی بھی ڈیوائس'}
+        👤 ${it.customerName || 'نام درج نہیں'} • ⏱️ ${durationLabel}${it.boundUid ? ' • 🔒 لاک UID: '+it.boundUid : ' • 🔓 کوئی بھی ڈیوائس'}
       </div>
+      ${it.activatedByUid ? `<div style="font-size:11.5px; color:var(--muted); margin-bottom:6px;">📱 استعمال کرنے والی ڈیوائس UID: <b>${it.activatedByUid}</b></div>` : ''}
+      ${expiryLine}
       <div style="display:flex; gap:6px;">
         ${!isRevoked ? `<button onclick="suspendLicenseCode('${it.code}')" style="flex:1; padding:6px; background:#fef3c7; color:#92400e; border:none; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer;">⏸️ معطل کریں</button>` : `<button onclick="reactivateLicenseCode('${it.code}')" style="flex:1; padding:6px; background:#dcfce7; color:#15803d; border:none; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer;">▶️ دوبارہ فعال کریں</button>`}
         <button onclick="deleteLicenseCode('${it.code}')" style="flex:1; padding:6px; background:#fee2e2; color:#b91c1c; border:none; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer;">🗑️ ڈیلیٹ کریں</button>
@@ -40032,6 +40128,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     try{ checkAndLockTrialOnline(); }catch(e){ console.error('checkAndLockTrialOnline failed', e); }
     try{ resyncLicenseOnline(); }catch(e){ console.error('resyncLicenseOnline failed', e); }
+    // ---------- ☁️ اگر مقامی سٹوریج میں subscriptionExpiry موجود نہیں (crash/reinstall/data clear کے بعد)
+    // مگر اسی UID کے خلاف Firestore میں پیڈ سبسکرپشن کا ریکارڈ ہو، تو خودکار بحال کر دیں ---------- -->
+    try{ restoreSubscriptionFromCloud(); }catch(e){ console.error('restoreSubscriptionFromCloud failed', e); }
   }, 2000);
 
   try{ renderProductList(); }catch(e){ console.error('renderProductList failed', e); }
