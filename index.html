@@ -5565,22 +5565,21 @@
           </div>
           <!-- ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE8): آرڈر ٹیکنگ میں بھی وہی سبزی نیویگیٹر (3D اگلا/پچھلا بٹن
                + نمبر ویل) — اسی سٹاک مینجمنٹ والے سسٹم سے، منتخب سبزی خودکار نمایاں ہو کر سکرول ہو جاتی ہے ---------- -->
-          <div id="otVegNavigator" style="display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; box-shadow:inset 0 1px 3px rgba(0,0,0,.06);">
-            <button type="button" id="otVegNavPrevBtn" onclick="otVegNavStep(-1)" title="پچھلی سبزی" class="saVegNav3dBtn">◀</button>
-            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px;">
-              <div id="otVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
-              <div style="position:relative;">
-                <div id="otVegNavDialTrack" class="saVegNavDialTrack" onscroll="otVegNavOnDialScroll()"></div>
-                <div class="saVegNavDialPointer"></div>
+          <!-- ---------- 🔼🔽 صدام کی ہدایت (22 ستمبر، رات): پرانا افقی نمبر-ویل (1,2,3,4,5...) اور
+               پتلا/موٹا سلائیڈر مکمل ہٹا دیے گئے — اب صرف اوپر/نیچے تیر (آئٹم کے اوپر/نیچے شفٹ کرنے کے لیے)
+               اور نیچے ایک الگ "اگلا آئٹم لکھیں" بٹن۔ otVegNavDialTrack کو مکمل حذف نہیں کیا (صرف چھپایا) تاکہ
+               اندرونی سنکرونائزیشن/ہائی لائٹ منطق (syncOtVegNavigator/otVegNavGoToIndex) بدستور کام کرے ---------- -->
+          <div id="otVegNavigator" style="display:flex; flex-direction:column; gap:6px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; box-shadow:inset 0 1px 3px rgba(0,0,0,.06);">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" id="otVegNavPrevBtn" onclick="otVegNavStep(-1)" title="اوپر والا آئٹم" class="saVegNav3dBtn" style="font-size:19px;">🔼</button>
+              <div style="flex:1; min-width:0;">
+                <div id="otVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
               </div>
+              <button type="button" id="otVegNavNextBtn" onclick="otVegNavStep(1)" title="نیچے والا آئٹم" class="saVegNav3dBtn" style="font-size:19px;">🔽</button>
             </div>
-            <button type="button" id="otVegNavNextBtn" onclick="otVegNavStep(1)" title="اگلی سبزی" class="saVegNav3dBtn">▶</button>
+            <div id="otVegNavDialTrack" class="saVegNavDialTrack" style="display:none;" onscroll="otVegNavOnDialScroll()"></div>
+            <button type="button" onclick="otVegNavStep(1)" title="اگلا آئٹم لکھنے کے لیے جائیں" style="width:100%; padding:8px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:8px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.18);">✍️ اگلا آئٹم لکھیں ⬇️</button>
           </div>
-        </div>
-        <div id="otBoldSliderRow" style="display:flex; align-items:center; gap:10px; background:#eef2ff; border:1.5px solid #c7d2fe; border-radius:10px; padding:8px 12px; margin:10px 0;">
-          <span style="font-size:12.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap;">پتلا</span>
-          <input type="range" id="otBoldSlider" min="400" max="900" step="50" value="700" oninput="setOtItemsFontWeight(this.value)" style="flex:1;">
-          <span style="font-size:12.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap;">موٹا</span>
         </div>
         <!-- ---------- 🔍 صدام کی ہدایت (FM15SEPTU): آئٹم لسٹ کے لیے سرچ بار — سیریل نمبر یا نام (جزوی لفظ)
              دونوں سے تلاش، جامع (comprehensive) — بالکل کسٹمر سرچ بار جیسی ---------- -->
@@ -16462,19 +16461,12 @@ function buildRateBadgesHtml(v, showStock){
 // طریقہ استعمال ہوتا ہے (ٹچ اور ماؤس دونوں پر یکساں کام کرتا ہے)۔ کوئی دستی ترتیب نہ ہو تو ہمیشہ کی طرح
 // سیریل نمبر سے ہی ترتیب رہتی ہے — یہ فیچر صرف اضافی ہے، کچھ نہیں توڑتا ---------- -->
 const PRODUCT_MANUAL_ORDER_KEY = 'fmProductManualOrder';
+// ---------- 🚫 صدام کی ہدایت (23 ستمبر): ہاتھ سے گھسیٹ کر (drag) ترتیب دینے کا پورا نظام ہمیشہ کے لیے
+// ختم — اب یہ فنکشن کچھ نہیں کرتا، فہرست ہمیشہ صرف سیریل نمبر (serial_no) کے مطابق ہی رہے گی، بغیر کسی
+// استثنا کے، تاکہ سٹاک مینجمنٹ، آرڈر ٹیکنگ اور بلنگ — تینوں سکرینوں پر سیریل نمبر ہمیشہ بالکل ایک جیسے
+// نظر آئیں۔ ⠿ ہینڈل بھی کارڈز سے مکمل ہٹا دیا گیا ہے (اوپر renderProductList/renderStockAdjustmentScreen میں)۔
+// پرانی محفوظ شدہ دستی ترتیب (اگر کہیں پڑی ہو) اب جان بوجھ کر نظرانداز کر دی جاتی ہے ---------- -->
 function applyManualCardOrder(list){
-  try{
-    const order = loadFromStorage(PRODUCT_MANUAL_ORDER_KEY, []) || [];
-    if(!order.length) return list;
-    const pos = new Map();
-    order.forEach((id, i) => pos.set(id, i));
-    list.sort((a, b) => {
-      const pa = pos.has(a.product_id) ? pos.get(a.product_id) : Infinity;
-      const pb = pos.has(b.product_id) ? pos.get(b.product_id) : Infinity;
-      if(pa !== pb) return pa - pb;
-      return (a.serial_no || 0) - (b.serial_no || 0);
-    });
-  }catch(e){ console.warn('applyManualCardOrder failed', e); }
   return list;
 }
 function persistManualCardOrderFromDom(containerId){
@@ -16517,6 +16509,15 @@ function initCardDragReorder(containerId){
 // (خالی جگہ — placeholder) پر جا کر بیٹھ جاتا ہے — بالکل موبائل ہوم سکرین آئیکن ری آرڈر کی طرح ---------- -->
 function onCardDragStart(e, containerId){
   try{
+    // ---------- 🔒 صدام کی ہدایت (23 ستمبر): اہم فکس — پہلے "لسٹ لاک کریں" صرف سیریل نمبر براہ راست بدلنے
+    // (تبادلہ/ایڈٹ) کو روکتی تھی، مگر ⠿ ہینڈل سے کارڈ گھسیٹ کر (drag) ترتیب بدلنا بالکل نہیں روکتی تھی —
+    // اسی لیے لاک لگے ہونے کے باوجود غلطی سے ذرا سا کارڈ گھسیٹنے پر پوری فہرست کی ترتیب خاموشی سے بدل کر
+    // فوراً کلاؤڈ پر چلی جاتی تھی (اور وہاں سے بلنگ/آرڈر ٹیکنگ ہر جگہ سیریل نمبر آگے پیچھے ہو جاتے تھے)۔
+    // اب لاک لگی ہو تو ڈریگ شروع ہی نہیں ہوگی ---------- -->
+    if(typeof PRODUCT_SERIAL_LOCKED !== 'undefined' && PRODUCT_SERIAL_LOCKED){
+      alert('🔒 سیریل نمبر فی الحال مقفل ہیں — ترتیب گھسیٹ کر تبدیل نہیں ہو سکتی۔ پہلے 🔓 اَن لاک کریں۔');
+      return;
+    }
     const card = e.target.closest('.productCard[data-pid]');
     const wrap = document.getElementById(containerId);
     if(!card || !wrap) return;
@@ -16682,7 +16683,6 @@ function renderProductList(query = ''){
         </div>
         <div class="pActions">
           <span class="variantCount" style="display:none;">${p.variants.length} variants</span>
-          <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
           <!-- ---------- 🗑️ صدام کی ہدایت (FM16SEPWE0835AM): ڈیلیٹ بٹن اب صرف ایڈمن کو نظر آئے گا — پہلے مکمل
                چھپا ہوا تھا (display:none)، اب فعال؛ فنکشن deleteProduct() میں پہلے سے دو دفعہ تصدیق موجود ہے ---------- -->
@@ -18156,7 +18156,7 @@ function vcInlineCommit(field, value){
 }
 
 function adjustVcInlineSpeed(deltaMs){
-  vcInlineSpeedMs = Math.max(200, Math.min(3000, vcInlineSpeedMs + deltaMs));
+  vcInlineSpeedMs = Math.max(200, Math.min(7000, vcInlineSpeedMs + deltaMs));
   saveToStorage('vcEditSpeedMs', vcInlineSpeedMs);
   const el = document.getElementById('vcInlineSpeedVal');
   if(el) el.textContent = (vcInlineSpeedMs / 1000).toFixed(1) + ' س';
@@ -19856,7 +19856,6 @@ function renderStockAdjustmentScreen(query){
           <div class="pName" style="flex:1; font-weight:900;">${p.name}${p.variants[0] && p.variants[0].label ? ' ' + p.variants[0].label : ''}</div>
         </div>
         <div class="pActions">
-          <button class="cardDragHandle" title="ترتیب بدلنے کے لیے پکڑ کر لے جائیں" onclick="event.stopPropagation();">⠿</button>
           <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
           <!-- ---------- 🗑️ صدام کی ہدایت (FM16SEPWE0835AM): ڈیلیٹ بٹن اب صرف ایڈمن کو نظر آئے گا — پہلے مکمل
                چھپا ہوا تھا (display:none)، اب فعال؛ فنکشن deleteProduct() میں پہلے سے دو دفعہ تصدیق موجود ہے ---------- -->
@@ -24354,14 +24353,19 @@ function syncOtVegNavigator(list){
   if(nextBtn) nextBtn.disabled = false;
   const keepIdx = Math.max(0, Math.min(_otVegNavList.length - 1, _otVegNavCurIdx || 0));
   track.innerHTML = _otVegNavList.map((v, i) => `<div class="saVegNavTick" data-idx="${i}" onclick="otVegNavGoToIndex(${i})"><span class="tickLine"></span><span>${i + 1}</span></div>`).join('');
-  otVegNavGoToIndex(keepIdx);
+  // ---------- 🐞 صدام کی ہدایت (23 ستمبر): اہم فکس — یہ فنکشن ہر 5 سیکنڈ والی خودکار کلاؤڈ ری فریش پر بھی
+  // چلتا ہے (renderOtItemsPage کے ذریعے)۔ پہلے یہ ہر بار otVegNavGoToIndex کو سکرول کرنے کا اشارہ دیتا تھا،
+  // جس سے صارف جہاں بھی کام کر رہا ہو (مثلاً آئٹم 32/40) وہاں سے ہر چند سیکنڈ بعد خودکار پہلے آئٹم پر
+  // واپس گھسیٹا جاتا تھا۔ اب یہ صرف لیبل/ہائی لائٹ تازہ کرتا ہے، سکرین کو زبردستی سکرول نہیں کرتا —
+  // سکرول صرف اسی وقت ہو جب صارف خود 🔼🔽/اگلا بٹن دبائے (otVegNavStep) ---------- -->
+  otVegNavGoToIndex(keepIdx, false, true);
 }
 function otVegNavStep(delta){
   if(_otVegNavList.length === 0) return;
   let idx = Math.max(0, Math.min(_otVegNavList.length - 1, (_otVegNavCurIdx || 0) + delta));
   otVegNavGoToIndex(idx);
 }
-function otVegNavGoToIndex(idx, _fromDialScroll){
+function otVegNavGoToIndex(idx, _fromDialScroll, _skipScroll){
   idx = Math.max(0, Math.min(_otVegNavList.length - 1, Number(idx) || 0));
   _otVegNavCurIdx = idx;
   const v = _otVegNavList[idx];
@@ -24371,7 +24375,7 @@ function otVegNavGoToIndex(idx, _fromDialScroll){
   const track = document.getElementById('otVegNavDialTrack');
   if(track){
     track.querySelectorAll('.saVegNavTick').forEach(el => el.classList.toggle('active', Number(el.dataset.idx) === idx));
-    if(!_fromDialScroll){
+    if(!_fromDialScroll && !_skipScroll){
       const tickEl = track.querySelector(`.saVegNavTick[data-idx="${idx}"]`);
       if(tickEl){
         // ---------- 🐞 صدام کی ہدایت (FM16SEPWE0451PM): وہی فکس یہاں بھی — 350ms کی بجائے اصل سکرول رکنے
@@ -24397,11 +24401,12 @@ function otVegNavGoToIndex(idx, _fromDialScroll){
   // ---------- 📌 صدام کی ہدایت (FM16SEPWE): منتخب سبزی کو فہرست کی پہلی (اوپر والی) قطار میں لائیں —
   // پہلے block:'center' سے یہ فہرست کے درمیان/نیچے کہیں بھی (مثلاً 63 یا 80 نمبر کی جگہ) چلا جاتا تھا۔
   // scroll-margin-top (اوپر .vegNavActiveRow میں) کی بدولت یہ اوپر والے ہیڈرز/بار کے عین نیچے، سب سے
-  // اوپر آئے گا، اور ہیڈرز نہیں چھپیں گے ---------- -->
+  // اوپر آئے گا، اور ہیڈرز نہیں چھپیں گے — 🐞 صدام کی ہدایت (23 ستمبر): _skipScroll ہو تو صرف رنگ/ہائی لائٹ
+  // لگے، سکرین زبردستی سکرول نہ ہو (خودکار بیک گراؤنڈ ری فریش کے دوران) ---------- -->
   const cardEl = document.querySelector(`.otItemRow[data-variant-id="${v.variant_id}"]`);
   if(cardEl){
     cardEl.classList.add('vegNavActiveRow');
-    cardEl.scrollIntoView({behavior:'smooth', block:'start'});
+    if(!_skipScroll) cardEl.scrollIntoView({behavior:'smooth', block:'start'});
     _otVegNavActiveCardEl = cardEl;
   } else {
     _otVegNavActiveCardEl = null;
@@ -24410,7 +24415,7 @@ function otVegNavGoToIndex(idx, _fromDialScroll){
   const rowEl = document.querySelector(`tr[data-variant-id="${v.variant_id}"]`);
   if(rowEl){
     rowEl.classList.add('vegNavActiveRow');
-    rowEl.scrollIntoView({behavior:'smooth', block:'start'});
+    if(!_skipScroll) rowEl.scrollIntoView({behavior:'smooth', block:'start'});
     _otVegNavActiveRowEl = rowEl;
   } else {
     _otVegNavActiveRowEl = null;
