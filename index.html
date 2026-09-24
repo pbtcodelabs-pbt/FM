@@ -3441,6 +3441,23 @@
       </div>
     </div>
 
+    <!-- ---------- 🆕 صدام کی ہدایت (FM24SEPTH0837AM): بلنگ کے دوران اگر منتخب آئٹم کی موجودہ سیل موڈ (Rwp/Isb)
+         والی قیمت خالی/صفر ہو تو بل بنانا رکنے کی بجائے یہیں چھوٹا سا پاپ اپ کھلے — صرف وہی ایک قیمت پوچھیں،
+         فوراً محفوظ ہو کر بل میں شامل ہو جائے۔ اس طرح نیا آئٹم فیڈ کرتے وقت کوئی پابندی نہیں، مگر بل میں
+         بغیر قیمت کے آئٹم بھی نہیں جا سکتا — سٹاک پیج پر الگ سے جانے کی ضرورت ختم ---------- -->
+    <div class="modalOverlay" id="billingQuickPriceModal" onclick="if(event.target===this) closeBillingQuickPriceModal()">
+      <div class="modalBox">
+        <h3>💰 فروخت قیمت درج کریں</h3>
+        <div id="bqpName" style="font-weight:800; font-size:15px; margin-bottom:4px; text-align:right;">—</div>
+        <div id="bqpMode" style="font-size:12.5px; color:var(--muted); margin-bottom:10px; text-align:right;">—</div>
+        <input type="number" id="bqpPrice" placeholder="قیمت لکھیں" onfocus="this.select()" onkeydown="if(event.key==='Enter') confirmBillingQuickPrice();">
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeBillingQuickPriceModal()">Cancel</button>
+          <button class="saveBtn" onclick="confirmBillingQuickPrice()">✅ محفوظ کریں اور بل میں شامل کریں</button>
+        </div>
+      </div>
+    </div>
+
     <!-- QUICK ADD CUSTOMER POPUP (Billing کے دوران نیا کسٹمر فوری شامل کرنے کے لیے — سیدھا مرکزی کسٹمر لسٹ میں بھی محفوظ ہوگا) -->
     <div class="modalOverlay" id="quickAddCustomerModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
@@ -4348,10 +4365,12 @@
           <span class="closeBtn" onclick="closeProfileModal()">✖</span>
         </div>
         <div class="profileBodyFlex">
-          <!-- ---------- 🧹 صدام کی ہدایت پر بائیں طرف کے چھوٹے آئیکن بٹن (New Bill, Collect, Wallet,
-               Opening Bal., Profile, Transactions) چھپا دیے گئے ہیں — کوڈ ڈیلیٹ نہیں کیا، صرف display:none
-               لگایا ہے تاکہ ضرورت پڑنے پر واپس دکھایا جا سکے ---------- -->
-          <div class="profileSidebar" id="profileQuickActions" style="display:none;"></div>
+          <!-- ---------- 🔄 صدام کی ہدایت (FM24SEPTH0837AM): بائیں طرف کے چھوٹے آئیکن بٹن (New PO/New Bill,
+               Pay Supplier/Collect, Profile, Transactions) دوبارہ بحال — پہلے یہاں display:none لگا کر
+               چھپا دیے گئے تھے، جس کی وجہ سے سپلائر پروفائل میں نیا پرچیز آرڈر/پیمنٹ کے بٹن نظر نہیں آ رہے
+               تھے، حالانکہ اصل فنکشن (openPoModal, openPaySupplierModal وغیرہ) ہمیشہ کام کر رہے تھے —
+               صرف بٹن ہی پوشیدہ تھے ---------- -->
+          <div class="profileSidebar" id="profileQuickActions"></div>
           <div class="profileMain">
             <div id="profileEmailRow" style="display:none; align-items:center; gap:6px; margin-bottom:10px;"></div>
             <div class="profileFigures" id="profileFigures"></div>
@@ -8491,7 +8510,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'بدھ23ستمبر07:00pm';
+const APP_BUILD_VERSION = 'جمعرات24ستمبر09:23am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -13481,6 +13500,15 @@ function addToCart(variantId){
   }
 
   const price = Billing.saleMode === 'retail' ? product.retail : product.wholesale;
+  // ---------- 🔒🆕 صدام کی ہدایت (FM24SEPTH0837AM): اگر اس سیل موڈ کی قیمت ابھی تک خالی/صفر ہے (نیا آئٹم
+  // جو بغیر قیمت فیڈ ہوا تھا) تو بل میں چپ چاپ 0 پر شامل کرنے کی بجائے یہیں چھوٹا سا پاپ اپ کھول کر صرف
+  // وہی ایک قیمت مانگیں — بھرتے ہی خودکار محفوظ ہو کر بل میں شامل ہو جائے گا۔ نئے آئٹم پر پہلے سے کوئی
+  // موجودہ مقدار کارٹ میں نہ ہو تبھی یہ چیک لگے (تاکہ پہلے سے کارٹ میں موجود آئٹم کی مقدار بڑھانے پر
+  // بلاوجہ پاپ اپ نہ آئے) ---------- -->
+  if(!existing && !price){
+    openBillingQuickPriceModal(variantId);
+    return;
+  }
   // ---------- 💪 صدام کی ہدایت (FM050926): فروخت مزدوری اب نرخ (unitPrice) میں خودکار جمع نہیں ہوتی —
   // نرخ ہمیشہ خالص/صاف رہے گا (کسٹمر رقم × نرخ)، مزدوری صرف اپنے علیحدہ کالم اور علیحدہ ٹوٹل میں شامل ہوگی ---------- -->
   const laborPerUnit = product.sellLabor || 0;
@@ -13497,6 +13525,44 @@ function addToCart(variantId){
   searchItems('');
   renderCart();
   renderBillingProductGrid(); // کارڈ پر مقدار کا بیج فوراً اپڈیٹ ہو
+}
+
+// ---------- 🆕 صدام کی ہدایت (FM24SEPTH0837AM): بلنگ کے دوران خالی قیمت والے آئٹم کے لیے چھوٹا پاپ اپ —
+// صرف موجودہ سیل موڈ (Rwp/Isb) کی ایک ہی قیمت مانگتا ہے، بھرتے ہی اصل productsData میں محفوظ ہو کر
+// خودکار addToCart دوبارہ چلا دیتا ہے (اب قیمت مل چکی، بل میں شامل ہو جائے گا) ---------- -->
+let billingQuickPriceCtx = null;
+function openBillingQuickPriceModal(variantId){
+  billingQuickPriceCtx = variantId;
+  const product = getFlatVariants().find(p => p.variant_id === variantId);
+  const nameEl = document.getElementById('bqpName');
+  const modeEl = document.getElementById('bqpMode');
+  const priceEl = document.getElementById('bqpPrice');
+  if(nameEl) nameEl.textContent = product ? (product.name + (product.label ? ' — ' + product.label : '')) : '—';
+  if(modeEl) modeEl.textContent = Billing.saleMode === 'retail' ? '🔴 اسلام آباد ریٹ ابھی خالی ہے' : '🟢 راولپنڈی ریٹ ابھی خالی ہے';
+  if(priceEl) priceEl.value = '';
+  document.getElementById('billingQuickPriceModal').classList.add('show');
+  setTimeout(() => priceEl?.focus(), 60);
+}
+function closeBillingQuickPriceModal(){
+  document.getElementById('billingQuickPriceModal').classList.remove('show');
+  billingQuickPriceCtx = null;
+}
+function confirmBillingQuickPrice(){
+  const val = parseFloat(document.getElementById('bqpPrice').value);
+  if(!val || val <= 0){ alert('⚠️ پہلے درست قیمت لکھیں'); return; }
+  const variantId = billingQuickPriceCtx;
+  if(variantId === null) return;
+  for(const p of productsData){
+    const v = p.variants.find(x => x.variant_id === variantId);
+    if(v){
+      if(Billing.saleMode === 'retail') v.retail = val; else v.wholesale = val;
+      break;
+    }
+  }
+  persistAllData();
+  pushProductsToCloud();
+  closeBillingQuickPriceModal();
+  addToCart(variantId); // ---------- قیمت اب مل چکی — دوبارہ کال کرتے ہی سیدھا بل میں شامل ہو جائے گا ---------- -->
 }
 
 /* =====================================================================
@@ -18012,9 +18078,9 @@ function vcInlinePanelSave(btnEl){
   // صرف تنبیہ دیں، جھوٹی ✅ کامیابی نہ دکھائیں (سٹاک خالی ہو تو کوئی مسئلہ نہیں) ---------- -->
   const check = vcInlineCheckRequiredFields();
   if(!check.ok){
-    alert(`⚠️ یہ سبزی مکمل محفوظ نہیں ہوگی، پہلے یہ خانہ بھریں: ${check.label}`);
+    // ---------- 🔓 صدام کی ہدایت (FM24SEPTH0837AM): پہلے یہاں خالی خانہ ہونے پر 💾 بالکل کام نہیں کرتا تھا —
+    // اب صرف نشان زد کر کے فوکس کر دیں (تنبیہ کے لیے)، مگر جو کچھ لکھا جا چکا ہے وہ محفوظ ہونے سے نہ رکے ---------- -->
     if(check.el){ check.el.focus({preventScroll:true}); check.el.select(); }
-    return;
   }
   persistAllData();
   pushProductsToCloud();
@@ -18441,9 +18507,10 @@ function saveNewProduct(){
     return;
   }
 
-  // ---------- 🔒 صدام کی ہدایت (FM20SEPSU06): سبزی اسی وقت محفوظ ہو جب اس کے تمام قیمت والے خانے بھرے ہوں —
-  // خرید قیمت، مزدوری خرید، مزدوری فروخت، راولپنڈی ریٹ، اسلام آباد ریٹ — ورنہ بل بننے کے وقت پتا چلتا تھا۔
-  // صرف سٹاک اس شرط سے باہر ہے (وہ آرڈر ٹیکنگ کے ذریعے الگ سے فیڈ ہوتا ہے) ---------- -->
+  // ---------- 🔓 صدام کی ہدایت (FM24SEPTH0837AM): پہلے یہاں 5 قیمت والے خانوں میں سے کوئی ایک بھی خالی ہو
+  // تو سبزی مکمل طور پر بلاک ہو کر محفوظ ہی نہیں ہوتی تھی (سخت alert آ کر رک جاتا) — یہی "نیا آئٹم فیڈ نہیں
+  // ہو رہا" شکایت کی اصل جڑ نکلی۔ اب صرف تنبیہ دی جاتی ہے، سیو ہونے سے نہیں روکا جاتا — چاہیں تو خالی خانے
+  // بعد میں بھی پُر کر سکتے ہیں (سٹاک پہلے کی طرح اس شرط سے باہر ہے) ---------- -->
   const NP_REQUIRED_FIELDS = [
     {val: purchase,  label: '💰 خرید قیمت'},
     {val: labor,     label: '💪 مزدوری خرید'},
@@ -18451,11 +18518,10 @@ function saveNewProduct(){
     {val: wholesale, label: '🟢 راولپنڈی ریٹ'},
     {val: retail,    label: '🔴 اسلام آباد ریٹ'},
   ];
-  for(const rf of NP_REQUIRED_FIELDS){
-    if(!rf.val){
-      alert(`⚠️ ${rf.label} کا خانہ خالی ہے — پہلے یہ خانہ بھریں، پھر سبزی محفوظ ہوگی۔ (صرف سٹاک کا خانہ خالی چھوڑا جا سکتا ہے)`);
-      return;
-    }
+  const npMissing = NP_REQUIRED_FIELDS.filter(rf => !rf.val);
+  if(npMissing.length > 0){
+    const missingLabels = npMissing.map(rf => rf.label).join('، ');
+    if(!confirm(`⚠️ یہ خانے ابھی خالی ہیں: ${missingLabels}\n\nکیا آپ پھر بھی محفوظ کرنا چاہتے ہیں؟ (بعد میں بھر سکتے ہیں)`)) return;
   }
 
   // ---------- بارکوڈ دیا گیا ہو تو چیک کریں کہ یہ کہیں پہلے سے کسی اور ویرینٹ پر محفوظ تو نہیں — ورنہ اسکین کرتے وقت غلط آئٹم مل سکتا ہے ----------
