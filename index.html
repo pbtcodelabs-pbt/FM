@@ -5591,16 +5591,11 @@
                پتلا/موٹا سلائیڈر مکمل ہٹا دیے گئے — اب صرف اوپر/نیچے تیر (آئٹم کے اوپر/نیچے شفٹ کرنے کے لیے)
                اور نیچے ایک الگ "اگلا آئٹم لکھیں" بٹن۔ otVegNavDialTrack کو مکمل حذف نہیں کیا (صرف چھپایا) تاکہ
                اندرونی سنکرونائزیشن/ہائی لائٹ منطق (syncOtVegNavigator/otVegNavGoToIndex) بدستور کام کرے ---------- -->
-          <div id="otVegNavigator" style="display:flex; flex-direction:column; gap:6px; background:linear-gradient(180deg,#eef2ff,#e0e7ff); border:1.5px solid var(--primary); border-radius:12px; padding:7px 8px; box-shadow:inset 0 1px 3px rgba(0,0,0,.06);">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <button type="button" id="otVegNavPrevBtn" onclick="otVegNavStep(-1)" title="اوپر والا آئٹم" class="saVegNav3dBtn" style="font-size:19px;">🔼</button>
-              <div style="flex:1; min-width:0;">
-                <div id="otVegNavLabel" style="font-size:11px; font-weight:800; color:var(--primary-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">— سبزی منتخب کریں —</div>
-              </div>
-              <button type="button" id="otVegNavNextBtn" onclick="otVegNavStep(1)" title="نیچے والا آئٹم" class="saVegNav3dBtn" style="font-size:19px;">🔽</button>
-            </div>
-            <div id="otVegNavDialTrack" class="saVegNavDialTrack" style="display:none;" onscroll="otVegNavOnDialScroll()"></div>
-            <button type="button" onclick="otVegNavStep(1)" title="اگلا آئٹم لکھنے کے لیے جائیں" style="width:100%; padding:8px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:8px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.18);">✍️ اگلا آئٹم لکھیں ⬇️</button>
+          <!-- ---------- 💊 صدام کی ہدایت (24 ستمبر): پرانا تیر/ویل/"اگلا آئٹم" والا پورا باکس ختم — اس کی جگہ ایک کیپسول جو نیچے جدول میں
+             آپ جو سبزی ٹچ کریں (قطار/مقدار کا خانہ/➕➖) وہی سرخ سیریل بیج + موٹے نام کے ساتھ اوپر دکھاتا ہے ---------- -->
+          <div id="otSelCapsule" dir="rtl" style="display:flex; align-items:center; gap:12px; min-height:60px; padding:9px 16px; background:linear-gradient(180deg,#ffffff,#e0f2fe); border:2.5px solid var(--primary); border-radius:999px; box-shadow:0 3px 10px rgba(0,0,0,.14), inset 0 1px 0 #fff; box-sizing:border-box;">
+            <span id="otSelCapsuleBadge" style="display:none;"></span>
+            <div id="otSelCapsuleName" style="flex:1; min-width:0; text-align:right; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:19px; font-weight:900; line-height:1.5; color:#134e2c; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">نیچے فہرست میں سبزی ٹچ کریں</div>
           </div>
         </div>
         <!-- ---------- 🔍 صدام کی ہدایت (FM15SEPTU): آئٹم لسٹ کے لیے سرچ بار — سیریل نمبر یا نام (جزوی لفظ)
@@ -24397,6 +24392,7 @@ function selectOtCustomer(customerId){
   otCheckedMap = {};
   otPage = 0;
   otSavedOrderId = null; // ---------- نیا کسٹمر — پرانا سیو شدہ آرڈر آئی ڈی بھول جائیں ----------
+  try{ otSelCapsuleClear(); }catch(e){}
 
   const nameEl = document.getElementById('otTopCustName');
   const areaEl = document.getElementById('otTopCustArea');
@@ -24452,6 +24448,43 @@ function backToOtCustomer(){
 // ---------- 🎯🔄 صدام کی ہدایت (FM16SEPWE8): آرڈر ٹیکنگ کا سبزی نیویگیٹر — بالکل سٹاک مینجمنٹ جیسا،
 // منتخب نمبر پر اسی آئٹم کی قطار/کارڈ خودکار نمایاں ہو کر سکرول ہو جاتا ہے (یہاں کوئی الگ ایڈٹ پینل نہیں،
 // صرف تلاش/نشاندہی کے لیے) ---------- -->
+
+// ---------- 💊 صدام کی ہدایت (24 ستمبر): سلیکٹڈ سبزی کیپسول — جدول/کارڈ میں جس قطار کو ٹچ کریں وہی اوپر کیپسول میں آ جائے
+// (وہی سرخ سیریل بیج، وہی نام موٹا)۔ کیپسول جدول سے باہر ہے اس لیے جدول دوبارہ بنے تو بھی قائم رہتا ہے ---------- -->
+const OT_SEL_PLACEHOLDER = 'نیچے فہرست میں سبزی ٹچ کریں';
+let _otSelVariantId = null;
+function otSelCapsuleClear(){
+  _otSelVariantId = null;
+  const b = document.getElementById('otSelCapsuleBadge');
+  const n = document.getElementById('otSelCapsuleName');
+  if(b){ b.style.display = 'none'; b.innerHTML = ''; }
+  if(n){ n.textContent = OT_SEL_PLACEHOLDER; n.style.color = '#64748b'; n.style.fontWeight = '700'; }
+}
+function otSelCapsuleShow(variantId){
+  const v = (otFlatCache || []).find(f => String(f.variant_id) === String(variantId));
+  const b = document.getElementById('otSelCapsuleBadge');
+  const n = document.getElementById('otSelCapsuleName');
+  if(!v || !b || !n) return;
+  _otSelVariantId = v.variant_id;
+  const pName = (productsData.find(p => p.product_id === v.product_id)?.name) || v.name;
+  // وہی سرخ گول بیج، جدول والے سائز (30px) میں — کوئی ڈیزائن/سائز تبدیلی نہیں
+  b.style.cssText = 'display:inline-flex; flex:0 0 auto;';
+  b.innerHTML = `<span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default !important;pointer-events:none !important;margin:0 !important;">${v.serial_no ?? '?'}</span>`;
+  n.textContent = pName + (v.label ? ' — ' + v.label : '');
+  n.style.color = '#134e2c';
+  n.style.fontWeight = '900';
+}
+['click','focusin'].forEach(evName => {
+  document.addEventListener(evName, (e) => {
+    const t = e.target;
+    if(!t || !t.closest) return;
+    const holder = t.closest('#otItemsList');
+    if(!holder) return;
+    const row = t.closest('[data-variant-id]');
+    if(row && holder.contains(row)) otSelCapsuleShow(row.getAttribute('data-variant-id'));
+  }, true);
+});
+
 let _otVegNavList = [];
 let _otVegNavCurIdx = 0;
 let _otVegNavScrollTimer = null;
