@@ -4351,7 +4351,7 @@
     </div>
 
     <!-- PARTY PROFILE MODAL (کسٹمر/سپلائر کی Completed 360° پروفائل — ایک ہی جگہ سب کچھ) -->
-    <div class="modalOverlay" id="profileModal" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="modalOverlay" id="profileModal" onclick="if(event.target===this) this.classList.remove('show')" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="profileBox" id="profileBoxEl">
         <div class="profileHead" id="profileHeadEl">
           <div class="pAvatarLg" id="profileAvatar">👤</div>
@@ -4631,11 +4631,8 @@
         <!-- کیٹیگری اور سٹاک ترتیب — لکھ لکھ کر ڈھونڈنے کی بجائے سیدھا منتخب کریں -->
         <button type="button" onclick="openPoLowStockPicker()" style="display:none; width:100%; padding:11px; margin-bottom:10px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer; font-family:inherit;">📥 کم سٹاک آئٹمز سے حاصل کریں</button>
         <div class="billingCategoryRail" id="poCategoryRail" style="margin-bottom:8px;"></div>
-        <div class="modeToggle" style="width:100%; margin-bottom:10px;">
-          <button id="poSortAsc" class="active" onclick="setPoSort('asc')" style="flex:1;">📉 سٹاک: کم → زیادہ</button>
-          <button id="poSortDesc" onclick="setPoSort('desc')" style="flex:1;">📈 سٹاک: زیادہ → کم</button>
-        </div>
-        <div class="productGrid" id="poBrowseList" style="margin-bottom:10px;"></div>
+        <div style="width:100%; margin-bottom:8px; font-size:11.5px; font-weight:700; color:var(--muted); text-align:center;">↕️ ترتیب: سیریل نمبر کے مطابق — بالکل 🧮 سٹاک مینجمنٹ جیسی (پکی، کبھی نہیں بدلتی)</div>
+        <div id="poBrowseList" style="margin-bottom:10px;"></div>
 
         <div class="searchRow" style="margin-bottom:8px;">
           <input type="text" id="poSearchInput" dir="rtl" placeholder="🔍 یا لکھ کر تلاش کریں..." oninput="searchPoItems(this.value)">
@@ -8510,7 +8507,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات24ستمبر10:26am';
+const APP_BUILD_VERSION = 'جمعرات24ستمبر10:58am';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -22051,9 +22048,9 @@ function renderAvatarInto(elId, photo, emoji){
 function buildContactButtons(phone, email){
   const waDigits = phone ? formatPhoneForWhatsApp(phone) : '';
   const phoneHtml = phone ? `
-    <a class="cCall" href="tel:+${waDigits}" title="Call">📞</a>
-    <a class="cWhatsapp" href="https://wa.me/${waDigits}" target="_blank" rel="noopener" title="WhatsApp">💬</a>
-    <a class="cSms" href="sms:+${waDigits}" title="SMS">✉️</a>
+    <a class="cCall" href="tel:+${waDigits}" title="کال کریں">📞</a>
+    <a class="cWhatsapp" href="https://wa.me/${waDigits}" target="_blank" rel="noopener" title="واٹس ایپ">💬</a>
+    <a class="cSms" href="sms:+${waDigits}" title="ایس ایم ایس">✉️</a>
   ` : `
     <span class="cCall cDisabled">📞</span>
     <span class="cWhatsapp cDisabled">💬</span>
@@ -22061,7 +22058,7 @@ function buildContactButtons(phone, email){
   `;
   // ---------- جی میل کا آئیکن — کمپوز باکس براہ راست اسی ای میل ایڈریس کے ساتھ کھلے گا ----------
   const gmailHtml = email
-    ? `<a class="cGmail" href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}" target="_blank" rel="noopener" title="Gmail">📧</a>`
+    ? `<a class="cGmail" href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}" target="_blank" rel="noopener" title="جی میل">📧</a>`
     : `<span class="cGmail cDisabled">📧</span>`;
 
   return phoneHtml + gmailHtml;
@@ -22123,8 +22120,8 @@ let profilePoFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' 
 // ---------- فلٹر بار کا مشترکہ HTML (Bills اور Purchase Orders دونوں کے لیے استعمال ہوتا ہے) ----------
 function buildFilterBarHtml(prefix, statusOptions, filterState, onChangeFn){
   const dateOptions = [
-    ['all','All Time'], ['today','Today'], ['week','This Week'], ['lastweek','Last Week'],
-    ['month','This Month'], ['lastmonth','Last Month'], ['year','This Year'], ['custom','Custom Range…']
+    ['all','ہمیشہ'], ['today','آج'], ['week','اس ہفتے'], ['lastweek','پچھلے ہفتے'],
+    ['month','اس مہینے'], ['lastmonth','پچھلے مہینے'], ['year','اس سال'], ['custom','مخصوص تاریخ…']
   ];
   const tabsHtml = statusOptions.map(([key,label]) =>
     `<button class="${filterState.status===key?'active':''}" onclick="${onChangeFn}('status','${key}')">${label}</button>`
@@ -22135,9 +22132,9 @@ function buildFilterBarHtml(prefix, statusOptions, filterState, onChangeFn){
   const customRangeHtml = filterState.dateKey === 'custom' ? `
     <div class="pfCustomRange">
       <input type="date" id="${prefix}CustomFrom" value="${filterState.customFrom||''}">
-      <span style="font-size:11px; color:var(--muted);">to</span>
+      <span style="font-size:11px; color:var(--muted);">تا</span>
       <input type="date" id="${prefix}CustomTo" value="${filterState.customTo||''}">
-      <button onclick="${onChangeFn}('customApply', null)">Apply</button>
+      <button onclick="${onChangeFn}('customApply', null)">لاگو کریں</button>
     </div>` : '';
   return `<div class="pfFilterBar"><div class="pfStatusTabs">${tabsHtml}</div>${dateSelectHtml}${customRangeHtml}</div>`;
 }
@@ -22505,7 +22502,7 @@ function openSupplierProfile(supplierId){
   renderAvatarInto('profileAvatar', s.photo, '🏭');
   document.getElementById('profileName').textContent = s.name;
   document.getElementById('profileMeta').innerHTML = s.phone
-    ? `<a href="tel:+${formatPhoneForWhatsApp(s.phone)}">📱 ${s.phone}</a>` : 'No phone number saved';
+    ? `<a href="tel:+${formatPhoneForWhatsApp(s.phone)}">📱 ${s.phone}</a>` : 'فون نمبر محفوظ نہیں';
   document.getElementById('profileHeadContacts').innerHTML = buildContactButtons(s.phone, s.email);
   renderProfileNicknameTag(s.keywords);
 
@@ -22513,7 +22510,7 @@ function openSupplierProfile(supplierId){
   emailRow.style.display = 'flex';
   emailRow.innerHTML = `
     <span style="font-size:12px; color:var(--muted);">📧</span>
-    <input type="email" placeholder="Gmail address (optional)" value="${s.email || ''}"
+    <input type="email" placeholder="جی میل ایڈریس (اختیاری)" value="${s.email || ''}"
            onchange="updateSupplierEmail(${s.supplier_id}, this.value)"
            style="flex:1; padding:7px 10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px;">
   `;
@@ -22522,16 +22519,16 @@ function openSupplierProfile(supplierId){
   figuresEl.className = typeof s.openingBalance !== 'undefined' ? 'profileFigures' : 'profileFigures single';
   figuresEl.innerHTML = `
     ${typeof s.openingBalance !== 'undefined' ? `<div class="pfBox"><div class="pfLabel">💼 سابقہ بقایہ (Opening)</div><div class="pfValue" style="color:var(--muted);">Rs. ${s.openingBalance.toLocaleString()}</div></div>` : ''}
-    <div class="pfBox"><div class="pfLabel">📤 Payable (we owe)</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
+    <div class="pfBox"><div class="pfLabel">📤 واجب الادا (ہم نے دینے ہیں)</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
   `;
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم؛ Transactions سب سے نیچے ---
   document.getElementById('profileQuickActions').innerHTML = `
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "نیا پرچیز آرڈر" بٹن دوبارہ فعال — یہیں سے openPoModal کھلتا ہے ---------- -->
-    <button style="background:linear-gradient(155deg,#0ea5e9,#0369a1);" onclick="openPoModal(${s.supplier_id});"><span class="sideIcon">📦</span><span class="sideLabel">New PO</span></button>
-    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id});"><span class="sideIcon">💵</span><span class="sideLabel">Pay Supplier</span></button>
-    <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
-    <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
+    <button style="background:linear-gradient(155deg,#0ea5e9,#0369a1);" onclick="openPoModal(${s.supplier_id});"><span class="sideIcon">📦</span><span class="sideLabel">نیا آرڈر</span></button>
+    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id});"><span class="sideIcon">💵</span><span class="sideLabel">ادائیگی</span></button>
+    <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">پروفائل</span></button>
+    <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">لین دین</span></button>
   `;
 
   renderSupplierMainContent(s.supplier_id);
@@ -22559,20 +22556,20 @@ function renderSupplierPoSection(supplierId){
   orders = orders.filter(po => isDateInRange(po.date, range));
 
   const ordersHtml = orders.length === 0
-    ? `<div class="profileEmpty">No purchase orders match this filter</div>`
+    ? `<div class="profileEmpty">اس فلٹر سے کوئی پرچیز آرڈر نہیں ملا</div>`
     : orders.map(po => {
         const idx = po.po_idx;
         const isPending = po.status !== 'received';
         const daysPending = daysSince(po.date);
-        const itemsDesc = po.items.slice(0,2).map(i => i.name).join(', ') + (po.items.length > 2 ? ` +${po.items.length-2} more` : '');
-        const statusTxt = isPending ? `⏳ Pending • ${daysPending}d` : `✅ Received`;
+        const itemsDesc = po.items.slice(0,2).map(i => i.name).join(', ') + (po.items.length > 2 ? ` +${po.items.length-2} مزید` : '');
+        const statusTxt = isPending ? `⏳ زیرِالتواء • ${daysPending} دن` : `✅ موصول ہو گیا`;
         const actionBtn = isPending
-          ? `<button class="btnReceiveShipment" onclick="event.stopPropagation(); closeProfileModal(); openReceiveShipmentModal(${s.supplier_id}, ${idx});">🚚 Receive Shipment</button>
-             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
-             <button class="btnPrint" onclick="event.stopPropagation(); openPoReminderModal(${s.supplier_id}, ${idx});">📢 Remind</button>
-             <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ Delete</button>`
-          : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
-             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ Return</button>`;
+          ? `<button class="btnReceiveShipment" onclick="event.stopPropagation(); closeProfileModal(); openReceiveShipmentModal(${s.supplier_id}, ${idx});">🚚 مال وصول کریں</button>
+             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ دیکھیں</button>
+             <button class="btnPrint" onclick="event.stopPropagation(); openPoReminderModal(${s.supplier_id}, ${idx});">📢 یاد دہانی</button>
+             <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ حذف کریں</button>`
+          : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ دیکھیں</button>
+             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ واپسی</button>`;
         return `
         <div class="billRow ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; gap:6px; cursor:default;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
@@ -22587,11 +22584,11 @@ function renderSupplierPoSection(supplierId){
       }).join('');
 
   const filterBarHtml = buildFilterBarHtml('profilePo',
-    [['all','All'],['pending','Pending'],['received','Received']], profilePoFilter, 'applySupplierPoFilter');
+    [['all','تمام'],['pending','زیرِالتواء'],['received','موصول شدہ']], profilePoFilter, 'applySupplierPoFilter');
 
   document.getElementById('profileSections').innerHTML = `
     ${buildSupplierBankAccountsHtml(s)}
-    <div class="profileSectionTitle"><span>📦 All Purchase Orders</span><span class="cnt">${orders.length} orders</span></div>
+    <div class="profileSectionTitle"><span>📦 تمام پرچیز آرڈرز</span><span class="cnt">${orders.length} آرڈرز</span></div>
     ${filterBarHtml}
     <div id="profilePoListWrap">${ordersHtml}</div>
   `;
@@ -22603,9 +22600,9 @@ function renderSupplierTransactionsSection(supplierId){
   if(!s) return;
   const ledger = s.ledgerHistory || [];
   const ledgerHtml = ledger.length === 0
-    ? `<div class="profileEmpty">No transactions yet</div>`
+    ? `<div class="profileEmpty">ابھی تک کوئی لین دین نہیں</div>`
     : ledger.map(h => {
-        const label = h.type === 'payment' ? '💵 Payment Sent' : h.type === 'return' ? '↩️ Item Return' : h.type;
+        const label = h.type === 'payment' ? '💵 ادائیگی بھیجی گئی' : h.type === 'return' ? '↩️ سامان کی واپسی' : h.type;
         const isGot = h.type === 'return'; // ریٹرن ہمارے حق میں کم واجب الادا کرتا ہے — سبز، ادائیگی سرخ
         return `<div class="ledgerRow"><div class="lrTop">
             <div><div class="lrDate">${h.date}${h.note ? ' — ' + h.note : ''}</div><div class="lrDesc">${label}</div></div>
@@ -22614,7 +22611,7 @@ function renderSupplierTransactionsSection(supplierId){
       }).join('');
 
   document.getElementById('profileSections').innerHTML = `
-    <div class="profileSectionTitle"><span>📜 Transaction History</span><span class="cnt">${ledger.length} entries</span></div>
+    <div class="profileSectionTitle"><span>📜 لین دین کی تاریخ</span><span class="cnt">${ledger.length} اندراجات</span></div>
     <div>${ledgerHtml}</div>
   `;
 }
@@ -22745,20 +22742,20 @@ function bankLogoImgHtml(bankName, size){
 function buildSupplierBankAccountsHtml(s){
   const accounts = getSupplierBankAccounts(s);
   const listHtml = accounts.length === 0
-    ? `<div class="profileEmpty">No bank/wallet accounts added yet</div>`
+    ? `<div class="profileEmpty">ابھی تک کوئی بینک/والیٹ اکاؤنٹ شامل نہیں</div>`
     : accounts.map((acc, idx) => `
       <div class="bankAccCard">
         <div class="bankAccCardTop">
           <div style="min-width:0; display:flex; align-items:center; gap:8px;">
             ${bankLogoImgHtml(acc.type, 26)}
             <div>
-              <div class="bankAccType">${acc.type || 'Bank/Wallet'}</div>
+              <div class="bankAccType">${acc.type || 'بینک/والیٹ'}</div>
               ${acc.title ? `<div class="bankAccTitle">${acc.title}</div>` : ''}
             </div>
           </div>
           <div class="bankAccBtns">
-            <button onclick="openEditSupplierBankAccount(${s.supplier_id}, ${idx})" title="Edit">✏️</button>
-            <button onclick="deleteSupplierBankAccount(${s.supplier_id}, ${idx})" title="Delete">🗑️</button>
+            <button onclick="openEditSupplierBankAccount(${s.supplier_id}, ${idx})" title="تبدیل کریں">✏️</button>
+            <button onclick="deleteSupplierBankAccount(${s.supplier_id}, ${idx})" title="حذف کریں">🗑️</button>
           </div>
         </div>
         <div class="bankAccNumber">${acc.number || '—'}</div>
@@ -22768,9 +22765,9 @@ function buildSupplierBankAccountsHtml(s){
       </div>
     `).join('');
   return `
-    <div class="profileSectionTitle"><span>🏦 Bank / Wallet Accounts</span><span class="cnt">${accounts.length}</span></div>
+    <div class="profileSectionTitle"><span>🏦 بینک / والیٹ اکاؤنٹس</span><span class="cnt">${accounts.length}</span></div>
     <div>${listHtml}</div>
-    <button type="button" class="addBankAccBtn" onclick="openAddSupplierBankAccount(${s.supplier_id})">➕ Add Bank/Wallet Account</button>
+    <button type="button" class="addBankAccBtn" onclick="openAddSupplierBankAccount(${s.supplier_id})">➕ بینک/والیٹ اکاؤنٹ شامل کریں</button>
   `;
 }
 
@@ -22778,9 +22775,9 @@ function buildSupplierBankAccountsHtml(s){
 let editingSupplierBankAccount = { supplierId: null, idx: null };
 let sbaPhotoDataUrl = null;
 function fillSupplierBankAccountModal(acc){
-  document.getElementById('sbaType').innerHTML = `<option value="">— Select Bank/Wallet —</option>` +
+  document.getElementById('sbaType').innerHTML = `<option value="">— بینک/والیٹ منتخب کریں —</option>` +
     Object.keys(BANK_LOGIN_URLS).map(b => `<option value="${b}" ${acc.type===b?'selected':''}>${b}</option>`).join('') +
-    `<option value="Other" ${acc.type==='Other'?'selected':''}>Other</option>`;
+    `<option value="Other" ${acc.type==='Other'?'selected':''}>دیگر</option>`;
   document.getElementById('sbaTitle').value = acc.title || '';
   document.getElementById('sbaNumber').value = acc.number || '';
   document.getElementById('sbaUan').value = acc.uan || '';
@@ -22814,7 +22811,7 @@ function saveSupplierBankAccount(){
   const type = document.getElementById('sbaType').value;
   const number = document.getElementById('sbaNumber').value.trim();
   if(!type || !number){
-    alert('Please select a bank/wallet and enter the account number.');
+    alert('براہ کرم بینک/والیٹ منتخب کریں اور اکاؤنٹ نمبر درج کریں۔');
     return;
   }
   const acc = {
@@ -22919,8 +22916,8 @@ function openPaySupplierModal(supplierId){
   // ---------- اسی سپلائر کے محفوظ شدہ بینک/والیٹ اکاؤنٹس ڈراپ ڈاؤن میں دکھائیں تاکہ کس اکاؤنٹ میں بھیجا گیا منتخب کیا جا سکے ----------
   const accSel = document.getElementById('paySupplierAccountSelect');
   const accounts = getSupplierBankAccounts(s);
-  accSel.innerHTML = '<option value="">Cash / No specific account</option>' +
-    accounts.map((acc, idx) => `<option value="${idx}">${(acc.type||'Account')}${acc.number ? ' — '+acc.number : ''}</option>`).join('');
+  accSel.innerHTML = '<option value="">نقد / کوئی مخصوص اکاؤنٹ نہیں</option>' +
+    accounts.map((acc, idx) => `<option value="${idx}">${(acc.type||'اکاؤنٹ')}${acc.number ? ' — '+acc.number : ''}</option>`).join('');
   accSel.value = '';
   document.getElementById('paySupplierModal').classList.add('show');
 }
@@ -22936,21 +22933,21 @@ function updatePaySupplierRemainingHint(){
   if(!s || amount <= 0){ hint.style.display = 'none'; return; }
   const remaining = Math.max(0, s.total_payable - amount);
   hint.style.display = 'block';
-  hint.textContent = `After this payment, remaining payable: Rs. ${remaining.toLocaleString()}` + (amount > s.total_payable ? ' ⚠️ (exceeds current payable)' : '');
+  hint.textContent = `اس ادائیگی کے بعد، باقی واجب الادا: Rs. ${remaining.toLocaleString()}` + (amount > s.total_payable ? ' ⚠️ (موجودہ واجب الادا سے زیادہ ہے)' : '');
 }
 function confirmPaySupplier(){
   const amount = parseFloat(document.getElementById('paySupplierAmount').value) || 0;
   if(amount <= 0){
-    alert('Please enter a valid amount.');
+    alert('براہ کرم درست رقم درج کریں۔');
     return;
   }
   const s = suppliersData.find(x => x.supplier_id === activePaySupplierId);
   if(!s) return;
 
-  if(amount > s.total_payable && !confirm(`This amount exceeds the supplier's total payable (Rs. ${s.total_payable.toLocaleString()}). Continue anyway?`)){
+  if(amount > s.total_payable && !confirm(`یہ رقم سپلائر کے کل واجب الادا (Rs. ${s.total_payable.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)){
     return;
   }
-  if(amount > financeDummy.cashInHand && !confirm(`This exceeds your current Cash in Hand (Rs. ${financeDummy.cashInHand.toLocaleString()}). Continue anyway?`)){
+  if(amount > financeDummy.cashInHand && !confirm(`یہ آپ کے موجودہ نقد (Cash in Hand: Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)){
     return;
   }
 
@@ -22999,7 +22996,6 @@ let activePoSupplierId = null;
 let poCart = []; // {variant_id, name, qty, cost}
 
 let activePoCategory = 'all';
-let activePoSort = 'asc'; // 'asc' | 'desc' — سٹاک کے حساب سے ترتیب
 
 function openPoModal(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
@@ -23011,12 +23007,9 @@ function openPoModal(supplierId){
   const poSortSel = document.getElementById('poCartSortSelect');
   if(poSortSel) poSortSel.value = 'added';
   activePoCategory = 'all';
-  activePoSort = 'asc';
   document.getElementById('poModalTitle').textContent = `📦 پرچیز آرڈر — ${s.name}`;
   document.getElementById('poSearchInput').value = '';
   document.getElementById('poSearchResults').classList.remove('show');
-  document.getElementById('poSortAsc').classList.add('active');
-  document.getElementById('poSortDesc').classList.remove('active');
   renderPoCategoryRail();
   renderPoBrowseList();
   renderPoCart();
@@ -23045,109 +23038,110 @@ function filterPoCategory(cat){
   renderPoBrowseList();
 }
 
-// ---------- سٹاک کے حساب سے ترتیب — کم سٹاک والے فوری نظر آئیں تاکہ منگوانے کا فیصلہ آسان ہو ----------
-function setPoSort(dir){
-  activePoSort = dir;
-  document.getElementById('poSortAsc').classList.toggle('active', dir === 'asc');
-  document.getElementById('poSortDesc').classList.toggle('active', dir === 'desc');
-  renderPoBrowseList();
-}
-
-// ---------- تمام پراڈکٹس کی مکمل فہرست — کارڈ گرڈ (بلنگ/ایڈوانس آرڈر جیسا)، کم سٹاک والے سب سے اوپر ----------
+// ---------- 🔄 صدام کی ہدایت (FM24SEPTH): کارڈ گرڈ کی بجائے اب بالکل 🧮 سٹاک مینجمنٹ جیسی لائن وائز فہرست —
+// ترتیب ہمیشہ سیریل نمبر کے مطابق پکی رہتی ہے (وہی ترتیب جو سٹاک مینجمنٹ میں نظر آتی ہے)، آرڈر بنتے وقت
+// (مقدار بڑھنے/گھٹنے پر) بھی سیریل نمبروں کی جگہ کبھی نہیں بدلتی ---------- -->
 function renderPoBrowseList(){
   const wrap = document.getElementById('poBrowseList');
   if(!wrap) return;
-  let flat = getFlatVariants();
-  if(activePoCategory !== 'all'){
-    flat = flat.filter(v => v.category === activePoCategory);
-  }
 
-  if(flat.length === 0){
-    wrap.innerHTML = `<div class="placeholder" style="grid-column:1/-1;">No items in this category</div>`;
+  let list = productsData.filter(p => !p.isDormant);
+  if(activePoCategory !== 'all'){
+    list = list.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activePoCategory);
+  }
+  // ---------- 🔒 سیریل نمبر کے مطابق پکی ترتیب — سٹاک مینجمنٹ کی 'serial' موڈ جیسی، بشمول دستی ڈریگ ترتیب ---------- -->
+  list = list.slice().sort((a, b) => (a.serial_no || 0) - (b.serial_no || 0));
+  applyManualCardOrder(list);
+
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="placeholder">اس کیٹیگری میں کوئی آئٹم نہیں</div>`;
     return;
   }
 
-  // ---------- ویریئنٹس کو پراڈکٹ کے حساب سے یکجا کریں — ایک پراڈکٹ ایک ہی کارڈ ----------
-  const productMap = new Map();
-  flat.forEach(v => {
-    if(!productMap.has(v.product_id)){
-      productMap.set(v.product_id, {
-        product_id: v.product_id,
-        name: productsData.find(p => p.product_id === v.product_id)?.name || v.name,
-        category: v.category,
-        image: null,
-        variants: [],
-      });
-    }
-    const grp = productMap.get(v.product_id);
-    grp.variants.push(v);
-    if(!grp.image && v.image) grp.image = v.image;
-  });
-  let groupedProducts = Array.from(productMap.values());
+  const thBase = "position:-webkit-sticky;position:sticky;top:0;z-index:10;background:#134e2c;color:#fff;font-weight:800;font-size:11px;padding:6px 3px;white-space:nowrap;text-align:center;border-left:1px solid rgba(255,255,255,.15);box-sizing:border-box;";
+  const tdBase = "padding:4px 2px;border-bottom:1px solid #eef1f5;border-left:1px solid #eef1f5;text-align:center;vertical-align:middle;box-sizing:border-box;";
+  const numFont = "font-family:Arial,Helvetica,sans-serif;";
+  const urduFont = "font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;";
+  const measUrduFont = "800 12.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
+  const measPackFont = "700 11px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
+  const measNumFont = "900 12px Arial,Helvetica,sans-serif";
 
-  // ---------- کم سٹاک والے سب سے اوپر (یا زیادہ سٹاک والے، ٹوگل کے مطابق) — ہر پراڈکٹ کا سب سے کم ویریئنٹ سٹاک موازنے کے لیے استعمال ہو ----------
-  groupedProducts.forEach(p => { p._minStock = Math.min(...p.variants.map(v => v.stock)); });
-  groupedProducts.sort((a, b) => activePoSort === 'asc' ? a._minStock - b._minStock : b._minStock - a._minStock);
+  const serialW = 34;
+  const nameW = autoColWidth('نام', list.map(p => p.name), measUrduFont, {min:66, max:160, pad:20});
+  const packingW = autoColWidth('پیکنگ', list.map(p => { const v = p.variants[0]||{}; return p.variants.length > 1 ? '📦 چُنیں' : (v.label || '—'); }), measPackFont, {min:50, max:96, pad:14});
+  const stockW = autoColWidth('📦 سٹاک', list.map(p => p.variants[0]?.stock||0), measNumFont, {min:38, max:66, pad:14});
+  const qtyW = 98;
 
-  wrap.innerHTML = groupedProducts.map(p => {
-    const isSingleVariant = p.variants.length === 1;
-    const nameFontSize = p.name.length > 18 ? '8.5px' : p.name.length > 13 ? '9.5px' : '10.5px';
-    let priceLabel, qtyBadgeHtml, actionAreaHtml, outOfStockClass = '', lowStockClass = '', stockBadgeHtml = '', cardOnClick = '';
+  const colWidths = [serialW, nameW, packingW, stockW, qtyW];
+  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
 
-    if(isSingleVariant){
-      const v = p.variants[0];
-      const outOfStock = v.stock <= 0;
-      const isLow = !outOfStock && v.stock <= (v.lowStockAt ?? 0);
-      outOfStockClass = outOfStock ? 'outOfStock' : '';
-      lowStockClass = isLow ? 'lowStockCard' : '';
+  const rows = list.map((p, idx) => {
+    const isSingle = p.variants.length === 1;
+    const v = p.variants[0] || {};
+    const rowBg = idx % 2 === 0 ? '#ffffff' : '#f1f6f2';
+    const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
+
+    let stock, isOut, isLow, qtyInCart, packingCellHtml, qtyCellHtml;
+
+    if(isSingle){
+      stock = v.stock || 0;
+      isOut = stock <= 0;
+      isLow = !isOut && stock <= (v.lowStockAt ?? 0);
       const cartItem = poCart.find(c => c.variant_id === v.variant_id);
-      const qtyInCart = cartItem ? cartItem.qty : 0;
-      const stackedCls = qtyInCart > 0 ? ' stacked' : '';
-      stockBadgeHtml = outOfStock ? `<div class="pgStockBadge outBadge${stackedCls}">Out of Stock</div>`
-        : isLow ? `<div class="pgStockBadge lowBadge${stackedCls}">Low: ${v.stock}</div>`
-        : `<div class="pgStockBadge normalBadge${stackedCls}">Qty: ${v.stock}</div>`;
-      priceLabel = `Rs. ${v.purchase}`;
-      qtyBadgeHtml = qtyInCart > 0 ? `<div class="pgQtyBadge">${qtyInCart}</div>` : '';
-      actionAreaHtml = `
-        <button class="pgMinusBtn" onclick="changePoCartQty(${v.variant_id}, -1)">−</button>
-        <button class="pgPlusBtn" onclick="addToPoCartGrid(${v.variant_id})">+</button>
-      `;
+      qtyInCart = cartItem ? cartItem.qty : 0;
+      packingCellHtml = `<span style="${numFont}font-size:11px;color:#475569;">${v.label || '—'}</span>`;
+      qtyCellHtml = `
+        <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
+          <button type="button" onclick="changePoCartQty(${v.variant_id}, -1)" style="width:24px;height:24px;border-radius:7px;border:none;background:#fee2e2;color:#b91c1c;font-weight:900;font-size:15px;line-height:1;">−</button>
+          <span style="min-width:20px; font-weight:900; ${numFont}font-size:13px; color:${qtyInCart>0 ? '#134e2c' : '#94a3b8'};">${qtyInCart}</span>
+          <button type="button" onclick="addToPoCartGrid(${v.variant_id})" style="width:24px;height:24px;border-radius:7px;border:none;background:#dcfce7;color:#15803d;font-weight:900;font-size:15px;line-height:1;">+</button>
+        </div>`;
     } else {
-      const totalQtyInCart = p.variants.reduce((sum, v) => {
-        const ci = poCart.find(c => c.variant_id === v.variant_id);
-        return sum + (ci ? ci.qty : 0);
-      }, 0);
-      const allOutOfStock = p.variants.every(v => v.stock <= 0);
-      const anyLow = !allOutOfStock && p.variants.some(v => v.stock > 0 && v.stock <= (v.lowStockAt ?? 0));
-      const totalStockAllVariants = p.variants.reduce((sum, v) => sum + v.stock, 0);
-      outOfStockClass = allOutOfStock ? 'outOfStock' : '';
-      lowStockClass = anyLow ? 'lowStockCard' : '';
-      const stackedCls2 = totalQtyInCart > 0 ? ' stacked' : '';
-      stockBadgeHtml = allOutOfStock ? `<div class="pgStockBadge outBadge${stackedCls2}">Out of Stock</div>`
-        : anyLow ? `<div class="pgStockBadge lowBadge${stackedCls2}">Low Stock</div>`
-        : `<div class="pgStockBadge normalBadge${stackedCls2}">Qty: ${totalStockAllVariants}</div>`;
-      priceLabel = `${p.variants.length} پیکنگ`;
-      qtyBadgeHtml = totalQtyInCart > 0 ? `<div class="pgQtyBadge">${totalQtyInCart}</div>` : '';
-      actionAreaHtml = `<button class="pgChooseBtn" onclick="openPoVariantChooser(${p.product_id})">📦 پیکنگ سلیکٹ کریں ▾</button>`;
-      cardOnClick = `onclick="openPoVariantChooser(${p.product_id})"`;
+      const totalStock = p.variants.reduce((s0,vv)=>s0+(vv.stock||0),0);
+      stock = totalStock;
+      isOut = p.variants.every(vv => (vv.stock||0) <= 0);
+      isLow = !isOut && p.variants.some(vv => (vv.stock||0) > 0 && (vv.stock||0) <= (vv.lowStockAt ?? 0));
+      qtyInCart = p.variants.reduce((sum, vv) => { const ci = poCart.find(c=>c.variant_id===vv.variant_id); return sum + (ci?ci.qty:0); }, 0);
+      packingCellHtml = `<button type="button" onclick="openPoVariantChooser(${p.product_id})" style="width:100%;padding:4px 2px;border:1.5px solid #d3d8de;border-radius:9px;font-size:10.5px;background:#fff;cursor:pointer;${urduFont}">📦 چُنیں</button>`;
+      qtyCellHtml = `<button type="button" onclick="openPoVariantChooser(${p.product_id})" style="width:100%; padding:5px 2px; border-radius:9px; border:none; font-weight:900; ${numFont}font-size:12.5px; background:${qtyInCart>0 ? '#dcfce7':'#f1f5f9'}; color:${qtyInCart>0 ? '#15803d':'#94a3b8'};">${qtyInCart>0 ? qtyInCart+' ✓' : '➕ منتخب کریں'}</button>`;
     }
+
+    const stockCellHtml = `<div style="width:100%;box-sizing:border-box;padding:3px 2px;border-radius:9px;font-size:12px;font-weight:900;${numFont}background:${isOut ? '#fee2e2' : isLow ? '#ffedd5' : '#f1f5f9'};color:${isOut ? '#b91c1c' : isLow ? '#c2410c' : '#475569'};">${stock}</div>`;
 
     return `
-      <div class="productGridCard ${outOfStockClass} ${lowStockClass}" data-product-id="${p.product_id}" ${cardOnClick}>
-        <div class="pgImageArea${p.image ? '' : ' pgNoImage'}">
-          ${qtyBadgeHtml}
-          ${stockBadgeHtml}
-          ${p.image ? `<img src="${p.image}">` : ''}
-          <div class="pgCaption${p.image ? '' : ' pgCaptionNoImg'}" style="${p.image ? `background:${getProductCardCaptionBgFinal()};` : `background:${getProductCardBgFinal()};`}">
-            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; line-height:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).isNastaleeq ? '1.9' : '1.15'}; color:${getProductCardTextColorFinal(!!p.image)};">${p.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; margin:0 4px 0 0; vertical-align:middle;">${p.serial_no}</span>` : ''}${p.name}</div>
-            <div class="pgPrice" style="color:${getProductCardTextColorFinal(!!p.image)};">${priceLabel}</div>
-          </div>
-        </div>
-        <div class="pgButtonStrip">
-          ${actionAreaHtml}
-        </div>
-      </div>`;
+      <tr style="background:${rowBg};">
+        <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:28px !important;height:28px !important;min-width:28px !important;min-height:28px !important;font-size:11px !important;cursor:default !important;pointer-events:none !important;">${p.serial_no ?? '?'}</span></td>
+        <td style="${tdBase}${frozenTd(1)}${urduFont}font-size:12.5px;font-weight:800;">${p.name}</td>
+        <td style="${tdBase}${frozenTd(2)}">${packingCellHtml}</td>
+        <td style="${tdBase}">${stockCellHtml}</td>
+        <td style="${tdBase}">${qtyCellHtml}</td>
+      </tr>`;
   }).join('');
+
+  const headers = ['#','نام','پیکنگ','📦 سٹاک','مقدار'];
+  const theadHtml = '<tr>' + headers.map((h,i) => {
+    const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
+    return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
+  }).join('') + '</tr>';
+
+  const colgroupHtml = '<colgroup>' + colWidths.map((w,i) => i===1 ? '<col style="width:auto;">' : `<col style="width:${w}px;">`).join('') + '</colgroup>';
+  const totalTableW = colWidths.reduce((a,b)=>a+b,0);
+
+  const oldScrollEl = document.getElementById('poBrowseScrollWrap');
+  const savedScrollTop = oldScrollEl ? oldScrollEl.scrollTop : 0;
+  const savedScrollLeft = oldScrollEl ? oldScrollEl.scrollLeft : 0;
+
+  wrap.innerHTML = `
+    <div id="poBrowseScrollWrap" dir="rtl" style="max-height:44vh; overflow:auto; -webkit-overflow-scrolling:touch; border-radius:10px; border:1px solid #dbe1ea;">
+      <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:${totalTableW}px;table-layout:fixed;font-size:12.5px;margin:0;">
+        ${colgroupHtml}
+        <thead>${theadHtml}</thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  const scrollWrap = document.getElementById('poBrowseScrollWrap');
+  if(scrollWrap){ scrollWrap.scrollTop = savedScrollTop; scrollWrap.scrollLeft = savedScrollLeft; }
 }
 
 // ---------- کارڈ پر + دبانے سے براہ راست پرچیز آرڈر کارٹ میں شامل ہو ----------
