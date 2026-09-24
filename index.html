@@ -671,6 +671,12 @@
     scroll-margin-top:96px;
   }
   .vegNavActiveRow td{ background:#fef3c7 !important; }
+  /* ---------- 🔵 صدام کی ہدایت (24 ستمبر): آرڈر ٹیکنگ جدول میں جس سبزی کی مقدار لگ چکی ہو (سلیکٹڈ) اس کی پوری قطار
+     گہرے نمایاں نیلے رنگ میں + دائیں طرف موٹی پٹی — پہلے ہلکا سا نیلا تھا جو زیبرا رنگ میں کھو جاتا تھا۔ کلاس ٹوگل ہونے سے
+     رنگ فوراً بدلتا ہے (پہلے tr پر رنگ لگتا تھا جو td کے اپنے رنگ کے نیچے چھپ جاتا تھا) ---------- */
+  tr.otSelRow td{ background:#93c5fd !important; color:#0b2a5b !important; border-bottom-color:#2563eb !important; }
+  tr.otSelRow td:first-child{ box-shadow:inset -6px 0 0 #1d4ed8; }
+  tr.otSelRow input.otQtyInput{ border:2.5px solid #1d4ed8 !important; background:#fff !important; color:#0b2a5b !important; }
   .screen{display:none; animation:fadeIn .25s ease;}
   .screen.active{display:block;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
@@ -12032,8 +12038,8 @@ function goTo(screenName, _isHistoryNav){
           return sa - sb;
         }));
         const itemsStep = document.getElementById('otStepItems');
-        if(itemsStep && itemsStep.style.display !== 'none' && typeof renderOtItemsPage === 'function'){
-          renderOtItemsPage();
+        if(itemsStep && itemsStep.style.display !== 'none' && typeof otBackgroundRefresh === 'function'){
+          otBackgroundRefresh(); // 🛡️ سکرول/ٹائپنگ محفوظ — دیکھیں renderOtItemsPage کے اوپر کا تبصرہ
         }
       }
     });
@@ -24565,9 +24571,50 @@ function getOtFilteredItems(){
   );
 }
 
+// ---------- 🛡️🐞 صدام کی ہدایت (24 ستمبر): "لسٹ بھاگ کر پہلے نمبر پر آ جاتی ہے" کی اصل جڑ ----------
+// ہر 5 سیکنڈ کی خودکار کلاؤڈ پولنگ (fetchProductsFromCloud) — ڈیٹا بدلا ہو یا نہ بدلا ہو، ہر بار — پورا جدول
+// innerHTML سے دوبارہ بنا دیتی تھی۔ جدول کا سکرول والا ڈبہ (div) بھی نیا بن جاتا تھا، اس لیے سکرول ہمیشہ 0 (یعنی نمبر 1)
+// پر لوٹ آتا، اور جس خانے میں لکھ رہے ہوتے وہ بھی مٹ جاتا۔ اسی لیے آپ 71 پر ہوتے اور نتیجہ 3 نمبر پر بڑھتا نظر آتا
+// (ٹچ کے وقت لسٹ اوپر جا چکی ہوتی)۔ پہلے کی گئی فکسز صرف نیویگیٹر ویل کا سکرول روکتی تھیں، اصل ری رینڈر نہیں۔
+// اب: (1) ڈیٹا نہ بدلا ہو تو ری رینڈر ہی نہیں ہوتا، (2) صارف ٹائپ کر رہا / سکرول یا ٹچ کر رہا ہو تو ری رینڈر مؤخر،
+// (3) ری رینڈر ہو بھی تو سکرول کی جگہ محفوظ رکھ کر واپس لگائی جاتی ہے ---------- -->
+let _otLastSig = '';
+let _otLastTouchTs = 0;
+let _otBgRefreshTimer = null;
+function otComputeSig(){
+  try{
+    return (otFlatCache || []).map(v => [v.variant_id, v.serial_no, v.name, v.label, v.stock, v.reserved, v.product_id].join('|')).join(';');
+  }catch(e){ return String(Math.random()); }
+}
+['touchstart','pointerdown','wheel','scroll','keydown'].forEach(evName => {
+  document.addEventListener(evName, (e) => {
+    const t = e.target;
+    if(t && t.nodeType === 1 && t.closest && t.closest('#otItemsList')) _otLastTouchTs = Date.now();
+    else if(evName === 'scroll' && t && t.id === 'otItemsList') _otLastTouchTs = Date.now();
+  }, {capture:true, passive:true});
+});
+function otUserIsBusy(){
+  const wrap = document.getElementById('otItemsList');
+  const ae = document.activeElement;
+  if(wrap && ae && wrap.contains(ae) && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return true;
+  if(document.getElementById('otItemSearchInput') === ae) return true;
+  return (Date.now() - _otLastTouchTs) < 3000;
+}
+function otBackgroundRefresh(){
+  clearTimeout(_otBgRefreshTimer);
+  if(!document.getElementById('otItemsList')) return;
+  if(otComputeSig() === _otLastSig) return; // ڈیٹا وہی ہے — کچھ دوبارہ بنانے کی ضرورت نہیں
+  if(otUserIsBusy()){
+    _otBgRefreshTimer = setTimeout(otBackgroundRefresh, 2500); // صارف مصروف ہے — تھوڑی دیر بعد پھر دیکھیں
+    return;
+  }
+  renderOtItemsPage();
+}
+
 function renderOtItemsPage(){
   const list = document.getElementById('otItemsList');
   if(!list) return;
+  _otLastSig = otComputeSig();
   const btn = document.getElementById('otViewModeBtn');
   if(btn) btn.textContent = otViewMode === 'table' ? '🗂️ کارڈ' : '📊 جدول';
   const items = getOtFilteredItems();
@@ -24633,6 +24680,10 @@ function toggleOtViewMode(){
 // ہے (نام+پیکنگ منجمد، سبز sticky header، چھوٹا سیریل بیج) — مگر یہاں صرف مقدار لکھی جا سکتی ہے، باقی سب صرف
 // دیکھنے کے لیے (کوئی قیمت نہیں، کوئی نئی چیز شامل/حذف نہیں کر سکتے) ---------- -->
 function renderOtItemsTable(wrap){
+  // ---------- 📌 جدول دوبارہ بنانے سے پہلے سکرول کی جگہ یاد رکھیں، بعد میں واپس لگائیں ----------
+  const _oldBox = wrap.firstElementChild;
+  const _keepTop = _oldBox ? _oldBox.scrollTop : 0;
+  const _keepLeft = _oldBox ? _oldBox.scrollLeft : 0;
   // ---------- 🔍 صدام کی ہدایت (FM15SEPTU): جدول نظارے میں بھی سرچ کا اثر ہو — فلٹر شدہ فہرست استعمال کریں ---------- -->
   const otItems = getOtFilteredItems();
   // ---------- 🟢 صدام کی ہدایت (FM11SEP): سبز کیپشن بار پہلے سکرول کرتے ہی غائب ہو جاتا تھا کیونکہ اس کا z-index سیٹ
@@ -24647,11 +24698,11 @@ function renderOtItemsTable(wrap){
   const measUrduFontOt = "700 13.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measPackFontOt = "700 11.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measNumFontOt = "900 12.5px Arial,Helvetica,sans-serif";
-  const serialWOt = autoColWidth('#', otItems.map(v => v.serial_no ?? '?'), measNumFontOt, {min:32, max:48, pad:14});
-  const nameWOt = autoColWidth('نام', otItems.map(v => (productsData.find(p => p.product_id === v.product_id)?.name) || v.name), measUrduFontOt, {min:70, max:190, pad:24});
-  const packWOt = autoColWidth('پیکنگ', otItems.map(v => v.label || ''), measPackFontOt, {min:40, max:90, pad:14});
-  const stockWOt = autoColWidth('سٹاک', otItems.map(v => otAvailableStock(v.variant_id)), measNumFontOt, {min:36, max:64, pad:14});
-  let qtyWOt = Math.max(96, autoColWidth('مقدار', otItems.map(v => otQtyMap[v.variant_id] || ''), measNumFontOt, {min:30, max:60, pad:10}) + 66);
+  const serialWOt = autoColWidth('#', otItems.map(v => v.serial_no ?? '?'), measNumFontOt, {min:28, max:40, pad:8});
+  const nameWOt = autoColWidth('نام', otItems.map(v => (productsData.find(p => p.product_id === v.product_id)?.name) || v.name), measUrduFontOt, {min:64, max:160, pad:14});
+  const packWOt = autoColWidth('پیکنگ', otItems.map(v => v.label || ''), measPackFontOt, {min:36, max:76, pad:8});
+  const stockWOt = autoColWidth('سٹاک', otItems.map(v => otAvailableStock(v.variant_id)), measNumFontOt, {min:32, max:56, pad:8});
+  let qtyWOt = 178; // 📏 مقدار کا خانہ بڑا — 3 ہندسے صاف نظر آئیں + ➕➖ بٹن
   // ---------- 📐 صدام کی ہدایت (FM11SEP): پہلے ٹیبل کی چوڑائی صرف کالمز جتنی ہوتی تھی تو بائیں طرف خالی جگہ بچ جاتی تھی —
   // اب اگر سکرین اس سے چوڑی ہے تو باقی بچی ہوئی ساری جگہ "مقدار" کالم کو دے دی جائے (وہی کالم خالی جگہ کے بالکل ساتھ ہے) ---------- -->
   const otAvailW = (wrap.clientWidth || wrap.offsetWidth || 0) - 4;
@@ -24662,7 +24713,7 @@ function renderOtItemsTable(wrap){
   const rows = otItems.map((v, idx) => {
     const qty = otQtyMap[v.variant_id] || 0;
     const checked = qty > 0;
-    const rowBg = checked ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : (idx % 2 === 0 ? '#ffffff' : '#dde6e2');
+    const rowBg = (idx % 2 === 0 ? '#ffffff' : '#dde6e2'); // سلیکٹڈ قطار کا رنگ اب CSS کلاس otSelRow سے (زیادہ نمایاں)
     const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
     const pName = (productsData.find(p => p.product_id === v.product_id)?.name) || v.name;
     const avail = otAvailableStock(v.variant_id);
@@ -24672,7 +24723,7 @@ function renderOtItemsTable(wrap){
     // باقی سفید رہ جاتے تھے) ---------- -->
     const rowTd = `background:${rowBg};`;
     return `
-      <tr data-variant-id="${v.variant_id}">
+      <tr data-variant-id="${v.variant_id}" class="${checked ? 'otSelRow' : ''}">
         <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default !important;pointer-events:none !important;margin:0 !important;">${v.serial_no ?? '?'}</span></td>
         <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13.5px;font-weight:var(--otFw,700);">${pName}</td>
         <td style="${tdBase}${rowTd}${urduFont}font-size:11.5px;">${v.label || ''}</td>
@@ -24680,10 +24731,10 @@ function renderOtItemsTable(wrap){
         <td style="${tdBase}${rowTd}padding:4px 3px;">
           <!-- ---------- 🖐️ صدام کی ہدایت (FM11SEP): مقدار کے خانے اور سٹاک کالم کی حد کے درمیان فاصلہ، اور +/− بٹنوں
                کے درمیان بھی زیادہ فاصلہ — تاکہ الگ الگ آسانی سے دبائے جا سکیں ---------- -->
-          <div style="display:flex; align-items:center; justify-content:center; gap:9px; padding-inline-end:6px;">
-            <input type="text" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setOtQtyTableManual(${v.variant_id}, this.value, this)" style="width:42px;box-sizing:border-box;padding:5px 2px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:7px;font-size:12.5px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);">
-            <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, 1)" style="width:27px;height:27px;border:none;border-radius:7px;background:#dcfce7;color:#15803d;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #86efac;">+</button>
-            <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, -1)" style="width:27px;height:27px;border:none;border-radius:7px;background:#fee2e2;color:#b91c1c;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #fca5a5;">−</button>
+          <div style="display:flex; align-items:center; justify-content:center; gap:10px; padding-inline-end:4px;">
+            <input type="text" class="otQtyInput" data-vid="${v.variant_id}" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setOtQtyTableManual(${v.variant_id}, this.value, this)" style="width:70px;height:36px;box-sizing:border-box;padding:4px 2px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:8px;font-size:17px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);">
+            <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, 1)" style="width:32px;height:32px;border:none;border-radius:7px;background:#dcfce7;color:#15803d;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #86efac;">+</button>
+            <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, -1)" style="width:32px;height:32px;border:none;border-radius:7px;background:#fee2e2;color:#b91c1c;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #fca5a5;">−</button>
           </div>
         </td>
       </tr>`;
@@ -24705,6 +24756,11 @@ function renderOtItemsTable(wrap){
       </table>
     </div>
   `;
+  const _newBox = wrap.firstElementChild;
+  if(_newBox && (_keepTop || _keepLeft)){
+    _newBox.scrollTop = _keepTop;
+    _newBox.scrollLeft = _keepLeft;
+  }
 }
 // ---------- 🐞 صدام کی ہدایت (FM18SEPFR): اصل خرابی — یہ فنکشن اور نیچے موجود ویل والا setOtQtyDirect(...)
 // دونوں کا نام ایک جیسا "setOtQtyDirect" تھا۔ جاوا اسکرپٹ میں ایک ہی نام کے دو function ہوں تو بعد والا
@@ -24727,7 +24783,7 @@ function setOtQtyTableManual(variantId, value, inputEl){
     inputEl.value = qty || '';
     inputEl.style.borderColor = qty > 0 ? 'var(--primary)' : '#dbe1ea';
     const tr = inputEl.closest('tr');
-    if(tr) tr.style.background = qty > 0 ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : '';
+    if(tr) tr.classList.toggle('otSelRow', qty > 0);
     flashSavedInput(inputEl); // ---------- 💾 صدام کی ہدایت (FM10SEPTH0530PM): محفوظ ہونے کا اشارہ ---------- -->
   }
   updateOtStockCell(variantId); // ---------- 📦 صدام کی ہدایت (FM10SEPTH): مقدار بدلتے ہی سٹاک کالم فوراً اپڈیٹ ---------- -->
@@ -24748,7 +24804,7 @@ function changeOtQtyTable(btn, variantId, delta){
     input.style.borderColor = next > 0 ? 'var(--primary)' : '#dbe1ea';
   }
   const tr = btn.closest('tr');
-  if(tr) tr.style.background = next > 0 ? 'linear-gradient(180deg,#eff6ff,#dbeafe)' : '';
+  if(tr) tr.classList.toggle('otSelRow', next > 0);
   updateOtStockCell(variantId); // ---------- 📦 صدام کی ہدایت (FM10SEPTH): مقدار بدلتے ہی سٹاک کالم فوراً اپڈیٹ ---------- -->
 }
 
@@ -31030,7 +31086,7 @@ async function fetchProductsFromCloud(silent){
       // ساتھ فوراً دوبارہ دکھائیں — بالکل Billing گرڈ جیسا ---------- -->
       if(currentScreenName === 'orderTaking'){
         const itemsStep = document.getElementById('otStepItems');
-        if(itemsStep && itemsStep.style.display !== 'none' && typeof renderOtItemsPage === 'function') renderOtItemsPage();
+        if(itemsStep && itemsStep.style.display !== 'none' && typeof otBackgroundRefresh === 'function') otBackgroundRefresh(); // 🛡️ اصل فکس: ہر 5 سیکنڈ بلاوجہ ری رینڈر بند
         if(typeof updateOtPresenceButtonLabels === 'function') updateOtPresenceButtonLabels();
       }
     }
