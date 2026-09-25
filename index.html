@@ -3830,9 +3830,12 @@
       <!-- ---------- 🔒 صدام کی ہدایت (22 ستمبر، صبح 8:47): اب چونکہ لائن میں صرف ایک ہی بٹن بچا ہے، خالی جگہ
            بہت زیادہ بچ رہی تھی — صدام نے وہ خالی جگہ اسی 📊 رپورٹس بٹن کو دینے کو کہا: بٹن اب پوری لائن جتنا
            لمبا، درمیان میں، اور نمایاں/واضح (بڑا فونٹ + موٹی پیڈنگ) ---------- -->
-      <div style="display:flex; align-items:center; justify-content:center; gap:4px; margin-bottom:10px; flex-wrap:nowrap;">
-        <!-- ---------- 🔧 عنوان + منشی — اب مکمل طور پر چھپے ہوئے (کوڈ محفوظ)، اوپر کی لائن میں صرف رپورٹس بٹن
-             نظر آئے گا تاکہ کبھی کوئی overflow/کٹنے کا امکان ہی نہ رہے ---------- -->
+      <!-- ---------- 🆕 صدام کی ہدایت (FM25SEPFR): تین بٹن ایک ہی لائن میں، کبھی نہیں کٹیں گے — ترتیب:
+           1) 🏭 بیوپاری سے خریداری  2) 💵 نقد خریداری  3) 📊 رپورٹ (سب سے آخری کونے پر) ---------- -->
+      <div style="display:flex; align-items:stretch; gap:5px; margin-bottom:10px; flex-wrap:nowrap;">
+        <button type="button" onclick="openSupplierPickerForPo()" style="flex:1.35 1 0; min-width:0; padding:9px 3px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:10px; font-weight:900; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">🏭 بیوپاری سے خریداری</button>
+        <button type="button" onclick="openCashPurchaseModal()" style="flex:1.05 1 0; min-width:0; padding:9px 3px; background:linear-gradient(180deg,#34d399,#059669); color:#fff; border:none; border-radius:10px; font-weight:900; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">💵 نقد خریداری</button>
+        <!-- ---------- 🔧 عنوان + منشی — اب مکمل طور پر چھپے ہوئے (کوڈ محفوظ) ---------- -->
         <div style="display:none; align-items:center; gap:4px; flex:1 1 auto; min-width:0; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;">
           <!-- ---------- 🔧 صدام کی ہدایت (FM21SEPMO04): عنوان سکڑ کر صرف "..." رہ جاتا تھا (بمشکل پڑھا جاتا) —
                اسی جگہ سکرین کے مینیو/ہیڈر سے پہلے ہی پتا ہے کہ یہ سٹاک ایڈجسٹمنٹ سکرین ہے، اس لیے یہاں سے
@@ -3843,9 +3846,9 @@
                🔒 FM22SEPTU09: یہ بٹن اب مکمل چھپا دیا — نیچے ڈراپ ڈاؤن میں وہی عمل پہلے سے ایک انٹری کے طور پر موجود ہے ---------- -->
           <button type="button" onclick="openMunshiStockLogReport()" title="🧑‍🌾 منشی کا شامل کردہ سٹاک دیکھیں" style="flex:0 0 auto; padding:4px 6px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:9px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی سٹاک</button>
         </div>
-        <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:1 1 auto; max-width:480px;">
-          <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="width:100%; justify-content:center; padding:11px 14px; font-size:14.5px; font-weight:900; max-width:none; white-space:nowrap; border-radius:11px;">
-            <span>📊 رپورٹس</span>
+        <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0.8 1 0; min-width:0; max-width:none;">
+          <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="width:100%; justify-content:center; padding:9px 3px; font-size:10.5px; font-weight:900; max-width:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-radius:10px;">
+            <span>📊 رپورٹ</span>
             <span class="categoryDropdownArrow">▾</span>
           </button>
           <div class="categoryDropdownPanel" id="stockAdjReportsDropdownPanel">
@@ -4671,7 +4674,22 @@
 
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closePoModal()">منسوخ</button>
-          <button class="saveBtn" onclick="savePurchaseOrder()">محفوظ کریں (سٹاک میں شامل ہو جائے گا)</button>
+          <button class="saveBtn" id="poSaveBtn" onclick="savePurchaseOrder()">محفوظ کریں (سٹاک میں شامل ہو جائے گا)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 🆕 صدام کی ہدایت (FM25SEPFR): "🏭 بیوپاری سے خریداری" بٹن دبانے پر پہلے یہیں سے سپلائر منتخب کریں،
+         پھر اوپر والا 📦 پرچیز آرڈر موڈل اسی سپلائر کے لیے کھلتا ہے ---------- -->
+    <div class="modalOverlay" id="poSupplierPickModal" onclick="if(event.target===this) closeSupplierPickerForPo()" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+      <div class="modalBoxWide" style="width:400px; max-height:80vh; overflow-y:auto;">
+        <h3>🏭 کس بیوپاری سے خریداری؟</h3>
+        <div class="searchRow" style="margin-bottom:8px;">
+          <input type="text" id="poSupplierPickSearch" dir="rtl" placeholder="🔍 بیوپاری کا نام لکھیں..." oninput="renderSupplierPickerForPoList(this.value)">
+        </div>
+        <div id="poSupplierPickList"></div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeSupplierPickerForPo()">منسوخ</button>
         </div>
       </div>
     </div>
@@ -8538,7 +8556,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM25SEPFR0334PM';
+const APP_BUILD_VERSION = 'FM25SEPFR0348PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -23062,26 +23080,71 @@ function confirmPaySupplier(){
    ===================================================================== */
 let activePoSupplierId = null;
 let poCart = []; // {variant_id, name, qty, cost}
+let poCashMode = false; // 🆕 صدام کی ہدایت (FM25SEPFR): "💵 نقد خریداری" — سپلائر کے بغیر، اسی پرچیز آرڈر کارٹ
+// (ٹیبل/کوائٹی وہیل) کو استعمال کر کے، تصدیق پر سیدھا سٹاک میں شامل — کوئی سپلائر کھاتہ متاثر نہیں ہوتا
+let cashPurchasesData = loadFromStorage('cashPurchases', []); // 🆕 نقد خریداری کا ریکارڈ (رپورٹ کے لیے محفوظ)
 
 let activePoCategory = 'all';
 
 function openPoModal(supplierId){
-  const s = suppliersData.find(x => x.supplier_id === supplierId);
-  if(!s) return;
+  let s = null;
+  if(supplierId){
+    s = suppliersData.find(x => x.supplier_id === supplierId);
+    if(!s) return;
+    poCashMode = false;
+  } else {
+    // 🆕 supplierId نہ ہو تو یہ "💵 نقد خریداری" موڈ ہے — وہی ٹیبل/کارٹ، بس سپلائر کے بغیر
+    poCashMode = true;
+  }
 
-  activePoSupplierId = supplierId;
+  activePoSupplierId = supplierId || null;
   poCart = [];
   poCartSortMode = 'added';
   const poSortSel = document.getElementById('poCartSortSelect');
   if(poSortSel) poSortSel.value = 'added';
   activePoCategory = 'all';
-  document.getElementById('poModalTitle').textContent = `📦 پرچیز آرڈر — ${s.name}`;
+  document.getElementById('poModalTitle').textContent = poCashMode ? '💵 نقد خریداری' : `📦 بیوپاری سے خریداری — ${s.name}`;
+  const poSaveBtnEl = document.getElementById('poSaveBtn');
+  if(poSaveBtnEl) poSaveBtnEl.textContent = poCashMode ? '✅ تصدیق کریں (سٹاک میں فوراً شامل ہو جائے گا)' : 'محفوظ کریں (بیوپاری کے پینڈنگ آرڈر میں شامل ہو گا)';
   document.getElementById('poSearchInput').value = '';
   document.getElementById('poSearchResults').classList.remove('show');
   renderPoCategoryRail();
   renderPoBrowseList();
   renderPoCart();
   document.getElementById('poModal').classList.add('show');
+}
+
+// 🆕 صدام کی ہدایت (FM25SEPFR): سٹاک مینجمنٹ کے اوپر "💵 نقد خریداری" بٹن سے یہیں کھلتا ہے
+function openCashPurchaseModal(){
+  openPoModal(null);
+}
+
+// 🆕 صدام کی ہدایت (FM25SEPFR): سٹاک مینجمنٹ کے اوپر "🏭 بیوپاری سے خریداری" بٹن — پہلے سپلائر منتخب کریں
+function openSupplierPickerForPo(){
+  const inp = document.getElementById('poSupplierPickSearch');
+  if(inp) inp.value = '';
+  renderSupplierPickerForPoList('');
+  document.getElementById('poSupplierPickModal').classList.add('show');
+}
+function closeSupplierPickerForPo(){
+  document.getElementById('poSupplierPickModal').classList.remove('show');
+}
+function renderSupplierPickerForPoList(query){
+  const wrap = document.getElementById('poSupplierPickList');
+  if(!wrap) return;
+  query = (query || '').trim().toLowerCase();
+  let list = suppliersData.slice().sort((a,b) => a.name.localeCompare(b.name));
+  if(query) list = list.filter(s => s.name.toLowerCase().includes(query));
+
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="profileEmpty">کوئی بیوپاری نہیں ملا</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(s => `
+    <div class="profileListRow" onclick="closeSupplierPickerForPo(); openPoModal(${s.supplier_id});" style="cursor:pointer;">
+      <div class="plMain">🏭 ${s.name}</div>
+      <div class="plAmount" style="font-size:11.5px; color:var(--muted);">${s.phone || ''}</div>
+    </div>`).join('');
 }
 
 // ---------- کیٹیگری کے مطابق فلٹر کریں (لکھ لکھ کر ڈھونڈنے کی بجائے سیدھا منتخب کریں) ----------
@@ -23280,6 +23343,7 @@ function renderPoVariantChooserList(productId){
 function closePoModal(){
   document.getElementById('poModal').classList.remove('show');
   activePoSupplierId = null;
+  poCashMode = false; // 🆕 نقد خریداری موڈ بند — اگلی بار جو بھی موڈ کھلے، صحیح سیٹ ہو
 }
 
 // ---------- پرچیز آرڈر میں آئٹم تلاش کریں ----------
@@ -23461,6 +23525,36 @@ function setPoCartSort(mode){
 // ---------- محفوظ کریں: اسٹاک بڑھے، سپلائر کا واجب الادا بڑھے، ہسٹری میں محفوظ ہو ----------
 function savePurchaseOrder(){
   if(poCart.length === 0){ alert('Please add at least one item.'); return; }
+
+  // 🆕 صدام کی ہدایت (FM25SEPFR): "💵 نقد خریداری" — کوئی سپلائر نہیں، تصدیق پر سیدھا سٹاک میں اضافہ،
+  // کسی بیوپاری کا کھاتہ/واجب الادا متاثر نہیں ہوتا (بالکل اسی طرز پر جیسے confirmShipmentReceipt میں سٹاک بڑھتا ہے)
+  if(poCashMode){
+    if(!confirm('نقد خریداری کی تصدیق کریں؟ سٹاک فوراً بڑھ جائے گا۔')) return;
+    let cashTotal = 0;
+    poCart.forEach(item => {
+      cashTotal += item.qty * item.cost;
+      productsData.forEach(p => {
+        const v = p.variants.find(vv => vv.variant_id === item.variant_id);
+        if(v){ v.stock = (v.stock || 0) + item.qty; v.purchase = item.cost; }
+      });
+    });
+    cashPurchasesData = cashPurchasesData || [];
+    cashPurchasesData.unshift({
+      items: JSON.parse(JSON.stringify(poCart)),
+      total: cashTotal,
+      date: new Date().toISOString().split('T')[0]
+    });
+    saveToStorage('cashPurchases', cashPurchasesData);
+    persistAllData();
+    pushProductsToCloud(); // ---------- ☁️ نقد خریداری سے سٹاک بڑھنا فوراً کلاؤڈ میں ----------
+    closePoModal();
+    renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput') ? document.getElementById('stockAdjSearchInput').value : '');
+    renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
+    renderBillingProductGrid();
+    alert('✅ نقد خریداری محفوظ ہو گئی، سٹاک اپڈیٹ ہو گیا۔ کل رقم: Rs. ' + cashTotal.toLocaleString());
+    return;
+  }
+
   const s = suppliersData.find(x => x.supplier_id === activePoSupplierId);
   if(!s) return;
 
