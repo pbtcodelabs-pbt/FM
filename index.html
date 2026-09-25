@@ -8508,7 +8508,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'جمعرات24ستمبر10:58am';
+const APP_BUILD_VERSION = 'FM24SEPTH0932PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11274,8 +11274,7 @@ function checkDraftCompletion(productId){
   const nameOk = p.name && p.name.trim();
   const packingOk = v.label && v.label.trim();
   if(nameOk && packingOk){
-    const maxSerial = productsData.reduce((m, x) => Math.max(m, x.serial_no || 0), 0);
-    p.serial_no = maxSerial + 1;
+    p.serial_no = getNextProductSerial();
     draftNewProductId = null;
     persistAllData();
     pushProductsToCloud();
@@ -15121,7 +15120,28 @@ function assignInitialProductSerials(){
 }
 // ---------- نئی شامل ہونے والی کسی بھی سبزی کو، اگر اس کا سیریل نمبر ابھی خالی ہو، اگلا نمبر دے دیں —
 // موجودہ کسی سبزی کا نمبر کبھی نہیں بدلتا ---------- -->
+// ---------- 🔒🆕 مرکزی سیریل نظام (FM24SEPTH): ہر نئی پروڈکٹ (سٹاک مینجمنٹ، آرڈر ٹیکنگ، بلنگ، پرچیز) کو اگلا سیریل
+// صرف اسی ایک فنکشن سے ملے گا — ہمیشہ موجودہ سب سے بڑے سیریل کے بعد کا، درمیان میں کبھی نہیں ----------
+function getNextProductSerial(){
+  return productsData.reduce((m, x) => Math.max(m, Number(x.serial_no) || 0), 0) + 1;
+}
+// ---------- 🔒🆕 دو موبائلوں پر بیک وقت نئی پروڈکٹ بننے سے اگر ایک ہی سیریل دو پروڈکٹس کو مل جائے تو: پرانی پروڈکٹ
+// (چھوٹا product_id) اپنا سیریل رکھتی ہے، صرف بعد والی کو آخری سیریل کے بعد کا نیا نمبر ملتا ہے۔ باقی کسی کا سیریل نہیں بدلتا ----------
+function repairDuplicateProductSerials(){
+  const seen = new Map();
+  const dups = [];
+  productsData.slice().sort((a,b) => (Number(a.product_id)||0) - (Number(b.product_id)||0)).forEach(p => {
+    const n = Number(p.serial_no);
+    if(!n) return;
+    if(seen.has(n)) dups.push(p); else seen.set(n, p);
+  });
+  if(!dups.length) return false;
+  let maxSerial = productsData.reduce((m, x) => Math.max(m, Number(x.serial_no) || 0), 0);
+  dups.forEach(p => { maxSerial++; p.serial_no = maxSerial; });
+  return true;
+}
 function backfillMissingProductSerials(){
+  try{ if(repairDuplicateProductSerials()){ try{ AppState.settings.productsPendingSync = true; }catch(e){} } }catch(e){}
   // ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): اب نمبر خود اپنی مرضی سے دیں گے — خودکار بھرنے کا نظام بند،
   // ورنہ صاف کیے گئے (خالی چھوڑے گئے) نمبر ہر بار پیج کھلتے ہی خودکار دوبارہ بھر جاتے ---------- -->
   if(loadFromStorage('serialManualMode', false)) return;
@@ -18142,8 +18162,7 @@ function vcInlineSaveNew(){
   const num = id => parseFloat(document.getElementById(id)?.value) || 0;
   const newProductId = nextProductId++;
   const newVariantId = nextVariantId++;
-  const maxSerial = productsData.reduce((m,x) => Math.max(m, x.serial_no || 0), 0);
-  const savedSerial = maxSerial + 1;
+  const savedSerial = getNextProductSerial();
   productsData.push({
     product_id: newProductId, name, category:'', isDormant:false, serial_no: savedSerial,
     variants:[{ variant_id:newVariantId, label:packing, barcode:'NEW'+newVariantId, purchase:num('vcAddPurchase'), labor:0, sellLabor:0, retail:num('vcAddRetail'), wholesale:num('vcAddWholesale'), stock:num('vcAddStock'), lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
@@ -23989,6 +24008,19 @@ function otAvailableStock(variantId){
 }
 // ---------- ہر جگہ (کارڈ بیج + جدول کالم) جہاں یہ نمبر دکھایا جا رہا ہو، ایک ہی جگہ سے اپڈیٹ کریں ---------- -->
 function updateOtStockCell(variantId){
+  // ---------- 🔗 FM24SEPTH0932PM: جدول کا سٹاک خانہ = اصل سٹاک − یہاں لکھی مقدار (بالکل سٹاک مینجمنٹ والا عدد، مقدار لکھتے ہی گھٹتا ہے) ---------- -->
+  try{
+    let liveStock = null;
+    for(const pp of productsData){ const lv = (pp.variants||[]).find(x => x.variant_id === variantId); if(lv){ liveStock = Number(lv.stock)||0; break; } }
+    if(liveStock !== null){
+      const tv = liveStock - (Number(otQtyMap[variantId]) || 0);
+      document.querySelectorAll(`[data-ot-tstock-for="${variantId}"]`).forEach(el => {
+        el.textContent = tv;
+        el.style.color = tv < 0 ? '#b91c1c' : '#15803d';
+        el.style.borderColor = tv < 0 ? '#fca5a5' : '#86efac';
+      });
+    }
+  }catch(e){}
   const avail = otAvailableStock(variantId);
   const style = avail <= 0 ? 'color:#b91c1c;' : 'color:#134e2c;';
   document.querySelectorAll(`[data-ot-stock-for="${variantId}"]`).forEach(el => {
@@ -24227,8 +24259,7 @@ function otAddStockCreateNewVeg(){
   const packing = (document.getElementById('otAddStockNewPacking')?.value || '').trim();
   const newProductId = nextProductId++;
   const newVariantId = nextVariantId++;
-  const maxSerial = productsData.reduce((m,x) => Math.max(m, x.serial_no || 0), 0);
-  const savedSerial = maxSerial + 1;
+  const savedSerial = getNextProductSerial();
   productsData.push({
     product_id: newProductId, name, category:'', isDormant:false, serial_no: savedSerial,
     variants:[{ variant_id:newVariantId, label:packing, barcode:'NEW'+newVariantId, purchase:0, labor:0, sellLabor:0, retail:0, wholesale:0, stock:0, lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
@@ -24717,50 +24748,54 @@ function renderOtItemsTable(wrap){
   const _oldBox = wrap.firstElementChild;
   const _keepTop = _oldBox ? _oldBox.scrollTop : 0;
   const _keepLeft = _oldBox ? _oldBox.scrollLeft : 0;
-  // ---------- 🔍 صدام کی ہدایت (FM15SEPTU): جدول نظارے میں بھی سرچ کا اثر ہو — فلٹر شدہ فہرست استعمال کریں ---------- -->
+  // ---------- 🔗 صدام کی ہدایت (FM24SEPTH0932PM): آرڈر ٹیکنگ کا جدول اب سٹاک مینجمنٹ (Stock Adjustment) کے جدول کا
+  // بالکل ہم شکل ہے — وہی کالم (# / نام / پیکنگ / 📦 سٹاک / 🔖 بکنگ)، وہی چوڑائیاں، وہی رنگ، وہی منجمد کالم۔ سب سے اہم:
+  // نام، پیکنگ، سٹاک اور بکنگ اب پرانی محفوظ نقل (otFlatCache) سے نہیں، سیدھا اصل ڈیٹا (productsData) سے پڑھے جاتے ہیں —
+  // اس لیے دونوں سکرینوں پر عدد کبھی مختلف نہیں ہو سکتے۔ اوپر والے خرید/فروخت/ریٹ کے ڈبے یہاں نہیں ہیں۔
+  // آرڈر ٹیکنگ کا اپنا صرف ایک کالم: مقدار (لکھنے کے لیے) ---------- -->
   const otItems = getOtFilteredItems();
-  // ---------- 🟢 صدام کی ہدایت (FM11SEP): سبز کیپشن بار پہلے سکرول کرتے ہی غائب ہو جاتا تھا کیونکہ اس کا z-index سیٹ
-  // نہیں تھا (نیچے کی قطاریں اوپر پینٹ ہو جاتی تھیں) — اب z-index دے کر ہمیشہ اوپر رکھا، اور ہلکا شفاف "واٹر مارک" رنگ دیا ---------- -->
-  const thBase = "position:-webkit-sticky;position:sticky;top:0;z-index:14;background:rgba(19,78,44,.93);backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);color:#fff;font-weight:800;font-size:11px;padding:6px 3px;white-space:nowrap;text-align:center;border-left:1px solid rgba(255,255,255,.15);box-sizing:border-box;";
-  const tdBase = "padding:4px 3px;border-bottom:1.5px solid #dbe1ea;border-left:1px solid #eef1f5;text-align:center;vertical-align:middle;box-sizing:border-box;font-weight:700;";
+  const liveOf = (v) => {
+    const p = productsData.find(pp => pp.product_id === v.product_id);
+    const lv = p ? (p.variants || []).find(x => x.variant_id === v.variant_id) : null;
+    return { p: p || null, lv: lv || v };
+  };
+  const thBase = "position:-webkit-sticky;position:sticky;top:0;z-index:10;background:#134e2c;color:#fff;font-weight:800;font-size:11px;padding:6px 3px;white-space:nowrap;text-align:center;border-left:1px solid rgba(255,255,255,.15);box-sizing:border-box;";
+  const tdBase = "padding:3px 2px;border-bottom:1px solid #eef1f5;border-left:1px solid #eef1f5;text-align:center;vertical-align:middle;box-sizing:border-box;";
+  const numFont = "font-family:Arial,Helvetica,sans-serif;";
   const urduFont = "font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;";
-  // ---------- 🏷️ صدام کی ہدایت: ترتیب اب # (سرخ گول سیریل) → نام → پیکنگ → مقدار — سیریل سب سے پہلے، مستقل جگہ پر ---------- -->
-  // ---------- 📦 صدام کی ہدایت (FM10SEPTH): پیکنگ کے بعد، مقدار سے پہلے، دستیاب سٹاک کا نیا کالم ---------- -->
-  // ---------- 📏 صدام کی ہدایت (FM10SEPTH0445PM): کالم کی چوڑائی خودکار — سب سے بڑے نام/عدد کے مطابق، تاکہ
-  // تنگ کالم (سٹاک، # ) مزید تنگ ہوں اور درمیان کی خالی جگہ ختم ہو، ایک ہی سکرین پر زیادہ نظر آئے ---------- -->
-  const measUrduFontOt = "700 13.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
-  const measPackFontOt = "700 11.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
-  const measNumFontOt = "900 12.5px Arial,Helvetica,sans-serif";
-  const serialWOt = autoColWidth('#', otItems.map(v => v.serial_no ?? '?'), measNumFontOt, {min:28, max:40, pad:8});
-  const nameWOt = autoColWidth('نام', otItems.map(v => (productsData.find(p => p.product_id === v.product_id)?.name) || v.name), measUrduFontOt, {min:64, max:160, pad:14});
-  const packWOt = autoColWidth('پیکنگ', otItems.map(v => v.label || ''), measPackFontOt, {min:36, max:76, pad:8});
-  const stockWOt = autoColWidth('سٹاک', otItems.map(v => otAvailableStock(v.variant_id)), measNumFontOt, {min:32, max:56, pad:8});
-  let qtyWOt = 178; // 📏 مقدار کا خانہ بڑا — 3 ہندسے صاف نظر آئیں + ➕➖ بٹن
-  // ---------- 📐 صدام کی ہدایت (FM11SEP): پہلے ٹیبل کی چوڑائی صرف کالمز جتنی ہوتی تھی تو بائیں طرف خالی جگہ بچ جاتی تھی —
-  // اب اگر سکرین اس سے چوڑی ہے تو باقی بچی ہوئی ساری جگہ "مقدار" کالم کو دے دی جائے (وہی کالم خالی جگہ کے بالکل ساتھ ہے) ---------- -->
-  const otAvailW = (wrap.clientWidth || wrap.offsetWidth || 0) - 4;
-  const otPreliminaryTotal = serialWOt + nameWOt + packWOt + stockWOt + qtyWOt;
-  if(otAvailW > otPreliminaryTotal){ qtyWOt += (otAvailW - otPreliminaryTotal); }
-  const colWidths = [serialWOt, nameWOt, packWOt, stockWOt, qtyWOt];
-  const rightOffsets = [0, colWidths[0]];
+  const inputStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:12px;text-align:center;background:#fff;" + numFont;
+  const measUrduFont = "800 12.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
+  const measPackFont = "700 11px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
+  const measNumFont = "900 12px Arial,Helvetica,sans-serif";
+  const live = otItems.map(liveOf);
+  const serialW = 38;
+  const nameW = autoColWidth('نام', live.map(x => (x.p ? x.p.name : x.lv.name) || ''), measUrduFont, {min:70, max:190, pad:24});
+  const packingW = autoColWidth('پیکنگ', live.map(x => x.lv.label || '— منتخب —'), measPackFont, {min:52, max:110, pad:14});
+  const stockW = autoColWidth('📦 سٹاک', live.map(x => x.lv.stock || 0), measNumFont, {min:40, max:80, pad:16});
+  const bookingW = autoColWidth('🔖 بکنگ', live.map(x => x.lv.reserved || 0), measNumFont, {min:40, max:80, pad:16});
+  const qtyW = 178; // مقدار کا خانہ — 3 ہندسے صاف نظر آئیں + ➕➖ بٹن
+  const colWidths = [serialW, nameW, packingW, stockW, bookingW, qtyW];
+  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
   const rows = otItems.map((v, idx) => {
+    const { p, lv } = live[idx];
     const qty = otQtyMap[v.variant_id] || 0;
     const checked = qty > 0;
-    const rowBg = (idx % 2 === 0 ? '#ffffff' : '#dde6e2'); // سلیکٹڈ قطار کا رنگ اب CSS کلاس otSelRow سے (زیادہ نمایاں)
-    const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
-    const pName = (productsData.find(p => p.product_id === v.product_id)?.name) || v.name;
-    const avail = otAvailableStock(v.variant_id);
-    const availColor = avail <= 0 ? '#b91c1c' : '#134e2c';
-    // ---------- 🔒 صدام کی ہدایت: سیریل نمبر یہاں صرف دکھانے کے لیے (سرخ گول بیج) — کوئی onclick نہیں، ایڈٹ/تبدیل/حذف کبھی ممکن نہیں یہاں سے ---------- -->
-    // ---------- 🦓 صدام کی ہدایت (FM10SEPTH0530PM): زیبرا رنگ اب پوری قطار پر (پہلے صرف # اور نام کالم پر تھا،
-    // باقی سفید رہ جاتے تھے) ---------- -->
+    const rowBg = (idx % 2 === 0 ? '#ffffff' : '#dbe6da'); // سلیکٹڈ قطار کا رنگ CSS کلاس otSelRow سے
     const rowTd = `background:${rowBg};`;
+    const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
+    const pName = p ? p.name : v.name;
+    const serialNo = p ? p.serial_no : v.serial_no;
+    const stockNow = (Number(lv.stock) || 0) - qty;
+    const stockStyle = inputStyle + (stockNow < 0 ? "border-color:#fca5a5;color:#b91c1c;font-weight:900;" : "border-color:#86efac;color:#15803d;font-weight:900;");
+    const packBoxStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;" + urduFont;
+    const rsv = Number(lv.reserved) || 0;
     return `
       <tr data-variant-id="${v.variant_id}" class="${checked ? 'otSelRow' : ''}">
-        <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default !important;pointer-events:none !important;margin:0 !important;">${v.serial_no ?? '?'}</span></td>
-        <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13.5px;font-weight:var(--otFw,700);">${pName}</td>
-        <td style="${tdBase}${rowTd}${urduFont}font-size:11.5px;">${v.label || ''}</td>
-        <td style="${tdBase}${rowTd}font-weight:900;color:${availColor};" data-ot-stock-for="${v.variant_id}">${avail}</td>
+        <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; cursor:default !important; pointer-events:none !important; margin:0 !important;">${serialNo ?? '?'}</span></td>
+        <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13px;font-weight:var(--otFw,800);">${pName}</td>
+        <td style="${tdBase}${frozenTd(2)}"><div style="${packBoxStyle}">${lv.label || '—'}</div></td>
+        <td style="${tdBase}${rowTd}"><div style="${stockStyle}" data-ot-tstock-for="${v.variant_id}">${stockNow}</div></td>
+        <td style="${tdBase}${rowTd}"><div style="width:100%;box-sizing:border-box;padding:6px 2px;border-radius:11px;font-size:13px;font-weight:900;text-align:center;${numFont}background:${rsv>0 ? '#ffedd5' : '#f1f5f9'};color:${rsv>0 ? '#c2410c' : '#94a3b8'};border:1.5px solid ${rsv>0 ? '#fdba74' : '#e2e8f0'};">${rsv}</div></td>
         <td style="${tdBase}${rowTd}padding:4px 3px;">
           <!-- ---------- 🖐️ صدام کی ہدایت (FM11SEP): مقدار کے خانے اور سٹاک کالم کی حد کے درمیان فاصلہ، اور +/− بٹنوں
                کے درمیان بھی زیادہ فاصلہ — تاکہ الگ الگ آسانی سے دبائے جا سکیں ---------- -->
@@ -24772,17 +24807,18 @@ function renderOtItemsTable(wrap){
         </td>
       </tr>`;
   }).join('');
-  const headers = ['#','نام','پیکنگ','سٹاک','مقدار'];
+  const headers = ['#','نام','پیکنگ','📦 سٹاک','🔖 بکنگ','مقدار'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
-    const frozen = i < 2 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:16;` : '';
+    const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
   }).join('') + '</tr>';
-  const colgroupHtml = '<colgroup>' + colWidths.map(w => `<col style="width:${w}px;">`).join('') + '</colgroup>';
+  // نام والا کالم (index 1) اور مقدار (آخری) — بچی ہوئی جگہ خودکار نام کو، جدول ہمیشہ پوری چوڑائی تک
+  const colgroupHtml = '<colgroup>' + colWidths.map((w,i) => i===1 ? '<col style="width:auto;">' : `<col style="width:${w}px;">`).join('') + '</colgroup>';
   const totalTableWOt = colWidths.reduce((a,b) => a+b, 0);
   wrap.style.display = 'block';
   wrap.innerHTML = `
-    <div style="width:100%;max-height:74vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1.5px solid #cbd5e1;box-shadow:0 3px 10px rgba(0,0,0,.1);">
-      <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableWOt}px;table-layout:fixed;font-size:12.5px;">
+    <div style="width:100%;max-height:74vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea;">
+      <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:100%;min-width:${totalTableWOt}px;table-layout:fixed;font-size:12.5px;">
         ${colgroupHtml}
         <thead>${theadHtml}</thead>
         <tbody>${rows}</tbody>
@@ -31014,6 +31050,7 @@ async function pushProductsToCloud(){
             const cloudOnlyItems = cloudPeekArr.filter(p => !localIds.has(p.product_id));
             if(cloudOnlyItems.length){
               productsData = [...productsData, ...cloudOnlyItems];
+              try{ repairDuplicateProductSerials(); }catch(e){}
               saveProductsLight();
             }
           }
@@ -31076,6 +31113,7 @@ async function fetchProductsFromCloud(silent){
     const cloudIdsNow = new Set(cloudProducts.map(p => p.product_id));
     const localOnlyItems = productsData.filter(p => !cloudIdsNow.has(p.product_id));
     productsData = localOnlyItems.length ? [...cloudProducts, ...localOnlyItems] : cloudProducts;
+    try{ if(repairDuplicateProductSerials()){ AppState.settings.productsPendingSync = true; } }catch(e){}
     const cloudNextProductId = parseInt(doc.fields?.nextProductId?.integerValue || '0');
     if(cloudNextProductId > nextProductId) nextProductId = cloudNextProductId;
     const cloudNextVariantId = parseInt(doc.fields?.nextVariantId?.integerValue || '0');
