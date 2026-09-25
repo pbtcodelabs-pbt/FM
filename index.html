@@ -8508,7 +8508,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM25SEPFR1132AM';
+const APP_BUILD_VERSION = 'FM25SEPFR1137AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9498,9 +9498,9 @@ function finishLogin(user, rememberOverride){
    ===================================================================== */
 let pendingCustomerLoginId = null;
 
-// ---------- 🕌 صدام کی ہدایت (FM8SEPTU6): "السلام علیکم ورحمۃ اللہ" اور "اللہ پاک آپ کے کاروبار میں برکت
-// عطا فرمائے" — دونوں باری باری، ہلکے فیڈ کے ساتھ، لاگ ان سکرین پر ---------- -->
-const LOGIN_GREETING_LINES = ['السلام علیکم ورحمۃ اللہ', 'اللہ پاک آپ کے کاروبار میں برکت عطا فرمائے'];
+// ---------- 🕌 صدام کی ہدایت (25 ستمبر): پرانی سلام والی لائنیں ہٹا کر "بسم اللہ الرحمن الرحیم" اور
+// "سبحان اللہ وبحمدہ سبحان اللہ العظیم" — دونوں باری باری، ہلکے فیڈ کے ساتھ، لاگ ان سکرین پر ---------- -->
+const LOGIN_GREETING_LINES = ['بسم اللہ الرحمن الرحیم', 'سبحان اللہ وبحمدہ سبحان اللہ العظیم'];
 let loginGreetingIdx = 0;
 function startLoginGreetingCycle(){
   const el = document.getElementById('loginIslamicGreeting');
@@ -24026,7 +24026,7 @@ function otAvailableStock(variantId){
 }
 // ---------- ہر جگہ (کارڈ بیج + جدول کالم) جہاں یہ نمبر دکھایا جا رہا ہو، ایک ہی جگہ سے اپڈیٹ کریں ---------- -->
 function updateOtStockCell(variantId){
-  // ---------- 🔗 FM25SEPFR1132AM: جدول کا سٹاک خانہ = اصل سٹاک − یہاں لکھی مقدار (بالکل سٹاک مینجمنٹ والا عدد، مقدار لکھتے ہی گھٹتا ہے) ---------- -->
+  // ---------- 🔗 FM25SEPFR1137AM: جدول کا سٹاک خانہ = اصل سٹاک − یہاں لکھی مقدار (بالکل سٹاک مینجمنٹ والا عدد، مقدار لکھتے ہی گھٹتا ہے) ---------- -->
   try{
     let liveStock = null;
     for(const pp of productsData){ const lv = (pp.variants||[]).find(x => x.variant_id === variantId); if(lv){ liveStock = Number(lv.stock)||0; break; } }
@@ -24766,7 +24766,7 @@ function renderOtItemsTable(wrap){
   const _oldBox = wrap.firstElementChild;
   const _keepTop = _oldBox ? _oldBox.scrollTop : 0;
   const _keepLeft = _oldBox ? _oldBox.scrollLeft : 0;
-  // ---------- 🔗 صدام کی ہدایت (FM25SEPFR1132AM): آرڈر ٹیکنگ کا جدول اب سٹاک مینجمنٹ (Stock Adjustment) کے جدول کا
+  // ---------- 🔗 صدام کی ہدایت (FM25SEPFR1137AM): آرڈر ٹیکنگ کا جدول اب سٹاک مینجمنٹ (Stock Adjustment) کے جدول کا
   // بالکل ہم شکل ہے — وہی کالم (# / نام / پیکنگ / 📦 سٹاک / 🔖 بکنگ)، وہی چوڑائیاں، وہی رنگ، وہی منجمد کالم۔ سب سے اہم:
   // نام، پیکنگ، سٹاک اور بکنگ اب پرانی محفوظ نقل (otFlatCache) سے نہیں، سیدھا اصل ڈیٹا (productsData) سے پڑھے جاتے ہیں —
   // اس لیے دونوں سکرینوں پر عدد کبھی مختلف نہیں ہو سکتے۔ اوپر والے خرید/فروخت/ریٹ کے ڈبے یہاں نہیں ہیں۔
