@@ -8508,7 +8508,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM24SEPTH0932PM';
+const APP_BUILD_VERSION = 'FM25SEPFR1132AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -17090,6 +17090,24 @@ function releaseOrderStock(items){
     if(v) v.reserved = Math.max(0, (v.reserved || 0) - (Number(i.qty) || 0));
   });
 }
+// ---------- 🩹 صدام کی ہدایت (25 ستمبر): "بھوت" بکنگ فکس — پہلے v.reserved ایک الگ، ہاتھ سے بڑھایا/گھٹایا جانے
+// والا نمبر تھا، جو دو موبائل فونز کے درمیان تصادم (ایک ہی وقت پر دونوں کا پش) کی صورت میں غلط اٹکا رہ سکتا تھا،
+// چاہے آرڈر/بل خود ڈیلیٹ ہو چکا ہو۔ اب v.reserved کبھی خود سے نہیں بدلتا — بلکہ ہمیشہ موجودہ پینڈنگ (نامکمل)
+// آرڈرز کی فہرست سے دوبارہ، صفر سے شمار ہوتا ہے۔ یعنی اگر کوئی آرڈر واقعی ڈیلیٹ ہو چکا ہے تو اس کی بکنگ خودکار
+// صفر ہو جائے گی — کسی "بھوت" نمبر کا امکان ہی نہیں رہتا ---------- -->
+function recomputeReservedFromOrders(){
+  try{
+    productsData.forEach(p => (p.variants || []).forEach(v => { v.reserved = 0; }));
+    (advanceOrdersData || []).forEach(o => {
+      if(!o || o.status === 'fulfilled' || o.isDraft || o.stockReleased) return;
+      (o.items || []).forEach(i => {
+        if(!i || i.variant_id === null || i.variant_id === undefined) return;
+        const v = findVariantByVariantId(i.variant_id);
+        if(v) v.reserved = (v.reserved || 0) + (Number(i.qty) || 0);
+      });
+    });
+  }catch(e){}
+}
 
 // ---------- فروخت/واپسی پر ایک ہی جگہ سے سٹاک کاٹیں — Batches موجود ہوں تو FEFO (پہلے ایکسپائر ہونے والی کھیپ پہلے خرچ) ----------
 function deductVariantStock(v, qty){
@@ -24008,7 +24026,7 @@ function otAvailableStock(variantId){
 }
 // ---------- ہر جگہ (کارڈ بیج + جدول کالم) جہاں یہ نمبر دکھایا جا رہا ہو، ایک ہی جگہ سے اپڈیٹ کریں ---------- -->
 function updateOtStockCell(variantId){
-  // ---------- 🔗 FM24SEPTH0932PM: جدول کا سٹاک خانہ = اصل سٹاک − یہاں لکھی مقدار (بالکل سٹاک مینجمنٹ والا عدد، مقدار لکھتے ہی گھٹتا ہے) ---------- -->
+  // ---------- 🔗 FM25SEPFR1132AM: جدول کا سٹاک خانہ = اصل سٹاک − یہاں لکھی مقدار (بالکل سٹاک مینجمنٹ والا عدد، مقدار لکھتے ہی گھٹتا ہے) ---------- -->
   try{
     let liveStock = null;
     for(const pp of productsData){ const lv = (pp.variants||[]).find(x => x.variant_id === variantId); if(lv){ liveStock = Number(lv.stock)||0; break; } }
@@ -24748,7 +24766,7 @@ function renderOtItemsTable(wrap){
   const _oldBox = wrap.firstElementChild;
   const _keepTop = _oldBox ? _oldBox.scrollTop : 0;
   const _keepLeft = _oldBox ? _oldBox.scrollLeft : 0;
-  // ---------- 🔗 صدام کی ہدایت (FM24SEPTH0932PM): آرڈر ٹیکنگ کا جدول اب سٹاک مینجمنٹ (Stock Adjustment) کے جدول کا
+  // ---------- 🔗 صدام کی ہدایت (FM25SEPFR1132AM): آرڈر ٹیکنگ کا جدول اب سٹاک مینجمنٹ (Stock Adjustment) کے جدول کا
   // بالکل ہم شکل ہے — وہی کالم (# / نام / پیکنگ / 📦 سٹاک / 🔖 بکنگ)، وہی چوڑائیاں، وہی رنگ، وہی منجمد کالم۔ سب سے اہم:
   // نام، پیکنگ، سٹاک اور بکنگ اب پرانی محفوظ نقل (otFlatCache) سے نہیں، سیدھا اصل ڈیٹا (productsData) سے پڑھے جاتے ہیں —
   // اس لیے دونوں سکرینوں پر عدد کبھی مختلف نہیں ہو سکتے۔ اوپر والے خرید/فروخت/ریٹ کے ڈبے یہاں نہیں ہیں۔
@@ -24772,9 +24790,10 @@ function renderOtItemsTable(wrap){
   const nameW = autoColWidth('نام', live.map(x => (x.p ? x.p.name : x.lv.name) || ''), measUrduFont, {min:70, max:190, pad:24});
   const packingW = autoColWidth('پیکنگ', live.map(x => x.lv.label || '— منتخب —'), measPackFont, {min:52, max:110, pad:14});
   const stockW = autoColWidth('📦 سٹاک', live.map(x => x.lv.stock || 0), measNumFont, {min:40, max:80, pad:16});
-  const bookingW = autoColWidth('🔖 بکنگ', live.map(x => x.lv.reserved || 0), measNumFont, {min:40, max:80, pad:16});
+  // ---------- 🗑️ صدام کی ہدایت (25 ستمبر): "بکنگ" کالم مکمل ختم — یہ ایڈمن سکرین کی نقل تھی اور بلاوجہ
+  // سکرول/سلائیڈنگ کا باعث بن رہا تھا۔ اب بکنگ/انتخاب کی مقدار خود "مقدار" کالم کے +/− خانے میں ہی نظر آتی ہے ---------- -->
   const qtyW = 178; // مقدار کا خانہ — 3 ہندسے صاف نظر آئیں + ➕➖ بٹن
-  const colWidths = [serialW, nameW, packingW, stockW, bookingW, qtyW];
+  const colWidths = [serialW, nameW, packingW, stockW, qtyW];
   const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
   const rows = otItems.map((v, idx) => {
     const { p, lv } = live[idx];
@@ -24788,14 +24807,12 @@ function renderOtItemsTable(wrap){
     const stockNow = (Number(lv.stock) || 0) - qty;
     const stockStyle = inputStyle + (stockNow < 0 ? "border-color:#fca5a5;color:#b91c1c;font-weight:900;" : "border-color:#86efac;color:#15803d;font-weight:900;");
     const packBoxStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;" + urduFont;
-    const rsv = Number(lv.reserved) || 0;
     return `
       <tr data-variant-id="${v.variant_id}" class="${checked ? 'otSelRow' : ''}">
         <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; cursor:default !important; pointer-events:none !important; margin:0 !important;">${serialNo ?? '?'}</span></td>
         <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13px;font-weight:var(--otFw,800);">${pName}</td>
         <td style="${tdBase}${frozenTd(2)}"><div style="${packBoxStyle}">${lv.label || '—'}</div></td>
         <td style="${tdBase}${rowTd}"><div style="${stockStyle}" data-ot-tstock-for="${v.variant_id}">${stockNow}</div></td>
-        <td style="${tdBase}${rowTd}"><div style="width:100%;box-sizing:border-box;padding:6px 2px;border-radius:11px;font-size:13px;font-weight:900;text-align:center;${numFont}background:${rsv>0 ? '#ffedd5' : '#f1f5f9'};color:${rsv>0 ? '#c2410c' : '#94a3b8'};border:1.5px solid ${rsv>0 ? '#fdba74' : '#e2e8f0'};">${rsv}</div></td>
         <td style="${tdBase}${rowTd}padding:4px 3px;">
           <!-- ---------- 🖐️ صدام کی ہدایت (FM11SEP): مقدار کے خانے اور سٹاک کالم کی حد کے درمیان فاصلہ، اور +/− بٹنوں
                کے درمیان بھی زیادہ فاصلہ — تاکہ الگ الگ آسانی سے دبائے جا سکیں ---------- -->
@@ -24807,7 +24824,7 @@ function renderOtItemsTable(wrap){
         </td>
       </tr>`;
   }).join('');
-  const headers = ['#','نام','پیکنگ','📦 سٹاک','🔖 بکنگ','مقدار'];
+  const headers = ['#','نام','پیکنگ','📦 سٹاک','مقدار'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
     const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
@@ -26725,14 +26742,14 @@ function deleteAdvanceOrder(orderId){
   // (اگر پہلے سے Fulfill/بل بن چکا ہو تو وہ ریزرویشن پہلے ہی fulfillAdvanceOrder میں خارج ہو چکی ہوتی ہے) ----------
   // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): !delOrder.stockReleased بھی چیک کریں — اگر ایڈمن نے یہ آرڈر بلنگ میں
   // لوڈ کیا تھا (ریزرویشن پہلے ہی خارج ہو چکی) مگر بل مکمل کیے بغیر سیدھا ڈیلیٹ کر دیا، تو دوبارہ خارج نہ ہو ---------- -->
-  if(delOrder && delOrder.status !== 'fulfilled' && !delOrder.stockReleased){
-    releaseOrderStock(delOrder.items);
-    pushProductsToCloud();
-    pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02) ---------- -->
-  }
   // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): یہی آرڈر موجودہ بلنگ کارٹ کا منبع تھا تو وہ ربط بھی ختم کریں ----------
   if(Billing.sourceAdvanceOrderId === orderId) Billing.sourceAdvanceOrderId = null;
   advanceOrdersData = advanceOrdersData.filter(o => o.id !== orderId);
+  recomputeReservedFromOrders(); // ---------- 🩹 25 ستمبر: آرڈر ڈیلیٹ ہوتے ہی بکنگ فوراً درست، بھوت نمبر کا امکان نہیں ----------
+  if(delOrder && delOrder.status !== 'fulfilled' && !delOrder.stockReleased){
+    pushProductsToCloud();
+    pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02) ---------- -->
+  }
   persistAllData();
   pushAdvanceOrdersToCloud(); // ---------- کلاؤڈ پر بھی خودکار اپڈیٹ ----------
   renderAdvanceOrdersScreen();
@@ -26786,8 +26803,8 @@ function fulfillAdvanceOrder(orderId){
   // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): order.stockReleased سے گارڈ کیا تاکہ اگر ایڈمن یہی آرڈر دوبارہ ٹیپ
   // کرے (پہلی بار بل مکمل کیے بغیر واپس آ گیا ہو) تو ریزرویشن دوبارہ خارج ہو کر دوسرے آرڈرز کا سٹاک خراب نہ کرے ---------- -->
   if(order.status !== 'fulfilled' && !order.stockReleased){
-    releaseOrderStock(order.items);
     order.stockReleased = true;
+    recomputeReservedFromOrders(); // ---------- 🩹 25 ستمبر: بلنگ میں جاتے ہی بکنگ فوراً درست ----------
     pushProductsToCloud();
     pauseCloudPolling(20000); // ---------- 🔒 صدام کی ہدایت (FM21SEPMO02) ---------- -->
   }
@@ -30259,24 +30276,28 @@ async function fetchAdvanceOrdersFromCloud(silent){
     const cloudOrders = JSON.parse(jsonStr);
     if(!Array.isArray(cloudOrders)) return false;
 
-    const localIds = new Set(advanceOrdersData.map(o => o.id));
-    let addedAny = false;
-    cloudOrders.forEach(co => {
-      if(!localIds.has(co.id)){
-        advanceOrdersData.push(co);
-        addedAny = true;
-      }
-    });
-    if(addedAny) advanceOrdersData.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // ---------- 🩹 صدام کی ہدایت (25 ستمبر): پہلے یہاں صرف کلاؤڈ میں موجود نئے آرڈرز مقامی فہرست میں شامل ہوتے
+    // تھے — جو آرڈر دوسرے فون (ایڈمن) نے ڈیلیٹ کر دیا ہو وہ اس فون کی مقامی فہرست سے کبھی نہیں ہٹتا تھا، اسی
+    // لیے "بکنگ" ہمیشہ اٹکی رہتی۔ اب کلاؤڈ کی فہرست کو بنیاد بنایا جاتا ہے (ڈیلیٹ شدہ آرڈر خودکار غائب ہو جاتا
+    // ہے)، اور صرف وہ آرڈرز جو ابھی اسی فون پر بنے مگر کلاؤڈ پر نہیں گئے، آخر میں شامل کیے جاتے ہیں ---------- -->
+    // ---------- ابھی چند سیکنڈ پہلے اسی فون پر بنا آرڈر ہو سکتا ہے کلاؤڈ پر ابھی نہ پہنچا ہو (push چل رہی ہو) —
+    // اسے 2 منٹ تک رکھیں، اس کے بعد کلاؤڈ پر نہ ہونے کا مطلب واقعی ڈیلیٹ ہو چکا ہے ---------- -->
+    const cloudIdsNow = new Set(cloudOrders.map(o => o.id));
+    const localOnlyOrders = advanceOrdersData.filter(o => !cloudIdsNow.has(o.id) && (Date.now() - new Date(o.createdAt).getTime()) < 120000);
+    const before = advanceOrdersData.length;
+    advanceOrdersData = [...cloudOrders, ...localOnlyOrders];
+    advanceOrdersData.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const addedAny = advanceOrdersData.length !== before || true; // ہمیشہ تازہ حالت مان کر ری رینڈر (نیچے recompute بھی چلے گا)
 
     const cloudNextId = parseInt(doc.fields?.nextAdvOrderId?.integerValue || '0');
     if(cloudNextId > nextAdvOrderId) nextAdvOrderId = cloudNextId;
 
     saveToStorage('advanceOrders', advanceOrdersData);
     saveToStorage('nextAdvOrderId', nextAdvOrderId);
+    recomputeReservedFromOrders(); // ---------- ہر سنک کے بعد بکنگ ہمیشہ تازہ، حقیقی پینڈنگ آرڈرز سے شمار ہو ----------
 
-    if(addedAny && !silent && typeof renderAdvanceOrdersScreen === 'function' && document.getElementById('advOrderListWrap')){
-      renderAdvanceOrdersScreen(); // ---------- نیا آرڈر آیا ہو تو سکرین فوراً تازہ کریں ----------
+    if(!silent && typeof renderAdvanceOrdersScreen === 'function' && document.getElementById('advOrderListWrap')){
+      renderAdvanceOrdersScreen(); // ---------- فہرست بدلی ہو تو سکرین فوراً تازہ کریں ----------
     }
     return addedAny;
   }catch(e){
@@ -31114,6 +31135,7 @@ async function fetchProductsFromCloud(silent){
     const localOnlyItems = productsData.filter(p => !cloudIdsNow.has(p.product_id));
     productsData = localOnlyItems.length ? [...cloudProducts, ...localOnlyItems] : cloudProducts;
     try{ if(repairDuplicateProductSerials()){ AppState.settings.productsPendingSync = true; } }catch(e){}
+    try{ recomputeReservedFromOrders(); }catch(e){} // ---------- 🩹 25 ستمبر: بکنگ یہاں بھی فوراً درست، پرانا/بھوت reserved کلاؤڈ سے نہ رہ جائے ----------
     const cloudNextProductId = parseInt(doc.fields?.nextProductId?.integerValue || '0');
     if(cloudNextProductId > nextProductId) nextProductId = cloudNextProductId;
     const cloudNextVariantId = parseInt(doc.fields?.nextVariantId?.integerValue || '0');
