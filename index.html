@@ -6622,6 +6622,15 @@
   </div>
 </div>
 
+<!-- ---------- 🚧 مستقل مینٹیننس موڈ اشارہ — صرف اسی فون پر نظر آئے جس نے موڈ آن کیا تھا (localStorage کی
+     maintenanceLocalBypass چیک کر کے)۔ جب تک آف نہ کیا جائے، ہر سکرین پر اوپر چپکا رہے گا تاکہ ڈویلپر/ایڈمن
+     بھول نہ جائے کہ باقی سب فونز اس وقت بند پڑے ہیں۔ یہیں سے ایک ٹیپ میں آف بھی کیا جا سکتا ہے
+     (toggleMaintenanceMode وہی فنکشن استعمال ہوتا ہے جو Developer Panel کا بٹن استعمال کرتا ہے) ---------- -->
+<div id="maintenanceLocalBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:999998; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; padding:8px 12px; font-weight:800; font-size:12.5px; box-shadow:0 2px 8px rgba(0,0,0,.25);" dir="rtl">
+  <span>🚧 مینٹیننس موڈ آن ہے — باقی سب فونز پر ایپ بند ہے</span>
+  <button type="button" onclick="toggleMaintenanceMode()" style="padding:5px 12px; border:none; border-radius:7px; background:#fff; color:#92400e; font-weight:900; font-size:11.5px; cursor:pointer; white-space:nowrap;">✅ ابھی آف کریں</button>
+</div>
+
 <div class="modalOverlay" id="devSecretModal" style="z-index:3700;" onclick="if(event.target===this) closeDevSecretPanel()">
   <div class="modalBox" style="max-width:420px; position:relative;">
     <button onclick="closeDevSecretPanel()" style="position:absolute; top:10px; left:10px; background:#f1f5f9; border:none; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--text);">✕</button>
@@ -8529,7 +8538,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM25SEPFR1233PM';
+const APP_BUILD_VERSION = 'FM25SEPFR0334PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -31343,17 +31352,29 @@ async function toggleMaintenanceMode(){
 
 function refreshMaintenanceToggleBtnLabel(){
   const btn = document.getElementById('maintenanceToggleBtn');
-  if(!btn) return;
   const onByMe = loadFromStorage('maintenanceLocalBypass', false);
-  if(onByMe){
-    btn.textContent = '✅ مینٹیننس موڈ آف کریں (کام مکمل ہو گیا)';
-    btn.style.background = 'linear-gradient(180deg,#ef4444,#b91c1c)';
-    btn.style.color = '#fff';
-  } else {
-    btn.textContent = '🚧 مینٹیننس موڈ آن کریں';
-    btn.style.background = 'linear-gradient(180deg,#f59e0b,#b45309)';
-    btn.style.color = '#fff';
+  if(btn){
+    if(onByMe){
+      btn.textContent = '✅ مینٹیننس موڈ آف کریں (کام مکمل ہو گیا)';
+      btn.style.background = 'linear-gradient(180deg,#ef4444,#b91c1c)';
+      btn.style.color = '#fff';
+    } else {
+      btn.textContent = '🚧 مینٹیننس موڈ آن کریں';
+      btn.style.background = 'linear-gradient(180deg,#f59e0b,#b45309)';
+      btn.style.color = '#fff';
+    }
   }
+  // ---------- 🚧 اسی فون پر مستقل اوپری بینر بھی اسی وقت اپڈیٹ کر دیں — چاہے یہ فنکشن Developer Panel کھلنے
+  // پر چلے یا toggleMaintenanceMode() کے بعد، بینر ہمیشہ درست حالت میں رہے گا ---------- -->
+  refreshMaintenanceLocalBanner();
+}
+
+// ---------- 🚧 مستقل مینٹیننس موڈ اشارہ — صرف اسی فون پر دکھائیں جس نے موڈ آن کیا تھا ---------- -->
+function refreshMaintenanceLocalBanner(){
+  const banner = document.getElementById('maintenanceLocalBanner');
+  if(!banner) return;
+  const onByMe = loadFromStorage('maintenanceLocalBypass', false);
+  banner.style.display = onByMe ? 'flex' : 'none';
 }
 
 // ---------- 🔄 صدام کی ہدایت (FM20SEPSU02): دستی "تازہ کریں" بٹن — pending تبدیلی ہو تو پہلے بھیجیں،
@@ -40543,6 +40564,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ~4 سیکنڈ بعد دوبارہ — تاکہ ڈویلپر کے کام کے دوران باقی سب فونز پر بروقت "انتظار فرمائیں" اوورلے آ/جا سکے ---------- -->
   try{ fetchMaintenanceMode(true); }catch(e){ console.error('fetchMaintenanceMode failed', e); }
   setInterval(() => { try{ fetchMaintenanceMode(false); }catch(e){} }, 4000);
+  // ---------- 🚧 اسی فون پر اگر پہلے سے مینٹیننس موڈ آن کیا ہوا ہے تو ایپ کھلتے ہی مستقل بینر بھی فوراً نظر آئے
+  // (پہلے صرف Developer Panel کھولنے یا ٹوگل کرنے پر اپڈیٹ ہوتا تھا، اب شروع میں ہی) ---------- -->
+  try{ refreshMaintenanceLocalBanner(); }catch(e){ console.error('refreshMaintenanceLocalBanner failed', e); }
 
   try{ setupLoginScreen(); }catch(e){ console.error('setupLoginScreen failed', e); }
 
