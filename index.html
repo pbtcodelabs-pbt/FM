@@ -8556,7 +8556,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM25SEPFR0348PM';
+const APP_BUILD_VERSION = 'FM25SEPFR0615PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -17157,6 +17157,21 @@ function recomputeReservedFromOrders(){
   }catch(e){}
 }
 
+// ---------- صدام کی ہدایت (بیوپاری/بیچ ریٹ مکسنگ کا حل — ویٹڈ ایوریج کاسٹ): جب بھی نیا مال آئے (خواہ کیش خریداری ہو یا شپمنٹ وصولی)،
+// پرانے ریٹ کو نئے ریٹ سے اوور رائٹ کرنے کی بجائے پرانے + نئے مال کا "ملا جلا اوسط ریٹ" (Weighted Average Cost) نکالیں۔
+// مثال: 100 بوری پرانی @2000 + 80 بوری نئی @2500 = (100*2000 + 80*2500)/180 = ~2222 (نہ کہ صرف 2500)۔
+// اس طرح کسی بیوپاری کا الگ حساب متاثر نہیں ہوتا (وہ purchaseHistory میں پہلے سے محفوظ ہے) اور منافع/سٹاک ویلیو والی رپورٹس بھی
+// خودکار درست ہو جاتی ہیں کیونکہ وہ سب v.purchase ہی پڑھتی ہیں — کہیں اور کوڈ بدلنے کی ضرورت نہیں ----------
+function applyPurchaseToVariant(v, qty, rate){
+  if(!v || qty <= 0) return;
+  const oldStock = Math.max(0, v.stock || 0);
+  const oldRate = v.purchase || 0;
+  const newStock = oldStock + qty;
+  const weightedAvg = newStock > 0 ? ((oldStock * oldRate) + (qty * rate)) / newStock : rate;
+  v.stock = newStock;
+  v.purchase = Math.round(weightedAvg * 100) / 100; // دو ڈیسیمل تک راؤنڈ
+}
+
 // ---------- فروخت/واپسی پر ایک ہی جگہ سے سٹاک کاٹیں — Batches موجود ہوں تو FEFO (پہلے ایکسپائر ہونے والی کھیپ پہلے خرچ) ----------
 function deductVariantStock(v, qty){
   if(!v || qty <= 0) return;
@@ -23535,7 +23550,7 @@ function savePurchaseOrder(){
       cashTotal += item.qty * item.cost;
       productsData.forEach(p => {
         const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-        if(v){ v.stock = (v.stock || 0) + item.qty; v.purchase = item.cost; }
+        if(v){ applyPurchaseToVariant(v, item.qty, item.cost); }
       });
     });
     cashPurchasesData = cashPurchasesData || [];
@@ -28597,7 +28612,7 @@ function confirmShipmentReceipt(){
   receiveShipmentCart.forEach(item => {
     productsData.forEach(p => {
       const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ v.stock += item.qty; v.purchase = item.cost; } // TODO: DB میں current_stock += qty, purchase_price اپڈیٹ
+      if(v){ applyPurchaseToVariant(v, item.qty, item.cost); } // 🆕 صدام کی ہدایت: ویٹڈ ایوریج کاسٹ — TODO: DB میں current_stock += qty, purchase_price (ویٹڈ ایوریج) اپڈیٹ
     });
   });
 
