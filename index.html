@@ -6609,6 +6609,19 @@
 </div>
 <style>@keyframes gdriveProgAnim{0%{margin-left:-40%;} 100%{margin-left:100%;}}</style>
 
+<!-- ---------- 🚧 صدام کی ہدایت (25 ستمبر، دوپہر): "مینٹیننس موڈ" — جب ڈویلپر لائیو ایپ میں کوڈ اپڈیٹ کر رہا ہو
+     تو باقی سب صارفین (منشی/عملہ/ایڈمن دوسرے فون) کی سکرین پر یہ مکمل، ناقابلِ عبور اوورلے آ جائے — کوئی بھی
+     بٹن/خانہ اس کے نیچے چھو نہ سکے، تاکہ اسی وقت ڈیٹا میں گڑبڑ (سیریل نمبر الٹ ہونا وغیرہ) نہ ہو۔ جس فون سے
+     ڈویلپر نے یہ آن کیا ہو، اسی فون پر یہ نظر نہیں آتی (localStorage میں مقامی چھوٹ محفوظ ہوتی ہے) — تاکہ ڈویلپر
+     خود کام جاری رکھ سکے۔ بند کرتے ہی (کلاؤڈ پولنگ، ہر ~4 سیکنڈ) سب فونز پر خودکار غائب ہو جاتی ہے ---------- -->
+<div id="maintenanceOverlay" style="display:none; position:fixed; inset:0; z-index:999999; background:rgba(10,15,20,.94); align-items:center; justify-content:center; padding:24px; touch-action:none;" dir="rtl">
+  <div style="max-width:340px; text-align:center;">
+    <div style="font-size:52px; margin-bottom:14px;">🛠️</div>
+    <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:22px; font-weight:800; color:#fff; margin-bottom:10px; line-height:1.6;">براہِ کرم انتظار فرمائیں</div>
+    <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:600; color:#e2e8f0; line-height:1.9;">ویب سائٹ پر اس وقت کام جاری ہے۔<br>ابھی ویب سائٹ استعمال نہ کریں اور کوئی ڈیٹا نہ ڈالیں۔</div>
+  </div>
+</div>
+
 <div class="modalOverlay" id="devSecretModal" style="z-index:3700;" onclick="if(event.target===this) closeDevSecretPanel()">
   <div class="modalBox" style="max-width:420px; position:relative;">
     <button onclick="closeDevSecretPanel()" style="position:absolute; top:10px; left:10px; background:#f1f5f9; border:none; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--text);">✕</button>
@@ -6624,6 +6637,14 @@
     <div id="devSecretUnlocked" style="display:none; max-height:70vh; overflow-y:auto;">
       <div id="devCloudSyncStatus" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:8px 12px; margin-bottom:12px; font-size:11.5px; font-weight:600; text-align:left; line-height:1.5;"></div>
       <button class="testPrintBtn" style="margin-bottom:14px; background:#eef2ff; color:var(--primary-dark);" onclick="devEnterAppDirectly()">🚀 Enter App Now (skip PIN / activation code)</button>
+
+      <!-- ---------- 🚧 صدام کی ہدایت (25 ستمبر، دوپہر): مینٹیننس موڈ بٹن — دبانے پر باقی سب فونز پر فوری
+           "انتظار فرمائیں" اوورلے آ جائے گی، صرف اسی ڈویلپر فون پر نہیں ---------- -->
+      <div style="background:#fef3c7; border:1.5px solid #fcd34d; border-radius:12px; padding:12px; margin-bottom:14px;" dir="rtl">
+        <div style="font-size:12.5px; font-weight:800; color:#92400e; margin-bottom:6px;">🚧 مینٹیننس موڈ</div>
+        <div style="font-size:11px; color:#78716c; margin-bottom:10px; line-height:1.6;">آن کریں تو باقی سب فونز پر "انتظار فرمائیں، ابھی ویب سائٹ استعمال نہ کریں" کی سکرین آ جائے گی (اس فون پر نہیں)۔ کام مکمل ہونے پر آف کر دیں — سکرین چند سیکنڈ میں خودکار غائب ہو جائے گی۔</div>
+        <button type="button" id="maintenanceToggleBtn" onclick="toggleMaintenanceMode()" style="width:100%; padding:11px; border:none; border-radius:10px; font-weight:900; font-size:13.5px; cursor:pointer;">🚧 مینٹیننس موڈ آن کریں</button>
+      </div>
 
       <!-- ---------- 🔍 صدام کی ہدایت (FM6SEPSU8): آرڈر سنکرونائزیشن تشخیصی بٹن — تاکہ اندازوں کی بجائے
            اصل ثبوت (لوکل ڈیٹا، کلاؤڈ ڈیٹا، اصل خرابی کا پیغام) نظر آئے۔ کسٹمر اور ایڈمن دونوں کے فون پر
@@ -8508,7 +8529,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM25SEPFR1137AM';
+const APP_BUILD_VERSION = 'FM25SEPFR1233PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -24786,56 +24807,57 @@ function renderOtItemsTable(wrap){
   const measPackFont = "700 11px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measNumFont = "900 12px Arial,Helvetica,sans-serif";
   const live = otItems.map(liveOf);
-  const serialW = 38;
-  const nameW = autoColWidth('نام', live.map(x => (x.p ? x.p.name : x.lv.name) || ''), measUrduFont, {min:70, max:190, pad:24});
-  const packingW = autoColWidth('پیکنگ', live.map(x => x.lv.label || '— منتخب —'), measPackFont, {min:52, max:110, pad:14});
-  const stockW = autoColWidth('📦 سٹاک', live.map(x => x.lv.stock || 0), measNumFont, {min:40, max:80, pad:16});
+  // ---------- 📱 صدام کی ہدایت (25 ستمبر، دوپہر): جدول کبھی بھی سکرین کی چوڑائی سے باہر نہ نکلے — سلائیڈ/سکرول
+  // کی بالکل ضرورت نہ رہے۔ کالموں کی زیادہ سے زیادہ چوڑائی کم کر دی، اور نیچے جدول width:100% + table-layout:fixed
+  // کے ساتھ بغیر min-width کے بنایا گیا ہے تاکہ براؤزر خود تمام کالم پیج کے اندر ہی سکیڑ کر فٹ کر دے ---------- -->
+  const serialW = 32;
+  const nameW = autoColWidth('نام', live.map(x => (x.p ? x.p.name : x.lv.name) || ''), measUrduFont, {min:60, max:100, pad:14});
+  const packingW = autoColWidth('پیکنگ', live.map(x => x.lv.label || '— منتخب —'), measPackFont, {min:40, max:62, pad:8});
+  const stockW = autoColWidth('📦 سٹاک', live.map(x => x.lv.stock || 0), measNumFont, {min:28, max:42, pad:8});
   // ---------- 🗑️ صدام کی ہدایت (25 ستمبر): "بکنگ" کالم مکمل ختم — یہ ایڈمن سکرین کی نقل تھی اور بلاوجہ
   // سکرول/سلائیڈنگ کا باعث بن رہا تھا۔ اب بکنگ/انتخاب کی مقدار خود "مقدار" کالم کے +/− خانے میں ہی نظر آتی ہے ---------- -->
-  const qtyW = 178; // مقدار کا خانہ — 3 ہندسے صاف نظر آئیں + ➕➖ بٹن
+  const qtyW = 116; // مقدار کا خانہ — کمپیکٹ، پیج کے اندر ہی فٹ ہو
   const colWidths = [serialW, nameW, packingW, stockW, qtyW];
-  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
   const rows = otItems.map((v, idx) => {
     const { p, lv } = live[idx];
     const qty = otQtyMap[v.variant_id] || 0;
     const checked = qty > 0;
     const rowBg = (idx % 2 === 0 ? '#ffffff' : '#dbe6da'); // سلیکٹڈ قطار کا رنگ CSS کلاس otSelRow سے
     const rowTd = `background:${rowBg};`;
-    const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
     const pName = p ? p.name : v.name;
     const serialNo = p ? p.serial_no : v.serial_no;
+    const swipePid = p ? p.product_id : v.product_id;
     const stockNow = (Number(lv.stock) || 0) - qty;
-    const stockStyle = inputStyle + (stockNow < 0 ? "border-color:#fca5a5;color:#b91c1c;font-weight:900;" : "border-color:#86efac;color:#15803d;font-weight:900;");
-    const packBoxStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;" + urduFont;
+    const stockStyle = inputStyle + (stockNow < 0 ? "border-color:#fca5a5;color:#b91c1c;font-weight:900;" : "border-color:#86efac;color:#15803d;font-weight:900;") + "padding:4px 1px;font-size:11px;";
+    const packBoxStyle = "width:100%;min-width:0;box-sizing:border-box;padding:5px 1px;border:1.5px solid #d3d8de;border-radius:9px;font-size:10.5px;text-align:center;background:#fff;" + urduFont;
+    // ---------- 📱 صدام کی ہدایت (25 ستمبر، دوپہر): پوری قطار اب سلائیڈ (سوائپ) کر کے "غیر حاضر" کی جا سکتی ہے —
+    // جدول اب horizontally سکرول نہیں ہوتا، اس لیے پہلے کی طرح کالم منجمد (sticky) کرنے کی ضرورت نہیں رہی، اور
+    // پوری قطار بلا رکاوٹ ایک طرف سرک سکتی ہے (wireOtTableSwipeRows نیچے یہ سنبھالتا ہے) ---------- -->
     return `
-      <tr data-variant-id="${v.variant_id}" class="${checked ? 'otSelRow' : ''}">
-        <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; cursor:default !important; pointer-events:none !important; margin:0 !important;">${serialNo ?? '?'}</span></td>
-        <td style="${tdBase}${frozenTd(1)}text-align:right;padding-inline-end:8px;${urduFont}font-size:13px;font-weight:var(--otFw,800);">${pName}</td>
-        <td style="${tdBase}${frozenTd(2)}"><div style="${packBoxStyle}">${lv.label || '—'}</div></td>
+      <tr data-variant-id="${v.variant_id}" data-swipe-pid="${swipePid}" class="${checked ? 'otSelRow' : ''} otTableSwipeRow">
+        <td style="${tdBase}${rowTd}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:26px !important; height:26px !important; min-width:26px !important; min-height:26px !important; font-size:11px !important; cursor:default !important; pointer-events:none !important; margin:0 !important;">${serialNo ?? '?'}</span></td>
+        <td style="${tdBase}${rowTd}text-align:right;padding-inline-end:5px;${urduFont}font-size:12px;font-weight:var(--otFw,800);white-space:normal;word-break:break-word;line-height:1.25;">${pName}</td>
+        <td style="${tdBase}${rowTd}"><div style="${packBoxStyle}">${lv.label || '—'}</div></td>
         <td style="${tdBase}${rowTd}"><div style="${stockStyle}" data-ot-tstock-for="${v.variant_id}">${stockNow}</div></td>
-        <td style="${tdBase}${rowTd}padding:4px 3px;">
-          <!-- ---------- 🖐️ صدام کی ہدایت (FM11SEP): مقدار کے خانے اور سٹاک کالم کی حد کے درمیان فاصلہ، اور +/− بٹنوں
-               کے درمیان بھی زیادہ فاصلہ — تاکہ الگ الگ آسانی سے دبائے جا سکیں ---------- -->
-          <div style="display:flex; align-items:center; justify-content:center; gap:10px; padding-inline-end:4px;">
-            <input type="text" class="otQtyInput" data-vid="${v.variant_id}" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setOtQtyTableManual(${v.variant_id}, this.value, this)" style="width:70px;height:36px;box-sizing:border-box;padding:4px 2px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:8px;font-size:17px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);">
-            <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, 1)" style="width:32px;height:32px;border:none;border-radius:7px;background:#dcfce7;color:#15803d;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #86efac;">+</button>
-            <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, -1)" style="width:32px;height:32px;border:none;border-radius:7px;background:#fee2e2;color:#b91c1c;font-size:15px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #fca5a5;">−</button>
+        <td style="${tdBase}${rowTd}padding:3px 2px;">
+          <!-- ---------- 🖐️ صدام کی ہدایت (FM11SEP، 25SEP دوپہر): +/− بٹن اور مقدار کا خانہ اب پیج کے اندر ہی فٹ
+               ہونے کے لیے کمپیکٹ — چھوٹے مگر پھر بھی الگ الگ آسانی سے دبائے جا سکیں ---------- -->
+          <div style="display:flex; align-items:center; justify-content:center; gap:3px; width:100%;">
+            <input type="text" class="otQtyInput" data-vid="${v.variant_id}" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setOtQtyTableManual(${v.variant_id}, this.value, this)" style="width:38px;height:32px;box-sizing:border-box;padding:2px 1px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:7px;font-size:14px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);flex:0 0 auto;">
+            <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, 1)" style="width:26px;height:26px;border:none;border-radius:6px;background:#dcfce7;color:#15803d;font-size:13px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #86efac;">+</button>
+            <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, -1)" style="width:26px;height:26px;border:none;border-radius:6px;background:#fee2e2;color:#b91c1c;font-size:13px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #fca5a5;">−</button>
           </div>
         </td>
       </tr>`;
   }).join('');
   const headers = ['#','نام','پیکنگ','📦 سٹاک','مقدار'];
-  const theadHtml = '<tr>' + headers.map((h,i) => {
-    const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
-    return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
-  }).join('') + '</tr>';
-  // نام والا کالم (index 1) اور مقدار (آخری) — بچی ہوئی جگہ خودکار نام کو، جدول ہمیشہ پوری چوڑائی تک
+  const theadHtml = '<tr>' + headers.map((h,i) => `<th style="${thBase}width:${colWidths[i]}px;">${h}</th>`).join('') + '</tr>';
+  // نام والا کالم (index 1) — بچی ہوئی جگہ خودکار نام کو ملے، مگر جدول اب کبھی پیج سے چوڑا نہیں ہوگا
   const colgroupHtml = '<colgroup>' + colWidths.map((w,i) => i===1 ? '<col style="width:auto;">' : `<col style="width:${w}px;">`).join('') + '</colgroup>';
-  const totalTableWOt = colWidths.reduce((a,b) => a+b, 0);
   wrap.style.display = 'block';
   wrap.innerHTML = `
-    <div style="width:100%;max-height:74vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea;">
-      <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:100%;min-width:${totalTableWOt}px;table-layout:fixed;font-size:12.5px;">
+    <div style="width:100%;max-width:100%;max-height:74vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea;">
+      <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:100%;max-width:100%;table-layout:fixed;font-size:12.5px;">
         ${colgroupHtml}
         <thead>${theadHtml}</thead>
         <tbody>${rows}</tbody>
@@ -24843,10 +24865,82 @@ function renderOtItemsTable(wrap){
     </div>
   `;
   const _newBox = wrap.firstElementChild;
-  if(_newBox && (_keepTop || _keepLeft)){
+  if(_newBox && _keepTop){
     _newBox.scrollTop = _keepTop;
-    _newBox.scrollLeft = _keepLeft;
   }
+  wireOtTableSwipeRows(wrap);
+}
+// ---------- 👉👈 صدام کی ہدایت (25 ستمبر، دوپہر): آرڈر ٹیکنگ کے جدول میں ہی پوری قطار کو سرکا کر (سوائپ) سبزی
+// کو "غیر حاضر" کیا جا سکے — اب چونکہ جدول میں کوئی افقی سکرول نہیں رہا (کالم منجمد کرنے کی ضرورت ختم)، پوری
+// قطار سیدھی سرک سکتی ہے۔ منشی (کوئی بھی رول) یہاں سے یہ کر سکتا ہے — یہی otTogglePresence فنکشن استعمال ہوتا
+// ہے جو 🔴 غیر حاضر سبزیاں والے موڈل میں بھی استعمال ہوتا ہے، اس لیے دونوں جگہ سے تبدیلی ہمیشہ ہم آہنگ رہتی ہے۔
+// واپس "حاضر" کرنے کے لیے اوپر 🔴 غیر حاضر سبزیاں بٹن سے موڈل کھول کر وہاں سے سرکا کر واپس لایا جا سکتا ہے ---------- -->
+function wireOtTableSwipeRows(wrap){
+  if(!wrap || wrap.dataset.otTableSwipeWired) return;
+  wrap.dataset.otTableSwipeWired = '1';
+  let activeRow = null, startX = 0, startY = 0, dx = 0, dragging = false, lockedHorizontal = false, pointerDownTime = 0;
+  const dormantThreshold = 170; // ---------- جان بوجھ کر لمبا سرکانا — غلطی سے سبزی غیر حاضر نہ ہو جائے ----------
+  const dormantMinHoldMs = 450;
+  const getX = e => (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+  const getY = e => (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+  const resetRow = () => {
+    if(activeRow){
+      activeRow.style.transition = 'transform .15s, opacity .15s, background .15s';
+      activeRow.style.transform = '';
+      activeRow.style.opacity = '';
+      activeRow.style.background = '';
+      activeRow.querySelectorAll('td').forEach(td => { td.style.background = ''; });
+    }
+    dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
+  };
+  const onStart = e => {
+    if(e.target.closest('button,a')) return;
+    const row = e.target.closest('.otTableSwipeRow');
+    if(!row || !wrap.contains(row)) return;
+    activeRow = row; startX = getX(e); startY = getY(e); dx = 0; dragging = true; lockedHorizontal = false;
+    pointerDownTime = Date.now();
+    row.style.transition = '';
+  };
+  const onMove = e => {
+    if(!dragging || !activeRow) return;
+    const x = getX(e), y = getY(e);
+    dx = x - startX; const dy = y - startY;
+    if(!lockedHorizontal){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      if(Math.abs(dy) > Math.abs(dx)){ resetRow(); return; }
+      lockedHorizontal = true;
+    }
+    if(e.cancelable) e.preventDefault();
+    activeRow.style.position = 'relative';
+    activeRow.style.zIndex = '4';
+    activeRow.style.transform = `translateX(${dx}px)`;
+    const tint = Math.abs(dx) > dormantThreshold ? '#fca5a5' : '#fecaca';
+    activeRow.querySelectorAll('td').forEach(td => { td.style.background = tint; });
+  };
+  const onEnd = () => {
+    if(!dragging || !activeRow){ resetRow(); return; }
+    const row = activeRow;
+    const productId = parseInt(row.dataset.swipePid, 10);
+    const heldMs = Date.now() - pointerDownTime;
+    const commitOk = lockedHorizontal && Math.abs(dx) > dormantThreshold && heldMs >= dormantMinHoldMs;
+    if(commitOk){
+      row.style.transition = 'transform .12s, opacity .12s';
+      row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
+      row.style.opacity = '0';
+      dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
+      setTimeout(() => { otTogglePresence(productId); }, 130);
+    } else {
+      resetRow();
+    }
+  };
+  wrap.addEventListener('touchstart', onStart, {passive:true});
+  wrap.addEventListener('touchmove', onMove, {passive:false});
+  wrap.addEventListener('touchend', onEnd);
+  wrap.addEventListener('touchcancel', resetRow);
+  wrap.addEventListener('pointerdown', e => { if(e.pointerType === 'touch') return; onStart(e); });
+  wrap.addEventListener('pointermove', e => { if(e.pointerType === 'touch') return; onMove(e); });
+  wrap.addEventListener('pointerup', e => { if(e.pointerType === 'touch') return; onEnd(); });
+  wrap.addEventListener('pointercancel', e => { if(e.pointerType === 'touch') return; resetRow(); });
 }
 // ---------- 🐞 صدام کی ہدایت (FM18SEPFR): اصل خرابی — یہ فنکشن اور نیچے موجود ویل والا setOtQtyDirect(...)
 // دونوں کا نام ایک جیسا "setOtQtyDirect" تھا۔ جاوا اسکرپٹ میں ایک ہی نام کے دو function ہوں تو بعد والا
@@ -31189,6 +31283,79 @@ async function fetchProductsFromCloud(silent){
   }
 }
 
+// ---------- 🚧 صدام کی ہدایت (25 ستمبر، دوپہر): "مینٹیننس موڈ" — پوری ایپ کا ایک مشترکہ آن/آف فلیگ، Firestore
+// میں محفوظ۔ جو فون اسے آن کرے، اسی فون پر localStorage میں ایک مقامی چھوٹ (maintenanceLocalBypass) بھی محفوظ
+// ہو جاتی ہے تاکہ خود ڈویلپر کو اوورلے نظر نہ آئے، باقی سب فونز پر (جن کے پاس یہ چھوٹ نہیں) اوورلے فوراً نظر
+// آئے گی۔ آف کرتے ہی اگلے پول (~4 سیکنڈ) پر سب فونز سے خودکار غائب ہو جائے گی ---------- -->
+const MAINTENANCE_DOC_PATH = 'shopData/maintenance';
+let _maintenanceLastKnownOn = null;
+
+async function pushMaintenanceMode(on){
+  try{
+    await authFirestoreFetch(`${MAINTENANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          on: { booleanValue: !!on },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    return true;
+  }catch(e){ return false; }
+}
+
+async function fetchMaintenanceMode(){
+  try{
+    const res = await authFirestoreFetch(`${MAINTENANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 404){ applyMaintenanceOverlayState(false); return; }
+    if(!res.ok) return;
+    const doc = await res.json();
+    const on = !!doc.fields?.on?.booleanValue;
+    _maintenanceLastKnownOn = on;
+    applyMaintenanceOverlayState(on);
+  }catch(e){ /* آف لائن — پچھلی حالت پر ہی رہنے دیں، جیسے ہی نیٹ آئے گا اگلے پول پر خودکار درست ہو جائے گا */ }
+}
+
+function applyMaintenanceOverlayState(on){
+  const overlay = document.getElementById('maintenanceOverlay');
+  if(!overlay) return;
+  const localBypass = loadFromStorage('maintenanceLocalBypass', false);
+  overlay.style.display = (on && !localBypass) ? 'flex' : 'none';
+}
+
+// ---------- 🚧 ڈویلپر پینل کا بٹن — ایک ٹیپ میں آن/آف، اسی فون پر خود کو مقامی چھوٹ دیتا ہے ---------- -->
+async function toggleMaintenanceMode(){
+  const btn = document.getElementById('maintenanceToggleBtn');
+  const currentlyOnByMe = loadFromStorage('maintenanceLocalBypass', false);
+  const turningOn = !currentlyOnByMe;
+  if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
+  const ok = await pushMaintenanceMode(turningOn);
+  if(ok){
+    saveToStorage('maintenanceLocalBypass', turningOn);
+    applyMaintenanceOverlayState(turningOn);
+  }
+  refreshMaintenanceToggleBtnLabel();
+  if(btn) btn.disabled = false;
+  if(!ok) alert('❌ آف لائن — انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں');
+}
+
+function refreshMaintenanceToggleBtnLabel(){
+  const btn = document.getElementById('maintenanceToggleBtn');
+  if(!btn) return;
+  const onByMe = loadFromStorage('maintenanceLocalBypass', false);
+  if(onByMe){
+    btn.textContent = '✅ مینٹیننس موڈ آف کریں (کام مکمل ہو گیا)';
+    btn.style.background = 'linear-gradient(180deg,#ef4444,#b91c1c)';
+    btn.style.color = '#fff';
+  } else {
+    btn.textContent = '🚧 مینٹیننس موڈ آن کریں';
+    btn.style.background = 'linear-gradient(180deg,#f59e0b,#b45309)';
+    btn.style.color = '#fff';
+  }
+}
+
 // ---------- 🔄 صدام کی ہدایت (FM20SEPSU02): دستی "تازہ کریں" بٹن — pending تبدیلی ہو تو پہلے بھیجیں،
 // پھر کلاؤڈ سے یقینی تازہ ڈیٹا منگوا کر سکرین دوبارہ بنائیں (ٹائپنگ گارڈ کو نظرانداز کر کے، چونکہ یہ خود
 // صارف کا دبایا ہوا بٹن ہے) ---------- -->
@@ -35530,6 +35697,7 @@ async function unlockDevSecretPanel(){
   document.getElementById('devSecretLocked').style.display = 'none';
   document.getElementById('devSecretUnlocked').style.display = 'block';
   renderMarqueeDevList();
+  refreshMaintenanceToggleBtnLabel();
 
   // ---------- 🩺 کلاؤڈ سنک کی خرابی اب کسٹمر کو نظر نہیں آتی — صرف یہاں، ڈویلپر پینل کے اندر ----------
   const cloudStatusEl = document.getElementById('devCloudSyncStatus');
@@ -40370,6 +40538,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // فوراً صاف کریں — پہلے یہ صرف Order Taking کھولنے پر ہوتا تھا، اب ایپ کے شروع میں ہی، تاکہ کوئی بھی
   // سکرین (Billing, Order Taking, وغیرہ) کبھی ٹکرائی ہوئی id کے ساتھ کام نہ کرے ----------
   try{ recalcIdCounters(); dedupeVariantIds(); }catch(e){ console.error('recalcIdCounters/dedupeVariantIds failed', e); }
+
+  // ---------- 🚧 صدام کی ہدایت (25 ستمبر، دوپہر): مینٹیننس موڈ فوراً چیک کریں (لاگ ان سے پہلے بھی) اور ہر
+  // ~4 سیکنڈ بعد دوبارہ — تاکہ ڈویلپر کے کام کے دوران باقی سب فونز پر بروقت "انتظار فرمائیں" اوورلے آ/جا سکے ---------- -->
+  try{ fetchMaintenanceMode(true); }catch(e){ console.error('fetchMaintenanceMode failed', e); }
+  setInterval(() => { try{ fetchMaintenanceMode(false); }catch(e){} }, 4000);
 
   try{ setupLoginScreen(); }catch(e){ console.error('setupLoginScreen failed', e); }
 
