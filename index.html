@@ -8556,7 +8556,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM25SEPFR0615PM';
+const APP_BUILD_VERSION = 'FM25SEPFR0837PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15084,6 +15084,23 @@ const LEGACY_DEMO_PRODUCT_NAMES = ['Bio Amla Shampoo', 'Bio Amla Shampoo+Conditi
   }
 })();
 
+// ---------- 🧾 صدام کی ہدایت (25 ستمبر، چالان سسٹم): موجودہ سٹاک والے ہر variant کو ایک بار "چالان نمبر 1"
+// میں تبدیل کریں (موجودہ v.purchase ریٹ کے ساتھ) — تاکہ نیا چالان سسٹم فوراً پرانے ڈیٹا پر بھی کام کرے۔
+// یہ محفوظ اور بار بار چلنے کے قابل (idempotent) ہے — جس variant کے پاس پہلے سے چالان ہوں اسے نہیں چھیڑتا ---------- -->
+(function migrateOldStockToChalanOne(){
+  let changed = false;
+  productsData.forEach(p => {
+    (p.variants || []).forEach(v => {
+      if(!v.chalans || v.chalans.length === 0){
+        const before = v.chalans;
+        ensureVariantChalans(v);
+        if(v.chalans !== before) changed = true;
+      }
+    });
+  });
+  if(changed) saveToStorage('products', productsData);
+})();
+
 // ---------- 📊 صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ کے لیے — "پرانا سٹاک" اور "آج شامل کیا
 // گیا سٹاک" جاننے کے لیے ہر دن کی شروعات پر موجودہ سٹاک کی تصویر (snapshot) محفوظ کرتے ہیں۔ اس کے بعد جب بھی
 // سٹاک بڑھایا جائے (نیا مال آئے) تو وہ اضافہ الگ سے گنا جاتا ہے۔ نوٹ: یہ نظام آج سے شروع ہو رہا ہے — گزرے
@@ -17157,19 +17174,41 @@ function recomputeReservedFromOrders(){
   }catch(e){}
 }
 
-// ---------- صدام کی ہدایت (بیوپاری/بیچ ریٹ مکسنگ کا حل — ویٹڈ ایوریج کاسٹ): جب بھی نیا مال آئے (خواہ کیش خریداری ہو یا شپمنٹ وصولی)،
-// پرانے ریٹ کو نئے ریٹ سے اوور رائٹ کرنے کی بجائے پرانے + نئے مال کا "ملا جلا اوسط ریٹ" (Weighted Average Cost) نکالیں۔
-// مثال: 100 بوری پرانی @2000 + 80 بوری نئی @2500 = (100*2000 + 80*2500)/180 = ~2222 (نہ کہ صرف 2500)۔
-// اس طرح کسی بیوپاری کا الگ حساب متاثر نہیں ہوتا (وہ purchaseHistory میں پہلے سے محفوظ ہے) اور منافع/سٹاک ویلیو والی رپورٹس بھی
-// خودکار درست ہو جاتی ہیں کیونکہ وہ سب v.purchase ہی پڑھتی ہیں — کہیں اور کوڈ بدلنے کی ضرورت نہیں ----------
-function applyPurchaseToVariant(v, qty, rate){
+/* =====================================================================
+   🧾 صدام کی نئی ہدایت (25 ستمبر، چالان سسٹم): ویٹڈ ایوریج کاسٹ کا طریقہ ختم — اب ہر خریداری کا
+   ریٹ اپنے آپ میں الگ "چالان" کے طور پر محفوظ رہے گا، پرانے ریٹ کے ساتھ ملا کر اوسط نہیں نکالی جائے گی۔
+   v.chalans = [{chalanNo, qty, rate, source, ts}] — v.stock ہمیشہ سب چالانوں کے qty کا مجموعہ رہتا ہے۔
+   v.purchase اب بھی موجود رہتا ہے مگر صرف "سب سے تازہ چالان کا ریٹ" کے حوالے کے طور پر — اصل منافع کا
+   حساب اگلے مرحلے میں فروخت کے وقت اسی چالان کے ریٹ سے کیا جائے گا جس سے مقدار کاٹی جائے۔
+   ===================================================================== */
+let nextChalanNoGlobal = loadFromStorage('nextChalanNoGlobal', 1); // فال بیک، عام طور پر ہر variant کا اپنا v.nextChalanNo استعمال ہوگا
+
+// ---------- پرانا سٹاک (جو ایوریج ریٹ پر تھا) کو ایک بار "چالان نمبر 1" میں بدل دیں ----------
+function ensureVariantChalans(v){
+  if(!v) return [];
+  if(!v.chalans) v.chalans = [];
+  if(v.chalans.length === 0 && Math.max(0, v.stock || 0) > 0){
+    v.chalans.push({ chalanNo: 1, qty: Math.max(0, v.stock || 0), rate: v.purchase || 0, source: 'پرانا سٹاک', ts: Date.now() });
+    v.nextChalanNo = 2;
+  }
+  if(!v.nextChalanNo) v.nextChalanNo = (v.chalans.reduce((m,c) => Math.max(m, c.chalanNo||0), 0) || 0) + 1;
+  return v.chalans;
+}
+
+// ---------- نئی خریداری پر نیا الگ چالان بنائیں (ایوریج نہیں نکالنی) ----------
+function addPurchaseChalan(v, qty, rate, source){
   if(!v || qty <= 0) return;
-  const oldStock = Math.max(0, v.stock || 0);
-  const oldRate = v.purchase || 0;
-  const newStock = oldStock + qty;
-  const weightedAvg = newStock > 0 ? ((oldStock * oldRate) + (qty * rate)) / newStock : rate;
-  v.stock = newStock;
-  v.purchase = Math.round(weightedAvg * 100) / 100; // دو ڈیسیمل تک راؤنڈ
+  ensureVariantChalans(v);
+  const chalanNo = v.nextChalanNo || 1;
+  v.chalans.push({ chalanNo, qty, rate: rate || 0, source: source || '', ts: Date.now() });
+  v.nextChalanNo = chalanNo + 1;
+  v.stock = Math.max(0, v.stock || 0) + qty;
+  v.purchase = rate; // ---------- صرف حوالے کے لیے تازہ ترین ریٹ — پرانی جگہوں کے ٹوٹنے سے بچاؤ کے لیے برقرار رکھا ----------
+}
+
+// ---------- پرانا نام برقرار — پرانے کسی کوڈ نے کہیں یہ فنکشن کالا ہو تو بھی نیا چالان سسٹم ہی چلے ----------
+function applyPurchaseToVariant(v, qty, rate){
+  addPurchaseChalan(v, qty, rate, '');
 }
 
 // ---------- فروخت/واپسی پر ایک ہی جگہ سے سٹاک کاٹیں — Batches موجود ہوں تو FEFO (پہلے ایکسپائر ہونے والی کھیپ پہلے خرچ) ----------
@@ -23550,7 +23589,7 @@ function savePurchaseOrder(){
       cashTotal += item.qty * item.cost;
       productsData.forEach(p => {
         const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-        if(v){ applyPurchaseToVariant(v, item.qty, item.cost); }
+        if(v){ addPurchaseChalan(v, item.qty, item.cost, 'نقد خریداری'); }
       });
     });
     cashPurchasesData = cashPurchasesData || [];
@@ -28612,7 +28651,7 @@ function confirmShipmentReceipt(){
   receiveShipmentCart.forEach(item => {
     productsData.forEach(p => {
       const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ applyPurchaseToVariant(v, item.qty, item.cost); } // 🆕 صدام کی ہدایت: ویٹڈ ایوریج کاسٹ — TODO: DB میں current_stock += qty, purchase_price (ویٹڈ ایوریج) اپڈیٹ
+      if(v){ addPurchaseChalan(v, item.qty, item.cost, 'بیوپاری وصولی'); } // 🆕 صدام کی ہدایت: ہر وصولی کا ریٹ الگ چالان — TODO: DB میں purchase_batches ٹیبل میں نئی قطار
     });
   });
 
