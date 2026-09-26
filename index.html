@@ -8565,7 +8565,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA0750AM';
+const APP_BUILD_VERSION = 'FM26SEPSA0835AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11479,6 +11479,7 @@ function applyRole(role, name){
 
   updateTopbarUserBadge(); // ---------- اوپر ٹاپ بار پر لاگ ان یوزر کا نام چمکتے ہوئے (Nastaleeq) دکھائیں ----------
   applyUserScreenPermissions(name);
+  try{ refreshMaintenanceQuickUi(); }catch(e){} // 🔒 رول بدلتے ہی ہوم والا مینٹیننس لفظ صرف ایڈمن کو
 }
 
 // ---------- ٹاپ بار پر ہمیشہ نظر آنے والا، چمکتا ہوا (glitter) بائیں سے دائیں سرکتا لاگ ان یوزر کا نام —
@@ -31989,55 +31990,174 @@ window.addEventListener('online', () => {
 const PRODUCTS_DOC_PATH = 'shopData/products';
 let productsPollTimer = null;
 
+/* =====================================================================
+   🔗 صدام کی ہدایت (26 ستمبر): سٹاک ہم آہنگی کی اصل خرابی کا پکا حل — "تین طرفہ ملاپ" (3-way merge)
+   پہلے ہر فون اپنی پوری پراڈکٹ فہرست کلاؤڈ پر لکھ دیتا تھا — جو فون بعد میں لکھتا، وہ دوسرے فون کی
+   تبدیلی (مثلاً ایڈمن کا ڈالا سٹاک) مٹا دیتا تھا۔ اب ہر فون یاد رکھتا ہے کہ کلاؤڈ کی آخری معلوم حالت
+   (base) کیا تھی؛ بھیجتے/لیتے وقت صرف وہی چیز بدلتی ہے جو اسی فون نے واقعی بدلی ہو۔ سٹاک اور چالان کی
+   مقدار "فرق" (delta) کے طور پر ملتی ہے — دونوں فونز کی تبدیلیاں جمع ہو جاتی ہیں، کوئی نہیں مٹتی
+   ===================================================================== */
+let productsSyncBase = loadFromStorage('productsSyncBase', null);
+function _syncClone(x){ return x == null ? x : JSON.parse(JSON.stringify(x)); }
+function _stableStr(x){
+  if(x === undefined) return 'u';
+  if(x === null || typeof x !== 'object') return JSON.stringify(x);
+  if(Array.isArray(x)) return '[' + x.map(_stableStr).join(',') + ']';
+  return '{' + Object.keys(x).filter(k => x[k] !== undefined).sort().map(k => JSON.stringify(k) + ':' + _stableStr(x[k])).join(',') + '}';
+}
+function _syncEq(a, b){ return _stableStr(a) === _stableStr(b); }
+function _syncSetBase(arr){
+  productsSyncBase = _syncClone(stripImagesForSync(arr));
+  try{ saveToStorage('productsSyncBase', productsSyncBase); }catch(e){}
+}
+function stripImagesForSync(arr){
+  return (arr || []).map(p => ({...p, variants: (p.variants || []).map(v => { const {image, ...rest} = v; return rest; })}));
+}
+const _SYNC_COUNTER_FIELDS = ['stock', 'salesCount'];
+const _SYNC_SKIP_FIELDS = ['reserved', 'image', 'chalans', 'nextChalanNo'];
+function _chalanKey(c){ return c.cid || (c.chalanNo + '_' + (c.ts || 0)); }
+
+// ---------- ایک ورائنٹ کے چالان: مقدار = فرق سے، باقی خانے = جس طرف بدلا وہ؛ نئے چالان دونوں طرف سے شامل ---------- -->
+function _mergeChalans(bCh, lCh, rCh){
+  bCh = bCh || []; lCh = lCh || []; rCh = rCh || [];
+  const bm = new Map(bCh.map(c => [_chalanKey(c), c]));
+  const lm = new Map(lCh.map(c => [_chalanKey(c), c]));
+  const out = [];
+  const seen = new Set();
+  rCh.forEach(r => {
+    const k = _chalanKey(r); seen.add(k);
+    const l = lm.get(k), b = bm.get(k);
+    if(!l){ if(b && _syncEq(b, r)) return; out.push(_syncClone(r)); return; } // مقامی طور پر حذف
+    if(!b){ out.push(_syncClone(r)); return; }
+    const m = {};
+    new Set([...Object.keys(r), ...Object.keys(l)]).forEach(f => {
+      if(f === 'qty' || f === 'origQty'){ m[f] = Math.round(((Number(r[f])||0) + (Number(l[f])||0) - (Number(b[f])||0)) * 100) / 100; if(f === 'qty' && m[f] < 0) m[f] = 0; }
+      else m[f] = _syncEq(l[f], b[f]) ? _syncClone(r[f]) : _syncClone(l[f]);
+    });
+    out.push(m);
+  });
+  lCh.forEach(l => {
+    const k = _chalanKey(l);
+    if(seen.has(k)) return;
+    if(bm.has(k)) return; // دوسرے فون نے حذف کیا
+    const c = _syncClone(l);
+    if(out.some(o => o.chalanNo === c.chalanNo)) c.chalanNo = out.reduce((mx, o) => Math.max(mx, o.chalanNo || 0), 0) + 1;
+    out.push(c);
+  });
+  out.sort((a, b) => (a.chalanNo || 0) - (b.chalanNo || 0));
+  return out;
+}
+function _mergeObj(b, l, r, isVariant){
+  if(!b) return _syncClone(r);
+  const m = {};
+  new Set([...Object.keys(r), ...Object.keys(l)]).forEach(f => {
+    if(f === 'variants' || (isVariant && (f === 'chalans' || f === 'nextChalanNo' || f === 'image'))) return;
+    if(isVariant && f === 'reserved'){ m[f] = r[f]; return; }
+    if(isVariant && _SYNC_COUNTER_FIELDS.includes(f)){
+      m[f] = Math.round(((Number(r[f])||0) + (Number(l[f])||0) - (Number(b[f])||0)) * 100) / 100;
+      return;
+    }
+    m[f] = _syncEq(l[f], b[f]) ? _syncClone(r[f]) : _syncClone(l[f]);
+  });
+  if(isVariant){
+    if(l.image !== undefined) m.image = l.image; else if(r.image !== undefined) m.image = r.image;
+    m.chalans = _mergeChalans(b.chalans, l.chalans, r.chalans);
+    m.nextChalanNo = Math.max(Number(r.nextChalanNo)||0, Number(l.nextChalanNo)||0, (m.chalans || []).reduce((mx, c) => Math.max(mx, c.chalanNo || 0), 0) + 1);
+  }
+  return m;
+}
+function _mergeList(bArr, lArr, rArr, idField, mergeItem){
+  const bm = new Map((bArr || []).map(x => [x[idField], x]));
+  const lm = new Map((lArr || []).map(x => [x[idField], x]));
+  const out = []; const seen = new Set();
+  (rArr || []).forEach(r => {
+    const id = r[idField]; seen.add(id);
+    const l = lm.get(id), b = bm.get(id);
+    if(!l){ if(b && _syncEq(stripOne(b), stripOne(r))) return; out.push(_syncClone(r)); return; }
+    out.push(mergeItem(b, l, r));
+  });
+  (lArr || []).forEach(l => {
+    const id = l[idField];
+    if(seen.has(id) || bm.has(id)) return; // یا پہلے شامل، یا دوسرے فون نے حذف کیا
+    out.push(_syncClone(l));
+  });
+  return out;
+}
+function stripOne(x){ if(!x) return x; const {image, ...rest} = x; return rest; }
+
+// ---------- اصل ملاپ: base = آخری معلوم کلاؤڈ حالت، local = یہ فون، remote = ابھی کا کلاؤڈ ---------- -->
+function mergeProductsThreeWay(base, local, remote){
+  if(!Array.isArray(base)){
+    // ---------- پہلی بار (base نہیں): کلاؤڈ بنیاد، صرف مقامی نئے آئٹم شامل (پرانا محفوظ رویہ) ---------- -->
+    const ids = new Set(remote.map(p => p.product_id));
+    return [..._syncClone(remote), ...local.filter(p => !ids.has(p.product_id)).map(_syncClone)];
+  }
+  return _mergeList(base, local, remote, 'product_id', (b, l, r) => {
+    const m = _mergeObj(b, l, r, false);
+    m.variants = _mergeList(b ? b.variants : [], l.variants, r.variants, 'variant_id', (bv, lv, rv) => _mergeObj(bv, lv, rv, true));
+    return m;
+  });
+}
+// ---------- مقامی تصویریں (جو کلاؤڈ پر نہیں ہوتیں) ملاپ کے بعد واپس جوڑیں ---------- -->
+function _reattachLocalImages(merged, local){
+  const imgs = new Map();
+  (local || []).forEach(p => (p.variants || []).forEach(v => { if(v.image) imgs.set(v.variant_id, v.image); }));
+  merged.forEach(p => (p.variants || []).forEach(v => { if(!v.image && imgs.has(v.variant_id)) v.image = imgs.get(v.variant_id); }));
+  return merged;
+}
+
 async function pushProductsToCloud(){
   saveProductsLight(); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں (تصویریں الگ IndexedDB میں)
   saveToStorage('nextProductId', nextProductId);
   saveToStorage('nextVariantId', nextVariantId);
+  // 🧾 بھیجنے سے پہلے ہر ورائنٹ کے چالان سٹاک کے برابر کریں — دستی سٹاک تبدیلی کا چالان بھی اسی تبدیلی کے ساتھ جائے
+  try{ productsData.forEach(p => (p.variants || []).forEach(v => ensureVariantChalans(v))); }catch(e){}
   try{
-    // ---------- 🔗🛡️ صدام کی ہدایت (24 ستمبر، سٹاک/سیریل ہم آہنگی فکس): پہلے یہ فنکشن مقامی فہرست کو
-    // سیدھا کلاؤڈ پر بھیج دیتا تھا — چاہے اس دوران کسی دوسرے فون (مثلاً منشی) نے کوئی نیا آئٹم شامل کر کے
-    // پہلے ہی کلاؤڈ پر بھیج دیا ہو۔ نتیجہ: وہ نیا آئٹم اور سیریل نمبر کی پوری ترتیب مٹ جاتی تھی۔ اب پش کرنے
-    // سے پہلے کلاؤڈ کی تازہ ترین کاپی منگوا کر، جو آئٹم صرف کلاؤڈ پر ہیں (اس فون پر ابھی نہیں آئے) انہیں
-    // مقامی فہرست میں شامل کر کے ہی پش کیا جاتا ہے — کسی کا ڈیٹا گم نہیں ہوگا ---------- -->
-    try{
-      const cloudPeek = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-      if(cloudPeek && cloudPeek.ok){
-        const cloudPeekDoc = await cloudPeek.json();
-        const cloudPeekStr = cloudPeekDoc.fields?.json?.stringValue;
-        if(cloudPeekStr){
-          const cloudPeekArr = JSON.parse(cloudPeekStr);
-          if(Array.isArray(cloudPeekArr)){
-            const localIds = new Set(productsData.map(p => p.product_id));
-            const cloudOnlyItems = cloudPeekArr.filter(p => !localIds.has(p.product_id));
-            if(cloudOnlyItems.length){
-              productsData = [...productsData, ...cloudOnlyItems];
-              try{ repairDuplicateProductSerials(); }catch(e){}
-              saveProductsLight();
-            }
+    const manualOrderForCloud = loadFromStorage(PRODUCT_MANUAL_ORDER_KEY, []) || [];
+    let ok = false;
+    // ---------- 🔗 26 ستمبر: پہلے کلاؤڈ کی تازہ کاپی، پھر تین طرفہ ملاپ، پھر لکھائی — اور لکھائی صرف تب جب
+    // اس دوران کسی اور فون نے نہ لکھا ہو (updateTime شرط)؛ لکھا ہو تو دوبارہ ملاپ کر کے کوشش (3 بار تک) ---------- -->
+    for(let attempt = 0; attempt < 3 && !ok; attempt++){
+      let updateTime = null;
+      const peek = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+      if(peek && peek.ok){
+        const pdoc = await peek.json();
+        updateTime = pdoc.updateTime || null;
+        const pstr = pdoc.fields?.json?.stringValue;
+        if(pstr){
+          const remote = JSON.parse(pstr);
+          if(Array.isArray(remote)){
+            productsData = _reattachLocalImages(mergeProductsThreeWay(productsSyncBase, productsData, remote), productsData);
+            try{ repairDuplicateProductSerials(); }catch(e){}
+            try{ recomputeReservedFromOrders(); }catch(e){}
+            saveProductsLight();
           }
         }
+        const rn = parseInt(pdoc.fields?.nextProductId?.integerValue || '0'); if(rn > nextProductId) nextProductId = rn;
+        const rv = parseInt(pdoc.fields?.nextVariantId?.integerValue || '0'); if(rv > nextVariantId) nextVariantId = rv;
+      } else if(!(peek && peek.status === 404)){
+        throw new Error('peek failed');
       }
-    }catch(peekErr){ /* کلاؤڈ سے موازنہ نہ ہو سکے تو بھی مقامی ڈیٹا بھیج دیں گے، بہتر ہے رک نہ جائیں ---------- */ }
-    // ---------- 🔗🔒 صدام کی ہدایت (22 ستمبر): دستی ترتیب (ڈریگ) اور سیریل لاک حالت پہلے صرف اسی فون پر
-    // (localStorage) محفوظ رہتی تھی — اسی لیے منشی کے فون اور بلنگ ٹیبل پر ترتیب الگ ہو جاتی تھی۔ اب یہ دونوں
-    // پراڈکٹس کے ساتھ ہی کلاؤڈ میں بھیجی جائیں گی ---------- -->
-    const manualOrderForCloud = loadFromStorage(PRODUCT_MANUAL_ORDER_KEY, []) || [];
-    const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          json: { stringValue: JSON.stringify(productsData) },
-          nextProductId: { integerValue: String(nextProductId) },
-          nextVariantId: { integerValue: String(nextVariantId) },
-          updatedAt: { integerValue: String(Date.now()) },
-          manualOrder: { stringValue: JSON.stringify(manualOrderForCloud) },
-          serialLocked: { booleanValue: !!PRODUCT_SERIAL_LOCKED }
-        }
-      })
-    });
-    const ok = !!(res && res.ok);
-    AppState.settings.productsPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+      const pre = updateTime ? `&currentDocument.updateTime=${encodeURIComponent(updateTime)}` : '';
+      const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}${pre}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            json: { stringValue: JSON.stringify(productsData) },
+            nextProductId: { integerValue: String(nextProductId) },
+            nextVariantId: { integerValue: String(nextVariantId) },
+            updatedAt: { integerValue: String(Date.now()) },
+            manualOrder: { stringValue: JSON.stringify(manualOrderForCloud) },
+            serialLocked: { booleanValue: !!PRODUCT_SERIAL_LOCKED }
+          }
+        })
+      });
+      ok = !!(res && res.ok);
+      if(ok) _syncSetBase(productsData);
+      else if(!(res && (res.status === 400 || res.status === 409 || res.status === 412))) break;
+    }
+    AppState.settings.productsPendingSync = !ok;
     persistAllData();
     return ok;
   }catch(e){
@@ -32051,13 +32171,10 @@ async function fetchProductsFromCloud(silent){
   if(!silent && isCloudPollingPaused()) return false;
   // ---------- اگر اسی فون پر کوئی پراڈکٹ/سٹاک تبدیلی (نیا آئٹم، ریٹ، سٹاک ایڈجسٹمنٹ، فروخت وغیرہ) ابھی کلاؤڈ میں نہیں گئی
   // تو پہلے وہی بھیجیں — ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی (مثلاً ابھی کٹا ہوا سٹاک) مٹ جانے کا خطرہ ہوگا ----------
-  if(AppState.settings.productsPendingSync){
-    const pushed = await pushProductsToCloud();
-    if(pushed) return true;
-    return false;
-  }
+  // 🔗 26 ستمبر: پہلے یہاں "اسی فون کی تبدیلی باقی ہو تو پوری مقامی فہرست کلاؤڈ پر لکھ دو" ہوتا تھا — یہی دوسرے فون
+  // (مثلاً ایڈمن) کا ڈالا سٹاک مٹاتا تھا۔ اب ہمیشہ کلاؤڈ پڑھ کر تین طرفہ ملاپ، پھر ضرورت ہو تو ملاپ شدہ فہرست بھیجیں
   try{
-    const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
+    const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
     if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
     if(!res.ok) return false;
     const doc = await res.json();
@@ -32071,9 +32188,11 @@ async function fetchProductsFromCloud(silent){
     // کی ترتیب بھی الجھ جاتی تھی۔ اب دونوں فہرستیں ملا دی جاتی ہیں: کلاؤڈ کا ڈیٹا بنیاد ہے (چونکہ وہ سب فونز کی
     // مشترکہ تازہ ترین حالت ہے)، اور جو آئٹم صرف مقامی طور پر موجود ہیں (ابھی کلاؤڈ پر نہیں گئے) وہ آخر میں
     // شامل کر دیے جاتے ہیں — کسی کا ڈیٹا یا سیریل نمبر گم نہیں ہوگا ---------- -->
-    const cloudIdsNow = new Set(cloudProducts.map(p => p.product_id));
-    const localOnlyItems = productsData.filter(p => !cloudIdsNow.has(p.product_id));
-    productsData = localOnlyItems.length ? [...cloudProducts, ...localOnlyItems] : cloudProducts;
+    const mergedNow = _reattachLocalImages(mergeProductsThreeWay(productsSyncBase, productsData, cloudProducts), productsData);
+    const hadLocalChanges = !_syncEq(stripImagesForSync(mergedNow), stripImagesForSync(cloudProducts));
+    productsData = mergedNow;
+    _syncSetBase(cloudProducts);
+    if(hadLocalChanges){ AppState.settings.productsPendingSync = true; setTimeout(() => { try{ pushProductsToCloud(); }catch(e){} }, 400); }
     try{ if(repairDuplicateProductSerials()){ AppState.settings.productsPendingSync = true; } }catch(e){}
     try{ recomputeReservedFromOrders(); }catch(e){} // ---------- 🩹 25 ستمبر: بکنگ یہاں بھی فوراً درست، پرانا/بھوت reserved کلاؤڈ سے نہ رہ جائے ----------
     const cloudNextProductId = parseInt(doc.fields?.nextProductId?.integerValue || '0');
@@ -32354,6 +32473,8 @@ function refreshMaintenanceQuickUi(){
     el.style.background = on ? 'linear-gradient(180deg,#f59e0b,#b45309)' : 'rgba(255,255,255,.12)';
     el.style.color = on ? '#fff' : (el.id === 'maintQuickLabelHome' ? '#94a3b8' : 'rgba(255,255,255,.55)');
     el.style.boxShadow = on ? '0 3px 0 #78350f' : 'none';
+    // 🔒 26 ستمبر: ہوم صفحے والا لفظ صرف ایڈمن کو — ملازم/منشی کے ہوم پر نظر نہ آئے
+    if(el.id === 'maintQuickLabelHome') el.style.display = (AppState.currentRole === 'admin') ? '' : 'none';
   });
   const st = document.getElementById('maintQuickStatus');
   const btn = document.getElementById('maintQuickToggleBtn');
