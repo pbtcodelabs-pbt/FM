@@ -4639,6 +4639,12 @@
     <div class="modalOverlay" id="poModal" onclick="if(event.target===this) this.classList.remove('show')" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="modalBoxWide" style="width:460px; max-height:90vh; overflow-y:auto;">
         <h3 id="poModalTitle">📦 پرچیز آرڈر</h3>
+        <!-- 🧾 26 ستمبر: نئی سبزی یہیں سے (نام + پیکنگ) — بن کر سیدھی نیچے خریداری میں شامل -->
+        <div dir="rtl" style="display:flex; gap:6px; margin-bottom:10px; background:#eafbf0; border:1.5px dashed #15803d; border-radius:10px; padding:8px;">
+          <input type="text" id="poNewVegName" placeholder="🥬 نئی سبزی کا نام" style="flex:1; min-width:0; padding:8px; border:1px solid #86efac; border-radius:8px; font-size:13px; text-align:center; box-sizing:border-box;">
+          <input type="text" id="poNewVegPacking" placeholder="📦 پیکنگ ▾" readonly onclick="poOpenNewVegPackingPicker()" style="flex:0 0 88px; padding:8px; border:1px solid #86efac; border-radius:8px; font-size:12px; text-align:center; cursor:pointer; box-sizing:border-box;">
+          <button type="button" onclick="poCreateNewVeg()" title="نئی سبزی شامل کریں" style="flex:0 0 42px; border:none; border-radius:8px; background:#16a34a; color:#fff; font-size:18px; font-weight:900; cursor:pointer;">➕</button>
+        </div>
 
         <!-- کیٹیگری اور سٹاک ترتیب — لکھ لکھ کر ڈھونڈنے کی بجائے سیدھا منتخب کریں -->
         <button type="button" onclick="openPoLowStockPicker()" style="display:none; width:100%; padding:11px; margin-bottom:10px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer; font-family:inherit;">📥 کم سٹاک آئٹمز سے حاصل کریں</button>
@@ -4679,6 +4685,7 @@
           <button class="cancelBtn" onclick="closePoModal()">منسوخ</button>
           <button class="saveBtn" id="poSaveBtn" onclick="savePurchaseOrder()">محفوظ کریں (سٹاک میں شامل ہو جائے گا)</button>
         </div>
+        <button type="button" onclick="zeroAllStock()" style="width:100%; margin-top:10px; padding:9px; background:#fef2f2; color:#b91c1c; border:1.5px dashed #fca5a5; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">🧹 سارا سٹاک زیرو کریں (ایڈمن PIN)</button>
       </div>
     </div>
 
@@ -5563,7 +5570,11 @@
         <!-- ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): "نیا سٹاک" اور "نیا کسٹمر" دونوں بٹن ہوم پیج پر —
              ایک ہی لائن میں برابر تقسیم، نیا سٹاک دائیں طرف، نیا کسٹمر بائیں طرف ---------- -->
         <div style="display:flex; gap:8px; width:86%; max-width:340px; margin:0 auto 10px;" dir="rtl">
-          <button type="button" onclick="openOtAddStockModal()" style="flex:1; padding:11px 4px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:12px; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">➕ نیا سٹاک ایڈ کریں</button>
+          <!-- 🧾 26 ستمبر: "➕ نیا سٹاک" کی جگہ وہی دو خریداری بٹن جو ایڈمن کے سٹاک مینجمنٹ میں ہیں -->
+          <button type="button" onclick="openSupplierPickerForPo()" style="flex:1; padding:11px 4px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:12px; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:normal; line-height:1.5;">🏭 بیوپاری سے خریداری</button>
+          <button type="button" onclick="openCashPurchaseModal()" style="flex:1; padding:11px 4px; background:linear-gradient(180deg,#34d399,#059669); color:#fff; border:none; border-radius:12px; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:normal; line-height:1.5;">💵 نقد خریداری</button>
+        </div>
+        <div style="display:flex; gap:8px; width:86%; max-width:340px; margin:0 auto 10px;" dir="rtl">
           <button type="button" onclick="openOtNewCustomer()" style="flex:1; padding:11px 4px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:12px; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">➕ نیا کسٹمر ایڈ کریں</button>
         </div>
         <!-- ---------- 🟢🔴 صدام کی ہدایت (22 ستمبر): منشی خود بھی یہیں سے سبزیاں حاضر/غیر حاضر کر سکے —
@@ -8565,7 +8576,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA0835AM';
+const APP_BUILD_VERSION = 'FM26SEPSA0920AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10772,6 +10783,10 @@ function selectPackingOption(value){
   const savedScrollY2 = saveMainScrollY();
   if(sourceWrapId === 'productListWrap'){
     renderProductList(document.getElementById('productSearchInput')?.value || '');
+  } else if(sourceWrapId === 'poBrowseList'){
+    // 🧾 خریداری سکرین سے پیکنگ بدلی — فہرست اور کارٹ دونوں تازہ
+    poCart.forEach(it => { const vv = findVariantByVariantId(it.variant_id); if(vv) it.label = vv.label || ''; });
+    renderPoBrowseList(); renderPoCart(); refreshOtAfterStockChange();
   } else if(sourceWrapId === 'otAddStockListWrap'){
     // ---------- 🔴 صدام کی ہدایت (19 ستمبر، شام): "نیا سٹاک" فارم سے پیکنگ بدلی جائے تو اسی فہرست کو دوبارہ بنائیں ---------- -->
     renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || '');
@@ -15238,6 +15253,10 @@ function getNextProductSerial(){
 // ---------- 🔒🆕 دو موبائلوں پر بیک وقت نئی پروڈکٹ بننے سے اگر ایک ہی سیریل دو پروڈکٹس کو مل جائے تو: پرانی پروڈکٹ
 // (چھوٹا product_id) اپنا سیریل رکھتی ہے، صرف بعد والی کو آخری سیریل کے بعد کا نیا نمبر ملتا ہے۔ باقی کسی کا سیریل نہیں بدلتا ----------
 function repairDuplicateProductSerials(){
+  // 🔒 26 ستمبر: سیریل نمبر کی خودکار درستگی اب صرف ایڈمن کے فون پر — منشی/ملازم/کسٹمر کا فون (یا لاگ ان سے پہلے)
+  // کبھی کسی سبزی کا نمبر نہیں بدلے گا۔ پہلے ہر فون عارضی ٹکراؤ دیکھ کر ایک سبزی کو آخری نمبر (64، 65...) دے کر
+  // کلاؤڈ پر بھیج دیتا تھا — یہی ایڈمن کی درست کی ہوئی ترتیب بار بار خراب کرتا تھا
+  if(typeof AppState === 'undefined' || AppState.currentRole !== 'admin') return false;
   const seen = new Map();
   const dups = [];
   productsData.slice().sort((a,b) => (Number(a.product_id)||0) - (Number(b.product_id)||0)).forEach(p => {
@@ -23788,6 +23807,54 @@ function openPoModal(supplierId){
 }
 
 // 🆕 صدام کی ہدایت (FM25SEPFR): سٹاک مینجمنٹ کے اوپر "💵 نقد خریداری" بٹن سے یہیں کھلتا ہے
+// ---------- 🧾 صدام کی ہدایت (26 ستمبر): آرڈر ٹیکنگ کا الگ "➕ نیا سٹاک" فارم ختم — منشی اب وہی "🏭 بیوپاری سے
+// خریداری" اور "💵 نقد خریداری" استعمال کرتا ہے جو ایڈمن کرتا ہے (ایک ہی منطق، ایک ہی سکرین، منشی کو ریٹ/رقم نہیں
+// دکھتی)۔ اسی خریداری سکرین میں نئی سبزی شامل کرنا اور پیکنگ بدلنا بھی یہیں سے ---------- -->
+function poCreateNewVeg(){
+  const nameEl = document.getElementById('poNewVegName');
+  const packEl = document.getElementById('poNewVegPacking');
+  const name = (nameEl?.value || '').trim();
+  if(!name){ alert('⚠️ سبزی کا نام لکھیں'); nameEl?.focus(); return; }
+  const packing = (packEl?.value || '').trim();
+  const newProductId = nextProductId++;
+  const newVariantId = nextVariantId++;
+  const savedSerial = getNextProductSerial();
+  productsData.push({
+    product_id: newProductId, name, category:'', isDormant:false, serial_no: savedSerial,
+    variants:[{ variant_id:newVariantId, label:packing, barcode:'NEW'+newVariantId, purchase:0, labor:0, sellLabor:0, retail:0, wholesale:0, stock:0, lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
+  });
+  saveToStorage('nextProductId', nextProductId);
+  saveToStorage('nextVariantId', nextVariantId);
+  persistAllData();
+  pushProductsToCloud();
+  if(nameEl) nameEl.value = '';
+  if(packEl) packEl.value = '';
+  poCart.push({variant_id: newVariantId, name, label: packing, qty: 1, cost: null});
+  renderPoCategoryRail();
+  renderPoBrowseList();
+  renderPoCart();
+  refreshOtAfterStockChange();
+  alert(`✅ "${name}" شامل ہو گئی (سیریل #${savedSerial}) — نیچے خریداری میں مقدار لکھیں`);
+}
+function poOpenNewVegPackingPicker(){
+  packingPickerCtx = { isNewDraft:true, targetInputId:'poNewVegPacking' };
+  renderPackingPickerList();
+  document.getElementById('packingPickerModal').classList.add('show');
+}
+// ---------- خریداری/نئی سبزی کے بعد آرڈر ٹیکنگ کی فہرست فوراً تازہ ---------- -->
+function refreshOtAfterStockChange(){
+  try{
+    otFlatCache = applyManualCardOrder(getFlatVariants().sort((a, b) => {
+      const sa = a.serial_no, sb = b.serial_no;
+      if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
+      if(sa == null) return 1;
+      if(sb == null) return -1;
+      return sa - sb;
+    }));
+    if(typeof currentScreenName !== 'undefined' && currentScreenName === 'orderTaking') renderOtItemsPage();
+  }catch(e){}
+}
+
 function openCashPurchaseModal(){
   openPoModal(null);
 }
@@ -23893,7 +23960,7 @@ function renderPoBrowseList(){
       isLow = !isOut && stock <= (v.lowStockAt ?? 0);
       const cartItem = poCart.find(c => c.variant_id === v.variant_id);
       qtyInCart = cartItem ? cartItem.qty : 0;
-      packingCellHtml = `<span style="${numFont}font-size:11px;color:#475569;">${v.label || '—'}</span>`;
+      packingCellHtml = `<button type="button" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', 'poBrowseList')" style="width:100%;padding:4px 2px;border:1.5px solid #93c5fd;border-radius:9px;font-size:10.5px;background:#eff6ff;color:#1e3a8a;cursor:pointer;${urduFont}">${v.label || '— چنیں —'} ▾</button>`;
       qtyCellHtml = `
         <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
           <button type="button" onclick="changePoCartQty(${v.variant_id}, -1)" style="width:24px;height:24px;border-radius:7px;border:none;background:#fee2e2;color:#b91c1c;font-weight:900;font-size:15px;line-height:1;">−</button>
@@ -24028,7 +24095,7 @@ function searchPoItems(query){
   const flat = getFlatVariants().filter(v => v.name.toLowerCase().includes(query));
   if(flat.length === 0){
     box.innerHTML = `
-      <div class="resultItem" onclick="openQuickAddPrefilled('${query.replace(/'/g,"\\'")}', 'po')">
+      <div class="resultItem" onclick="document.getElementById('poNewVegName').value='${query.replace(/'/g,"\\'")}'; document.getElementById('poSearchResults').classList.remove('show'); document.getElementById('poNewVegName').scrollIntoView({block:'center'}); document.getElementById('poNewVegName').focus();">
         <div><div class="rName">➕ "${query}" not found — tap to add as new item</div><div class="rMeta">Tap to auto-fill the name</div></div>
       </div>`;
   } else {
@@ -24226,6 +24293,7 @@ function savePurchaseOrder(){
     persistAllData();
     pushProductsToCloud(); // ---------- ☁️ نقد خریداری سے سٹاک بڑھنا فوراً کلاؤڈ میں ----------
     if(_munshiLogged){ try{ pushMunshiStockLogToCloud(); }catch(e){} }
+    refreshOtAfterStockChange();
     try{ pauseCloudPolling(20000); }catch(e){}
     closePoModal();
     renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput') ? document.getElementById('stockAdjSearchInput').value : '');
@@ -24271,6 +24339,7 @@ function savePurchaseOrder(){
   pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): نیا پرچیز آرڈر بننے پر واجب الادا فوراً کلاؤڈ میں ----------
   pushProductsToCloud(); // 🧾 نیا سٹاک/چالان فوراً کلاؤڈ میں
   if(_poMunshiLogged){ try{ pushMunshiStockLogToCloud(); }catch(e){} }
+  refreshOtAfterStockChange();
   try{ pauseCloudPolling(20000); }catch(e){}
   try{ renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput') ? document.getElementById('stockAdjSearchInput').value : ''); }catch(e){}
   closePoModal();
