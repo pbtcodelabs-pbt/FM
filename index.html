@@ -3864,6 +3864,7 @@
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openCustListReport();">👥 کسٹمر</span></div>
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openSupListReport();">🚚 سپلائرز</span></div>
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openMandiSaleRecordReport();">🧾 منڈی سیل ریکارڈ (برائے منشی)</span></div>
+            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openPurchaseChalanReport();">🧾 خرید (نقد / بیوپاری) اور چالان رپورٹ</span></div>
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openMunshiStockLogReport();">🧑‍🌾 منشی کا شامل کردہ سٹاک</span></div>
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openDailyStockProfitReport();">🧾 منڈی سیل ریکارڈ (برائے ایڈمن)</span></div>
             <div class="stockAdjReportsSortBlock">
@@ -5677,6 +5678,11 @@
           <input type="text" id="otAddStockNewName" placeholder="🥬 نئی سبزی کا نام" style="flex:1; min-width:0; padding:8px; border:1px solid #86efac; border-radius:8px; font-size:13px; text-align:center; box-sizing:border-box;">
           <input type="text" id="otAddStockNewPacking" placeholder="📦 پیکنگ ▾" readonly onclick="otAddStockOpenNewPackingPicker()" style="flex:0 0 90px; padding:8px; border:1px solid #86efac; border-radius:8px; font-size:12px; text-align:center; cursor:pointer; box-sizing:border-box;">
           <button type="button" onclick="otAddStockCreateNewVeg()" title="نئی سبزی شامل کریں" style="flex:0 0 42px; border:none; border-radius:8px; background:#16a34a; color:#fff; font-size:18px; font-weight:900; cursor:pointer;">➕</button>
+        </div>
+        <!-- ---------- 🧾 صدام کی ہدایت (26 ستمبر): ہر اندراج الگ چالان — پہلے ذریعہ چنیں (نقد یا کون سا بیوپاری)۔ ریٹ ایڈمن لگائے گا ---------- -->
+        <div dir="rtl" style="display:flex; align-items:center; gap:6px; margin-bottom:10px; background:#fffbeb; border:1.5px solid #f59e0b; border-radius:10px; padding:7px 8px;">
+          <span style="flex:0 0 auto; font-weight:800; font-size:13px; color:#92400e;">🧾 مال کہاں سے آیا:</span>
+          <select id="otAddStockSource" style="flex:1; min-width:0; padding:7px; border:1.5px solid #f59e0b; border-radius:8px; font-size:13px; font-weight:800; background:#fff;"></select>
         </div>
         <input type="text" id="otAddStockSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر" oninput="renderOtAddStockList(this.value)"
                style="width:100%; padding:10px; border:2px solid var(--primary); border-radius:10px; font-size:13.5px; font-weight:700; text-align:center; margin-bottom:10px; box-sizing:border-box;">
@@ -8556,7 +8562,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM25SEPFR0837PM';
+const APP_BUILD_VERSION = 'FM26SEPSA0556AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -13940,6 +13946,15 @@ function endCustomerSelection(){
 
 // ---------- Render Cart Table + Totals ----------
 let billingDraftCustomerRestored = false;
+// ---------- 🧾 صدام کی ہدایت (26 ستمبر): بلنگ کارٹ میں چالان کا انتخاب ---------- -->
+function openCartChalanPicker(idx){
+  const item = Billing.cart[idx];
+  if(!item) return;
+  openChalanPicker(item.variant_id, item.qty, item.chalanAlloc || null, (alloc) => {
+    item.chalanAlloc = alloc;
+    renderCart();
+  });
+}
 function renderCart(){
   saveBillingCartDraft(); // ---------- ہر تبدیلی کے بعد خودکار محفوظ — رفریش سے کارٹ ضائع نہ ہو ----------
   renderHomeUnfinishedCartCard(); // ---------- حفاظتی: ہوم پیج کا کارڈ بھی ہمیشہ اسی وقت تازہ ہو، چاہے ہوم پیج کا اپنا رینڈر کہیں نہ چلا ہو ----------
@@ -13973,7 +13988,7 @@ function renderCart(){
     body.innerHTML = Billing.cart.map((item, idx) => `
       <tr>
         <td style="text-align:center; color:var(--muted); font-weight:700;">${idx+1}</td>
-        <td>${item.name}${item.laborPerUnit > 0 ? `<div style="font-size:10px; color:#b45309; font-weight:700; margin-top:2px;">💪 مزدوری شامل: Rs. ${item.laborPerUnit}/یونٹ (کل Rs. ${(item.laborPerUnit*item.qty).toLocaleString()})</div>` : ''}</td>
+        <td>${item.name}${item.loose_product_id ? '' : chalanChipHtml(item.variant_id, item.qty, item.chalanAlloc || null, `openCartChalanPicker(${idx})`)}${item.laborPerUnit > 0 ? `<div style="font-size:10px; color:#b45309; font-weight:700; margin-top:2px;">💪 مزدوری شامل: Rs. ${item.laborPerUnit}/یونٹ (کل Rs. ${(item.laborPerUnit*item.qty).toLocaleString()})</div>` : ''}</td>
         <td>
           <div class="qtyBtns">
             <button onclick="changeQty(${item.variant_id}, -1)">−</button>
@@ -14103,7 +14118,7 @@ function renderCart(){
     const grossProfit = Billing.cart.reduce((sum, item) => {
       const v = flat.find(f => f.variant_id === item.variant_id);
       // ---------- 💪 صدام کی ہدایت (FM050926): اصل لاگت میں خرید مزدوری بھی شامل ہو (v.purchase + v.labor) ----------
-      const cost = v ? (v.purchase + (v.labor||0)) : (item.costPerUnit || 0);
+      const cost = v ? (getChalanAllocUnitCost(findVariantByVariantId(item.variant_id), item.chalanAlloc, v.purchase) + (v.labor||0)) : (item.costPerUnit || 0);
       return sum + ((item.unitPrice - cost) * item.qty);
     }, 0);
     const profit = grossProfit + discount; // ---------- FM050926 (تصحیح): مزدوری کبھی منافع میں شامل نہیں — یہ ریڑھی/رکشہ والوں کی امانت ہے، ہماری آمدنی نہیں ----------
@@ -14276,6 +14291,18 @@ async function openBillPreviewBeforeComplete(){
 function finalizeInvoice(){
   if(Billing.cart.length === 0) return;
 
+  // ---------- 🧾 صدام کی ہدایت (26 ستمبر): بل فائنل سے پہلے — (1) ہر سبزی کا چالان طے ہو (ایک ہو تو خودکار)
+  // (2) ان چالانوں کا خرید ریٹ لگ چکا ہو۔ ریٹ باقی ہو تو اسی بل کے چالانوں کا پاپ اپ کھلے، سب ریٹ لگتے ہی
+  // "اب بل مکمل کریں" دبا کر بل بن جائے۔ منشی کو یہ پابندی نہیں — وہ ریٹ کے بغیر مال دے سکتا ہے ---------- -->
+  if(AppState.currentRole === 'admin'){
+    const okCh = checkBillChalansReady(Billing.cart, (item) => {
+      const idx = Billing.cart.indexOf(item);
+      if(typeof openCartSheet === 'function'){ try{ openCartSheet(); }catch(e){} }
+      openCartChalanPicker(idx);
+    }, () => finalizeInvoice(), 'اس بل');
+    if(!okCh) return;
+  }
+
   // ---------- 💰 صدام کی ہدایت (FM16SEPWE0857AM): بل بننے سے پہلے کارٹ کے ہر آئٹم کی خرید قیمت،
   // مزدوری فروخت، راولپنڈی ریٹ اور اسلام آباد ریٹ — یہ سب خانے بھرے ہونے لازمی ہیں، ورنہ بل نہیں بنے گا اور
   // بتایا جائے گا کہ کس سبزی کا کون سا خانہ خالی ہے (سٹاک زیرو والا چیک پہلے سے موجود ہے، یہ اس کے علاوہ ہے)
@@ -14406,7 +14433,7 @@ function finalizeInvoice(){
   Billing.cart.forEach(item => {
     productsData.forEach(p => {
       const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ deductVariantStock(v, item.qty); v.salesCount = (v.salesCount || 0) + item.qty; } // TODO: DB میں product_variants.current_stock -= qty
+      if(v){ deductVariantStock(v, item.qty, item.chalanAlloc); v.salesCount = (v.salesCount || 0) + item.qty; } // TODO: DB میں product_variants.current_stock -= qty
     });
   });
 
@@ -14768,6 +14795,11 @@ function addReviewItem(variantId){
 function approvePendingBill(){
   const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
   if(!p) return;
+  // ---------- 🧾 منظوری سے پہلے ہر سبزی کا چالان طے ہو ---------- -->
+  const okCh = checkBillChalansReady(p.items, (item) => {
+    openChalanPicker(item.variant_id, item.qty, item.chalanAlloc || null, (alloc) => { item.chalanAlloc = alloc; });
+  }, () => approvePendingBill(), 'اس بل');
+  if(!okCh) return;
 
   const customer = p.customer_id ? customersData.find(c => c.customer_id === p.customer_id) : null;
   const subtotal = p.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
@@ -14800,7 +14832,7 @@ function approvePendingBill(){
   p.items.forEach(item => {
     productsData.forEach(prod => {
       const v = prod.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ deductVariantStock(v, item.qty); v.salesCount = (v.salesCount || 0) + item.qty; }
+      if(v){ deductVariantStock(v, item.qty, item.chalanAlloc); v.salesCount = (v.salesCount || 0) + item.qty; }
     });
   });
 
@@ -17183,27 +17215,83 @@ function recomputeReservedFromOrders(){
    ===================================================================== */
 let nextChalanNoGlobal = loadFromStorage('nextChalanNoGlobal', 1); // فال بیک، عام طور پر ہر variant کا اپنا v.nextChalanNo استعمال ہوگا
 
+// ---------- 🧾 صدام کی ہدایت (26 ستمبر، چالان سسٹم مرحلہ 2): ہر چالان کی مکمل شکل —
+// {chalanNo, qty(باقی), origQty(اصل آمد), rate(null = ریٹ باقی), ratePending, source, supplierId, supplierName, poRef, by, ts}
+// منشی صرف مقدار ڈالتا ہے (ریٹ خالی = "ریٹ باقی")، ایڈمن بعد میں ہر چالان کا الگ ریٹ لگاتا ہے۔
+// فروخت پر FIFO نہیں — منشی یا ایڈمن خود چنتا ہے کہ کس چالان سے مال نکالنا ہے ---------- -->
+function _chRound(n){ return Math.round((Number(n) || 0) * 100) / 100; }
+function _chalanSum(v){ return _chRound((v.chalans || []).reduce((s, c) => s + (Number(c.qty) || 0), 0)); }
+function chalanAllocSum(alloc){
+  if(!alloc || typeof alloc !== 'object') return 0;
+  return _chRound(Object.keys(alloc).reduce((s, k) => s + (Number(alloc[k]) || 0), 0));
+}
+function isChalanAdmin(){ return AppState.currentRole === 'admin'; }
+
 // ---------- پرانا سٹاک (جو ایوریج ریٹ پر تھا) کو ایک بار "چالان نمبر 1" میں بدل دیں ----------
 function ensureVariantChalans(v){
   if(!v) return [];
-  if(!v.chalans) v.chalans = [];
-  if(v.chalans.length === 0 && Math.max(0, v.stock || 0) > 0){
-    v.chalans.push({ chalanNo: 1, qty: Math.max(0, v.stock || 0), rate: v.purchase || 0, source: 'پرانا سٹاک', ts: Date.now() });
+  if(!Array.isArray(v.chalans)) v.chalans = [];
+  if(v.chalans.length === 0 && Math.max(0, Number(v.stock) || 0) > 0){
+    const q = Math.max(0, Number(v.stock) || 0);
+    v.chalans.push({ chalanNo: 1, qty: q, origQty: q, rate: Number(v.purchase) || 0, ratePending: false, source: 'پرانا سٹاک', ts: Date.now() });
     v.nextChalanNo = 2;
   }
+  v.chalans.forEach(c => { if(c.origQty == null) c.origQty = Number(c.qty) || 0; });
   if(!v.nextChalanNo) v.nextChalanNo = (v.chalans.reduce((m,c) => Math.max(m, c.chalanNo||0), 0) || 0) + 1;
+  reconcileVariantChalans(v);
   return v.chalans;
 }
 
-// ---------- نئی خریداری پر نیا الگ چالان بنائیں (ایوریج نہیں نکالنی) ----------
-function addPurchaseChalan(v, qty, rate, source){
-  if(!v || qty <= 0) return;
+// ---------- 🔗 چالانوں کا مجموعہ ہمیشہ اصل سٹاک کے برابر رہے — اگر کہیں دستی ترمیم (سٹاک خانے میں سیدھا نمبر،
+// سٹاک زیرو وغیرہ) سے فرق پڑ جائے تو یہاں خاموشی سے برابر کر دیں ---------- -->
+function reconcileVariantChalans(v){
+  const target = Math.max(0, _chRound(v.stock));
+  const sum = _chalanSum(v);
+  if(Math.abs(sum - target) < 0.001) return;
+  if(sum < target){
+    const add = _chRound(target - sum);
+    const last = v.chalans[v.chalans.length - 1];
+    if(last && last.source === 'دستی ترمیم' && !last.ratePending && (Date.now() - (last.ts || 0)) < 12 * 3600 * 1000){
+      last.qty = _chRound(last.qty + add);
+      last.origQty = _chRound((last.origQty || 0) + add);
+    } else {
+      const no = v.nextChalanNo || 1;
+      v.chalans.push({ chalanNo: no, qty: add, origQty: add, rate: Number(v.purchase) || 0, ratePending: false, source: 'دستی ترمیم', ts: Date.now() });
+      v.nextChalanNo = no + 1;
+    }
+  } else {
+    let excess = _chRound(sum - target);
+    for(const c of v.chalans){
+      if(excess <= 0) break;
+      const take = Math.min(Number(c.qty) || 0, excess);
+      c.qty = _chRound(c.qty - take);
+      excess = _chRound(excess - take);
+    }
+  }
+}
+
+// ---------- نئی خریداری پر نیا الگ چالان بنائیں (ایوریج نہیں نکالنی) — ریٹ خالی/صفر ہو تو "ریٹ باقی" ----------
+function addPurchaseChalan(v, qty, rate, source, meta){
+  if(!v || !(qty > 0)) return null;
   ensureVariantChalans(v);
   const chalanNo = v.nextChalanNo || 1;
-  v.chalans.push({ chalanNo, qty, rate: rate || 0, source: source || '', ts: Date.now() });
+  const pending = !(Number(rate) > 0);
+  const c = {
+    chalanNo, qty: _chRound(qty), origQty: _chRound(qty),
+    rate: pending ? null : Number(rate), ratePending: pending,
+    source: source || '',
+    supplierId: (meta && meta.supplierId != null) ? meta.supplierId : null,
+    supplierName: (meta && meta.supplierName) || '',
+    poRef: (meta && meta.poRef != null) ? meta.poRef : null,
+    by: (AppState.currentUser && AppState.currentUser.name) || '',
+    ts: Date.now()
+  };
+  v.chalans.push(c);
   v.nextChalanNo = chalanNo + 1;
-  v.stock = Math.max(0, v.stock || 0) + qty;
-  v.purchase = rate; // ---------- صرف حوالے کے لیے تازہ ترین ریٹ — پرانی جگہوں کے ٹوٹنے سے بچاؤ کے لیے برقرار رکھا ----------
+  v.stock = Math.max(0, Number(v.stock) || 0) + _chRound(qty);
+  if(!pending) v.purchase = Number(rate); // ---------- صرف حوالے کے لیے تازہ ترین ریٹ ----------
+  try{ setTimeout(refreshChalanRateFab, 50); }catch(e){}
+  return c;
 }
 
 // ---------- پرانا نام برقرار — پرانے کسی کوڈ نے کہیں یہ فنکشن کالا ہو تو بھی نیا چالان سسٹم ہی چلے ----------
@@ -17211,26 +17299,520 @@ function applyPurchaseToVariant(v, qty, rate){
   addPurchaseChalan(v, qty, rate, '');
 }
 
-// ---------- فروخت/واپسی پر ایک ہی جگہ سے سٹاک کاٹیں — Batches موجود ہوں تو FEFO (پہلے ایکسپائر ہونے والی کھیپ پہلے خرچ) ----------
-function deductVariantStock(v, qty){
+// ---------- فروخت/واپسی پر ایک ہی جگہ سے سٹاک کاٹیں — alloc = {chalanNo: qty} (منشی/ایڈمن کا چنا ہوا چالان)۔
+// جو مقدار کسی چالان کے ساتھ منسوب نہ ہو وہ صرف ہم آہنگی کے لیے پرانے چالان سے کٹتی ہے ---------- -->
+function deductVariantStock(v, qty, alloc){
   if(!v || qty <= 0) return;
+  ensureVariantChalans(v);
+  let remaining = _chRound(qty);
+  if(alloc && typeof alloc === 'object'){
+    Object.keys(alloc).forEach(no => {
+      if(remaining <= 0) return;
+      const c = v.chalans.find(x => String(x.chalanNo) === String(no));
+      if(!c) return;
+      const take = Math.min(Number(alloc[no]) || 0, Number(c.qty) || 0, remaining);
+      c.qty = _chRound(c.qty - take);
+      remaining = _chRound(remaining - take);
+    });
+  }
+  for(const c of v.chalans){
+    if(remaining <= 0) break;
+    const take = Math.min(Number(c.qty) || 0, remaining);
+    c.qty = _chRound(c.qty - take);
+    remaining = _chRound(remaining - take);
+  }
   v.stock = Math.max(0, (v.stock || 0) - qty);
   if(v.batches && v.batches.length){
-    let remaining = qty;
+    let remainingB = qty;
     const sorted = [...v.batches].sort((a,b) => {
       if(!a.expiryDate) return 1;
       if(!b.expiryDate) return -1;
       return new Date(a.expiryDate) - new Date(b.expiryDate);
     });
     for(const b of sorted){
-      if(remaining <= 0) break;
-      const take = Math.min(b.qty, remaining);
+      if(remainingB <= 0) break;
+      const take = Math.min(b.qty, remainingB);
       b.qty -= take;
-      remaining -= take;
+      remainingB -= take;
     }
     v.batches = v.batches.filter(b => b.qty > 0);
   }
 }
+
+// ---------- واپسی/بل منسوخی پر سٹاک واپس — اسی چالان میں جس سے بیچا گیا تھا ---------- -->
+function restoreVariantStock(v, qty, alloc){
+  if(!v || !(qty > 0)) return;
+  ensureVariantChalans(v);
+  let remaining = _chRound(qty);
+  if(alloc && typeof alloc === 'object'){
+    Object.keys(alloc).forEach(no => {
+      if(remaining <= 0) return;
+      const c = v.chalans.find(x => String(x.chalanNo) === String(no));
+      if(!c) return;
+      const give = Math.min(Number(alloc[no]) || 0, remaining);
+      c.qty = _chRound(c.qty + give);
+      remaining = _chRound(remaining - give);
+    });
+  }
+  if(remaining > 0){
+    const last = v.chalans[v.chalans.length - 1];
+    if(last){ last.qty = _chRound(last.qty + remaining); }
+    else {
+      const no = v.nextChalanNo || 1;
+      v.chalans.push({ chalanNo: no, qty: remaining, origQty: remaining, rate: Number(v.purchase) || 0, ratePending: false, source: 'واپسی', ts: Date.now() });
+      v.nextChalanNo = no + 1;
+    }
+  }
+  v.stock = (Number(v.stock) || 0) + qty;
+}
+
+// ---------- منافع کے لیے: منتخب چالانوں کا اوسط ریٹ (جن کا ریٹ ابھی باقی ہو تو fallback) ---------- -->
+function getChalanAllocUnitCost(v, alloc, fallback){
+  if(!v || !alloc || typeof alloc !== 'object') return fallback;
+  let q = 0, amt = 0;
+  for(const no of Object.keys(alloc)){
+    const c = (v.chalans || []).find(x => String(x.chalanNo) === String(no));
+    const aq = Number(alloc[no]) || 0;
+    if(!c || aq <= 0) continue;
+    if(c.ratePending || !(Number(c.rate) > 0)) return fallback;
+    q += aq; amt += aq * Number(c.rate);
+  }
+  return q > 0 ? amt / q : fallback;
+}
+
+// ---------- چالان کا ذریعہ (بیوپاری/نقد/منشی) مختصر لیبل ---------- -->
+function chalanSourceLabel(c){
+  if(c.supplierName) return '🏭 ' + c.supplierName;
+  if(c.source === 'نقد خریداری') return '💵 نقد';
+  if(c.source === 'پرانا سٹاک') return '📦 پرانا سٹاک';
+  if(c.source === 'دستی ترمیم') return '✍️ دستی ترمیم';
+  return c.source ? ('📥 ' + c.source) : '📥';
+}
+function chalanDateLabel(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  const mins = String(d.getMinutes()).padStart(2, '0');
+  let h = d.getHours(); const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12;
+  return `${d.getDate()}/${d.getMonth()+1} ${h}:${mins}${ap}`;
+}
+function findProductAndVariant(variantId){
+  for(const p of productsData){
+    const v = (p.variants || []).find(vv => vv.variant_id === variantId);
+    if(v) return {p, v};
+  }
+  return {p: null, v: null};
+}
+
+// ---------- دوسرے پینڈنگ آرڈرز میں اس ورائنٹ کے کس چالان سے کتنا بک ہے ---------- -->
+function getChalanReservedMap(variantId, excludeOrderId){
+  const map = {};
+  (advanceOrdersData || []).forEach(o => {
+    if(!o || o.status === 'fulfilled' || o.isDraft || o.stockReleased) return;
+    if(excludeOrderId != null && o.id === excludeOrderId) return;
+    (o.items || []).forEach(i => {
+      if(!i || i.variant_id !== variantId || !i.chalanAlloc) return;
+      Object.keys(i.chalanAlloc).forEach(no => { map[no] = _chRound((map[no] || 0) + (Number(i.chalanAlloc[no]) || 0)); });
+    });
+  });
+  return map;
+}
+
+/* =====================================================================
+   🧾 چالان منتخب کرنے کا پاپ اپ — آرڈر ٹیکنگ (منشی) اور بلنگ (ایڈمن) دونوں میں یہی
+   منشی کو ریٹ کبھی نظر نہیں آتا، صرف چالان نمبر، ذریعہ، تاریخ اور باقی مقدار
+   ===================================================================== */
+let chalanPickerCtx = null;
+function ensureChalanPickerModal(){
+  if(document.getElementById('chalanPickerModal')) return;
+  const el = document.createElement('div');
+  el.className = 'modalOverlay';
+  el.id = 'chalanPickerModal';
+  el.style.zIndex = '10050';
+  el.onclick = (e) => { if(e.target === el) closeChalanPicker(); };
+  el.innerHTML = `
+    <div class="modalBox" dir="rtl" style="max-width:440px; max-height:88vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+      <h3 id="chalanPickerTitle" style="margin:0 0 6px; text-align:center;">🧾 چالان منتخب کریں</h3>
+      <div id="chalanPickerSummary" style="text-align:center; font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:13px; margin-bottom:8px;"></div>
+      <div id="chalanPickerList"></div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button type="button" onclick="chalanPickerClear()" style="flex:0 0 auto; padding:11px 12px; border:none; border-radius:10px; background:#fef2f2; color:#b91c1c; font-weight:800; cursor:pointer;">🧹 صاف</button>
+        <button type="button" onclick="closeChalanPicker()" style="flex:1; padding:11px; border:none; border-radius:10px; background:#f1f5f9; color:#334155; font-weight:800; cursor:pointer;">✖ بند</button>
+        <button type="button" onclick="chalanPickerSave()" style="flex:1.4; padding:11px; border:none; border-radius:10px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; font-weight:900; cursor:pointer; box-shadow:0 3px 0 #14532d;">✅ محفوظ</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+}
+function openChalanPicker(variantId, needQty, currentAlloc, onSave, opts){
+  const {p, v} = findProductAndVariant(variantId);
+  if(!v){ alert('یہ سبزی نہیں ملی'); return; }
+  ensureVariantChalans(v);
+  ensureChalanPickerModal();
+  chalanPickerCtx = {
+    variantId, needQty: _chRound(needQty), onSave,
+    alloc: currentAlloc ? JSON.parse(JSON.stringify(currentAlloc)) : {},
+    excludeOrderId: opts && opts.excludeOrderId != null ? opts.excludeOrderId : null
+  };
+  document.getElementById('chalanPickerTitle').textContent = `🧾 ${p ? p.name : ''}${v.label ? ' — ' + v.label : ''}`;
+  renderChalanPicker();
+  document.getElementById('chalanPickerModal').classList.add('show');
+}
+function closeChalanPicker(){
+  const m = document.getElementById('chalanPickerModal');
+  if(m) m.classList.remove('show');
+  chalanPickerCtx = null;
+}
+function renderChalanPicker(){
+  const ctx = chalanPickerCtx; if(!ctx) return;
+  const {v} = findProductAndVariant(ctx.variantId); if(!v) return;
+  const admin = isChalanAdmin();
+  const reserved = getChalanReservedMap(ctx.variantId, ctx.excludeOrderId);
+  const list = (v.chalans || []).filter(c => (Number(c.qty) || 0) > 0 || (ctx.alloc[c.chalanNo] > 0));
+  const sum = chalanAllocSum(ctx.alloc);
+  const ok = sum >= ctx.needQty && ctx.needQty > 0;
+  document.getElementById('chalanPickerSummary').innerHTML =
+    `<span style="background:#eff6ff; color:#1e3a8a; border-radius:8px; padding:4px 10px;">مطلوبہ: ${ctx.needQty}</span>
+     <span style="background:${ok ? '#dcfce7' : '#fee2e2'}; color:${ok ? '#15803d' : '#b91c1c'}; border-radius:8px; padding:4px 10px; margin-right:6px;">منتخب: ${sum}</span>`;
+  const wrap = document.getElementById('chalanPickerList');
+  if(list.length === 0){
+    wrap.innerHTML = `<div style="text-align:center; color:var(--muted); padding:16px 0;">اس سبزی کا کوئی چالان سٹاک میں نہیں</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(c => {
+    const res = Number(reserved[c.chalanNo]) || 0;
+    const avail = _chRound(Math.max(0, (Number(c.qty) || 0) - res));
+    const mine = Number(ctx.alloc[c.chalanNo]) || 0;
+    const sel = mine > 0;
+    const rateHtml = admin
+      ? (c.ratePending ? `<span style="color:#b45309; font-weight:900;">⏳ ریٹ باقی</span>` : `<span style="color:#0f766e; font-weight:900; font-family:Arial,Helvetica,sans-serif;">Rs. ${c.rate}</span>`)
+      : '';
+    return `
+      <div onclick="chalanPickerQuickFill(${c.chalanNo})" style="display:flex; align-items:center; gap:8px; padding:9px 10px; margin-bottom:7px; border-radius:12px; cursor:pointer; background:${sel ? 'linear-gradient(155deg,#dcfce7,#bbf7d0)' : 'linear-gradient(155deg,#ffffff,#f1f5f9)'}; border:2px solid ${sel ? '#16a34a' : '#e2e8f0'}; box-shadow:0 2px 0 ${sel ? '#15803d' : '#cbd5e1'};">
+        <div style="flex:0 0 auto; min-width:46px; text-align:center; background:#134e2c; color:#fff; border-radius:10px; padding:5px 4px; font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:15px;">#${c.chalanNo}</div>
+        <div style="flex:1; min-width:0; font-size:12.5px; line-height:1.5;">
+          <div style="font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${chalanSourceLabel(c)} <span style="font-family:Arial,Helvetica,sans-serif; font-size:10.5px; color:var(--muted);">${chalanDateLabel(c.ts)}</span></div>
+          <div style="font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:12.5px;">
+            <span style="color:#134e2c;">باقی: ${avail}</span>${res > 0 ? ` <span style="color:#c2410c; font-size:11px;">(بک ${res})</span>` : ''} ${rateHtml}
+          </div>
+        </div>
+        <input type="text" inputmode="decimal" value="${mine || ''}" placeholder="0" onclick="event.stopPropagation()" onfocus="this.select()" onchange="chalanPickerSetQty(${c.chalanNo}, this.value)" style="flex:0 0 58px; width:58px; height:36px; box-sizing:border-box; border:2px solid ${sel ? '#16a34a' : '#cbd5e1'}; border-radius:9px; text-align:center; font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:14px;">
+      </div>`;
+  }).join('');
+}
+// ---------- پورے کارڈ پر ٹیپ = اسی چالان سے جتنی ضرورت ہے (زیادہ سے زیادہ دستیاب) خودکار بھر دیں ---------- -->
+function chalanPickerQuickFill(chalanNo){
+  const ctx = chalanPickerCtx; if(!ctx) return;
+  const {v} = findProductAndVariant(ctx.variantId); if(!v) return;
+  const c = v.chalans.find(x => x.chalanNo === chalanNo); if(!c) return;
+  if(Number(ctx.alloc[chalanNo]) > 0){ delete ctx.alloc[chalanNo]; renderChalanPicker(); return; }
+  const reserved = getChalanReservedMap(ctx.variantId, ctx.excludeOrderId);
+  const avail = Math.max(0, (Number(c.qty) || 0) - (Number(reserved[chalanNo]) || 0));
+  const stillNeed = _chRound(ctx.needQty - chalanAllocSum(ctx.alloc));
+  const give = _chRound(Math.min(avail, Math.max(0, stillNeed)));
+  if(give <= 0){
+    if(stillNeed <= 0) alert('مطلوبہ مقدار پوری ہو چکی ہے — کسی اور چالان کو ہٹا کر یہ منتخب کریں');
+    else alert('اس چالان میں مال باقی نہیں');
+    return;
+  }
+  ctx.alloc[chalanNo] = give;
+  renderChalanPicker();
+}
+function chalanPickerSetQty(chalanNo, val){
+  const ctx = chalanPickerCtx; if(!ctx) return;
+  let q = _chRound(parseFloat(String(val).replace(',', '.')));
+  if(!isFinite(q) || q < 0) q = 0;
+  if(q > 0) ctx.alloc[chalanNo] = q; else delete ctx.alloc[chalanNo];
+  renderChalanPicker();
+}
+function chalanPickerClear(){
+  if(!chalanPickerCtx) return;
+  chalanPickerCtx.alloc = {};
+  renderChalanPicker();
+}
+function chalanPickerSave(){
+  const ctx = chalanPickerCtx; if(!ctx) return;
+  const sum = chalanAllocSum(ctx.alloc);
+  if(sum > ctx.needQty){ alert(`⚠️ منتخب مقدار (${sum}) مطلوبہ (${ctx.needQty}) سے زیادہ ہے — کم کریں`); return; }
+  const {v} = findProductAndVariant(ctx.variantId);
+  if(v){
+    for(const no of Object.keys(ctx.alloc)){
+      const c = v.chalans.find(x => String(x.chalanNo) === String(no));
+      if(c && ctx.alloc[no] > (Number(c.qty) || 0)){ alert(`⚠️ چالان #${no} میں صرف ${c.qty} باقی ہے`); return; }
+    }
+  }
+  const clean = {};
+  Object.keys(ctx.alloc).forEach(k => { if(ctx.alloc[k] > 0) clean[k] = ctx.alloc[k]; });
+  const cb = ctx.onSave;
+  closeChalanPicker();
+  if(typeof cb === 'function') cb(Object.keys(clean).length ? clean : null);
+}
+
+// ---------- چھوٹا چالان بٹن (چِپ) — کسی بھی فہرست میں ---------- -->
+function chalanChipHtml(variantId, qty, alloc, onclickJs){
+  if(!(qty > 0)) return '';
+  const v = findVariantByVariantId(variantId); if(!v) return '';
+  const open = ensureVariantChalans(v).filter(c => (Number(c.qty) || 0) > 0);
+  if(open.length === 0 && !alloc) return '';
+  const sum = chalanAllocSum(alloc);
+  let bg, fg, txt;
+  if(alloc && sum >= qty){ bg = '#dcfce7'; fg = '#15803d'; txt = '🧾 ' + Object.keys(alloc).map(k => '#' + k).join('+'); }
+  else if(!alloc && open.length === 1){ bg = '#f1f5f9'; fg = '#475569'; txt = '🧾 #' + open[0].chalanNo; }
+  else { bg = '#fee2e2'; fg = '#b91c1c'; txt = alloc ? `🧾 ${sum}/${qty}` : '🧾 چالان چنیں'; }
+  return `<button type="button" onclick="event.stopPropagation(); ${onclickJs}" style="margin-top:3px; width:100%; padding:2px 3px; border:1px solid ${fg}; border-radius:7px; background:${bg}; color:${fg}; font-size:10.5px; font-weight:900; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:Arial,'JameelNooriNastaleeqKasheeda',sans-serif;">${txt}</button>`;
+}
+
+// ---------- بل/منظوری سے پہلے: ہر لائن کا چالان طے ہو — ایک ہی چالان ہو تو خودکار، زیادہ ہوں تو پوچھیں ---------- -->
+function ensureItemsChalanAlloc(items, onNeedPick){
+  for(const item of (items || [])){
+    if(!item || item.variant_id == null || item.loose_product_id) continue;
+    const v = findVariantByVariantId(item.variant_id);
+    if(!v) continue;
+    const open = ensureVariantChalans(v).filter(c => (Number(c.qty) || 0) > 0);
+    if(open.length === 0) continue;
+    const sum = chalanAllocSum(item.chalanAlloc);
+    if(item.chalanAlloc && sum >= item.qty) continue;
+    if(!item.chalanAlloc && open.length === 1){ item.chalanAlloc = { [open[0].chalanNo]: item.qty }; continue; }
+    alert(`🧾 "${item.name}" کے ${open.length} چالان موجود ہیں — پہلے منتخب کریں کہ کون سا چالان بیچنا ہے (${sum}/${item.qty})`);
+    if(typeof onNeedPick === 'function') onNeedPick(item);
+    return false;
+  }
+  return true;
+}
+
+/* =====================================================================
+   ⏳ ریٹ لگنا باقی — صرف ایڈمن: تیرتا بٹن + پاپ اپ (ہر چالان کا الگ ریٹ)
+   ===================================================================== */
+function getPendingRateChalans(){
+  const out = [];
+  (productsData || []).forEach(p => (p.variants || []).forEach(v => {
+    (v.chalans || []).forEach(c => { if(c.ratePending) out.push({p, v, c}); });
+  }));
+  return out.sort((a, b) => (a.c.ts || 0) - (b.c.ts || 0));
+}
+let _chalanRateLastSeenCount = -1;
+function refreshChalanRateFab(){
+  let fab = document.getElementById('chalanRateFab');
+  const _ls = document.getElementById('loginScreen');
+  const loggedIn = !(_ls && getComputedStyle(_ls).display !== 'none');
+  const admin = isChalanAdmin() && loggedIn;
+  const n = admin ? getPendingRateChalans().length : 0;
+  if(!fab){
+    if(n === 0) return;
+    fab = document.createElement('button');
+    fab.id = 'chalanRateFab';
+    fab.type = 'button';
+    fab.onclick = () => openChalanRateModal('pending');
+    fab.style.cssText = "position:fixed; left:10px; bottom:92px; z-index:9990; border:none; border-radius:22px; padding:9px 14px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; font-weight:900; font-size:13px; box-shadow:0 4px 0 #78350f, 0 6px 14px rgba(0,0,0,.25); cursor:pointer; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',Arial,sans-serif; animation:chalanFabPulse 1.6s infinite;";
+    document.body.appendChild(fab);
+    if(!document.getElementById('chalanFabStyle')){
+      const st = document.createElement('style');
+      st.id = 'chalanFabStyle';
+      st.textContent = '@keyframes chalanFabPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}';
+      document.head.appendChild(st);
+    }
+  }
+  fab.style.display = n > 0 ? '' : 'none';
+  fab.innerHTML = `⏳ ${n} چالان — ریٹ باقی`;
+  // ---------- نیا چالان آئے (گنتی بڑھے) تو خود پاپ اپ کھولیں — مگر کوئی دوسرا پاپ اپ کھلا ہو تو نہیں ---------- -->
+  if(admin && n > 0 && n > _chalanRateLastSeenCount){
+    const anyOpen = document.querySelector('.modalOverlay.show');
+    if(!anyOpen){
+      _chalanRateLastSeenCount = n;
+      openChalanRateModal('pending');
+    }
+  } else if(n < _chalanRateLastSeenCount || !admin){
+    _chalanRateLastSeenCount = n;
+  }
+}
+let chalanRateModalTab = 'pending';
+function ensureChalanRateModal(){
+  if(document.getElementById('chalanRateModal')) return;
+  const el = document.createElement('div');
+  el.className = 'modalOverlay';
+  el.id = 'chalanRateModal';
+  el.onclick = (e) => { if(e.target === el) closeChalanRateModal(); };
+  el.innerHTML = `
+    <div class="modalBox" dir="rtl" style="max-width:480px; max-height:90vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+      <h3 style="margin:0 0 8px; text-align:center;">🧾 چالان اور ریٹ</h3>
+      <div style="display:flex; gap:6px; margin-bottom:8px;">
+        <button type="button" id="chalanRateTabPending" onclick="setChalanRateTab('pending')" style="flex:1; padding:9px; border:none; border-radius:10px; font-weight:900; cursor:pointer;">⏳ ریٹ باقی</button>
+        <button type="button" id="chalanRateTabAll" onclick="setChalanRateTab('all')" style="flex:1; padding:9px; border:none; border-radius:10px; font-weight:900; cursor:pointer;">📋 تمام چالان</button>
+      </div>
+      <button type="button" onclick="closeChalanRateModal(); openPurchaseChalanReport();" style="width:100%; margin-bottom:8px; padding:9px; border:none; border-radius:10px; background:#1e3a8a; color:#fff; font-weight:900; cursor:pointer;">📊 خرید اور چالان رپورٹ</button>
+      <input type="text" id="chalanRateSearch" placeholder="🔍 سبزی کا نام یا سیریل نمبر" oninput="renderChalanRateModal()" style="width:100%; box-sizing:border-box; padding:9px; border:2px solid var(--primary); border-radius:10px; font-size:13px; text-align:center; margin-bottom:8px;">
+      <div id="chalanRateList"></div>
+      <button type="button" onclick="closeChalanRateModal()" style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:10px; background:#f1f5f9; color:#334155; font-weight:800; cursor:pointer;">✖ بند کریں</button>
+    </div>`;
+  document.body.appendChild(el);
+}
+// ---------- opts.onlyKeys = ['vid_chalanNo'] — صرف اسی بل کے چالان؛ opts.onDone = سب ریٹ لگنے کے بعد بل مکمل کریں ---------- -->
+let chalanRateModalFilter = null;
+function openChalanRateModal(tab, opts){
+  if(!isChalanAdmin()){ alert('صرف ایڈمن ریٹ لگا سکتا ہے'); return; }
+  ensureChalanRateModal();
+  chalanRateModalTab = tab || 'pending';
+  chalanRateModalFilter = (opts && opts.onlyKeys) ? {keys: new Set(opts.onlyKeys), onDone: opts.onDone || null, title: opts.title || ''} : null;
+  const s = document.getElementById('chalanRateSearch'); if(s) s.value = '';
+  renderChalanRateModal();
+  document.getElementById('chalanRateModal').classList.add('show');
+}
+function closeChalanRateModal(){
+  const m = document.getElementById('chalanRateModal');
+  if(m) m.classList.remove('show');
+  chalanRateModalFilter = null;
+}
+function chalanRateFilterDone(){
+  const cb = chalanRateModalFilter && chalanRateModalFilter.onDone;
+  closeChalanRateModal();
+  if(typeof cb === 'function') setTimeout(cb, 50);
+}
+// ---------- بل کی چیزوں کے وہ چالان جن کا ریٹ ابھی باقی ہے ---------- -->
+function getPendingRateKeysForItems(items){
+  const keys = [];
+  (items || []).forEach(it => {
+    if(!it || !it.chalanAlloc) return;
+    const v = findVariantByVariantId(it.variant_id);
+    if(!v) return;
+    Object.keys(it.chalanAlloc).forEach(no => {
+      const c = (v.chalans || []).find(x => String(x.chalanNo) === String(no));
+      if(c && c.ratePending) keys.push(v.variant_id + '_' + c.chalanNo);
+    });
+  });
+  return [...new Set(keys)];
+}
+// ---------- بل فائنل سے پہلے: (1) ہر چیز کا چالان طے (2) ان چالانوں کا ریٹ لگا ہو — ورنہ پاپ اپ ---------- -->
+function checkBillChalansReady(items, onPick, onDone, title){
+  if(!ensureItemsChalanAlloc(items, onPick)) return false;
+  const keys = getPendingRateKeysForItems(items);
+  if(keys.length){
+    openChalanRateModal('pending', {onlyKeys: keys, onDone, title});
+    return false;
+  }
+  return true;
+}
+function setChalanRateTab(tab){ chalanRateModalTab = tab; renderChalanRateModal(); }
+function renderChalanRateModal(){
+  const wrap = document.getElementById('chalanRateList'); if(!wrap) return;
+  const pendingTab = chalanRateModalTab === 'pending';
+  const tP = document.getElementById('chalanRateTabPending'), tA = document.getElementById('chalanRateTabAll');
+  if(tP){ tP.style.background = pendingTab ? '#b45309' : '#f1f5f9'; tP.style.color = pendingTab ? '#fff' : '#334155'; }
+  if(tA){ tA.style.background = !pendingTab ? '#134e2c' : '#f1f5f9'; tA.style.color = !pendingTab ? '#fff' : '#334155'; }
+  const q = (document.getElementById('chalanRateSearch')?.value || '').trim().toLowerCase();
+  let rows = [];
+  if(pendingTab){
+    rows = getPendingRateChalans();
+  } else {
+    productsData.slice().sort((a,b) => (a.serial_no||0) - (b.serial_no||0)).forEach(p => (p.variants || []).forEach(v => {
+      ensureVariantChalans(v).forEach(c => { if((Number(c.qty) || 0) > 0 || c.ratePending) rows.push({p, v, c}); });
+    }));
+  }
+  if(q) rows = rows.filter(r => r.p.name.toLowerCase().includes(q) || String(r.p.serial_no ?? '') === q);
+  // ---------- 🧾 بل والا فلٹر: صرف اسی بل کے ریٹ باقی چالان، سب لگ جائیں تو "بل مکمل کریں" بٹن ---------- -->
+  const flt = chalanRateModalFilter;
+  let fltHead = '';
+  if(flt && pendingTab){
+    rows = rows.filter(r => flt.keys.has(r.v.variant_id + '_' + r.c.chalanNo));
+    fltHead = `<div style="text-align:center; background:#fef2f2; color:#b91c1c; border:1.5px solid #fca5a5; border-radius:10px; padding:7px; margin-bottom:8px; font-weight:900; font-size:13px;">🧾 ${flt.title || 'اس بل'} کے ${rows.length} چالانوں کا ریٹ باقی — پہلے ریٹ لگائیں، پھر بل بنے گا</div>`;
+    if(rows.length === 0){
+      wrap.innerHTML = `<div style="text-align:center; color:#15803d; font-weight:900; padding:14px 0;">✅ اس بل کے سب چالانوں کا ریٹ لگ گیا</div>` +
+        (flt.onDone ? `<button type="button" onclick="chalanRateFilterDone()" style="width:100%; padding:13px; border:none; border-radius:12px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; font-weight:900; font-size:15px; cursor:pointer; box-shadow:0 3px 0 #14532d;">✅ اب بل مکمل کریں</button>` : '');
+      return;
+    }
+  }
+  if(rows.length === 0){
+    wrap.innerHTML = `<div style="text-align:center; color:var(--muted); padding:18px 0;">${pendingTab ? '✅ کسی چالان کا ریٹ باقی نہیں' : 'کوئی چالان نہیں'}</div>`;
+    return;
+  }
+  wrap.innerHTML = fltHead + rows.map(({p, v, c}) => {
+    const key = `${v.variant_id}_${c.chalanNo}`;
+    return `
+      <div style="padding:9px 10px; margin-bottom:8px; border-radius:12px; background:${c.ratePending ? 'linear-gradient(155deg,#fffbeb,#fef3c7)' : 'linear-gradient(155deg,#ffffff,#f0fdf4)'}; border:2px solid ${c.ratePending ? '#f59e0b' : '#bbf7d0'};">
+        <div style="display:flex; align-items:center; gap:7px;">
+          ${p.serial_no ? `<span style="${SERIAL_BADGE_INLINE_STYLE} width:26px !important; height:26px !important; min-width:26px !important; min-height:26px !important; font-size:11px !important; margin:0; cursor:default;">${p.serial_no}</span>` : ''}
+          <div style="flex:1; min-width:0; font-weight:900; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}${v.label ? ` <span style="font-size:11px; color:#1e3a8a;">(${v.label})</span>` : ''}</div>
+          <div style="flex:0 0 auto; background:#134e2c; color:#fff; border-radius:9px; padding:3px 8px; font-family:Arial,Helvetica,sans-serif; font-weight:900;">#${c.chalanNo}</div>
+        </div>
+        <div style="font-size:12px; margin-top:4px; line-height:1.6;">
+          ${chalanSourceLabel(c)} <span style="font-family:Arial,Helvetica,sans-serif; font-size:10.5px; color:var(--muted);">${chalanDateLabel(c.ts)}${c.by ? ' — ' : ''}</span>${c.by ? `<span style="font-size:11px; color:var(--muted);">✍️ ${c.by}</span>` : ''}
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:5px; font-family:Arial,Helvetica,sans-serif;">
+          <span style="font-size:12px; font-weight:900; color:#1e3a8a; background:#eff6ff; border-radius:7px; padding:4px 7px;">آمد: ${c.origQty ?? c.qty}</span>
+          <span style="font-size:12px; font-weight:900; color:#134e2c; background:#dcfce7; border-radius:7px; padding:4px 7px;">باقی: ${c.qty}</span>
+          <input type="text" inputmode="decimal" id="chRate_${key}" value="${c.ratePending ? '' : (c.rate ?? '')}" placeholder="ریٹ" onfocus="this.select()" style="flex:1; min-width:0; height:34px; box-sizing:border-box; border:2px solid ${c.ratePending ? '#f59e0b' : '#86efac'}; border-radius:9px; text-align:center; font-weight:900; font-size:14px;">
+          <button type="button" onclick="saveChalanRate(${v.variant_id}, ${c.chalanNo})" style="flex:0 0 44px; height:34px; border:none; border-radius:9px; background:#16a34a; color:#fff; font-size:16px; cursor:pointer; box-shadow:0 3px 0 #14532d;">💾</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+function saveChalanRate(variantId, chalanNo){
+  if(!isChalanAdmin()){ alert('صرف ایڈمن ریٹ لگا سکتا ہے'); return; }
+  const {p, v} = findProductAndVariant(variantId);
+  if(!v) return;
+  const c = (v.chalans || []).find(x => x.chalanNo === chalanNo);
+  if(!c) return;
+  const inp = document.getElementById(`chRate_${variantId}_${chalanNo}`);
+  const rate = _chRound(parseFloat(String(inp ? inp.value : '').replace(',', '.')));
+  if(!(rate > 0)){ alert('⚠️ درست ریٹ لکھیں'); if(inp) inp.focus(); return; }
+  const oldRate = c.ratePending ? 0 : (Number(c.rate) || 0);
+  if(oldRate === rate){ if(typeof flashSavedInput === 'function' && inp) flashSavedInput(inp); return; }
+  const qtyForBill = Number(c.origQty != null ? c.origQty : c.qty) || 0;
+  const amountDiff = Math.round(qtyForBill * (rate - oldRate));
+  c.rate = rate;
+  c.ratePending = false;
+  c.rateBy = (AppState.currentUser && AppState.currentUser.name) || '';
+  c.rateTs = Date.now();
+  // ---------- حوالے کا "خرید قیمت" = جس چالان کا ریٹ سب سے تازہ ہو ---------- -->
+  const latest = v.chalans.filter(x => !x.ratePending && Number(x.rate) > 0).sort((a, b) => (b.ts || 0) - (a.ts || 0))[0];
+  if(latest) v.purchase = latest.rate;
+
+  // ---------- 🏭 بیوپاری کا کھاتہ — ریٹ لگتے ہی واجب الادا بڑھے، اور متعلقہ خرید ریکارڈ میں بھی ریٹ درج ہو ---------- -->
+  let suppliersChanged = false;
+  if(c.supplierId != null){
+    const s = suppliersData.find(x => x.supplier_id === c.supplierId);
+    if(s){
+      s.total_payable = (Number(s.total_payable) || 0) + amountDiff;
+      s.purchaseHistory = s.purchaseHistory || [];
+      let po = c.poRef != null ? s.purchaseHistory.find(x => x.poId === c.poRef) : null;
+      if(!po && c.chalanRecRef != null) po = s.purchaseHistory.find(x => x.poId === c.chalanRecRef);
+      if(po){
+        (po.items || []).forEach(it => { if(it.variant_id === variantId && !(Number(it.cost) > 0)) it.cost = rate; else if(it.variant_id === variantId && it.cost === oldRate) it.cost = rate; });
+        po.total = (po.items || []).reduce((sm, it) => sm + (Number(it.qty) || 0) * (Number(it.cost) || 0), 0);
+      } else {
+        const recId = Date.now();
+        s.purchaseHistory.unshift({
+          poId: recId,
+          items: [{variant_id: variantId, name: p ? p.name : '', label: v.label || '', qty: qtyForBill, cost: rate}],
+          total: Math.round(qtyForBill * rate),
+          date: new Date().toISOString().split('T')[0],
+          status: 'received',
+          note: `منشی اندراج — چالان #${chalanNo}`
+        });
+        c.chalanRecRef = recId;
+      }
+      suppliersChanged = true;
+    }
+  } else if(c.poRef != null){
+    const cp = (cashPurchasesData || []).find(x => x.id === c.poRef);
+    if(cp){
+      (cp.items || []).forEach(it => { if(it.variant_id === variantId && (!(Number(it.cost) > 0) || it.cost === oldRate)) it.cost = rate; });
+      cp.total = (cp.items || []).reduce((sm, it) => sm + (Number(it.qty) || 0) * (Number(it.cost) || 0), 0);
+      saveToStorage('cashPurchases', cashPurchasesData);
+    }
+  }
+  persistAllData();
+  pushProductsToCloud();
+  if(suppliersChanged){ try{ pushSuppliersToCloud(); }catch(e){} }
+  try{ pauseCloudPolling(20000); }catch(e){}
+  if(chalanRateModalTab === 'pending' && inp){
+    const card = inp.closest('div[style*="border-radius:12px"]');
+    if(card){ card.style.transition = 'opacity .25s'; card.style.opacity = '0'; }
+    setTimeout(renderChalanRateModal, 260);
+  } else {
+    renderChalanRateModal();
+  }
+  refreshChalanRateFab();
+  try{ if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || ''); }catch(e){}
+}
+setInterval(() => { try{ refreshChalanRateFab(); }catch(e){} }, 6000);
 
 let activeBatchesProductId = null;
 let activeBatchesVariantId = null;
@@ -23159,7 +23741,7 @@ function openPoModal(supplierId){
   activePoCategory = 'all';
   document.getElementById('poModalTitle').textContent = poCashMode ? '💵 نقد خریداری' : `📦 بیوپاری سے خریداری — ${s.name}`;
   const poSaveBtnEl = document.getElementById('poSaveBtn');
-  if(poSaveBtnEl) poSaveBtnEl.textContent = poCashMode ? '✅ تصدیق کریں (سٹاک میں فوراً شامل ہو جائے گا)' : 'محفوظ کریں (بیوپاری کے پینڈنگ آرڈر میں شامل ہو گا)';
+  if(poSaveBtnEl) poSaveBtnEl.textContent = poCashMode ? '✅ تصدیق کریں (سٹاک میں فوراً شامل ہو جائے گا)' : '✅ محفوظ کریں (سٹاک میں فوراً شامل ہو جائے گا)';
   document.getElementById('poSearchInput').value = '';
   document.getElementById('poSearchResults').classList.remove('show');
   renderPoCategoryRail();
@@ -23335,7 +23917,7 @@ function addToPoCartGrid(variantId){
   if(!v) return;
   const existing = poCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, cost: v.purchase});
+  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, cost: (AppState.currentRole === 'admin' ? v.purchase : null)});
   renderPoBrowseList();
   renderPoCart();
 }
@@ -23429,7 +24011,7 @@ function addToPoCart(variantId){
 
   const existing = poCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, cost: v.purchase});
+  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, cost: (AppState.currentRole === 'admin' ? v.purchase : null)});
 
   document.getElementById('poSearchInput').value = '';
   document.getElementById('poSearchResults').classList.remove('show');
@@ -23475,7 +24057,7 @@ function addSelectedLowStockToPo(){
     if(!v) return;
     const existing = poCart.find(i => i.variant_id === variantId);
     if(existing) existing.qty += qty;
-    else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty, cost: v.purchase});
+    else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty, cost: (AppState.currentRole === 'admin' ? v.purchase : null)});
     addedCount++;
   });
   if(addedCount === 0){
@@ -23517,8 +24099,9 @@ function renderPoCart(){
 
   let total = 0;
   body.innerHTML = poCart.map((i, idx) => {
-    const lineTotal = i.qty * i.cost;
+    const lineTotal = i.qty * (Number(i.cost) || 0);
     total += lineTotal;
+    const _poAdmin = AppState.currentRole === 'admin'; // 🧾 منشی کو ریٹ/رقم نظر نہیں آتی — ایڈمن بعد میں چالان پر لگائے گا
     // ---------- Item کے نام سے ویریئنٹ الگ کریں — باقی پوری ایپ کی طرح یہاں بھی الگ کالم میں ----------
     let baseName = i.name;
     if(i.label && baseName.endsWith(i.label)){
@@ -23530,13 +24113,13 @@ function renderPoCart(){
         <td>${baseName}</td>
         <td><span style="display:inline-block; font-size:11px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:4px 6px; text-align:center;">${i.label || '—'}</span></td>
         <td><input type="number" min="1" value="${i.qty}" style="width:55px;" onfocus="this.select()" onchange="updatePoQty(${i.variant_id}, parseInt(this.value)||1)"></td>
-        <td><input type="number" min="0" value="${i.cost}" style="width:70px;" onfocus="this.select()" onchange="updatePoCost(${i.variant_id}, parseFloat(this.value)||0)"></td>
-        <td>Rs. ${lineTotal.toLocaleString()}</td>
+        <td>${_poAdmin ? `<input type="number" min="0" value="${i.cost ?? ''}" placeholder="ریٹ باقی" style="width:70px;" onfocus="this.select()" onchange="updatePoCost(${i.variant_id}, parseFloat(this.value)||0)">` : '<span style="font-size:11px; color:#b45309; font-weight:800;">⏳ ایڈمن</span>'}</td>
+        <td>${_poAdmin ? ('Rs. ' + lineTotal.toLocaleString()) : '—'}</td>
         <td><button class="removeBtn" onclick="removePoItem(${i.variant_id})">✖</button></td>
       </tr>
     `;
   }).join('');
-  document.getElementById('poGrandTotal').textContent = 'Rs. ' + total.toLocaleString();
+  document.getElementById('poGrandTotal').textContent = AppState.currentRole === 'admin' ? ('Rs. ' + total.toLocaleString()) : '⏳ ریٹ ایڈمن لگائے گا';
 }
 
 // ---------- کارٹ آئٹمز کو ترتیب دیں — مقدار، نام، یا ویریئنٹ کے حساب سے گروپ بنا کر —
@@ -23585,15 +24168,18 @@ function savePurchaseOrder(){
   if(poCashMode){
     if(!confirm('نقد خریداری کی تصدیق کریں؟ سٹاک فوراً بڑھ جائے گا۔')) return;
     let cashTotal = 0;
+    const cashId = Date.now();
     poCart.forEach(item => {
-      cashTotal += item.qty * item.cost;
+      cashTotal += item.qty * (Number(item.cost) || 0);
       productsData.forEach(p => {
         const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-        if(v){ addPurchaseChalan(v, item.qty, item.cost, 'نقد خریداری'); }
+        if(v){ addPurchaseChalan(v, item.qty, item.cost, 'نقد خریداری', {poRef: cashId}); }
       });
     });
     cashPurchasesData = cashPurchasesData || [];
     cashPurchasesData.unshift({
+      id: cashId,
+      by: (AppState.currentUser && AppState.currentUser.name) || '',
       items: JSON.parse(JSON.stringify(poCart)),
       total: cashTotal,
       date: new Date().toISOString().split('T')[0]
@@ -23605,7 +24191,9 @@ function savePurchaseOrder(){
     renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput') ? document.getElementById('stockAdjSearchInput').value : '');
     renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
     renderBillingProductGrid();
-    alert('✅ نقد خریداری محفوظ ہو گئی، سٹاک اپڈیٹ ہو گیا۔ کل رقم: Rs. ' + cashTotal.toLocaleString());
+    alert(AppState.currentRole === 'admin'
+      ? ('✅ نقد خریداری محفوظ ہو گئی، سٹاک اپڈیٹ ہو گیا۔ کل رقم: Rs. ' + cashTotal.toLocaleString())
+      : '✅ نقد خریداری محفوظ — نیا چالان بن گیا، ریٹ ایڈمن لگائے گا۔');
     return;
   }
 
@@ -23613,7 +24201,15 @@ function savePurchaseOrder(){
   if(!s) return;
 
   let total = 0;
-  poCart.forEach(item => { total += item.qty * item.cost; });
+  poCart.forEach(item => { total += item.qty * (Number(item.cost) || 0); });
+  // ---------- 🧾 صدام کی ہدایت (26 ستمبر): بیوپاری کا مال بھی نقد کی طرح فوراً سٹاک میں — منشی اسی وقت آرڈر
+  // میں دے سکے۔ ہر آئٹم کا الگ چالان (بیوپاری کے نام سے)، ریٹ نہ ہو تو "ریٹ باقی" — ایڈمن بعد میں لگائے گا
+  // اور تب ہی بیوپاری کا کھاتہ اس رقم سے بڑھے گا ---------- -->
+  const newPoId = Date.now();
+  poCart.forEach(item => {
+    const v = findVariantByVariantId(item.variant_id);
+    if(v) addPurchaseChalan(v, item.qty, item.cost, 'بیوپاری خریداری', {supplierId: s.supplier_id, supplierName: s.name, poRef: newPoId});
+  });
 
   // ---------- اہم: صرف آرڈر بنے، ابھی سٹاک میں کچھ شامل نہیں ہوتا ----------
   // مال حقیقت میں تو ابھی ملا ہی نہیں — سٹاک صرف "Receive Shipment" مکمل ہونے پر بڑھے گا۔
@@ -23621,19 +24217,26 @@ function savePurchaseOrder(){
   s.total_payable += total; // آرڈر کی مالیت طے ہو گئی، ادائیگی کا وعدہ بن گیا
   s.purchaseHistory = s.purchaseHistory || [];
   s.purchaseHistory.unshift({
+    poId: newPoId, // 🧾 چالان سے جوڑنے کے لیے
+    by: (AppState.currentUser && AppState.currentUser.name) || '',
     items: JSON.parse(JSON.stringify(poCart)),
     total,
     date: new Date().toISOString().split('T')[0],
-    status: 'pending_receipt' // 'pending_receipt' | 'received'
+    status: 'received', // 🧾 مال فوراً سٹاک میں — الگ "وصولی" کی ضرورت نہیں
+    receivedDate: new Date().toISOString().split('T')[0]
   });
 
   persistAllData();
   pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): نیا پرچیز آرڈر بننے پر واجب الادا فوراً کلاؤڈ میں ----------
+  pushProductsToCloud(); // 🧾 نیا سٹاک/چالان فوراً کلاؤڈ میں
+  try{ pauseCloudPolling(20000); }catch(e){}
+  try{ renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput') ? document.getElementById('stockAdjSearchInput').value : ''); }catch(e){}
   closePoModal();
   renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
   renderBillingProductGrid(); // نیا اسٹاک بلنگ گرڈ میں بھی فوراً نظر آئے
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   // ---------- بل/ایڈوانس آرڈر کی طرح — Save کے فوراً بعد پرنٹ ایبل پریویو دکھائیں (خالی alert کی بجائے) ----------
+  if(AppState.currentRole !== 'admin'){ alert('✅ بیوپاری کا مال سٹاک میں شامل — نیا چالان بن گیا، ریٹ ایڈمن لگائے گا۔'); return; }
   openPoPreview(s.supplier_id, 0);
 }
 
@@ -24181,6 +24784,7 @@ async function saveAdvanceOrder(){
 let otCustomer = null;      // {customer_id, name, area} — منتخب شدہ کسٹمر
 let otQtyMap = {};          // {variant_id: qty}
 let otCheckedMap = {};      // {variant_id: true/false}
+let otChalanMap = {};       // 🧾 {variant_id: {chalanNo: qty}} — منشی کا چنا ہوا چالان
 let otFlatCache = [];       // موجودہ سکرین کے لیے آئٹمز کی فہرست (ایک بار سورٹ کر کے محفوظ)
 let otPage = 0;             // موجودہ صفحہ نمبر (0 سے شروع)
 let otReviewItems = [];     // ریویو سکرین کے لیے منتخب شدہ آئٹمز
@@ -24202,8 +24806,30 @@ function otAvailableStock(variantId){
   const here = Number(otQtyMap[variantId]) || 0;
   return (Number(v.stock) || 0) - (Number(v.reserved) || 0) - here;
 }
+
+// ---------- 🧾 صدام کی ہدایت (26 ستمبر): آرڈر ٹیکنگ میں ہر سبزی کے ساتھ چالان بٹن — منشی خود چنے کہ کس چالان
+// سے مال جائے (FIFO نہیں)۔ ریٹ یہاں کبھی نظر نہیں آتا ---------- -->
+function otChalanChipHtml(variantId){
+  const qty = Number(otQtyMap[variantId]) || 0;
+  return chalanChipHtml(variantId, qty, otChalanMap[variantId] || null, `openOtChalanPicker(${variantId})`);
+}
+function refreshOtChalanChip(variantId){
+  const qty = Number(otQtyMap[variantId]) || 0;
+  const alloc = otChalanMap[variantId];
+  if(alloc && (qty <= 0 || chalanAllocSum(alloc) > qty)) delete otChalanMap[variantId];
+  document.querySelectorAll(`[data-ot-chalan-for="${variantId}"]`).forEach(el => { el.innerHTML = otChalanChipHtml(variantId); });
+}
+function openOtChalanPicker(variantId){
+  const qty = Number(otQtyMap[variantId]) || 0;
+  if(qty <= 0){ alert('پہلے مقدار لکھیں'); return; }
+  openChalanPicker(variantId, qty, otChalanMap[variantId] || null, (alloc) => {
+    if(alloc) otChalanMap[variantId] = alloc; else delete otChalanMap[variantId];
+    refreshOtChalanChip(variantId);
+  }, {excludeOrderId: otSavedOrderId});
+}
 // ---------- ہر جگہ (کارڈ بیج + جدول کالم) جہاں یہ نمبر دکھایا جا رہا ہو، ایک ہی جگہ سے اپڈیٹ کریں ---------- -->
 function updateOtStockCell(variantId){
+  try{ refreshOtChalanChip(variantId); }catch(e){}
   // ---------- 🔗 FM25SEPFR1137AM: جدول کا سٹاک خانہ = اصل سٹاک − یہاں لکھی مقدار (بالکل سٹاک مینجمنٹ والا عدد، مقدار لکھتے ہی گھٹتا ہے) ---------- -->
   try{
     let liveStock = null;
@@ -24239,6 +24865,13 @@ function openOtAddStockModal(){
   if(nameEl) nameEl.value = '';
   if(packEl) packEl.value = '';
   if(searchEl) searchEl.value = '';
+  const srcSel = document.getElementById('otAddStockSource');
+  if(srcSel){
+    const prev = srcSel.value || 'cash';
+    srcSel.innerHTML = `<option value="cash">💵 نقد خریداری</option>` +
+      (suppliersData || []).slice().sort((a,b) => a.name.localeCompare(b.name)).map(s => `<option value="${s.supplier_id}">🏭 ${s.name}</option>`).join('');
+    srcSel.value = Array.from(srcSel.options).some(o => o.value === prev) ? prev : 'cash';
+  }
   renderOtAddStockList('');
   document.getElementById('otAddStockModal').classList.add('show');
 }
@@ -24423,7 +25056,11 @@ function otAddStockCommit(productId, variantId){
   const p = productsData.find(x => x.product_id === productId);
   const v = p?.variants.find(x => x.variant_id === variantId);
   if(!v) return;
-  v.stock = (Number(v.stock) || 0) + qty;
+  // ---------- 🧾 صدام کی ہدایت (26 ستمبر): ہر اندراج = نیا الگ چالان، ریٹ خالی (ایڈمن لگائے گا) ---------- -->
+  const srcVal = document.getElementById('otAddStockSource')?.value || 'cash';
+  const srcSupplier = srcVal !== 'cash' ? suppliersData.find(s => String(s.supplier_id) === srcVal) : null;
+  const newCh = addPurchaseChalan(v, qty, null, srcSupplier ? 'بیوپاری (منشی اندراج)' : 'نقد خریداری',
+    srcSupplier ? {supplierId: srcSupplier.supplier_id, supplierName: srcSupplier.name} : {});
   // ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): ہر اندراج اپنے وقت کے ساتھ الگ لاگ میں محفوظ —
   // اگر ایک ہی سبزی دن میں دو دفعہ فیڈ ہو تو دونوں الگ الگ اندراج کے طور پر رہیں گی، مدغم نہیں ہوں گی ---------- -->
   munshiStockLogData.push({
@@ -24435,6 +25072,8 @@ function otAddStockCommit(productId, variantId){
     name: p.name,
     label: v.label || '',
     qty: qty,
+    chalanNo: newCh ? newCh.chalanNo : null,
+    source: srcSupplier ? srcSupplier.name : 'نقد',
     by: (AppState.currentUser && AppState.currentUser.name) || ''
   });
   persistAllData();
@@ -24490,6 +25129,7 @@ function renderOrderTakingScreen(){
   otCustomer = null;
   otQtyMap = {};
   otCheckedMap = {};
+  otChalanMap = {};
   otPage = 0;
   otReviewItems = [];
   otSavedOrderId = null;
@@ -24617,6 +25257,7 @@ function selectOtCustomer(customerId){
   otCustomer = {customer_id: c.customer_id, name: c.name, area: c.area || '', phone: c.phone || ''};
   otQtyMap = {};
   otCheckedMap = {};
+  otChalanMap = {};
   otPage = 0;
   otSavedOrderId = null; // ---------- نیا کسٹمر — پرانا سیو شدہ آرڈر آئی ڈی بھول جائیں ----------
   try{ otSelCapsuleClear(); }catch(e){}
@@ -25004,6 +25645,7 @@ function renderOtItemsTable(wrap){
             <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, 1)" style="width:26px;height:26px;border:none;border-radius:6px;background:#dcfce7;color:#15803d;font-size:13px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #86efac;">+</button>
             <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, -1)" style="width:26px;height:26px;border:none;border-radius:6px;background:#fee2e2;color:#b91c1c;font-size:13px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #fca5a5;">−</button>
           </div>
+          <div data-ot-chalan-for="${v.variant_id}">${otChalanChipHtml(v.variant_id)}</div>
         </td>
       </tr>`;
   }).join('');
@@ -25416,7 +26058,7 @@ async function openOtReview(){
     .filter(id => otCheckedMap[id] && (otQtyMap[id] || 0) > 0)
     .map(id => {
       const v = otFlatCache.find(f => f.variant_id === Number(id));
-      return {variant_id: Number(id), name: v ? v.name : '', label: v ? (v.label || '') : '', qty: otQtyMap[id], unitPrice: 0};
+      return {variant_id: Number(id), name: v ? v.name : '', label: v ? (v.label || '') : '', qty: otQtyMap[id], unitPrice: 0, chalanAlloc: otChalanMap[id] ? JSON.parse(JSON.stringify(otChalanMap[id])) : null};
     });
 
   if(items.length === 0){ alert('کم از کم ایک چیز کو ٹک کر کے تعداد لگائیں'); return; }
@@ -25434,7 +26076,7 @@ async function openOtReview(){
   // آرڈر مکمل دباتے ہی یہیں خودکار محفوظ ہو جاتا ہے اور اسی وقت ایڈمن کی سکرین پر پہنچ جاتا ہے۔
   // اگر بندہ ◀ ترمیم کریں سے واپس جا کر تعداد بدلے اور دوبارہ آرڈر مکمل دبائے تو نئی انٹری نہیں بنتی،
   // وہی پہلے سے محفوظ آرڈر اپڈیٹ ہو جاتا ہے (otSavedOrderId کی مدد سے) ----------
-  const itemsForSave = items.map(i => ({variant_id: i.variant_id, name: i.name, label: i.label, qty: i.qty, unitPrice: 0}));
+  const itemsForSave = items.map(i => ({variant_id: i.variant_id, name: i.name, label: i.label, qty: i.qty, unitPrice: 0, chalanAlloc: i.chalanAlloc || null}));
   // ---------- 📦 صدام کی ہدایت (FM10SEPTH): آرڈر محفوظ/اپڈیٹ ہوتے ہی سٹاک "بک" کریں — پہلے اگر یہی آرڈر
   // پہلے سے محفوظ تھا تو اس کی پرانی مقدار واپس کریں، پھر نئی مقدار بک کریں (تاکہ ترمیم پر دگنی کٹوتی نہ ہو) ---------- -->
   if(otSavedOrderId){
@@ -25522,6 +26164,7 @@ function startNextOtCustomer(){
   otCustomer = null;
   otQtyMap = {};
   otCheckedMap = {};
+  otChalanMap = {};
   otReviewItems = [];
   otSavedOrderId = null;
   otPage = 0;
@@ -25806,10 +26449,12 @@ function editOtDraftOrder(orderId){
   selectOtCustomer(order.customer_id);
   otQtyMap = {};
   otCheckedMap = {};
+  otChalanMap = {};
   order.items.forEach(i => {
     if(i.variant_id != null){
       otQtyMap[i.variant_id] = i.qty;
       otCheckedMap[i.variant_id] = true;
+      if(i.chalanAlloc) otChalanMap[i.variant_id] = JSON.parse(JSON.stringify(i.chalanAlloc));
     }
   });
   otSavedOrderId = order.id;
@@ -27043,7 +27688,7 @@ function fulfillAdvanceOrder(orderId){
 
   Billing.cart = order.items
     .filter(i => i.variant_id !== null) // ---------- کسٹم/رف آئٹمز جو انوینٹری میں نہیں، انہیں بل میں شامل نہیں کیا جا سکتا ----------
-    .map(i => ({variant_id: i.variant_id, name: i.name, qty: i.qty, unitPrice: i.unitPrice}));
+    .map(i => ({variant_id: i.variant_id, name: i.name, qty: i.qty, unitPrice: i.unitPrice, chalanAlloc: i.chalanAlloc || null}));
 
   const skippedCustom = order.items.filter(i => i.variant_id === null);
 
@@ -28524,8 +29169,9 @@ function renderReceiveShipmentCart(){
     list.innerHTML = `<div class="profileEmpty">No items in this shipment</div>`;
   } else {
     list.innerHTML = receiveShipmentCart.map((item, idx) => {
-      const lineTotal = item.qty * item.cost;
+      const lineTotal = item.qty * (Number(item.cost) || 0);
       total += lineTotal;
+      const _rsAdmin = AppState.currentRole === 'admin';
       // ---------- Item کے نام سے ویریئنٹ الگ کریں — باقی ایپ کی طرح یہاں بھی "چینی Kg" کی بجائے
       // نام اور Variant الگ الگ خانوں میں نظر آئیں ----------
       const _split_rs = splitItemNamePacking(item.name, item.label);
@@ -28537,13 +29183,13 @@ function renderReceiveShipmentCart(){
           <span class="riName">${baseName}</span>
           <span class="riVariant">${rsItemPacking || '—'}</span>
           <input type="number" class="riQty" min="0" value="${item.qty}" onfocus="this.select()" onchange="updateReceiveQty(${idx}, parseInt(this.value)||0)">
-          <input type="number" class="riRate" min="0" value="${item.cost}" onfocus="this.select()" onchange="updateReceiveCost(${idx}, parseFloat(this.value)||0)">
-          <span class="riLine">Rs. ${lineTotal.toLocaleString()}</span>
+          ${_rsAdmin ? `<input type="number" class="riRate" min="0" value="${item.cost ?? ''}" placeholder="ریٹ باقی" onfocus="this.select()" onchange="updateReceiveCost(${idx}, parseFloat(this.value)||0)">` : '<span class="riRate" style="font-size:11px; color:#b45309; font-weight:800;">⏳ ایڈمن</span>'}
+          <span class="riLine">${_rsAdmin ? ('Rs. ' + lineTotal.toLocaleString()) : '—'}</span>
           <button class="riRemove" onclick="removeReceiveItem(${idx})">✖</button>
         </div>`;
     }).join('');
   }
-  document.getElementById('receiveShipmentTotal').textContent = 'Rs. ' + total.toLocaleString();
+  document.getElementById('receiveShipmentTotal').textContent = AppState.currentRole === 'admin' ? ('Rs. ' + total.toLocaleString()) : '⏳ ریٹ ایڈمن لگائے گا';
 }
 function updateReceiveQty(idx, qty){
   // ---------- مقدار 0 کر دیں تو مطلب یہ آئٹم شپمنٹ میں آیا ہی نہیں — خودکار ہٹا دیں ----------
@@ -28587,7 +29233,7 @@ function addReceiveShipmentItem(variantId){
   if(!v) return;
   const existing = receiveShipmentCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else receiveShipmentCart.push({variant_id: variantId, name: v.name, qty: 1, cost: v.purchase});
+  else receiveShipmentCart.push({variant_id: variantId, name: v.name, qty: 1, cost: (AppState.currentRole === 'admin' ? v.purchase : null)});
 
   document.getElementById('receiveShipmentAddInput').value = '';
   document.getElementById('receiveShipmentSearchResults').classList.remove('show');
@@ -28644,14 +29290,15 @@ function confirmShipmentReceipt(){
   }
   if(!confirm('Confirm that you have physically received this shipment? Stock will be updated.')) return;
 
-  const newTotal = receiveShipmentCart.reduce((sum, i) => sum + i.qty * i.cost, 0);
+  const newTotal = receiveShipmentCart.reduce((sum, i) => sum + i.qty * (Number(i.cost) || 0), 0);
   const oldTotal = po.total;
 
   // ---------- سٹاک میں اضافہ کریں (اصل موصول شدہ مقدار کے مطابق، آرڈر کی مقدار نہیں) ----------
+  if(!po.poId) po.poId = Date.now();
   receiveShipmentCart.forEach(item => {
     productsData.forEach(p => {
       const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ addPurchaseChalan(v, item.qty, item.cost, 'بیوپاری وصولی'); } // 🆕 صدام کی ہدایت: ہر وصولی کا ریٹ الگ چالان — TODO: DB میں purchase_batches ٹیبل میں نئی قطار
+      if(v){ addPurchaseChalan(v, item.qty, item.cost, 'بیوپاری وصولی', {supplierId: s.supplier_id, supplierName: s.name, poRef: po.poId}); } // 🆕 صدام کی ہدایت: ہر وصولی کا ریٹ الگ چالان — TODO: DB میں purchase_batches ٹیبل میں نئی قطار
     });
   });
 
@@ -28675,6 +29322,7 @@ function confirmShipmentReceipt(){
   renderBillingProductGrid();
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   // ---------- بل/ایڈوانس آرڈر کی طرح — Confirm کے فوراً بعد پرنٹ ایبل "Goods Received" پریویو دکھائیں ----------
+  if(AppState.currentRole !== 'admin'){ alert('✅ مال وصول — نیا چالان بن گیا، ریٹ ایڈمن لگائے گا۔'); return; }
   openPoPreview(receivedSupplierId, receivedPoIdx);
 }
 
@@ -28810,7 +29458,7 @@ function confirmBatchReturn(invoiceId){
     // اسٹاک میں Item واپس شامل کریں
     productsData.forEach(p => {
       const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v) v.stock += qty; // TODO: DB میں product_variants.current_stock += qty
+      if(v) restoreVariantStock(v, qty, item.chalanAlloc); // TODO: DB میں product_variants.current_stock += qty
     });
 
     item.returned = true;
@@ -32667,7 +33315,7 @@ function adminVoidBill(invoiceId){
   inv.items.forEach(item => {
     productsData.forEach(p => {
       const v = p.variants.find(x => x.variant_id === item.variant_id);
-      if(v) v.stock += item.qty; // TODO: DB میں product_variants.current_stock += qty
+      if(v) restoreVariantStock(v, item.qty, item.chalanAlloc); // TODO: DB میں product_variants.current_stock += qty
     });
   });
 
@@ -37972,7 +38620,8 @@ async function renderReportToCanvas(){
   if(!canvas || !currentReportType) return;
   // ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): تاریخ فلٹر بار صرف "منشی کا شامل کردہ سٹاک" رپورٹ پر نظر آئے ---------- -->
   const mlfWrap = document.getElementById('munshiLogFilterWrap');
-  if(mlfWrap) mlfWrap.style.display = (currentReportType === 'munshistocklog') ? 'block' : 'none';
+  if(mlfWrap) mlfWrap.style.display = (currentReportType === 'munshistocklog' || currentReportType === 'purchasechalan') ? 'block' : 'none';
+  if(currentReportType === 'purchasechalan'){ await renderPurchaseChalanReportToCanvas(); return; } // 🧾 خرید اور چالان رپورٹ
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'stockprofit'){ await renderDailyStockProfitReportToCanvas(); return; } // ---------- صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ — اپنا الگ لے آؤٹ ---------- -->
@@ -38747,7 +39396,10 @@ async function renderDailyStockProfitReportToCanvas(){
     // ---------- زیادہ درست منافع: ہر بل کی اپنی unitPrice سے (بجائے صرف موجودہ ریٹ کے) ---------- -->
     let realProfit = 0;
     todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
-      if(it.variant_id === v.variant_id) realProfit += (it.qty || 0) * ((it.unitPrice || 0) - cost);
+      if(it.variant_id === v.variant_id){
+        const itCost = it.chalanAlloc ? (getChalanAllocUnitCost(v, it.chalanAlloc, v.purchase || 0) + (v.labor || 0)) : cost; // 🧾 جس چالان سے بکا اسی کا ریٹ
+        realProfit += (it.qty || 0) * ((it.unitPrice || 0) - itCost);
+      }
     }));
     totalProfitToday += realProfit;
     rows.push({serial: p.serial_no ?? '?', name: p.name, label: v.label || '', opening, added, total, sold, remaining, cost, salePrice, profitRate, profit: realProfit});
@@ -39344,6 +39996,302 @@ function openMunshiStockLogReport(){
   // ---------- کھلتے ہی خاموشی سے کلاؤڈ سے تازہ ترین لاگ منگوائیں — تاکہ دوسرے فون سے فیڈ کیا گیا سٹاک بھی نظر آئے ---------- -->
   fetchMunshiStockLogFromCloud(true).then(() => setTimeout(() => renderReportToCanvas(), 100));
   setTimeout(() => renderReportToCanvas(), 100);
+}
+
+
+/* =====================================================================
+   🧾 صدام کی ہدایت (26 ستمبر): خرید اور چالان رپورٹ — ایک ہی صفحے پر
+   (1) 💵 نقد خرید  (2) 🏭 بیوپاری خرید (ہر بیوپاری الگ)  (3) 🧾 چالان وار: آمد، بکا، باقی، ریٹ، منافع
+   ہمیشہ اردو سائیڈ سے (دائیں سے بائیں)، نستعلیق میں۔ تاریخ فلٹر وہی جو منشی سٹاک رپورٹ میں ہے
+   ===================================================================== */
+function openPurchaseChalanReport(){
+  if(AppState.currentRole !== 'admin'){ alert('یہ رپورٹ صرف ایڈمن دیکھ سکتا ہے (اس میں ریٹ ہیں)'); return; }
+  currentReportType = 'purchasechalan';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = '🧾 خرید اور چالان رپورٹ';
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  munshiLogFilterState = { key: 'today', customFrom: '', customTo: '' };
+  syncMunshiLogFilterButtons();
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+
+function getPurchaseChalanReportData(){
+  const range = munshiLogFilterState.key === 'all' ? null : getDateRangeForKey(munshiLogFilterState.key, munshiLogFilterState.customFrom, munshiLogFilterState.customTo);
+  const inRange = (ts) => !range || isDateInRange(ts, range);
+  const NON_PURCHASE = ['پرانا سٹاک', 'دستی ترمیم', 'واپسی'];
+  const cash = [], supplierMap = {};
+  const chalanRows = [];
+
+  // ---------- اس دورانیے کے بلوں سے ہر چالان کی فروخت اور منافع ---------- -->
+  const soldMap = {}; // key: vid_chalanNo → {qty, revenue}
+  (invoicesData || []).forEach(inv => {
+    if(!inv || inv.status === 'voided' || !inv.created_at || !inRange(inv.created_at)) return;
+    (inv.items || []).forEach(it => {
+      if(!it || !it.chalanAlloc) return;
+      Object.keys(it.chalanAlloc).forEach(no => {
+        const q = Number(it.chalanAlloc[no]) || 0;
+        const k = it.variant_id + '_' + no;
+        soldMap[k] = soldMap[k] || {qty:0, revenue:0};
+        soldMap[k].qty += q;
+        soldMap[k].revenue += q * (Number(it.unitPrice) || 0);
+      });
+    });
+  });
+
+  productsData.slice().sort((a,b) => (a.serial_no ?? 1e9) - (b.serial_no ?? 1e9)).forEach(p => (p.variants || []).forEach(v => {
+    ensureVariantChalans(v).forEach(c => {
+      const base = {serial: p.serial_no, name: p.name, label: v.label || '', chalanNo: c.chalanNo, c, v};
+      const pq = Number(c.origQty != null ? c.origQty : c.qty) || 0;
+      if(!NON_PURCHASE.includes(c.source) && inRange(c.ts)){
+        const row = {...base, qty: pq, rate: c.ratePending ? null : Number(c.rate) || 0, amount: c.ratePending ? null : Math.round(pq * (Number(c.rate) || 0))};
+        if(c.supplierId != null){
+          const key = String(c.supplierId);
+          supplierMap[key] = supplierMap[key] || {name: c.supplierName || (suppliersData.find(s => s.supplier_id === c.supplierId)?.name) || 'بیوپاری', rows: []};
+          supplierMap[key].rows.push(row);
+        } else {
+          cash.push(row);
+        }
+      }
+      const sold = soldMap[v.variant_id + '_' + c.chalanNo];
+      if((Number(c.qty) || 0) > 0 || inRange(c.ts) || sold){
+        let profit = null;
+        if(sold && !c.ratePending){
+          profit = Math.round(sold.revenue - sold.qty * ((Number(c.rate) || 0) + (Number(v.labor) || 0)));
+        }
+        chalanRows.push({...base, source: chalanSourceLabel(c).replace(/^\S+\s/, ''), inQty: pq, soldQty: sold ? Math.round(sold.qty * 100) / 100 : 0, left: Number(c.qty) || 0,
+          rate: c.ratePending ? null : Number(c.rate) || 0, profit});
+      }
+    });
+  }));
+  const suppliers = Object.values(supplierMap).sort((a,b) => a.name.localeCompare(b.name));
+  return {cash, suppliers, chalanRows};
+}
+
+async function renderPurchaseChalanReportToCanvas(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  const useA4 = AppState.settings.reportPrintStyle === 'a4';
+  const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+  const ctx = canvas.getContext('2d');
+  const data = getPurchaseChalanReportData();
+
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
+  // ---------- 🔒 صدام کی ہدایت: رپورٹ ہمیشہ اردو نستعلیق میں، دائیں سے بائیں ---------- -->
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
+  const fontFam = selectedFontPreset.family;
+  const numberPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportNumberFontId) || FONT_PRESETS.find(f => f.id === 'tahoma') || selectedFontPreset;
+  const numFontFam = numberPreset.family;
+  try{ await document.fonts.load(`13px ${numFontFam}`); }catch(e){}
+  try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
+
+  const base = useA4 ? 2.1 : 1.5;
+  const fsTitle = Math.round(15 * base * fontScale);
+  const fsSubtitle = Math.round(12 * base * fontScale);
+  const fsSection = Math.round(11 * base * fontScale);
+  const fsSmall = Math.round(9 * base * fontScale);
+  const fsHeader = Math.round(8.5 * base * fontScale);
+  const fsItem = Math.round(9 * base * fontScale);
+  const margin = useA4 ? 40 : 6;
+  const tableLeft = margin, tableRight = pxWidth - margin;
+  const totalW = tableRight - tableLeft;
+  const rowH = Math.round(fsItem * 2.7 * rowScaleSetting);
+  const headerRowH = Math.round(fsHeader * 2.8 * rowScaleSetting);
+  const sectionH = Math.round(fsSection * 2.6);
+  const gapH = Math.round(fsItem * 1.2);
+  const rc = getReceiptColor();
+  const fmt = (n) => (n === null || n === undefined) ? '⏳' : Number(n).toLocaleString();
+
+  // ---------- کالم دائیں سے بائیں (پہلا کالم سب سے دائیں) ---------- -->
+  const layoutCols = (defs) => {
+    const fixed = defs.filter(d => d.frac).reduce((s,d) => s + Math.round(totalW * d.frac), 0);
+    let x = tableRight;
+    return defs.map(d => {
+      const w = d.frac ? Math.round(totalW * d.frac) : (totalW - fixed);
+      x -= w;
+      return {...d, width: w, x};
+    });
+  };
+  const purchaseCols = layoutCols([
+    {key:'n', label:'#', frac:0.07, num:true},
+    {key:'name', label:'سبزی / پیکنگ'},
+    {key:'chalan', label:'چالان', frac:0.1, num:true},
+    {key:'qty', label:'مقدار', frac:0.12, num:true},
+    {key:'rate', label:'ریٹ', frac:0.15, num:true},
+    {key:'amount', label:'رقم', frac:0.19, num:true},
+  ]);
+  const chalanCols = layoutCols([
+    {key:'name', label:'سبزی / چالان'},
+    {key:'inQty', label:'آمد', frac:0.1, num:true},
+    {key:'soldQty', label:'بکا', frac:0.1, num:true},
+    {key:'left', label:'باقی', frac:0.1, num:true},
+    {key:'rate', label:'ریٹ', frac:0.13, num:true},
+    {key:'profit', label:'منافع', frac:0.16, num:true},
+  ]);
+
+  // ---------- خاکہ (blocks) — پہلے اونچائی ناپیں، پھر بنائیں ---------- -->
+  const blocks = [];
+  const pushPurchaseTable = (rows) => {
+    blocks.push({t:'head', cols: purchaseCols});
+    if(rows.length === 0){ blocks.push({t:'empty', text:'کوئی خرید نہیں'}); return 0; }
+    let tq = 0, ta = 0, pendingAny = false;
+    rows.forEach((r, i) => {
+      blocks.push({t:'row', cols: purchaseCols, idx:i, cells:{n: i+1, name: r.name, sub: r.label, serial: r.serial, chalan: '#' + r.chalanNo, qty: r.qty, rate: fmt(r.rate), amount: fmt(r.amount)}});
+      tq += r.qty; if(r.amount === null) pendingAny = true; else ta += r.amount;
+    });
+    blocks.push({t:'total', cols: purchaseCols, cells:{name:'کل', qty: Math.round(tq*100)/100, amount: pendingAny ? (ta > 0 ? ta.toLocaleString() + ' ⏳' : '⏳ باقی') : ta.toLocaleString()}});
+    return ta;
+  };
+  blocks.push({t:'section', text:'💵 نقد خرید', color:'#0f766e'});
+  const cashTotal = pushPurchaseTable(data.cash);
+  blocks.push({t:'gap'});
+  blocks.push({t:'section', text:'🏭 بیوپاری خرید', color:'#1e3a8a'});
+  let supTotal = 0;
+  if(data.suppliers.length === 0){ blocks.push({t:'head', cols: purchaseCols}); blocks.push({t:'empty', text:'کوئی خرید نہیں'}); }
+  data.suppliers.forEach(s => {
+    blocks.push({t:'sub', text:'🏭 ' + s.name});
+    supTotal += pushPurchaseTable(s.rows);
+  });
+  blocks.push({t:'gap'});
+  blocks.push({t:'summary', text:`نقد: ${cashTotal.toLocaleString()}   |   بیوپاری: ${supTotal.toLocaleString()}   |   کل خرید: ${(cashTotal + supTotal).toLocaleString()}`});
+  blocks.push({t:'gap'});
+  blocks.push({t:'section', text:'🧾 چالان وار — آمد، فروخت، باقی، منافع', color:'#134e2c'});
+  blocks.push({t:'head', cols: chalanCols});
+  let profitTotal = 0;
+  if(data.chalanRows.length === 0) blocks.push({t:'empty', text:'کوئی چالان نہیں'});
+  data.chalanRows.forEach((r, i) => {
+    if(r.profit) profitTotal += r.profit;
+    blocks.push({t:'row', cols: chalanCols, idx:i, cells:{name: r.name, sub: `#${r.chalanNo} — ${r.source}${r.label ? ' — ' + r.label : ''}`, serial: r.serial, inQty: r.inQty, soldQty: r.soldQty, left: r.left, rate: fmt(r.rate), profit: r.soldQty ? fmt(r.profit) : '—'}, profitColor: r.profit});
+  });
+  if(data.chalanRows.length) blocks.push({t:'total', cols: chalanCols, cells:{name:'کل منافع', profit: profitTotal.toLocaleString()}});
+
+  const hOf = (b) => b.t === 'section' ? sectionH : b.t === 'sub' ? Math.round(fsItem * 2.3) : b.t === 'head' ? headerRowH : b.t === 'gap' ? gapH : b.t === 'summary' ? Math.round(fsSection * 2.4) : rowH;
+
+  // ---------- سرخی ---------- -->
+  const fitFont = (text, maxW, px, weight, fam) => {
+    const w = weight ? weight + ' ' : '';
+    const f = fam || fontFam;
+    ctx.font = `${w}${px}px ${f}`;
+    let g = 0;
+    while(ctx.measureText(String(text)).width > maxW && px > 5 && g < 60){ px -= 0.5; ctx.font = `${w}${px}px ${f}`; g++; }
+    return px;
+  };
+  const filterLabels = {today:'آج', yesterday:'کل', week:'یہ ہفتہ', lastweek:'پچھلا ہفتہ', month:'یہ مہینہ', lastmonth:'پچھلا مہینہ', all:'تمام ریکارڈ'};
+  let rangeLabelText = filterLabels[munshiLogFilterState.key] || 'کسٹم تاریخ';
+  if(munshiLogFilterState.key === 'custom' && munshiLogFilterState.customFrom && munshiLogFilterState.customTo) rangeLabelText = `${munshiLogFilterState.customFrom} تا ${munshiLogFilterState.customTo}`;
+
+  let headerH = (useA4 ? 24 : 14) + fsTitle + Math.round(fsSubtitle * 1.8) + Math.round(fsSmall * 1.9) * 2 + 10;
+  const bodyH = blocks.reduce((s,b) => s + hOf(b), 0);
+  canvas.width = pxWidth;
+  canvas.height = Math.max(300, headerH + bodyH + 40);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, pxWidth, canvas.height);
+  ctx.direction = 'rtl';
+
+  const rr = useA4 ? 14 : 8;
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(margin/2 + rr, margin/2);
+  ctx.arcTo(pxWidth - margin/2, margin/2, pxWidth - margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(pxWidth - margin/2, canvas.height - margin/2, margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(margin/2, canvas.height - margin/2, margin/2, margin/2, rr);
+  ctx.arcTo(margin/2, margin/2, pxWidth - margin/2, margin/2, rr);
+  ctx.closePath(); ctx.stroke();
+
+  let y = (useA4 ? 24 : 14) + fsTitle;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#1a1a1a';
+  const bname = AppState.settings.businessName || 'صدام حسین فروٹ منڈی';
+  let px = fitFont(bname, totalW, fsTitle, 'bold'); ctx.fillText(bname, pxWidth/2, y);
+  y += Math.round(fsSubtitle * 1.8);
+  px = fitFont('🧾 خرید اور چالان رپورٹ', totalW, fsSubtitle, 'bold'); ctx.fillText('🧾 خرید اور چالان رپورٹ', pxWidth/2, y);
+  y += Math.round(fsSmall * 1.9);
+  ctx.fillStyle = '#0f766e'; px = fitFont(`دورانیہ: ${rangeLabelText}`, totalW, fsSmall, 'bold'); ctx.fillText(`دورانیہ: ${rangeLabelText}`, pxWidth/2, y);
+  y += Math.round(fsSmall * 1.9);
+  ctx.fillStyle = '#1a1a1a';
+  const now = new Date();
+  const dstr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+  ctx.font = `${fsSmall}px ${numFontFam}`; ctx.fillText(dstr, pxWidth/2, y);
+  y += 10;
+
+  const cellX = (c) => c.num ? c.x + c.width/2 : c.x + c.width - Math.max(4, Math.round(c.width * 0.04));
+  const drawGrid = (cols, top, h) => {
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+    ctx.strokeRect(tableLeft + 0.5, top + 0.5, totalW, h);
+    cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x + 0.5, top); ctx.lineTo(c.x + 0.5, top + h); ctx.stroke(); });
+  };
+  const badgeD = Math.max(12, Math.min(22, Math.round(fsItem * 1.3)));
+
+  blocks.forEach(b => {
+    const h = hOf(b);
+    if(b.t === 'section'){
+      ctx.fillStyle = b.color; ctx.fillRect(tableLeft, y + 3, totalW, h - 6);
+      ctx.fillStyle = '#ffffff'; ctx.textAlign = 'right';
+      fitFont(b.text, totalW - 16, fsSection, 'bold');
+      ctx.fillText(b.text, tableRight - 8, y + h/2 + fsSection * 0.35);
+    } else if(b.t === 'sub'){
+      ctx.fillStyle = '#eff6ff'; ctx.fillRect(tableLeft, y, totalW, h);
+      ctx.fillStyle = '#1e3a8a'; ctx.textAlign = 'right';
+      fitFont(b.text, totalW - 16, fsItem, 'bold');
+      ctx.fillText(b.text, tableRight - 8, y + h/2 + fsItem * 0.35);
+    } else if(b.t === 'head'){
+      ctx.fillStyle = rc.bg; ctx.fillRect(tableLeft, y, totalW, h);
+      drawGrid(b.cols, y, h);
+      ctx.fillStyle = '#0f172a';
+      b.cols.forEach(c => {
+        ctx.textAlign = c.num ? 'center' : 'right';
+        fitFont(c.label, c.width - 6, fsHeader, 'bold');
+        ctx.fillText(c.label, cellX(c), y + h/2 + fsHeader * 0.32);
+      });
+    } else if(b.t === 'empty'){
+      drawGrid([], y, h);
+      ctx.fillStyle = '#64748b'; ctx.textAlign = 'center';
+      fitFont(b.text, totalW, fsItem);
+      ctx.fillText(b.text, pxWidth/2, y + h/2 + fsItem * 0.32);
+    } else if(b.t === 'row' || b.t === 'total'){
+      ctx.fillStyle = b.t === 'total' ? rc.bg : (b.idx % 2 === 0 ? '#ffffff' : '#f1f5f9');
+      ctx.fillRect(tableLeft, y, totalW, h);
+      drawGrid(b.cols, y, h);
+      b.cols.forEach(c => {
+        const v = b.cells[c.key];
+        if(v === undefined || v === '') return;
+        ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, h); ctx.clip();
+        ctx.fillStyle = '#1a1a1a';
+        if(c.key === 'name' && b.t === 'row'){
+          const hasBadge = b.cells.serial !== null && b.cells.serial !== undefined;
+          const tx = cellX(c) - (hasBadge ? badgeD + 4 : 0);
+          ctx.textAlign = 'right';
+          const p1 = fitFont(v, c.width - 8 - (hasBadge ? badgeD + 4 : 0), fsItem, 'bold');
+          ctx.fillText(v, tx, y + h/2 - 2);
+          if(b.cells.sub){
+            ctx.fillStyle = '#475569';
+            fitFont(b.cells.sub, c.width - 8 - (hasBadge ? badgeD + 4 : 0), Math.round(p1 * 0.78));
+            ctx.fillText(b.cells.sub, tx, y + h/2 + Math.round(p1 * 0.9));
+          }
+          ctx.restore();
+          if(hasBadge){ try{ drawSerialBadge(ctx, cellX(c) - badgeD/2, y + h/2 - 2 - Math.round(p1 * 0.3), badgeD/2, b.cells.serial); }catch(e){} }
+          return;
+        }
+        const isNumTxt = typeof v === 'number' || /^[#\d.,\s+⏳—-]+$/.test(String(v));
+        ctx.textAlign = c.num ? 'center' : 'right';
+        if(c.key === 'profit' && typeof b.profitColor === 'number') ctx.fillStyle = b.profitColor < 0 ? '#b91c1c' : '#15803d';
+        if(String(v).includes('⏳')) ctx.fillStyle = '#b45309';
+        const weight = (b.t === 'total' || c.key === 'amount' || c.key === 'profit') ? '900' : '';
+        fitFont(String(v), c.width - 6, fsItem, weight, isNumTxt ? numFontFam : fontFam);
+        ctx.fillText(String(v), cellX(c), y + h/2 + fsItem * 0.32);
+        ctx.restore();
+      });
+    } else if(b.t === 'summary'){
+      ctx.fillStyle = '#fef3c7'; ctx.fillRect(tableLeft, y, totalW, h);
+      ctx.strokeStyle = '#b45309'; ctx.lineWidth = 1.3; ctx.strokeRect(tableLeft + 0.5, y + 0.5, totalW, h);
+      ctx.fillStyle = '#78350f'; ctx.textAlign = 'center';
+      fitFont(b.text, totalW - 10, fsSection, 'bold');
+      ctx.fillText(b.text, pxWidth/2, y + h/2 + fsSection * 0.35);
+    }
+    y += h;
+  });
+  ctx.direction = 'inherit';
 }
 
 async function renderMunshiStockLogToCanvas(){
@@ -40318,7 +41266,7 @@ async function shareReportPdf(){
   if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
   await renderReportToCanvas();
   const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog' || currentReportType === 'purchasechalan') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -40348,7 +41296,7 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog' || currentReportType === 'purchasechalan') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
     window.open(pdf.output('bloburl'), '_blank');
     return;
   }
