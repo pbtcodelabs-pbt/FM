@@ -8599,7 +8599,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA0222PM';
+const APP_BUILD_VERSION = 'FM26SEPSA0235PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11182,7 +11182,7 @@ function renderProductSpreadsheet(filtered, wrap){
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
         <!-- ---------- 🔖 صدام کی ہدایت (22 ستمبر): بکنگ (v.reserved) صرف دکھانے کے لیے — جان بوجھ کر input نہیں
         بنایا، تاکہ منشی کے پینڈنگ آرڈرز کا نظام غلطی سے دستی تبدیلی سے خراب نہ ہو (یہ نمبر خود بخود اپڈیٹ ہوتا ہے) ---------- -->
-        <td style="${tdBase}${rowTd}"><div style="width:100%;box-sizing:border-box;padding:6px 2px;border-radius:11px;font-size:13px;font-weight:900;text-align:center;${numFont}background:${(v.reserved||0)>0 ? '#ffedd5' : '#f1f5f9'};color:${(v.reserved||0)>0 ? '#c2410c' : '#94a3b8'};border:1.5px solid ${(v.reserved||0)>0 ? '#fdba74' : '#e2e8f0'};">${v.reserved||0}</div></td>
+        <td style="${tdBase}${rowTd}"><div onclick="event.stopPropagation(); openBookingDetails(${v.variant_id}, true)" style="cursor:pointer;width:100%;box-sizing:border-box;padding:6px 2px;border-radius:11px;font-size:13px;font-weight:900;text-align:center;${numFont}background:${(v.reserved||0)>0 ? '#ffedd5' : '#f1f5f9'};color:${(v.reserved||0)>0 ? '#c2410c' : '#94a3b8'};border:1.5px solid ${(v.reserved||0)>0 ? '#fdba74' : '#e2e8f0'};">${v.reserved||0}</div></td>
       </tr>`;
   }).join('');
   const headers = ['#','نام','پیکنگ','📦 سٹاک','🔖 بکنگ'];
@@ -18508,6 +18508,7 @@ async function fetchAdvanceOrdersFromCloud(silent){
 
 // ---------- 📋 بکنگ کی تفصیل — سٹاک کے خانے پر ٹیپ ---------- -->
 let _bookingOpenVid = null;
+let _bookingFromStockPage = false;
 function bookingOrdersForVariant(variantId){
   const rows = [];
   (advanceOrdersData || []).forEach(o => {
@@ -18528,8 +18529,9 @@ function _bkFmtTime(iso){
   }catch(e){ return ''; }
 }
 function _bkEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
-function openBookingDetails(variantId){
+function openBookingDetails(variantId, fromStock){
   _bookingOpenVid = variantId;
+  _bookingFromStockPage = !!fromStock;
   let m = document.getElementById('bookingDetailsModal');
   if(!m){
     m = document.createElement('div');
@@ -18587,7 +18589,7 @@ function renderBookingDetails(variantId){
       </div>`;
     }).join('');
   }
-  if(false) html += `<button type="button" onclick="clearAllBookings()" style="width:100%; margin-top:4px; padding:9px; border:1.5px dashed #fdba74; border-radius:10px; background:#fff7ed; color:#c2410c; font-weight:800; font-size:14px; font-family:inherit; cursor:pointer;">🧹 ساری سبزیوں کی بکنگ ختم کریں</button>`;
+  if(isAdmin && rows.length && _bookingFromStockPage) html += `<button type="button" onclick="clearAllBookings()" style="width:100%; margin-top:4px; padding:9px; border:1.5px dashed #fdba74; border-radius:10px; background:#fff7ed; color:#c2410c; font-weight:800; font-size:14px; font-family:inherit; cursor:pointer;">🧹 ساری سبزیوں کی بکنگ ختم کریں</button>`;
   body.innerHTML = html;
 }
 function bookingDeleteOrder(orderId){
@@ -18615,7 +18617,7 @@ function clearAllBookings(){
   pushAdvanceOrdersToCloud();
   try{ refreshOtAfterStockChange(); }catch(e){}
   try{ if(typeof renderAdvanceOrdersScreen === 'function') renderAdvanceOrdersScreen(); }catch(e){}
-  try{ if(typeof renderStockAdjustment === 'function' && currentScreenName === 'stockadjustment') renderStockAdjustment(); }catch(e){}
+  try{ if(typeof currentScreenName !== 'undefined' && (currentScreenName === 'stockadjustment' || currentScreenName === 'products') && typeof goTo === 'function') goTo(currentScreenName); }catch(e){}
   if(_bookingOpenVid != null) renderBookingDetails(_bookingOpenVid);
   alert('✅ ساری بکنگ ختم ہو گئی۔');
 }
@@ -33189,7 +33191,7 @@ function ensureMaintQuickUi(){
       document.head.appendChild(st);
     }
   }
-  addLabel(document.getElementById('screen-home'), 'maintQuickLabelHome');
+  // 🛠️ 26 ستمبر: ہوم سے ہٹا دیا — مینٹیننس کا لفظ صرف لاگ اِن سکرین پر
   const ovIcon = document.querySelector('#maintenanceOverlay div[style*="font-size:52px"]');
   if(ovIcon && !ovIcon.dataset.maintTap){ ovIcon.dataset.maintTap = '1'; ovIcon.style.cursor = 'pointer'; ovIcon.onclick = maintSecretTap; }
   if(!document.getElementById('maintQuickModal')){
@@ -33229,7 +33231,7 @@ function refreshMaintenanceQuickUi(){
     el.style.color = on ? '#fff' : (el.id === 'maintQuickLabelHome' ? '#94a3b8' : 'rgba(255,255,255,.55)');
     el.style.boxShadow = on ? '0 3px 0 #78350f' : 'none';
     // 🔒 26 ستمبر: ہوم صفحے والا لفظ صرف ایڈمن کو — ملازم/منشی کے ہوم پر نظر نہ آئے
-    if(el.id === 'maintQuickLabelHome') el.style.display = (AppState.currentRole === 'admin') ? '' : 'none';
+    if(el.id === 'maintQuickLabelHome') el.style.display = 'none';
   });
   const st = document.getElementById('maintQuickStatus');
   const btn = document.getElementById('maintQuickToggleBtn');
