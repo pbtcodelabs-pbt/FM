@@ -8602,7 +8602,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA0406PM';
+const APP_BUILD_VERSION = 'FM27SEPSU0313AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -24907,8 +24907,8 @@ function renderPoBrowseList(){
   const serialW = 34;
   const nameW = autoColWidth('نام', list.map(p => p.name), measUrduFont, {min:66, max:160, pad:20});
   const packingW = autoColWidth('پیکنگ', list.map(p => { const v = p.variants[0]||{}; return p.variants.length > 1 ? '📦 چُنیں' : (v.label || '—'); }), measPackFont, {min:50, max:96, pad:14});
-  const stockW = autoColWidth('📦 سٹاک', list.map(p => p.variants[0]?.stock||0), measNumFont, {min:38, max:66, pad:14});
-  const qtyW = 98;
+  const stockW = autoColWidth('📦 سٹاک', list.map(p => p.variants[0]?.stock||0), measNumFont, {min:34, max:52, pad:10});
+  const qtyW = 150;
 
   const colWidths = [serialW, nameW, packingW, stockW, qtyW];
   const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
@@ -24929,10 +24929,10 @@ function renderPoBrowseList(){
       qtyInCart = cartItem ? cartItem.qty : 0;
       packingCellHtml = `<button type="button" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', 'poBrowseList')" style="width:100%;padding:4px 2px;border:1.5px solid #93c5fd;border-radius:9px;font-size:10.5px;background:#eff6ff;color:#1e3a8a;cursor:pointer;${urduFont}">${v.label || '— چنیں —'} ▾</button>`;
       qtyCellHtml = `
-        <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
-          <button type="button" onclick="changePoCartQty(${v.variant_id}, -1)" style="width:24px;height:24px;border-radius:7px;border:none;background:#fee2e2;color:#b91c1c;font-weight:900;font-size:15px;line-height:1;">−</button>
-          <span style="min-width:20px; font-weight:900; ${numFont}font-size:13px; color:${qtyInCart>0 ? '#134e2c' : '#94a3b8'};">${qtyInCart}</span>
-          <button type="button" onclick="addToPoCartGrid(${v.variant_id})" style="width:24px;height:24px;border-radius:7px;border:none;background:#dcfce7;color:#15803d;font-weight:900;font-size:15px;line-height:1;">+</button>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; padding:0 2px;">
+          <button type="button" onclick="changePoCartQty(${v.variant_id}, -1)" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;border:none;background:#fee2e2;color:#b91c1c;font-weight:900;font-size:22px;line-height:1;padding:0;box-shadow:0 2px 0 #fca5a5;">−</button>
+          <input type="text" inputmode="decimal" value="${qtyInCart || ''}" placeholder="0" onfocus="this.select()" oninput="poLiveStockPreview(${v.variant_id}, this.value)" onchange="setPoCartQtyManual(${v.variant_id}, this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); }" style="flex:0 0 auto;width:54px;height:34px;box-sizing:border-box;padding:2px;border:1.5px solid ${qtyInCart>0 ? 'var(--primary)' : '#dbe1ea'};border-radius:8px;font-size:17px;font-weight:900;text-align:center;${numFont}color:${qtyInCart>0 ? '#134e2c' : '#64748b'};background:#fff;">
+          <button type="button" onclick="addToPoCartGrid(${v.variant_id})" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;border:none;background:#dcfce7;color:#15803d;font-weight:900;font-size:22px;line-height:1;padding:0;box-shadow:0 2px 0 #86efac;">+</button>
         </div>`;
     } else {
       const totalStock = p.variants.reduce((s0,vv)=>s0+(vv.stock||0),0);
@@ -24944,7 +24944,10 @@ function renderPoBrowseList(){
       qtyCellHtml = `<button type="button" onclick="openPoVariantChooser(${p.product_id})" style="width:100%; padding:5px 2px; border-radius:9px; border:none; font-weight:900; ${numFont}font-size:12.5px; background:${qtyInCart>0 ? '#dcfce7':'#f1f5f9'}; color:${qtyInCart>0 ? '#15803d':'#94a3b8'};">${qtyInCart>0 ? qtyInCart+' ✓' : '➕ منتخب کریں'}</button>`;
     }
 
-    const stockCellHtml = `<div style="width:100%;box-sizing:border-box;padding:3px 2px;border-radius:9px;font-size:12px;font-weight:900;${numFont}background:${isOut ? '#fee2e2' : isLow ? '#ffedd5' : '#f1f5f9'};color:${isOut ? '#b91c1c' : isLow ? '#c2410c' : '#475569'};">${stock}</div>`;
+    // 🔢 27 ستمبر: مقدار لکھتے ہی سٹاک ساتھ ساتھ بدلے (آنے والا مال = موجودہ سٹاک + لکھی مقدار) ---------- -->
+    const _shownStock = Math.round(((Number(stock) || 0) + (Number(qtyInCart) || 0)) * 100) / 100;
+    const _chg = (Number(qtyInCart) || 0) > 0;
+    const stockCellHtml = `<div data-po-stock-for="${isSingle ? v.variant_id : 'p' + p.product_id}" data-po-base-stock="${Number(stock) || 0}" style="width:100%;box-sizing:border-box;padding:3px 1px;border-radius:9px;font-size:11px;font-weight:900;${numFont}background:${_chg ? '#dcfce7' : isOut ? '#fee2e2' : isLow ? '#ffedd5' : '#f1f5f9'};color:${_chg ? '#15803d' : isOut ? '#b91c1c' : isLow ? '#c2410c' : '#475569'};">${_shownStock}</div>`;
 
     return `
       <tr style="background:${rowBg};">
@@ -24993,6 +24996,32 @@ function addToPoCartGrid(variantId){
   renderPoCart();
 }
 
+// ---------- ✍️ 27 ستمبر: مقدار خود لکھیں (300 کے لیے 300 دفعہ + نہ دبانا پڑے) ---------- -->
+function setPoCartQtyManual(variantId, value){
+  let q = parseFloat(String(value || '').replace(',', '.'));
+  if(!isFinite(q) || q < 0) q = 0;
+  q = Math.round(q * 100) / 100;
+  const existing = poCart.find(i => i.variant_id === variantId);
+  if(q <= 0){ poCart = poCart.filter(i => i.variant_id !== variantId); }
+  else if(existing){ existing.qty = q; }
+  else {
+    const v = getFlatVariants().find(f => f.variant_id === variantId);
+    if(!v) return;
+    poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: q, cost: (AppState.currentRole === 'admin' ? v.purchase : null)});
+  }
+  renderPoBrowseList();
+  renderPoCart();
+}
+function poLiveStockPreview(variantId, value){
+  const el = document.querySelector(`[data-po-stock-for="${variantId}"]`);
+  if(!el) return;
+  let q = parseFloat(String(value || '').replace(',', '.'));
+  if(!isFinite(q) || q < 0) q = 0;
+  const base = Number(el.getAttribute('data-po-base-stock')) || 0;
+  el.textContent = Math.round((base + q) * 100) / 100;
+  el.style.background = q > 0 ? '#dcfce7' : '#f1f5f9';
+  el.style.color = q > 0 ? '#15803d' : '#475569';
+}
 function changePoCartQty(variantId, delta){
   const item = poCart.find(i => i.variant_id === variantId);
   if(!item) return;
