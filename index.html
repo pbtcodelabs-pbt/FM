@@ -6220,7 +6220,7 @@
     <div class="modalOverlay" id="poPreviewModal" onclick="if(event.target===this) closePoPreview()">
       <div class="invoicePreviewBox">
         <div class="previewHeader">
-          <strong>📦 Purchase Order</strong>
+          <strong style="font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-weight:400; font-size:20px;">📦 بیوپاری خریداری</strong>
           <span style="cursor:pointer;" onclick="closePoPreview()">✖</span>
         </div>
 
@@ -8599,7 +8599,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA1135AM';
+const APP_BUILD_VERSION = 'FM26SEPSA1150AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29244,232 +29244,102 @@ function getCurrentPreviewPo(){
   return (s && po) ? {s, po} : null;
 }
 
+// ---------- 🧾 صدام کی ہدایت (26 ستمبر): بیوپاری خریداری کی رسید — اب مکمل اردو، نستعلیق کشیدہ، دائیں سے بائیں
+// (بل کے انداز میں)؛ پرنٹ، شیئر اور WhatsApp پہلے والے بٹنوں سے ہی ---------- -->
 async function renderPoToCanvas(){
   const ref = getCurrentPreviewPo();
   const canvas = document.getElementById('poCanvas');
   if(!ref || !canvas) return;
   const {s, po} = ref;
   const received = po.status === 'received';
-
   const useA4 = AppState.settings.poPrintStyle === 'a4';
   const paperWidthMM = AppState.settings.paperWidth || 80;
   const pxWidth = useA4 ? 850 : (paperWidthMM === 80 ? 576 : 384);
-  const baseScale = pxWidth / 576;
-
   const fscale = (AppState.settings.poFontScale || 100) / 100;
-  const bold = AppState.settings.poBoldItems !== false;
-  const align = AppState.settings.poAlign || 'left';
-  const vAlign = AppState.settings.poVAlign || 'middle';
-  const decimals = AppState.settings.poPriceDecimals ?? 0;
-  const scale = baseScale * fscale;
-  const rc = getReceiptColor();
-
-  const rowScaleSetting = (AppState.settings.poRowScale || 100) / 100;
-  const rowH = Math.round(24 * scale * rowScaleSetting), headerH = Math.round(22 * scale * rowScaleSetting);
-  const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
-  const tableH = headerH + (po.items.length * rowH);
-
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.poFontId) || FONT_PRESETS[0];
-  const canvasFontFamily = selectedFontPreset.family; // ---------- صدام کی ہدایت پر: بلوں/رپورٹس میں نستعلیق فونٹ کو زبردستی Arial پر تبدیل کرنے والی پرانی پابندی ہٹا دی گئی — اب منتخب شدہ فونٹ ہی پرنٹ/رپورٹ کینوس پر حقیقتاً لاگو ہوتا ہے ----------
-  const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
-  const fmt = (n) => (Number(n)||0).toFixed(decimals);
-
-  // ---------- خانوں کی چوڑائی خودکار — ہر کالم صرف اتنا چوڑا جتنی اس میں سب سے لمبی لکھائی کی ضرورت ہے،
-  // خامخواہ چوڑے ڈبے نہیں بنیں گے، اور نہ ہی کوئی لکھائی کٹے گی ----------
-  const measureCtx = document.createElement('canvas').getContext('2d');
-  const bodyFontPx = Math.round(14 * scale), headerFontPx = Math.round(13 * scale);
-  measureCtx.font = `bold ${Math.round(bodyFontPx * Math.max(1, fscale))}px ${canvasFontFamily}`;
-  const padX = Math.round(10 * scale);
-  const noW = Math.max(Math.round(24 * scale), measureCtx.measureText('#').width + padX, measureCtx.measureText(String(po.items.length)).width + padX);
-  let variantW = measureCtx.measureText('Variant').width + padX;
-  let qtyW = measureCtx.measureText('Qty').width + padX;
-  let costW = measureCtx.measureText('Cost').width + padX;
-  let totalW = measureCtx.measureText('Total').width + padX;
-  po.items.forEach(item => {
-    variantW = Math.max(variantW, measureCtx.measureText(item.label || '—').width + padX);
-    qtyW = Math.max(qtyW, measureCtx.measureText(String(item.qty)).width + padX);
-    costW = Math.max(costW, measureCtx.measureText(fmt(item.cost)).width + padX);
-    totalW = Math.max(totalW, measureCtx.measureText(fmt(item.qty*item.cost)).width + padX);
-  });
-  // ---------- 🔴 صدام کی ہدایت (19 ستمبر، دوپہر): Item کالم اب سب سے لمبے نام جتنا ہی چوڑا — باقی بچ جانے
-  // والی خالی جگہ #/Qty/Cost/Total (فعال) خانوں پر برابر تقسیم، Variant کالم کو اپنی مکمل ضرورت کی جگہ ملتی
-  // ہے مگر اضافی حصہ نہیں ملتا ---------- -->
-  let maxPoItemStr = '';
-  po.items.forEach(item => {
-    const base = splitItemNamePacking(item.name, item.label).baseName;
-    if(measureCtx.measureText(base).width > measureCtx.measureText(maxPoItemStr).width) maxPoItemStr = base;
-  });
-  const itemW = Math.max(Math.round(60*scale), Math.round(measureCtx.measureText(maxPoItemStr).width) + padX);
-  const leftoverPoW = Math.max(0, (tableRight - tableLeft) - noW - variantW - qtyW - costW - totalW - itemW);
-  const extraPoPerCol = Math.floor(leftoverPoW / 4);
-  const noW2 = noW + extraPoPerCol, qtyW2 = qtyW + extraPoPerCol, costW2 = costW + extraPoPerCol,
-        totalW2 = totalW + extraPoPerCol + (leftoverPoW - extraPoPerCol*4);
-  const colX = [
-    tableLeft,
-    tableLeft + noW2,
-    tableLeft + noW2 + itemW,
-    tableLeft + noW2 + itemW + variantW,
-    tableLeft + noW2 + itemW + variantW + qtyW2,
-    tableLeft + noW2 + itemW + variantW + qtyW2 + costW2,
-    tableRight
-  ];
-
-  let estimatedHeight = (30 + 26 + 22 + 22 + 54 + 26 + 40 + 30 + 40) * scale + tableH;
-  if(useA4) estimatedHeight += 60;
-  if(AppState.settings.businessAddress) estimatedHeight += 16 * scale;
-  if(AppState.settings.businessPhone) estimatedHeight += 16 * scale;
-  if(s.phone) estimatedHeight += 16 * scale;
-  if(received && po.receivedDate) estimatedHeight += 20 * scale;
-
+  const ur = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif";
+  const num = "Tahoma,Arial,Helvetica,sans-serif";
+  try{ await document.fonts.load(`bold 20px ${ur}`); await document.fonts.load(`16px ${ur}`); await document.fonts.ready; }catch(e){}
+  const k = (pxWidth / 576) * (useA4 ? 1.1 : 1) * fscale;
+  const fsBiz = Math.round(30 * k), fsTitle = Math.round(24 * k), fsTxt = Math.round(19 * k), fsHead = Math.round(17 * k), fsItem = Math.round(19 * k);
+  const margin = useA4 ? 36 : 8, left = margin, right = pxWidth - margin, W = right - left;
+  const items = (po.items || []);
+  const hasCh = items.some(it => it.chalanNo != null);
+  const defs = [{k:'n', l:'#', f:.07}, {k:'name', l:'سبزی'}, {k:'pack', l:'پیکنگ', f:.14}];
+  if(hasCh) defs.push({k:'ch', l:'چالان', f:.1});
+  defs.push({k:'qty', l:'مقدار', f:.11}, {k:'rate', l:'ریٹ', f:.13}, {k:'amt', l:'رقم', f:.16});
+  const fixed = defs.filter(d => d.f).reduce((a, d) => a + Math.round(W * d.f), 0);
+  let cx = right; const cols = defs.map(d => { const w = d.f ? Math.round(W * d.f) : W - fixed; cx -= w; return {...d, w, x: cx}; });
+  const rowH = Math.round(fsItem * 2.3), headH = Math.round(fsHead * 2.4), sumH = Math.round(fsTxt * 2.3);
   canvas.width = pxWidth;
-  canvas.height = Math.round(estimatedHeight);
+  canvas.height = 420 * k + items.length * rowH + sumH * 4 + 200;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, pxWidth, canvas.height);
-
-  try{
-    await document.fonts.load(`bold 26px ${canvasFontFamily}`);
-    await document.fonts.load(`16px ${canvasFontFamily}`);
-    await document.fonts.ready;
-  }catch(e){}
-
-  let y = 30 * scale;
-  ctx.textAlign = 'center';
-  ctx.font = F('bold 24px');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, pxWidth, canvas.height);
+  ctx.direction = 'rtl';
+  const fit = (t, maxW, px, w, fam) => { const ff = fam || ur; ctx.font = `${w ? w + ' ' : ''}${px}px ${ff}`; let g = 0; while(ctx.measureText(String(t)).width > maxW && px > 6 && g < 60){ px -= .5; ctx.font = `${w ? w + ' ' : ''}${px}px ${ff}`; g++; } return px; };
+  const isNum = (t) => /^[#\d.,\s\-—]+$/.test(String(t));
+  let y = 10 + fsBiz;
+  ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+  const biz = AppState.settings.businessName || 'صدام حسین فروٹ منڈی';
+  fit(biz, W, fsBiz, 'bold'); ctx.fillText(biz, pxWidth/2, y);
+  if(AppState.settings.businessPhone){ y += Math.round(fsTxt * 1.6); ctx.font = `${Math.round(fsTxt*.9)}px ${num}`; ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); }
+  y += Math.round(fsTitle * 0.9);
+  // عنوان کا ڈبہ
+  const boxH = Math.round(fsTitle * 2.9);
+  ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.strokeRect(left + 1, y, W - 2, boxH);
+  fit('📦 بیوپاری خریداری', W - 20, fsTitle, 'bold'); ctx.fillText('📦 بیوپاری خریداری', pxWidth/2, y + fsTitle * 1.25);
+  const st = received ? '✅ مال وصول — سٹاک میں شامل' : '⏳ مال ابھی وصول نہیں ہوا';
+  ctx.fillStyle = received ? '#15803d' : '#b45309'; fit(st, W - 20, Math.round(fsTxt * .95)); ctx.fillText(st, pxWidth/2, y + fsTitle * 2.45);
+  y += boxH + Math.round(fsTxt * 1.7);
   ctx.fillStyle = '#000';
-  ctx.fillText(AppState.settings.businessName || 'Fruit Mandi POS', pxWidth/2, y); y += 24 * scale;
-
-  if(AppState.settings.businessAddress || AppState.settings.businessPhone){
-    ctx.font = F('12px');
-    if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y); y += 16 * scale; }
-    if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += 16 * scale; }
-  }
-
-  // ---------- بینر — آرڈر ابھی جاری ہوا ہے یا مال موصول ہو چکا، تھیم رنگ سے ہم آہنگ ----------
-  y += 6 * scale;
-  const bannerTop = y, bannerH = 48 * scale;
-  ctx.fillStyle = rc.bg;
-  ctx.fillRect(tableLeft, bannerTop, tableRight - tableLeft, bannerH);
-  ctx.strokeStyle = rc.border;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(tableLeft + 1, bannerTop + 1, tableRight - tableLeft - 2, bannerH - 2);
-  ctx.fillStyle = rc.border;
-  ctx.font = F('bold 18px');
-  ctx.fillText(received ? '✅ GOODS RECEIVED' : '📦 PURCHASE ORDER', pxWidth/2, bannerTop + 22 * scale);
-  ctx.font = F('bold 13px');
-  ctx.fillText(received ? 'Stock updated' : 'Pending — not yet received', pxWidth/2, bannerTop + 40 * scale);
-  y = bannerTop + bannerH + 16 * scale;
-  ctx.fillStyle = '#000';
-
-  ctx.font = F('bold 15px');
-  ctx.fillText('Supplier: ' + s.name, pxWidth/2, y); y += 20 * scale;
-  if(s.phone){
-    ctx.font = F('13px');
-    ctx.fillText(s.phone, pxWidth/2, y); y += 20 * scale;
-  }
-  ctx.font = F('13px');
-  ctx.fillText('Order Date: ' + po.date, pxWidth/2, y); y += 18 * scale;
-  if(received && po.receivedDate){
-    ctx.fillText('Received: ' + po.receivedDate, pxWidth/2, y); y += 18 * scale;
-  }
-
-  drawSolidLine(ctx, y, pxWidth); y += 16 * scale;
-
-  // ---------- آئٹمز ٹیبل — اب تھیم پورے ٹیبل پر بھی لاگو ہوتا ہے (صرف اوپر کی پٹی پر نہیں) —
-  // ہیڈر لائن کا پس منظر تھیم رنگ سے، اور تمام لکیریں تھیم کے بارڈر رنگ سے، تاکہ پورا بل ایک جیسا مربوط نظر آئے ----------
-  const tableTop = y;
-  ctx.strokeStyle = rc.border;
-  ctx.lineWidth = 1;
-  colX.forEach(x => { ctx.beginPath(); ctx.moveTo(Math.floor(x)+0.5, tableTop); ctx.lineTo(Math.floor(x)+0.5, tableTop + tableH); ctx.stroke(); });
-  let hLineY = tableTop;
-  const drawTableHLine = (ly) => { ctx.beginPath(); ctx.moveTo(tableLeft, Math.floor(ly)+0.5); ctx.lineTo(tableRight, Math.floor(ly)+0.5); ctx.stroke(); };
-  drawTableHLine(hLineY);
-
-  // ---------- ہیڈر لائن کا رنگین پس منظر ----------
-  ctx.fillStyle = rc.bg;
-  ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerH);
-  ctx.fillStyle = rc.text;
-
-  ctx.font = F('bold 13px');
-  // ---------- عمودی الائنمنٹ (Top/Middle/Bottom) — قطار کی اونچائی بڑھانے پر بھی متن مناسب جگہ بیٹھے ----------
-  const getBaseline = (top, h, fontPx) => {
-    if(vAlign === 'top') return top + fontPx + Math.round(3 * scale);
-    if(vAlign === 'bottom') return top + h - Math.round(6 * scale);
-    return top + h/2 + fontPx * 0.35;
-  };
-  const headerBaseline = getBaseline(tableTop, headerH, headerFontPx);
-  const colCenterX = (a, b) => align === 'center' ? (a + b) / 2 : (align === 'right' ? b - padX/2 : a + padX/2);
-  ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
-  // ---------- Item کا نام ہمیشہ بائیں طرف — باقی تین کالمز (Qty/Cost/Total) الائنمنٹ سیٹنگ کے مطابق حرکت کریں،
-  // مگر آئٹم کا نام کبھی سینٹر/رائٹ نہیں ہونا چاہیے (پڑھنے میں مشکل اور بے ڈھنگا لگتا ہے) ----------
-  ctx.textAlign = 'left'; ctx.fillText('Item', colX[1] + padX/2, headerBaseline);
-  ctx.textAlign = 'center'; ctx.fillText('Variant', (colX[2]+colX[3])/2, headerBaseline);
-  ctx.textAlign = align;
-  ctx.fillText('Qty', colCenterX(colX[3], colX[4]), headerBaseline);
-  ctx.fillText('Cost', colCenterX(colX[4], colX[5]), headerBaseline);
-  ctx.fillText('Total', colCenterX(colX[5], colX[6]), headerBaseline);
-  ctx.fillStyle = '#1a1a1a'; // ---------- باقی قطاریں سفید پس منظر پر ہیں، ان کے لیے واپس گہرا رنگ ----------
-  hLineY += headerH;
-  drawTableHLine(hLineY);
-
-  ctx.font = F('bold 14px');
-  const maxItemWidth = itemW - padX;
-  const maxVariantWidth = variantW - padX;
-  po.items.forEach((item, idx) => {
-    const rowBaseline = getBaseline(hLineY, rowH, bodyFontPx);
-    // ---------- Item کے نام کے ساتھ ویریئنٹ نہ دہرائیں — وہ اب اپنے الگ Variant کالم میں ہے ----------
-    const _split_po = splitItemNamePacking(item.name, item.label);
-    let baseName = _split_po.baseName;
-    const poItemPacking = _split_po.packing;
-    let displayName = baseName;
-    ctx.textAlign = 'left';
-    while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0,-1); }
-    if(displayName !== baseName) displayName = displayName.trim() + '…';
-
-    ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
-    ctx.textAlign = 'left';
-    ctx.save();
-    ctx.beginPath(); ctx.rect(colX[1], hLineY, colX[2]-colX[1], rowH); ctx.clip();
-    ctx.fillText(displayName, colX[1] + padX/2, rowBaseline);
-    ctx.restore();
-
-    ctx.textAlign = 'center';
-    let variantText = poItemPacking || '—';
-    while(ctx.measureText(variantText).width > maxVariantWidth && variantText.length > 1){ variantText = variantText.slice(0,-1); }
-    ctx.fillText(variantText, (colX[2]+colX[3])/2, rowBaseline);
-
-    ctx.textAlign = align;
-    ctx.fillText(String(item.qty), colCenterX(colX[3], colX[4]), rowBaseline);
-    ctx.fillText(fmt(item.cost), colCenterX(colX[4], colX[5]), rowBaseline);
-    ctx.fillText(fmt(item.qty*item.cost), colCenterX(colX[5], colX[6]), rowBaseline);
-
-    hLineY += rowH;
-    drawTableHLine(hLineY);
+  const line = (label, val) => { ctx.textAlign = 'right'; fit(label, W * .45, fsTxt, 'bold'); ctx.fillText(label, right - 4, y); ctx.textAlign = 'left'; const isN = isNum(val); fit(val, W * .52, fsTxt, '', isN ? num : ur); ctx.fillText(val, left + 4, y); y += Math.round(fsTxt * 1.75); };
+  line('بیوپاری:', s.name);
+  line('تاریخ:', String(po.date || ''));
+  if(received && po.receivedDate && po.receivedDate !== po.date) line('وصولی:', String(po.receivedDate));
+  y += 4;
+  // جدول
+  ctx.fillStyle = '#e5e7eb'; ctx.fillRect(left, y, W, headH);
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.2; ctx.strokeRect(left + .5, y + .5, W, headH);
+  cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x + .5, y); ctx.lineTo(c.x + .5, y + headH); ctx.stroke(); ctx.fillStyle = '#000'; ctx.textAlign = 'center'; fit(c.l, c.w - 4, fsHead, 'bold'); ctx.fillText(c.l, c.x + c.w/2, y + headH/2 + fsHead * .35); });
+  y += headH;
+  let tq = 0, tot = 0;
+  items.forEach((it, i) => {
+    const q = Number(it.qty) || 0, r = Number(it.cost) || 0, a = Math.round(q * r); tq += q; tot += a;
+    let nm = it.name || '', pk = it.label || '';
+    if(pk && nm.endsWith(pk)) nm = nm.slice(0, nm.length - pk.length).trim();
+    const cells = {n: i + 1, name: nm, pack: pk || '—', ch: it.chalanNo != null ? '#' + it.chalanNo : '—', qty: q, rate: r ? r.toLocaleString() : '⏳', amt: r ? a.toLocaleString() : '⏳'};
+    ctx.fillStyle = i % 2 ? '#f3f4f6' : '#fff'; ctx.fillRect(left, y, W, rowH);
+    ctx.strokeStyle = '#6b7280'; ctx.lineWidth = 1; ctx.strokeRect(left + .5, y + .5, W, rowH);
+    cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x + .5, y); ctx.lineTo(c.x + .5, y + rowH); ctx.stroke();
+      const t = String(cells[c.k]); ctx.fillStyle = '#000';
+      if(c.k === 'name'){ ctx.textAlign = 'right'; fit(t, c.w - 8, fsItem, 'bold'); ctx.fillText(t, c.x + c.w - 4, y + rowH/2 + fsItem * .32); }
+      else { ctx.textAlign = 'center'; fit(t, c.w - 4, fsItem, c.k === 'amt' ? 'bold' : '', isNum(t) ? num : ur); ctx.fillText(t, c.x + c.w/2, y + rowH/2 + fsItem * .32); }
+    });
+    y += rowH;
   });
-
-  y = tableTop + tableH + 20 * scale;
-
-  // ---------- کتنی ورائٹیاں اور کل کتنے آئٹم آرڈر ہوئے — چاہے قیمت 0 ہو، یہ گنتی ہمیشہ نظر آئے ----------
-  const totalQtyOrdered = po.items.reduce((s2, it) => s2 + (it.qty || 0), 0);
-  ctx.textAlign = 'center';
-  ctx.font = F('12px');
-  ctx.fillStyle = '#64748b';
-  ctx.fillText(`${po.items.length} varieties · ${totalQtyOrdered} total items ordered`, pxWidth/2, y);
-  ctx.fillStyle = '#000';
-  y += 22 * scale;
-
-  ctx.textAlign = 'right';
-  ctx.font = F('bold 20px');
-  ctx.fillText('Grand Total: Rs. ' + fmt(po.total), pxWidth-(10*scale), y);
-  y += 30 * scale;
-
-  ctx.fillStyle = '#000';
-  ctx.textAlign = 'center';
-  ctx.font = F('13px');
-  ctx.fillText(received ? 'Thank you — stock has been updated.' : 'This order is pending receipt.', pxWidth/2, y); y += 20 * scale;
-
-  if(Math.abs(y - canvas.height) > 4){
-    const finalH = Math.round(y + 10);
+  y += 6;
+  const sums = [
+    [`اقسام: ${items.length}  —  کل مقدار: ${Math.round(tq * 100) / 100}`, null],
+    ['کل رقم', tot],
+    ['بیوپاری کا کل بقایا (ہم نے دینا ہے)', Math.round(Number(s.total_payable) || 0)],
+  ];
+  sums.forEach(([lbl, val], i) => {
+    const last = i === sums.length - 1;
+    ctx.fillStyle = last ? '#fef3c7' : '#fff'; ctx.fillRect(left, y, W, sumH);
+    ctx.strokeStyle = last ? '#b45309' : '#9ca3af'; ctx.lineWidth = last ? 1.6 : 1; ctx.strokeRect(left + .5, y + .5, W, sumH);
+    ctx.fillStyle = '#000';
+    if(val === null){ ctx.textAlign = 'center'; fit(lbl, W - 10, Math.round(fsTxt * .95)); ctx.fillText(lbl, pxWidth/2, y + sumH/2 + fsTxt * .32); }
+    else { ctx.textAlign = 'right'; fit(lbl, W * .6, fsTxt, 'bold'); ctx.fillText(lbl, right - 8, y + sumH/2 + fsTxt * .32);
+      ctx.textAlign = 'left'; const v = 'Rs. ' + (val || 0).toLocaleString(); fit(v, W * .38, Math.round(fsTxt * 1.1), 'bold', num); ctx.fillText(v, left + 8, y + sumH/2 + fsTxt * .35); }
+    y += sumH;
+  });
+  y += Math.round(fsTxt * 1.8);
+  ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+  const thanks = received ? 'شکریہ — مال سٹاک میں شامل ہو گیا' : 'یہ آرڈر ابھی وصول ہونا باقی ہے';
+  fit(thanks, W, fsTxt); ctx.fillText(thanks, pxWidth/2, y);
+  y += Math.round(fsTxt * 1.2);
+  ctx.direction = 'inherit';
+  const finalH = Math.round(y + 10);
+  if(Math.abs(finalH - canvas.height) > 4){
     const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
     canvas.height = finalH;
     ctx.putImageData(imgData, 0, 0);
