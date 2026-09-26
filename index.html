@@ -8599,7 +8599,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA1125AM';
+const APP_BUILD_VERSION = 'FM26SEPSA1135AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12005,6 +12005,7 @@ function goTo(screenName, _isHistoryNav){
     navForwardStack = []; // نئی نیویگیشن پر آگے کا راستہ صاف — بالکل براؤزر کی طرح
   }
   currentScreenName = screenName;
+  try{ setTimeout(refreshChalanRateFab, 250); }catch(e){}
   updateNavArrowsState();
 
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -17684,7 +17685,9 @@ function refreshChalanRateFab(){
   let fab = document.getElementById('chalanRateFab');
   const _ls = document.getElementById('loginScreen');
   const loggedIn = !(_ls && getComputedStyle(_ls).display !== 'none');
-  const admin = isChalanAdmin() && loggedIn;
+  // 🔒 26 ستمبر: یہ بٹن اور خودکار پاپ اپ صرف ایڈمن کے سٹاک صفحے پر — ہوم، آرڈر بکنگ یا کسی اور صفحے پر نہیں
+  const onStockPage = (typeof currentScreenName !== 'undefined' && currentScreenName === 'stockadjustment');
+  const admin = isChalanAdmin() && loggedIn && onStockPage;
   const n = admin ? getPendingRateChalans().length : 0;
   if(!fab){
     if(n === 0) return;
@@ -17710,8 +17713,8 @@ function refreshChalanRateFab(){
       _chalanRateLastSeenCount = n;
       openChalanRateModal('pending');
     }
-  } else if(n < _chalanRateLastSeenCount || !admin){
-    _chalanRateLastSeenCount = n;
+  } else if(admin && n < _chalanRateLastSeenCount){
+    _chalanRateLastSeenCount = n; // حساب لگنے سے گنتی کم ہوئی — آئندہ صرف نیا چالان آنے پر پاپ اپ
   }
 }
 let chalanRateModalTab = 'pending';
@@ -18071,7 +18074,7 @@ function renderChalanRateModal(){
           ${inp('chRwp_' + key, wholesaleVal, '🟢 راولپنڈی', '#16a34a')}
         </div>
         <div style="display:flex; gap:6px; margin-top:6px;">
-          <select id="chSrc_${key}" style="flex:1; min-width:0; height:38px; border:2px solid #0369a1; border-radius:9px; font-size:13px; font-weight:800; background:#fff;">${_chSupplierOptions(srcSel)}</select>
+          <button type="button" id="chSrc_${key}" data-value="${srcSel}" onclick="openChSupplierPicker('${key}')" style="flex:1; min-width:0; height:40px; border:2px solid #0369a1; border-radius:10px; background:#fff; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:15px; color:#0c4a6e; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 8px;">${_chSrcLabel(srcSel)} ▾</button>
           <button type="button" onclick="saveChalanAccounting(${v.variant_id}, ${c.chalanNo})" style="flex:0 0 52px; height:38px; border:none; border-radius:9px; background:#16a34a; color:#fff; font-size:18px; cursor:pointer; box-shadow:0 3px 0 #14532d;">✅</button>
         </div>
       </div>`;
@@ -18111,7 +18114,7 @@ function saveChalanAccounting(variantId, chalanNo){
   const key = `${variantId}_${chalanNo}`;
   const num = (id) => _chRound(parseFloat(String(document.getElementById(id)?.value || '').replace(',', '.')));
   const rate = num('chRate_' + key), labor = num('chLab_' + key), isb = num('chIsb_' + key), rwp = num('chRwp_' + key);
-  const src = document.getElementById('chSrc_' + key)?.value || '';
+  const src = document.getElementById('chSrc_' + key)?.dataset.value || '';
   if(!(rate > 0)){ alert('⚠️ خرید قیمت لکھیں'); document.getElementById('chRate_' + key)?.focus(); return; }
   if(!(isb > 0)){ alert('⚠️ اسلام آباد ریٹ لکھیں'); document.getElementById('chIsb_' + key)?.focus(); return; }
   if(!(rwp > 0)){ alert('⚠️ راولپنڈی ریٹ لکھیں'); document.getElementById('chRwp_' + key)?.focus(); return; }
@@ -18316,6 +18319,61 @@ async function renderSupplierSlipToCanvas(){
     if(si < slips.length - 1){ ctx.setLineDash([6, 5]); ctx.strokeStyle = '#64748b'; ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#64748b'; ctx.textAlign = 'center'; ctx.font = `${fsSmall}px ${numFam}`; ctx.fillText('✂', pxWidth/2, y - 3); y += 12; }
   });
   ctx.direction = 'inherit';
+}
+
+// ---------- 🏭 خوبصورت بیوپاری چناؤ — نام اور بقایا الگ الگ کیپسول میں، نستعلیق (سادہ ڈراپ ڈاؤن کی جگہ) ---------- -->
+function _chSrcLabel(val){
+  if(val === 'cash') return '💵 نقد خریداری';
+  if(val === '' || val == null) return '🏭 بیوپاری / نقد چنیں';
+  const s = (suppliersData || []).find(x => String(x.supplier_id) === String(val));
+  return s ? ('🏭 ' + s.name) : '🏭 بیوپاری / نقد چنیں';
+}
+let _chSupplierPickKey = null;
+function openChSupplierPicker(key){
+  _chSupplierPickKey = key;
+  let m = document.getElementById('chSupplierPickModal');
+  if(!m){
+    m = document.createElement('div');
+    m.className = 'modalOverlay'; m.id = 'chSupplierPickModal'; m.style.zIndex = '10060';
+    m.onclick = (e) => { if(e.target === m) m.classList.remove('show'); };
+    m.innerHTML = `
+      <div class="modalBox" dir="rtl" style="max-width:380px; max-height:82vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+        <h3 style="margin:0 0 8px;">🏭 کس بیوپاری سے آیا؟</h3>
+        <input type="text" id="chSupplierPickSearch" dir="rtl" placeholder="🔍 بیوپاری کا نام لکھیں..." oninput="renderChSupplierPickList(this.value)" style="width:100%; box-sizing:border-box; padding:9px 12px; border:1.5px solid #cbd5e1; border-radius:12px; font-size:14px; margin-bottom:8px; font-family:inherit;">
+        <div id="chSupplierPickList"></div>
+        <button type="button" onclick="document.getElementById('chSupplierPickModal').classList.remove('show')" style="width:100%; margin-top:8px; padding:11px; border:none; border-radius:12px; background:#f1f5f9; color:#334155; font-size:15px; cursor:pointer; font-family:inherit;">منسوخ</button>
+      </div>`;
+    document.body.appendChild(m);
+  }
+  const si = document.getElementById('chSupplierPickSearch'); if(si) si.value = '';
+  renderChSupplierPickList('');
+  m.classList.add('show');
+}
+function renderChSupplierPickList(query){
+  const wrap = document.getElementById('chSupplierPickList'); if(!wrap) return;
+  const q = (query || '').trim().toLowerCase();
+  const cur = document.getElementById('chSrc_' + _chSupplierPickKey)?.dataset.value || '';
+  const row = (val, name, balHtml, active) => `
+    <div onclick="pickChSupplier('${val}')" style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; margin-bottom:6px; border-radius:12px; cursor:pointer; background:${active ? '#ecfdf5' : '#fff'}; box-shadow:0 1px 4px rgba(0,0,0,.08); border:1.5px solid ${active ? '#16a34a' : 'transparent'};">
+      <span style="display:inline-block; width:fit-content; max-width:70%; padding:3px 12px; border-radius:999px; background:linear-gradient(180deg,#e0f2fe,#bae6fd); color:#0c4a6e; font-size:15px; line-height:1.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+      ${balHtml}
+    </div>`;
+  let html = '';
+  if(!q || 'نقد'.includes(q)) html += row('cash', '💵 نقد خریداری', '', cur === 'cash');
+  (suppliersData || []).slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
+    if(q && !s.name.toLowerCase().includes(q)) return;
+    const bal = Math.round(Number(s.total_payable) || 0);
+    const bg = bal > 0 ? 'linear-gradient(180deg,#fef3c7,#fde68a)' : (bal < 0 ? 'linear-gradient(180deg,#fee2e2,#fecaca)' : '#f1f5f9');
+    const fg = bal > 0 ? '#92400e' : (bal < 0 ? '#b91c1c' : '#64748b');
+    const balHtml = `<span style="display:inline-block; width:fit-content; padding:3px 10px; border-radius:999px; background:${bg}; color:${fg}; font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:13px; white-space:nowrap; direction:ltr;">${bal.toLocaleString()}</span>`;
+    html += row(s.supplier_id, '🏭 ' + s.name, balHtml, String(cur) === String(s.supplier_id));
+  });
+  wrap.innerHTML = html || `<div style="text-align:center; color:var(--muted); padding:14px 0;">کوئی بیوپاری نہیں ملا</div>`;
+}
+function pickChSupplier(val){
+  const b = document.getElementById('chSrc_' + _chSupplierPickKey);
+  if(b){ b.dataset.value = String(val); b.textContent = _chSrcLabel(String(val)) + ' ▾'; }
+  document.getElementById('chSupplierPickModal')?.classList.remove('show');
 }
 
 let activeBatchesProductId = null;
