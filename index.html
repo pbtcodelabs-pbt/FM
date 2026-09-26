@@ -6643,6 +6643,7 @@
     <div style="font-size:52px; margin-bottom:14px;">🛠️</div>
     <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:22px; font-weight:800; color:#fff; margin-bottom:10px; line-height:1.6;">براہِ کرم انتظار فرمائیں</div>
     <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:600; color:#e2e8f0; line-height:1.9;">ویب سائٹ پر اس وقت کام جاری ہے۔<br>ابھی ویب سائٹ استعمال نہ کریں اور کوئی ڈیٹا نہ ڈالیں۔</div>
+  <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:22px; font-weight:900; color:#86efac; line-height:2; margin-top:14px;">﴿ إِنَّ اللّٰهَ مَعَ الصّٰبِرِينَ ﴾</div>
   </div>
 </div>
 
@@ -8562,7 +8563,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA0556AM';
+const APP_BUILD_VERSION = 'FM26SEPSA0622AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9505,6 +9506,7 @@ async function login(){
 // ---------- لاگ ان مکمل کرنے کا مشترکہ حصہ (Admin اور Employee دونوں لاگ ان یہیں سے گزرتے ہیں) ----------
 // rememberOverride: undefined ہو تو Admin پینل کے چیک باکس سے فیصلہ ہوگا؛ true/false ملے تو وہی حتمی فیصلہ ہے (Employee پینل اپنا الگ چیک باکس بھیجتا ہے) ----------
 function finishLogin(user, rememberOverride){
+  if(maintenanceLoginGuard()) return false; // 🚧 مینٹیننس جاری — کوئی لاگ ان نہیں
   const remember = (rememberOverride !== undefined) ? rememberOverride : (document.getElementById('rememberPinChk')?.checked ?? true);
   if(remember){
     saveToStorage('rememberedSession', { user_id: user.user_id });
@@ -9644,6 +9646,7 @@ function confirmCustomerLogin(){
 
 // ---------- عملے کے finishLogin() سے مکمل الگ — کسٹمر کے پاس صرف customer-only اسکرینز ہی نظر آئیں گی ----------
 function finishCustomerLogin(cust){
+  if(maintenanceLoginGuard()) return false; // 🚧 مینٹیننس جاری — کوئی لاگ ان نہیں
   AppState.currentUser = { name: cust.name };
   AppState.currentRole = 'customer';
   AppState.currentCustomerId = cust.customer_id;
@@ -11408,6 +11411,7 @@ async function activateFromLoginScreen(){
 
 // ---------- اگر اس ڈیوائس پر پن یاد رکھا ہوا ہے تو خودکار لاگ ان کر دیں (لاگ ان اسکرین دکھائے بغیر) ----------
 function tryAutoLogin(){
+  if(typeof isMaintenanceBlocked === 'function' && isMaintenanceBlocked()){ try{ applyMaintenanceOverlayState(); }catch(e){} return false; } // 🚧 خودکار لاگ ان بھی بند
   // ---------- PIN Lock بند ہو تو سیدھا واحد Admin یوزر کے طور پر داخل کریں — کوئی PIN نہیں مانگا جائے گا۔
   // یہ صرف سنگل یوزر (بغیر Salesman/staff) کے لیے محفوظ ہے — Settings میں واضح انتباہ کے بعد ہی بند ہوتا ہے ----------
   if(AppState.settings.pinLockEnabled === false){
@@ -32093,64 +32097,117 @@ async function fetchProductsFromCloud(silent){
 // ہو جاتی ہے تاکہ خود ڈویلپر کو اوورلے نظر نہ آئے، باقی سب فونز پر (جن کے پاس یہ چھوٹ نہیں) اوورلے فوراً نظر
 // آئے گی۔ آف کرتے ہی اگلے پول (~4 سیکنڈ) پر سب فونز سے خودکار غائب ہو جائے گی ---------- -->
 const MAINTENANCE_DOC_PATH = 'shopData/maintenance';
-let _maintenanceLastKnownOn = null;
+let _maintenanceLastKnownOn = loadFromStorage('maintenanceLastOn', null); // آخری معلوم حالت — ایپ کھلتے ہی (نیٹ آنے سے پہلے بھی) لاگو
+let _maintenanceLastCheck = { ts: 0, err: '' };
 
+// ---------- 🩹 صدام کی ہدایت (26 ستمبر): پہلے یہاں جواب (res.ok) چیک ہی نہیں ہوتا تھا — کلاؤڈ پر لکھائی ناکام
+// ہو جاتی (مثلاً ٹوکن/اجازت کا مسئلہ) تب بھی "کامیاب" مان لیا جاتا، ایڈمن کے فون پر بینر آ جاتا مگر باقی فونز پر
+// کبھی کچھ نہ آتا۔ اب اصل جواب چیک ہوتا ہے، اور لکھنے کے بعد دوبارہ پڑھ کر تصدیق کی جاتی ہے ---------- -->
 async function pushMaintenanceMode(on){
   try{
-    await authFirestoreFetch(`${MAINTENANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+    const res = await authFirestoreFetch(`${MAINTENANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         fields: {
           on: { booleanValue: !!on },
-          updatedAt: { integerValue: String(Date.now()) }
+          updatedAt: { integerValue: String(Date.now()) },
+          by: { stringValue: (AppState.currentUser && AppState.currentUser.name) || 'admin' }
         }
       })
     });
-    return true;
-  }catch(e){ return false; }
+    if(!res.ok){
+      let reason = 'HTTP ' + res.status;
+      try{ const b = await res.json(); if(b?.error?.message) reason += ' — ' + b.error.message; }catch(e2){}
+      return { ok: false, err: reason };
+    }
+    return { ok: true, err: '' };
+  }catch(e){ return { ok: false, err: (window.__cloudSyncError || e.message || 'آف لائن') }; }
+}
+
+// ---------- کلاؤڈ سے موجودہ حالت پڑھیں (کیش کے بغیر) — true/false، یا null اگر پڑھ نہ سکے ---------- -->
+async function readMaintenanceFromCloud(){
+  try{
+    const res = await authFirestoreFetch(`${MAINTENANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(res.status === 404){ _maintenanceLastCheck = { ts: Date.now(), err: '' }; return false; }
+    if(!res.ok){ _maintenanceLastCheck = { ts: Date.now(), err: 'HTTP ' + res.status }; return null; }
+    const doc = await res.json();
+    _maintenanceLastCheck = { ts: Date.now(), err: '' };
+    return !!doc.fields?.on?.booleanValue;
+  }catch(e){
+    _maintenanceLastCheck = { ts: Date.now(), err: (window.__cloudSyncError || e.message || 'آف لائن') };
+    return null;
+  }
 }
 
 async function fetchMaintenanceMode(){
-  try{
-    const res = await authFirestoreFetch(`${MAINTENANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-    if(res.status === 404){ applyMaintenanceOverlayState(false); return; }
-    if(!res.ok) return;
-    const doc = await res.json();
-    const on = !!doc.fields?.on?.booleanValue;
-    _maintenanceLastKnownOn = on;
-    applyMaintenanceOverlayState(on);
-  }catch(e){ /* آف لائن — پچھلی حالت پر ہی رہنے دیں، جیسے ہی نیٹ آئے گا اگلے پول پر خودکار درست ہو جائے گا */ }
+  const on = await readMaintenanceFromCloud();
+  if(on === null) return; // آف لائن — پچھلی حالت پر رہنے دیں
+  _maintenanceLastKnownOn = on;
+  saveToStorage('maintenanceLastOn', on);
+  // ---------- کلاؤڈ پر موڈ آف ہو چکا ہو (کسی بھی فون سے) تو اس فون کی مقامی چھوٹ بھی صاف ---------- -->
+  if(!on && loadFromStorage('maintenanceLocalBypass', false)) saveToStorage('maintenanceLocalBypass', false);
+  applyMaintenanceOverlayState(on);
+  refreshMaintenanceLocalBanner();
+  refreshMaintenanceQuickUi();
 }
 
+// ---------- 🚧 صدام کی ہدایت (26 ستمبر): مینٹیننس آن ہو تو — لاگ ان صفحے پر خوبصورت بینر "ویب سائٹ پر مینٹیننس
+// جاری ہے" اور لاگ ان مکمل بند (ایڈمن، ملازم، منشی، کسٹمر — کوئی اندر نہ جا سکے)؛ جو پہلے سے ایپ کے اندر ہو
+// اس پر پوری سکرین کا اوورلے۔ صرف وہ فون مستثنیٰ جس سے مینٹیننس آن کی گئی ---------- -->
+function isMaintenanceBlocked(){
+  const on = _maintenanceLastKnownOn === true;
+  return on && !loadFromStorage('maintenanceLocalBypass', false);
+}
 function applyMaintenanceOverlayState(on){
+  if(on !== undefined && on !== null) _maintenanceLastKnownOn = !!on;
+  const blocked = isMaintenanceBlocked();
   const overlay = document.getElementById('maintenanceOverlay');
-  if(!overlay) return;
-  const localBypass = loadFromStorage('maintenanceLocalBypass', false);
-  overlay.style.display = (on && !localBypass) ? 'flex' : 'none';
+  const ls = document.getElementById('loginScreen');
+  const loginVisible = !!(ls && getComputedStyle(ls).display !== 'none');
+  if(overlay) overlay.style.display = (blocked && !loginVisible) ? 'flex' : 'none';
+  if(ls) ls.classList.toggle('maintBlocked', blocked);
+  try{ ensureMaintQuickUi(); }catch(e){}
+  const lb = document.getElementById('maintLoginBanner');
+  if(lb) lb.style.display = blocked ? 'block' : 'none';
+}
+// ---------- لاگ ان کی ہر کوشش پر یہ چیک — مینٹیننس جاری ہو تو روک دیں ---------- -->
+function maintenanceLoginGuard(){
+  if(!isMaintenanceBlocked()) return false;
+  applyMaintenanceOverlayState();
+  alert('🚧 ویب سائٹ پر مینٹیننس جاری ہے — برائے کرم انتظار فرمائیں۔ کام مکمل ہوتے ہی لاگ ان کھل جائے گا۔');
+  return true;
 }
 
-// ---------- 🚧 ڈویلپر پینل کا بٹن — ایک ٹیپ میں آن/آف، اسی فون پر خود کو مقامی چھوٹ دیتا ہے ---------- -->
-async function toggleMaintenanceMode(){
-  const btn = document.getElementById('maintenanceToggleBtn');
-  const currentlyOnByMe = loadFromStorage('maintenanceLocalBypass', false);
-  const turningOn = !currentlyOnByMe;
-  if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
-  const ok = await pushMaintenanceMode(turningOn);
-  if(ok){
+// ---------- آن/آف — جس فون سے آن کیا جائے اسے مقامی چھوٹ ملتی ہے، باقی سب فونز پر اوورلے ---------- -->
+async function setMaintenanceMode(turningOn){
+  const btns = [document.getElementById('maintenanceToggleBtn'), document.getElementById('maintQuickToggleBtn')].filter(Boolean);
+  btns.forEach(b => { b.disabled = true; b.textContent = '⏳ کلاؤڈ پر بھیج رہا ہوں...'; });
+  const r = await pushMaintenanceMode(turningOn);
+  let verified = null;
+  if(r.ok) verified = await readMaintenanceFromCloud();
+  btns.forEach(b => { b.disabled = false; });
+  if(r.ok && verified === turningOn){
     saveToStorage('maintenanceLocalBypass', turningOn);
+    _maintenanceLastKnownOn = turningOn;
+    saveToStorage('maintenanceLastOn', turningOn);
     applyMaintenanceOverlayState(turningOn);
   }
   refreshMaintenanceToggleBtnLabel();
-  if(btn) btn.disabled = false;
-  if(!ok) alert('❌ آف لائن — انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں');
+  refreshMaintenanceQuickUi();
+  if(!r.ok) alert('❌ کلاؤڈ پر محفوظ نہیں ہوا — ' + r.err + '\nانٹرنیٹ چیک کر کے دوبارہ کوشش کریں');
+  else if(verified !== turningOn) alert('⚠️ کلاؤڈ پر بھیج دیا مگر تصدیق نہیں ہو سکی — چند سیکنڈ بعد دوبارہ دیکھیں');
+}
+async function toggleMaintenanceMode(){
+  const cur = _maintenanceLastKnownOn !== null ? _maintenanceLastKnownOn : loadFromStorage('maintenanceLocalBypass', false);
+  await setMaintenanceMode(!cur);
 }
 
 function refreshMaintenanceToggleBtnLabel(){
   const btn = document.getElementById('maintenanceToggleBtn');
-  const onByMe = loadFromStorage('maintenanceLocalBypass', false);
+  const on = _maintenanceLastKnownOn !== null ? _maintenanceLastKnownOn : loadFromStorage('maintenanceLocalBypass', false);
   if(btn){
-    if(onByMe){
+    if(on){
       btn.textContent = '✅ مینٹیننس موڈ آف کریں (کام مکمل ہو گیا)';
       btn.style.background = 'linear-gradient(180deg,#ef4444,#b91c1c)';
       btn.style.color = '#fff';
@@ -32160,8 +32217,6 @@ function refreshMaintenanceToggleBtnLabel(){
       btn.style.color = '#fff';
     }
   }
-  // ---------- 🚧 اسی فون پر مستقل اوپری بینر بھی اسی وقت اپڈیٹ کر دیں — چاہے یہ فنکشن Developer Panel کھلنے
-  // پر چلے یا toggleMaintenanceMode() کے بعد، بینر ہمیشہ درست حالت میں رہے گا ---------- -->
   refreshMaintenanceLocalBanner();
 }
 
@@ -32171,6 +32226,113 @@ function refreshMaintenanceLocalBanner(){
   if(!banner) return;
   const onByMe = loadFromStorage('maintenanceLocalBypass', false);
   banner.style.display = onByMe ? 'flex' : 'none';
+}
+
+/* =====================================================================
+   🚧 صدام کی ہدایت (26 ستمبر): آسان راستہ — لاگ ان صفحے اور ہوم صفحے کے نیچے "مینٹیننس" کا لفظ،
+   اسے 7 دفعہ ٹچ کریں تو بغیر پاسورڈ کے آن/آف والا پینل کھل جائے۔ موڈ آن ہو تو وہیں "🚧 مینٹیننس جاری ہے"
+   لکھا نظر آئے۔ دوسرے فون پر اوورلے آیا ہوا ہو تو اوورلے کے 🛠️ نشان کو 7 دفعہ ٹچ کر کے بھی یہی پینل کھلتا ہے
+   ===================================================================== */
+let _maintTapCount = 0, _maintTapTimer = null;
+function maintSecretTap(){
+  _maintTapCount++;
+  clearTimeout(_maintTapTimer);
+  _maintTapTimer = setTimeout(() => { _maintTapCount = 0; }, 2500);
+  if(_maintTapCount >= 7){
+    _maintTapCount = 0;
+    openMaintQuickPanel();
+  }
+}
+function ensureMaintQuickUi(){
+  const addLabel = (parent, id) => {
+    if(!parent || document.getElementById(id)) return;
+    const el = document.createElement('div');
+    el.id = id;
+    el.className = 'maintQuickLabel';
+    el.setAttribute('dir', 'rtl');
+    el.onclick = maintSecretTap;
+    el.style.cssText = "text-align:center; margin:14px auto 6px; padding:6px 14px; width:fit-content; border-radius:20px; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:13px; font-weight:800; cursor:pointer; user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;";
+    parent.appendChild(el);
+  };
+  const loginBox = document.getElementById('loginScreen')?.querySelector('.loginBox') || document.getElementById('loginScreen');
+  addLabel(loginBox, 'maintQuickLabelLogin');
+  if(loginBox && !document.getElementById('maintLoginBanner')){
+    const bn = document.createElement('div');
+    bn.id = 'maintLoginBanner';
+    bn.className = 'maintLoginBanner';
+    bn.setAttribute('dir', 'rtl');
+    bn.style.cssText = "display:none; margin:10px 0 12px; padding:18px 14px; border-radius:18px; text-align:center; background:linear-gradient(160deg,#fff7ed,#fde68a); border:2px solid #f59e0b; box-shadow:0 6px 0 #b45309, 0 10px 22px rgba(0,0,0,.28); font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;";
+    bn.innerHTML = `<div style="font-size:42px; line-height:1.2; animation:maintSpin 3s ease-in-out infinite;">🛠️</div>
+      <div style="font-size:18px; font-weight:900; color:#7c2d12; line-height:1.9; margin-top:4px; white-space:nowrap;">ویب سائٹ پر مینٹیننس جاری ہے</div>
+      <div style="font-size:16px; font-weight:700; color:#92400e; line-height:1.9;">برائے کرم انتظار فرمائیں</div>
+      <div style="font-size:12.5px; color:#78350f; line-height:1.9; margin-top:4px;">کام مکمل ہوتے ہی ایپ خود بخود کھل جائے گی</div>
+      <div style="font-size:19px; font-weight:900; color:#15803d; line-height:2; margin-top:6px; padding-top:6px; border-top:1.5px dashed #f59e0b;">﴿ إِنَّ اللّٰهَ مَعَ الصّٰبِرِينَ ﴾</div>`;
+    const firstChild = loginBox.children[1] || loginBox.firstChild;
+    loginBox.insertBefore(bn, firstChild);
+    if(!document.getElementById('maintBlockStyle')){
+      const st = document.createElement('style');
+      st.id = 'maintBlockStyle';
+      st.textContent = `#loginScreen.maintBlocked .loginBox > *:not(.maintLoginBanner):not(.maintQuickLabel):not(:first-child){opacity:.18; filter:grayscale(1); pointer-events:none !important;}
+        @keyframes maintSpin{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}`;
+      document.head.appendChild(st);
+    }
+  }
+  addLabel(document.getElementById('screen-home'), 'maintQuickLabelHome');
+  const ovIcon = document.querySelector('#maintenanceOverlay div[style*="font-size:52px"]');
+  if(ovIcon && !ovIcon.dataset.maintTap){ ovIcon.dataset.maintTap = '1'; ovIcon.style.cursor = 'pointer'; ovIcon.onclick = maintSecretTap; }
+  if(!document.getElementById('maintQuickModal')){
+    const m = document.createElement('div');
+    m.id = 'maintQuickModal';
+    m.className = 'modalOverlay';
+    m.style.zIndex = '1000001';
+    m.onclick = (e) => { if(e.target === m) closeMaintQuickPanel(); };
+    m.innerHTML = `
+      <div class="modalBox" dir="rtl" style="max-width:360px; text-align:center; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif;">
+        <h3 style="margin:0 0 8px;">🛠️ مینٹیننس</h3>
+        <div id="maintQuickStatus" style="font-size:14px; font-weight:800; margin-bottom:10px; line-height:1.9;"></div>
+        <button type="button" id="maintQuickToggleBtn" onclick="toggleMaintenanceMode()" style="width:100%; padding:14px; border:none; border-radius:12px; color:#fff; font-weight:900; font-size:15px; cursor:pointer;"></button>
+        <div id="maintQuickCheck" style="font-size:11px; color:var(--muted); margin-top:8px; font-family:Arial,Helvetica,sans-serif;"></div>
+        <button type="button" onclick="closeMaintQuickPanel()" style="width:100%; margin-top:10px; padding:11px; border:none; border-radius:10px; background:#f1f5f9; color:#334155; font-weight:800; cursor:pointer;">✖ بند کریں</button>
+      </div>`;
+    document.body.appendChild(m);
+  }
+}
+async function openMaintQuickPanel(){
+  ensureMaintQuickUi();
+  document.getElementById('maintQuickModal').classList.add('show');
+  refreshMaintenanceQuickUi();
+  await fetchMaintenanceMode(); // تازہ ترین کلاؤڈ حالت
+  refreshMaintenanceQuickUi();
+}
+function closeMaintQuickPanel(){
+  const m = document.getElementById('maintQuickModal');
+  if(m) m.classList.remove('show');
+}
+function refreshMaintenanceQuickUi(){
+  try{ ensureMaintQuickUi(); }catch(e){ return; }
+  const on = _maintenanceLastKnownOn !== null ? _maintenanceLastKnownOn : loadFromStorage('maintenanceLocalBypass', false);
+  document.querySelectorAll('.maintQuickLabel').forEach(el => {
+    el.textContent = on ? '🚧 مینٹیننس جاری ہے' : '🛠️ مینٹیننس';
+    el.style.background = on ? 'linear-gradient(180deg,#f59e0b,#b45309)' : 'rgba(255,255,255,.12)';
+    el.style.color = on ? '#fff' : (el.id === 'maintQuickLabelHome' ? '#94a3b8' : 'rgba(255,255,255,.55)');
+    el.style.boxShadow = on ? '0 3px 0 #78350f' : 'none';
+  });
+  const st = document.getElementById('maintQuickStatus');
+  const btn = document.getElementById('maintQuickToggleBtn');
+  const chk = document.getElementById('maintQuickCheck');
+  if(st) st.innerHTML = on
+    ? '<span style="color:#b45309;">🚧 مینٹیننس جاری ہے</span><br><span style="font-size:12px; color:#475569;">باقی سب فونز پر ایپ بند ہے</span>'
+    : '<span style="color:#15803d;">✅ ایپ سب کے لیے کھلی ہے</span>';
+  if(btn && !btn.disabled){
+    btn.textContent = on ? '✅ مینٹیننس بند کریں (کام مکمل)' : '🚧 مینٹیننس شروع کریں';
+    btn.style.background = on ? 'linear-gradient(180deg,#22c55e,#15803d)' : 'linear-gradient(180deg,#f59e0b,#b45309)';
+    btn.style.boxShadow = on ? '0 3px 0 #14532d' : '0 3px 0 #78350f';
+  }
+  if(chk){
+    const t = _maintenanceLastCheck.ts ? new Date(_maintenanceLastCheck.ts).toLocaleTimeString() : '—';
+    chk.textContent = _maintenanceLastCheck.err ? `☁️ cloud check failed (${t}): ${_maintenanceLastCheck.err}` : `☁️ cloud checked: ${t}`;
+    chk.style.color = _maintenanceLastCheck.err ? '#b91c1c' : 'var(--muted)';
+  }
 }
 
 // ---------- 🔄 صدام کی ہدایت (FM20SEPSU02): دستی "تازہ کریں" بٹن — pending تبدیلی ہو تو پہلے بھیجیں،
@@ -41663,6 +41825,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------- 🚧 اسی فون پر اگر پہلے سے مینٹیننس موڈ آن کیا ہوا ہے تو ایپ کھلتے ہی مستقل بینر بھی فوراً نظر آئے
   // (پہلے صرف Developer Panel کھولنے یا ٹوگل کرنے پر اپڈیٹ ہوتا تھا، اب شروع میں ہی) ---------- -->
   try{ refreshMaintenanceLocalBanner(); }catch(e){ console.error('refreshMaintenanceLocalBanner failed', e); }
+  try{ refreshMaintenanceQuickUi(); }catch(e){ console.error('refreshMaintenanceQuickUi failed', e); }
 
   try{ setupLoginScreen(); }catch(e){ console.error('setupLoginScreen failed', e); }
 
