@@ -2752,6 +2752,7 @@
          خودکار کھلا ہوا آئے گا (setupLoginScreen میں دیکھیں) تاکہ ضروری چیز کبھی چھپی نہ رہے ---------- -->
     <div class="loginMoreToggle" id="loginMoreToggleBtn" onclick="toggleLoginMoreOptions()">⚙️ مزید آپشنز <span id="loginMoreToggleArrow">▾</span></div>
     <div id="loginMoreOptions" style="display:none;">
+      <div id="loginLicenseInfoBox"></div>
       <button onclick="shareAppLink()" style="background:#dcfce7 !important; color:var(--success) !important; margin-top:12px; display:flex; align-items:center; justify-content:center; border-radius:12px !important; padding:12px !important; font-weight:800 !important; box-shadow:0 2px 6px rgba(22,163,74,.15) !important; border:1px solid #bbf7d0 !important;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share This App</button>
 
       <!-- ---------- سیدھا Login سکرین سے ہی Activation Code لگانے کا آپشن — PIN سے پہلے، تاکہ کنفیوژن نہ ہو ---------- -->
@@ -8601,7 +8602,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA0354PM';
+const APP_BUILD_VERSION = 'FM26SEPSA0406PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10626,6 +10627,7 @@ function toggleLoginMoreOptions(open){
   const shouldOpen = (typeof open === 'boolean') ? open : (box.style.display === 'none');
   box.style.display = shouldOpen ? 'block' : 'none';
   btn.classList.toggle('open', shouldOpen);
+  if(shouldOpen){ try{ renderLoginLicenseInfo(); }catch(e){} }
 }
 
 // ---------- 📊 صدام کی ہدایت (FM10SEPTH0844AM): جدول نظارہ — Products اور Stock Adjustment دونوں سکرینز
@@ -18676,6 +18678,7 @@ function _licApplyRestore(expiryStr, activatedOn, code){
     }
   }catch(e){}
   try{ syncSubscriptionToCloud(); }catch(e){}
+  try{ renderLoginLicenseInfo(); }catch(e){}
 }
 // ---------- اسی فون (UID) پر لگے تمام کوڈز میں سے سب سے لمبی میعاد والا ---------- -->
 async function _licFindByUid(uid){
@@ -18779,6 +18782,49 @@ async function retrySubscriptionRestore(){
     m.style.color = 'var(--danger)';
     m.textContent = navigator.onLine === false ? '❌ انٹرنیٹ نہیں — انٹرنیٹ چلا کر دوبارہ دبائیں۔' : '❌ اس فون پر کوئی چالو سبسکرپشن نہیں ملی۔ پرانا کوڈ دوبارہ ڈال دیں، یا نیا کوڈ لیں۔';
   }
+}
+
+// ---------- 📋 مزید آپشنز میں: Device ID + لگا ہوا کوڈ + ختم ہونے کی تاریخ — کاپی اور "خانے میں لگائیں" ---------- -->
+function _licCopy(text, btn){
+  const done = () => { if(btn){ const o = btn.textContent; btn.textContent = '✅ کاپی ہو گیا'; setTimeout(() => { btn.textContent = o; }, 1400); } };
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done, () => { _licCopyFallback(text); done(); }); return; }
+  }catch(e){}
+  _licCopyFallback(text); done();
+}
+function _licCopyFallback(text){
+  try{ const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }catch(e){}
+}
+function renderLoginLicenseInfo(){
+  const box = document.getElementById('loginLicenseInfoBox');
+  if(!box) return;
+  let uid = '';
+  try{ uid = getOrCreateDeviceUID(); }catch(e){}
+  const code = AppState.settings.lastActivationCode || '';
+  const exp = AppState.settings.subscriptionExpiry || '';
+  const trial = !!AppState.settings.isOnFreeTrial;
+  let expTxt = '—';
+  try{ if(exp) expTxt = (typeof formatDateDMY === 'function' ? formatDateDMY(exp) : exp) + (trial ? ' (مفت ٹرائل)' : ''); }catch(e){ expTxt = exp; }
+  const btn = (label, js, bg, col) => `<button type="button" onclick="${js}" style="width:auto !important; flex:0 0 auto; margin:0 !important; padding:6px 10px !important; border:none; border-radius:8px !important; background:${bg} !important; color:${col} !important; font-size:12.5px !important; font-weight:800; cursor:pointer; font-family:inherit;">${label}</button>`;
+  const val = (v) => `<span style="flex:1; min-width:0; font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:16px; letter-spacing:1px; direction:ltr; text-align:left; overflow:hidden; text-overflow:ellipsis; user-select:all; -webkit-user-select:all;">${v}</span>`;
+  const row = (label, inner) => `<div style="display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid #dbe1ea; border-radius:10px; padding:7px 9px; margin-top:6px;"><span style="flex:0 0 auto; font-size:13px; font-weight:800; color:#334155;">${label}</span>${inner}</div>`;
+  box.innerHTML = `<div dir="rtl" style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px; padding:10px; margin-top:12px; text-align:right; font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+    <div style="font-size:14px; font-weight:800; color:#166534;">📋 آپ کی سبسکرپشن کی معلومات</div>
+    ${row('📱 Device ID', val(_bkEsc(uid || '—')) + (uid ? btn('📋 کاپی', `_licCopy('${uid}', this)`, '#e0f2fe', '#075985') : ''))}
+    <div style="background:#fff; border:1.5px solid #dbe1ea; border-radius:10px; padding:7px 9px; margin-top:6px;">
+      <div style="display:flex; align-items:center; gap:8px;"><span style="flex:0 0 auto; font-size:13px; font-weight:800; color:#334155;">🔑 کوڈ</span>${val(_bkEsc(code || '— ابھی کوئی کوڈ نہیں'))}</div>
+      ${code ? `<div style="display:flex; gap:6px; margin-top:6px; justify-content:flex-start;">${btn('📋 کاپی', `_licCopy(${JSON.stringify(code).replace(/"/g, '&quot;')}, this)`, '#e0f2fe', '#075985')}${btn('⬇️ خانے میں لگائیں', 'licPasteCodeIntoBox()', '#dcfce7', '#166534')}</div>` : ''}
+    </div>
+    ${row('📅 ختم ہونے کی تاریخ', val(_bkEsc(expTxt)))}
+    <div style="font-size:12px; color:#475569; margin-top:6px; line-height:1.7;">یہ کوڈ سنبھال کر رکھیں — اسی موبائل پر ایپ دوبارہ لگانی پڑے تو یہی کوڈ دوبارہ ڈال دیں۔</div>
+  </div>`;
+}
+function licPasteCodeIntoBox(){
+  const code = AppState.settings.lastActivationCode || '';
+  const ab = document.getElementById('loginActivationBox');
+  if(ab) ab.style.display = 'block';
+  const inp = document.getElementById('loginActivationCodeInput');
+  if(inp){ inp.value = code; try{ inp.focus(); inp.scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){} }
 }
 
 let activeBatchesProductId = null;
