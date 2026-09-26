@@ -8602,7 +8602,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM27SEPSU0313AM';
+const APP_BUILD_VERSION = 'FM27SEPSU0322AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -24904,11 +24904,11 @@ function renderPoBrowseList(){
   const measPackFont = "700 11px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measNumFont = "900 12px Arial,Helvetica,sans-serif";
 
-  const serialW = 34;
-  const nameW = autoColWidth('نام', list.map(p => p.name), measUrduFont, {min:66, max:160, pad:20});
-  const packingW = autoColWidth('پیکنگ', list.map(p => { const v = p.variants[0]||{}; return p.variants.length > 1 ? '📦 چُنیں' : (v.label || '—'); }), measPackFont, {min:50, max:96, pad:14});
-  const stockW = autoColWidth('📦 سٹاک', list.map(p => p.variants[0]?.stock||0), measNumFont, {min:34, max:52, pad:10});
-  const qtyW = 150;
+  const serialW = 30;
+  const nameW = 60; // نام کالم خودکار (بچی ہوئی جگہ)، لمبا نام دو سطروں میں
+  const packingW = 56;
+  const stockW = 40;
+  const qtyW = 124;
 
   const colWidths = [serialW, nameW, packingW, stockW, qtyW];
   const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
@@ -24917,7 +24917,7 @@ function renderPoBrowseList(){
     const isSingle = p.variants.length === 1;
     const v = p.variants[0] || {};
     const rowBg = idx % 2 === 0 ? '#ffffff' : '#f1f6f2';
-    const frozenTd = (i) => `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;background:${rowBg};z-index:3;`;
+    const frozenTd = (i) => `background:${rowBg};`;
 
     let stock, isOut, isLow, qtyInCart, packingCellHtml, qtyCellHtml;
 
@@ -24929,10 +24929,10 @@ function renderPoBrowseList(){
       qtyInCart = cartItem ? cartItem.qty : 0;
       packingCellHtml = `<button type="button" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', 'poBrowseList')" style="width:100%;padding:4px 2px;border:1.5px solid #93c5fd;border-radius:9px;font-size:10.5px;background:#eff6ff;color:#1e3a8a;cursor:pointer;${urduFont}">${v.label || '— چنیں —'} ▾</button>`;
       qtyCellHtml = `
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; padding:0 2px;">
-          <button type="button" onclick="changePoCartQty(${v.variant_id}, -1)" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;border:none;background:#fee2e2;color:#b91c1c;font-weight:900;font-size:22px;line-height:1;padding:0;box-shadow:0 2px 0 #fca5a5;">−</button>
-          <input type="text" inputmode="decimal" value="${qtyInCart || ''}" placeholder="0" onfocus="this.select()" oninput="poLiveStockPreview(${v.variant_id}, this.value)" onchange="setPoCartQtyManual(${v.variant_id}, this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); }" style="flex:0 0 auto;width:54px;height:34px;box-sizing:border-box;padding:2px;border:1.5px solid ${qtyInCart>0 ? 'var(--primary)' : '#dbe1ea'};border-radius:8px;font-size:17px;font-weight:900;text-align:center;${numFont}color:${qtyInCart>0 ? '#134e2c' : '#64748b'};background:#fff;">
-          <button type="button" onclick="addToPoCartGrid(${v.variant_id})" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;border:none;background:#dcfce7;color:#15803d;font-weight:900;font-size:22px;line-height:1;padding:0;box-shadow:0 2px 0 #86efac;">+</button>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:3px; padding:0;">
+          <button type="button" onclick="changePoCartQty(${v.variant_id}, -1)" style="flex:0 0 auto;width:32px;height:34px;border-radius:9px;border:none;background:#fee2e2;color:#b91c1c;font-weight:900;font-size:22px;line-height:1;padding:0;box-shadow:0 2px 0 #fca5a5;">−</button>
+          <input type="text" inputmode="decimal" value="${qtyInCart || ''}" placeholder="0" onfocus="this.select()" oninput="poLiveStockPreview(${v.variant_id}, this.value)" onchange="setPoCartQtyManual(${v.variant_id}, this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); }" style="flex:0 0 auto;width:46px;height:34px;box-sizing:border-box;padding:1px;border:1.5px solid ${qtyInCart>0 ? 'var(--primary)' : '#dbe1ea'};border-radius:8px;font-size:16px;font-weight:900;text-align:center;${numFont}color:${qtyInCart>0 ? '#134e2c' : '#64748b'};background:#fff;">
+          <button type="button" onclick="addToPoCartGrid(${v.variant_id})" style="flex:0 0 auto;width:32px;height:34px;border-radius:9px;border:none;background:#dcfce7;color:#15803d;font-weight:900;font-size:22px;line-height:1;padding:0;box-shadow:0 2px 0 #86efac;">+</button>
         </div>`;
     } else {
       const totalStock = p.variants.reduce((s0,vv)=>s0+(vv.stock||0),0);
@@ -24952,7 +24952,7 @@ function renderPoBrowseList(){
     return `
       <tr style="background:${rowBg};">
         <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:28px !important;height:28px !important;min-width:28px !important;min-height:28px !important;font-size:11px !important;cursor:default !important;pointer-events:none !important;">${p.serial_no ?? '?'}</span></td>
-        <td style="${tdBase}${frozenTd(1)}${urduFont}font-size:12.5px;font-weight:800;">${p.name}</td>
+        <td style="${tdBase}${frozenTd(1)}${urduFont}font-size:12.5px;font-weight:800;white-space:normal;word-break:break-word;line-height:1.35;text-align:right;padding-inline-end:4px;">${p.name}</td>
         <td style="${tdBase}${frozenTd(2)}">${packingCellHtml}</td>
         <td style="${tdBase}">${stockCellHtml}</td>
         <td style="${tdBase}">${qtyCellHtml}</td>
@@ -24973,8 +24973,8 @@ function renderPoBrowseList(){
   const savedScrollLeft = oldScrollEl ? oldScrollEl.scrollLeft : 0;
 
   wrap.innerHTML = `
-    <div id="poBrowseScrollWrap" dir="rtl" style="max-height:44vh; overflow:auto; -webkit-overflow-scrolling:touch; border-radius:10px; border:1px solid #dbe1ea;">
-      <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:${totalTableW}px;table-layout:fixed;font-size:12.5px;margin:0;">
+    <div id="poBrowseScrollWrap" dir="rtl" style="max-height:44vh; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; border-radius:10px; border:1px solid #dbe1ea;">
+      <table style="border-collapse:separate;border-spacing:0;width:100%;max-width:100%;table-layout:fixed;font-size:12.5px;margin:0;">
         ${colgroupHtml}
         <thead>${theadHtml}</thead>
         <tbody>${rows}</tbody>
