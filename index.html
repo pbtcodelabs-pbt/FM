@@ -2406,7 +2406,10 @@
     کبھی غائب نہ ہو (صرف اُن صفحوں پر نظر آئے گا جہاں سرچ کی ضرورت ہے، JS سے display خودکار سیٹ ہوتی ہے) ---------- */
     #globalUiZoomBar{
       grid-column:1; grid-row:3;
-      position:sticky; top:calc(56px + 54px); z-index:588;
+      /* 🩹 26 ستمبر: پہلے position:sticky; top:110px تھا — ہیڈر کی اصل اونچائی 110 سے کم ہونے پر یہ پٹی 27px نیچے
+         کھسک کر سٹاک مینجمنٹ/پراڈکٹس/کسٹمرز کے اوپری بٹنوں کو ڈھانپ لیتی تھی (یہی "بٹن اوپر سے کٹ رہے ہیں" کی جڑ)۔
+         یہ اپنی grid row میں پہلے ہی ہمیشہ نظر آتی ہے (سکرول صرف #mainArea میں ہوتا ہے)، اس لیے sticky کی ضرورت نہیں */
+      position:relative; top:auto; z-index:588;
     }
     /* ---------- بلنگ سکرین پر مزید کمپیکٹ ---------- */
     body.billing-active #globalUiZoomBar{ padding:3px 12px; }
@@ -2759,7 +2762,6 @@
   <button class="devChatOption" onclick="sendDevChat('whatsapp')"><span class="devChatIcon">💬</span> WhatsApp</button>
   <button class="devChatOption" onclick="sendDevChat('sms')"><span class="devChatIcon">✉️</span> SMS</button>
   <button class="devChatOption" onclick="sendDevChat('email')"><span class="devChatIcon">📧</span> Gmail</button>
-  <button class="devChatOption" onclick="resetDeviceUIDForTesting()" style="margin-top:10px; border-top:1px solid var(--border); padding-top:12px;"><span class="devChatIcon">🔄</span> Reset Device ID (Testing Only)</button>
 </div>
 
 <!-- 🔐 SUBSCRIPTION GATE — سبسکرپشن ختم/غیر فعال ہونے پر یہ صفحہ لاگ ان کے بعد نظر آئے گا -->
@@ -3832,9 +3834,9 @@
            لمبا، درمیان میں، اور نمایاں/واضح (بڑا فونٹ + موٹی پیڈنگ) ---------- -->
       <!-- ---------- 🆕 صدام کی ہدایت (FM25SEPFR): تین بٹن ایک ہی لائن میں، کبھی نہیں کٹیں گے — ترتیب:
            1) 🏭 بیوپاری سے خریداری  2) 💵 نقد خریداری  3) 📊 رپورٹ (سب سے آخری کونے پر) ---------- -->
-      <div style="display:flex; align-items:stretch; gap:5px; margin-bottom:10px; flex-wrap:nowrap;">
-        <button type="button" onclick="openSupplierPickerForPo()" style="flex:1.35 1 0; min-width:0; padding:9px 3px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:10px; font-weight:900; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">🏭 بیوپاری سے خریداری</button>
-        <button type="button" onclick="openCashPurchaseModal()" style="flex:1.05 1 0; min-width:0; padding:9px 3px; background:linear-gradient(180deg,#34d399,#059669); color:#fff; border:none; border-radius:10px; font-weight:900; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">💵 نقد خریداری</button>
+      <div style="display:flex; align-items:stretch; gap:6px; margin-bottom:10px; flex-wrap:wrap;"><!-- 🔒 26 ستمبر: دونوں خریداری بٹن آدھی آدھی چوڑائی، رپورٹ نیچے پوری لائن -->
+        <button type="button" onclick="openSupplierPickerForPo()" style="flex:1 1 calc(50% - 3px); min-width:0; padding:11px 4px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:10px; font-weight:900; font-size:13px; line-height:1.5; white-space:normal; overflow:visible; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">🏭 بیوپاری سے خریداری</button>
+        <button type="button" onclick="openCashPurchaseModal()" style="flex:1 1 calc(50% - 3px); min-width:0; padding:11px 4px; background:linear-gradient(180deg,#34d399,#059669); color:#fff; border:none; border-radius:10px; font-weight:900; font-size:13px; line-height:1.5; white-space:normal; overflow:visible; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 5px rgba(0,0,0,.15);">💵 نقد خریداری</button>
         <!-- ---------- 🔧 عنوان + منشی — اب مکمل طور پر چھپے ہوئے (کوڈ محفوظ) ---------- -->
         <div style="display:none; align-items:center; gap:4px; flex:1 1 auto; min-width:0; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;">
           <!-- ---------- 🔧 صدام کی ہدایت (FM21SEPMO04): عنوان سکڑ کر صرف "..." رہ جاتا تھا (بمشکل پڑھا جاتا) —
@@ -3846,7 +3848,7 @@
                🔒 FM22SEPTU09: یہ بٹن اب مکمل چھپا دیا — نیچے ڈراپ ڈاؤن میں وہی عمل پہلے سے ایک انٹری کے طور پر موجود ہے ---------- -->
           <button type="button" onclick="openMunshiStockLogReport()" title="🧑‍🌾 منشی کا شامل کردہ سٹاک دیکھیں" style="flex:0 0 auto; padding:4px 6px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:9px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی سٹاک</button>
         </div>
-        <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:0.8 1 0; min-width:0; max-width:none;">
+        <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:1 1 100%; min-width:0; max-width:none;">
           <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="width:100%; justify-content:center; padding:9px 3px; font-size:10.5px; font-weight:900; max-width:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-radius:10px;">
             <span>📊 رپورٹ</span>
             <span class="categoryDropdownArrow">▾</span>
@@ -6641,9 +6643,9 @@
 <div id="maintenanceOverlay" style="display:none; position:fixed; inset:0; z-index:999999; background:rgba(10,15,20,.94); align-items:center; justify-content:center; padding:24px; touch-action:none;" dir="rtl">
   <div style="max-width:340px; text-align:center;">
     <div style="font-size:52px; margin-bottom:14px;">🛠️</div>
+  <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:22px; font-weight:900; color:#86efac; line-height:2; margin-top:14px;">﴿ إِنَّ اللّٰهَ مَعَ الصّٰبِرِينَ ﴾</div>
     <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:22px; font-weight:800; color:#fff; margin-bottom:10px; line-height:1.6;">براہِ کرم انتظار فرمائیں</div>
     <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:16px; font-weight:600; color:#e2e8f0; line-height:1.9;">ویب سائٹ پر اس وقت کام جاری ہے۔<br>ابھی ویب سائٹ استعمال نہ کریں اور کوئی ڈیٹا نہ ڈالیں۔</div>
-  <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:22px; font-weight:900; color:#86efac; line-height:2; margin-top:14px;">﴿ إِنَّ اللّٰهَ مَعَ الصّٰبِرِينَ ﴾</div>
   </div>
 </div>
 
@@ -8563,7 +8565,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA0625AM';
+const APP_BUILD_VERSION = 'FM26SEPSA0750AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9287,7 +9289,10 @@ function openDevChat(context){
 
 // ---------- 🔄 ٹیسٹنگ کے دوران Device ID دوبارہ بنانے کے لیے — کچھ فونز (خاص طور پر MIUI/Xiaomi) پر
 // Chrome کا "Clear data" TWA کی سائٹ ڈیٹا صحیح طرح صاف نہیں کرتا، اس لیے یہ فوری متبادل راستہ ----------
-function resetDeviceUIDForTesting(){
+// ---------- 🔒 صدام کی ہدایت (26 ستمبر): یہ سہولت ہمیشہ کے لیے بند — کوئی بھی Device ID ری سیٹ کر کے مفت ٹرائل
+// دوبارہ نہ لے سکے۔ فنکشن کا نام صرف پرانے حوالوں کے ٹوٹنے سے بچانے کے لیے باقی ہے، اب یہ کچھ نہیں کرتا ---------- -->
+function resetDeviceUIDForTesting(){ return; }
+function _removedResetDeviceUID_unused(){
   if(!confirm('⚠️ This will erase this device\'s Device ID and subscription/trial data (for testing only). Continue?')) return;
   delete AppState.settings.deviceUID;
   delete AppState.settings.subscriptionExpiry;
@@ -14298,6 +14303,9 @@ function finalizeInvoice(){
   // ---------- 🧾 صدام کی ہدایت (26 ستمبر): بل فائنل سے پہلے — (1) ہر سبزی کا چالان طے ہو (ایک ہو تو خودکار)
   // (2) ان چالانوں کا خرید ریٹ لگ چکا ہو۔ ریٹ باقی ہو تو اسی بل کے چالانوں کا پاپ اپ کھلے، سب ریٹ لگتے ہی
   // "اب بل مکمل کریں" دبا کر بل بن جائے۔ منشی کو یہ پابندی نہیں — وہ ریٹ کے بغیر مال دے سکتا ہے ---------- -->
+  for(const _it of Billing.cart){
+    if(!_it.unitPrice || _it.unitPrice <= 0){ alert(`⚠️ "${_it.name}" کی فروخت قیمت (ریٹ) نہیں لگی — پہلے اس کا ریٹ لگائیں، پھر بل بنے گا۔`); return; }
+  }
   if(AppState.currentRole === 'admin'){
     const okCh = checkBillChalansReady(Billing.cart, (item) => {
       const idx = Billing.cart.indexOf(item);
@@ -17294,6 +17302,9 @@ function addPurchaseChalan(v, qty, rate, source, meta){
   v.nextChalanNo = chalanNo + 1;
   v.stock = Math.max(0, Number(v.stock) || 0) + _chRound(qty);
   if(!pending) v.purchase = Number(rate); // ---------- صرف حوالے کے لیے تازہ ترین ریٹ ----------
+  // ---------- 🩹 آڈٹ (26 ستمبر): خریداری سے آیا مال روزانہ رپورٹ کے "آج شامل" میں بھی گنا جائے — پہلے یہ صرف
+  // سٹاک خانے میں دستی نمبر بدلنے پر گنا جاتا تھا، اس لیے منڈی سیل ریکارڈ میں آج کی آمد کم دکھتی تھی ---------- -->
+  try{ recordStockAddedToday(v.variant_id, _chRound(qty)); }catch(e){}
   try{ setTimeout(refreshChalanRateFab, 50); }catch(e){}
   return c;
 }
@@ -17817,6 +17828,27 @@ function saveChalanRate(variantId, chalanNo){
   try{ if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || ''); }catch(e){}
 }
 setInterval(() => { try{ refreshChalanRateFab(); }catch(e){} }, 6000);
+
+// ---------- 🩹 آڈٹ (26 ستمبر): منشی کی نقد/بیوپاری خریداری بھی "منشی کا شامل کردہ سٹاک" رپورٹ میں آئے ---------- -->
+function logMunshiPurchaseEntry(v, qty, chalan, sourceLabel){
+  if(AppState.currentRole === 'admin' || !v) return false;
+  const {p} = findProductAndVariant(v.variant_id);
+  munshiStockLogData.push({
+    id: nextMunshiLogId++, ts: Date.now(),
+    product_id: p ? p.product_id : null, variant_id: v.variant_id,
+    serial_no: p ? (p.serial_no ?? null) : null, name: p ? p.name : '', label: v.label || '',
+    qty: qty, chalanNo: chalan ? chalan.chalanNo : null, source: sourceLabel || '',
+    by: (AppState.currentUser && AppState.currentUser.name) || ''
+  });
+  return true;
+}
+// ---------- سٹاک کی مالیت — ہر چالان اپنے ریٹ سے (ریٹ باقی ہو تو تازہ ترین خرید ریٹ) ---------- -->
+function variantStockValue(v){
+  if(!v) return 0;
+  const chs = (v.chalans || []).filter(c => (Number(c.qty) || 0) > 0);
+  if(!chs.length) return (Number(v.purchase) || 0) * (Number(v.stock) || 0);
+  return chs.reduce((s, c) => s + (Number(c.qty) || 0) * (c.ratePending ? (Number(v.purchase) || 0) : (Number(c.rate) || 0)), 0);
+}
 
 let activeBatchesProductId = null;
 let activeBatchesVariantId = null;
@@ -19423,7 +19455,7 @@ function renderDashDate(){
 function renderHealthBand(){
   // کل اسٹاک ویلیو = تمام variants کی (purchase price × stock) کا مجموعہ
   let stockValue = 0;
-  productsData.forEach(p => p.variants.forEach(v => stockValue += (v.purchase * v.stock)));
+  productsData.forEach(p => p.variants.forEach(v => stockValue += variantStockValue(v))); // 🧾 ہر چالان اپنے ریٹ سے
 
   // ---------- Receivable/Payable اب لائیو حساب ہیں — کسٹمرز اور سپلائرز کے اصل موجودہ ریکارڈ سے، پرانی جامد (static) قیمت سے نہیں ----------
   const totalReceivable = customersData.reduce((sum, c) => sum + (c.total_receivable || 0), 0);
@@ -24173,11 +24205,12 @@ function savePurchaseOrder(){
     if(!confirm('نقد خریداری کی تصدیق کریں؟ سٹاک فوراً بڑھ جائے گا۔')) return;
     let cashTotal = 0;
     const cashId = Date.now();
+    let _munshiLogged = false;
     poCart.forEach(item => {
       cashTotal += item.qty * (Number(item.cost) || 0);
       productsData.forEach(p => {
         const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-        if(v){ addPurchaseChalan(v, item.qty, item.cost, 'نقد خریداری', {poRef: cashId}); }
+        if(v){ const _nc = addPurchaseChalan(v, item.qty, item.cost, 'نقد خریداری', {poRef: cashId}); if(logMunshiPurchaseEntry(v, item.qty, _nc, 'نقد')) _munshiLogged = true; }
       });
     });
     cashPurchasesData = cashPurchasesData || [];
@@ -24191,6 +24224,8 @@ function savePurchaseOrder(){
     saveToStorage('cashPurchases', cashPurchasesData);
     persistAllData();
     pushProductsToCloud(); // ---------- ☁️ نقد خریداری سے سٹاک بڑھنا فوراً کلاؤڈ میں ----------
+    if(_munshiLogged){ try{ pushMunshiStockLogToCloud(); }catch(e){} }
+    try{ pauseCloudPolling(20000); }catch(e){}
     closePoModal();
     renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput') ? document.getElementById('stockAdjSearchInput').value : '');
     renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
@@ -24210,9 +24245,10 @@ function savePurchaseOrder(){
   // میں دے سکے۔ ہر آئٹم کا الگ چالان (بیوپاری کے نام سے)، ریٹ نہ ہو تو "ریٹ باقی" — ایڈمن بعد میں لگائے گا
   // اور تب ہی بیوپاری کا کھاتہ اس رقم سے بڑھے گا ---------- -->
   const newPoId = Date.now();
+  let _poMunshiLogged = false;
   poCart.forEach(item => {
     const v = findVariantByVariantId(item.variant_id);
-    if(v) addPurchaseChalan(v, item.qty, item.cost, 'بیوپاری خریداری', {supplierId: s.supplier_id, supplierName: s.name, poRef: newPoId});
+    if(v){ const _nc = addPurchaseChalan(v, item.qty, item.cost, 'بیوپاری خریداری', {supplierId: s.supplier_id, supplierName: s.name, poRef: newPoId}); if(logMunshiPurchaseEntry(v, item.qty, _nc, s.name)) _poMunshiLogged = true; }
   });
 
   // ---------- اہم: صرف آرڈر بنے، ابھی سٹاک میں کچھ شامل نہیں ہوتا ----------
@@ -24233,6 +24269,7 @@ function savePurchaseOrder(){
   persistAllData();
   pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): نیا پرچیز آرڈر بننے پر واجب الادا فوراً کلاؤڈ میں ----------
   pushProductsToCloud(); // 🧾 نیا سٹاک/چالان فوراً کلاؤڈ میں
+  if(_poMunshiLogged){ try{ pushMunshiStockLogToCloud(); }catch(e){} }
   try{ pauseCloudPolling(20000); }catch(e){}
   try{ renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput') ? document.getElementById('stockAdjSearchInput').value : ''); }catch(e){}
   closePoModal();
@@ -32264,10 +32301,10 @@ function ensureMaintQuickUi(){
     bn.setAttribute('dir', 'rtl');
     bn.style.cssText = "display:none; margin:10px 0 12px; padding:18px 14px; border-radius:18px; text-align:center; background:linear-gradient(160deg,#fff7ed,#fde68a); border:2px solid #f59e0b; box-shadow:0 6px 0 #b45309, 0 10px 22px rgba(0,0,0,.28); font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;";
     bn.innerHTML = `<div style="font-size:42px; line-height:1.2; animation:maintSpin 3s ease-in-out infinite;">🛠️</div>
+      <div style="font-size:20px; font-weight:900; color:#15803d; line-height:2; margin-top:4px; padding-bottom:6px; border-bottom:1.5px dashed #f59e0b;">﴿ إِنَّ اللّٰهَ مَعَ الصّٰبِرِينَ ﴾</div>
       <div style="font-size:18px; font-weight:900; color:#7c2d12; line-height:1.9; margin-top:4px; white-space:nowrap;">ویب سائٹ پر مینٹیننس جاری ہے</div>
       <div style="font-size:16px; font-weight:700; color:#92400e; line-height:1.9;">برائے کرم انتظار فرمائیں</div>
-      <div style="font-size:12.5px; color:#78350f; line-height:1.9; margin-top:4px;">کام مکمل ہوتے ہی ایپ خود بخود کھل جائے گی</div>
-      <div style="font-size:19px; font-weight:900; color:#15803d; line-height:2; margin-top:6px; padding-top:6px; border-top:1.5px dashed #f59e0b;">﴿ إِنَّ اللّٰهَ مَعَ الصّٰبِرِينَ ﴾</div>`;
+      <div style="font-size:12.5px; color:#78350f; line-height:1.9; margin-top:4px;">کام مکمل ہوتے ہی ایپ خود بخود کھل جائے گی</div>`;
     const firstChild = loginBox.children[1] || loginBox.firstChild;
     loginBox.insertBefore(bn, firstChild);
     if(!document.getElementById('maintBlockStyle')){
@@ -39143,6 +39180,13 @@ async function renderReportToCanvas(){
 async function renderTodaySaleReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
+  // 🩹 آڈٹ (26 ستمبر): یہ مددگار فنکشن اس رپورٹ میں موجود ہی نہیں تھا (دوسری رپورٹ کے اندر مقامی تھا) — رپورٹ خالی/رک جاتی تھی
+  const fitReportCellFont = (text, maxWidth, basePx) => {
+    let px = basePx;
+    ctx.font = `${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > 7){ px -= 1; ctx.font = `${px}px ${fontFam}`; }
+    return px;
+  };
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
   const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
