@@ -2944,6 +2944,7 @@
     <input type="text" id="subGateCodeInput" placeholder="6-digit code">
     <button onclick="submitActivationCode()" style="margin-top:14px;">✅ Activate</button>
     <div id="subGateMsg" style="margin-top:10px; font-size:13px; font-weight:700;"></div>
+    <button type="button" onclick="retrySubscriptionRestore()" style="margin-top:10px; width:100%; padding:10px; border:1.5px solid #86efac; border-radius:10px; background:#f0fdf4; color:#166534; font-weight:800; font-size:14px; cursor:pointer;">🔄 پرانی سبسکرپشن دوبارہ چیک کریں</button>
     <div class="loginHint">No code yet? Tap the 💬 chat bubble below to ask your developer.</div>
   </div>
   <button class="devChatBubble" onclick="openDevChat('subscription')" title="Chat with Developer">💬</button>
@@ -3750,7 +3751,7 @@
     <!-- DASHBOARD (Admin only) -->
     <div class="screen admin-only" id="screen-dashboard">
       <div class="dashHeader">
-        <div class="pageTitle">📊 Dashboard (Admin Only)</div>
+        <div class="pageTitle">📊 ڈیش بورڈ</div>
         <div class="dashDate" id="dashDate">—</div>
       </div>
 
@@ -3766,47 +3767,47 @@
 
       <!-- ---------- ⭐ سب سے پہلے، سب سے نمایاں: صاف صاف Profit/Loss سمری (کل اثاثے − کل واجبات) ---------- -->
       <div class="netPositionHero" id="netPositionHero">
-        <div class="nphLabel">💰 Net Financial Position</div>
+        <div class="nphLabel">💰 کل مالی حالت</div>
         <div class="nphValue" id="nphValue">—</div>
         <div class="nphBreakdown" id="nphBreakdown">—</div>
       </div>
 
       <!-- ZONE 1: فوری اعداد و شمار — ایک ہی لائن میں سب سے اہم نمبرز -->
-      <div class="dashSectionLabel">Quick Overview</div>
+      <div class="dashSectionLabel">ایک نظر میں</div>
       <div class="kpiGrid" id="kpiGrid"></div>
 
       <!-- ZONE 2: Financial Health — کس طرح بنی، اس کی تفصیل (سبز = آنے والے پیسے، سرخ = جانے والے پیسے) -->
-      <div class="dashSectionLabel">Financial Health — Money In vs Money Out</div>
+      <div class="dashSectionLabel">لینا اور دینا</div>
       <div class="finSplitWrap">
         <div class="finSplitCol finGreen">
-          <div class="finSplitHead">🟢 Money Coming In / Assets</div>
-          <div class="finRow"><span>📦 Stock Value</span><span id="hlStock">—</span></div>
-          <div class="finRow"><span>💵 Cash in Hand</span><span id="hlCash">—</span></div>
-          <div class="finRow"><span>🤝 Customer Receivables</span><span id="hlReceivable">—</span></div>
-          <div class="finRow"><span>📔 Diary I Gave</span><span id="hlDiaryReceivable">—</span></div>
-          <div class="finSplitTotal" id="finGreenTotal">Total: Rs. 0</div>
+          <div class="finSplitHead">🟢 لینا (اثاثے)</div>
+          <div class="finRow"><span>📦 سٹاک کی مالیت</span><span id="hlStock">—</span></div>
+          <div class="finRow"><span>💵 ہاتھ میں کیش</span><span id="hlCash">—</span></div>
+          <div class="finRow"><span>🤝 گاہکوں پر بقایا</span><span id="hlReceivable">—</span></div>
+          <div class="finRow"><span>📔 ڈائری — میں نے دیا</span><span id="hlDiaryReceivable">—</span></div>
+          <div class="finSplitTotal" id="finGreenTotal">کل: Rs. 0</div>
         </div>
         <div class="finSplitCol finRed">
-          <div class="finSplitHead">🔴 Money Going Out / Liabilities</div>
-          <div class="finRow"><span>📤 Supplier Payables</span><span id="hlPayable">—</span></div>
-          <div class="finRow"><span>📔 Diary I Got</span><span id="hlDiaryPayable">—</span></div>
-          <div class="finSplitTotal" id="finRedTotal">Total: Rs. 0</div>
+          <div class="finSplitHead">🔴 دینا</div>
+          <div class="finRow"><span>📤 بیوپاریوں کا دینا</span><span id="hlPayable">—</span></div>
+          <div class="finRow"><span>📔 ڈائری — مجھے ملا</span><span id="hlDiaryPayable">—</span></div>
+          <div class="finSplitTotal" id="finRedTotal">کل: Rs. 0</div>
         </div>
       </div>
 
       <!-- ZONE 3: الرٹس — کم اسٹاک اور ایکسپائری اب ساتھ ساتھ، الگ الگ صاف پینل میں -->
-      <div class="dashSectionLabel" id="needsAttentionSection" style="display:none;">Needs Attention</div>
+      <div class="dashSectionLabel" id="needsAttentionSection" style="display:none;">توجہ طلب</div>
       <div class="alertsWrap">
         <div class="alertPanel" style="display:none;">
           <div class="alertPanelHead">
-            <h3>⚠️ Low Stock Alerts</h3>
+            <h3>⚠️ کم سٹاک</h3>
             <span class="alertCountBadge warn" id="lowStockCount">0</span>
           </div>
           <div class="alertList" id="lowStockGrid"></div>
         </div>
         <div class="alertPanel" style="display:none;">
           <div class="alertPanelHead">
-            <h3>⏳ Expiry Warnings</h3>
+            <h3>⏳ ایکسپائری</h3>
             <span class="alertCountBadge danger" id="expiryCount">0</span>
           </div>
           <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
@@ -4906,28 +4907,28 @@
          📈 TREND ANALYSIS — سیل/ریونیو ٹرینڈز: آئٹم وائز، کسٹمر وائز، ایریا وائز
          ===================================================================== -->
     <div class="screen admin-only" id="screen-trends">
-      <div class="pageTitle">📈 Trend Analysis</div>
+      <div class="pageTitle">📈 رجحانات</div>
 
       <!-- ---------- تاریخ کی حد — سب ٹیبز پر یکساں لاگو ہوتی ہے ---------- -->
       <div class="billStatusTabs" id="trendDateTabs">
-        <button class="billTabBtn active" id="trendDateTab-today" onclick="setTrendDateKey('today')">📅 Today</button>
-        <button class="billTabBtn" id="trendDateTab-week" onclick="setTrendDateKey('week')">🗓️ This Week</button>
-        <button class="billTabBtn" id="trendDateTab-month" onclick="setTrendDateKey('month')">📆 This Month</button>
-        <button class="billTabBtn" id="trendDateTab-all" onclick="setTrendDateKey('all')">♾️ All Time</button>
-        <button class="billTabBtn" id="trendDateTab-custom" onclick="setTrendDateKey('custom')">🔧 Custom Range</button>
+        <button class="billTabBtn active" id="trendDateTab-today" onclick="setTrendDateKey('today')">📅 آج</button>
+        <button class="billTabBtn" id="trendDateTab-week" onclick="setTrendDateKey('week')">🗓️ یہ ہفتہ</button>
+        <button class="billTabBtn" id="trendDateTab-month" onclick="setTrendDateKey('month')">📆 یہ مہینہ</button>
+        <button class="billTabBtn" id="trendDateTab-all" onclick="setTrendDateKey('all')">♾️ سب</button>
+        <button class="billTabBtn" id="trendDateTab-custom" onclick="setTrendDateKey('custom')">🔧 اپنی تاریخ</button>
       </div>
       <div class="pfCustomRange" id="trendCustomRangeRow" style="display:none;">
         <input type="date" id="trendCustomFrom" onchange="renderTrendsScreen()">
-        <span style="font-size:11px; color:var(--muted);">to</span>
+        <span style="font-size:11px; color:var(--muted);">سے</span>
         <input type="date" id="trendCustomTo" onchange="renderTrendsScreen()">
       </div>
       <div id="trendRangeLabel" style="text-align:center; font-size:11.5px; color:var(--muted); font-weight:600; margin:4px 0 10px;"></div>
 
       <!-- ---------- آئٹم / کسٹمر / ایریا ---------- -->
       <div class="billStatusTabs" id="trendGroupTabs">
-        <button class="billTabBtn active" id="trendGroupTab-item" onclick="setTrendGroupBy('item')">📦 Items</button>
-        <button class="billTabBtn" id="trendGroupTab-customer" onclick="setTrendGroupBy('customer')">👥 Customers</button>
-        <button class="billTabBtn" id="trendGroupTab-area" onclick="setTrendGroupBy('area')">🗺️ Areas</button>
+        <button class="billTabBtn active" id="trendGroupTab-item" onclick="setTrendGroupBy('item')">📦 مال</button>
+        <button class="billTabBtn" id="trendGroupTab-customer" onclick="setTrendGroupBy('customer')">👥 گاہک</button>
+        <button class="billTabBtn" id="trendGroupTab-area" onclick="setTrendGroupBy('area')">🗺️ علاقے</button>
       </div>
 
       <div id="trendSummaryBar"></div>
@@ -5908,7 +5909,7 @@
          ===================================================================== -->
     <div class="screen" id="screen-dailyRecovery" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="pageTitle" style="text-align:right;">📋 روزانہ ریکوری لسٹ</div>
-      <div class="settingsHint" style="margin-top:-6px; text-align:right;">یہ صرف ریکوری (ادھار) کی فہرست ہے — نقد فروخت کہیں شامل نہیں ہوتی۔ "آج کا مال" صرف اسی حصے کا ہے جو آج ادھار گیا۔ "تازہ مکمل بقایہ" ہمیشہ اصل، لائیو Current Balance ہے۔</div>
+      <div class="settingsHint" style="margin-top:-6px; text-align:right;">یہ صرف ریکوری (ادھار) کی فہرست ہے — نقد فروخت کہیں شامل نہیں ہوتی۔ "آج کا مال" صرف اسی حصے کا ہے جو آج ادھار گیا۔ "تازہ مکمل بقایہ" ہمیشہ اصل، تازہ بقایا ہے۔</div>
 
       <!-- ---------- کمپیکٹ کنٹرول پٹی — ترتیب / فونٹ / سائز(زوم) / نمبروں کی سیدھ / پرنٹ / شیئر ---------- -->
       <div id="drControlsBar" style="display:flex; gap:6px; align-items:center; margin:10px 0 12px; flex-wrap:wrap;">
@@ -6568,19 +6569,19 @@
 
       <!-- --- 🏪 دکان کی معلومات — بل کے اوپر نظر آئیں (خاص طور پر A4 انوائس پر) --- -->
       <div class="settingsCard">
-        <h3>🏪 My Business Info</h3>
-        <input type="text" id="bizNameInput" placeholder="Business Name" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizOwnerInput" placeholder="Owner Name" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizAddressInput" placeholder="Address" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <h3>🏪 کاروبار</h3>
+        <input type="text" id="bizNameInput" placeholder="کاروبار کا نام" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizOwnerInput" placeholder="مالک" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizAddressInput" placeholder="ایڈریس" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizPhoneInput" placeholder="موبائل" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
       </div>
 
       <!-- --- 💳 میرے پیمنٹ اکاؤنٹس (Reminders میں خودکار شامل ہوں گے) --- -->
       <div class="settingsCard" id="settingsCardPaymentAccounts">
-        <h3>💳 My Payment Accounts</h3>
+        <h3>💳 بینک اکاؤنٹس</h3>
         <div id="myPaymentAccountsWrap"></div>
         <input type="file" id="accountQrFileInput" accept="image/*" style="display:none;" onchange="handleAccountQrFileSelected(event)">
-        <button class="testPrintBtn" style="margin-top:10px;" onclick="openAddPaymentAccountModal()">➕ Add Account</button>
+        <button class="testPrintBtn" style="margin-top:10px;" onclick="openAddPaymentAccountModal()">➕ نیا اکاؤنٹ</button>
       </div>
 
       <!-- --- 📔 My Diary شارٹ کٹ — اس کلائنٹ کے لیے چھپا دیا گیا (کوڈ محفوظ ہے) --- -->
@@ -8600,7 +8601,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM26SEPSA0247PM';
+const APP_BUILD_VERSION = 'FM26SEPSA0342PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8721,7 +8722,7 @@ function getOrCreateDeviceUID(){
   if(AppState.settings.deviceUID) return AppState.settings.deviceUID;
   const fp = [
     navigator.userAgent.length,
-    screen.width, screen.height,
+    Math.min(screen.width, screen.height), Math.max(screen.width, screen.height),
     navigator.hardwareConcurrency || 2,
     new Date().getTimezoneOffset(),
     navigator.language.length,
@@ -8746,7 +8747,7 @@ function getOrCreateDeviceUID(){
 // ---------- 🔒 Firestore میں ٹرائل کو مستقل طور پر لاک کریں — ایک بار انٹرنیٹ ملتے ہی چیک ہوتا ہے۔
 // اگر یہی Device ID پہلے سے Firestore میں "trials" میں موجود ہو (یعنی Data Clear کر کے دوبارہ ٹرائل لینے
 // کی کوشش کی گئی) تو مقامی ٹرائل فوراً منسوخ کر دیا جاتا ہے۔ اگر نیا ہو تو مستقل ریکارڈ بنا دیا جاتا ہے ----------
-async function checkAndLockTrialOnline(){
+async function _legacyCheckAndLockTrialOnline(){
   if(!AppState.settings.freeTrialGranted || AppState.settings.trialLockConfirmedOnline) return;
   // ---------- 🐛 صدام کی ہدایت (FM3SEPTH10): اصل بگ یہیں ملی! اگر صارف نے اصل کوڈ (گفٹ/خریدا ہوا) لگا کر ٹرائل کو
   // پہلے ہی حقیقی سبسکرپشن میں بدل دیا ہو (isOnFreeTrial === false) تو یہ فنکشن سبسکرپشن کو کبھی نہ چھیڑے —
@@ -8811,7 +8812,7 @@ async function syncSubscriptionToCloud(){
 // ---------- ☁️ ایپ کھلتے ہی چیک کریں: اگر اس UID کے خلاف Firestore میں پیڈ سبسکرپشن کی expiry موجود ہو
 // (یعنی پہلے کبھی کوڈ لگایا جا چکا تھا) مگر مقامی سٹوریج خالی ہو (crash/reinstall/data clear کی وجہ سے)،
 // تو خودکار اسے واپس بحال کر دیں — صارف کو دوبارہ کوڈ نہ مانگنا پڑے ---------- -->
-async function restoreSubscriptionFromCloud(){
+async function _legacyRestoreSubscriptionFromCloud(){
   if(AppState.settings.subscriptionExpiry) return; // ---------- مقامی طور پر پہلے سے موجود ہو تو کچھ کرنے کی ضرورت نہیں ----------
   const uid = AppState.settings.deviceUID;
   if(!uid) return;
@@ -8901,7 +8902,14 @@ async function activateSubscription(code){
   if(data.active === false) return {success:false, message:'This code has been revoked. Please contact the developer.'};
   // ---------- 🎁 صدام کی ہدایت (FM3SEPTH10): اگر کوڈ کسی خاص ڈیوائس سے bound نہیں (boundUid خالی) تو کوئی بھی ڈیوائس ایک بار استعمال کر سکتی ہے ----------
   if(data.boundUid && data.boundUid !== uid) return {success:false, message:'This code was issued for a different device.'};
-  if(data.activatedAt) return {success:false, message:'This code has already been used.'};
+  if(data.activatedAt){
+    if(String(data.activatedByUid || '') === String(uid) && Number(data.expiresAt) > Date.now()){
+      const expStr = new Date(Number(data.expiresAt)).toISOString().slice(0,10);
+      _licApplyRestore(expStr, new Date(Number(data.activatedAt)).toISOString().slice(0,10), trimmedCode);
+      return {success:true, expiry: expStr, daysGranted: Math.max(0, Math.round((Number(data.expiresAt) - Date.now()) / 86400000)), restored: true};
+    }
+    return {success:false, message:'یہ کوڈ کسی اور فون پر لگ چکا ہے۔'};
+  }
 
   const daysNum = data.lifetime ? 36500 : (data.days || 0);
   if(!daysNum) return {success:false, message:'This code has invalid duration data. Please contact the developer.'};
@@ -10582,6 +10590,7 @@ function showSubscriptionGate(){
         : `Your subscription expired on ${formatDateDMY(exp)}.`)
     : `This app is not yet activated.`;
   document.getElementById('subscriptionGateScreen').style.display = 'flex';
+  setTimeout(() => { try{ retrySubscriptionRestore(); }catch(e){} }, 300);
   // ---------- 🧹 صدام کی ہدایت (FM3SEPTH10): Package Plans (قیمتوں کی فہرست/خود سے ادائیگی) کا پاپ اپ خودکار
   // نہیں کھلے گا — چونکہ اصل طریقہ کار یہ ہے کہ صدام خود Developer Panel سے کوڈ بنا کر کسٹمر کو دیتے ہیں،
   // کسٹمر کو صرف یہی ایک سادہ کوڈ کا خانہ نظر آنا چاہیے (نیچے), الگ سے قیمتوں کا پاپ اپ الجھن پیدا کرتا تھا ---------- -->
@@ -18638,6 +18647,140 @@ function offerCloseOrdersForDirectBill(invoice){
   }catch(e){}
 }
 
+
+/* =====================================================================
+   🔑 26 ستمبر: "ایپ ڈیلیٹ/ڈیٹا صاف کرنے کے بعد دوبارہ کوڈ مانگتی ہے" — اصل وجہ اور حل
+   وجہ: ڈیٹا صاف ہونے کے بعد ایپ خود 7 دن کا ٹرائل لگا دیتی تھی، اس لیے "کلاؤڈ سے بحالی" یہ سمجھ کر رک جاتی
+   تھی کہ سبسکرپشن پہلے سے موجود ہے؛ پھر ٹرائل-لاک اسی فون کا پرانا ٹرائل دیکھ کر سب صفر کر دیتا اور کوڈ مانگتا۔
+   حل: (1) بحالی ہمیشہ پہلے چلے — جب تک اصل (پیڈ) سبسکرپشن نہ ہو، (2) دو جگہ سے تلاش: devices/{uid}
+   اور licenses (جس کوڈ کو اسی فون نے لگایا تھا — activatedByUid)، (3) وہی کوڈ دوبارہ ڈالنے پر بھی بحالی،
+   (4) ٹرائل-لاک صفر کرنے سے پہلے ایک بار بحالی کی کوشش
+   ===================================================================== */
+function _licToday0(){ const d = new Date(); d.setHours(0,0,0,0); return d; }
+function _licApplyRestore(expiryStr, activatedOn, code){
+  AppState.settings.subscriptionExpiry = expiryStr;
+  AppState.settings.subscriptionActivatedOn = activatedOn || AppState.settings.subscriptionActivatedOn || '';
+  if(code) AppState.settings.lastActivationCode = code;
+  AppState.settings.isOnFreeTrial = false;
+  AppState.settings.trialLockConfirmedOnline = true;
+  persistAllData();
+  try{ if(typeof setupLoginScreen === 'function') setupLoginScreen(); }catch(e){}
+  try{ if(typeof renderSubscriptionBanner === 'function') renderSubscriptionBanner(); }catch(e){}
+  // ---------- اگر کوڈ والی سکرین کھلی ہو تو خود بند ہو کر ایپ دوبارہ کھلے ---------- -->
+  try{
+    const g = document.getElementById('subscriptionGateScreen');
+    if(g && g.style.display !== 'none' && g.style.display !== ''){
+      const m = document.getElementById('subGateMsg');
+      if(m){ m.style.color = 'var(--success)'; m.textContent = '✅ آپ کی پرانی سبسکرپشن مل گئی — ایپ کھل رہی ہے...'; }
+      setTimeout(() => { try{ location.reload(); }catch(e){} }, 1200);
+    }
+  }catch(e){}
+  try{ syncSubscriptionToCloud(); }catch(e){}
+}
+// ---------- اسی فون (UID) پر لگے تمام کوڈز میں سے سب سے لمبی میعاد والا ---------- -->
+async function _licFindByUid(uid){
+  let best = null;
+  // 1) devices/{uid}
+  try{
+    const res = await authFirestoreFetch(`devices/${encodeURIComponent(uid)}?key=${FIREBASE_API_KEY}`);
+    if(res && res.status === 200){
+      const d = _parseFirestoreFields((await res.json()).fields || {});
+      if(d.subscriptionExpiry) best = { expiry: d.subscriptionExpiry, on: d.subscriptionActivatedOn || '', code: d.lastActivationCode || '' };
+    }
+  }catch(e){}
+  // 2) licenses جہاں activatedByUid = یہ فون
+  try{
+    const res = await fetch(`${FIRESTORE_BASE}:runQuery?key=${FIREBASE_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ structuredQuery: {
+        from: [{ collectionId: 'licenses' }],
+        where: { fieldFilter: { field: { fieldPath: 'activatedByUid' }, op: 'EQUAL', value: { stringValue: String(uid) } } },
+        limit: 50
+      }})
+    });
+    if(res && res.ok){
+      const rows = await res.json();
+      (Array.isArray(rows) ? rows : []).forEach(r => {
+        if(!r || !r.document) return;
+        const d = _parseFirestoreFields(r.document.fields || {});
+        if(d.active === false) return;
+        const ms = Number(d.expiresAt) || 0;
+        if(!ms) return;
+        const exp = new Date(ms).toISOString().slice(0, 10);
+        const code = decodeURIComponent(String(r.document.name || '').split('/').pop() || '');
+        const on = d.activatedAt ? new Date(Number(d.activatedAt)).toISOString().slice(0, 10) : '';
+        if(!best || exp > best.expiry) best = { expiry: exp, on, code };
+      });
+    }
+  }catch(e){}
+  return best;
+}
+let _licRestoreBusy = null;
+async function restoreSubscriptionFromCloud(){
+  // ---------- صرف تب چھوڑیں جب اصل (پیڈ) سبسکرپشن فعال ہو — مفت ٹرائل یا خالی ہو تو ہمیشہ تلاش کریں ---------- -->
+  if(isSubscriptionActive() && !AppState.settings.isOnFreeTrial) return false;
+  if(_licRestoreBusy) return _licRestoreBusy;
+  _licRestoreBusy = (async () => {
+    const uid = getOrCreateDeviceUID();
+    if(!uid) return false;
+    const best = await _licFindByUid(uid);
+    if(!best || !best.expiry) return false;
+    const expD = new Date(best.expiry); expD.setHours(0,0,0,0);
+    if(expD < _licToday0()) return false; // پرانی، ختم شدہ سبسکرپشن — کوڈ ہی چاہیے
+    const cur = AppState.settings.subscriptionExpiry;
+    if(!AppState.settings.isOnFreeTrial && cur && cur >= best.expiry) return false;
+    _licApplyRestore(best.expiry, best.on, best.code);
+    return true;
+  })();
+  try{ return await _licRestoreBusy; } finally { _licRestoreBusy = null; }
+}
+// ---------- ٹرائل-لاک: پہلے بحالی کی کوشش، صرف تب ٹرائل ختم کریں جب کوئی پرانی سبسکرپشن نہ ملے ---------- -->
+async function checkAndLockTrialOnline(){
+  if(!AppState.settings.freeTrialGranted || AppState.settings.trialLockConfirmedOnline) return;
+  if(!AppState.settings.isOnFreeTrial){
+    AppState.settings.trialLockConfirmedOnline = true;
+    persistAllData();
+    return;
+  }
+  const uid = AppState.settings.deviceUID;
+  if(!uid) return;
+  try{
+    if(await restoreSubscriptionFromCloud()) return;
+    const res = await authFirestoreFetch(`trials/${uid}?key=${FIREBASE_API_KEY}`);
+    if(res.status === 200){
+      AppState.settings.subscriptionExpiry = null;
+      AppState.settings.isOnFreeTrial = false;
+      AppState.settings.trialLockConfirmedOnline = true;
+      persistAllData();
+      if(typeof setupLoginScreen === 'function') setupLoginScreen();
+      return;
+    }
+    if(res.status === 404){
+      await authFirestoreFetch(`trials/${uid}?key=${FIREBASE_API_KEY}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { usedAt: { integerValue: String(Date.now()) } } })
+      });
+    } else {
+      return; // کوئی اور جواب — اگلی بار
+    }
+  }catch(e){ return; }
+  AppState.settings.trialLockConfirmedOnline = true;
+  persistAllData();
+}
+// ---------- کوڈ والی سکرین کھلتے ہی خود تلاش + "دوبارہ چیک کریں" بٹن ---------- -->
+async function retrySubscriptionRestore(){
+  const m = document.getElementById('subGateMsg');
+  if(m){ m.style.color = 'var(--muted)'; m.textContent = '⏳ اس فون کی پرانی سبسکرپشن تلاش ہو رہی ہے...'; }
+  let ok = false;
+  try{ ok = await restoreSubscriptionFromCloud(); }catch(e){}
+  if(!ok && m && !/✅/.test(m.textContent)){
+    m.style.color = 'var(--danger)';
+    m.textContent = navigator.onLine === false ? '❌ انٹرنیٹ نہیں — انٹرنیٹ چلا کر دوبارہ دبائیں۔' : '❌ اس فون پر کوئی چالو سبسکرپشن نہیں ملی۔ پرانا کوڈ دوبارہ ڈال دیں، یا نیا کوڈ لیں۔';
+  }
+}
+
 let activeBatchesProductId = null;
 let activeBatchesVariantId = null;
 
@@ -20229,7 +20372,7 @@ function renderPendingBillsBanner(){
   }
   banner.classList.add('show');
   document.getElementById('pendingBillsBannerText').textContent =
-    count === 1 ? '1 bill is waiting for your approval' : `${count} bills are waiting for your approval`;
+    `${count} بل آپ کی منظوری کے منتظر ہیں`;
   document.getElementById('pendingBillsBannerCount').textContent = count;
 }
 
@@ -20267,8 +20410,8 @@ function renderHealthBand(){
   // ---------- سبز کالم (آنے والے پیسے) اور سرخ کالم (جانے والے پیسے) کے اپنے اپنے ٹوٹل ----------
   const greenTotal = stockValue + financeDummy.cashInHand + totalReceivable + diaryReceivable;
   const redTotal = totalPayable + diaryPayable;
-  document.getElementById('finGreenTotal').textContent = 'Total: Rs. ' + greenTotal.toLocaleString();
-  document.getElementById('finRedTotal').textContent = 'Total: Rs. ' + redTotal.toLocaleString();
+  document.getElementById('finGreenTotal').textContent = 'کل: Rs. ' + greenTotal.toLocaleString();
+  document.getElementById('finRedTotal').textContent = 'کل: Rs. ' + redTotal.toLocaleString();
 
   // ---------- سب سے اہم سمری: کل اثاثے (اسٹاک + نقدی + وصولیاں + ڈائری وصولیاں) − کل واجبات (ادائیگیاں + ڈائری واجبات) = صافی پوزیشن ----------
   const totalAssets = greenTotal;
@@ -20278,9 +20421,9 @@ function renderHealthBand(){
   const hero = document.getElementById('netPositionHero');
   hero.classList.toggle('negative', netPosition < 0);
   document.getElementById('nphValue').textContent =
-    `Rs. ${Math.abs(netPosition).toLocaleString()} ${netPosition >= 0 ? '📈 Profit' : '📉 Loss'}`;
+    `Rs. ${Math.abs(netPosition).toLocaleString()} ${netPosition >= 0 ? '📈 منافع' : '📉 نقصان'}`;
   document.getElementById('nphBreakdown').textContent =
-    `Assets: Rs. ${totalAssets.toLocaleString()} (Stock + Cash + Receivables + Diary)  −  Liabilities: Rs. ${totalLiabilities.toLocaleString()} (Payables + Diary)`;
+    `لینا: Rs. ${totalAssets.toLocaleString()} (سٹاک + کیش + گاہکوں پر بقایا + ڈائری)  −  دینا: Rs. ${totalLiabilities.toLocaleString()} (بیوپاریوں کا + ڈائری)`;
 }
 
 // --- ZONE 1: KPI Cards (بنیادی نمبرز + الرٹس کی گنتی، سب ایک نظر میں) ---
@@ -20296,10 +20439,10 @@ function renderKpiCards(){
     .reduce((sum, inv) => sum + inv.grand_total, 0);
 
   const stats = [
-    {icon:'💰', label:"Today's Sales", value:'Rs. ' + todaySales.toLocaleString(), tone:'', action:"goToTodaysSalesFromDash()"},
-    {icon:'👥', label:'Total Customers', value: customersData.length, tone:'', action:"goTo('customers')"},
-    {icon:'📦', label:'Products / Variants', value: `${productsData.length} / ${totalVariants}`, tone:'', action:"goTo('products')"},
-    {icon:'⚠️', label:'Alerts Needing Attention', value: (lowStockCount + expiryCount), tone: (lowStockCount + expiryCount) > 0 ? 'danger' : '', action:"scrollToAlertsSection()"},
+    {icon:'💰', label:'آج کی فروخت', value:'Rs. ' + todaySales.toLocaleString(), tone:'', action:"goToTodaysSalesFromDash()"},
+    {icon:'👥', label:'کل گاہک', value: customersData.length, tone:'', action:"goTo('customers')"},
+    {icon:'📦', label:'سبزیاں / پیکنگ', value: `${productsData.length} / ${totalVariants}`, tone:'', action:"goTo('products')"},
+    {icon:'⚠️', label:'توجہ طلب', value: (lowStockCount + expiryCount), tone: (lowStockCount + expiryCount) > 0 ? 'danger' : '', action:"scrollToAlertsSection()"},
   ];
   document.getElementById('kpiGrid').innerHTML = stats.map(s => `
     <div class="kpiCard ${s.tone}" onclick="${s.action}">
@@ -31662,14 +31805,14 @@ function renderTrendsScreen(){
   const range = getDateRangeForKey(trendDateKey, customFrom, customTo);
 
   if(trendDateKey === 'custom' && !range){
-    document.getElementById('trendRangeLabel').textContent = 'Select a From and To date above';
+    document.getElementById('trendRangeLabel').textContent = 'اوپر سے دونوں تاریخیں چنیں';
     document.getElementById('trendSummaryBar').innerHTML = '';
     document.getElementById('trendListWrap').innerHTML = '';
     return;
   }
 
   const rangeLabelText = {
-    today:'Today', week:'This Week', month:'This Month', all:'All Time', custom:'Custom Range'
+    today:'آج', week:'یہ ہفتہ', month:'یہ مہینہ', all:'سب', custom:'اپنی تاریخ'
   }[trendDateKey] || '';
   document.getElementById('trendRangeLabel').textContent = range
     ? `${rangeLabelText}: ${range.from.toLocaleDateString()} — ${range.to.toLocaleDateString()}`
@@ -31680,15 +31823,15 @@ function renderTrendsScreen(){
   document.getElementById('trendSummaryBar').innerHTML = `
     <div style="display:flex; gap:8px; margin-bottom:14px;">
       <div style="flex:1; background:#eef2ff; border-radius:10px; padding:10px; text-align:center;">
-        <div style="font-size:10.5px; color:var(--primary-dark); font-weight:700;">🧾 Bills</div>
+        <div style="font-size:10.5px; color:var(--primary-dark); font-weight:700;">🧾 بل</div>
         <div style="font-size:16px; font-weight:800; color:var(--primary-dark);">${data.totalBills}</div>
       </div>
       <div style="flex:1; background:#f0fdf4; border-radius:10px; padding:10px; text-align:center;">
-        <div style="font-size:10.5px; color:#166534; font-weight:700;">💰 Revenue</div>
+        <div style="font-size:10.5px; color:#166534; font-weight:700;">💰 کل رقم</div>
         <div style="font-size:16px; font-weight:800; color:#166534;">Rs. ${data.totalRevenue.toLocaleString()}</div>
       </div>
       <div style="flex:1; background:#fff7ed; border-radius:10px; padding:10px; text-align:center;">
-        <div style="font-size:10.5px; color:#9a3412; font-weight:700;">📦 Qty Sold</div>
+        <div style="font-size:10.5px; color:#9a3412; font-weight:700;">📦 فروخت مقدار</div>
         <div style="font-size:16px; font-weight:800; color:#9a3412;">${data.totalQty}</div>
       </div>
     </div>`;
@@ -31697,33 +31840,33 @@ function renderTrendsScreen(){
 
   if(trendGroupBy === 'item'){
     const rows = Array.from(data.items.entries()).map(([name, v]) => ({name, ...v})).sort((a,b) => b.qty - a.qty);
-    if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">No sales in this period</div>'; return; }
+    if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">ان دنوں میں کوئی فروخت نہیں</div>'; return; }
     wrap.innerHTML = rows.map((r, i) => `
       <div class="bankAccCard">
         <div class="bankAccCardTop">
-          <div style="min-width:0;"><div class="bankAccType">#${i+1} — ${r.name}</div><div class="bankAccTitle">${r.qty} sold</div></div>
+          <div style="min-width:0;"><div class="bankAccType">#${i+1} — ${r.name}</div><div class="bankAccTitle">${r.qty} فروخت</div></div>
           <div style="font-weight:800; font-size:15px; color:#166534;">Rs. ${r.revenue.toLocaleString()}</div>
         </div>
       </div>
     `).join('');
   } else if(trendGroupBy === 'customer'){
     const rows = Array.from(data.customers.values()).sort((a,b) => b.revenue - a.revenue);
-    if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">No sales in this period</div>'; return; }
+    if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">ان دنوں میں کوئی فروخت نہیں</div>'; return; }
     wrap.innerHTML = rows.map((r, i) => `
       <div class="bankAccCard">
         <div class="bankAccCardTop">
-          <div style="min-width:0;"><div class="bankAccType">#${i+1} — ${r.name}</div><div class="bankAccTitle">${r.billCount} bill(s) • ${r.qty} items</div></div>
+          <div style="min-width:0;"><div class="bankAccType">#${i+1} — ${r.name}</div><div class="bankAccTitle">${r.billCount} بل • ${r.qty} مال</div></div>
           <div style="font-weight:800; font-size:15px; color:#166534;">Rs. ${r.revenue.toLocaleString()}</div>
         </div>
       </div>
     `).join('');
   } else { // area
     const rows = Array.from(data.areas.entries()).map(([area, v]) => ({area, ...v})).sort((a,b) => b.revenue - a.revenue);
-    if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">No sales with an Area set on the customer profile in this period — add "Area / City / Route" when saving a customer</div>'; return; }
+    if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">ان دنوں میں علاقے والے گاہکوں کی کوئی فروخت نہیں — گاہک میں "علاقہ یا شہر" لکھیں</div>'; return; }
     wrap.innerHTML = rows.map((r, i) => `
       <div class="bankAccCard">
         <div class="bankAccCardTop">
-          <div style="min-width:0;"><div class="bankAccType">#${i+1} — 🗺️ ${r.area}</div><div class="bankAccTitle">${r.customerIds.size} customer(s) • ${r.billCount} bill(s) • ${r.qty} items</div></div>
+          <div style="min-width:0;"><div class="bankAccType">#${i+1} — 🗺️ ${r.area}</div><div class="bankAccTitle">${r.customerIds.size} گاہک • ${r.billCount} بل • ${r.qty} مال</div></div>
           <div style="font-weight:800; font-size:15px; color:#166534;">Rs. ${r.revenue.toLocaleString()}</div>
         </div>
       </div>
@@ -38423,27 +38566,27 @@ function renderMyPaymentAccounts(){
   if(!wrap) return;
   const accounts = AppState.settings.paymentAccounts || [];
   if(accounts.length === 0){
-    wrap.innerHTML = `<div style="color:var(--muted); font-size:13px; padding:8px 2px;">No accounts added yet — tap ➕ Add Account below</div>`;
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:13px; padding:8px 2px;">ابھی کوئی اکاؤنٹ نہیں — نیچے ➕ نیا اکاؤنٹ دبائیں</div>`;
     return;
   }
   wrap.innerHTML = accounts.map((acc, idx) => `
     <div class="paymentAccCard">
       <div class="paymentAccTopRow">
-        <div onclick="editAccountPhoto(${idx})" title="Tap to add/change photo" style="cursor:pointer; width:44px; height:44px; border-radius:50%; overflow:hidden; flex:0 0 44px; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-size:18px; border:2px dashed #c7d2fe;">
+        <div onclick="editAccountPhoto(${idx})" title="تصویر لگائیں/بدلیں" style="cursor:pointer; width:44px; height:44px; border-radius:50%; overflow:hidden; flex:0 0 44px; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-size:18px; border:2px dashed #c7d2fe;">
           ${acc.photo ? `<img src="${acc.photo}" style="width:100%; height:100%; object-fit:cover;">` : '👤'}
         </div>
         <div class="paymentAccInfo">
           <div class="paymentAccTitle">${acc.name || 'Untitled'} <span class="paymentAccBank" style="display:inline-flex; align-items:center; gap:4px; vertical-align:middle;">${bankLogoImgHtml(acc.type, 18)}${acc.type || '—'}</span></div>
-          <div class="paymentAccNumber paymentAccNumberValue" onclick="copyMyAccountNumber(${idx})" style="cursor:pointer; text-decoration:underline dotted;" title="Tap to copy">${acc.number || '—'}</div>
-          <div class="paymentAccNumber" onclick="editAccountIban(${idx})" style="cursor:pointer; text-decoration:underline dotted; font-size:11px; color:var(--primary-dark); font-weight:600;" title="Tap to add/edit IBAN">${acc.iban ? `IBAN: ${acc.iban}` : '➕ Add IBAN Number'}</div>
+          <div class="paymentAccNumber paymentAccNumberValue" onclick="copyMyAccountNumber(${idx})" style="cursor:pointer; text-decoration:underline dotted;" title="کاپی کریں">${acc.number || '—'}</div>
+          <div class="paymentAccNumber" onclick="editAccountIban(${idx})" style="cursor:pointer; text-decoration:underline dotted; font-size:11px; color:var(--primary-dark); font-weight:600;" title="IBAN لکھیں/بدلیں">${acc.iban ? `IBAN: ${acc.iban}` : '➕ IBAN نمبر شامل کریں'}</div>
         </div>
       </div>
       <div class="paymentAccActionsRow">
-        <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer"><span style="font-size:15px;">${acc.showOnReceipt ? '🧾✅' : '🧾'}</span><span class="paymentAccBtnLabel">Receipt</span></button>
-        <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'Change QR code' : 'Add QR code (best quality — for Scan to Pay)'}"><span style="font-size:15px;">${acc.qr ? '🔳✅' : '🔳'}</span><span class="paymentAccBtnLabel">QR Code</span></button>
-        <button onclick="shareAccountCard(${idx})" title="Share as a landscape card"><span style="font-size:15px;">🎴</span><span class="paymentAccBtnLabel">Card</span></button>
-        <button onclick="shareAccountPoster(${idx})" title="Share as a portrait mini-poster"><span style="font-size:15px;">🖼️</span><span class="paymentAccBtnLabel">Poster</span></button>
-        <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})"><span style="font-size:15px;">🗑️</span><span class="paymentAccBtnLabel">Delete</span></button>
+        <button onclick="toggleAccountShowOnReceipt(${idx})" title="بل کے نیچے چھاپیں"><span style="font-size:15px;">${acc.showOnReceipt ? '🧾✅' : '🧾'}</span><span class="paymentAccBtnLabel">بل پر</span></button>
+        <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'QR کوڈ بدلیں' : 'QR کوڈ لگائیں'}"><span style="font-size:15px;">${acc.qr ? '🔳✅' : '🔳'}</span><span class="paymentAccBtnLabel">QR کوڈ</span></button>
+        <button onclick="shareAccountCard(${idx})" title="کارڈ بھیجیں"><span style="font-size:15px;">🎴</span><span class="paymentAccBtnLabel">کارڈ</span></button>
+        <button onclick="shareAccountPoster(${idx})" title="پوسٹر بھیجیں"><span style="font-size:15px;">🖼️</span><span class="paymentAccBtnLabel">پوسٹر</span></button>
+        <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})"><span style="font-size:15px;">🗑️</span><span class="paymentAccBtnLabel">ڈیلیٹ</span></button>
       </div>
     </div>
   `).join('');
@@ -42776,7 +42919,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------- 📡 انٹرنیٹ ملتے ہی خاموشی سے: (1) ٹرائل کا Firestore لاک چیک/محفوظ کریں (2) ادائیگی شدہ
   // سبسکرپشن دور سے منسوخ تو نہیں ہوئی — یوزر کو کوئی لوڈنگ نظر نہیں آئے گی، بیک گراؤنڈ میں ہوتا ہے ----------
   setTimeout(() => {
-    try{ checkAndLockTrialOnline(); }catch(e){ console.error('checkAndLockTrialOnline failed', e); }
+    (async () => { try{ await restoreSubscriptionFromCloud(); }catch(e){} try{ await checkAndLockTrialOnline(); }catch(e){} })();
     try{ resyncLicenseOnline(); }catch(e){ console.error('resyncLicenseOnline failed', e); }
     // ---------- ☁️ اگر مقامی سٹوریج میں subscriptionExpiry موجود نہیں (crash/reinstall/data clear کے بعد)
     // مگر اسی UID کے خلاف Firestore میں پیڈ سبسکرپشن کا ریکارڈ ہو، تو خودکار بحال کر دیں ---------- -->
