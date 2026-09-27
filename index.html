@@ -692,6 +692,7 @@
      رنگ فوراً بدلتا ہے (پہلے tr پر رنگ لگتا تھا جو td کے اپنے رنگ کے نیچے چھپ جاتا تھا) ---------- */
   tr.otSelRow td{ background:#93c5fd !important; color:#0b2a5b !important; border-bottom-color:#2563eb !important; }
   tr.otSelRow td:first-child{ box-shadow:inset -6px 0 0 #1d4ed8; }
+  html.shopBilal #mobileTopbar{ background:linear-gradient(160deg,#6d28d9,#3b0764) !important; }
   tr.otTouchRow > td{ background:#dbeafe !important; }
   tr.otSelRow input.otQtyInput{ border:2.5px solid #1d4ed8 !important; background:#fff !important; color:#0b2a5b !important; }
   .screen{display:none; animation:fadeIn .25s ease;}
@@ -2983,7 +2984,7 @@
       <!-- ---------- 📞 موبائل نمبر — صدام کی ہدایت پر چھپا دیا گیا (کوڈ محفوظ) ---------- -->
       <span style="display:none;">📞 03425556364</span>
       <span id="topbarVersionBadge" onclick="handleVersionBadgeTap()" dir="ltr" style="unicode-bidi:plaintext; font-family:'Arial Black', Arial, Helvetica, sans-serif !important; font-size:11.5px; color:#fff; font-weight:900; letter-spacing:.3px; text-shadow:0 1px 1px rgba(0,0,0,.35); background:linear-gradient(90deg, #be185d, #d97706, #059669, #2563eb, #7c3aed, #be185d); background-size:400% auto; animation:versionBadgeBgShift 8s ease-in-out infinite; padding:3px 7px; border-radius:7px; cursor:pointer; white-space:nowrap; overflow:visible; text-overflow:clip; max-width:none; text-align:center; line-height:1.2; border:1px solid rgba(255,255,255,.7); box-shadow:0 0 6px rgba(255,255,255,.3), inset 0 1px 0 rgba(255,255,255,.3); flex:0 0 auto;"></span>
-      <span style="flex:1 1 auto; min-width:0; text-align:center; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:clamp(15px, 5vw, 21px); font-weight:700; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.55); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">صدام فروٹ منڈی</span>
+      <span style="flex:1 1 auto; min-width:0; text-align:center; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:clamp(15px, 5vw, 21px); font-weight:700; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.55); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="topbarShopTitle">صدام فروٹ منڈی</span>
       <span id="connStatusBadge" class="online" style="flex:0 0 auto;">Online</span>
     </div>
     <!-- ---------- 🔤 شاپ کا نام (چھوٹا، ثانوی) — کوڈ محفوظ، بس چھپا ہوا ---------- -->
@@ -7447,6 +7448,22 @@
 // ایپ بند ہوتے ہی ضائع ہو جاتے تھے اور صرف شروعاتی Demo ڈیٹا (Lipton, Sugar) واپس آتا تھا۔
 // اب یہ سب localStorage میں مستقل محفوظ ہوتا ہے — بند/دوبارہ کھولنے پر بھی موجود رہے گا۔
 const STORAGE_PREFIX = 'fmPos_';
+// ---------- 🏪 27 ستمبر: موجودہ دکان — "main" (صدام فروٹ منڈی، اصل، پہلے جیسا) یا "bilal" (بلال فروٹ فارم) ----------
+const ACTIVE_SHOP = (function(){
+  try{
+    const s = localStorage.getItem('fm_activeShop');
+    if(s === 'bilal' && localStorage.getItem('fm_multiShopEnabled') === '1') return 'bilal';
+  }catch(e){}
+  return 'main';
+})();
+const IS_BILAL = ACTIVE_SHOP === 'bilal';
+// یہ چیزیں دونوں دکانوں میں مشترک (فون کی سطح پر) — باقی سب ہر دکان کا الگ
+const SHARED_STORAGE_KEYS = new Set(['settings','users','nextUserId','rememberedSession','maintenanceLocalBypass','maintenanceLastOn','marqueeSettings','drZoomPct','rlZoomPct','vcEditSpeedMs','quickDockItems','recoveryPosterFontScale','recoveryPosterFontId','recoveryPosterColorId','otViewMode','productViewMode','productsPageViewMode']);
+function _storageKey(key){ return STORAGE_PREFIX + ((IS_BILAL && !SHARED_STORAGE_KEYS.has(key)) ? 'bilal__' : '') + key; }
+// کلاؤڈ: صدام کی دکان کا راستہ بالکل پہلے جیسا (shopData/products)، بلال کا الگ (shopData/bilal_products)
+function shopDocPath(name){ return 'shopData/' + (IS_BILAL ? 'bilal_' : '') + name; }
+// ہر دکان کی اپنی سیٹنگز (نام، پینڈنگ سنک، ابتدائی کیش، بیک اپ وغیرہ) — باقی سیٹنگز فون کی سطح پر مشترک
+const SHOP_SETTING_FIELDS = ['businessName','businessPhone','businessAddress','ownerName','businessLogo','openingCashBalance','productsPendingSync','suppliersPendingSync','pendingBillsPendingSync','invoicesPendingSync','financePendingSync','customersPendingSync','approvalRequestsPendingSync','lastBackupFileName','lastBackupAt','lastGDriveBackupAt','vegProductsSeededV1','ledgerSuppliersSeededV1','ledgerCustomersSeededV1','trackInventory','taxEnabled','taxPercent'];
 const OLD_STORAGE_PREFIX = 'aioPos_'; // ---------- 🍇 صدام کی ہدایت (FM4SEPTF01): پرانا prefix — صرف ایک بار ڈیٹا کاپی کرنے کے لیے رکھا گیا، خود کبھی نہیں لکھا جائے گا ----------
 // ---------- 🍇 صدام کی ہدایت (FM4SEPTF01): ایپ کا نام/شناخت اب مکمل طور پر "Fruit Mandi POS" — پرانے AIOPOS ٹیمپلیٹ کا کوئی حوالہ باقی نہیں رہنا چاہیے۔
 // یہ صرف ایک بار چلے گا: اگر پرانے prefix والا ڈیٹا موجود ہے اور نئے prefix میں ابھی کچھ محفوظ نہیں ہوا، تو خاموشی سے کاپی کر دیں —
@@ -7567,7 +7584,7 @@ async function idbSetImage(key, dataUrl){
     const db = await openImgDb();
     return await new Promise((resolve) => {
       const tx = db.transaction(AIO_IMG_STORE, 'readwrite');
-      tx.objectStore(AIO_IMG_STORE).put(dataUrl, key);
+      tx.objectStore(AIO_IMG_STORE).put(dataUrl, (IS_BILAL ? 'bilal__' : '') + key);
       tx.oncomplete = () => resolve(true);
       tx.onerror = () => resolve(false);
     });
@@ -7578,7 +7595,7 @@ async function idbGetImage(key){
     const db = await openImgDb();
     return await new Promise((resolve) => {
       const tx = db.transaction(AIO_IMG_STORE, 'readonly');
-      const req = tx.objectStore(AIO_IMG_STORE).get(key);
+      const req = tx.objectStore(AIO_IMG_STORE).get((IS_BILAL ? 'bilal__' : '') + key);
       req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => resolve(null);
     });
@@ -7589,7 +7606,7 @@ async function idbDeleteImage(key){
     const db = await openImgDb();
     return await new Promise((resolve) => {
       const tx = db.transaction(AIO_IMG_STORE, 'readwrite');
-      tx.objectStore(AIO_IMG_STORE).delete(key);
+      tx.objectStore(AIO_IMG_STORE).delete((IS_BILAL ? 'bilal__' : '') + key);
       tx.oncomplete = () => resolve(true);
       tx.onerror = () => resolve(false);
     });
@@ -7672,9 +7689,25 @@ async function hydratePhotosFromIndexedDB(){
 
 function loadFromStorage(key, fallback){
   try{
-    const raw = localStorage.getItem(STORAGE_PREFIX + key);
+    const raw = localStorage.getItem(_storageKey(key));
     if(raw === null || raw === undefined) return fallback;
-    return JSON.parse(raw);
+    const val = JSON.parse(raw);
+    if(key === 'settings' && val && typeof val === 'object'){
+      // 🏪 اسی دکان کی اپنی سیٹنگز اوپر لگائیں
+      let shopS = null;
+      try{ const r2 = localStorage.getItem(_storageKey('shopSettings')); shopS = r2 ? JSON.parse(r2) : null; }catch(e2){}
+      if(!shopS){
+        shopS = {};
+        if(IS_BILAL){
+          shopS = { businessName: 'بلال فروٹ فارم', openingCashBalance: 0, vegProductsSeededV1: true, ledgerSuppliersSeededV1: true, ledgerCustomersSeededV1: true, trackInventory: val.trackInventory, taxEnabled: val.taxEnabled, taxPercent: val.taxPercent };
+        } else {
+          SHOP_SETTING_FIELDS.forEach(f => { if(val[f] !== undefined) shopS[f] = val[f]; });
+        }
+        try{ localStorage.setItem(_storageKey('shopSettings'), JSON.stringify(shopS)); }catch(e3){}
+      }
+      SHOP_SETTING_FIELDS.forEach(f => { if(shopS[f] !== undefined) val[f] = shopS[f]; else if(IS_BILAL) delete val[f]; });
+    }
+    return val;
   }catch(e){
     console.warn('محفوظ شدہ ڈیٹا پڑھنے میں مسئلہ:', key, e);
     return fallback;
@@ -7683,7 +7716,11 @@ function loadFromStorage(key, fallback){
 let storageQuotaWarned = false; // ---------- ایک سیشن میں بار بار الرٹ نہ آئے، صرف پہلی بار ----------
 function saveToStorage(key, value){
   try{
-    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+    localStorage.setItem(_storageKey(key), JSON.stringify(value));
+    if(key === 'settings' && value && typeof value === 'object'){
+      const shopS = {}; SHOP_SETTING_FIELDS.forEach(f => { if(value[f] !== undefined) shopS[f] = value[f]; });
+      localStorage.setItem(_storageKey('shopSettings'), JSON.stringify(shopS));
+    }
     return true;
   }catch(e){
     console.warn('ڈیٹا محفوظ کرنے میں مسئلہ:', key, e);
@@ -7735,6 +7772,7 @@ function persistAllData(){
   if(typeof expenseData !== 'undefined') saveToStorage('expenses', expenseData);
   if(typeof nextExpenseId !== 'undefined') saveToStorage('nextExpenseId', nextExpenseId);
   if(typeof marqueeSettings !== 'undefined') saveToStorage('marqueeSettings', marqueeSettings);
+  try{ if(typeof extraSyncScheduleCheck === 'function') extraSyncScheduleCheck(); }catch(e){}
 }
 setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خودکار محفوظ (fail-safe) ----------
 
@@ -7749,7 +7787,7 @@ setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خو
 // کبھی آپس میں گڈمڈ نہ ہوں، صاف پتا چلے کہ یہ فائل کس ورژن سے آئی ----------
 // ---------- بیک اپ فائل کا نام — یہ Fruit Mandi POS فائل ہے، اس لیے نام بالکل اسی ورژن سٹرنگ کے فارمیٹ میں بنتا ہے
 // جیسا خود ایپ کا ورژن ہے — BKFM{دن}{مہینہ}{دن کا نام}{وقت}{AM/PM}.JSON — مثال: BKFM318MO0607AM.JSON ----------
-function generateBackupFileName(){
+function generateBackupFileName(shopOverride){
   const now = new Date();
   const dayNames = ['SU','MO','TU','WE','TH','FR','SA'];
   const dayCode = dayNames[now.getDay()];
@@ -7760,7 +7798,8 @@ function generateBackupFileName(){
   hh = hh % 12; if(hh === 0) hh = 12;
   const hhStr = String(hh).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
-  return `BKFM${date}${month}${dayCode}${hhStr}${mm}${ampm}.JSON`;
+  const _sh = shopOverride || ACTIVE_SHOP;
+  return `${_sh === 'bilal' ? 'BKBL' : 'BKFM'}${date}${month}${dayCode}${hhStr}${mm}${ampm}.JSON`;
 }
 
 function buildBackupObject(){
@@ -7786,6 +7825,7 @@ function buildBackupObject(){
     recoveryList: recoveryListData,
     nextRecoveryId,
     customCategories: customCategories,
+    cashPurchases: (typeof cashPurchasesData !== 'undefined' ? cashPurchasesData : []),
     expiryAlertDays: expiryAlertDays,
     quickDockItems: quickDockItems,
   };
@@ -7990,7 +8030,7 @@ function checkScheduledAutoBackup(){
   state.done.push(slot);
   saveToStorage('autoBackupSlotState', state);
   try{
-    backupToGoogleDrive(true);
+    backupToGoogleDrive(true, null, (typeof isMultiShopEnabled === 'function' && isMultiShopEnabled()));
   }catch(e){ console.warn('scheduled auto-backup failed', e); }
   setTimeout(() => { autoBackupCheckLock = false; }, 5000);
 }
@@ -7998,7 +8038,7 @@ function checkScheduledAutoBackup(){
 setTimeout(checkScheduledAutoBackup, 8000);
 setInterval(checkScheduledAutoBackup, 10 * 60 * 1000);
 
-async function backupToGoogleDrive(silent){
+async function backupToGoogleDrive(silent, shopOverride, alsoOtherShop){
   const btn = document.getElementById('gdriveBackupBtn');
   const client = getGDriveTokenClient();
   if(!client){
@@ -8020,8 +8060,8 @@ async function backupToGoogleDrive(silent){
       if(btn) btn.textContent = '⏳ Uploading...';
       updateGDriveProgress('⏳ Uploading backup...');
       const folderId = await ensureGDriveBackupFolder(); // ---------- ہمیشہ "AIO Backup" فولڈر کے اندر ہی جائے ----------
-      const fileName = generateBackupFileName();
-      const backup = buildBackupObject();
+      const fileName = generateBackupFileName(shopOverride);
+      const backup = (shopOverride && shopOverride !== ACTIVE_SHOP) ? buildBackupObjectForShop(shopOverride) : buildBackupObject();
       const fileContent = JSON.stringify(backup);
 
       const metadata = { name: fileName, mimeType: 'application/json', parents: [folderId] };
@@ -8045,11 +8085,13 @@ async function backupToGoogleDrive(silent){
         throw new Error('Upload failed: ' + uploadRes.status + ' ' + errText);
       }
 
-      AppState.settings.lastBackupFileName = fileName;
-      AppState.settings.lastBackupAt = new Date().toISOString();
-      AppState.settings.lastGDriveBackupAt = new Date().toISOString();
-      persistAllData();
-      renderHomeLastBackupLine();
+      if(!shopOverride || shopOverride === ACTIVE_SHOP){
+        AppState.settings.lastBackupFileName = fileName;
+        AppState.settings.lastBackupAt = new Date().toISOString();
+        AppState.settings.lastGDriveBackupAt = new Date().toISOString();
+        persistAllData();
+        renderHomeLastBackupLine();
+      }
 
       // ---------- کس Google اکاؤنٹ میں محفوظ ہوا — یہ بتانا صارف کے لیے سب سے زیادہ اطمینان بخش ہوتا ہے ----------
       let accountEmail = '';
@@ -8075,6 +8117,8 @@ async function backupToGoogleDrive(silent){
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
       gdriveOpActive = false;
+      // 🏪 دوسری دکان کا بیک اپ بھی (اگر دو دکانوں والا نظام آن ہو)
+      if(alsoOtherShop){ setTimeout(() => { try{ backupToGoogleDrive(true, IS_BILAL ? 'main' : 'bilal', false); }catch(e){} }, 3000); }
     }
   };
 
@@ -8131,7 +8175,7 @@ async function restoreFromGoogleDrive(){
       const listRes = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } });
       if(!listRes.ok) throw new Error('List failed: ' + listRes.status);
       const listData = await listRes.json();
-      const files = (listData.files || []).filter(f => f.name.startsWith('BKFM'));
+      const files = (listData.files || []).filter(f => f.name.startsWith(IS_BILAL ? 'BKBL' : 'BKFM'));
       renderGDriveFileList(files);
       hideGDriveProgress();
       document.getElementById('gdriveRestoreModal').classList.add('show');
@@ -8322,6 +8366,7 @@ function proceedWithImport(){
       nextExpenseId = backup.nextExpenseId || nextExpenseId;
       // ---------- اہم فکس: My Diary، Payments، اور Advance Orders بحال کریں — پہلے یہ بیک اپ میں شامل ہی نہیں تھے ----------
       if(typeof diaryData !== 'undefined'){ diaryData.length = 0; diaryData.push(...(backup.diary || [])); }
+      if(Array.isArray(backup.cashPurchases) && typeof cashPurchasesData !== 'undefined'){ cashPurchasesData = backup.cashPurchases; saveToStorage('cashPurchases', cashPurchasesData); }
       nextDiaryId = backup.nextDiaryId || nextDiaryId;
       if(typeof paymentsData !== 'undefined'){ paymentsData.length = 0; paymentsData.push(...(backup.payments || [])); }
       nextPaymentId = backup.nextPaymentId || nextPaymentId;
@@ -8543,7 +8588,7 @@ const AppState = {
 // ---------- 🏷️ صدام کی ہدایت پر: بزنس کا نام اور موبائل نمبر ہارڈ کوڈ — جہاں بھی بل پرنٹ ہو (تھرمل/A4/سکرین/
 // WhatsApp شیئر)، ہمیشہ یہی نام اور نمبر چھپے، چاہے Settings میں محفوظ شدہ پرانی/خالی ویلیو کچھ بھی ہو —
 // اسی لیے یہ سیٹنگز لوڈ ہونے کے فوراً بعد زبردستی اوور رائٹ کی جاتی ہے ----------
-AppState.settings.businessName = 'صدام حسین فروٹ منڈی';
+AppState.settings.businessName = IS_BILAL ? 'بلال فروٹ فارم' : 'صدام حسین فروٹ منڈی';
 AppState.settings.businessPhone = '03425556364';
 
 // ---------- 🩹 ون-ٹائم مائیگریشن (ورژن کی بنیاد پر) — پرانی ٹیسٹنگ کے دوران کوئی بھی rate/plans
@@ -8604,7 +8649,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM27SEPSU0850PM';
+const APP_BUILD_VERSION = 'FM27SEPSU0913PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11542,6 +11587,7 @@ function tryAutoLogin(){
 }
 
 function applyRole(role, name){
+  if(IS_BILAL && role !== 'admin'){ try{ localStorage.setItem('fm_activeShop', 'main'); }catch(e){} location.reload(); return; }
   AppState.currentUser = { name: name || (role==='admin' ? 'Saddam Hussain' : 'Abdul Wahab') };
   AppState.currentRole = role;
 
@@ -11985,6 +12031,7 @@ let navBackStack = [];
 let navForwardStack = [];
 
 function goTo(screenName, _isHistoryNav){
+  try{ if(screenName === 'payments' || screenName === 'mydiary'){ const _d = EXTRA_SYNC_DEFS.find(d => d.key === (screenName === 'payments' ? 'payments' : 'diary')); if(_d) setTimeout(() => extraSyncOne(_d), 300); } }catch(e){}
   // ---------- 🍇 Fruit Mandi POS: صدام کی حتمی ہدایت پر — Admin کا Home اب ایک عام Home اسکرین ہے (بالکل
   // Salesman کی طرح)، اپنی منتخب کردہ Shortcut اسکرینوں کے آئیکن گرڈ کے ساتھ۔ Billing/پراڈکٹ گرڈ کبھی بھی
   // خودکار طور پر نہیں کھلتی — نہ لاگ ان پر، نہ ری فریش پر، نہ Home بٹن دبانے پر ---------- -->
@@ -15185,7 +15232,7 @@ function isoDaysFromToday(n){
   d.setDate(d.getDate() + n);
   return d.toISOString().slice(0,10);
 }
-let productsData = loadFromStorage('products', PRODUCTS_SEED_DATA);
+let productsData = loadFromStorage('products', IS_BILAL ? [] : PRODUCTS_SEED_DATA);
 // ---------- 🧹🧹 صدام کی ہدایت (FM16SEPWE): اصل مسئلہ ملا! پہلے یہ ڈیمو ڈیٹا صرف *نئے* خالی انسٹال کے لیے
 // روکا گیا تھا — مگر جن فونز پر یہ ڈیمو ڈیٹا صفائی سے پہلے ہی محفوظ ہو چکا تھا، وہاں localStorage میں یہ
 // اب بھی پڑا رہتا اور بار بار واپس نظر آتا رہتا تھا (کوڈ کی تبدیلی پرانا محفوظ شدہ ڈیٹا خودکار صاف نہیں کرتی)۔
@@ -18910,10 +18957,38 @@ function applyLoginDeviceLock(){
     set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
   };
   const css = `
-  #fmCalcBtn{position:fixed;z-index:99990;width:52px;height:52px;border-radius:16px;border:none;cursor:pointer;
-    background:linear-gradient(160deg,#334155,#0f172a);color:#fff;font-size:26px;line-height:52px;text-align:center;
-    box-shadow:0 5px 0 #020617,0 8px 16px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25);touch-action:none;user-select:none;-webkit-user-select:none;padding:0;display:none;}
-  #fmCalcBtn:active{transform:translateY(3px);box-shadow:0 2px 0 #020617,0 4px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.2);}
+  #fmCalcBtn{position:fixed;z-index:99990;width:50px;height:50px;border-radius:50%;border:2.5px solid #fff;cursor:pointer;
+    background:radial-gradient(circle at 35% 30%,#fb7185,#e11d48 55%,#9f1239);color:#fff;text-align:center;
+    box-shadow:0 5px 0 #881337,0 9px 18px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.35);touch-action:none;user-select:none;-webkit-user-select:none;padding:0;display:none;}
+  #fmCalcBtn svg{width:28px;height:28px;display:block;margin:auto;pointer-events:none;}
+  #fmCalcBtn:active{transform:translateY(3px);box-shadow:0 2px 0 #881337,0 4px 8px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.3);}
+  #fmCalc .fcTheme{width:30px;height:30px;border-radius:9px;border:none;background:linear-gradient(160deg,#a78bfa,#6d28d9);color:#fff;font-size:15px;
+    box-shadow:0 3px 0 #3b0764;cursor:pointer;padding:0;line-height:30px;margin-inline-end:6px;}
+  #fmCalc .fcTheme:active{transform:translateY(2px);box-shadow:0 1px 0 #3b0764;}
+  /* ---------- 🎨 تھیمز ---------- */
+  #fmCalc.th1{background:linear-gradient(170deg,#1e3a8a,#172554 60%,#0b1437);}
+  #fmCalc.th1 .fcScreen{background:linear-gradient(180deg,#031525,#062a44);}
+  #fmCalc.th1 .fcVal{color:#67e8f9;text-shadow:0 0 6px #22d3ee,0 0 14px rgba(34,211,238,.75),0 0 26px rgba(34,211,238,.45);}
+  #fmCalc.th1 .fcExpr{color:#a5f3fc;}
+  #fmCalc.th1 .fcK{background:linear-gradient(170deg,#3b5bdb,#27418f);box-shadow:0 5px 0 #0b1a4a,0 7px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.25);}
+  #fmCalc.th1 .fcK.op{background:linear-gradient(170deg,#22d3ee,#0891b2);box-shadow:0 5px 0 #164e63,0 7px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3);}
+  #fmCalc.th1 .fcK.fn{background:linear-gradient(170deg,#c7d2fe,#818cf8);color:#1e1b4b;box-shadow:0 5px 0 #3730a3,0 7px 10px rgba(0,0,0,.4);}
+  #fmCalc.th2{background:linear-gradient(170deg,#4a1d24,#2a0f14 60%,#16070a);}
+  #fmCalc.th2 .fcScreen{background:linear-gradient(180deg,#1f1405,#2e1d06);}
+  #fmCalc.th2 .fcVal{color:#fbbf24;text-shadow:0 0 6px #f59e0b,0 0 14px rgba(245,158,11,.75),0 0 26px rgba(245,158,11,.45);}
+  #fmCalc.th2 .fcExpr{color:#fde68a;}
+  #fmCalc.th2 .fcK{background:linear-gradient(170deg,#7f1d1d,#4c0f13);box-shadow:0 5px 0 #1c0507,0 7px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.2);}
+  #fmCalc.th2 .fcK.op{background:linear-gradient(170deg,#fcd34d,#d97706);color:#3b1d02;box-shadow:0 5px 0 #78350f,0 7px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.4);}
+  #fmCalc.th2 .fcK.fn{background:linear-gradient(170deg,#fda4af,#e11d48);box-shadow:0 5px 0 #881337,0 7px 10px rgba(0,0,0,.4);}
+  #fmCalc.th2 .fcK.eq{background:linear-gradient(170deg,#fbbf24,#b45309);box-shadow:0 5px 0 #78350f,0 7px 10px rgba(0,0,0,.4);}
+  #fmCalc.th3{background:linear-gradient(170deg,#f8fafc,#e2e8f0 60%,#cbd5e1);box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 1px 0 #fff,inset 0 -2px 0 rgba(0,0,0,.12);}
+  #fmCalc.th3 .fcTitle{color:#334155;}
+  #fmCalc.th3 .fcScreen{background:linear-gradient(180deg,#d9f99d,#bef264);border-color:#65a30d;box-shadow:inset 0 3px 8px rgba(0,0,0,.25);}
+  #fmCalc.th3 .fcVal{color:#1a2e05;text-shadow:none;}
+  #fmCalc.th3 .fcExpr{color:#365314;}
+  #fmCalc.th3 .fcK{background:linear-gradient(170deg,#ffffff,#e5e7eb);color:#0f172a;box-shadow:0 5px 0 #94a3b8,0 7px 10px rgba(0,0,0,.18),inset 0 1px 0 #fff;}
+  #fmCalc.th3 .fcK.op{background:linear-gradient(170deg,#60a5fa,#2563eb);color:#fff;box-shadow:0 5px 0 #1e3a8a,0 7px 10px rgba(0,0,0,.2);}
+  #fmCalc.th3 .fcK.fn{background:linear-gradient(170deg,#fecaca,#f87171);color:#450a0a;box-shadow:0 5px 0 #991b1b,0 7px 10px rgba(0,0,0,.2);}
   #fmCalc{position:fixed;z-index:99991;width:292px;display:none;transform-origin:top left;touch-action:none;user-select:none;-webkit-user-select:none;
     background:linear-gradient(170deg,#3b4454,#1c222d 60%,#12161d);border-radius:22px;padding:10px 12px 14px;
     box-shadow:0 18px 40px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -2px 0 rgba(0,0,0,.4);font-family:Arial,Helvetica,sans-serif;}
@@ -18940,11 +19015,11 @@ function applyLoginDeviceLock(){
   function mount(){
     if(document.getElementById('fmCalc')) return;
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
-    const btn = document.createElement('button'); btn.id = 'fmCalcBtn'; btn.type = 'button'; btn.textContent = '🧮'; btn.title = 'کیلکولیٹر';
+    const btn = document.createElement('button'); btn.id = 'fmCalcBtn'; btn.type = 'button'; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="2.5" width="16" height="19" rx="3" fill="#fff"/><rect x="6.5" y="5" width="11" height="4.2" rx="1" fill="#16a34a"/><g fill="#e11d48"><circle cx="8.3" cy="12.6" r="1.25"/><circle cx="12" cy="12.6" r="1.25"/><circle cx="15.7" cy="12.6" r="1.25"/><circle cx="8.3" cy="16.2" r="1.25"/><circle cx="12" cy="16.2" r="1.25"/><circle cx="15.7" cy="16.2" r="1.25"/><circle cx="8.3" cy="19.4" r="1.1"/><circle cx="12" cy="19.4" r="1.1"/></g><rect x="14.6" y="18.3" width="2.3" height="2.2" rx=".5" fill="#f59e0b"/></svg>'; btn.title = 'کیلکولیٹر';
     document.body.appendChild(btn);
     const box = document.createElement('div'); box.id = 'fmCalc';
     const keys = [['C','fn'],['⌫','fn'],['%','fn'],['÷','op'],['7'],['8'],['9'],['×','op'],['4'],['5'],['6'],['−','op'],['1'],['2'],['3'],['+','op'],['00'],['0'],['.'],['=','eq']];
-    box.innerHTML = `<div class="fcHead"><span class="fcTitle">🧮 کیلکولیٹر</span><span class="fcGrip"></span><button type="button" class="fcX">✕</button></div>
+    box.innerHTML = `<div class="fcHead"><span class="fcTitle">کیلکولیٹر</span><span class="fcGrip"></span><button type="button" class="fcTheme" title="رنگ بدلیں">🎨</button><button type="button" class="fcX">✕</button></div>
       <div class="fcScreen"><div class="fcExpr"></div><div class="fcVal">0</div></div>
       <div class="fcKeys">${keys.map(([k, c]) => `<button type="button" class="fcK ${c || ''}" data-k="${k}">${k}</button>`).join('')}</div>`;
     document.body.appendChild(box);
@@ -19003,6 +19078,12 @@ function applyLoginDeviceLock(){
     };
     const close = () => { box.style.display = 'none'; };
     box.querySelector('.fcX').addEventListener('click', close);
+    // ---------- 🎨 رنگ (تھیم) بدلنا — 4 تھیمز، ہر ٹیپ پر اگلی ---------- -->
+    const LS_TH = 'fm_calcTheme';
+    let th = Number(ls.get(LS_TH, 0)) || 0;
+    const applyTh = () => { box.classList.remove('th1', 'th2', 'th3'); if(th) box.classList.add('th' + th); };
+    applyTh();
+    box.querySelector('.fcTheme').addEventListener('click', () => { th = (th + 1) % 4; ls.set(LS_TH, th); applyTh(); try{ navigator.vibrate && navigator.vibrate(10); }catch(_){} });
 
     // ---------- 🧮 بٹن: ٹیپ = کھولیں/بند، کھینچیں = جگہ بدلیں ---------- -->
     (function(){
@@ -19020,8 +19101,8 @@ function applyLoginDeviceLock(){
       const head = box.querySelector('.fcHead');
       let drag = null, pinch = null;
       const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
-      head.addEventListener('touchstart', e => { if(e.touches.length === 1 && !e.target.closest('.fcX')){ drag = {sx: e.touches[0].clientX, sy: e.touches[0].clientY, ox: box.offsetLeft, oy: box.offsetTop}; } }, {passive:true});
-      head.addEventListener('mousedown', e => { if(e.target.closest('.fcX')) return; drag = {sx: e.clientX, sy: e.clientY, ox: box.offsetLeft, oy: box.offsetTop}; });
+      head.addEventListener('touchstart', e => { if(e.touches.length === 1 && !e.target.closest('.fcX') && !e.target.closest('.fcTheme')){ drag = {sx: e.touches[0].clientX, sy: e.touches[0].clientY, ox: box.offsetLeft, oy: box.offsetTop}; } }, {passive:true});
+      head.addEventListener('mousedown', e => { if(e.target.closest('.fcX') || e.target.closest('.fcTheme')) return; drag = {sx: e.clientX, sy: e.clientY, ox: box.offsetLeft, oy: box.offsetTop}; });
       box.addEventListener('touchstart', e => { if(e.touches.length === 2){ drag = null; pinch = {d: dist(e.touches), s: scale}; } }, {passive:true});
       const move = (x, y) => { if(!drag) return; applyBox(drag.ox + x - drag.sx, drag.oy + y - drag.sy); };
       box.addEventListener('touchmove', e => {
@@ -19048,6 +19129,230 @@ function applyLoginDeviceLock(){
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();
 })();
+
+
+/* =====================================================================
+   🏪 27 ستمبر: دو دکانیں ایک ایپ میں — "صدام فروٹ منڈی" (اصل) اور "بلال فروٹ فارم"۔
+   ہر دکان کا ڈیٹا بالکل الگ (فون میں بھی، کلاؤڈ میں بھی، Google Drive بیک اپ میں بھی)۔
+   یہ نظام چھپا ہوا ہے: صرف ایڈمن، اوپر دکان کے نام پر 7 بار ٹیپ کر کے آن کرے۔ آن ہونے پر نام کے ساتھ ⇄
+   آ جاتا ہے، اس پر ٹیپ سے دکان بدلتی ہے۔ منشی/ملازم ہمیشہ صرف صدام کی دکان میں۔
+   ===================================================================== */
+const SHOP_LABELS = { main: 'صدام فروٹ منڈی', bilal: 'بلال فروٹ فارم' };
+function isMultiShopEnabled(){ try{ return localStorage.getItem('fm_multiShopEnabled') === '1'; }catch(e){ return false; } }
+function switchShopTo(shop){
+  try{ localStorage.setItem('fm_activeShop', shop === 'bilal' ? 'bilal' : 'main'); }catch(e){}
+  try{ persistAllData(); }catch(e){}
+  setTimeout(() => { location.reload(); }, 150);
+}
+function refreshShopHeader(){
+  const t = document.getElementById('topbarShopTitle');
+  if(!t) return;
+  const isAdmin = AppState.currentRole === 'admin';
+  const on = isMultiShopEnabled() && isAdmin;
+  t.textContent = SHOP_LABELS[ACTIVE_SHOP] + (on ? ' ⇄' : '');
+  t.style.cursor = isAdmin ? 'pointer' : '';
+  const bar = t.closest('#topbar') || document.querySelector('.topbar') || null;
+  if(IS_BILAL){
+    document.documentElement.classList.add('shopBilal');
+  } else {
+    document.documentElement.classList.remove('shopBilal');
+  }
+}
+function openShopSwitcher(){
+  if(AppState.currentRole !== 'admin' || !isMultiShopEnabled()) return;
+  let m = document.getElementById('shopSwitchModal');
+  if(!m){
+    m = document.createElement('div');
+    m.id = 'shopSwitchModal'; m.className = 'modalOverlay'; m.setAttribute('dir', 'rtl');
+    m.style.fontFamily = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif";
+    m.onclick = (e) => { if(e.target === m) m.classList.remove('show'); };
+    document.body.appendChild(m);
+  }
+  const card = (shop, icon, bg) => {
+    const cur = shop === ACTIVE_SHOP;
+    return `<button type="button" onclick="${cur ? "document.getElementById('shopSwitchModal').classList.remove('show')" : `switchShopTo('${shop}')`}" style="width:100%; margin:8px 0; padding:16px 12px; border:none; border-radius:16px; background:${bg}; color:#fff; font-family:inherit; font-size:22px; font-weight:800; box-shadow:0 5px 0 rgba(0,0,0,.35); cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+      <span>${icon} ${SHOP_LABELS[shop]}</span><span style="font-size:14px; background:rgba(255,255,255,.2); padding:3px 10px; border-radius:10px;">${cur ? '✅ ابھی یہی کھلی ہے' : 'کھولیں ›'}</span></button>`;
+  };
+  m.innerHTML = `<div class="modalBox" style="max-width:380px; text-align:right;">
+    <h3 style="margin:0 0 6px; font-size:20px;">🏪 دکان منتخب کریں</h3>
+    <div style="font-size:13px; color:#64748b; margin-bottom:6px;">ہر دکان کا کھاتہ، گاہک، بل اور سٹاک بالکل الگ ہے۔</div>
+    ${card('main', '🍎', 'linear-gradient(160deg,#0f766e,#134e2c)')}
+    ${card('bilal', '🍉', 'linear-gradient(160deg,#7c3aed,#4c1d95)')}
+    <div class="modalBtns" style="margin-top:8px;"><button class="cancelBtn" onclick="document.getElementById('shopSwitchModal').classList.remove('show')" style="font-family:inherit;">بند کریں</button></div>
+  </div>`;
+  m.classList.add('show');
+}
+(function wireShopTitle(){
+  let taps = [];
+  document.addEventListener('click', (e) => {
+    const t = e.target && e.target.closest && e.target.closest('#topbarShopTitle');
+    if(!t) return;
+    if(AppState.currentRole !== 'admin') return;
+    const now = Date.now();
+    taps = taps.filter(x => now - x < 4000); taps.push(now);
+    if(taps.length >= 7){
+      taps = [];
+      const on = isMultiShopEnabled();
+      if(!on){
+        if(confirm('🏪 دو دکانوں کا نظام (بلال فروٹ فارم) اس فون پر آن کریں؟')){
+          try{ localStorage.setItem('fm_multiShopEnabled', '1'); }catch(e2){}
+          refreshShopHeader();
+          alert('✅ آن ہو گیا۔ اب دکان کے نام پر ایک ٹیپ سے دکان بدل سکتے ہیں۔');
+        }
+      } else if(confirm('دو دکانوں کا نظام اس فون پر بند کریں؟ (ڈیٹا محفوظ رہے گا)')){
+        try{ localStorage.removeItem('fm_multiShopEnabled'); }catch(e2){}
+        if(IS_BILAL) switchShopTo('main'); else refreshShopHeader();
+      }
+      return;
+    }
+    if(isMultiShopEnabled() && taps.length === 1){
+      setTimeout(() => { if(taps.length === 1) openShopSwitcher(); }, 450);
+    }
+  }, true);
+})();
+setInterval(() => { try{ refreshShopHeader(); }catch(e){} }, 1500);
+
+// ---------- 💾 دوسری دکان کا بیک اپ (جو ابھی کھلی نہیں) — سیدھا فون کی محفوظ جگہ سے پڑھ کر ---------- -->
+function buildBackupObjectForShop(shop){
+  const pref = STORAGE_PREFIX + (shop === 'bilal' ? 'bilal__' : '');
+  const get = (k, d) => { try{ const r = localStorage.getItem((SHARED_STORAGE_KEYS.has(k) ? STORAGE_PREFIX : pref) + k); return r == null ? d : JSON.parse(r); }catch(e){ return d; } };
+  const settings = Object.assign({}, get('settings', {}));
+  const shopS = get('shopSettings', null) || {};
+  SHOP_SETTING_FIELDS.forEach(f => { if(shopS[f] !== undefined) settings[f] = shopS[f]; else delete settings[f]; });
+  return {
+    exportedAt: new Date().toISOString(),
+    shop: shop,
+    products: get('products', []), customers: get('customers', []), suppliers: get('suppliers', []),
+    invoices: get('invoices', []), users: get('users', []), approvalRequests: get('approvalRequests', []),
+    nextProductId: get('nextProductId', 1), nextVariantId: get('nextVariantId', 1), nextCustomerId: get('nextCustomerId', 1),
+    nextSupplierId: get('nextSupplierId', 1), nextUserId: get('nextUserId', 1), nextRequestId: get('nextRequestId', 1), nextBatchId: get('nextBatchId', 1),
+    settings,
+    expenses: get('expenses', []), nextExpenseId: get('nextExpenseId', 1),
+    diary: get('diary', []), nextDiaryId: get('nextDiaryId', 1),
+    payments: get('payments', []), nextPaymentId: get('nextPaymentId', 1),
+    advanceOrders: get('advanceOrders', []), nextAdvOrderId: get('nextAdvOrderId', 1),
+    recoveryList: get('recoveryList', []), nextRecoveryId: get('nextRecoveryId', 1),
+    customCategories: get('customCategories', []),
+    cashPurchases: get('cashPurchases', []),
+    expiryAlertDays: get('expiryAlertDays', 30), quickDockItems: get('quickDockItems', []),
+  };
+}
+
+
+/* =====================================================================
+   ☁️ 27 ستمبر: پیمنٹس، میری ڈائری، نقد خریداری، کیٹیگری — اب یہ بھی کلاؤڈ پر (پہلے صرف ایڈمن کے فون میں تھیں)
+   کم ریڈ کے لیے: بار بار چیک نہیں — صرف ایپ کھلنے پر، متعلقہ سکرین کھلنے پر، اور تبدیلی پر۔
+   تین طرفہ ملاپ (base/local/cloud) — کسی فون کی تبدیلی دوسرے سے نہیں مٹتی۔ تصاویر (سلپ) کلاؤڈ پر نہیں جاتیں
+   ===================================================================== */
+const EXTRA_SYNC_DEFS = [
+  { key: 'payments', idOf: x => x && x.payment_id, get: () => paymentsData, set: v => { paymentsData = v; }, bumpNext: v => { const m = v.reduce((a, x) => Math.max(a, Number(x.payment_id) || 0), 0); if(m >= nextPaymentId) nextPaymentId = m + 1; } },
+  { key: 'diary', idOf: x => x && x.id, get: () => diaryData, set: v => { diaryData = v; }, bumpNext: v => { const m = v.reduce((a, x) => Math.max(a, Number(x.id) || 0), 0); if(m >= nextDiaryId) nextDiaryId = m + 1; } },
+  { key: 'cashPurchases', idOf: x => x && x.id, get: () => cashPurchasesData, set: v => { cashPurchasesData = v; }, bumpNext: () => {} },
+  { key: 'categories', idOf: x => x, get: () => customCategories, set: v => { customCategories = v; }, bumpNext: () => {} },
+];
+function _xHeavyStrip(x){
+  if(x === null || typeof x !== 'object') return x;
+  if(Array.isArray(x)) return x.map(_xHeavyStrip);
+  const o = {};
+  Object.keys(x).forEach(k => {
+    const v = x[k];
+    if(typeof v === 'string' && v.length > 1500 && v.startsWith('data:')) return; // تصویر صرف اسی فون پر
+    o[k] = _xHeavyStrip(v);
+  });
+  return o;
+}
+function _xReattach(cloudItem, localItem){
+  if(!localItem || typeof cloudItem !== 'object' || cloudItem === null) return cloudItem;
+  const o = Object.assign({}, cloudItem);
+  Object.keys(localItem).forEach(k => { const v = localItem[k]; if(o[k] === undefined && typeof v === 'string' && v.startsWith('data:')) o[k] = v; });
+  return o;
+}
+function _xBaseKey(def){ return 'xsyncBase_' + def.key; }
+function _xMerge(def, local, cloud){
+  const base = loadFromStorage(_xBaseKey(def), null); // {id: str}
+  const lm = new Map(), cm = new Map(), order = [];
+  (local || []).forEach(x => { const id = def.idOf(x); if(id == null) return; if(!lm.has(String(id))){ lm.set(String(id), x); order.push(String(id)); } });
+  (cloud || []).forEach(x => { const id = def.idOf(x); if(id == null) return; if(!cm.has(String(id))){ cm.set(String(id), x); if(!lm.has(String(id))) order.push(String(id)); } });
+  const out = [];
+  order.forEach(id => {
+    const l = lm.get(id), c = cm.get(id);
+    const inBase = !!(base && Object.prototype.hasOwnProperty.call(base, id));
+    if(l !== undefined && c !== undefined){
+      const lChanged = !base || !inBase || _stableStr(_xHeavyStrip(l)) !== base[id];
+      out.push(lChanged ? l : _xReattach(c, l));
+    } else if(l !== undefined){
+      if(!inBase) out.push(l); // نیا، اسی فون پر بنا
+    } else if(c !== undefined){
+      if(!base || !inBase) out.push(c); // نیا، دوسرے فون سے
+    }
+  });
+  return out;
+}
+function _xSetBase(def, list){
+  const m = {};
+  (list || []).forEach(x => { const id = def.idOf(x); if(id != null) m[String(id)] = _stableStr(_xHeavyStrip(x)); });
+  try{ saveToStorage(_xBaseKey(def), m); }catch(e){}
+}
+async function _xReadCloud(def){
+  const res = await authFirestoreFetch(`${shopDocPath(def.key)}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+  if(res && res.status === 404) return { ok: true, list: [], updateTime: null, missing: true };
+  if(!res || !res.ok) return { ok: false };
+  const doc = await res.json();
+  let list = [];
+  try{ const s = doc.fields?.json?.stringValue; if(s){ const p = JSON.parse(s); if(Array.isArray(p)) list = p; } }catch(e){}
+  return { ok: true, list, updateTime: doc.updateTime || null };
+}
+const _xBusy = {};
+const _xLastSig = {};
+async function extraSyncOne(def, forcePush){
+  if(_xBusy[def.key]) return;
+  _xBusy[def.key] = true;
+  try{
+    for(let attempt = 0; attempt < 3; attempt++){
+      const cloud = await _xReadCloud(def);
+      if(!cloud.ok) break;
+      const merged = _xMerge(def, def.get() || [], cloud.list);
+      def.set(merged); def.bumpNext(merged);
+      try{ if(def.key === 'cashPurchases') saveToStorage('cashPurchases', cashPurchasesData); persistAllData(); }catch(e){}
+      const strippedMerged = _xHeavyStrip(merged);
+      const cloudSame = _stableStr(strippedMerged) === _stableStr(cloud.list);
+      if(cloudSame){ _xSetBase(def, merged); _xLastSig[def.key] = JSON.stringify(strippedMerged); break; }
+      const body = JSON.stringify(strippedMerged);
+      if(body.length > 950000){ console.warn('extra sync: doc too large', def.key, body.length); break; }
+      const pre = cloud.updateTime ? `&currentDocument.updateTime=${encodeURIComponent(cloud.updateTime)}` : '';
+      const res = await authFirestoreFetch(`${shopDocPath(def.key)}?key=${FIREBASE_API_KEY}${pre}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { json: { stringValue: body }, updatedAt: { integerValue: String(Date.now()) } } })
+      });
+      if(res && res.ok){ _xSetBase(def, merged); _xLastSig[def.key] = body; break; }
+      if(!(res && (res.status === 400 || res.status === 409 || res.status === 412))) break;
+    }
+  }catch(e){ /* آف لائن — اگلی بار */ }
+  _xBusy[def.key] = false;
+  try{
+    if(typeof currentScreenName !== 'undefined'){
+      if(def.key === 'payments' && currentScreenName === 'payments' && typeof renderPaymentsScreen === 'function') renderPaymentsScreen();
+      if(def.key === 'diary' && currentScreenName === 'mydiary' && typeof renderMyDiaryList === 'function') renderMyDiaryList();
+    }
+  }catch(e){}
+}
+function extraSyncAll(){ EXTRA_SYNC_DEFS.forEach(d => { extraSyncOne(d); }); }
+// ---------- تبدیلی ہوتے ہی (persistAllData کے بعد) — صرف اسی فہرست کو بھیجیں جو واقعی بدلی ہو ---------- -->
+let _xCheckTimer = null;
+function extraSyncScheduleCheck(){
+  if(_xCheckTimer) return;
+  _xCheckTimer = setTimeout(() => {
+    _xCheckTimer = null;
+    EXTRA_SYNC_DEFS.forEach(d => {
+      let sig = '';
+      try{ sig = JSON.stringify(_xHeavyStrip(d.get() || [])); }catch(e){ return; }
+      if(_xLastSig[d.key] === undefined){ _xLastSig[d.key] = sig; return; } // پہلی بار — ابتدائی ہم آہنگی الگ سے ہوتی ہے
+      if(sig !== _xLastSig[d.key]) extraSyncOne(d);
+    });
+  }, 4000);
+}
+// ایپ کھلنے کے کچھ دیر بعد ایک بار مکمل ہم آہنگی (ہر فہرست ایک ریڈ)
+setTimeout(() => { try{ extraSyncAll(); }catch(e){} }, 6000);
 
 let activeBatchesProductId = null;
 let activeBatchesVariantId = null;
@@ -20847,7 +21152,7 @@ const CUSTOMERS_SEED_DATA = [
     walletHistory:[]},
   {customer_id:3, name:'Walk-in Customer — Ali', phone:'', address:'', keywords:'', wallet_balance:0, total_receivable:0, walletHistory:[]},
 ];
-let customersData = loadFromStorage('customers', CUSTOMERS_SEED_DATA);
+let customersData = loadFromStorage('customers', IS_BILAL ? [] : CUSTOMERS_SEED_DATA);
 let nextCustomerId = loadFromStorage('nextCustomerId', 4);
 
 // ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): کسٹمر اور سپلائر کی فہرست میں بھی وہی مرضی کا سیریل نمبر —
@@ -20914,7 +21219,7 @@ const SUPPLIERS_SEED_DATA = [
   {supplier_id:1, name:'Unilever Pakistan', phone:'923001112223', address:'Karachi', keywords:'', total_payable:12500},
   {supplier_id:2, name:'Local Grocery Supplier', phone:'923337778889', address:'Lahore', keywords:'', total_payable:6000},
 ];
-let suppliersData = loadFromStorage('suppliers', SUPPLIERS_SEED_DATA);
+let suppliersData = loadFromStorage('suppliers', IS_BILAL ? [] : SUPPLIERS_SEED_DATA);
 let nextSupplierId = loadFromStorage('nextSupplierId', 3);
 
 /* =====================================================================
@@ -32369,7 +32674,7 @@ window.addEventListener('online', () => {
    REST API سے، ہر آرڈر محفوظ ہونے پر فوری push، اور Pending Orders/Order Taking
    سکرین کھلی ہو تو ہر چند سیکنڈ بعد خودکار fetch (تقریباً real-time کا تجربہ) ----------
    ===================================================================== */
-const ADVANCE_ORDERS_DOC_PATH = 'shopData/advanceOrders';
+const ADVANCE_ORDERS_DOC_PATH = shopDocPath('advanceOrders');
 let advanceOrdersPollTimer = null;
 
 // ---------- 🔍 صدام کی ہدایت (FM6SEPSU8): آرڈر Sync تشخیص — کسٹمر یا ایڈمن، کسی بھی فون سے چلا کر
@@ -32486,6 +32791,7 @@ async function _legacyFetchAdvanceOrdersFromCloud(silent){
 function startAdvanceOrdersPolling(){
   stopAdvanceOrdersPolling();
   advanceOrdersPollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchAdvanceOrdersFromCloud(false);
   }, 12000);
 }
@@ -32496,7 +32802,7 @@ function stopAdvanceOrdersPolling(){
 /* =====================================================================
    ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواستیں — بالکل Advance Orders جیسا Firestore Sync ---------- -->
    ===================================================================== */
-const RETURN_REQUESTS_DOC_PATH = 'shopData/returnRequests';
+const RETURN_REQUESTS_DOC_PATH = shopDocPath('returnRequests');
 let returnRequestsPollTimer = null;
 async function pushReturnRequestsToCloud(){
   saveToStorage('returnRequests', returnRequestsData);
@@ -32555,7 +32861,7 @@ async function fetchReturnRequestsFromCloud(silent){
 }
 function startReturnRequestsPolling(){
   stopReturnRequestsPolling();
-  returnRequestsPollTimer = setInterval(() => { fetchReturnRequestsFromCloud(false); }, 12000);
+  returnRequestsPollTimer = setInterval(() => { if(document.hidden) return; fetchReturnRequestsFromCloud(false); }, 12000);
 }
 function stopReturnRequestsPolling(){
   if(returnRequestsPollTimer){ clearInterval(returnRequestsPollTimer); returnRequestsPollTimer = null; }
@@ -32835,7 +33141,7 @@ async function confirmReturnCredit(){
    ☁️ RECOVERY LIST — Firestore Sync (ملٹی موبائل: ملازم جو وصولی اپنے فون پر
    درج کرے، وہ خودکار صدام کے فون پر Pending Confirmation میں نظر آ جائے) ----------
    ===================================================================== */
-const RECOVERY_LIST_DOC_PATH = 'shopData/recoveryList';
+const RECOVERY_LIST_DOC_PATH = shopDocPath('recoveryList');
 let recoveryListPollTimer = null;
 
 async function pushRecoveryListToCloud(){
@@ -32906,6 +33212,7 @@ async function fetchRecoveryListFromCloud(silent){
 function startRecoveryListPolling(){
   stopRecoveryListPolling();
   recoveryListPollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchRecoveryListFromCloud(false);
   }, 12000);
 }
@@ -32918,7 +33225,7 @@ function stopRecoveryListPolling(){
    ہر سٹاک اندراج، بالکل RECOVERY LIST جیسا "صرف نئے شامل کریں" pattern —
    تاکہ ایڈمن کے فون پر بھی وہی مکمل، وقت کے ساتھ الگ الگ ریکارڈ نظر آئے) ----------
    ===================================================================== */
-const MUNSHI_LOG_DOC_PATH = 'shopData/munshiStockLog';
+const MUNSHI_LOG_DOC_PATH = shopDocPath('munshiStockLog');
 let munshiLogPollTimer = null;
 
 async function pushMunshiStockLogToCloud(){
@@ -32978,6 +33285,7 @@ async function fetchMunshiStockLogFromCloud(silent){
 function startMunshiLogPolling(){
   stopMunshiLogPolling();
   munshiLogPollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchMunshiStockLogFromCloud(false);
   }, 12000);
 }
@@ -32992,7 +33300,7 @@ function stopMunshiLogPolling(){
    pattern استعمال کیا ہے (چونکہ کسٹمر ریکارڈز میں edit-in-place ہوتا ہے،
    advance-orders والا "صرف نئے شامل کریں" pattern یہاں موزوں نہیں) ----------
    ===================================================================== */
-const CUSTOMERS_DOC_PATH = 'shopData/customers';
+const CUSTOMERS_DOC_PATH = shopDocPath('customers');
 let customersPollTimer = null;
 
 async function pushCustomersToCloud(){
@@ -33087,6 +33395,7 @@ async function fetchCustomersFromCloud(silent){
 function startCustomersPolling(){
   stopCustomersPolling();
   customersPollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchCustomersFromCloud(false);
   }, 12000);
 }
@@ -33107,7 +33416,7 @@ window.addEventListener('online', () => {
    ہر تبدیلی خودکار ہر ڈیوائس پر۔ full-overwrite + pendingSync pattern استعمال کیا
    ہے (سپلائر ریکارڈز میں بھی edit-in-place ہوتا ہے، اسی لیے یہی موزوں ہے) ----------
    ===================================================================== */
-const SUPPLIERS_DOC_PATH = 'shopData/suppliers';
+const SUPPLIERS_DOC_PATH = shopDocPath('suppliers');
 let suppliersPollTimer = null;
 
 async function pushSuppliersToCloud(){
@@ -33201,6 +33510,7 @@ async function fetchSuppliersFromCloud(silent){
 function startSuppliersPolling(){
   stopSuppliersPolling();
   suppliersPollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchSuppliersFromCloud(false);
   }, 12000);
 }
@@ -33222,7 +33532,7 @@ window.addEventListener('online', () => {
    خودکار سنک۔ بالکل کسٹمرز/سپلائرز والا ہی full-overwrite + pendingSync
    pattern استعمال کیا ہے (پراڈکٹ ریکارڈز میں بھی edit-in-place ہوتا ہے) ----------
    ===================================================================== */
-const PRODUCTS_DOC_PATH = 'shopData/products';
+const PRODUCTS_DOC_PATH = shopDocPath('products');
 let productsPollTimer = null;
 
 /* =====================================================================
@@ -33756,8 +34066,9 @@ async function manualRefreshStockFromCloud(){
 function startProductsPolling(){
   stopProductsPolling();
   productsPollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchProductsFromCloud(false);
-  }, 5000);
+  }, 15000);
 }
 function stopProductsPolling(){
   if(productsPollTimer){ clearInterval(productsPollTimer); productsPollTimer = null; }
@@ -33777,7 +34088,7 @@ window.addEventListener('online', () => {
    pendingSync pattern استعمال کیا ہے (invoicesData میں بھی edit-in-place
    ہوتا ہے — void سے status بدلتی ہے، delete سے فہرست سے نکلتا ہے) ----------
    ===================================================================== */
-const INVOICES_DOC_PATH = 'shopData/invoices';
+const INVOICES_DOC_PATH = shopDocPath('invoices');
 let invoicesPollTimer = null;
 
 async function pushInvoicesToCloud(){
@@ -33837,6 +34148,7 @@ async function fetchInvoicesFromCloud(silent){
 function startInvoicesPolling(){
   stopInvoicesPolling();
   invoicesPollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchInvoicesFromCloud(false);
   }, 12000);
 }
@@ -33856,7 +34168,7 @@ window.addEventListener('online', () => {
    Approve/Reject، کسٹمر ایپ سے پیمنٹ اسکرین شاٹ — سب فوری ہر ڈیوائس پر۔
    بالکل انوائسز والا ہی full-overwrite + pendingSync pattern ----------
    ===================================================================== */
-const PENDING_BILLS_DOC_PATH = 'shopData/pendingBills';
+const PENDING_BILLS_DOC_PATH = shopDocPath('pendingBills');
 let pendingBillsPollTimer = null;
 
 async function pushPendingBillsToCloud(){
@@ -33924,6 +34236,7 @@ async function fetchPendingBillsFromCloud(silent){
 function startPendingBillsPolling(){
   stopPendingBillsPolling();
   pendingBillsPollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchPendingBillsFromCloud(false);
   }, 12000);
 }
@@ -33943,7 +34256,7 @@ window.addEventListener('online', () => {
    دونوں ایک ہی shopData/finance ڈاکومنٹ میں محفوظ ہوتے ہیں (چھوٹا ڈیٹا، الگ ڈاکومنٹ کی ضرورت نہیں)۔
    بالکل customers/suppliers/products/invoices والا ہی full-overwrite + pendingSync pattern ----------
    ===================================================================== */
-const FINANCE_DOC_PATH = 'shopData/finance';
+const FINANCE_DOC_PATH = shopDocPath('finance');
 let financePollTimer = null;
 
 async function pushFinanceToCloud(){
@@ -34011,6 +34324,7 @@ async function fetchFinanceFromCloud(silent){
 function startFinancePolling(){
   stopFinancePolling();
   financePollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchFinanceFromCloud(false);
   }, 12000);
 }
@@ -34030,7 +34344,7 @@ const APPROVAL_REQUESTS_SEED_DATA = [
   {request_id:2, requested_by:'Bilal', action_type:'edit_bill', target:'Invoice #INV-0039', reason:'Wrong quantity was entered', status:'pending', date:'2026-06-30'},
   {request_id:3, requested_by:'Aslam Bhai', action_type:'edit_bill', target:'Invoice #INV-0031', reason:'Price needs correction', status:'approved', date:'2026-06-28'},
 ];
-let approvalRequests = loadFromStorage('approvalRequests', APPROVAL_REQUESTS_SEED_DATA);
+let approvalRequests = loadFromStorage('approvalRequests', IS_BILAL ? [] : APPROVAL_REQUESTS_SEED_DATA);
 let nextRequestId = loadFromStorage('nextRequestId', 4);
 
 /* =====================================================================
@@ -34039,7 +34353,7 @@ let nextRequestId = loadFromStorage('nextRequestId', 4);
    ہر ڈیوائس پر۔ بالکل customers/suppliers/invoices/pendingBills والا ہی
    full-overwrite + pendingSync pattern استعمال کیا ہے ----------
    ===================================================================== */
-const APPROVAL_REQUESTS_DOC_PATH = 'shopData/approvalRequests';
+const APPROVAL_REQUESTS_DOC_PATH = shopDocPath('approvalRequests');
 let approvalRequestsPollTimer = null;
 
 async function pushApprovalRequestsToCloud(){
@@ -34103,6 +34417,7 @@ async function fetchApprovalRequestsFromCloud(silent){
 function startApprovalRequestsPolling(){
   stopApprovalRequestsPolling();
   approvalRequestsPollTimer = setInterval(() => {
+    if(document.hidden) return;
     fetchApprovalRequestsFromCloud(false);
   }, 12000);
 }
@@ -34504,7 +34819,7 @@ const INVOICES_SEED_DATA = [
   {invoice_id:1, invoice_no:'INV-0042', customer_name:'Muhammad Usman', customer_phone:'923001234567', sold_by:'Aslam Bhai', sale_mode:'retail',
     items:[{name:'Lipton Tea 1kg', qty:2, unitPrice:850},{name:'Sugar 1kg', qty:1, unitPrice:160}], grand_total:1860, status:'completed', created_at:new Date().toISOString()},
 ];
-let invoicesData = loadFromStorage('invoices', INVOICES_SEED_DATA);
+let invoicesData = loadFromStorage('invoices', IS_BILAL ? [] : INVOICES_SEED_DATA);
 
 // ---------- Bill History: Status Tabs (All / Pending / Clear) ----------
 // نوٹ: "Pending" کا مطلب وہ بل ہیں جن کی رقم ابھی وصول نہیں ہوئی (credit پر بکے)
@@ -43230,7 +43545,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------- 🚧 صدام کی ہدایت (25 ستمبر، دوپہر): مینٹیننس موڈ فوراً چیک کریں (لاگ ان سے پہلے بھی) اور ہر
   // ~4 سیکنڈ بعد دوبارہ — تاکہ ڈویلپر کے کام کے دوران باقی سب فونز پر بروقت "انتظار فرمائیں" اوورلے آ/جا سکے ---------- -->
   try{ fetchMaintenanceMode(true); }catch(e){ console.error('fetchMaintenanceMode failed', e); }
-  setInterval(() => { try{ fetchMaintenanceMode(false); }catch(e){} }, 4000);
+  setInterval(() => { try{ if(document.hidden) return; const _ls = document.getElementById('loginScreen'); const _onLogin = _ls && getComputedStyle(_ls).display !== 'none'; const _now = Date.now(); if(!_onLogin && window.__lastMaintPoll && _now - window.__lastMaintPoll < 60000) return; window.__lastMaintPoll = _now; fetchMaintenanceMode(false); }catch(e){} }, 20000);
   // ---------- 🚧 اسی فون پر اگر پہلے سے مینٹیننس موڈ آن کیا ہوا ہے تو ایپ کھلتے ہی مستقل بینر بھی فوراً نظر آئے
   // (پہلے صرف Developer Panel کھولنے یا ٹوگل کرنے پر اپڈیٹ ہوتا تھا، اب شروع میں ہی) ---------- -->
   try{ refreshMaintenanceLocalBanner(); }catch(e){ console.error('refreshMaintenanceLocalBanner failed', e); }
