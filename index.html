@@ -692,6 +692,7 @@
      رنگ فوراً بدلتا ہے (پہلے tr پر رنگ لگتا تھا جو td کے اپنے رنگ کے نیچے چھپ جاتا تھا) ---------- */
   tr.otSelRow td{ background:#93c5fd !important; color:#0b2a5b !important; border-bottom-color:#2563eb !important; }
   tr.otSelRow td:first-child{ box-shadow:inset -6px 0 0 #1d4ed8; }
+  tr.otTouchRow > td{ background:#dbeafe !important; }
   tr.otSelRow input.otQtyInput{ border:2.5px solid #1d4ed8 !important; background:#fff !important; color:#0b2a5b !important; }
   .screen{display:none; animation:fadeIn .25s ease;}
   .screen.active{display:block;}
@@ -8602,7 +8603,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM27SEPSU0328AM';
+const APP_BUILD_VERSION = 'FM27SEPSU1207PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -26487,6 +26488,12 @@ function otSelCapsuleShow(variantId){
   otSelCapsuleQtyRefresh();
 }
 // ---------- 🔢 صدام کی ہدایت (26 ستمبر): منتخب سبزی کی اس آرڈر میں لکھی مقدار — سیریل بیج سے بڑا، موٹا ہندسہ ---------- -->
+function otMarkTouchedRow(){
+  document.querySelectorAll('#otItemsList .otTouchRow').forEach(r => r.classList.remove('otTouchRow'));
+  if(_otSelVariantId == null) return;
+  const r = document.querySelector(`#otItemsList [data-variant-id="${_otSelVariantId}"]`);
+  if(r) r.classList.add('otTouchRow');
+}
 function otSelCapsuleQtyRefresh(){
   const q = document.getElementById('otSelCapsuleQty');
   if(!q) return;
@@ -26503,7 +26510,7 @@ function otSelCapsuleQtyRefresh(){
     const holder = t.closest('#otItemsList');
     if(!holder) return;
     const row = t.closest('[data-variant-id]');
-    if(row && holder.contains(row)) otSelCapsuleShow(row.getAttribute('data-variant-id'));
+    if(row && holder.contains(row)){ otSelCapsuleShow(row.getAttribute('data-variant-id')); try{ otMarkTouchedRow(); }catch(e){} }
   }, true);
 });
 
@@ -26529,7 +26536,8 @@ function syncOtVegNavigator(list){
   }
   if(prevBtn) prevBtn.disabled = false;
   if(nextBtn) nextBtn.disabled = false;
-  const keepIdx = Math.max(0, Math.min(_otVegNavList.length - 1, _otVegNavCurIdx || 0));
+  let keepIdx = Math.max(0, Math.min(_otVegNavList.length - 1, _otVegNavCurIdx || 0));
+  try{ if(typeof _otSelVariantId !== 'undefined' && _otSelVariantId != null){ const _ti = _otVegNavList.findIndex(x => String(x.variant_id) === String(_otSelVariantId)); if(_ti >= 0) keepIdx = _ti; } }catch(e){}
   track.innerHTML = _otVegNavList.map((v, i) => `<div class="saVegNavTick" data-idx="${i}" onclick="otVegNavGoToIndex(${i})"><span class="tickLine"></span><span>${i + 1}</span></div>`).join('');
   // ---------- 🐞 صدام کی ہدایت (23 ستمبر): اہم فکس — یہ فنکشن ہر 5 سیکنڈ والی خودکار کلاؤڈ ری فریش پر بھی
   // چلتا ہے (renderOtItemsPage کے ذریعے)۔ پہلے یہ ہر بار otVegNavGoToIndex کو سکرول کرنے کا اشارہ دیتا تھا،
@@ -26736,7 +26744,7 @@ function toggleOtViewMode(){
 // دیکھنے کے لیے (کوئی قیمت نہیں، کوئی نئی چیز شامل/حذف نہیں کر سکتے) ---------- -->
 function renderOtItemsTable(wrap){
   // ---------- 📌 جدول دوبارہ بنانے سے پہلے سکرول کی جگہ یاد رکھیں، بعد میں واپس لگائیں ----------
-  const _oldBox = wrap.firstElementChild;
+  const _oldBox = wrap.querySelector('#otTableScrollBox') || wrap.firstElementChild;
   const _keepTop = _oldBox ? _oldBox.scrollTop : 0;
   const _keepLeft = _oldBox ? _oldBox.scrollLeft : 0;
   // ---------- 🔗 صدام کی ہدایت (FM25SEPFR1137AM): آرڈر ٹیکنگ کا جدول اب سٹاک مینجمنٹ (Stock Adjustment) کے جدول کا
@@ -26810,7 +26818,7 @@ function renderOtItemsTable(wrap){
   wrap.style.display = 'block';
   wrap.innerHTML = `
     <div style="text-align:center; margin:2px 0 6px; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:17px; color:#15803d;">🟢 حاضر سبزیاں</div>
-    <div style="width:100%;max-width:100%;max-height:74vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #dbe1ea;">
+    <div id="otTableScrollBox" style="width:100%;max-width:100%;max-height:74vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overflow-anchor:none;border-radius:10px;border:1px solid #dbe1ea;">
       <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:100%;max-width:100%;table-layout:fixed;font-size:12.5px;">
         ${colgroupHtml}
         <thead>${theadHtml}</thead>
@@ -26818,10 +26826,11 @@ function renderOtItemsTable(wrap){
       </table>
     </div>
   `;
-  const _newBox = wrap.firstElementChild;
+  const _newBox = wrap.querySelector('#otTableScrollBox');
   if(_newBox && _keepTop){
     _newBox.scrollTop = _keepTop;
   }
+  try{ otMarkTouchedRow(); }catch(e){}
   wireOtTableSwipeRows(wrap);
 }
 // ---------- 👉👈 صدام کی ہدایت (25 ستمبر، دوپہر): آرڈر ٹیکنگ کے جدول میں ہی پوری قطار کو سرکا کر (سوائپ) سبزی
