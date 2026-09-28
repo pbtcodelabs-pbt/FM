@@ -8654,7 +8654,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM28SEPMO0827AM';
+const APP_BUILD_VERSION = 'FM28SEPMO1029AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -18998,6 +18998,43 @@ function applyLoginDeviceLock(){
     }
   }, true);
 })();
+
+// ---------- ✏️🗑️ 28 ستمبر: ملازم کا نام/فون بدلنا اور ملازم ڈیلیٹ کرنا (صرف ایڈمن) ---------- -->
+function editUserInfo(userId){
+  if(AppState.currentRole !== 'admin') return;
+  const u = usersData.find(x => x.user_id === userId); if(!u) return;
+  const name = prompt('نیا نام لکھیں:', u.name || '');
+  if(name === null) return;
+  const nm = name.replace(/\s+/g, ' ').trim();
+  if(!nm){ alert('نام خالی نہیں ہو سکتا۔'); return; }
+  if(usersData.some(x => x.user_id !== userId && String(x.name).trim().toLowerCase() === nm.toLowerCase())){ alert('❌ اس نام کا ملازم پہلے سے موجود ہے۔'); return; }
+  const phone = prompt('موبائل نمبر (اختیاری):', u.phone || '');
+  const oldName = u.name;
+  u.name = nm;
+  if(phone !== null) u.phone = phone.trim();
+  // اس فون کے مالک / یاد رکھے سیشن میں بھی نیا نام
+  try{ const o = getPhoneOwner(); if(o && String(o.id) === String(userId)){ o.name = nm; localStorage.setItem('fm_phoneOwner', JSON.stringify(o)); } }catch(e){}
+  try{ const rs = loadFromStorage('rememberedSession', null); if(rs && String(rs.user_id) === String(userId)){ rs.name = nm; saveToStorage('rememberedSession', rs); } }catch(e){}
+  try{ const c = getBioCred(); if(c && String(c.userId) === String(userId)){ c.name = nm; localStorage.setItem('fm_bioCred', JSON.stringify(c)); } }catch(e){}
+  if(AppState.currentUser && AppState.currentUser.name === oldName && AppState.currentRole === u.role){ AppState.currentUser.name = nm; }
+  saveToStorage('users', usersData);
+  pushUsersToCloud();
+  renderUserList();
+  try{ renderEmployeeLoginDropdown(); }catch(e){}
+}
+function deleteUserAccount(userId){
+  if(AppState.currentRole !== 'admin') return;
+  const u = usersData.find(x => x.user_id === userId); if(!u) return;
+  if(u.role === 'admin' && usersData.filter(x => x.role === 'admin' && x.is_active && x.user_id !== userId).length === 0){ alert('❌ یہ واحد ایڈمن ہے — ڈیلیٹ نہیں ہو سکتا۔'); return; }
+  if(u.role === 'admin' && AppState.currentUser && AppState.currentUser.name === u.name){ alert('❌ آپ خود کو ڈیلیٹ نہیں کر سکتے۔'); return; }
+  if(!confirm(`"${u.name}" کو ملازمین کی فہرست سے ڈیلیٹ کریں؟\n\nاس کے بنائے ہوئے بل/آرڈر ریکارڈ میں موجود رہیں گے، صرف یہ اب لاگ اِن نہیں کر سکے گا۔`)) return;
+  if(!confirm('پکا ڈیلیٹ کریں؟ یہ واپس نہیں ہو سکتا۔')) return;
+  usersData = usersData.filter(x => x.user_id !== userId);
+  saveToStorage('users', usersData);
+  pushUsersToCloud();
+  renderUserList();
+  try{ renderEmployeeLoginDropdown(); }catch(e){}
+}
 
 
 /* =====================================================================
@@ -34611,6 +34648,8 @@ function renderUserList(){
         <div class="uc2ColLeft">
           <button class="btnToggleActive" onclick="toggleUserActive(${u.user_id})">${u.is_active ? '⏸️ بند کریں' : '▶️ چالو کریں'}</button>
           <button class="btnResetPin" onclick="requestRoleChangeAuth(${u.user_id})">🔄 عہدہ بدلیں</button>
+          <button class="btnResetPin" onclick="editUserInfo(${u.user_id})" style="background:#fef9c3 !important; color:#854d0e !important;">✏️ نام بدلیں</button>
+          <button class="btnResetPin" onclick="deleteUserAccount(${u.user_id})" style="background:#fee2e2 !important; color:#b91c1c !important;">🗑️ ڈیلیٹ</button>
         </div>
         <div class="uc2ColRight">
           <div class="uc2ColRightTitle">🖥️ مجاز اسکرینز</div>
