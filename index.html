@@ -4844,21 +4844,37 @@
       </div>
     </div>
 
-    <!-- ---------- 💸 FM28SEP رات (صدام کی ہدایت): گاہک کو نقد ادھار دینا — بغیر مال خریدے، سیدھا اس کے کھاتے میں چڑھ جائے ---------- -->
+    <!-- ---------- 💸 FM29SEP (صدام کی ہدایت): گاہک کو نقد ادھار — بل جیسا حساب ٹیبل + یادداشت ---------- -->
+    <style>
+      #custLoanModal .clTable{ width:100%; border-collapse:separate; border-spacing:0 6px; margin:4px 0 8px; }
+      #custLoanModal .clTable td{ padding:8px 12px; font-size:16px; font-weight:700; }
+      #custLoanModal .clTable td:first-child{ border-radius:0 10px 10px 0; width:55%; }
+      #custLoanModal .clTable td:last-child{ border-radius:10px 0 0 10px; text-align:left; direction:ltr; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:16px; }
+      #custLoanModal .clInRow td{ padding:4px 8px; }
+      #custLoanModal .clInRow input{ width:100%; margin:0; padding:8px; font-size:17px; font-weight:900; text-align:center; border-radius:8px; box-sizing:border-box; font-family:'Arial Black',Arial,sans-serif; }
+    </style>
     <div class="modalOverlay" id="custLoanModal" onclick="if(event.target===this) closeCustLoanModal()" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
-      <div class="modalBox" style="max-width:420px;">
-        <div style="background:linear-gradient(135deg,#c2410c,#7c2d12); color:#fff; border-radius:14px; padding:12px 14px; margin-bottom:12px; box-shadow:0 4px 0 rgba(0,0,0,.25);">
-          <div style="font-size:21px; font-weight:800;">💸 گاہک کو نقد ادھار دیا</div>
-          <div id="custLoanName" style="font-size:16px; opacity:.95; margin-top:2px;"></div>
-          <div style="font-size:12.5px; opacity:.85; margin-top:2px;">مال نہیں خریدا — صرف نقد رقم دی، جو اس کے کھاتے میں چڑھ جائے گی</div>
+      <div class="modalBox" style="max-width:430px;">
+        <div style="background:linear-gradient(135deg,#c2410c,#7c2d12); color:#fff; border-radius:14px; padding:10px 14px; margin-bottom:8px; box-shadow:0 4px 0 rgba(0,0,0,.25); display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div style="font-size:20px; font-weight:800;">💸 نقد ادھار دیا</div>
+          <div id="custLoanName" style="font-size:16px; opacity:.95;"></div>
         </div>
-        <div id="custLoanBalanceHint" style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:10px; font-size:15px; font-weight:700; margin-bottom:10px; line-height:2;"></div>
-        <input type="number" id="custLoanAmount" dir="rtl" inputmode="numeric" placeholder="کتنی رقم دی؟" onfocus="this.select()" oninput="updateCustLoanHint()" style="font-size:20px; font-weight:800; text-align:center; border:2px solid #fdba74;">
-        <div id="custLoanHint" style="display:none; padding:10px 12px; border-radius:10px; font-size:14.5px; font-weight:700; margin:8px 0 10px; background:#fff7ed; color:#9a3412; line-height:2;"></div>
-        <textarea id="custLoanNote" dir="rtl" placeholder="نوٹ (مثلاً کل مال کے لیے لیے) — اختیاری" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:15px; min-height:44px; text-align:right;"></textarea>
+        <table class="clTable">
+          <tr class="clInRow" style="background:#fff7ed;"><td style="background:#ffedd5; color:#9a3412;">💸 دستی کیش دیا</td>
+            <td style="background:#ffedd5;"><input type="number" id="custLoanAmount" inputmode="numeric" placeholder="0" onfocus="this.select()" oninput="updateCustLoanHint()" style="border:2px solid #fb923c;"></td></tr>
+          <tr><td style="background:#eff6ff; color:#1e3a8a;">📊 سابقہ بقایا</td><td id="clPrev" style="background:#eff6ff; color:#1e3a8a;">0</td></tr>
+          <tr id="clWalletRow" style="display:none;"><td style="background:#f0fdf4; color:#15803d;">💳 والٹ سے کٹا</td><td id="clWallet" style="background:#f0fdf4; color:#15803d;">0</td></tr>
+          <tr><td style="background:#f1f5f9; color:#0f172a;">🧮 ٹوٹل رقم</td><td id="clTotal" style="background:#f1f5f9; color:#0f172a;">0</td></tr>
+          <tr class="clInRow"><td style="background:#ecfdf5; color:#166534;">📥 وصولی <span style="font-size:12px;">(اگر ہو)</span></td>
+            <td style="background:#ecfdf5;"><input type="number" id="custLoanRecovery" inputmode="numeric" placeholder="—" onfocus="this.select()" oninput="updateCustLoanHint()" style="border:2px solid #86efac;"></td></tr>
+          <tr><td style="background:#991b1b; color:#fff; font-size:17px;">✅ اب تک ٹوٹل بقایا</td><td id="clFinal" style="background:#991b1b; color:#fff; font-size:19px;">0</td></tr>
+          <tr id="clExtraWalletRow" style="display:none;"><td style="background:#dcfce7; color:#15803d;">💳 والٹ میں جمع</td><td id="clExtraWallet" style="background:#dcfce7; color:#15803d;">0</td></tr>
+        </table>
+        <div style="font-size:14px; font-weight:800; color:#78350f; margin:4px 2px;">📝 یادداشت <span id="clTimeStamp" style="font-size:12px; color:var(--muted); font-weight:600;"></span></div>
+        <textarea id="custLoanNote" dir="rtl" placeholder="کس کام کے لیے • کہاں • کس بندے کو دیا" style="width:100%; padding:8px; border:1.5px solid #fcd34d; background:#fffbeb; border-radius:10px; font-family:inherit; font-size:15px; min-height:54px; text-align:right; box-sizing:border-box;"></textarea>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeCustLoanModal()" style="font-family:inherit;">منسوخ</button>
-          <button class="saveBtn" onclick="saveCustLoan()" style="font-family:inherit; background:linear-gradient(135deg,#ea580c,#9a3412);">✅ ادھار کھاتے میں چڑھائیں</button>
+          <button class="saveBtn" onclick="saveCustLoan()" style="font-family:inherit; background:linear-gradient(135deg,#ea580c,#9a3412);">✅ محفوظ کریں</button>
         </div>
       </div>
     </div>
@@ -8644,7 +8660,8 @@ function getDeveloperContact(){
 // 🆕 FM28SEPMO0744PM: وصولی لسٹ — OK کے بعد بھی باقی بقایا کم نظر آئے، ایک وصولی میں کئی طریقے (نقد+جاز کیش+ایزی پیسہ+بینک)، نوٹ لاک نہیں (💾 نوٹ OK)، نوٹ ایڈمن/رپورٹ/پرنٹ میں
 // 🆕 FM28SEPMO0751PM: گاہک کے پروفائل میں "💸 ادھار دیا" اور بیوپاری کے پروفائل میں "📥 ادھار لیا" — بغیر مال کے نقد رقم سیدھی کھاتے میں
 // 🆕 FM28SEPMO0835PM: بلال فروٹ فارم کی ایک بار والی صفائی کا کوڈ بھی مکمل ہٹا دیا — اب اس کا کوئی نشان باقی نہیں
-const APP_BUILD_VERSION = 'FM28SEPMO0835PM';
+// 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
+const APP_BUILD_VERSION = 'FM29SEPTU0310AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10018,7 +10035,7 @@ function renderCustomerHomeLedgerList(customerId){
         else if(h.type === 'redeem'){ label = '➖ والٹ سے نکالا گیا'; isGot = false; }
         else { label = `📥 بقایا وصول ہوا (${h.via === 'wallet' ? 'والٹ سے' : 'نقد'})`; isGot = true; }
         return `<div class="ledgerRow"><div class="lrTop">
-            <div><div class="lrDate">${h.date ? new Date(h.date).toLocaleDateString('en-GB') : ''}</div><div class="lrDesc">${label}</div></div>
+            <div><div class="lrDate">${h.date ? new Date(h.date).toLocaleDateString('en-GB') : ''}${h.time ? ' • ' + h.time : ''}</div><div class="lrDesc">${label}</div></div>
             <div class="lrAmount ${isGot?'got':'gave'}">${isGot?'+':'-'} Rs. ${h.amount.toLocaleString()}</div>
           </div></div>`;
       }).join('');
@@ -24652,7 +24669,7 @@ function renderCustomerTransactionsSection(customerId){
         else { label = `📥 وصولی (${h.via === 'wallet' ? 'والٹ سے' : 'نقد'})`; isGot = true; }
         if(h.note && h.type !== 'receivable_collected') label += ` <span style="font-size:.85em; color:var(--muted);">— ${h.note}</span>`;
         return `<div class="ledgerRow"><div class="lrTop">
-            <div><div class="lrDate">${h.date ? new Date(h.date).toLocaleDateString('en-GB') : ''}</div><div class="lrDesc">${label}</div></div>
+            <div><div class="lrDate">${h.date ? new Date(h.date).toLocaleDateString('en-GB') : ''}${h.time ? ' • ' + h.time : ''}</div><div class="lrDesc">${label}</div></div>
             <div class="lrAmount ${isGot?'got':'gave'}">${isGot?'+':'-'} Rs. ${h.amount.toLocaleString()}</div>
           </div></div>`;
       }).join('');
@@ -32168,32 +32185,41 @@ function saveCollectReceivable(){
 // ---------- 💸 FM28SEP رات (صدام کی ہدایت): گاہک کو نقد ادھار دینا — مال نہیں خریدا، صرف نقد دیا جو اس کے کھاتے میں چڑھے۔
 // اگر گاہک کا والٹ (اس کی ایڈوانس رقم ہمارے پاس) ہو تو پہلے وہی کٹے گا، باقی رقم بقایا میں چڑھے گی ---------- -->
 let activeCustLoanId = null;
-function calcCustLoan(c, amount){
+// ---------- 🧮 FM29SEP: ادھار + (اختیاری) وصولی کا مکمل حساب — ٹیبل، تصدیق اور محفوظ کرنا تینوں یہی استعمال کرتے ہیں ----------
+function calcCustLoan(c, amount, recovery){
+  recovery = Math.max(0, recovery || 0);
   const wallet = Math.max(0, c.wallet_balance || 0);
   const fromWallet = Math.min(wallet, amount);
   const toReceivable = amount - fromWallet;
-  return { wallet, fromWallet, toReceivable, before: c.total_receivable || 0, after: (c.total_receivable || 0) + toReceivable, walletAfter: wallet - fromWallet };
+  const before = c.total_receivable || 0;
+  const total = before + toReceivable;
+  const toDue = Math.min(total, recovery);
+  const extraToWallet = recovery - toDue;
+  return { wallet, fromWallet, toReceivable, before, total, recovery, toDue, extraToWallet,
+           after: total - toDue, walletAfter: wallet - fromWallet + extraToWallet };
 }
-function custLoanLines(c, amount, plain){
-  const sp = calcCustLoan(c, amount);
-  const br = plain ? '\n' : '<br>';
-  const b = t => plain ? t : `<b>${t}</b>`;
-  const L = [`💸 آپ نے نقد دیے: Rs. ${amount.toLocaleString()}`];
-  if(sp.fromWallet > 0) L.push(`💳 پہلے اس کے والٹ (ایڈوانس) سے کٹے: Rs. ${sp.fromWallet.toLocaleString()} — باقی والٹ: Rs. ${sp.walletAfter.toLocaleString()}`);
-  if(sp.toReceivable > 0) L.push(`➕ کھاتے میں چڑھے: ${b('Rs. ' + sp.toReceivable.toLocaleString())}`);
-  L.push(`📊 بقایا: Rs. ${sp.before.toLocaleString()} → ${b('Rs. ' + sp.after.toLocaleString())}`);
-  return L.join(br);
+function clFmt(n){ return 'Rs. ' + Math.round(n).toLocaleString(); }
+function custLoanLines(c, amount, recovery){
+  const sp = calcCustLoan(c, amount, recovery);
+  const L = [`💸 دستی کیش دیا: ${clFmt(amount)}`, `📊 سابقہ بقایا: ${clFmt(sp.before)}`];
+  if(sp.fromWallet > 0) L.push(`💳 والٹ سے کٹا: ${clFmt(sp.fromWallet)}`);
+  L.push(`🧮 ٹوٹل رقم: ${clFmt(sp.total)}`);
+  L.push(`📥 وصولی: ${sp.recovery > 0 ? clFmt(sp.recovery) : '—'}`);
+  L.push(`✅ اب تک ٹوٹل بقایا: ${clFmt(sp.after)}`);
+  if(sp.extraToWallet > 0) L.push(`💳 والٹ میں جمع: ${clFmt(sp.extraToWallet)}`);
+  return L.join('\n');
 }
 function openCustLoanModal(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
   activeCustLoanId = customerId;
   document.getElementById('custLoanName').textContent = '👤 ' + c.name;
-  document.getElementById('custLoanBalanceHint').innerHTML = `موجودہ بقایا: Rs. ${(c.total_receivable || 0).toLocaleString()}` +
-    ((c.wallet_balance || 0) > 0 ? `<br><span style="color:#15803d;">💳 والٹ (اس کی ایڈوانس ہمارے پاس): Rs. ${c.wallet_balance.toLocaleString()}</span>` : '');
   document.getElementById('custLoanAmount').value = '';
+  document.getElementById('custLoanRecovery').value = '';
   document.getElementById('custLoanNote').value = '';
-  document.getElementById('custLoanHint').style.display = 'none';
+  const now = new Date();
+  document.getElementById('clTimeStamp').textContent = '— ' + now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  updateCustLoanHint();
   document.getElementById('custLoanModal').classList.add('show');
   setTimeout(() => { try{ document.getElementById('custLoanAmount').focus(); }catch(e){} }, 150);
 }
@@ -32201,36 +32227,58 @@ function closeCustLoanModal(){
   document.getElementById('custLoanModal').classList.remove('show');
   activeCustLoanId = null;
 }
+// ---------- رقم لکھتے ہی ٹیبل کے سب خانے فوراً بدلیں ----------
 function updateCustLoanHint(){
   const c = customersData.find(x => x.customer_id === activeCustLoanId);
-  const amount = parseFloat(document.getElementById('custLoanAmount').value) || 0;
-  const hint = document.getElementById('custLoanHint');
-  if(!c || amount <= 0){ hint.style.display = 'none'; return; }
-  hint.style.display = 'block';
-  hint.innerHTML = custLoanLines(c, amount, false);
+  if(!c) return;
+  const amount = Math.max(0, parseFloat(document.getElementById('custLoanAmount').value) || 0);
+  const recovery = Math.max(0, parseFloat(document.getElementById('custLoanRecovery').value) || 0);
+  const sp = calcCustLoan(c, amount, recovery);
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('clPrev', clFmt(sp.before));
+  set('clTotal', clFmt(sp.total));
+  set('clFinal', clFmt(sp.after));
+  document.getElementById('clWalletRow').style.display = sp.fromWallet > 0 ? '' : 'none';
+  set('clWallet', '- ' + clFmt(sp.fromWallet));
+  document.getElementById('clExtraWalletRow').style.display = sp.extraToWallet > 0 ? '' : 'none';
+  set('clExtraWallet', '+ ' + clFmt(sp.extraToWallet));
 }
 function saveCustLoan(){
   const c = customersData.find(x => x.customer_id === activeCustLoanId);
-  const amount = parseFloat(document.getElementById('custLoanAmount').value) || 0;
   if(!c) return;
-  if(amount <= 0){ alert('براہ کرم دی گئی رقم درج کریں۔'); return; }
-  if(!confirm(`💸 ${c.name}\n\n${custLoanLines(c, amount, true)}\n\nکیا یہ درست ہے؟`)) return;
-  if(amount > financeDummy.cashInHand && !confirm(`یہ آپ کے موجودہ نقد (Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)) return;
+  const amount = Math.max(0, parseFloat(document.getElementById('custLoanAmount').value) || 0);
+  const recovery = Math.max(0, parseFloat(document.getElementById('custLoanRecovery').value) || 0);
+  if(amount <= 0){ alert('دستی کیش کی رقم لکھیں۔'); return; }
+  if(!confirm(`👤 ${c.name}\n\n${custLoanLines(c, amount, recovery)}\n\nمحفوظ کریں؟`)) return;
+  if(amount > financeDummy.cashInHand + recovery && !confirm(`یہ آپ کے موجودہ نقد (Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)) return;
 
-  const sp = calcCustLoan(c, amount);
-  const note = document.getElementById('custLoanNote').value.trim();
-  const today = new Date().toISOString().split('T')[0];
+  const sp = calcCustLoan(c, amount, recovery);
+  const memo = document.getElementById('custLoanNote').value.trim();
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const timeStr = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
   const balanceBefore = c.total_receivable || 0;
   c.walletHistory = c.walletHistory || [];
-  c.wallet_balance = sp.walletAfter;
-  c.total_receivable = sp.after;
-  financeDummy.cashInHand -= amount; // ---------- نقد ہاتھ سے نکلا ----------
-  if(sp.fromWallet > 0) c.walletHistory.unshift({ type: 'redeem', amount: sp.fromWallet, via: 'cash', date: today, note: 'نقد ادھار دیتے وقت والٹ سے کٹا' });
-  if(sp.toReceivable > 0) c.walletHistory.unshift({ type: 'cash_given', amount: sp.toReceivable, via: 'cash', date: today, note: note || 'نقد ادھار دیا (بغیر مال)' });
 
-  const extra = [];
-  if(sp.fromWallet > 0) extra.push(`💳 والٹ سے Rs. ${sp.fromWallet.toLocaleString()}`);
-  if(sp.toReceivable > 0) extra.push(`➕ کھاتے میں چڑھے Rs. ${sp.toReceivable.toLocaleString()}`);
+  // ---------- ادھار ----------
+  financeDummy.cashInHand -= amount;
+  if(sp.fromWallet > 0) c.walletHistory.unshift({ type: 'redeem', amount: sp.fromWallet, via: 'cash', date: today, time: timeStr, note: 'نقد ادھار دیتے وقت والٹ سے کٹا' });
+  if(sp.toReceivable > 0) c.walletHistory.unshift({ type: 'cash_given', amount: sp.toReceivable, via: 'cash', date: today, time: timeStr, note: (memo ? memo + ' — ' : '') + '🕒 ' + timeStr });
+  c.total_receivable = sp.total;
+
+  // ---------- (اختیاری) وصولی — پرانے بلوں پر پہلے لگے، زیادہ ہو تو والٹ میں ----------
+  if(sp.recovery > 0){
+    financeDummy.cashInHand += sp.recovery;
+    let left = sp.toDue;
+    invoicesData.filter(inv => inv.customer_id === c.customer_id && getInvoiceAmountDue(inv) > 0 && inv.status !== 'voided')
+      .sort((a,b) => new Date(a.created_at) - new Date(b.created_at))
+      .forEach(inv => { if(left <= 0) return; const d = getInvoiceAmountDue(inv); const ap = Math.min(d, left); inv.amount_due = d - ap; left -= ap; });
+    if(sp.toDue > 0) c.walletHistory.unshift({ type: 'receivable_collected', amount: sp.toDue, via: 'cash', date: today, time: timeStr });
+    if(sp.extraToWallet > 0) c.walletHistory.unshift({ type: 'deposit', amount: sp.extraToWallet, via: 'cash', date: today, time: timeStr, note: 'اضافی وصولی — والٹ میں جمع' });
+    c.total_receivable = sp.after;
+  }
+  c.wallet_balance = sp.walletAfter;
+
   const savedPayment = recordPaymentEntry({
     direction: 'out',
     party_type: 'customer',
@@ -32240,12 +32288,13 @@ function saveCustLoan(){
     balance_before: balanceBefore,
     balance_after: c.total_receivable,
     method: 'Cash',
-    note: '💸 نقد ادھار دیا' + (note ? ' — ' + note : '') + (extra.length ? ' — ' + extra.join(' — ') : ''),
+    note: `💸 دستی کیش ${clFmt(amount)} • سابقہ ${clFmt(sp.before)} • ٹوٹل ${clFmt(sp.total)} • وصولی ${sp.recovery > 0 ? clFmt(sp.recovery) : '—'} • بقایا ${clFmt(sp.after)}` + (memo ? ` • 📝 ${memo}` : '') + ` • 🕒 ${timeStr}`,
   });
 
   closeCustLoanModal();
   persistAllData();
   pushCustomersToCloud();
+  if(sp.recovery > 0) pushInvoicesToCloud();
   pushFinanceToCloud();
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   if(currentProfileType === 'customers' && currentProfileId === c.customer_id && document.getElementById('profileModal').classList.contains('show')){
