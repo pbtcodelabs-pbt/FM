@@ -692,7 +692,6 @@
      رنگ فوراً بدلتا ہے (پہلے tr پر رنگ لگتا تھا جو td کے اپنے رنگ کے نیچے چھپ جاتا تھا) ---------- */
   tr.otSelRow td{ background:#93c5fd !important; color:#0b2a5b !important; border-bottom-color:#2563eb !important; }
   tr.otSelRow td:first-child{ box-shadow:inset -6px 0 0 #1d4ed8; }
-  html.shopBilal #mobileTopbar{ background:linear-gradient(160deg,#6d28d9,#3b0764) !important; }
   tr.otTouchRow > td{ background:#dbeafe !important; }
   tr.otSelRow input.otQtyInput{ border:2.5px solid #1d4ed8 !important; background:#fff !important; color:#0b2a5b !important; }
   .screen{display:none; animation:fadeIn .25s ease;}
@@ -2984,7 +2983,7 @@
       <!-- ---------- 📞 موبائل نمبر — صدام کی ہدایت پر چھپا دیا گیا (کوڈ محفوظ) ---------- -->
       <span style="display:none;">📞 03425556364</span>
       <span id="topbarVersionBadge" onclick="handleVersionBadgeTap()" dir="ltr" style="unicode-bidi:plaintext; font-family:'Arial Black', Arial, Helvetica, sans-serif !important; font-size:11.5px; color:#fff; font-weight:900; letter-spacing:.3px; text-shadow:0 1px 1px rgba(0,0,0,.35); background:linear-gradient(90deg, #be185d, #d97706, #059669, #2563eb, #7c3aed, #be185d); background-size:400% auto; animation:versionBadgeBgShift 8s ease-in-out infinite; padding:3px 7px; border-radius:7px; cursor:pointer; white-space:nowrap; overflow:visible; text-overflow:clip; max-width:none; text-align:center; line-height:1.2; border:1px solid rgba(255,255,255,.7); box-shadow:0 0 6px rgba(255,255,255,.3), inset 0 1px 0 rgba(255,255,255,.3); flex:0 0 auto;"></span>
-      <span style="flex:1 1 auto; min-width:0; text-align:center; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:clamp(15px, 5vw, 21px); font-weight:700; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.55); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="topbarShopTitle">صدام فروٹ منڈی</span>
+      <span style="flex:1 1 auto; min-width:0; text-align:center; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:clamp(15px, 5vw, 21px); font-weight:700; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.55); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">صدام فروٹ منڈی</span>
       <span id="connStatusBadge" class="online" style="flex:0 0 auto;">Online</span>
     </div>
     <!-- ---------- 🔤 شاپ کا نام (چھوٹا، ثانوی) — کوڈ محفوظ، بس چھپا ہوا ---------- -->
@@ -4791,25 +4790,27 @@
     </div>
 
     <!-- COLLECT RECEIVABLE MODAL (کسٹمر سے اُدھار وصولی) -->
-    <div class="modalOverlay" id="collectModal" onclick="if(event.target===this) this.classList.remove('show')">
+    <!-- ---------- 💳 صدام کی ہدایت (FM28SEP شام): یہ فارم اب مکمل اردو میں — اور بقایا سے زیادہ وصولی پر اضافی رقم
+         خودکار کسٹمر کے والٹ (ایڈوانس) میں جمع ہوتی ہے، جو یہیں نیچے والے ڈبے میں فوراً لکھی نظر آتی ہے ---------- -->
+    <div class="modalOverlay" id="collectModal" onclick="if(event.target===this) this.classList.remove('show')" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="modalBox">
-        <h3 id="collectModalTitle">💰 Collect Payment</h3>
-        <div style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:13px; font-weight:700; margin-bottom:12px;" id="collectReceivableHint">Total Receivable: Rs. 0</div>
+        <h3 id="collectModalTitle">💰 وصولی</h3>
+        <div style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:15px; font-weight:700; margin-bottom:12px;" id="collectReceivableHint">کل بقایا: Rs. 0</div>
         <div class="txnTypeToggle">
-          <button id="collectCash" class="active" onclick="setCollectMode('cash')">💵 Collect Cash</button>
-          <button id="collectWallet" onclick="setCollectMode('wallet')">💳 Deduct from Wallet</button>
+          <button id="collectCash" class="active" onclick="setCollectMode('cash')" style="font-family:inherit;">💵 نقد وصولی</button>
+          <button id="collectWallet" onclick="setCollectMode('wallet')" style="font-family:inherit;">💳 والٹ سے کاٹیں</button>
         </div>
-        <input type="number" id="collectAmount" placeholder="Enter collected amount" onfocus="this.select()" oninput="updateCollectRemainingHint()">
-        <div id="collectRemainingHint" style="display:none; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark);"></div>
-        <textarea id="collectNote" placeholder="Note (e.g. received via EasyPaisa) — optional" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; min-height:44px;"></textarea>
-        <button type="button" class="addBankAccBtn" onclick="attachPaymentSlipImage('collect')">📷 Attach Deposit Slip / Screenshot (optional)</button>
+        <input type="number" id="collectAmount" dir="rtl" placeholder="وصول شدہ رقم درج کریں" onfocus="this.select()" oninput="updateCollectRemainingHint()">
+        <div id="collectRemainingHint" style="display:none; padding:10px 12px; border-radius:10px; font-size:14.5px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark); line-height:2;"></div>
+        <textarea id="collectNote" dir="rtl" placeholder="نوٹ (مثلاً ایزی پیسہ سے وصول ہوئے) — اختیاری" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:15px; min-height:44px; text-align:right;"></textarea>
+        <button type="button" class="addBankAccBtn" onclick="attachPaymentSlipImage('collect')" style="font-family:inherit;">📷 رسید / سکرین شاٹ لگائیں (اختیاری)</button>
         <div id="collectSlipPreview" style="display:none; margin-top:8px; text-align:center;">
           <img id="collectSlipImg" style="max-width:100%; max-height:160px; border-radius:8px; border:1px solid #dbe1ea;">
-          <div><button type="button" style="background:none; border:none; color:var(--danger); font-size:12px; font-weight:700; cursor:pointer; margin-top:4px;" onclick="removePaymentSlipImage('collect')">✖ Remove Photo</button></div>
+          <div><button type="button" style="background:none; border:none; color:var(--danger); font-size:14px; font-weight:700; cursor:pointer; margin-top:4px; font-family:inherit;" onclick="removePaymentSlipImage('collect')">✖ تصویر ہٹائیں</button></div>
         </div>
         <div class="modalBtns">
-          <button class="cancelBtn" onclick="closeCollectModal()">Cancel</button>
-          <button class="saveBtn" onclick="saveCollectReceivable()">Save Collection</button>
+          <button class="cancelBtn" onclick="closeCollectModal()" style="font-family:inherit;">منسوخ</button>
+          <button class="saveBtn" onclick="saveCollectReceivable()" style="font-family:inherit;">وصولی محفوظ کریں</button>
         </div>
       </div>
     </div>
@@ -4817,11 +4818,16 @@
     <!-- ---------- سپلائر کو نقد ادائیگی — Payable خودکار کم ہو، Cash in Hand سے خودکار منہا ہو ---------- -->
     <div class="modalOverlay" id="paySupplierModal" onclick="if(event.target===this) this.classList.remove('show')" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="modalBox">
-        <h3>💵 سپلائر کو ادائیگی</h3>
-        <div style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:15px; font-weight:700; margin-bottom:12px;" id="paySupplierPayableHint">کل واجب الادا: Rs. 0</div>
+        <h3 id="paySupplierModalTitle">💵 بیوپاری کو ادائیگی</h3>
+        <div style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:15px; font-weight:700; margin-bottom:12px; line-height:2;" id="paySupplierPayableHint">کل واجب الادا: Rs. 0</div>
+        <!-- ---------- 🔁 صدام کی ہدایت (FM28SEP شام): ادائیگی (ہم نے دیے) یا وصولی (بیوپاری سے لیے — ایڈوانس/ادھار) ---------- -->
+        <div class="txnTypeToggle" id="paySupModeToggle">
+          <button id="paySupModePay" class="active" onclick="setPaySupplierMode('pay')" style="font-family:inherit;">💸 ادائیگی (ہم نے دیے)</button>
+          <button id="paySupModeReceive" onclick="setPaySupplierMode('receive')" style="font-family:inherit;">📥 وصولی (بیوپاری سے لیے)</button>
+        </div>
         <input type="number" id="paySupplierAmount" dir="rtl" placeholder="ادا کی گئی رقم درج کریں" onfocus="this.select()" oninput="updatePaySupplierRemainingHint()">
         <input type="number" id="paySupplierDiscount" dir="rtl" placeholder="🏷️ چھوٹ (ڈسکاؤنٹ) — اختیاری" onfocus="this.select()" oninput="updatePaySupplierRemainingHint()" style="margin-top:8px; border:1.5px solid #fcd34d !important; background:#fffbeb !important;">
-        <div id="paySupplierRemainingHint" style="display:none; padding:8px 12px; border-radius:8px; font-size:14px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark);"></div>
+        <div id="paySupplierRemainingHint" style="display:none; padding:10px 12px; border-radius:10px; font-size:14.5px; font-weight:700; margin:8px 0 10px; background:#eef2ff; color:var(--primary-dark); line-height:2;"></div>
         <select id="paySupplierAccountSelect" dir="rtl" style="width:100%; padding:10px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; font-family:inherit;">
           <option value="">نقد / کوئی خاص اکاؤنٹ نہیں</option>
         </select>
@@ -4833,7 +4839,26 @@
         </div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closePaySupplierModal()">منسوخ</button>
-          <button class="saveBtn" onclick="confirmPaySupplier()">ادائیگی کی تصدیق کریں</button>
+          <button class="saveBtn" id="paySupplierSaveBtn" onclick="confirmPaySupplier()">ادائیگی کی تصدیق کریں</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 💸 FM28SEP رات (صدام کی ہدایت): گاہک کو نقد ادھار دینا — بغیر مال خریدے، سیدھا اس کے کھاتے میں چڑھ جائے ---------- -->
+    <div class="modalOverlay" id="custLoanModal" onclick="if(event.target===this) closeCustLoanModal()" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+      <div class="modalBox" style="max-width:420px;">
+        <div style="background:linear-gradient(135deg,#c2410c,#7c2d12); color:#fff; border-radius:14px; padding:12px 14px; margin-bottom:12px; box-shadow:0 4px 0 rgba(0,0,0,.25);">
+          <div style="font-size:21px; font-weight:800;">💸 گاہک کو نقد ادھار دیا</div>
+          <div id="custLoanName" style="font-size:16px; opacity:.95; margin-top:2px;"></div>
+          <div style="font-size:12.5px; opacity:.85; margin-top:2px;">مال نہیں خریدا — صرف نقد رقم دی، جو اس کے کھاتے میں چڑھ جائے گی</div>
+        </div>
+        <div id="custLoanBalanceHint" style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:10px; font-size:15px; font-weight:700; margin-bottom:10px; line-height:2;"></div>
+        <input type="number" id="custLoanAmount" dir="rtl" inputmode="numeric" placeholder="کتنی رقم دی؟" onfocus="this.select()" oninput="updateCustLoanHint()" style="font-size:20px; font-weight:800; text-align:center; border:2px solid #fdba74;">
+        <div id="custLoanHint" style="display:none; padding:10px 12px; border-radius:10px; font-size:14.5px; font-weight:700; margin:8px 0 10px; background:#fff7ed; color:#9a3412; line-height:2;"></div>
+        <textarea id="custLoanNote" dir="rtl" placeholder="نوٹ (مثلاً کل مال کے لیے لیے) — اختیاری" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:15px; min-height:44px; text-align:right;"></textarea>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeCustLoanModal()" style="font-family:inherit;">منسوخ</button>
+          <button class="saveBtn" onclick="saveCustLoan()" style="font-family:inherit; background:linear-gradient(135deg,#ea580c,#9a3412);">✅ ادھار کھاتے میں چڑھائیں</button>
         </div>
       </div>
     </div>
@@ -7453,22 +7478,6 @@
 // ایپ بند ہوتے ہی ضائع ہو جاتے تھے اور صرف شروعاتی Demo ڈیٹا (Lipton, Sugar) واپس آتا تھا۔
 // اب یہ سب localStorage میں مستقل محفوظ ہوتا ہے — بند/دوبارہ کھولنے پر بھی موجود رہے گا۔
 const STORAGE_PREFIX = 'fmPos_';
-// ---------- 🏪 27 ستمبر: موجودہ دکان — "main" (صدام فروٹ منڈی، اصل، پہلے جیسا) یا "bilal" (بلال فروٹ فارم) ----------
-const ACTIVE_SHOP = (function(){
-  try{
-    const s = localStorage.getItem('fm_activeShop');
-    if(s === 'bilal' && localStorage.getItem('fm_multiShopEnabled') === '1') return 'bilal';
-  }catch(e){}
-  return 'main';
-})();
-const IS_BILAL = ACTIVE_SHOP === 'bilal';
-// یہ چیزیں دونوں دکانوں میں مشترک (فون کی سطح پر) — باقی سب ہر دکان کا الگ
-const SHARED_STORAGE_KEYS = new Set(['settings','users','nextUserId','rememberedSession','maintenanceLocalBypass','maintenanceLastOn','marqueeSettings','drZoomPct','rlZoomPct','vcEditSpeedMs','quickDockItems','recoveryPosterFontScale','recoveryPosterFontId','recoveryPosterColorId','otViewMode','productViewMode','productsPageViewMode']);
-function _storageKey(key){ return STORAGE_PREFIX + ((IS_BILAL && !SHARED_STORAGE_KEYS.has(key)) ? 'bilal__' : '') + key; }
-// کلاؤڈ: صدام کی دکان کا راستہ بالکل پہلے جیسا (shopData/products)، بلال کا الگ (shopData/bilal_products)
-function shopDocPath(name){ return 'shopData/' + (IS_BILAL ? 'bilal_' : '') + name; }
-// ہر دکان کی اپنی سیٹنگز (نام، پینڈنگ سنک، ابتدائی کیش، بیک اپ وغیرہ) — باقی سیٹنگز فون کی سطح پر مشترک
-const SHOP_SETTING_FIELDS = ['businessName','businessPhone','businessAddress','ownerName','businessLogo','openingCashBalance','productsPendingSync','suppliersPendingSync','pendingBillsPendingSync','invoicesPendingSync','financePendingSync','customersPendingSync','approvalRequestsPendingSync','lastBackupFileName','lastBackupAt','lastGDriveBackupAt','vegProductsSeededV1','ledgerSuppliersSeededV1','ledgerCustomersSeededV1','trackInventory','taxEnabled','taxPercent'];
 const OLD_STORAGE_PREFIX = 'aioPos_'; // ---------- 🍇 صدام کی ہدایت (FM4SEPTF01): پرانا prefix — صرف ایک بار ڈیٹا کاپی کرنے کے لیے رکھا گیا، خود کبھی نہیں لکھا جائے گا ----------
 // ---------- 🍇 صدام کی ہدایت (FM4SEPTF01): ایپ کا نام/شناخت اب مکمل طور پر "Fruit Mandi POS" — پرانے AIOPOS ٹیمپلیٹ کا کوئی حوالہ باقی نہیں رہنا چاہیے۔
 // یہ صرف ایک بار چلے گا: اگر پرانے prefix والا ڈیٹا موجود ہے اور نئے prefix میں ابھی کچھ محفوظ نہیں ہوا، تو خاموشی سے کاپی کر دیں —
@@ -7589,7 +7598,7 @@ async function idbSetImage(key, dataUrl){
     const db = await openImgDb();
     return await new Promise((resolve) => {
       const tx = db.transaction(AIO_IMG_STORE, 'readwrite');
-      tx.objectStore(AIO_IMG_STORE).put(dataUrl, (IS_BILAL ? 'bilal__' : '') + key);
+      tx.objectStore(AIO_IMG_STORE).put(dataUrl, key);
       tx.oncomplete = () => resolve(true);
       tx.onerror = () => resolve(false);
     });
@@ -7600,7 +7609,7 @@ async function idbGetImage(key){
     const db = await openImgDb();
     return await new Promise((resolve) => {
       const tx = db.transaction(AIO_IMG_STORE, 'readonly');
-      const req = tx.objectStore(AIO_IMG_STORE).get((IS_BILAL ? 'bilal__' : '') + key);
+      const req = tx.objectStore(AIO_IMG_STORE).get(key);
       req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => resolve(null);
     });
@@ -7611,7 +7620,7 @@ async function idbDeleteImage(key){
     const db = await openImgDb();
     return await new Promise((resolve) => {
       const tx = db.transaction(AIO_IMG_STORE, 'readwrite');
-      tx.objectStore(AIO_IMG_STORE).delete((IS_BILAL ? 'bilal__' : '') + key);
+      tx.objectStore(AIO_IMG_STORE).delete(key);
       tx.oncomplete = () => resolve(true);
       tx.onerror = () => resolve(false);
     });
@@ -7694,25 +7703,9 @@ async function hydratePhotosFromIndexedDB(){
 
 function loadFromStorage(key, fallback){
   try{
-    const raw = localStorage.getItem(_storageKey(key));
+    const raw = localStorage.getItem(STORAGE_PREFIX + key);
     if(raw === null || raw === undefined) return fallback;
-    const val = JSON.parse(raw);
-    if(key === 'settings' && val && typeof val === 'object'){
-      // 🏪 اسی دکان کی اپنی سیٹنگز اوپر لگائیں
-      let shopS = null;
-      try{ const r2 = localStorage.getItem(_storageKey('shopSettings')); shopS = r2 ? JSON.parse(r2) : null; }catch(e2){}
-      if(!shopS){
-        shopS = {};
-        if(IS_BILAL){
-          shopS = { businessName: 'بلال فروٹ فارم', openingCashBalance: 0, vegProductsSeededV1: true, ledgerSuppliersSeededV1: true, ledgerCustomersSeededV1: true, trackInventory: val.trackInventory, taxEnabled: val.taxEnabled, taxPercent: val.taxPercent };
-        } else {
-          SHOP_SETTING_FIELDS.forEach(f => { if(val[f] !== undefined) shopS[f] = val[f]; });
-        }
-        try{ localStorage.setItem(_storageKey('shopSettings'), JSON.stringify(shopS)); }catch(e3){}
-      }
-      SHOP_SETTING_FIELDS.forEach(f => { if(shopS[f] !== undefined) val[f] = shopS[f]; else if(IS_BILAL) delete val[f]; });
-    }
-    return val;
+    return JSON.parse(raw);
   }catch(e){
     console.warn('محفوظ شدہ ڈیٹا پڑھنے میں مسئلہ:', key, e);
     return fallback;
@@ -7721,11 +7714,7 @@ function loadFromStorage(key, fallback){
 let storageQuotaWarned = false; // ---------- ایک سیشن میں بار بار الرٹ نہ آئے، صرف پہلی بار ----------
 function saveToStorage(key, value){
   try{
-    localStorage.setItem(_storageKey(key), JSON.stringify(value));
-    if(key === 'settings' && value && typeof value === 'object'){
-      const shopS = {}; SHOP_SETTING_FIELDS.forEach(f => { if(value[f] !== undefined) shopS[f] = value[f]; });
-      localStorage.setItem(_storageKey('shopSettings'), JSON.stringify(shopS));
-    }
+    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
     return true;
   }catch(e){
     console.warn('ڈیٹا محفوظ کرنے میں مسئلہ:', key, e);
@@ -7792,7 +7781,7 @@ setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خو
 // کبھی آپس میں گڈمڈ نہ ہوں، صاف پتا چلے کہ یہ فائل کس ورژن سے آئی ----------
 // ---------- بیک اپ فائل کا نام — یہ Fruit Mandi POS فائل ہے، اس لیے نام بالکل اسی ورژن سٹرنگ کے فارمیٹ میں بنتا ہے
 // جیسا خود ایپ کا ورژن ہے — BKFM{دن}{مہینہ}{دن کا نام}{وقت}{AM/PM}.JSON — مثال: BKFM318MO0607AM.JSON ----------
-function generateBackupFileName(shopOverride){
+function generateBackupFileName(){
   const now = new Date();
   const dayNames = ['SU','MO','TU','WE','TH','FR','SA'];
   const dayCode = dayNames[now.getDay()];
@@ -7803,8 +7792,7 @@ function generateBackupFileName(shopOverride){
   hh = hh % 12; if(hh === 0) hh = 12;
   const hhStr = String(hh).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
-  const _sh = shopOverride || ACTIVE_SHOP;
-  return `${_sh === 'bilal' ? 'BKBL' : 'BKFM'}${date}${month}${dayCode}${hhStr}${mm}${ampm}.JSON`;
+  return `BKFM${date}${month}${dayCode}${hhStr}${mm}${ampm}.JSON`;
 }
 
 function buildBackupObject(){
@@ -8035,7 +8023,7 @@ function checkScheduledAutoBackup(){
   state.done.push(slot);
   saveToStorage('autoBackupSlotState', state);
   try{
-    backupToGoogleDrive(true, null, (typeof isMultiShopEnabled === 'function' && isMultiShopEnabled()));
+    backupToGoogleDrive(true);
   }catch(e){ console.warn('scheduled auto-backup failed', e); }
   setTimeout(() => { autoBackupCheckLock = false; }, 5000);
 }
@@ -8043,7 +8031,7 @@ function checkScheduledAutoBackup(){
 setTimeout(checkScheduledAutoBackup, 8000);
 setInterval(checkScheduledAutoBackup, 10 * 60 * 1000);
 
-async function backupToGoogleDrive(silent, shopOverride, alsoOtherShop){
+async function backupToGoogleDrive(silent){
   const btn = document.getElementById('gdriveBackupBtn');
   const client = getGDriveTokenClient();
   if(!client){
@@ -8065,8 +8053,8 @@ async function backupToGoogleDrive(silent, shopOverride, alsoOtherShop){
       if(btn) btn.textContent = '⏳ Uploading...';
       updateGDriveProgress('⏳ Uploading backup...');
       const folderId = await ensureGDriveBackupFolder(); // ---------- ہمیشہ "AIO Backup" فولڈر کے اندر ہی جائے ----------
-      const fileName = generateBackupFileName(shopOverride);
-      const backup = (shopOverride && shopOverride !== ACTIVE_SHOP) ? buildBackupObjectForShop(shopOverride) : buildBackupObject();
+      const fileName = generateBackupFileName();
+      const backup = buildBackupObject();
       const fileContent = JSON.stringify(backup);
 
       const metadata = { name: fileName, mimeType: 'application/json', parents: [folderId] };
@@ -8090,7 +8078,7 @@ async function backupToGoogleDrive(silent, shopOverride, alsoOtherShop){
         throw new Error('Upload failed: ' + uploadRes.status + ' ' + errText);
       }
 
-      if(!shopOverride || shopOverride === ACTIVE_SHOP){
+      {
         AppState.settings.lastBackupFileName = fileName;
         AppState.settings.lastBackupAt = new Date().toISOString();
         AppState.settings.lastGDriveBackupAt = new Date().toISOString();
@@ -8122,8 +8110,6 @@ async function backupToGoogleDrive(silent, shopOverride, alsoOtherShop){
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
       gdriveOpActive = false;
-      // 🏪 دوسری دکان کا بیک اپ بھی (اگر دو دکانوں والا نظام آن ہو)
-      if(alsoOtherShop){ setTimeout(() => { try{ backupToGoogleDrive(true, IS_BILAL ? 'main' : 'bilal', false); }catch(e){} }, 3000); }
     }
   };
 
@@ -8180,7 +8166,7 @@ async function restoreFromGoogleDrive(){
       const listRes = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } });
       if(!listRes.ok) throw new Error('List failed: ' + listRes.status);
       const listData = await listRes.json();
-      const files = (listData.files || []).filter(f => f.name.startsWith(IS_BILAL ? 'BKBL' : 'BKFM'));
+      const files = (listData.files || []).filter(f => f.name.startsWith('BKFM'));
       renderGDriveFileList(files);
       hideGDriveProgress();
       document.getElementById('gdriveRestoreModal').classList.add('show');
@@ -8593,7 +8579,7 @@ const AppState = {
 // ---------- 🏷️ صدام کی ہدایت پر: بزنس کا نام اور موبائل نمبر ہارڈ کوڈ — جہاں بھی بل پرنٹ ہو (تھرمل/A4/سکرین/
 // WhatsApp شیئر)، ہمیشہ یہی نام اور نمبر چھپے، چاہے Settings میں محفوظ شدہ پرانی/خالی ویلیو کچھ بھی ہو —
 // اسی لیے یہ سیٹنگز لوڈ ہونے کے فوراً بعد زبردستی اوور رائٹ کی جاتی ہے ----------
-AppState.settings.businessName = IS_BILAL ? 'بلال فروٹ فارم' : 'صدام حسین فروٹ منڈی';
+AppState.settings.businessName = 'صدام حسین فروٹ منڈی';
 AppState.settings.businessPhone = '03425556364';
 
 // ---------- 🩹 ون-ٹائم مائیگریشن (ورژن کی بنیاد پر) — پرانی ٹیسٹنگ کے دوران کوئی بھی rate/plans
@@ -8654,7 +8640,11 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM28SEPMO1029AM';
+// 🆕 FM28SEPMO0626PM: کسٹمر وصولی + بیوپاری ادائیگی/وصولی — زیادہ رقم خودکار والٹ میں، فارم اور تصدیقی پیغام میں پورا حساب، لسٹ میں سبز والٹ کیپسول، چٹ میں والٹ/وصولی
+// 🆕 FM28SEPMO0744PM: وصولی لسٹ — OK کے بعد بھی باقی بقایا کم نظر آئے، ایک وصولی میں کئی طریقے (نقد+جاز کیش+ایزی پیسہ+بینک)، نوٹ لاک نہیں (💾 نوٹ OK)، نوٹ ایڈمن/رپورٹ/پرنٹ میں
+// 🆕 FM28SEPMO0751PM: گاہک کے پروفائل میں "💸 ادھار دیا" اور بیوپاری کے پروفائل میں "📥 ادھار لیا" — بغیر مال کے نقد رقم سیدھی کھاتے میں
+// 🆕 FM28SEPMO0835PM: بلال فروٹ فارم کی ایک بار والی صفائی کا کوڈ بھی مکمل ہٹا دیا — اب اس کا کوئی نشان باقی نہیں
+const APP_BUILD_VERSION = 'FM28SEPMO0835PM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11596,7 +11586,6 @@ function tryAutoLogin(){
 }
 
 function applyRole(role, name){
-  if(IS_BILAL && role !== 'admin'){ try{ localStorage.setItem('fm_activeShop', 'main'); }catch(e){} location.reload(); return; }
   AppState.currentUser = { name: name || (role==='admin' ? 'Saddam Hussain' : 'Abdul Wahab') };
   AppState.currentRole = role;
 
@@ -15241,7 +15230,7 @@ function isoDaysFromToday(n){
   d.setDate(d.getDate() + n);
   return d.toISOString().slice(0,10);
 }
-let productsData = loadFromStorage('products', IS_BILAL ? [] : PRODUCTS_SEED_DATA);
+let productsData = loadFromStorage('products', PRODUCTS_SEED_DATA);
 // ---------- 🧹🧹 صدام کی ہدایت (FM16SEPWE): اصل مسئلہ ملا! پہلے یہ ڈیمو ڈیٹا صرف *نئے* خالی انسٹال کے لیے
 // روکا گیا تھا — مگر جن فونز پر یہ ڈیمو ڈیٹا صفائی سے پہلے ہی محفوظ ہو چکا تھا، وہاں localStorage میں یہ
 // اب بھی پڑا رہتا اور بار بار واپس نظر آتا رہتا تھا (کوڈ کی تبدیلی پرانا محفوظ شدہ ڈیٹا خودکار صاف نہیں کرتی)۔
@@ -17939,6 +17928,7 @@ function saveChalanRate(variantId, chalanNo){
     const s = suppliersData.find(x => x.supplier_id === c.supplierId);
     if(s){
       s.total_payable = (Number(s.total_payable) || 0) + amountDiff;
+      normalizeSupplierBalance(s); // 💳 FM28SEP: والٹ (ایڈوانس) ہو تو خودکار کٹے
       s.purchaseHistory = s.purchaseHistory || [];
       let po = c.poRef != null ? s.purchaseHistory.find(x => x.poId === c.poRef) : null;
       if(!po && c.chalanRecRef != null) po = s.purchaseHistory.find(x => x.poId === c.chalanRecRef);
@@ -18203,9 +18193,9 @@ function saveChalanAccounting(variantId, chalanNo){
   let suppliersChanged = false;
   if(c.bookedSupplierId != null){
     const so = suppliersData.find(s => s.supplier_id === c.bookedSupplierId);
-    if(so){ so.total_payable = (Number(so.total_payable) || 0) - (Number(c.bookedAmount) || 0); suppliersChanged = true; }
+    if(so){ so.total_payable = (Number(so.total_payable) || 0) - (Number(c.bookedAmount) || 0); normalizeSupplierBalance(so); suppliersChanged = true; }
   }
-  if(newSupplier){ newSupplier.total_payable = (Number(newSupplier.total_payable) || 0) + newAmount; suppliersChanged = true; }
+  if(newSupplier){ newSupplier.total_payable = (Number(newSupplier.total_payable) || 0) + newAmount; normalizeSupplierBalance(newSupplier); suppliersChanged = true; }
   c.bookedSupplierId = newSupplier ? newSupplier.supplier_id : null;
   c.bookedAmount = newAmount;
 
@@ -18293,19 +18283,22 @@ function getSupplierSlipData(){
       if(afterStart(c.ts)) purchasesAfter += amt;
       if(inR(c.ts)) items.push({serial: p.serial_no, name: p.name, label: v.label || '', chalanNo: c.chalanNo, qty: c.origQty ?? c.qty, rate: c.rate, amount: amt});
     })));
-    let paid = 0, paidAfter = 0, returned = 0, returnedAfter = 0, disc = 0;
+    let paid = 0, paidAfter = 0, returned = 0, returnedAfter = 0, disc = 0, received = 0, receivedAfter = 0;
     (s.ledgerHistory || []).forEach(h => {
       const ts = new Date(h.date + 'T12:00:00').getTime();
       const a = Number(h.amount) || 0;
       if(h.type === 'payment'){ if(inR(ts)){ if(h.isDiscount) disc += a; else paid += a; } if(afterStart(ts)) paidAfter += a; }
       else if(h.type === 'return'){ if(inR(ts)) returned += a; if(afterStart(ts)) returnedAfter += a; }
+      // 💳 FM28SEP شام: بیوپاری سے لی گئی رقم اس کا بقایا بڑھاتی ہے؛ والٹ کی اندرونی منتقلیاں (wallet_deposit/wallet_adjust) خالص حساب نہیں بدلتیں
+      else if(h.type === 'received'){ if(inR(ts)) received += a; if(afterStart(ts)) receivedAfter += a; }
     });
-    if(supplierSlipSupplierId == null && !items.length && !paid && !returned && !disc) return;
-    const current = Number(s.total_payable) || 0;
-    const previous = Math.round(current - purchasesAfter + paidAfter + returnedAfter);
+    if(supplierSlipSupplierId == null && !items.length && !paid && !returned && !disc && !received) return;
+    // 💳 خالص بقایا = ہم نے دینا − ہمارا ایڈوانس (والٹ) اس کے پاس۔ منفی ہو تو والٹ
+    const current = (Number(s.total_payable) || 0) - (Number(s.wallet_balance) || 0);
+    const previous = Math.round(current - purchasesAfter + paidAfter + returnedAfter - receivedAfter);
     const purchases = items.reduce((sm, it) => sm + it.amount, 0);
-    const closing = Math.round(previous + purchases - paid - returned - disc);
-    slips.push({s, items, previous, purchases, paid, returned, disc, closing});
+    const closing = Math.round(previous + purchases + received - paid - returned - disc);
+    slips.push({s, items, previous, purchases, paid, returned, disc, received, closing});
   });
   return slips;
 }
@@ -18329,7 +18322,7 @@ async function renderSupplierSlipToCanvas(){
   const cols = (() => { const defs = [{k:'n',l:'#',f:.07},{k:'name',l:'سبزی'},{k:'ch',l:'چالان',f:.11},{k:'qty',l:'مقدار',f:.12},{k:'rate',l:'ریٹ',f:.15},{k:'amt',l:'رقم',f:.19}];
     const fixed = defs.filter(d => d.f).reduce((s,d) => s + Math.round(W*d.f), 0); let x = right;
     return defs.map(d => { const w = d.f ? Math.round(W*d.f) : W - fixed; x -= w; return {...d, w, x}; }); })();
-  const slipH = (sl) => fsTitle + Math.round(fsSub*1.9)*2 + Math.round(fsSmall*1.9) + 16 + headH + Math.max(1, sl.items.length) * rowH + sumH * (sl.disc ? 6 : 5) + 30;
+  const slipH = (sl) => fsTitle + Math.round(fsSub*1.9)*2 + Math.round(fsSmall*1.9) + 16 + headH + Math.max(1, sl.items.length) * rowH + sumH * (5 + (sl.disc ? 1 : 0) + (sl.received ? 1 : 0)) + 30;
   const total = slips.length ? slips.reduce((s, sl) => s + slipH(sl), 0) : 260;
   canvas.width = pxWidth; canvas.height = Math.max(300, total + 30);
   ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, pxWidth, canvas.height);
@@ -18376,11 +18369,12 @@ async function renderSupplierSlipToCanvas(){
     // خلاصہ
     const sumRows = [
       ['خریداری', sl.purchases, '#134e2c'],
-      ['سابقہ بقایا', sl.previous, '#1e3a8a'],
-      ['کل رقم', sl.previous + sl.purchases, '#0f172a'],
+      [sl.previous < 0 ? '💳 سابقہ والٹ (ہمارا ایڈوانس)' : 'سابقہ بقایا', sl.previous, '#1e3a8a'],
+      ...(sl.received ? [['📥 بیوپاری سے وصولی', sl.received, '#1e3a8a']] : []),
+      ['کل رقم', sl.previous + sl.purchases + (sl.received || 0), '#0f172a'],
       ['ادائیگی' + (sl.returned ? ' / واپسی' : ''), -(sl.paid + sl.returned), '#b91c1c'],
       ...(sl.disc ? [['🏷️ چھوٹ (ڈسکاؤنٹ)', -sl.disc, '#b45309']] : []),
-      ['باقی بقایا (ہم نے دینا ہے)', sl.closing, '#7c2d12'],
+      sl.closing < 0 ? ['💳 والٹ (ہمارا ایڈوانس اس کے پاس)', -sl.closing, '#15803d'] : ['باقی بقایا (ہم نے دینا ہے)', sl.closing, '#7c2d12'],
     ];
     y += 4;
     sumRows.forEach((r, i) => {
@@ -19222,112 +19216,6 @@ function deleteUserAccount(userId){
 })();
 
 
-/* =====================================================================
-   🏪 27 ستمبر: دو دکانیں ایک ایپ میں — "صدام فروٹ منڈی" (اصل) اور "بلال فروٹ فارم"۔
-   ہر دکان کا ڈیٹا بالکل الگ (فون میں بھی، کلاؤڈ میں بھی، Google Drive بیک اپ میں بھی)۔
-   یہ نظام چھپا ہوا ہے: صرف ایڈمن، اوپر دکان کے نام پر 7 بار ٹیپ کر کے آن کرے۔ آن ہونے پر نام کے ساتھ ⇄
-   آ جاتا ہے، اس پر ٹیپ سے دکان بدلتی ہے۔ منشی/ملازم ہمیشہ صرف صدام کی دکان میں۔
-   ===================================================================== */
-const SHOP_LABELS = { main: 'صدام فروٹ منڈی', bilal: 'بلال فروٹ فارم' };
-function isMultiShopEnabled(){ try{ return localStorage.getItem('fm_multiShopEnabled') === '1'; }catch(e){ return false; } }
-function switchShopTo(shop){
-  try{ localStorage.setItem('fm_activeShop', shop === 'bilal' ? 'bilal' : 'main'); }catch(e){}
-  try{ persistAllData(); }catch(e){}
-  setTimeout(() => { location.reload(); }, 150);
-}
-function refreshShopHeader(){
-  const t = document.getElementById('topbarShopTitle');
-  if(!t) return;
-  const isAdmin = AppState.currentRole === 'admin';
-  const on = isMultiShopEnabled() && isAdmin;
-  t.textContent = SHOP_LABELS[ACTIVE_SHOP] + (on ? ' ⇄' : '');
-  t.style.cursor = isAdmin ? 'pointer' : '';
-  const bar = t.closest('#topbar') || document.querySelector('.topbar') || null;
-  if(IS_BILAL){
-    document.documentElement.classList.add('shopBilal');
-  } else {
-    document.documentElement.classList.remove('shopBilal');
-  }
-}
-function openShopSwitcher(){
-  if(AppState.currentRole !== 'admin' || !isMultiShopEnabled()) return;
-  let m = document.getElementById('shopSwitchModal');
-  if(!m){
-    m = document.createElement('div');
-    m.id = 'shopSwitchModal'; m.className = 'modalOverlay'; m.setAttribute('dir', 'rtl');
-    m.style.fontFamily = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif";
-    m.onclick = (e) => { if(e.target === m) m.classList.remove('show'); };
-    document.body.appendChild(m);
-  }
-  const card = (shop, icon, bg) => {
-    const cur = shop === ACTIVE_SHOP;
-    return `<button type="button" onclick="${cur ? "document.getElementById('shopSwitchModal').classList.remove('show')" : `switchShopTo('${shop}')`}" style="width:100%; margin:8px 0; padding:16px 12px; border:none; border-radius:16px; background:${bg}; color:#fff; font-family:inherit; font-size:22px; font-weight:800; box-shadow:0 5px 0 rgba(0,0,0,.35); cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-      <span>${icon} ${SHOP_LABELS[shop]}</span><span style="font-size:14px; background:rgba(255,255,255,.2); padding:3px 10px; border-radius:10px;">${cur ? '✅ ابھی یہی کھلی ہے' : 'کھولیں ›'}</span></button>`;
-  };
-  m.innerHTML = `<div class="modalBox" style="max-width:380px; text-align:right;">
-    <h3 style="margin:0 0 6px; font-size:20px;">🏪 دکان منتخب کریں</h3>
-    <div style="font-size:13px; color:#64748b; margin-bottom:6px;">ہر دکان کا کھاتہ، گاہک، بل اور سٹاک بالکل الگ ہے۔</div>
-    ${card('main', '🍎', 'linear-gradient(160deg,#0f766e,#134e2c)')}
-    ${card('bilal', '🍉', 'linear-gradient(160deg,#7c3aed,#4c1d95)')}
-    <div class="modalBtns" style="margin-top:8px;"><button class="cancelBtn" onclick="document.getElementById('shopSwitchModal').classList.remove('show')" style="font-family:inherit;">بند کریں</button></div>
-  </div>`;
-  m.classList.add('show');
-}
-(function wireShopTitle(){
-  let taps = [];
-  document.addEventListener('click', (e) => {
-    const t = e.target && e.target.closest && e.target.closest('#topbarShopTitle');
-    if(!t) return;
-    if(AppState.currentRole !== 'admin') return;
-    const now = Date.now();
-    taps = taps.filter(x => now - x < 4000); taps.push(now);
-    if(taps.length >= 7){
-      taps = [];
-      const on = isMultiShopEnabled();
-      if(!on){
-        if(confirm('🏪 دو دکانوں کا نظام (بلال فروٹ فارم) اس فون پر آن کریں؟')){
-          try{ localStorage.setItem('fm_multiShopEnabled', '1'); }catch(e2){}
-          refreshShopHeader();
-          alert('✅ آن ہو گیا۔ اب دکان کے نام پر ایک ٹیپ سے دکان بدل سکتے ہیں۔');
-        }
-      } else if(confirm('دو دکانوں کا نظام اس فون پر بند کریں؟ (ڈیٹا محفوظ رہے گا)')){
-        try{ localStorage.removeItem('fm_multiShopEnabled'); }catch(e2){}
-        if(IS_BILAL) switchShopTo('main'); else refreshShopHeader();
-      }
-      return;
-    }
-    if(isMultiShopEnabled() && taps.length === 1){
-      setTimeout(() => { if(taps.length === 1) openShopSwitcher(); }, 450);
-    }
-  }, true);
-})();
-setInterval(() => { try{ refreshShopHeader(); }catch(e){} }, 1500);
-
-// ---------- 💾 دوسری دکان کا بیک اپ (جو ابھی کھلی نہیں) — سیدھا فون کی محفوظ جگہ سے پڑھ کر ---------- -->
-function buildBackupObjectForShop(shop){
-  const pref = STORAGE_PREFIX + (shop === 'bilal' ? 'bilal__' : '');
-  const get = (k, d) => { try{ const r = localStorage.getItem((SHARED_STORAGE_KEYS.has(k) ? STORAGE_PREFIX : pref) + k); return r == null ? d : JSON.parse(r); }catch(e){ return d; } };
-  const settings = Object.assign({}, get('settings', {}));
-  const shopS = get('shopSettings', null) || {};
-  SHOP_SETTING_FIELDS.forEach(f => { if(shopS[f] !== undefined) settings[f] = shopS[f]; else delete settings[f]; });
-  return {
-    exportedAt: new Date().toISOString(),
-    shop: shop,
-    products: get('products', []), customers: get('customers', []), suppliers: get('suppliers', []),
-    invoices: get('invoices', []), users: get('users', []), approvalRequests: get('approvalRequests', []),
-    nextProductId: get('nextProductId', 1), nextVariantId: get('nextVariantId', 1), nextCustomerId: get('nextCustomerId', 1),
-    nextSupplierId: get('nextSupplierId', 1), nextUserId: get('nextUserId', 1), nextRequestId: get('nextRequestId', 1), nextBatchId: get('nextBatchId', 1),
-    settings,
-    expenses: get('expenses', []), nextExpenseId: get('nextExpenseId', 1),
-    diary: get('diary', []), nextDiaryId: get('nextDiaryId', 1),
-    payments: get('payments', []), nextPaymentId: get('nextPaymentId', 1),
-    advanceOrders: get('advanceOrders', []), nextAdvOrderId: get('nextAdvOrderId', 1),
-    recoveryList: get('recoveryList', []), nextRecoveryId: get('nextRecoveryId', 1),
-    customCategories: get('customCategories', []),
-    cashPurchases: get('cashPurchases', []),
-    expiryAlertDays: get('expiryAlertDays', 30), quickDockItems: get('quickDockItems', []),
-  };
-}
 
 
 /* =====================================================================
@@ -19385,7 +19273,7 @@ function _xSetBase(def, list){
   try{ saveToStorage(_xBaseKey(def), m); }catch(e){}
 }
 async function _xReadCloud(def){
-  const res = await authFirestoreFetch(`${shopDocPath(def.key)}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+  const res = await authFirestoreFetch(`shopData/${def.key}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
   if(res && res.status === 404) return { ok: true, list: [], updateTime: null, missing: true };
   if(!res || !res.ok) return { ok: false };
   const doc = await res.json();
@@ -19411,7 +19299,7 @@ async function extraSyncOne(def, forcePush){
       const body = JSON.stringify(strippedMerged);
       if(body.length > 950000){ console.warn('extra sync: doc too large', def.key, body.length); break; }
       const pre = cloud.updateTime ? `&currentDocument.updateTime=${encodeURIComponent(cloud.updateTime)}` : '';
-      const res = await authFirestoreFetch(`${shopDocPath(def.key)}?key=${FIREBASE_API_KEY}${pre}`, {
+      const res = await authFirestoreFetch(`shopData/${def.key}?key=${FIREBASE_API_KEY}${pre}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { json: { stringValue: body }, updatedAt: { integerValue: String(Date.now()) } } })
       });
@@ -21328,7 +21216,7 @@ const CUSTOMERS_SEED_DATA = [
     walletHistory:[]},
   {customer_id:3, name:'Walk-in Customer — Ali', phone:'', address:'', keywords:'', wallet_balance:0, total_receivable:0, walletHistory:[]},
 ];
-let customersData = loadFromStorage('customers', IS_BILAL ? [] : CUSTOMERS_SEED_DATA);
+let customersData = loadFromStorage('customers', CUSTOMERS_SEED_DATA);
 let nextCustomerId = loadFromStorage('nextCustomerId', 4);
 
 // ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): کسٹمر اور سپلائر کی فہرست میں بھی وہی مرضی کا سیریل نمبر —
@@ -21385,6 +21273,7 @@ let nextReturnId = loadFromStorage('nextReturnId', 1);
 // ایڈمن اصل کھاتے میں اندراج کے بعد تصدیق (Confirm) کرتا ہے، تب جا کر customer.total_receivable کم ہوتا ہے ----------
 let recoveryListData = loadFromStorage('recoveryList', []);
 let nextRecoveryId = loadFromStorage('nextRecoveryId', 1);
+let recoveryDeletedIds = loadFromStorage('recoveryDeletedIds', []); // 🗑️ FM28SEP شام: ایڈمن کے حذف کیے اندراج
 // ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): منشی/آرڈر لینے والے کے "نیا سٹاک" فارم سے ہر بار جو سٹاک فیڈ ہو،
 // اس کا ایک مستقل، وقت کے ساتھ الگ الگ اندراج والا لاگ — تاکہ ایڈمن بعد میں دیکھ سکے کہ کب، کیا، کتنا شامل ہوا
 // (ایک ہی دن میں دو دفعہ اندراج ہو تو دونوں علیحدہ علیحدہ نظر آئیں، مدغم نہ ہوں) ---------- -->
@@ -21395,7 +21284,7 @@ const SUPPLIERS_SEED_DATA = [
   {supplier_id:1, name:'Unilever Pakistan', phone:'923001112223', address:'Karachi', keywords:'', total_payable:12500},
   {supplier_id:2, name:'Local Grocery Supplier', phone:'923337778889', address:'Lahore', keywords:'', total_payable:6000},
 ];
-let suppliersData = loadFromStorage('suppliers', IS_BILAL ? [] : SUPPLIERS_SEED_DATA);
+let suppliersData = loadFromStorage('suppliers', SUPPLIERS_SEED_DATA);
 let nextSupplierId = loadFromStorage('nextSupplierId', 3);
 
 /* =====================================================================
@@ -23540,6 +23429,10 @@ function buildCustomerLedgerTimeline(customerId){
   (c.walletHistory || []).filter(h => h.type === 'receivable_collected').forEach(h => {
     events.push({ date: h.date || todayDateKey(), type:'recovery', amount: h.amount || 0, label: 'ریکوری' + (h.note ? ' — ' + h.note : '') });
   });
+  // 💸 FM28SEP رات: نقد ادھار دیا — کھاتے میں چڑھا (بل کی طرح)
+  (c.walletHistory || []).filter(h => h.type === 'cash_given').forEach(h => {
+    events.push({ date: h.date || todayDateKey(), type:'sale', isLoan: true, amount: h.amount || 0, label: '💸 نقد ادھار' + (h.note ? ' — ' + h.note : '') });
+  });
   events.sort((a,b) => new Date(a.date) - new Date(b.date));
   let running = c.openingBalance || 0;
   events.forEach(e => {
@@ -24290,7 +24183,7 @@ function wireCustomerSwipeRows(){
 // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر/سپلائر کارڈ کو بھی آرڈر ٹیکنگ والی کمپیکٹ، راؤنڈ، 3D
 // ایک-لائن رو کی طرز پر بنایا — چوڑے/چوکور پرانے کارڈ کی جگہ؛ سب انلائن سٹائل (کسی CSS کلاس پر انحصار نہیں) ---------- -->
 function buildCompactPartyRow(opts){
-  const { id, name, phone, serial, keywords, areaBadgeHtml, balance, balanceLabelColor, rowClickJs, deleteJs, serialClickJs, dormantJs, isDormant, swipeClass } = opts;
+  const { id, name, phone, serial, keywords, areaBadgeHtml, balance, balanceLabelColor, rowClickJs, deleteJs, serialClickJs, dormantJs, isDormant, swipeClass, wallet } = opts;
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
   const iconStyle = (grad) => `flex:0 0 27px; width:27px; height:27px; display:flex; align-items:center; justify-content:center; text-decoration:none; color:#fff; border-radius:50%; background:${grad}; box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 2px 4px -1px rgba(0,0,0,.4);`;
@@ -24311,7 +24204,11 @@ function buildCompactPartyRow(opts){
   // ---------- 💰 صدام کی ہدایت (FM13SEPSU): بقایہ کیپسول اب زیادہ نمایاں — بڑا، ابھرا ہوا، سرخ (یہ رقم واپس لینی ہے) ---------- -->
   const balBg = hasBal ? '#fee2e2' : '#f1f5f9';
   const balColor = hasBal ? '#b91c1c' : '#64748b';
-  const balHtml = `<div style="flex:0 0 74px; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; border-radius:9px; padding:6px 4px; background:${balBg}; color:${balColor}; box-shadow:0 2px 0 rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.6);">${hasBal ? 'Rs.' + balance.toLocaleString() : '—'}</div>`;
+  // ---------- 💳 صدام کی ہدایت (FM28SEP شام): بقایا صفر ہو اور والٹ میں رقم ہو تو مائنس نہیں — سبز "والٹ +" کیپسول ---------- -->
+  const hasWallet = !hasBal && (Number(wallet) || 0) > 0;
+  const balHtml = hasWallet
+    ? `<div style="flex:0 0 74px; font-size:11.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; border-radius:9px; padding:3px 4px; background:#dcfce7; color:#15803d; border:1.5px solid #86efac; box-shadow:0 2px 0 rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.6); line-height:1.3;"><div style="font-size:9px;">💳 والٹ</div>+${Number(wallet).toLocaleString()}</div>`
+    : `<div style="flex:0 0 74px; font-size:12.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; border-radius:9px; padding:6px 4px; background:${balBg}; color:${balColor}; box-shadow:0 2px 0 rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.6);">${hasBal ? 'Rs.' + balance.toLocaleString() : '—'}</div>`;
   const keywordHtml = keywords ? `<span style="flex:0 0 auto; font-size:9px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 5px;">${keywords}</span>` : '';
   const serialHtml = `<button type="button" onclick="event.stopPropagation(); ${serialClickJs}" style="flex:0 0 auto; ${SERIAL_BADGE_INLINE_STYLE} width:20px !important; height:20px !important; min-width:20px !important; min-height:20px !important; font-size:9.5px !important; box-shadow:none !important; border-width:1.5px !important;">${serial ?? '?'}</button>`;
   const cardHtml = `
@@ -24372,7 +24269,7 @@ function renderPartyList(query = ''){
         : `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#5b21b6; background:#ede9fe; border:1.5px solid #c4b5fd; border-radius:7px; padding:2px 5px; cursor:pointer;">❔</button>`;
       return buildCompactPartyRow({
         id: c.customer_id, name: c.name, phone: c.phone, serial: c.serial_no, keywords: c.keywords,
-        areaBadgeHtml, balance: c.total_receivable || 0,
+        areaBadgeHtml, balance: c.total_receivable || 0, wallet: c.wallet_balance || 0,
         rowClickJs: `openCustomerProfile(${c.customer_id})`,
         deleteJs: `deleteCustomer(${c.customer_id})`,
         serialClickJs: `openSerialPicker('customers', ${c.customer_id}, ${c.serial_no ?? 'null'}, '${(c.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`,
@@ -24410,7 +24307,7 @@ function renderPartyList(query = ''){
     const isAdminSup = AppState.currentRole === 'admin';
     wrap.innerHTML = filterBarHtml + filtered.map(s => buildCompactPartyRow({
       id: s.supplier_id, name: s.name, phone: s.phone, serial: s.serial_no, keywords: s.keywords,
-      areaBadgeHtml: '', balance: s.total_payable || 0,
+      areaBadgeHtml: '', balance: s.total_payable || 0, wallet: s.wallet_balance || 0,
       rowClickJs: `openSupplierProfile(${s.supplier_id})`,
       deleteJs: `deleteSupplier(${s.supplier_id})`,
       serialClickJs: `openSerialPicker('suppliers', ${s.supplier_id}, ${s.serial_no ?? 'null'}, '${(s.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`,
@@ -24624,7 +24521,8 @@ function openCustomerProfile(customerId){
     <div dir="rtl" style="grid-column:1/-1; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2.5px solid #d97706; border-radius:14px; padding:14px; margin-bottom:8px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div style="font-weight:900; color:#78350f; font-size:17px; margin-bottom:7px;">⏳ نئی وصولی — تصدیق درکار (ابھی کھاتے میں درج نہیں ہوئی)</div>
       <div style="font-size:14.5px; font-weight:700; color:#78350f; line-height:2;">
-        📥 وصول شدہ رقم: <b>Rs. ${pendingRec.amount.toLocaleString()}</b> (${RECOVERY_METHODS[pendingRec.method] || pendingRec.method})<br>
+        📥 وصول شدہ رقم: <b>Rs. ${pendingRec.amount.toLocaleString()}</b> (${recoverySplitLabel(pendingRec)})<br>
+        ${pendingRec.note ? `📝 نوٹ: <b>${escRlHtml(pendingRec.note)}</b><br>` : ''}
         🧑‍💼 بھیجنے والا: ${pendingRec.employeeName}<br>
         📊 موجودہ بقایہ: Rs. ${c.total_receivable.toLocaleString()} → تصدیق کے بعد بقایہ: <b>Rs. ${Math.max(0, c.total_receivable - pendingRec.amount).toLocaleString()}</b>
         ${pendingRec.amount > c.total_receivable ? `<br>💰 اضافی رقم Rs. ${(pendingRec.amount - c.total_receivable).toLocaleString()} خودکار Wallet میں جمع ہوگی` : ''}
@@ -24634,7 +24532,7 @@ function openCustomerProfile(customerId){
   figuresEl.innerHTML = `
     ${pendingBannerHtml}
     <!-- ---------- 💳 صدام کی ہدایت (FM3SEPTH10): Wallet Balance واپس فعال — زیادہ وصولی ہونے پر یہیں ایڈوانس جمع ہوتا ہے ---------- -->
-    ${c.wallet_balance > 0 ? `<div class="pfBox" style="grid-column:1/-1; background:#f0fdf4; border:1.5px solid #86efac;"><div class="pfLabel">💳 Wallet Balance (ایڈوانس)</div><div class="pfValue wallet" style="font-size:19px; color:#15803d;">Rs. ${c.wallet_balance.toLocaleString()}</div></div>` : ''}
+    ${c.wallet_balance > 0 ? `<div class="pfBox" style="grid-column:1/-1; background:#f0fdf4; border:1.5px solid #86efac;"><div class="pfLabel">💳 والٹ (ایڈوانس — اس کی رقم ہمارے پاس)</div><div class="pfValue wallet" style="font-size:19px; color:#15803d;">+ Rs. ${c.wallet_balance.toLocaleString()}</div></div>` : ''}
     ${typeof c.openingBalance !== 'undefined' ? `<div class="pfBox"><div class="pfLabel">💼 سابقہ بقایہ (Opening)</div><div class="pfValue" style="color:var(--muted);">Rs. ${c.openingBalance.toLocaleString()}</div></div>` : ''}
     <div class="pfBox"><div class="pfLabel">📥 Total بقایہ (Receivable)</div><div class="pfValue receivable" onclick="openCollectModal(${c.customer_id})" style="cursor:pointer;">Rs. ${c.total_receivable.toLocaleString()}</div></div>
   `;
@@ -24643,7 +24541,8 @@ function openCustomerProfile(customerId){
   const sideEl = document.getElementById('profileQuickActions');
   sideEl.innerHTML = `
     <button style="background:linear-gradient(155deg,#0f766e,#0b4a45);" onclick="startNewBillForCustomer(${c.customer_id})"><span class="sideIcon">🧾</span><span class="sideLabel">New Bill</span></button>
-    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});"><span class="sideIcon">📥</span><span class="sideLabel">Collect</span></button>
+    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});"><span class="sideIcon">📥</span><span class="sideLabel">وصولی</span></button>
+    <button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustLoanModal(${c.customer_id});"><span class="sideIcon">💸</span><span class="sideLabel">ادھار دیا</span></button>
     <button style="background:linear-gradient(155deg,#22c55e,#15803d);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});"><span class="sideIcon">➕</span><span class="sideLabel">Wallet</span></button>
     <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
     ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
@@ -24747,9 +24646,11 @@ function renderCustomerTransactionsSection(customerId){
     ? `<div class="profileEmpty">No transactions yet</div>`
     : c.walletHistory.map(h => {
         let label, isGot;
-        if(h.type === 'deposit'){ label = '➕ Added to Wallet'; isGot = true; }
-        else if(h.type === 'redeem'){ label = '➖ Withdrawn from Wallet'; isGot = false; }
-        else { label = `📥 Credit Collected (${h.via === 'wallet' ? 'via Wallet' : 'Cash'})`; isGot = true; }
+        if(h.type === 'deposit'){ label = '💳 والٹ میں جمع (ایڈوانس)'; isGot = true; }
+        else if(h.type === 'redeem'){ label = '💳 والٹ سے نکالا'; isGot = false; }
+        else if(h.type === 'cash_given'){ label = '💸 نقد ادھار دیا (کھاتے میں چڑھا)'; isGot = false; }
+        else { label = `📥 وصولی (${h.via === 'wallet' ? 'والٹ سے' : 'نقد'})`; isGot = true; }
+        if(h.note && h.type !== 'receivable_collected') label += ` <span style="font-size:.85em; color:var(--muted);">— ${h.note}</span>`;
         return `<div class="ledgerRow"><div class="lrTop">
             <div><div class="lrDate">${h.date ? new Date(h.date).toLocaleDateString('en-GB') : ''}</div><div class="lrDesc">${label}</div></div>
             <div class="lrAmount ${isGot?'got':'gave'}">${isGot?'+':'-'} Rs. ${h.amount.toLocaleString()}</div>
@@ -24955,7 +24856,10 @@ function openSupplierProfile(supplierId){
 
   const figuresEl = document.getElementById('profileFigures');
   figuresEl.className = typeof s.openingBalance !== 'undefined' ? 'profileFigures' : 'profileFigures single';
+  normalizeSupplierBalance(s);
   figuresEl.innerHTML = `
+    <!-- ---------- 💳 صدام کی ہدایت (FM28SEP شام): بیوپاری کا والٹ — ہمارا ایڈوانس جو اس کے پاس ہے (سبز، پلس میں) ---------- -->
+    ${(s.wallet_balance||0) > 0 ? `<div class="pfBox" style="grid-column:1/-1; background:#f0fdf4; border:1.5px solid #86efac;"><div class="pfLabel">💳 والٹ (ہمارا ایڈوانس اس کے پاس)</div><div class="pfValue wallet" style="font-size:19px; color:#15803d;">+ Rs. ${s.wallet_balance.toLocaleString()}</div></div>` : ''}
     ${typeof s.openingBalance !== 'undefined' ? `<div class="pfBox"><div class="pfLabel">💼 سابقہ بقایہ (Opening)</div><div class="pfValue" style="color:var(--muted);">Rs. ${s.openingBalance.toLocaleString()}</div></div>` : ''}
     <div class="pfBox"><div class="pfLabel">📤 واجب الادا (ہم نے دینے ہیں)</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
   `;
@@ -24965,7 +24869,8 @@ function openSupplierProfile(supplierId){
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "نیا پرچیز آرڈر" بٹن دوبارہ فعال — یہیں سے openPoModal کھلتا ہے ---------- -->
     <button style="background:linear-gradient(155deg,#0ea5e9,#0369a1);" onclick="openPoModal(${s.supplier_id});"><span class="sideIcon">📦</span><span class="sideLabel">نیا آرڈر</span></button>
     <button style="background:linear-gradient(155deg,#f59e0b,#b45309);" onclick="document.getElementById('profileModal').classList.remove('show'); openSupplierSlipReport(${s.supplier_id});"><span class="sideIcon">🧾</span><span class="sideLabel">چٹ</span></button>
-    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id});"><span class="sideIcon">💵</span><span class="sideLabel">ادائیگی</span></button>
+    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id}, 'pay');"><span class="sideIcon">💵</span><span class="sideLabel">ادائیگی</span></button>
+    <button style="background:linear-gradient(155deg,#10b981,#047857);" onclick="openPaySupplierModal(${s.supplier_id}, 'receive');"><span class="sideIcon">📥</span><span class="sideLabel">ادھار لیا</span></button>
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">پروفائل</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">لین دین</span></button>
   `;
@@ -25041,8 +24946,10 @@ function renderSupplierTransactionsSection(supplierId){
   const ledgerHtml = ledger.length === 0
     ? `<div class="profileEmpty">ابھی تک کوئی لین دین نہیں</div>`
     : ledger.map(h => {
-        const label = h.type === 'payment' ? '💵 ادائیگی بھیجی گئی' : h.type === 'return' ? '↩️ سامان کی واپسی' : h.type;
-        const isGot = h.type === 'return'; // ریٹرن ہمارے حق میں کم واجب الادا کرتا ہے — سبز، ادائیگی سرخ
+        const SUP_LEDGER_LABELS = { payment:'💵 ادائیگی بھیجی گئی', return:'↩️ سامان کی واپسی', discount:'🏷️ چھوٹ (ڈسکاؤنٹ)',
+          received:'📥 بیوپاری سے وصولی (ایڈوانس / ادھار)', wallet_deposit:'💳 زیادہ ادائیگی — والٹ میں جمع', wallet_adjust:'💳 والٹ (ایڈوانس) سے کٹوتی' };
+        const label = h.isDiscount ? SUP_LEDGER_LABELS.discount : (SUP_LEDGER_LABELS[h.type] || h.type);
+        const isGot = h.type === 'return' || h.isDiscount || h.type === 'discount' || h.type === 'wallet_deposit' || h.type === 'wallet_adjust'; // ہمارے حق میں — سبز
         return `<div class="ledgerRow"><div class="lrTop">
             <div><div class="lrDate">${h.date}${h.note ? ' — ' + h.note : ''}</div><div class="lrDesc">${label}</div></div>
             <div class="lrAmount ${isGot?'got':'gave'}">${isGot?'+':'-'} Rs. ${h.amount.toLocaleString()}</div>
@@ -25343,13 +25250,39 @@ function removePaymentSlipImage(target){
 
 // ---------- سپلائر کو نقد ادائیگی — Payable خودکار کم ہو، Cash in Hand سے خودکار منہا ہو (کسٹمر کے "Collect" کا آئینہ) ----------
 let activePaySupplierId = null;
-function openPaySupplierModal(supplierId){
+let activePaySupplierMode = 'pay';
+let activePaySupplierOnlyMode = null; // 'pay' = ہم نے بیوپاری کو دیے، 'receive' = بیوپاری سے ہم نے لیے
+
+// ---------- 💳 صدام کی ہدایت (FM28SEP شام): بیوپاری کا والٹ = ہمارا ایڈوانس جو بیوپاری کے پاس پڑا ہے
+// (زیادہ ادائیگی ہو جائے تو اضافی رقم یہاں جمع ہوتی ہے)۔ یہ فنکشن ہر تبدیلی کے بعد حساب کو صاف رکھتا ہے:
+//   • اگر واجب الادا منفی ہو جائے (ہم نے زیادہ دے دیا) → وہ رقم والٹ میں چلی جائے، واجب الادا صفر
+//   • اگر والٹ میں رقم ہو اور نیا سامان خریدنے سے واجب الادا بنے → پہلے والٹ سے خودکار کٹے ---------- -->
+function normalizeSupplierBalance(s, reasonNote){
+  if(!s) return;
+  s.total_payable = Number(s.total_payable) || 0;
+  s.wallet_balance = Number(s.wallet_balance) || 0;
+  const today = new Date().toISOString().split('T')[0];
+  if(s.total_payable < 0){
+    s.wallet_balance += -s.total_payable;
+    s.total_payable = 0;
+  }
+  if(s.wallet_balance > 0 && s.total_payable > 0){
+    const adj = Math.min(s.wallet_balance, s.total_payable);
+    s.wallet_balance -= adj;
+    s.total_payable -= adj;
+    s.ledgerHistory = s.ledgerHistory || [];
+    s.ledgerHistory.unshift({type:'wallet_adjust', amount: adj, date: today, note: reasonNote || 'والٹ (ایڈوانس) سے خودکار کٹوتی'});
+  }
+}
+
+function openPaySupplierModal(supplierId, onlyMode){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
   activePaySupplierId = supplierId;
-  document.getElementById('paySupplierPayableHint').textContent = `کل واجب الادا: Rs. ${s.total_payable.toLocaleString()}`;
+  activePaySupplierOnlyMode = onlyMode || null;
+  refreshPaySupplierPayableHint(s);
   document.getElementById('paySupplierAmount').value = '';
-  { const _d = document.getElementById('paySupplierDiscount'); if(_d) _d.value = ''; }
+  document.getElementById('paySupplierDiscount').value = '';
   document.getElementById('paySupplierNote').value = '';
   document.getElementById('paySupplierRemainingHint').style.display = 'none';
   removePaymentSlipImage('paySupplier');
@@ -25359,77 +25292,164 @@ function openPaySupplierModal(supplierId){
   accSel.innerHTML = '<option value="">نقد / کوئی مخصوص اکاؤنٹ نہیں</option>' +
     accounts.map((acc, idx) => `<option value="${idx}">${(acc.type||'اکاؤنٹ')}${acc.number ? ' — '+acc.number : ''}</option>`).join('');
   accSel.value = '';
+  // ---------- 📥 FM28SEP رات: پروفائل کے "ادھار لیا" بٹن سے کھلے تو سیدھا وصولی — ادائیگی/وصولی کا ٹوگل چھپا ----------
+  const tg = document.getElementById('paySupModeToggle');
+  if(tg) tg.style.display = onlyMode ? 'none' : '';
+  setPaySupplierMode(onlyMode || 'pay');
   document.getElementById('paySupplierModal').classList.add('show');
+}
+function refreshPaySupplierPayableHint(s){
+  const pay = s.total_payable || 0, wal = s.wallet_balance || 0;
+  document.getElementById('paySupplierPayableHint').innerHTML = `کل واجب الادا: Rs. ${pay.toLocaleString()}` +
+    (wal > 0 ? `<br><span style="color:#15803d;">💳 والٹ (ہمارا ایڈوانس اس کے پاس): Rs. ${wal.toLocaleString()}</span>` : '');
+}
+function setPaySupplierMode(mode){
+  activePaySupplierMode = mode;
+  const isPay = mode === 'pay';
+  document.getElementById('paySupModePay').classList.toggle('active', isPay);
+  document.getElementById('paySupModeReceive').classList.toggle('active', !isPay);
+  document.getElementById('paySupplierModalTitle').textContent = isPay ? '💵 بیوپاری کو ادائیگی' : (activePaySupplierOnlyMode === 'receive' ? '📥 بیوپاری سے نقد ادھار لیا — اس کے کھاتے میں جمع' : '📥 بیوپاری سے وصولی (ایڈوانس / ادھار)');
+  document.getElementById('paySupplierAmount').placeholder = isPay ? 'ادا کی گئی رقم درج کریں' : 'بیوپاری سے لی گئی رقم درج کریں';
+  document.getElementById('paySupplierDiscount').style.display = isPay ? '' : 'none';
+  if(!isPay) document.getElementById('paySupplierDiscount').value = '';
+  document.getElementById('paySupplierSaveBtn').textContent = isPay ? 'ادائیگی کی تصدیق کریں' : 'وصولی کی تصدیق کریں';
+  updatePaySupplierRemainingHint();
 }
 function closePaySupplierModal(){
   document.getElementById('paySupplierModal').classList.remove('show');
   activePaySupplierId = null;
 }
-// ---------- رقم لکھتے ہی فوری بتائیں کہ اس ادائیگی کے بعد سپلائر کا کتنا بقایہ (واجب الادا) رہ جائے گا ----------
+// ---------- 💳 صدام کی ہدایت (FM28SEP شام): ادائیگی/وصولی کا مکمل حساب ایک جگہ — ڈبہ، تصدیقی پیغام اور محفوظ کرنا ----------
+function calcSupplierSplit(s, amount, discount, mode){
+  const payable = Math.max(0, s.total_payable || 0);
+  const wallet = Math.max(0, s.wallet_balance || 0);
+  if(mode === 'pay'){
+    const discEff = Math.min(discount, payable);
+    const afterDisc = payable - discEff;
+    const toPayable = Math.min(afterDisc, amount);
+    const toWallet = Math.max(0, amount - afterDisc);
+    return { mode, payable, wallet, discEff, toPayable, toWallet, fromWallet: 0, addPayable: 0,
+             payableAfter: afterDisc - toPayable, walletAfter: wallet + toWallet };
+  }
+  // ---------- وصولی: پہلے ہمارا ایڈوانس (والٹ) واپس آئے، باقی رقم بیوپاری کی ہمارے پاس امانت/ادھار — یعنی ہم نے اسے دینی ہے ----------
+  const fromWallet = Math.min(wallet, amount);
+  const addPayable = amount - fromWallet;
+  return { mode, payable, wallet, discEff: 0, toPayable: 0, toWallet: 0, fromWallet, addPayable,
+           payableAfter: payable + addPayable, walletAfter: wallet - fromWallet };
+}
+function buildSupplierSplitLines(sp, amount, forConfirm){
+  const br = forConfirm ? '\n' : '<br>';
+  const b = (t) => forConfirm ? t : `<b>${t}</b>`;
+  const L = [];
+  if(sp.mode === 'pay'){
+    L.push(`📊 اس کا بقایا (ہم نے دینا) تھا: Rs. ${sp.payable.toLocaleString()}`);
+    if(sp.discEff > 0) L.push(`🏷️ چھوٹ (ڈسکاؤنٹ): Rs. ${sp.discEff.toLocaleString()}`);
+    L.push(`💸 آپ ادا کر رہے ہیں: Rs. ${amount.toLocaleString()}`);
+    if(sp.toWallet > 0){
+      if(sp.payable > 0) L.push('✅ بقایا مکمل صاف');
+      L.push(`💳 والٹ میں جمع ہوں گے: ${b('+ Rs. ' + sp.toWallet.toLocaleString())}`);
+      L.push(`💰 نیا والٹ (ہمارا ایڈوانس اس کے پاس): Rs. ${sp.walletAfter.toLocaleString()}`);
+    } else {
+      L.push(`📉 ادائیگی کے بعد باقی بقایا: ${b('Rs. ' + sp.payableAfter.toLocaleString())}`);
+    }
+  } else {
+    L.push(`📥 بیوپاری سے آپ لے رہے ہیں: Rs. ${amount.toLocaleString()}`);
+    if(sp.fromWallet > 0) L.push(`💳 ہمارا ایڈوانس (والٹ) واپس آیا: Rs. ${sp.fromWallet.toLocaleString()} — باقی والٹ: Rs. ${sp.walletAfter.toLocaleString()}`);
+    if(sp.addPayable > 0){
+      L.push(`➕ یہ رقم اس کے کھاتے میں جمع (ہم نے اسے واپس دینی ہے): ${b('+ Rs. ' + sp.addPayable.toLocaleString())}`);
+      L.push(`📊 اس کا بقایا (ہم نے دینا): Rs. ${sp.payable.toLocaleString()} → ${b('Rs. ' + sp.payableAfter.toLocaleString())}`);
+    }
+  }
+  return L.join(br);
+}
+// ---------- رقم لکھتے ہی فوری پورا حساب نیچے ڈبے میں ----------
 function updatePaySupplierRemainingHint(){
   const s = suppliersData.find(x => x.supplier_id === activePaySupplierId);
   const amount = parseFloat(document.getElementById('paySupplierAmount').value) || 0;
-  const discount = Math.max(0, parseFloat(document.getElementById('paySupplierDiscount')?.value) || 0);
+  const discount = parseFloat(document.getElementById('paySupplierDiscount').value) || 0;
   const hint = document.getElementById('paySupplierRemainingHint');
   if(!s || (amount <= 0 && discount <= 0)){ hint.style.display = 'none'; return; }
-  const remaining = Math.max(0, s.total_payable - amount - discount);
+  const sp = calcSupplierSplit(s, amount, discount, activePaySupplierMode);
   hint.style.display = 'block';
-  hint.textContent = (discount > 0 ? `ادائیگی Rs. ${amount.toLocaleString()} + چھوٹ Rs. ${discount.toLocaleString()} — ` : '') + `باقی واجب الادا: Rs. ${remaining.toLocaleString()}` + ((amount + discount) > s.total_payable ? ' ⚠️ (موجودہ واجب الادا سے زیادہ ہے)' : '');
+  const green = sp.toWallet > 0 || sp.mode === 'receive';
+  hint.style.background = green ? '#f0fdf4' : '#eef2ff';
+  hint.style.color = green ? '#166534' : 'var(--primary-dark)';
+  hint.innerHTML = buildSupplierSplitLines(sp, amount, false) +
+    (discount > sp.payable && sp.mode === 'pay' ? `<br><span style="color:var(--danger);">⚠️ چھوٹ بقایا سے زیادہ نہیں ہو سکتی — صرف Rs. ${sp.discEff.toLocaleString()} لگے گی</span>` : '');
 }
 function confirmPaySupplier(){
   const amount = parseFloat(document.getElementById('paySupplierAmount').value) || 0;
-  const discount = Math.max(0, parseFloat(document.getElementById('paySupplierDiscount')?.value) || 0);
-  if(amount <= 0 && discount <= 0){
+  const discount = parseFloat(document.getElementById('paySupplierDiscount').value) || 0;
+  const mode = activePaySupplierMode;
+  if(amount < 0 || discount < 0 || (amount <= 0 && (mode === 'receive' || discount <= 0))){
     alert('براہ کرم درست رقم درج کریں۔');
     return;
   }
   const s = suppliersData.find(x => x.supplier_id === activePaySupplierId);
   if(!s) return;
 
-  if((amount + discount) > s.total_payable && !confirm(`یہ رقم سپلائر کے کل واجب الادا (Rs. ${s.total_payable.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)){
-    return;
+  const sp = calcSupplierSplit(s, amount, discount, mode);
+  // ---------- 💳 صدام کی ہدایت (FM28SEP شام): زیادہ ادائیگی یا وصولی پر تصدیقی پیغام میں پورا حساب لکھا آئے ----------
+  if(sp.toWallet > 0 || mode === 'receive'){
+    if(!confirm(`${mode === 'pay' ? '💵' : '📥'} ${s.name}\n\n${buildSupplierSplitLines(sp, amount, true)}\n\nکیا یہ درست ہے؟`)) return;
   }
-  if(amount > financeDummy.cashInHand && !confirm(`یہ آپ کے موجودہ نقد (Cash in Hand: Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)){
+  if(mode === 'pay' && amount > financeDummy.cashInHand && !confirm(`یہ آپ کے موجودہ نقد (Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)){
     return;
   }
 
-  const note = document.getElementById('paySupplierNote').value.trim();
+  let note = document.getElementById('paySupplierNote').value.trim();
   const accIdx = document.getElementById('paySupplierAccountSelect').value;
   const accounts = getSupplierBankAccounts(s);
   const chosenAcc = accIdx !== '' ? accounts[accIdx] : null;
-  const balanceBefore = s.total_payable;
+  const balanceBefore = s.total_payable || 0;
+  const today = new Date().toISOString().split('T')[0];
+  s.ledgerHistory = s.ledgerHistory || [];
 
   // TODO: یہاں supplier_payments table میں INSERT ہوگا، suppliers.total_payable UPDATE ہوگا
-  s.total_payable -= (amount + discount); // 🏷️ چھوٹ بھی واجب الادا سے کم
-  financeDummy.cashInHand -= amount; // ---------- نقد ادائیگی — صرف اصل ادا کی گئی رقم کیش سے نکلی (چھوٹ نہیں) ----------
+  s.total_payable = sp.payableAfter;
+  s.wallet_balance = sp.walletAfter;
+  if(mode === 'pay'){
+    financeDummy.cashInHand -= amount; // ---------- نقد ادائیگی — یہ رقم اب کیش میں سے نکل گئی ----------
+    if(sp.discEff > 0) s.ledgerHistory.unshift({type:'payment', amount: sp.discEff, isDiscount: true, date: today, note: '🏷️ چھوٹ (ڈسکاؤنٹ)' + (note ? ' — ' + note : '')});
+    if(amount > 0) s.ledgerHistory.unshift({type:'payment', amount, date: today, note});
+    if(sp.toWallet > 0) s.ledgerHistory.unshift({type:'wallet_deposit', amount: sp.toWallet, date: today, note: 'زیادہ ادائیگی — والٹ (ایڈوانس) میں جمع'});
+  } else {
+    financeDummy.cashInHand += amount; // ---------- بیوپاری سے نقد لیا — کیش بڑھ گیا ----------
+    s.ledgerHistory.unshift({type:'received', amount, date: today, note: note || 'بیوپاری سے وصولی (ایڈوانس / ادھار)'});
+  }
 
-  s.ledgerHistory = s.ledgerHistory || [];
-  if(amount > 0) s.ledgerHistory.unshift({type:'payment', amount, date:new Date().toISOString().split('T')[0], note});
-  if(discount > 0) s.ledgerHistory.unshift({type:'payment', amount: discount, isDiscount: true, date:new Date().toISOString().split('T')[0], note: '🏷️ چھوٹ (ڈسکاؤنٹ)' + (note ? ' — ' + note : '')});
+  const extra = [];
+  if(sp.discEff > 0) extra.push(`🏷️ چھوٹ Rs. ${sp.discEff.toLocaleString()}`);
+  if(sp.toWallet > 0) extra.push(`💳 Rs. ${sp.toWallet.toLocaleString()} والٹ میں جمع (نیا والٹ: Rs. ${s.wallet_balance.toLocaleString()})`);
+  if(sp.fromWallet > 0) extra.push(`💳 ایڈوانس واپس Rs. ${sp.fromWallet.toLocaleString()}`);
+  if(sp.addPayable > 0) extra.push(`➕ بیوپاری کے کھاتے میں جمع Rs. ${sp.addPayable.toLocaleString()}`);
+  if(extra.length) note = (note ? note + ' — ' : '') + extra.join(' — ');
 
-  const savedPayment = recordPaymentEntry({
-    direction: 'out',
+  const savedPayment = (amount > 0) ? recordPaymentEntry({
+    direction: mode === 'pay' ? 'out' : 'in',
     party_type: 'supplier',
     party_id: s.supplier_id,
     party_name: s.name,
     amount,
     balance_before: balanceBefore,
     balance_after: s.total_payable,
+    wallet_added: sp.toWallet,
+    wallet_after: s.wallet_balance,
+    discount: sp.discEff,
     method: chosenAcc ? (chosenAcc.type || 'Bank/Wallet') : 'Cash',
     account_title: chosenAcc ? (chosenAcc.title || chosenAcc.type || '') : '',
     account_number: chosenAcc ? (chosenAcc.number || '') : '',
     slip_image: paymentSlipImages.paySupplier,
     note,
-    discount: discount || 0,
-  });
+  }) : null;
 
   closePaySupplierModal();
   persistAllData();
   pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): ادائیگی کے بعد بقایا فوراً کلاؤڈ میں ----------
-  pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد ادائیگی سے Cash in Hand کم ہونا فوراً کلاؤڈ میں ----------
+  pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): Cash in Hand کی تبدیلی فوراً کلاؤڈ میں ----------
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
-  openSupplierProfile(s.supplier_id); // پروفائل فوراً تازہ ترین حالت میں دوبارہ کھلے
-  sharePaymentReceiptImage(savedPayment.payment_id);
+  openSupplierProfile(s.supplier_id); // پروفائل فوراً تازہ ترین حالت (بقایا + والٹ خانہ) میں دوبارہ کھلے
+  if(savedPayment) sharePaymentReceiptImage(savedPayment.payment_id);
 }
 
 /* =====================================================================
@@ -26050,6 +26070,7 @@ function savePurchaseOrder(){
   // مال حقیقت میں تو ابھی ملا ہی نہیں — سٹاک صرف "Receive Shipment" مکمل ہونے پر بڑھے گا۔
   // TODO: یہاں purchase_orders + purchase_order_items table میں INSERT ہوگا (status:'pending_receipt')
   s.total_payable += total; // آرڈر کی مالیت طے ہو گئی، ادائیگی کا وعدہ بن گیا
+  normalizeSupplierBalance(s, 'خریداری پر والٹ (ایڈوانس) سے خودکار کٹوتی'); // 💳 FM28SEP
   s.purchaseHistory = s.purchaseHistory || [];
   s.purchaseHistory.unshift({
     poId: newPoId, // 🧾 چالان سے جوڑنے کے لیے
@@ -28401,7 +28422,8 @@ function openMyRecoveryRecords(){
             ${statusBadge}
           </div>
           <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">🕐 ${dateStr}</div>
-          <div style="font-size:14px; color:#15803d; font-weight:800;">💰 وصول شدہ: Rs. ${(r.amount||0).toLocaleString()} (${RECOVERY_METHODS[r.method] || r.method})</div>
+          <div style="font-size:14px; color:#15803d; font-weight:800;">💰 وصول شدہ: Rs. ${(r.amount||0).toLocaleString()} (${recoverySplitLabel(r)})</div>
+          ${r.note ? `<div style="font-size:13px; color:#78350f; background:#fffbeb; border-radius:7px; padding:4px 8px; margin-top:4px;">📝 ${escRlHtml(r.note)}</div>` : ''}
           <div style="display:flex; gap:6px; margin-top:8px;">
             <button onclick="reshareRecoveryEntry(${r.id})" style="flex:1; padding:7px; background:#25D366; color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">💬 دوبارہ شیئر</button>
             <button onclick="warnEmployeeCannotDeleteRecovery()" style="flex:1; padding:7px; background:#fef2f2; color:#b91c1c; border:1px solid #fca5a5; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">🗑️ حذف کریں</button>
@@ -28434,6 +28456,7 @@ function deleteRecoveryEntry(entryId){
   }
   if(!confirm('کیا آپ واقعی یہ وصولی کا اندراج حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔')) return;
   recoveryListData = recoveryListData.filter(r => r.id !== entryId);
+  if(!recoveryDeletedIds.includes(entryId)){ recoveryDeletedIds.push(entryId); saveToStorage('recoveryDeletedIds', recoveryDeletedIds); }
   persistAllData();
   pushRecoveryListToCloud();
   if(typeof renderRecoveryListAdminView === 'function') renderRecoveryListAdminView();
@@ -28449,8 +28472,38 @@ const RECOVERY_METHODS = {
   easypaisa: 'ایزی پیسہ',
   bank: 'بینک'
 };
-let rlAmountMap = {};  // {customer_id: amount} — ملازم کی سکرین پر عارضی
-let rlMethodMap = {};  // {customer_id: method}
+// ---------- 🆕 FM28SEP شام (صدام کی ہدایت): ایک وصولی میں کئی طریقے (کچھ نقد، کچھ جاز کیش، کچھ ایزی پیسہ، کچھ بینک)
+// ہر انٹری میں اب methods: [{method, amount}] محفوظ ہوتا ہے — پرانی انٹریاں (صرف method) بھی ویسے ہی چلتی ہیں ---------- -->
+function getRecoverySplit(r){
+  if(r && Array.isArray(r.methods) && r.methods.length) return r.methods.filter(m => (Number(m.amount) || 0) > 0);
+  return r ? [{ method: r.method || 'cash', amount: Number(r.amount) || 0 }] : [];
+}
+function recoverySplitLabel(r){
+  const sp = getRecoverySplit(r);
+  if(sp.length <= 1) return RECOVERY_METHODS[(sp[0] || {}).method] || (sp[0] || {}).method || '';
+  return sp.map(m => `${RECOVERY_METHODS[m.method] || m.method} ${Number(m.amount).toLocaleString()}`).join(' + ');
+}
+function escRlHtml(t){ return String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+let rlSplitMap = {};   // {customer_id: [{amount, method}]} — ملازم کی سکرین پر عارضی (OK سے پہلے)
+let rlNoteMap = {};    // {customer_id: note} — OK سے پہلے لکھا گیا نوٹ
+let rlReopenIds = [];  // "➕ مزید وصولی" دبانے پر دوبارہ کھلے کارڈ
+// ---------- پرانے نام — دوسری جگہوں سے حوالہ نہ ٹوٹے ----------
+let rlAmountMap = {};
+let rlMethodMap = {};
+
+// ---------- اس کسٹمر کی آج کی (اسی تاریخ کی) وصولی انٹریاں — کچی یا پکی دونوں ----------
+function rlTodayEntriesFor(customerId){
+  const t = todayDateKey();
+  return recoveryListData.filter(r => r.customer_id === customerId && (r.createdAt || '').split('T')[0] === t);
+}
+// ---------- اس کسٹمر کی تمام کچی (ایڈمن نے ابھی کھاتے میں درج نہیں کیں) وصولیاں — باقی بقایا انہی کو منہا کر کے دکھایا جاتا ہے ----------
+function rlPendingSumFor(customerId){
+  return recoveryListData.filter(r => r.customer_id === customerId && r.status === 'pending').reduce((a, r) => a + (Number(r.amount) || 0), 0);
+}
+function rlTypedTotal(customerId){
+  return (rlSplitMap[customerId] || []).reduce((a, m) => a + (Number(m.amount) || 0), 0);
+}
 
 function renderRecoveryListScreen(){
   const isAdmin = document.body.classList.contains('role-admin');
@@ -28458,11 +28511,8 @@ function renderRecoveryListScreen(){
   else renderRecoveryListEmployeeView();
 }
 
-// ---------- ملازم کا منظر — نستعلیق + مکمل RTL (صدام کی ہدایت FM3SEPTH10)، ہر انٹری کے ساتھ اپنا ✅ OK بٹن —
-// دبانے پر فوراً وہی ایک انٹری جمع ہو جاتی ہے (پوری فہرست کا انتظار نہیں کرنا پڑتا)، اور مکمل شدہ انٹری
-// فہرست کے سب سے اوپر چلی جاتی ہے تاکہ صاف نظر آئے کہ کس کس سے آج وصولی ہو چکی ہے ----------
-let rlDoneIds = []; // ---------- آج جن کسٹمرز کی وصولی مکمل (OK) ہو چکی، انہی کی ترتیب اوپر رکھنے کے لیے ----------
-// ---------- 🔒 صدام کی ہدایت (FM13SEPSU): علاقہ/آج کے خریدار فلٹر — آرڈر ٹیکنگ جیسا نظام ---------- -->
+// ---------- ملازم کا منظر — ہر کسٹمر کا اپنا ڈبہ، اپنا ✅ OK ----------
+let rlDoneIds = []; // (پرانا — اب \"مکمل\" ہونے کا فیصلہ آج کی محفوظ انٹری سے ہوتا ہے، ایپ دوبارہ کھلنے پر بھی)
 let rlAreaFilter = null; // null | 'retail' | 'wholesale' | 'today'
 function setRlAreaFilter(mode){
   rlAreaFilter = (rlAreaFilter === mode) ? null : mode;
@@ -28480,25 +28530,24 @@ function adjustRlZoom(delta){
   renderRecoveryListEmployeeView();
 }
 let rlZoomPct = loadFromStorage('rlZoomPct', 100);
+
+function rlIsDone(customerId){
+  return rlTodayEntriesFor(customerId).length > 0 && !rlReopenIds.includes(customerId);
+}
+
 function renderRecoveryListEmployeeView(){
-  rlAmountMap = {};
-  rlMethodMap = {};
-  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — کھوہ کھاتے والے کسٹمر بھی اب ریکوری لسٹ میں نظر آئیں گے ----------
-  let owing = customersData.filter(c => c.total_receivable > 0);
-  // ---------- 🔍 صدام کی ہدایت (FM15SEPTU): نام یا سیریل نمبر سے سرچ ---------- -->
+  // ---------- اس کسٹمر کا بقایا ہو، یا آج اس سے وصولی ہو چکی ہو (تاکہ مکمل ادائیگی کے بعد بھی ڈبہ غائب نہ ہو) ----------
+  let owing = customersData.filter(c => (c.total_receivable > 0) || rlTodayEntriesFor(c.customer_id).length > 0);
   const rlQ = (document.getElementById('rlCustSearch')?.value || '').trim().toLowerCase();
   if(rlQ){
     owing = owing.filter(c => (c.name || '').toLowerCase().includes(rlQ) || String(c.serial_no ?? '').includes(rlQ));
   }
-  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): علاقہ/آج کے خریدار فلٹر لگائیں ---------- -->
   if(rlAreaFilter === 'retail') owing = owing.filter(c => c.rateArea === 'retail');
   else if(rlAreaFilter === 'wholesale') owing = owing.filter(c => c.rateArea === 'wholesale');
   else if(rlAreaFilter === 'today') owing = owing.filter(c => customerBoughtToday(c.customer_id));
-  // ---------- 🔢 صدام کی ہدایت (FM12SEPSA...): مکمل شدہ (✅ OK والے) سب سے اوپر، باقی وہی سیریل نمبر
-  // کی ترتیب سے جو مین کسٹمر لسٹ میں موجود ہے (نام کے حساب سے نہیں) ---------- -->
   const sortMode = document.getElementById('rlSortSelect')?.value || 'default';
   owing.sort((a,b) => {
-    const aDone = rlDoneIds.includes(a.customer_id), bDone = rlDoneIds.includes(b.customer_id);
+    const aDone = rlIsDone(a.customer_id) ? 1 : 0, bDone = rlIsDone(b.customer_id) ? 1 : 0;
     if(aDone !== bDone) return bDone - aDone;
     if(sortMode === 'highest') return (b.total_receivable||0) - (a.total_receivable||0);
     if(sortMode === 'lowest') return (a.total_receivable||0) - (b.total_receivable||0);
@@ -28506,135 +28555,211 @@ function renderRecoveryListEmployeeView(){
   });
   const list = document.getElementById('rlEmployeeList');
   if(!list) return;
-
   if(owing.length === 0){
     list.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">فی الحال کسی کسٹمر کا بقایہ نہیں</div>`;
     return;
   }
-
-  // ---------- ⚡ کارکردگی: پوری فہرست ایک ہی بار حساب کریں، ہر کسٹمر کے لیے دوبارہ نہ چلائیں ----------
   const drAll = computeDailyRecoveryRows();
+  list.innerHTML = owing.map(c => buildRlEmployeeCard(c, drAll.find(r => r.c.customer_id === c.customer_id) || {})).join('');
+}
+// ---------- صرف ایک کارڈ دوبارہ بنائیں (باقی فہرست اور لکھی ہوئی رقمیں ویسی ہی رہیں) ----------
+function rerenderRlCard(customerId){
+  const el = document.getElementById('rlCard-' + customerId);
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!el || !c){ renderRecoveryListEmployeeView(); return; }
+  const dr = computeDailyRecoveryRows().find(r => r.c.customer_id === customerId) || {};
+  el.outerHTML = buildRlEmployeeCard(c, dr);
+}
 
-  list.innerHTML = owing.map(c => {
-    const isDone = rlDoneIds.includes(c.customer_id);
-    rlMethodMap[c.customer_id] = 'cash';
-    const digits = (c.phone || '').replace(/[^0-9]/g, '');
-    const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
-    // ---------- 🆕 صدام کی ہدایت (FM3SEPTH10): آج کا مال (ادھار)، ٹوٹل بقایہ، اور علاقہ ٹیگ بھی یہاں شامل ----------
-    const dr = drAll.find(r => r.c.customer_id === c.customer_id) || {};
-    const todayGoods = dr.todayGoods || 0;
-    const totalBalance = dr.totalBalance || c.total_receivable;
-    const noteKey = todayDateKey() + '_' + c.customer_id;
-    const noteVal = dailyRecoveryNotes[noteKey] || '';
-    return `
-    <div class="rlEmpRow" dir="rtl" style="background:${isDone ? '#f0fdf4' : '#fff'}; border:1.5px solid ${isDone ? '#86efac' : '#e5e9f0'}; border-radius:10px; padding:7px 8px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:${(13*rlZoomPct/100).toFixed(1)}px;">
+function buildRlEmployeeCard(c, dr){
+  const z = (n) => (n * rlZoomPct / 100).toFixed(1);
+  const cid = c.customer_id;
+  const isDone = rlIsDone(cid);
+  const todayEntries = rlTodayEntriesFor(cid);
+  const todaySent = todayEntries.reduce((a, r) => a + (Number(r.amount) || 0), 0);
+  const typed = isDone ? 0 : rlTypedTotal(cid);
+  // ---------- ✅ صدام کی ہدایت: OK کے بعد بھی باقی بقایا کم ہی نظر آئے — اصل بقایا − کچی وصولیاں − ابھی لکھی گئی رقم ----------
+  const remaining = Math.max(0, (c.total_receivable || 0) - rlPendingSumFor(cid) - typed);
+  const todayGoods = dr.todayGoods || 0;
+  const totalBalance = dr.totalBalance || c.total_receivable || 0;
+  const opening = (dr.openingBalance !== undefined) ? dr.openingBalance : (c.total_receivable || 0);
+  const digits = (c.phone || '').replace(/[^0-9]/g, '');
+  const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
+  if(!isDone && !rlSplitMap[cid]) rlSplitMap[cid] = [{ amount: 0, method: 'cash' }];
+  const rows = rlSplitMap[cid] || [];
+  const lastEntry = todayEntries.slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+  const noteVal = isDone ? ((lastEntry && lastEntry.note) || '') : (rlNoteMap[cid] || '');
+  const numF = `font-family:'Arial Black',Arial,sans-serif; font-weight:900;`;
+  const iconBtn = (href, bg, col, ic, extra) => `<a href="${href}" ${extra||''} style="flex:0 0 auto; width:${z(24)}px; height:${z(24)}px; display:flex; align-items:center; justify-content:center; background:${bg}; color:${col}; border-radius:50%; font-size:${z(11)}px; text-decoration:none;">${ic}</a>`;
+
+  // ---------- رقم کی قطاریں (ہر قطار: رقم + طریقہ) — "➕ دوسرا طریقہ" سے مزید قطار ----------
+  const splitRowsHtml = isDone ? '' : rows.map((m, i) => `
+      <div style="display:flex; gap:3px; align-items:center; margin-bottom:4px;">
+        <input type="number" min="0" inputmode="numeric" placeholder="${i === 0 ? 'رقم' : 'مزید رقم'}" value="${m.amount ? m.amount : ''}" oninput="updateRlSplit(${cid}, ${i}, 'amount', this.value)"
+               style="flex:1 1 0; min-width:0; padding:7px 4px; border:1.5px solid #dbe1ea; border-radius:6px; ${numF} font-size:${z(14)}px; text-align:center;">
+        <select onchange="updateRlSplit(${cid}, ${i}, 'method', this.value)" style="flex:0 0 ${z(74)}px; padding:7px 2px; border:1px solid #dbe1ea; border-radius:6px; font-size:${z(10)}px; font-family:inherit;">
+          ${Object.keys(RECOVERY_METHODS).map(k => `<option value="${k}" ${m.method === k ? 'selected' : ''}>${RECOVERY_METHODS[k]}</option>`).join('')}
+        </select>
+        ${i > 0 ? `<button type="button" onclick="removeRlSplitRow(${cid}, ${i})" style="flex:0 0 auto; width:${z(24)}px; height:${z(24)}px; border:none; border-radius:50%; background:#fee2e2; color:#b91c1c; font-size:${z(11)}px; cursor:pointer;">✖</button>` : ''}
+      </div>`).join('');
+
+  const doneSummaryHtml = isDone ? `
+      <div style="background:#dcfce7; border:1px solid #86efac; border-radius:8px; padding:6px 8px; margin-bottom:5px; font-size:${z(11.5)}px; font-weight:700; color:#166534; line-height:1.9;">
+        ${todayEntries.map(r => `✅ وصول: <b style="${numF}">Rs. ${(Number(r.amount)||0).toLocaleString()}</b> — ${recoverySplitLabel(r)}${r.status === 'confirmed' ? ' <span style="font-size:.85em;">(کھاتے میں درج)</span>' : ' <span style="font-size:.85em; color:#b45309;">(ایڈمن کے پاس)</span>'}`).join('<br>')}
+      </div>` : '';
+
+  return `
+    <div id="rlCard-${cid}" class="rlEmpRow" dir="rtl" style="background:${isDone ? '#f0fdf4' : '#fff'}; border:1.5px solid ${isDone ? '#86efac' : '#e5e9f0'}; border-radius:10px; padding:7px 8px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:${z(13)}px;">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-bottom:4px;">
         <div style="font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:3px; min-width:0;">
-          ${c.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; flex:0 0 auto; width:${(18*rlZoomPct/100).toFixed(0)}px !important; height:${(18*rlZoomPct/100).toFixed(0)}px !important; min-width:${(18*rlZoomPct/100).toFixed(0)}px !important; min-height:${(18*rlZoomPct/100).toFixed(0)}px !important; font-size:${(8.5*rlZoomPct/100).toFixed(1)}px !important; box-shadow:none !important; border-width:1.2px !important; padding:0 !important;">${c.serial_no}</span>` : ''}
+          ${c.serial_no ? `<span class="serialBadgeBtn" style="cursor:default; flex:0 0 auto; width:${z(18)}px !important; height:${z(18)}px !important; min-width:${z(18)}px !important; min-height:${z(18)}px !important; font-size:${z(8.5)}px !important; box-shadow:none !important; border-width:1.2px !important; padding:0 !important;">${c.serial_no}</span>` : ''}
           <span style="overflow:hidden; text-overflow:ellipsis;">${c.name}</span>
           ${isDone ? '✅' : ''}
         </div>
-        ${c.rateArea ? `<span style="flex:0 0 auto; font-size:${(8*rlZoomPct/100).toFixed(1)}px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:5px; padding:1px 4px; white-space:nowrap;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}
+        <div style="display:flex; gap:4px; align-items:center;">
+          ${c.rateArea ? `<span style="flex:0 0 auto; font-size:${z(8)}px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:5px; padding:1px 4px; white-space:nowrap;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}
+          ${c.phone ? iconBtn('tel:' + c.phone, '#eef2ff', 'var(--primary-dark)', '📞') : ''}
+          ${c.phone ? iconBtn('https://wa.me/' + waNum, '#dcfce7', '#15803d', '📱', 'target="_blank"') : ''}
+        </div>
       </div>
-      <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): "باقی بقیہ" (ادائیگی کے بعد کتنا رہ جائے گا) اب سب سے اوپر،
-           سب سے نمایاں، بڑے موٹے ہندسوں میں — یہی سب سے اہم نمبر ہے (لائیو، رقم لکھتے ہی بدلتا ہے) ---------- -->
-      <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:5px 8px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:${(10*rlZoomPct/100).toFixed(1)}px; font-weight:700; color:var(--danger);">باقی بقیہ رہ جائے گا</span>
-        <span id="rlRemain-${c.customer_id}" style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:${(17*rlZoomPct/100).toFixed(1)}px; color:var(--danger); direction:ltr;">Rs. ${totalBalance.toLocaleString()}</span>
+      <!-- ---------- باقی بقایا (بڑا) + ابھی وصول (سبز) — گاہک کے سامنے کھڑے ہو کر فوراً بتایا جا سکے ---------- -->
+      <div style="display:flex; gap:4px; margin-bottom:5px;">
+        <div style="flex:1.4; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:4px 8px; text-align:center;">
+          <div style="font-size:${z(10)}px; font-weight:700; color:var(--danger);">باقی بقایا</div>
+          <div id="rlRemain-${cid}" style="${numF} font-size:${z(17)}px; color:var(--danger); direction:ltr;">Rs. ${remaining.toLocaleString()}</div>
+        </div>
+        <div style="flex:1; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:4px 8px; text-align:center;">
+          <div style="font-size:${z(10)}px; font-weight:700; color:#15803d;">آج وصول</div>
+          <div id="rlTodayRec-${cid}" style="${numF} font-size:${z(17)}px; color:#15803d; direction:ltr;">Rs. ${(todaySent + typed).toLocaleString()}</div>
+        </div>
       </div>
-      <!-- ---------- رقم + طریقہ + کال/واٹس ایپ + OK — سب ایک ہی لائن میں، کمپیکٹ ---------- -->
-      <div style="display:flex; gap:3px; align-items:center; margin-bottom:5px;">
-        <input type="number" min="0" placeholder="رقم" ${isDone ? 'disabled' : ''} oninput="updateRlAmount(${c.customer_id}, this.value, ${totalBalance})"
-               style="flex:1 1 0; min-width:0; padding:6px 4px; border:1.5px solid #dbe1ea; border-radius:6px; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:${(14*rlZoomPct/100).toFixed(1)}px; text-align:center;">
-        <select ${isDone ? 'disabled' : ''} onchange="rlMethodMap[${c.customer_id}] = this.value;" style="flex:0 0 66px; padding:6px 2px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(9.5*rlZoomPct/100).toFixed(1)}px;">
-          ${Object.keys(RECOVERY_METHODS).map(k => `<option value="${k}">${RECOVERY_METHODS[k]}</option>`).join('')}
-        </select>
-        ${c.phone ? `<a href="tel:${c.phone}" style="flex:0 0 auto; width:${(22*rlZoomPct/100).toFixed(0)}px; height:${(22*rlZoomPct/100).toFixed(0)}px; display:flex; align-items:center; justify-content:center; background:#eef2ff; color:var(--primary-dark); border-radius:50%; font-size:${(10*rlZoomPct/100).toFixed(1)}px; text-decoration:none;">📞</a>` : ''}
-        ${c.phone ? `<a href="https://wa.me/${waNum}" target="_blank" style="flex:0 0 auto; width:${(22*rlZoomPct/100).toFixed(0)}px; height:${(22*rlZoomPct/100).toFixed(0)}px; display:flex; align-items:center; justify-content:center; background:#dcfce7; color:#15803d; border-radius:50%; font-size:${(10*rlZoomPct/100).toFixed(1)}px; text-decoration:none;">📱</a>` : ''}
-        ${isDone
-          ? `<span style="flex:0 0 auto; font-size:${(9*rlZoomPct/100).toFixed(1)}px; font-weight:800; color:#15803d; white-space:nowrap;">✅</span>`
-          : `<button type="button" onclick="submitSingleRecovery(${c.customer_id})" style="flex:0 0 auto; padding:6px 9px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-size:${(10.5*rlZoomPct/100).toFixed(1)}px; font-weight:800; cursor:pointer; white-space:nowrap;">✅ OK</button>`}
+      ${doneSummaryHtml}
+      ${splitRowsHtml}
+      ${isDone ? `
+        <button type="button" onclick="reopenRlCard(${cid})" style="width:100%; padding:5px; margin-bottom:5px; background:#fff; color:#15803d; border:1.5px dashed #86efac; border-radius:7px; font-size:${z(10.5)}px; font-weight:800; cursor:pointer; font-family:inherit;">➕ اسی گاہک سے مزید وصولی</button>` : `
+        <div style="display:flex; gap:4px; margin-bottom:5px;">
+          <button type="button" onclick="addRlSplitRow(${cid})" style="flex:1; padding:6px; background:#eef2ff; color:var(--primary-dark); border:1.5px dashed #a5b4fc; border-radius:7px; font-size:${z(10.5)}px; font-weight:800; cursor:pointer; font-family:inherit;">➕ دوسرا طریقہ (نقد + جاز کیش…)</button>
+          <button type="button" onclick="submitSingleRecovery(${cid})" style="flex:0 0 auto; padding:6px 14px; background:var(--primary); color:#fff; border:none; border-radius:7px; font-size:${z(12)}px; font-weight:800; cursor:pointer; white-space:nowrap;">✅ OK</button>
+        </div>`}
+      <div style="display:flex; gap:2px; margin-bottom:5px; font-size:${z(8)}px; overflow-x:auto; white-space:nowrap;">
+        <div style="background:#f8fafc; border-radius:4px; padding:2px 4px; flex:0 0 auto;">سابقہ:<b style="${numF}">${Number(opening).toLocaleString()}</b></div>
+        <div style="background:#fff7ed; color:#c2410c; border-radius:4px; padding:2px 4px; flex:0 0 auto;">آج مال:<b style="${numF}">${todayGoods.toLocaleString()}</b></div>
+        <div style="background:#f8fafc; border-radius:4px; padding:2px 4px; flex:0 0 auto;">ٹوٹل:<b style="${numF}">${Number(totalBalance).toLocaleString()}</b></div>
       </div>
-      <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): 5 ذیلی خانے مزید تنگ، ہندسے موٹے (Arial Black) — نستعلیق نہیں،
-           تاکہ رقم صاف اور واضح نظر آئے ---------- -->
-      <div style="display:flex; gap:2px; margin-bottom:5px; font-size:${(8*rlZoomPct/100).toFixed(1)}px; overflow-x:auto; white-space:nowrap;">
-        <div style="background:#f8fafc; border-radius:4px; padding:2px 4px; flex:0 0 auto;">سابقہ:<b style="font-family:'Arial Black',Arial,sans-serif; font-weight:900;">${dr.openingBalance.toLocaleString()}</b></div>
-        <div style="background:#fff7ed; color:#c2410c; border-radius:4px; padding:2px 4px; flex:0 0 auto;">آج مال:<b style="font-family:'Arial Black',Arial,sans-serif; font-weight:900;">${todayGoods.toLocaleString()}</b></div>
-        <div style="background:#f8fafc; border-radius:4px; padding:2px 4px; flex:0 0 auto;">ٹوٹل:<b style="font-family:'Arial Black',Arial,sans-serif; font-weight:900;">${totalBalance.toLocaleString()}</b></div>
-        <div style="background:#f0fdf4; color:#15803d; border-radius:4px; padding:2px 4px; flex:0 0 auto;">وصول:<b id="rlTodayRec-${c.customer_id}" style="font-family:'Arial Black',Arial,sans-serif; font-weight:900;">0</b></div>
+      <!-- ---------- 📝 صدام کی ہدایت: نوٹ کبھی لاک نہیں ہوتا — OK کے بعد بھی لکھ/بدل کر اس کا اپنا 💾 دبائیں ---------- -->
+      <div style="display:flex; gap:3px; align-items:center;">
+        <input type="text" id="rlNote-${cid}" value="${escRlHtml(noteVal)}" placeholder="📝 نوٹ (مثلاً باقی شام کو دے گا)" oninput="${isDone ? '' : `rlNoteMap[${cid}] = this.value;`}"
+               style="flex:1; min-width:0; padding:5px 6px; border:1px solid ${isDone ? '#86efac' : '#dbe1ea'}; border-radius:6px; font-size:${z(10)}px; font-family:inherit; box-sizing:border-box; background:#fff;">
+        ${isDone ? `<button type="button" onclick="saveRlNoteAfterOk(${cid})" style="flex:0 0 auto; padding:5px 9px; background:#15803d; color:#fff; border:none; border-radius:6px; font-size:${z(10)}px; font-weight:800; cursor:pointer; white-space:nowrap; font-family:inherit;">💾 نوٹ OK</button>` : ''}
       </div>
-      <!-- ---------- 📝 یادداشت/نوٹس — اختیاری، چھوٹی لائن ---------- -->
-      <input type="text" value="${noteVal.replace(/"/g,'&quot;')}" ${isDone ? 'disabled' : ''} placeholder="📝 نوٹ (اختیاری)" onchange="saveDailyRecoveryNote(${c.customer_id}, this.value)" style="width:100%; padding:3px 6px; border:1px solid #dbe1ea; border-radius:6px; font-size:${(8.5*rlZoomPct/100).toFixed(1)}px; font-family:inherit; box-sizing:border-box;">
     </div>`;
-  }).join('');
 }
 
-// ---------- ✅ ایک کسٹمر کی وصولی فوراً جمع کریں (پوری فہرست مکمل کرنے کا انتظار نہیں) — صدام کی ہدایت (FM3SEPTH10) ----------
-function submitSingleRecovery(customerId){
-  const amount = rlAmountMap[customerId] || 0;
-  if(amount <= 0){ alert('پہلے وصولی کی رقم لکھیں'); return; }
+// ---------- رقم/طریقہ لکھتے ہی باقی بقایا اور "آج وصول" فوراً بدلیں ----------
+function updateRlSplit(customerId, idx, field, val){
+  const rows = rlSplitMap[customerId] = rlSplitMap[customerId] || [{ amount: 0, method: 'cash' }];
+  if(!rows[idx]) rows[idx] = { amount: 0, method: 'cash' };
+  if(field === 'amount') rows[idx].amount = Math.max(0, parseFloat(val) || 0);
+  else rows[idx].method = val;
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
+  const typed = rlTypedTotal(customerId);
+  const todaySent = rlTodayEntriesFor(customerId).reduce((a, r) => a + (Number(r.amount) || 0), 0);
+  const remainEl = document.getElementById('rlRemain-' + customerId);
+  if(remainEl) remainEl.textContent = 'Rs. ' + Math.max(0, (c.total_receivable || 0) - rlPendingSumFor(customerId) - typed).toLocaleString();
+  const recEl = document.getElementById('rlTodayRec-' + customerId);
+  if(recEl) recEl.textContent = 'Rs. ' + (todaySent + typed).toLocaleString();
+}
+function addRlSplitRow(customerId){
+  const rows = rlSplitMap[customerId] = rlSplitMap[customerId] || [{ amount: 0, method: 'cash' }];
+  const used = rows.map(r => r.method);
+  const next = Object.keys(RECOVERY_METHODS).find(k => !used.includes(k)) || 'cash';
+  rows.push({ amount: 0, method: next });
+  rerenderRlCard(customerId);
+}
+function removeRlSplitRow(customerId, idx){
+  const rows = rlSplitMap[customerId] || [];
+  rows.splice(idx, 1);
+  if(!rows.length) rows.push({ amount: 0, method: 'cash' });
+  rerenderRlCard(customerId);
+}
+function reopenRlCard(customerId){
+  if(!rlReopenIds.includes(customerId)) rlReopenIds.push(customerId);
+  rlSplitMap[customerId] = [{ amount: 0, method: 'cash' }];
+  rlNoteMap[customerId] = '';
+  rerenderRlCard(customerId);
+}
 
-  recoveryListData.unshift({
+// ---------- ✅ ایک کسٹمر کی وصولی فوراً جمع کریں — تمام طریقے ایک ہی انٹری میں ----------
+function buildRecoveryEntryFromSplit(c){
+  const cid = c.customer_id;
+  const merged = {};
+  (rlSplitMap[cid] || []).forEach(m => { const a = Number(m.amount) || 0; if(a > 0) merged[m.method] = (merged[m.method] || 0) + a; });
+  const methods = Object.keys(merged).map(k => ({ method: k, amount: merged[k] }));
+  const amount = methods.reduce((a, m) => a + m.amount, 0);
+  if(amount <= 0) return null;
+  return {
     id: nextRecoveryId++,
-    customer_id: customerId,
+    customer_id: cid,
     customerName: c.name,
-    totalReceivableAtTime: c.total_receivable,
-    amount: amount,
-    method: rlMethodMap[customerId] || 'cash',
+    totalReceivableAtTime: Math.max(0, (c.total_receivable || 0) - rlPendingSumFor(cid)),
+    amount,
+    method: methods.length === 1 ? methods[0].method : 'mixed',
+    methods,
+    note: (rlNoteMap[cid] || '').trim(),
+    noteUpdatedAt: Date.now(),
     employeeName: AppState.currentUser?.name || 'Unknown',
     status: 'pending', // ---------- ایڈمن Confirm کرنے تک اصل کھاتے میں کوئی تبدیلی نہیں ----------
     createdAt: new Date().toISOString(),
     confirmedAt: null
-  });
+  };
+}
+function submitSingleRecovery(customerId){
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!c) return;
+  const entry = buildRecoveryEntryFromSplit(c);
+  if(!entry){ alert('پہلے وصولی کی رقم لکھیں'); return; }
+  recoveryListData.unshift(entry);
+  if(entry.note) saveDailyRecoveryNote(customerId, entry.note);
   persistAllData();
-  pushRecoveryListToCloud(); // ---------- ⚡ فوراً کلاؤڈ پر بھیجیں — ایڈمن کے ہوم پیج پر بیج فوراً اپڈیٹ ہو جائے گا ----------
-
-  rlDoneIds.push(customerId);
+  pushRecoveryListToCloud(); // ---------- ⚡ فوراً کلاؤڈ پر ----------
+  delete rlSplitMap[customerId]; delete rlNoteMap[customerId];
+  rlReopenIds = rlReopenIds.filter(x => x !== customerId);
+  if(!rlDoneIds.includes(customerId)) rlDoneIds.push(customerId);
   renderRecoveryListEmployeeView();
 }
-
-function updateRlAmount(customerId, val, totalReceivable){
-  const amount = Math.max(0, parseFloat(val) || 0);
-  rlAmountMap[customerId] = amount;
-  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): "باقی بقیہ" اب سب سے اوپر نمایاں خانے میں ہے — لیبل الگ سے
-  // ساتھ ہی لکھا ہوا ہے، اس لیے یہاں صرف رقم لکھنی ہے، دہرایا ہوا لیبل نہیں ---------- -->
-  const remainEl = document.getElementById('rlRemain-' + customerId);
-  if(remainEl) remainEl.textContent = 'Rs. ' + Math.max(0, totalReceivable - amount).toLocaleString();
-  // ---------- 📊 لائیو باکس اپڈیٹ — "آج کی وصولی" (صدام کی ہدایت FM3SEPTH10) ----------
-  const todayRecEl = document.getElementById('rlTodayRec-' + customerId);
-  if(todayRecEl) todayRecEl.textContent = amount.toLocaleString();
+// ---------- 📝 OK کے بعد نوٹ لکھنا/بدلنا — آج کی آخری انٹری میں محفوظ، ایڈمن کو بھی فوراً ----------
+function saveRlNoteAfterOk(customerId){
+  const el = document.getElementById('rlNote-' + customerId);
+  const note = (el ? el.value : '').trim();
+  const entries = rlTodayEntriesFor(customerId).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  if(!entries.length) return;
+  entries[0].note = note;
+  entries[0].noteUpdatedAt = Date.now();
+  saveDailyRecoveryNote(customerId, note);
+  persistAllData();
+  pushRecoveryListToCloud();
+  if(el){ el.style.borderColor = '#15803d'; el.style.background = '#f0fdf4'; }
+  const btn = el && el.nextElementSibling;
+  if(btn){ const t = btn.textContent; btn.textContent = '✅ محفوظ'; setTimeout(() => { btn.textContent = t; }, 1500); }
 }
+// ---------- پرانا فنکشن نام (کسی جگہ سے کال ہو تو نہ ٹوٹے) ----------
+function updateRlAmount(customerId, val){ updateRlSplit(customerId, 0, 'amount', val); }
 
 function submitRecoveryList(){
-  const entries = Object.keys(rlAmountMap)
-    .map(id => ({customer_id: Number(id), amount: rlAmountMap[id]}))
-    .filter(e => e.amount > 0);
-
-  if(entries.length === 0){ alert('کم از کم ایک کسٹمر کی وصولی کی رقم لکھیں'); return; }
-
-  entries.forEach(e => {
-    const c = customersData.find(x => x.customer_id === e.customer_id);
+  const ids = Object.keys(rlSplitMap).map(Number).filter(id => rlTypedTotal(id) > 0 && !rlIsDone(id));
+  if(ids.length === 0){ alert('کم از کم ایک کسٹمر کی وصولی کی رقم لکھیں'); return; }
+  ids.forEach(id => {
+    const c = customersData.find(x => x.customer_id === id);
     if(!c) return;
-    recoveryListData.unshift({
-      id: nextRecoveryId++,
-      customer_id: e.customer_id,
-      customerName: c.name,
-      totalReceivableAtTime: c.total_receivable,
-      amount: e.amount,
-      method: rlMethodMap[e.customer_id] || 'cash',
-      employeeName: AppState.currentUser?.name || 'Unknown',
-      status: 'pending', // ---------- ایڈمن Confirm کرنے تک اصل کھاتے میں کوئی تبدیلی نہیں ----------
-      createdAt: new Date().toISOString(),
-      confirmedAt: null
-    });
+    const entry = buildRecoveryEntryFromSplit(c);
+    if(!entry) return;
+    recoveryListData.unshift(entry);
+    if(entry.note) saveDailyRecoveryNote(id, entry.note);
+    delete rlSplitMap[id]; delete rlNoteMap[id];
   });
   persistAllData();
-  pushRecoveryListToCloud(); // ---------- ⚡ فوراً کلاؤڈ پر بھیجیں — ایڈمن کے فون پر خودکار نظر آ جائے گا ----------
-
-  rlAmountMap = {};
-  rlMethodMap = {};
+  pushRecoveryListToCloud();
   alert('آج کی وصولی جمع ہو گئی — ایڈمن اصل کھاتے میں اندراج کے بعد تصدیق کریں گے۔');
   goTo('home');
 }
@@ -28649,7 +28774,7 @@ function renderRecoveryListAdminView(){
   const total = pending.reduce((s, r) => s + r.amount, 0);
   const byMethod = {};
   Object.keys(RECOVERY_METHODS).forEach(k => byMethod[k] = 0);
-  pending.forEach(r => { byMethod[r.method] = (byMethod[r.method] || 0) + r.amount; });
+  pending.forEach(r => { getRecoverySplit(r).forEach(m => { byMethod[m.method] = (byMethod[m.method] || 0) + m.amount; }); });
 
   summaryEl.innerHTML = `
     <div style="font-size:20px; font-weight:900; color:var(--primary-dark); margin-bottom:2px;">⏳ کچی وصولی (ابھی کھاتے میں درج نہیں): Rs. ${total.toLocaleString()}</div>
@@ -28668,10 +28793,11 @@ function renderRecoveryListAdminView(){
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <div style="font-size:15px; font-weight:800;">${r.customerName}</div>
-          <div style="font-size:11.5px; color:var(--muted);">${RECOVERY_METHODS[r.method] || r.method} — بھیجا از: ${r.employeeName}</div>
+          <div style="font-size:11.5px; color:var(--muted);">${recoverySplitLabel(r)} — بھیجا از: ${r.employeeName}</div>
         </div>
         <div style="font-size:16px; font-weight:900; color:var(--success);">Rs. ${r.amount.toLocaleString()}</div>
       </div>
+      ${r.note ? `<div dir="rtl" style="margin-top:6px; background:#fff; border:1.5px dashed #d97706; border-radius:8px; padding:6px 10px; font-size:14px; font-weight:700; color:#78350f; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; line-height:1.9;">📝 ${escRlHtml(r.note)}</div>` : ''}
       <!-- ---------- ❓ صدام کی ہدایت (FM3SEPTH10): پہلے یہاں غلطی سے "درج کر دیا" لکھا تھا (لگتا تھا کام ہو چکا)۔
            اب صاف سوالیہ انداز — دبانے پر کسٹمر کے کھاتے پر لے جائے گا، وہیں سے اصل تصدیق (OK) ہوگی —
            جب تک وہاں OK نہ دبے، پیسے کھاتے سے نہیں نکلتے، یہ ابھی صرف "کچی" (غیر تصدیق شدہ) انٹری ہے ---------- -->
@@ -28695,7 +28821,8 @@ function computeDailyRecoveryRows(){
   return customersData.map(c => {
     const todayInvoices = invoicesData.filter(inv => inv.customer_id === c.customer_id && (inv.created_at || '').split('T')[0] === todayStr);
     // ---------- invoice.amount_due = اسی بل میں سے جتنا حصہ نقد ادا نہیں ہوا (یعنی ادھار گیا) — یہی اصل "آج کا مال" ہے ----------
-    const todayGoods = todayInvoices.reduce((s, inv) => s + (inv.amount_due || 0), 0);
+    const todayGoods = todayInvoices.reduce((s, inv) => s + (inv.amount_due || 0), 0)
+      + (c.walletHistory || []).filter(h => h.type === 'cash_given' && h.date === todayStr).reduce((s, h) => s + (h.amount || 0), 0); // 💸 آج کا نقد ادھار بھی
 
     const todayRecoveryEntries = (c.walletHistory || []).filter(h => h.type === 'receivable_collected' && h.date === todayStr);
     const todayRecovery = todayRecoveryEntries.reduce((s, h) => s + (h.amount || 0), 0);
@@ -28772,7 +28899,7 @@ function renderDailyRecoveryScreen(){
   tbody.innerHTML = rows.map((r, idx) => {
     const shade = idx % 2 === 0 ? '#F4F7F5' : '#fff';
     const noteKey = todayStr + '_' + r.c.customer_id;
-    const noteVal = dailyRecoveryNotes[noteKey] || '';
+    const noteVal = dailyRecoveryNotes[noteKey] || recoveryListData.filter(e => e.customer_id === r.c.customer_id && (e.createdAt || '').split('T')[0] === todayStr && e.note).map(e => e.note).join(' — ');
     const fmtCell = (n, color) => `<span style="color:${color || 'inherit'}; font-weight:700;">${n < 0 ? '('+Math.abs(n).toLocaleString()+')' : n.toLocaleString()}</span>`;
     // ---------- نمبر کالمز کی سیدھ منتخب کردہ الائنمنٹ کے مطابق — نام ہمیشہ رائٹ (کبھی نہیں بدلتی) ----------
     return `
@@ -28894,8 +29021,9 @@ function confirmRecoveryEntry(entryId){
     type: 'receivable_collected',
     amount: entry.amount - excess,
     via: entry.method,
+    methods: getRecoverySplit(entry),
     date: new Date().toISOString().split('T')[0],
-    note: `Recovery List — ${RECOVERY_METHODS[entry.method] || entry.method} — ${entry.employeeName}`
+    note: `Recovery List — ${recoverySplitLabel(entry)} — ${entry.employeeName}${entry.note ? ' — 📝 ' + entry.note : ''}`
   });
   if(excess > 0){
     c.walletHistory.unshift({
@@ -29192,34 +29320,55 @@ async function generateTodayOrderMatrixReport(){
 
 async function generateTodayRecoveryReport(){
   const todayStr = todayDateKey();
-  // ---------- 👤 صدام کی ہدایت (FM3SEPTH10): ملازم صرف اپنی آج کی جمع کردہ اندراجات دیکھے (تصدیق شدہ ہوں یا نہ ہوں)،
-  // ایڈمن ہمیشہ کی طرح آج کی تمام تصدیق شدہ اندراجات دیکھے ---------- -->
+  // ---------- 🆕 FM28SEP شام (صدام کی ہدایت): ایڈمن کی رپورٹ میں آج کی تمام وصولیاں — کچی (⏳ ابھی کھاتے میں نہیں)
+  // اور پکی (✅ کھاتے میں درج) دونوں، الگ نشان کے ساتھ۔ ملازم کو صرف اپنی آج کی جمع کردہ ---------- -->
   const isAdmin = AppState.currentRole === 'admin';
+  const dayOf = (t) => (t || '').split('T')[0];
   const todayEntries = recoveryListData.filter(r => {
-    if((r.createdAt || r.confirmedAt || '').split('T')[0] !== todayStr && (r.confirmedAt || '').split('T')[0] !== todayStr) return false;
-    if(isAdmin) return r.status === 'confirmed' && (r.confirmedAt || '').split('T')[0] === todayStr;
-    return r.employeeName === AppState.currentUser?.name && (r.createdAt || '').split('T')[0] === todayStr;
-  });
+    const sentToday = dayOf(r.createdAt) === todayStr;
+    if(isAdmin) return sentToday || (r.status === 'confirmed' && dayOf(r.confirmedAt) === todayStr);
+    return r.employeeName === AppState.currentUser?.name && sentToday;
+  }).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   if(todayEntries.length === 0){
-    alert(isAdmin ? 'آج ابھی تک کوئی وصولی تصدیق شدہ نہیں — پہلے کچھ انٹریز تصدیق کریں۔' : 'آج آپ نے ابھی تک کوئی وصولی جمع نہیں کی۔');
+    alert(isAdmin ? 'آج ابھی تک کوئی وصولی نہیں آئی۔' : 'آج آپ نے ابھی تک کوئی وصولی جمع نہیں کی۔');
     return;
   }
 
   const byMethod = {};
   Object.keys(RECOVERY_METHODS).forEach(k => byMethod[k] = 0);
-  let grandTotal = 0;
-  todayEntries.forEach(r => { byMethod[r.method] = (byMethod[r.method] || 0) + r.amount; grandTotal += r.amount; });
+  let grandTotal = 0, confirmedTotal = 0, pendingTotal = 0;
+  todayEntries.forEach(r => {
+    getRecoverySplit(r).forEach(m => { byMethod[m.method] = (byMethod[m.method] || 0) + m.amount; });
+    grandTotal += r.amount;
+    if(r.status === 'confirmed') confirmedTotal += r.amount; else pendingTotal += r.amount;
+  });
   const activeMethods = Object.keys(RECOVERY_METHODS).filter(k => byMethod[k] > 0);
 
-  const dateStr = new Date().toLocaleDateString('en-GB');
-  const rowH = 46, headerH = 210, methodBoxH = activeMethods.length > 0 ? 60 : 0;
   const W = 760;
-  const H = headerH + methodBoxH + (todayEntries.length * rowH) + 130;
+  const measureCanvas = document.createElement('canvas').getContext('2d');
+  // ---------- نوٹ لمبا ہو تو کئی لائنوں میں ٹوٹے ----------
+  function wrapLines(text, maxW, font){
+    measureCanvas.font = font;
+    const words = String(text || '').split(/\s+/); const lines = []; let cur = '';
+    words.forEach(w => { const t = cur ? cur + ' ' + w : w; if(measureCanvas.measureText(t).width > maxW && cur){ lines.push(cur); cur = w; } else cur = t; });
+    if(cur) lines.push(cur);
+    return lines;
+  }
+  const NOTE_FONT = '15px sans-serif';
+  const rowsLayout = todayEntries.map(r => {
+    const noteLines = r.note ? wrapLines('📝 ' + r.note, W - 80, NOTE_FONT) : [];
+    return { r, noteLines, h: 58 + noteLines.length * 22 + (noteLines.length ? 8 : 0) };
+  });
+  const dateStr = new Date().toLocaleDateString('en-GB');
+  const methodBoxH = activeMethods.length > 0 ? 62 : 0;
+  const statusBoxH = isAdmin ? 50 : 0;
+  const H = 150 + methodBoxH + 20 + statusBoxH + rowsLayout.reduce((a, x) => a + x.h, 0) + 140;
 
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
+  ctx.direction = 'rtl';
 
   ctx.fillStyle = '#faf7f2'; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = '#0b4a45'; ctx.fillRect(0, 0, W, 130);
@@ -29227,51 +29376,64 @@ async function generateTodayRecoveryReport(){
   ctx.fillStyle = '#fff'; ctx.font = 'bold 32px sans-serif';
   ctx.fillText('صدام فروٹ منڈی', W/2, 55);
   ctx.font = 'bold 22px sans-serif'; ctx.fillStyle = '#a7f3d0';
-  ctx.fillText('📊 آج کی ریکوری رپورٹ', W/2, 90);
+  ctx.fillText(isAdmin ? '📊 آج کی ریکوری رپورٹ' : `📊 وصولی رپورٹ — ${AppState.currentUser?.name || ''}`, W/2, 90);
   ctx.font = '16px sans-serif'; ctx.fillStyle = '#d1fae5';
   ctx.fillText(dateStr, W/2, 115);
 
-  // ---------- 💰 طریقہ ادائیگی کے حساب سے بریک ڈاؤن — سب سے اوپر (صدام کی ہدایت) ----------
+  // ---------- 💰 طریقہ ادائیگی کے حساب سے مجموعہ (ایک وصولی کے کئی طریقے الگ الگ جمع ہوتے ہیں) ----------
   let y = 150;
   if(activeMethods.length > 0){
     const boxW = (W - 40) / activeMethods.length;
     activeMethods.forEach((k, i) => {
-      const x = 20 + i * boxW;
+      const x = W - 20 - (i + 1) * boxW;
       ctx.fillStyle = '#f0fdf4'; ctx.strokeStyle = '#86efac'; ctx.lineWidth = 1.5;
-      ctx.fillRect(x, y, boxW - 8, methodBoxH);
-      ctx.strokeRect(x, y, boxW - 8, methodBoxH);
-      ctx.textAlign = 'center'; ctx.fillStyle = '#15803d'; ctx.font = 'bold 13px sans-serif';
-      ctx.fillText(RECOVERY_METHODS[k].split(' (')[0], x + (boxW-8)/2, y + 24);
-      ctx.font = 'bold 18px sans-serif';
-      ctx.fillText('Rs. ' + byMethod[k].toLocaleString(), x + (boxW-8)/2, y + 46);
+      ctx.fillRect(x + 4, y, boxW - 8, methodBoxH);
+      ctx.strokeRect(x + 4, y, boxW - 8, methodBoxH);
+      ctx.textAlign = 'center'; ctx.fillStyle = '#15803d'; ctx.font = 'bold 15px sans-serif';
+      ctx.fillText(RECOVERY_METHODS[k], x + boxW/2, y + 25);
+      ctx.font = 'bold 19px sans-serif';
+      ctx.fillText('Rs. ' + byMethod[k].toLocaleString(), x + boxW/2, y + 50);
     });
-    y += methodBoxH + 20;
+    y += methodBoxH + 12;
   }
+  if(isAdmin){
+    ctx.fillStyle = '#fffbeb'; ctx.fillRect(20, y, (W-50)/2, 40);
+    ctx.fillStyle = '#ecfdf5'; ctx.fillRect(30 + (W-50)/2, y, (W-50)/2, 40);
+    ctx.textAlign = 'center'; ctx.font = 'bold 16px sans-serif';
+    ctx.fillStyle = '#166534'; ctx.fillText(`✅ کھاتے میں درج: Rs. ${confirmedTotal.toLocaleString()}`, 30 + (W-50)*0.75, y + 26);
+    ctx.fillStyle = '#92400e'; ctx.fillText(`⏳ ابھی کچی: Rs. ${pendingTotal.toLocaleString()}`, 20 + (W-50)*0.25, y + 26);
+    y += statusBoxH;
+  }
+  y += 8;
 
-  // ---------- 🧾 ہر کسٹمر کی ایک لائن — نام، طریقہ، رقم ----------
-  ctx.textAlign = 'right'; ctx.font = 'bold 15px sans-serif';
-  todayEntries.forEach((r, idx) => {
+  // ---------- 🧾 ہر گاہک: نام، طریقے (تقسیم کے ساتھ)، رقم، حالت، اور نوٹ ----------
+  rowsLayout.forEach((x, idx) => {
+    const r = x.r;
     ctx.fillStyle = idx % 2 === 0 ? '#f4f7f5' : '#ffffff';
-    ctx.fillRect(20, y, W-40, rowH);
-    ctx.fillStyle = '#1f2937'; ctx.textAlign = 'right'; ctx.font = 'bold 17px sans-serif';
-    ctx.fillText(r.customerName, W-35, y + rowH/2 + 6);
-    ctx.fillStyle = '#6b7280'; ctx.textAlign = 'center'; ctx.font = '13px sans-serif';
-    ctx.fillText(RECOVERY_METHODS[r.method] || r.method, W/2, y + rowH/2 + 5);
-    ctx.fillStyle = '#15803d'; ctx.textAlign = 'left'; ctx.font = 'bold 18px sans-serif';
-    ctx.fillText('Rs. ' + r.amount.toLocaleString(), 35, y + rowH/2 + 6);
-    y += rowH;
+    ctx.fillRect(20, y, W-40, x.h);
+    ctx.textAlign = 'right'; ctx.fillStyle = '#1f2937'; ctx.font = 'bold 18px sans-serif';
+    ctx.fillText(`${idx + 1}. ${r.customerName}`, W-35, y + 26);
+    ctx.fillStyle = '#6b7280'; ctx.font = '14px sans-serif';
+    ctx.fillText(`${recoverySplitLabel(r)}${isAdmin ? '  •  ' + (r.employeeName || '') : ''}`, W-35, y + 48);
+    ctx.textAlign = 'left'; ctx.fillStyle = '#15803d'; ctx.font = 'bold 19px sans-serif';
+    ctx.fillText('Rs. ' + r.amount.toLocaleString(), 35, y + 26);
+    ctx.font = 'bold 13px sans-serif'; ctx.fillStyle = r.status === 'confirmed' ? '#15803d' : '#b45309';
+    ctx.fillText(r.status === 'confirmed' ? '✅ کھاتے میں' : '⏳ کچی', 35, y + 48);
+    if(x.noteLines.length){
+      ctx.textAlign = 'right'; ctx.fillStyle = '#78350f'; ctx.font = NOTE_FONT;
+      x.noteLines.forEach((ln, i) => ctx.fillText(ln, W-40, y + 72 + i * 22));
+    }
+    y += x.h;
   });
 
   // ---------- 🏆 گرینڈ ٹوٹل ----------
   y += 15;
   ctx.fillStyle = '#0b4a45'; ctx.fillRect(20, y, W-40, 65);
   ctx.textAlign = 'center'; ctx.fillStyle = '#a7f3d0'; ctx.font = 'bold 18px sans-serif';
-  ctx.fillText('کل ٹوٹل ریکوری', W/2, y+27);
+  ctx.fillText(`کل ٹوٹل ریکوری (${todayEntries.length} گاہک)`, W/2, y+27);
   ctx.fillStyle = '#fff'; ctx.font = 'bold 30px sans-serif';
   ctx.fillText('Rs. ' + grandTotal.toLocaleString(), W/2, y+55);
 
-  // ---------- 🖼️ صدام کی ہدایت (FM3SEPTH10): پہلے یہیں (ایپ کے اندر) دکھائیں — خودکار پرنٹ/شیئر کا سوال نہیں،
-  // پہلے صاف رپورٹ نظر آئے، پھر خود بندہ فیصلہ کرے پرنٹ کرنا ہے یا شیئر کرنا ہے ---------- -->
   canvas.toBlob((blob) => {
     openReportImagePreview(canvas, {
       title: isAdmin ? '📊 آج کی ریکوری رپورٹ' : '📊 میری آج کی وصولی رپورٹ',
@@ -29461,7 +29623,7 @@ async function renderRecoveryReceiptCanvas(c, entry, printMode){
   y += balBoxH + Y(30);
 
   // ---------- طریقہ + وصول کنندہ + تاریخ ---------- -->
-  fitText(`${RECOVERY_METHODS[entry.method] || entry.method}  •  ${dateStr}`, W/2, y+Y(26), Y(18), '', W-80, 'center', mutedColor);
+  fitText(`${recoverySplitLabel(entry)}  •  ${dateStr}`, W/2, y+Y(26), Y(18), '', W-80, 'center', mutedColor);
   fitText(`وصول کنندہ: ${entry.employeeName}`, W/2, y+Y(56), Y(17), '', W-80, 'center', mutedColor);
 
   fitText('شکریہ — صدام حسین', W/2, H-Y(46), Y(16), 'italic', W-80, 'center', mutedColor);
@@ -31062,6 +31224,7 @@ function confirmShipmentReceipt(){
   // ---------- اگر مقدار/قیمت میں فرق آیا ہو تو سپلائر کا واجب الادا خودکار ایڈجسٹ ہو ----------
   const diff = newTotal - oldTotal;
   s.total_payable += diff; // TODO: suppliers.total_payable UPDATE
+  normalizeSupplierBalance(s); // 💳 FM28SEP
 
   po.items = JSON.parse(JSON.stringify(receiveShipmentCart));
   po.total = newTotal;
@@ -31672,6 +31835,7 @@ function saveNewParty(){
         if(serialNum !== null) s.serial_no = serialNum;
         s.openingBalance = openingBalance;
         s.total_payable = (s.total_payable || 0) + diff;
+        normalizeSupplierBalance(s); // 💳 FM28SEP
         if(npPhotoDataUrl !== null) s.photo = npPhotoDataUrl; // ✅ Firestore Sync (قدم 2) — saveNewParty کے آخر میں pushSuppliersToCloud() سے کلاؤڈ میں
       }
     }
@@ -31827,16 +31991,12 @@ let activeCollectMode = 'cash';
 function openCollectModal(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
-
-  if(c.total_receivable <= 0){
-    alert('This customer has no outstanding receivable right now.');
-    return;
-  }
-
+  // ---------- 💳 صدام کی ہدایت (FM28SEP شام): پہلے بقایا صفر ہونے پر یہ فارم کھلتا ہی نہیں تھا — اب کھلتا ہے،
+  // تاکہ کسٹمر سے ایڈوانس رقم بھی لی جا سکے (پوری رقم سیدھا اس کے والٹ میں جمع ہو جائے گی) ---------- -->
   activeCollectCustomerId = customerId;
   activeCollectMode = 'cash';
-  document.getElementById('collectModalTitle').textContent = `💰 ${c.name} — Collect Payment`;
-  document.getElementById('collectReceivableHint').textContent = `Total Receivable: Rs. ${c.total_receivable.toLocaleString()}`;
+  document.getElementById('collectModalTitle').textContent = `💰 ${c.name} — وصولی`;
+  refreshCollectReceivableHint(c);
   setCollectMode('cash');
   document.getElementById('collectAmount').value = '';
   document.getElementById('collectNote').value = '';
@@ -31844,51 +32004,105 @@ function openCollectModal(customerId){
   removePaymentSlipImage('collect');
   document.getElementById('collectModal').classList.add('show');
 }
+// ---------- اوپر والا سرخ ڈبہ: کل بقایا + (اگر ہو) والٹ میں پہلے سے جمع رقم ----------
+function refreshCollectReceivableHint(c){
+  const el = document.getElementById('collectReceivableHint');
+  const rec = c.total_receivable || 0, wal = c.wallet_balance || 0;
+  el.innerHTML = `کل بقایا: Rs. ${rec.toLocaleString()}` +
+    (wal > 0 ? `<br><span style="color:#15803d;">💳 والٹ میں پہلے سے جمع: Rs. ${wal.toLocaleString()}</span>` : '');
+}
 function closeCollectModal(){
   document.getElementById('collectModal').classList.remove('show');
   activeCollectCustomerId = null;
 }
-// ---------- رقم لکھتے ہی فوری بتائیں کہ اس وصولی کے بعد کسٹمر کا کتنا بقایہ رہ جائے گا ----------
+// ---------- 💳 صدام کی ہدایت (FM28SEP شام): وصولی کا مکمل حساب ایک جگہ — ڈبہ، تصدیقی پیغام اور اصل محفوظ کرنا
+// تینوں یہی استعمال کرتے ہیں تاکہ جو نظر آئے وہی محفوظ ہو ---------- -->
+function calcCollectSplit(c, amount, mode){
+  const due = Math.max(0, c.total_receivable || 0);
+  const toDue = Math.min(due, amount);
+  const toWallet = mode === 'cash' ? Math.max(0, amount - due) : 0;
+  return { due, toDue, toWallet, remaining: due - toDue, walletAfter: (c.wallet_balance || 0) + toWallet };
+}
+// ---------- رقم لکھتے ہی فوری بتائیں: بقایا کتنا تھا، کتنا وصول ہوا، کتنا بچا، اور کتنا والٹ میں جائے گا ----------
 function updateCollectRemainingHint(){
   const c = customersData.find(x => x.customer_id === activeCollectCustomerId);
   const amount = parseFloat(document.getElementById('collectAmount').value) || 0;
   const hint = document.getElementById('collectRemainingHint');
   if(!c || amount <= 0){ hint.style.display = 'none'; return; }
-  const remaining = Math.max(0, c.total_receivable - amount);
+  const sp = calcCollectSplit(c, amount, activeCollectMode);
   hint.style.display = 'block';
-  hint.textContent = `After this collection, remaining receivable: Rs. ${remaining.toLocaleString()}` + (amount > c.total_receivable ? ' ⚠️ (exceeds current receivable)' : '');
+  if(activeCollectMode === 'wallet'){
+    const wal = c.wallet_balance || 0;
+    const bad = amount > wal || amount > sp.due;
+    hint.style.background = bad ? '#fef2f2' : '#eef2ff';
+    hint.style.color = bad ? 'var(--danger)' : 'var(--primary-dark)';
+    hint.innerHTML = `💳 والٹ میں موجود: Rs. ${wal.toLocaleString()}<br>` +
+      (amount > wal ? '⚠️ والٹ میں اتنی رقم نہیں' : amount > sp.due ? `⚠️ بقایا صرف Rs. ${sp.due.toLocaleString()} ہے` :
+       `والٹ سے کٹنے کے بعد باقی بقایا: Rs. ${(sp.due - amount).toLocaleString()}`);
+    return;
+  }
+  if(sp.toWallet > 0){
+    hint.style.background = '#f0fdf4'; hint.style.color = '#166534';
+    hint.innerHTML = `📊 اس کا بقایا تھا: Rs. ${sp.due.toLocaleString()}<br>` +
+      `📥 آپ وصول کر رہے ہیں: Rs. ${amount.toLocaleString()}<br>` +
+      (sp.due > 0 ? `✅ بقایا مکمل صاف<br>` : '') +
+      `<span style="font-size:16px;">💳 والٹ میں جمع ہوں گے: <b>+ Rs. ${sp.toWallet.toLocaleString()}</b></span><br>` +
+      `💰 نیا والٹ بیلنس: Rs. ${sp.walletAfter.toLocaleString()}`;
+  } else {
+    hint.style.background = '#eef2ff'; hint.style.color = 'var(--primary-dark)';
+    hint.innerHTML = `اس وصولی کے بعد باقی بقایا: Rs. ${sp.remaining.toLocaleString()}`;
+  }
 }
 function setCollectMode(mode){
   activeCollectMode = mode;
   document.getElementById('collectCash').classList.toggle('active', mode === 'cash');
   document.getElementById('collectWallet').classList.toggle('active', mode === 'wallet');
+  updateCollectRemainingHint();
 }
 function saveCollectReceivable(){
   const amount = parseFloat(document.getElementById('collectAmount').value) || 0;
   if(amount <= 0){
-    alert('Please enter a valid amount.');
+    alert('براہ کرم درست رقم درج کریں۔');
     return;
   }
 
   const c = customersData.find(x => x.customer_id === activeCollectCustomerId);
   if(!c) return;
+  c.wallet_balance = c.wallet_balance || 0;
+  c.walletHistory = c.walletHistory || [];
 
-  if(amount > c.total_receivable){
-    alert(`This amount exceeds the customer's total receivable (Rs. ${c.total_receivable.toLocaleString()}).`);
-    return;
+  if(activeCollectMode === 'wallet'){
+    if(amount > c.total_receivable){
+      alert(`والٹ سے صرف بقایا تک رقم کاٹی جا سکتی ہے — بقایا Rs. ${c.total_receivable.toLocaleString()} ہے۔`);
+      return;
+    }
+    if(amount > c.wallet_balance){
+      alert('کسٹمر کے والٹ میں اتنی رقم موجود نہیں۔');
+      return;
+    }
   }
-  if(activeCollectMode === 'wallet' && amount > c.wallet_balance){
-    alert("Customer's wallet doesn't have enough balance.");
-    return;
+
+  const sp = calcCollectSplit(c, amount, activeCollectMode);
+  // ---------- 💳 صدام کی ہدایت (FM28SEP شام): بقایا سے زیادہ وصولی — پہلے یہاں روک دیا جاتا تھا، اب تصدیقی پیغام میں
+  // پورا حساب لکھا آتا ہے اور اضافی رقم خودکار کسٹمر کے والٹ (ایڈوانس) میں جمع ہو جاتی ہے ---------- -->
+  if(sp.toWallet > 0){
+    const msg = `💳 ${c.name}\n\n` +
+      `📊 اس کا بقایا تھا: Rs. ${sp.due.toLocaleString()}\n` +
+      `📥 آپ وصول کر رہے ہیں: Rs. ${amount.toLocaleString()}\n` +
+      (sp.due > 0 ? `✅ بقایا مکمل صاف ہو جائے گا\n` : '') +
+      `➕ والٹ میں جمع ہوں گے: Rs. ${sp.toWallet.toLocaleString()}\n` +
+      `💰 نیا والٹ بیلنس: Rs. ${sp.walletAfter.toLocaleString()}\n\n` +
+      `کیا یہ درست ہے؟`;
+    if(!confirm(msg)) return;
   }
 
   // ✅ Firestore Sync (قدم 1) — saveCollectReceivable کے آخر میں pushCustomersToCloud() موجود ہے
   const balanceBefore = c.total_receivable;
-  c.total_receivable -= amount;
+  c.total_receivable = sp.remaining;
 
   // ---------- 🧹 صدام کی ہدایت: وصول شدہ رقم پرانے (oldest) بلوں پر پہلے لگے گی — جتنے بل مکمل صاف ہو سکیں ہو
   // جائیں، بچی ہوئی رقم اگلے (نئے) بل پر جزوی طور پر لگے، تاکہ ہر بل کا اپنا صحیح بقایہ نظر آئے ---------- -->
-  let remainingToApply = amount;
+  let remainingToApply = sp.toDue;
   const customerBillsOldestFirst = invoicesData
     .filter(inv => inv.customer_id === c.customer_id && (getInvoiceAmountDue(inv) > 0) && inv.status !== 'voided')
     .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
@@ -31904,18 +32118,24 @@ function saveCollectReceivable(){
     c.wallet_balance -= amount; // ✅ Firestore Sync (قدم 1) — نیچے pushCustomersToCloud() موجود ہے
   } else {
     financeDummy.cashInHand += amount; // TODO: نقدی لیجر (cash ledger) میں INSERT
+    c.wallet_balance += sp.toWallet;   // ---------- 💳 اضافی رقم والٹ (ایڈوانس) میں ----------
     pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد وصولی سے Cash in Hand بڑھنا فوراً کلاؤڈ میں ----------
   }
   // ---------- نوٹ: totalReceivable اب Dashboard پر لائیو حساب ہوتا ہے (customersData سے براہ راست)، اس لیے یہاں الگ سے اپڈیٹ کرنے کی ضرورت نہیں ----------
 
-  c.walletHistory.unshift({
-    type: 'receivable_collected',
-    amount,
-    via: activeCollectMode,
-    date: new Date().toISOString().split('T')[0]
-  });
+  const today = new Date().toISOString().split('T')[0];
+  if(sp.toDue > 0){
+    c.walletHistory.unshift({ type: 'receivable_collected', amount: sp.toDue, via: activeCollectMode, date: today });
+  }
+  if(sp.toWallet > 0){
+    c.walletHistory.unshift({ type: 'deposit', amount: sp.toWallet, via: 'cash', date: today,
+      note: `اضافی وصولی — والٹ (ایڈوانس) میں جمع` });
+  }
 
-  const collectNote = document.getElementById('collectNote').value.trim();
+  let collectNote = document.getElementById('collectNote').value.trim();
+  if(sp.toWallet > 0){
+    collectNote = (collectNote ? collectNote + ' — ' : '') + `💳 Rs. ${sp.toWallet.toLocaleString()} والٹ میں جمع (نیا والٹ: Rs. ${c.wallet_balance.toLocaleString()})`;
+  }
   const savedPayment = recordPaymentEntry({
     direction: 'in',
     party_type: 'customer',
@@ -31924,6 +32144,8 @@ function saveCollectReceivable(){
     amount,
     balance_before: balanceBefore,
     balance_after: c.total_receivable,
+    wallet_added: sp.toWallet,
+    wallet_after: c.wallet_balance,
     method: activeCollectMode === 'wallet' ? 'Wallet' : 'Cash',
     slip_image: paymentSlipImages.collect,
     note: collectNote,
@@ -31932,18 +32154,104 @@ function saveCollectReceivable(){
   closeCollectModal();
   persistAllData();
   pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): وصولی کے بعد بقایا/والٹ فوراً کلاؤڈ میں ----------
-  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 6) اہم فکس: پہلے یہاں اوپر بلوں کا amount_due بدلنے کے بعد
-  // کبھی invoicesData کلاؤڈ میں نہیں جاتا تھا — اس لیے وصولی صرف اسی فون پر بل کا بقایہ صحیح دکھاتی تھی،
-  // دوسرے فون پر وہی بل ابھی تک "پورا بقایہ" دکھاتا رہتا تھا۔ اب وصولی ہوتے ہی فوراً ہر ڈیوائس پر ----------
-  renderPartyList(document.getElementById('partySearchInput').value);
-  sharePaymentReceiptImage(savedPayment.payment_id);
+  pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 6): بلوں کا amount_due بھی فوراً ہر ڈیوائس پر ----------
+  renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
 
-  // ---------- اگر پروفائل موڈل اسی کسٹمر کے لیے کھلا ہے تو بقایہ خانہ اور آرڈرز لسٹ فوراً تازہ کریں ----------
+  // ---------- 💳 صدام کی ہدایت (FM28SEP شام): اگر پیچھے اسی کسٹمر کا پروفائل کھلا ہے تو پورا پروفائل فوراً
+  // نئے حساب کے ساتھ دوبارہ بنے — بقایا خانہ + سبز والٹ خانہ دونوں فوراً بدل جائیں ---------- -->
   if(currentProfileType === 'customers' && currentProfileId === c.customer_id && document.getElementById('profileModal').classList.contains('show')){
-    const figuresEl = document.getElementById('profileFigures');
-    if(figuresEl) figuresEl.innerHTML = `<div class="pfBox"><div class="pfLabel">📥 Total بقایہ (Receivable)</div><div class="pfValue receivable" onclick="openCollectModal(${c.customer_id})" style="cursor:pointer;">Rs. ${c.total_receivable.toLocaleString()}</div></div>`;
-    renderCustomerMainContent(c.customer_id);
+    openCustomerProfile(c.customer_id);
   }
+  sharePaymentReceiptImage(savedPayment.payment_id);
+}
+
+// ---------- 💸 FM28SEP رات (صدام کی ہدایت): گاہک کو نقد ادھار دینا — مال نہیں خریدا، صرف نقد دیا جو اس کے کھاتے میں چڑھے۔
+// اگر گاہک کا والٹ (اس کی ایڈوانس رقم ہمارے پاس) ہو تو پہلے وہی کٹے گا، باقی رقم بقایا میں چڑھے گی ---------- -->
+let activeCustLoanId = null;
+function calcCustLoan(c, amount){
+  const wallet = Math.max(0, c.wallet_balance || 0);
+  const fromWallet = Math.min(wallet, amount);
+  const toReceivable = amount - fromWallet;
+  return { wallet, fromWallet, toReceivable, before: c.total_receivable || 0, after: (c.total_receivable || 0) + toReceivable, walletAfter: wallet - fromWallet };
+}
+function custLoanLines(c, amount, plain){
+  const sp = calcCustLoan(c, amount);
+  const br = plain ? '\n' : '<br>';
+  const b = t => plain ? t : `<b>${t}</b>`;
+  const L = [`💸 آپ نے نقد دیے: Rs. ${amount.toLocaleString()}`];
+  if(sp.fromWallet > 0) L.push(`💳 پہلے اس کے والٹ (ایڈوانس) سے کٹے: Rs. ${sp.fromWallet.toLocaleString()} — باقی والٹ: Rs. ${sp.walletAfter.toLocaleString()}`);
+  if(sp.toReceivable > 0) L.push(`➕ کھاتے میں چڑھے: ${b('Rs. ' + sp.toReceivable.toLocaleString())}`);
+  L.push(`📊 بقایا: Rs. ${sp.before.toLocaleString()} → ${b('Rs. ' + sp.after.toLocaleString())}`);
+  return L.join(br);
+}
+function openCustLoanModal(customerId){
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!c) return;
+  activeCustLoanId = customerId;
+  document.getElementById('custLoanName').textContent = '👤 ' + c.name;
+  document.getElementById('custLoanBalanceHint').innerHTML = `موجودہ بقایا: Rs. ${(c.total_receivable || 0).toLocaleString()}` +
+    ((c.wallet_balance || 0) > 0 ? `<br><span style="color:#15803d;">💳 والٹ (اس کی ایڈوانس ہمارے پاس): Rs. ${c.wallet_balance.toLocaleString()}</span>` : '');
+  document.getElementById('custLoanAmount').value = '';
+  document.getElementById('custLoanNote').value = '';
+  document.getElementById('custLoanHint').style.display = 'none';
+  document.getElementById('custLoanModal').classList.add('show');
+  setTimeout(() => { try{ document.getElementById('custLoanAmount').focus(); }catch(e){} }, 150);
+}
+function closeCustLoanModal(){
+  document.getElementById('custLoanModal').classList.remove('show');
+  activeCustLoanId = null;
+}
+function updateCustLoanHint(){
+  const c = customersData.find(x => x.customer_id === activeCustLoanId);
+  const amount = parseFloat(document.getElementById('custLoanAmount').value) || 0;
+  const hint = document.getElementById('custLoanHint');
+  if(!c || amount <= 0){ hint.style.display = 'none'; return; }
+  hint.style.display = 'block';
+  hint.innerHTML = custLoanLines(c, amount, false);
+}
+function saveCustLoan(){
+  const c = customersData.find(x => x.customer_id === activeCustLoanId);
+  const amount = parseFloat(document.getElementById('custLoanAmount').value) || 0;
+  if(!c) return;
+  if(amount <= 0){ alert('براہ کرم دی گئی رقم درج کریں۔'); return; }
+  if(!confirm(`💸 ${c.name}\n\n${custLoanLines(c, amount, true)}\n\nکیا یہ درست ہے؟`)) return;
+  if(amount > financeDummy.cashInHand && !confirm(`یہ آپ کے موجودہ نقد (Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)) return;
+
+  const sp = calcCustLoan(c, amount);
+  const note = document.getElementById('custLoanNote').value.trim();
+  const today = new Date().toISOString().split('T')[0];
+  const balanceBefore = c.total_receivable || 0;
+  c.walletHistory = c.walletHistory || [];
+  c.wallet_balance = sp.walletAfter;
+  c.total_receivable = sp.after;
+  financeDummy.cashInHand -= amount; // ---------- نقد ہاتھ سے نکلا ----------
+  if(sp.fromWallet > 0) c.walletHistory.unshift({ type: 'redeem', amount: sp.fromWallet, via: 'cash', date: today, note: 'نقد ادھار دیتے وقت والٹ سے کٹا' });
+  if(sp.toReceivable > 0) c.walletHistory.unshift({ type: 'cash_given', amount: sp.toReceivable, via: 'cash', date: today, note: note || 'نقد ادھار دیا (بغیر مال)' });
+
+  const extra = [];
+  if(sp.fromWallet > 0) extra.push(`💳 والٹ سے Rs. ${sp.fromWallet.toLocaleString()}`);
+  if(sp.toReceivable > 0) extra.push(`➕ کھاتے میں چڑھے Rs. ${sp.toReceivable.toLocaleString()}`);
+  const savedPayment = recordPaymentEntry({
+    direction: 'out',
+    party_type: 'customer',
+    party_id: c.customer_id,
+    party_name: c.name,
+    amount,
+    balance_before: balanceBefore,
+    balance_after: c.total_receivable,
+    method: 'Cash',
+    note: '💸 نقد ادھار دیا' + (note ? ' — ' + note : '') + (extra.length ? ' — ' + extra.join(' — ') : ''),
+  });
+
+  closeCustLoanModal();
+  persistAllData();
+  pushCustomersToCloud();
+  pushFinanceToCloud();
+  renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
+  if(currentProfileType === 'customers' && currentProfileId === c.customer_id && document.getElementById('profileModal').classList.contains('show')){
+    openCustomerProfile(c.customer_id);
+  }
+  sharePaymentReceiptImage(savedPayment.payment_id);
 }
 
 // ---------- Billing کے کسٹمر ڈراپ ڈاؤن کو customersData سے پُر کریں — ساتھ ساتھ City/Area فلٹر ڈراپ ڈاؤن بھی تازہ کریں ----------
@@ -32191,7 +32499,13 @@ function updateRpRemainingHint(){
   const remaining = Math.max(0, current - amount);
   hint.style.display = 'block';
   hint.style.background = '#eef2ff'; hint.style.color = 'var(--primary-dark)';
-  hint.textContent = `After this payment, remaining balance: Rs. ${remaining.toLocaleString()}` + (amount > current ? ' ⚠️ (amount exceeds current balance)' : '');
+  // ---------- 💳 صدام کی ہدایت (FM28SEP شام): زیادہ رقم پر صاف بتائیں کہ اضافی رقم والٹ میں جائے گی ----------
+  if(amount > current){
+    hint.style.background = '#f0fdf4'; hint.style.color = '#166534';
+    hint.innerHTML = `📊 بقایا تھا: Rs. ${current.toLocaleString()} — رقم: Rs. ${amount.toLocaleString()}<br>✅ بقایا صاف — 💳 والٹ میں جمع ہوں گے: <b>+ Rs. ${(amount - current).toLocaleString()}</b>`;
+  } else {
+    hint.textContent = `اس کے بعد باقی بقایا: Rs. ${remaining.toLocaleString()}`;
+  }
 }
 function onRecordPaymentMethodChange(){
   const method = document.getElementById('rpMethod').value;
@@ -32254,7 +32568,11 @@ function saveRecordPaymentModal(){
     partyName = c.name;
     balanceBefore = c.total_receivable || 0;
     // ---------- کسٹمر کے واجب الوصول اور کیش ان ہینڈ کو بھی اپڈیٹ کریں (Collect Payment کی طرح) ----------
+    // ---------- 💳 صدام کی ہدایت (FM28SEP شام): پہلے بقایا سے زیادہ رقم یہاں ضائع ہو جاتی تھی — اب اضافی رقم والٹ میں ----------
+    const rpExcessC = Math.max(0, amount - Math.max(0, c.total_receivable || 0));
     c.total_receivable = Math.max(0, (c.total_receivable || 0) - amount);
+    c.wallet_balance = (c.wallet_balance || 0) + rpExcessC;
+    if(rpExcessC > 0){ (c.walletHistory = c.walletHistory || []).unshift({type:'deposit', amount: rpExcessC, via:'cash', date:new Date().toISOString().split('T')[0], note:'اضافی وصولی — والٹ میں جمع'}); }
     balanceAfter = c.total_receivable;
     financeDummy.cashInHand += amount;
     c.walletHistory = c.walletHistory || [];
@@ -32264,7 +32582,8 @@ function saveRecordPaymentModal(){
     if(!s) return;
     partyName = s.name;
     balanceBefore = s.total_payable || 0;
-    s.total_payable = Math.max(0, (s.total_payable || 0) - amount);
+    s.total_payable = (s.total_payable || 0) - amount;
+    normalizeSupplierBalance(s); // 💳 FM28SEP: زیادہ ادائیگی والٹ (ایڈوانس) میں
     balanceAfter = s.total_payable;
     financeDummy.cashInHand -= amount;
     s.ledgerHistory = s.ledgerHistory || [];
@@ -32865,7 +33184,7 @@ window.addEventListener('online', () => {
    REST API سے، ہر آرڈر محفوظ ہونے پر فوری push، اور Pending Orders/Order Taking
    سکرین کھلی ہو تو ہر چند سیکنڈ بعد خودکار fetch (تقریباً real-time کا تجربہ) ----------
    ===================================================================== */
-const ADVANCE_ORDERS_DOC_PATH = shopDocPath('advanceOrders');
+const ADVANCE_ORDERS_DOC_PATH = 'shopData/advanceOrders';
 let advanceOrdersPollTimer = null;
 
 // ---------- 🔍 صدام کی ہدایت (FM6SEPSU8): آرڈر Sync تشخیص — کسٹمر یا ایڈمن، کسی بھی فون سے چلا کر
@@ -32993,7 +33312,7 @@ function stopAdvanceOrdersPolling(){
 /* =====================================================================
    ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی درخواستیں — بالکل Advance Orders جیسا Firestore Sync ---------- -->
    ===================================================================== */
-const RETURN_REQUESTS_DOC_PATH = shopDocPath('returnRequests');
+const RETURN_REQUESTS_DOC_PATH = 'shopData/returnRequests';
 let returnRequestsPollTimer = null;
 async function pushReturnRequestsToCloud(){
   saveToStorage('returnRequests', returnRequestsData);
@@ -33332,12 +33651,15 @@ async function confirmReturnCredit(){
    ☁️ RECOVERY LIST — Firestore Sync (ملٹی موبائل: ملازم جو وصولی اپنے فون پر
    درج کرے، وہ خودکار صدام کے فون پر Pending Confirmation میں نظر آ جائے) ----------
    ===================================================================== */
-const RECOVERY_LIST_DOC_PATH = shopDocPath('recoveryList');
+const RECOVERY_LIST_DOC_PATH = 'shopData/recoveryList';
 let recoveryListPollTimer = null;
 
+// ---------- 🗑️ FM28SEP شام: ایڈمن کے حذف کیے اندراج دوسرے فونوں سے دوبارہ نہ آئیں ----------
 async function pushRecoveryListToCloud(){
   saveToStorage('recoveryList', recoveryListData);
   saveToStorage('nextRecoveryId', nextRecoveryId);
+  // ---------- 🔄 FM28SEP شام: بھیجنے سے پہلے کلاؤڈ کی تازہ حالت ملا لیں — تاکہ کسی اور فون کی تبدیلی (تصدیق/نوٹ) نہ مٹے ----------
+  try{ await fetchRecoveryListFromCloud(true); }catch(e){}
   try{
     await authFirestoreFetch(`${RECOVERY_LIST_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
       method: 'PATCH',
@@ -33345,6 +33667,7 @@ async function pushRecoveryListToCloud(){
       body: JSON.stringify({
         fields: {
           json: { stringValue: JSON.stringify(recoveryListData) },
+          deletedIds: { stringValue: JSON.stringify(recoveryDeletedIds) },
           nextRecoveryId: { integerValue: String(nextRecoveryId) },
           updatedAt: { integerValue: String(Date.now()) }
         }
@@ -33366,9 +33689,22 @@ async function fetchRecoveryListFromCloud(silent){
     const cloudList = JSON.parse(jsonStr);
     if(!Array.isArray(cloudList)) return false;
 
-    const localIds = new Set(recoveryListData.map(r => r.id));
     let addedAny = false;
+    try{
+      const cDel = JSON.parse(doc.fields?.deletedIds?.stringValue || '[]');
+      if(Array.isArray(cDel)) cDel.forEach(id => { if(!recoveryDeletedIds.includes(id)){ recoveryDeletedIds.push(id); } });
+      saveToStorage('recoveryDeletedIds', recoveryDeletedIds);
+      const before = recoveryListData.length;
+      recoveryListData = recoveryListData.filter(r => !recoveryDeletedIds.includes(r.id));
+      if(recoveryListData.length !== before) addedAny = true;
+    }catch(e){}
+    const localIds = new Set(recoveryListData.map(r => r.id));
     cloudList.forEach(cr => {
+      if(recoveryDeletedIds.includes(cr.id)) return;
+      const localN = recoveryListData.find(r => r.id === cr.id);
+      if(localN && (Number(cr.noteUpdatedAt) || 0) > (Number(localN.noteUpdatedAt) || 0)){
+        localN.note = cr.note; localN.noteUpdatedAt = cr.noteUpdatedAt; addedAny = true;
+      }
       if(!localIds.has(cr.id)){
         recoveryListData.push(cr);
         addedAny = true;
@@ -33416,7 +33752,7 @@ function stopRecoveryListPolling(){
    ہر سٹاک اندراج، بالکل RECOVERY LIST جیسا "صرف نئے شامل کریں" pattern —
    تاکہ ایڈمن کے فون پر بھی وہی مکمل، وقت کے ساتھ الگ الگ ریکارڈ نظر آئے) ----------
    ===================================================================== */
-const MUNSHI_LOG_DOC_PATH = shopDocPath('munshiStockLog');
+const MUNSHI_LOG_DOC_PATH = 'shopData/munshiStockLog';
 let munshiLogPollTimer = null;
 
 async function pushMunshiStockLogToCloud(){
@@ -33491,7 +33827,7 @@ function stopMunshiLogPolling(){
    pattern استعمال کیا ہے (چونکہ کسٹمر ریکارڈز میں edit-in-place ہوتا ہے،
    advance-orders والا "صرف نئے شامل کریں" pattern یہاں موزوں نہیں) ----------
    ===================================================================== */
-const CUSTOMERS_DOC_PATH = shopDocPath('customers');
+const CUSTOMERS_DOC_PATH = 'shopData/customers';
 let customersPollTimer = null;
 
 async function pushCustomersToCloud(){
@@ -33607,7 +33943,7 @@ window.addEventListener('online', () => {
    ہر تبدیلی خودکار ہر ڈیوائس پر۔ full-overwrite + pendingSync pattern استعمال کیا
    ہے (سپلائر ریکارڈز میں بھی edit-in-place ہوتا ہے، اسی لیے یہی موزوں ہے) ----------
    ===================================================================== */
-const SUPPLIERS_DOC_PATH = shopDocPath('suppliers');
+const SUPPLIERS_DOC_PATH = 'shopData/suppliers';
 let suppliersPollTimer = null;
 
 async function pushSuppliersToCloud(){
@@ -33723,7 +34059,7 @@ window.addEventListener('online', () => {
    خودکار سنک۔ بالکل کسٹمرز/سپلائرز والا ہی full-overwrite + pendingSync
    pattern استعمال کیا ہے (پراڈکٹ ریکارڈز میں بھی edit-in-place ہوتا ہے) ----------
    ===================================================================== */
-const PRODUCTS_DOC_PATH = shopDocPath('products');
+const PRODUCTS_DOC_PATH = 'shopData/products';
 let productsPollTimer = null;
 
 /* =====================================================================
@@ -34279,7 +34615,7 @@ window.addEventListener('online', () => {
    pendingSync pattern استعمال کیا ہے (invoicesData میں بھی edit-in-place
    ہوتا ہے — void سے status بدلتی ہے، delete سے فہرست سے نکلتا ہے) ----------
    ===================================================================== */
-const INVOICES_DOC_PATH = shopDocPath('invoices');
+const INVOICES_DOC_PATH = 'shopData/invoices';
 let invoicesPollTimer = null;
 
 async function pushInvoicesToCloud(){
@@ -34359,7 +34695,7 @@ window.addEventListener('online', () => {
    Approve/Reject، کسٹمر ایپ سے پیمنٹ اسکرین شاٹ — سب فوری ہر ڈیوائس پر۔
    بالکل انوائسز والا ہی full-overwrite + pendingSync pattern ----------
    ===================================================================== */
-const PENDING_BILLS_DOC_PATH = shopDocPath('pendingBills');
+const PENDING_BILLS_DOC_PATH = 'shopData/pendingBills';
 let pendingBillsPollTimer = null;
 
 async function pushPendingBillsToCloud(){
@@ -34447,7 +34783,7 @@ window.addEventListener('online', () => {
    دونوں ایک ہی shopData/finance ڈاکومنٹ میں محفوظ ہوتے ہیں (چھوٹا ڈیٹا، الگ ڈاکومنٹ کی ضرورت نہیں)۔
    بالکل customers/suppliers/products/invoices والا ہی full-overwrite + pendingSync pattern ----------
    ===================================================================== */
-const FINANCE_DOC_PATH = shopDocPath('finance');
+const FINANCE_DOC_PATH = 'shopData/finance';
 let financePollTimer = null;
 
 async function pushFinanceToCloud(){
@@ -34535,7 +34871,7 @@ const APPROVAL_REQUESTS_SEED_DATA = [
   {request_id:2, requested_by:'Bilal', action_type:'edit_bill', target:'Invoice #INV-0039', reason:'Wrong quantity was entered', status:'pending', date:'2026-06-30'},
   {request_id:3, requested_by:'Aslam Bhai', action_type:'edit_bill', target:'Invoice #INV-0031', reason:'Price needs correction', status:'approved', date:'2026-06-28'},
 ];
-let approvalRequests = loadFromStorage('approvalRequests', IS_BILAL ? [] : APPROVAL_REQUESTS_SEED_DATA);
+let approvalRequests = loadFromStorage('approvalRequests', APPROVAL_REQUESTS_SEED_DATA);
 let nextRequestId = loadFromStorage('nextRequestId', 4);
 
 /* =====================================================================
@@ -34544,7 +34880,7 @@ let nextRequestId = loadFromStorage('nextRequestId', 4);
    ہر ڈیوائس پر۔ بالکل customers/suppliers/invoices/pendingBills والا ہی
    full-overwrite + pendingSync pattern استعمال کیا ہے ----------
    ===================================================================== */
-const APPROVAL_REQUESTS_DOC_PATH = shopDocPath('approvalRequests');
+const APPROVAL_REQUESTS_DOC_PATH = 'shopData/approvalRequests';
 let approvalRequestsPollTimer = null;
 
 async function pushApprovalRequestsToCloud(){
@@ -35013,7 +35349,7 @@ const INVOICES_SEED_DATA = [
   {invoice_id:1, invoice_no:'INV-0042', customer_name:'Muhammad Usman', customer_phone:'923001234567', sold_by:'Aslam Bhai', sale_mode:'retail',
     items:[{name:'Lipton Tea 1kg', qty:2, unitPrice:850},{name:'Sugar 1kg', qty:1, unitPrice:160}], grand_total:1860, status:'completed', created_at:new Date().toISOString()},
 ];
-let invoicesData = loadFromStorage('invoices', IS_BILAL ? [] : INVOICES_SEED_DATA);
+let invoicesData = loadFromStorage('invoices', INVOICES_SEED_DATA);
 
 // ---------- Bill History: Status Tabs (All / Pending / Clear) ----------
 // نوٹ: "Pending" کا مطلب وہ بل ہیں جن کی رقم ابھی وصول نہیں ہوئی (credit پر بکے)
