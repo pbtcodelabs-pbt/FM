@@ -6443,6 +6443,11 @@
 
         <!-- --- 🔒 Account Security — PIN سے محفوظ، صرف اسی دکان کے Admin کی اپنی سیکیورٹی سیٹنگز
              (ڈویلپر کی رابطہ معلومات اب یہاں نہیں — وہ الگ، چھپے ہوئے Developer Panel میں منتقل ہو چکی ہیں) --- -->
+        <div class="settingsCard admin-only" id="bioSettingsCard">
+          <h3>👆 فنگر پرنٹ لاگ اِن (ایڈمن)</h3>
+          <div id="bioSettingsBody"></div>
+        </div>
+
         <div class="settingsCard">
           <h3>🔒 اکاؤنٹ کی حفاظت</h3>
           <div id="adminControlLocked">
@@ -8649,7 +8654,7 @@ function getDeveloperContact(){
 //      اور بیک اپ فائل کے نام میں تینوں جگہ ایک ساتھ لگائیں — نہ چھوٹا کریں نہ فارمیٹ بدلیں۔
 //   2) یہ ورژن سکرین پر (topbarVersionBadge/loginVersionBadge/appBuildVersionText) بھی بعینہٖ اسی طرح
 //      نظر آنا چاہیے — بیک گراؤنڈ باکس کو لمبا/چوڑا کر کے تاکہ پورا متن کٹے بغیر نظر آئے۔
-const APP_BUILD_VERSION = 'FM27SEPSU0913PM';
+const APP_BUILD_VERSION = 'FM28SEPMO0827AM';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9554,6 +9559,7 @@ async function setupLoginScreen(){
     // ---------- 🚀 سبسکرپشن/ٹرائل فعال ہو (یا PIN ابھی تک ڈیفالٹ ہو) تو خوش آمدید سکرین پر رکنے کی بجائے
     // خودکار سیدھا ایپ میں داخل کر دیں — ایک اضافی "Enter App" ٹیپ کی ضرورت نہ رہے ----------
     try{ applyLoginDeviceLock(); }catch(e){}
+    try{ renderBioLoginButton(); }catch(e){}
     if(skipPin){
       quickEnterApp();
       return;
@@ -9624,10 +9630,10 @@ async function login(){
 // rememberOverride: undefined ہو تو Admin پینل کے چیک باکس سے فیصلہ ہوگا؛ true/false ملے تو وہی حتمی فیصلہ ہے (Employee پینل اپنا الگ چیک باکس بھیجتا ہے) ----------
 function finishLogin(user, rememberOverride){
   if(maintenanceLoginGuard()) return false; // 🚧 مینٹیننس جاری — کوئی لاگ ان نہیں
-  try{ rememberDeviceLoginUser(user); }catch(e){}
-  const remember = (rememberOverride !== undefined) ? rememberOverride : (document.getElementById('rememberPinChk')?.checked ?? true);
+  let _phoneOwnerOk = true; try{ _phoneOwnerOk = rememberDeviceLoginUser(user); }catch(e){}
+  const remember = _phoneOwnerOk && ((rememberOverride !== undefined) ? rememberOverride : (document.getElementById('rememberPinChk')?.checked ?? true));
   if(remember){
-    saveToStorage('rememberedSession', { user_id: user.user_id });
+    saveToStorage('rememberedSession', { user_id: user.user_id, role: user.role, name: user.name });
   } else {
     saveToStorage('rememberedSession', null);
   }
@@ -11558,7 +11564,10 @@ function tryAutoLogin(){
   const remembered = loadFromStorage('rememberedSession', null);
   if(!remembered || !remembered.user_id) return false;
 
-  const user = usersData.find(u => u.user_id === remembered.user_id);
+  let user = usersData.find(u => u.user_id === remembered.user_id && (!remembered.role || u.role === remembered.role) && (!remembered.name || u.name === remembered.name));
+  if(!user && remembered.role && remembered.name) user = usersData.find(u => u.role === remembered.role && u.name === remembered.name); // id بدل گئی ہو تو نام/عہدہ سے
+  try{ _migratePhoneOwner(); if(user && !isPhoneOwnerUser(user)){ saveToStorage('rememberedSession', null); return false; } }catch(e){}
+  try{ if(user && user.role === 'admin' && getBioCred() && _bioAdminUser()){ setTimeout(() => { try{ renderBioLoginButton(); }catch(e){} }, 300); return false; } }catch(e){}
   if(!user || !user.is_active){
     saveToStorage('rememberedSession', null); // یوزر ڈیلیٹ/غیرفعال ہو چکا ہو تو یاد رکھا ہوا سیشن بھی صاف کر دیں
     return false;
@@ -12253,7 +12262,7 @@ function goTo(screenName, _isHistoryNav){
     startCustomersPolling();
   }
   if(screenName === 'dailyRecovery') renderDailyRecoveryScreen();
-  if(screenName === 'settings') renderSettingsScreen();
+  if(screenName === 'settings'){ renderSettingsScreen(); try{ renderBioSettingsCard(); }catch(e){} }
   if(screenName === 'billsettings') renderBillSettingsScreen();
   if(screenName === 'myaccount') renderMyAccountScreen();
   if(screenName === 'payments') renderPaymentsScreen();
@@ -18888,44 +18897,89 @@ function licPasteCodeIntoBox(){
    ===================================================================== */
 let _loginShowAll = false;
 let _loginStaffTitleOrig = null;
+// ---------- 📱 28 ستمبر (پکا نظام): ہر فون کا ایک "مالک" — جو پہلی بار اس فون پر لاگ اِن ہو۔
+// لاگ اِن سکرین پر صرف مالک کا خانہ۔ خودکار لاگ اِن بھی صرف مالک کا۔ کوئی اور (بسم اللہ پر 7 ٹیپ سے) لاگ اِن کرے تو
+// وہ عارضی ہے — یاد نہیں رکھا جاتا، اگلی بار ایپ پھر مالک کے لیے ہی کھلتی ہے۔ مالک بدلنا ہو تو 7 ٹیپ والے موڈ میں
+// "📱 یہ فون اب اسی کا ہے" ٹِک کر کے لاگ اِن کریں ---------- -->
+function getPhoneOwner(){
+  try{ const o = JSON.parse(localStorage.getItem('fm_phoneOwner') || 'null'); if(o && o.id != null) return o; }catch(e){}
+  return null;
+}
+function setPhoneOwner(user){
+  try{ localStorage.setItem('fm_phoneOwner', JSON.stringify({ id: user.user_id, role: user.role, name: user.name })); }catch(e){}
+}
+function _phoneOwnerUser(){
+  const o = getPhoneOwner(); if(!o) return null;
+  const users = (usersData || []).filter(u => u.is_active);
+  return users.find(u => String(u.user_id) === String(o.id) && u.role === o.role && (!o.name || u.name === o.name))
+      || users.find(u => u.role === o.role && o.name && u.name === o.name) || null;
+}
+function isPhoneOwnerUser(user){
+  if(!user) return false;
+  const o = getPhoneOwner(); if(!o) return true;
+  const ou = _phoneOwnerUser();
+  if(!ou) return true; // مالک اب موجود نہیں (ڈیلیٹ ہو گیا) — رکاوٹ نہیں
+  return String(ou.user_id) === String(user.user_id);
+}
+// پرانے فونز کے لیے ایک بار: مالک خود پہچانیں (جس فون سے Drive بیک اپ ہوا وہ ایڈمن کا، ورنہ جو یاد رکھا ہوا ہے)
+function _migratePhoneOwner(){
+  try{
+    if(getPhoneOwner()) return;
+    const users = (usersData || []).filter(u => u.is_active);
+    const adminSign = !!(AppState.settings && (AppState.settings.lastGDriveBackupAt || AppState.settings.gdriveAccountEmail));
+    if(adminSign){ const a = users.find(u => u.role === 'admin'); if(a){ setPhoneOwner(a); return; } }
+    const rs = loadFromStorage('rememberedSession', null);
+    if(rs && rs.user_id != null){ const u = users.find(x => String(x.user_id) === String(rs.user_id) && (!rs.role || x.role === rs.role)); if(u){ setPhoneOwner(u); return; } }
+  }catch(e){}
+}
+// لاگ اِن کامیاب — true = مالک (یاد رکھیں)، false = عارضی لاگ اِن (یاد نہ رکھیں)
 function rememberDeviceLoginUser(user){
   try{
-    if(user && (user.role === 'admin' || user.role === 'salesman')){
-      localStorage.setItem('fm_deviceLoginUser', JSON.stringify({ id: user.user_id, role: user.role }));
-      _loginShowAll = false;
-    }
-  }catch(e){}
+    if(!user || !(user.role === 'admin' || user.role === 'salesman')) return true;
+    const chk = document.getElementById('phoneOwnerChangeChk');
+    if(!getPhoneOwner() || (chk && chk.checked && _loginShowAll)){ setPhoneOwner(user); if(chk) chk.checked = false; _loginShowAll = false; return true; }
+    const owner = isPhoneOwnerUser(user);
+    _loginShowAll = false;
+    return owner;
+  }catch(e){ return true; }
 }
 function applyLoginDeviceLock(){
   try{
+    _migratePhoneOwner();
+    const wrap = document.getElementById('loginPinWrap');
     const rows = document.querySelectorAll('#loginPinWrap > .loginRoleRow');
     const adminRow = rows[0], staffRow = rows[1];
     if(!adminRow || !staffRow) return;
     const sel = document.getElementById('employeeLoginSelect');
     const title = staffRow.querySelector('.loginRoleTitle');
     if(title && _loginStaffTitleOrig === null) _loginStaffTitleOrig = title.textContent;
+    let chkWrap = document.getElementById('phoneOwnerChangeWrap');
+    if(!chkWrap && wrap){
+      chkWrap = document.createElement('label');
+      chkWrap.id = 'phoneOwnerChangeWrap';
+      chkWrap.style.cssText = 'display:none; align-items:center; justify-content:center; gap:8px; margin:8px 0 2px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,.12); color:#fff; font-size:14px; font-weight:700; cursor:pointer;';
+      chkWrap.innerHTML = '<input type="checkbox" id="phoneOwnerChangeChk" style="width:17px; height:17px; margin:0;"> 📱 یہ فون اب اسی کا ہے (اگلا لاگ اِن اس فون کا مالک بنے گا)';
+      wrap.appendChild(chkWrap);
+    }
     const showAll = () => {
       adminRow.style.display = ''; staffRow.style.display = '';
-      if(sel) sel.style.display = '';
+      if(sel){ sel.style.display = ''; [...sel.options].forEach(o => { o.hidden = false; o.disabled = false; }); }
       if(title && _loginStaffTitleOrig !== null) title.textContent = _loginStaffTitleOrig;
     };
-    let lock = null;
-    try{ lock = JSON.parse(localStorage.getItem('fm_deviceLoginUser') || 'null'); }catch(e){}
-    if(_loginShowAll || !lock){ showAll(); return; }
-    const u = (usersData || []).find(x => String(x.user_id) === String(lock.id) && x.is_active);
-    if(!u){ showAll(); return; }
-    if(u.role === 'admin'){
+    const owner = _phoneOwnerUser();
+    if(chkWrap) chkWrap.style.display = (_loginShowAll && owner) ? 'flex' : 'none';
+    if(_loginShowAll || !owner){ showAll(); return; }
+    if(owner.role === 'admin'){
       adminRow.style.display = ''; staffRow.style.display = 'none';
     } else {
       adminRow.style.display = 'none'; staffRow.style.display = '';
       if(sel){
-        if(![...sel.options].some(o => String(o.value) === String(u.user_id))){
-          const o = document.createElement('option'); o.value = u.user_id; o.textContent = u.name; sel.appendChild(o);
-        }
-        sel.value = String(u.user_id);
+        [...sel.options].forEach(o => { const ok = String(o.value) === String(owner.user_id); o.hidden = !ok; o.disabled = !ok; });
+        if(![...sel.options].some(o => String(o.value) === String(owner.user_id))){ const o = document.createElement('option'); o.value = owner.user_id; o.textContent = owner.name; sel.appendChild(o); }
+        sel.value = String(owner.user_id);
         sel.style.display = 'none';
       }
-      if(title) title.textContent = '🧑‍💼 ' + u.name;
+      if(title) title.textContent = '🧑‍💼 ' + owner.name;
     }
   }catch(e){}
 }
@@ -19353,6 +19407,91 @@ function extraSyncScheduleCheck(){
 }
 // ایپ کھلنے کے کچھ دیر بعد ایک بار مکمل ہم آہنگی (ہر فہرست ایک ریڈ)
 setTimeout(() => { try{ extraSyncAll(); }catch(e){} }, 6000);
+
+
+/* =====================================================================
+   👆 28 ستمبر: ایڈمن (صدام) کے لیے فنگر پرنٹ / فون کے ٹچ سے لاگ اِن — صرف ایڈمن، ملازمین کے لیے نہیں۔
+   فون کا اپنا بایو میٹرک (WebAuthn) — فنگر پرنٹ فون سے باہر کبھی نہیں جاتا۔ آن ہونے کے بعد اس فون پر ایپ
+   خود ایڈمن کے لیے نہیں کھلتی — پہلے ٹچ مانگتی ہے (پن بھی ساتھ چلتا رہتا ہے)
+   ===================================================================== */
+function _bioB64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function _bioUnB64(s){ s = s.replace(/-/g,'+').replace(/_/g,'/'); while(s.length % 4) s += '='; const b = atob(s); const a = new Uint8Array(b.length); for(let i=0;i<b.length;i++) a[i] = b.charCodeAt(i); return a.buffer; }
+function getBioCred(){ try{ const c = JSON.parse(localStorage.getItem('fm_bioCred') || 'null'); return (c && c.id) ? c : null; }catch(e){ return null; } }
+async function isBioSupported(){
+  try{ return !!(window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); }catch(e){ return false; }
+}
+function _bioAdminUser(){
+  const c = getBioCred(); if(!c) return null;
+  const users = (usersData || []).filter(u => u.is_active && u.role === 'admin');
+  return users.find(u => String(u.user_id) === String(c.userId)) || users.find(u => u.name === c.name) || null;
+}
+async function enableBioLogin(){
+  if(AppState.currentRole !== 'admin'){ alert('❌ فنگر پرنٹ صرف ایڈمن کے لیے ہے۔'); return; }
+  if(!(await isBioSupported())){ alert('❌ اس فون یا براؤزر میں فنگر پرنٹ کی سہولت نہیں ملی۔\n\nفون کی سیٹنگ میں فنگر پرنٹ یا سکرین لاک لگا ہو، اور ایپ Chrome میں کھلی ہو۔'); return; }
+  const me = (usersData || []).find(u => u.role === 'admin' && u.name === (AppState.currentUser?.name || '')) || (usersData || []).find(u => u.role === 'admin' && u.is_active);
+  if(!me){ alert('ایڈمن نہیں ملا'); return; }
+  try{
+    const cred = await navigator.credentials.create({ publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rp: { name: 'Fruit Mandi POS' },
+      user: { id: new TextEncoder().encode('fm-admin-' + me.user_id), name: me.name, displayName: me.name },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
+      timeout: 60000, attestation: 'none'
+    }});
+    if(!cred) throw new Error('no-cred');
+    localStorage.setItem('fm_bioCred', JSON.stringify({ id: _bioB64(cred.rawId), userId: me.user_id, name: me.name, at: Date.now() }));
+    renderBioSettingsCard();
+    alert('✅ فنگر پرنٹ لاگ اِن آن ہو گیا۔\n\nاب اس فون پر ایپ کھولتے ہی ٹچ مانگے گی۔');
+  }catch(e){
+    alert('❌ فنگر پرنٹ آن نہیں ہو سکا' + (e && e.name === 'NotAllowedError' ? ' (منسوخ یا وقت ختم)' : '') + '۔');
+  }
+}
+function disableBioLogin(){
+  if(!confirm('اس فون پر فنگر پرنٹ لاگ اِن بند کریں؟ (پن سے لاگ اِن چلتا رہے گا)')) return;
+  try{ localStorage.removeItem('fm_bioCred'); }catch(e){}
+  renderBioSettingsCard(); try{ renderBioLoginButton(); }catch(e){}
+}
+let _bioBusy = false;
+async function bioLogin(){
+  if(_bioBusy) return;
+  const c = getBioCred(); const admin = _bioAdminUser();
+  if(!c || !admin){ alert('فنگر پرنٹ لاگ اِن آن نہیں — پن سے لاگ اِن کریں۔'); return; }
+  _bioBusy = true;
+  try{
+    const a = await navigator.credentials.get({ publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials: [{ type: 'public-key', id: _bioUnB64(c.id), transports: ['internal'] }],
+      userVerification: 'required', timeout: 60000
+    }});
+    if(a){ window.__bioVerified = true; finishLogin(admin, true); }
+  }catch(e){
+    const m = document.getElementById('bioLoginMsg'); if(m){ m.textContent = '❌ ٹچ نہیں ہوا — دوبارہ دبائیں یا پن لکھیں'; }
+  }
+  _bioBusy = false;
+}
+function renderBioLoginButton(){
+  const adminRow = document.querySelectorAll('#loginPinWrap > .loginRoleRow')[0];
+  if(!adminRow) return;
+  let b = document.getElementById('bioLoginBox');
+  const on = !!(getBioCred() && _bioAdminUser());
+  if(!on){ if(b) b.style.display = 'none'; return; }
+  if(!b){
+    b = document.createElement('div'); b.id = 'bioLoginBox';
+    b.style.cssText = 'text-align:center; margin:8px 0 4px;';
+    b.innerHTML = `<button type="button" onclick="bioLogin()" style="width:auto; display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border:none; border-radius:14px; background:linear-gradient(160deg,#22c55e,#15803d); color:#fff; font-size:17px; font-weight:800; box-shadow:0 4px 0 #14532d; cursor:pointer; font-family:inherit;"><span style="font-size:24px;">👆</span> فنگر پرنٹ سے لاگ اِن</button><div id="bioLoginMsg" style="font-size:12px; color:#fecaca; margin-top:4px; min-height:14px;"></div>`;
+    const bar = adminRow.querySelector('.loginRoleInputBar');
+    if(bar) adminRow.insertBefore(b, bar); else adminRow.appendChild(b);
+  }
+  b.style.display = '';
+}
+function renderBioSettingsCard(){
+  const box = document.getElementById('bioSettingsBody'); if(!box) return;
+  const c = getBioCred();
+  box.innerHTML = c
+    ? `<div style="color:#15803d; font-weight:800; margin-bottom:8px;">✅ اس فون پر آن ہے (${_bkEsc(c.name || '')})</div><button type="button" class="testPrintBtn" style="background:#fee2e2; color:#b91c1c;" onclick="disableBioLogin()">بند کریں</button>`
+    : `<div class="settingsHint" style="margin-top:0;">صرف ایڈمن کے لیے۔ آن کرنے کے بعد اس فون پر ایپ کھولتے ہی فنگر پرنٹ مانگے گی — کوئی اور (منشی/ملازم) ایڈمن کے طور پر نہیں کھول سکے گا۔ پن بھی ساتھ چلتا رہے گا۔</div><button type="button" class="testPrintBtn" onclick="enableBioLogin()">👆 فنگر پرنٹ لاگ اِن آن کریں</button>`;
+}
 
 let activeBatchesProductId = null;
 let activeBatchesVariantId = null;
@@ -32545,6 +32684,20 @@ usersData.forEach(u => {
   if(u.role === 'salesman' && u.name === 'Bilal'){ u.name = 'ABC'; u.is_active = true; }
 });
 let nextUserId = loadFromStorage('nextUserId', 4);
+function repairDuplicateUserIds(){
+  try{
+    const seen = new Set(); let changed = false;
+    const ordered = [...usersData].sort((a, b) => (a.role === 'admin' ? 0 : 1) - (b.role === 'admin' ? 0 : 1));
+    let maxId = usersData.reduce((m, u) => Math.max(m, Number(u.user_id) || 0), 0);
+    ordered.forEach(u => {
+      if(seen.has(String(u.user_id))){ u.user_id = ++maxId; changed = true; }
+      seen.add(String(u.user_id));
+    });
+    if(nextUserId <= maxId){ nextUserId = maxId + 1; changed = true; }
+    return changed;
+  }catch(e){ return false; }
+}
+try{ if(repairDuplicateUserIds()){ saveToStorage('users', usersData); saveToStorage('nextUserId', nextUserId); } }catch(e){}
 
 // ---------- ملازم کو دی جا سکنے والی اسکرینز کی فہرست — اب سائیڈ مینیو میں موجود ہر اسکرین یہاں بھی شامل ہے
 // (پہلے یہ فہرست پرانی/نامکمل تھی — Order Taking، Recovery List وغیرہ نئی اسکرینیں اس میں شامل نہیں تھیں) ---------- -->
@@ -32646,6 +32799,7 @@ async function fetchUsersFromCloud(silent){
     usersData = cloudUsers;
     const cloudNextId = parseInt(doc.fields?.nextUserId?.integerValue || '0');
     if(cloudNextId > nextUserId) nextUserId = cloudNextId;
+    if(repairDuplicateUserIds()){ setTimeout(() => { try{ pushUsersToCloud(); }catch(e){} }, 1500); }
     saveToStorage('users', usersData);
     saveToStorage('nextUserId', nextUserId);
     if(!silent){
@@ -34645,6 +34799,7 @@ async function saveNewUser(){
     alert('This PIN is already used by another user. Please choose a different PIN.');
     return;
   }
+  nextUserId = Math.max(nextUserId, usersData.reduce((m, u) => Math.max(m, Number(u.user_id) || 0), 0) + 1);
   usersData.push({user_id: nextUserId++, name, username, phone, pin: hashedPin, pinPlain: pin, role, is_active:true, screens: role === 'admin' ? [] : screens});
   pushUsersToCloud();
 
