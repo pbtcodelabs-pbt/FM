@@ -4846,12 +4846,18 @@
 
     <!-- ---------- 💸 FM29SEP (صدام کی ہدایت): گاہک کو نقد ادھار — بل جیسا حساب ٹیبل + یادداشت ---------- -->
     <style>
-      #custLoanModal .clTable{ width:100%; border-collapse:separate; border-spacing:0 6px; margin:4px 0 8px; }
-      #custLoanModal .clTable td{ padding:8px 12px; font-size:16px; font-weight:700; }
-      #custLoanModal .clTable td:first-child{ border-radius:0 10px 10px 0; width:55%; }
-      #custLoanModal .clTable td:last-child{ border-radius:10px 0 0 10px; text-align:left; direction:ltr; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:16px; }
-      #custLoanModal .clInRow td{ padding:4px 8px; }
-      #custLoanModal .clInRow input{ width:100%; margin:0; padding:8px; font-size:17px; font-weight:900; text-align:center; border-radius:8px; box-sizing:border-box; font-family:'Arial Black',Arial,sans-serif; }
+      .loanSavedActions{ margin-top:10px; }
+      .loanSavedActions .lsaRow{ display:flex; gap:6px; }
+      .loanSavedActions .lsaRow button{ flex:1; border:none; border-radius:12px; padding:10px 4px; color:#fff; font-family:inherit; font-size:14px; font-weight:800; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.25); line-height:1.5; }
+      .loanSavedActions .lsaRow button .ic{ display:block; font-size:20px; }
+      .loanSavedActions .lsaClose{ width:100%; margin-top:8px; padding:9px; border:none; border-radius:10px; background:#e2e8f0; color:#334155; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; }
+      .loanSavedBanner{ background:#dcfce7; color:#166534; border:1.5px solid #86efac; border-radius:10px; padding:6px 10px; text-align:center; font-weight:800; font-size:15px; margin-bottom:6px; }
+      #supLoanModal .clTable, #custLoanModal .clTable{ width:100%; border-collapse:separate; border-spacing:0 6px; margin:4px 0 8px; }
+      #supLoanModal .clTable td, #custLoanModal .clTable td{ padding:8px 12px; font-size:16px; font-weight:700; }
+      #supLoanModal .clTable td:first-child, #custLoanModal .clTable td:first-child{ border-radius:0 10px 10px 0; width:55%; }
+      #supLoanModal .clTable td:last-child, #custLoanModal .clTable td:last-child{ border-radius:10px 0 0 10px; text-align:left; direction:ltr; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:16px; }
+      #supLoanModal .clInRow td, #custLoanModal .clInRow td{ padding:4px 8px; }
+      #supLoanModal .clInRow input, #custLoanModal .clInRow input{ width:100%; margin:0; padding:8px; font-size:17px; font-weight:900; text-align:center; border-radius:8px; box-sizing:border-box; font-family:'Arial Black',Arial,sans-serif; }
     </style>
     <div class="modalOverlay" id="custLoanModal" onclick="if(event.target===this) closeCustLoanModal()" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="modalBox" style="max-width:430px;">
@@ -4859,6 +4865,7 @@
           <div style="font-size:20px; font-weight:800;">💸 نقد ادھار دیا</div>
           <div id="custLoanName" style="font-size:16px; opacity:.95;"></div>
         </div>
+        <div id="clSavedBanner" class="loanSavedBanner" style="display:none;">✅ محفوظ ہو گیا</div>
         <table class="clTable">
           <tr class="clInRow" style="background:#fff7ed;"><td style="background:#ffedd5; color:#9a3412;">💸 دستی کیش دیا</td>
             <td style="background:#ffedd5;"><input type="number" id="custLoanAmount" inputmode="numeric" placeholder="0" onfocus="this.select()" oninput="updateCustLoanHint()" style="border:2px solid #fb923c;"></td></tr>
@@ -4872,10 +4879,40 @@
         </table>
         <div style="font-size:14px; font-weight:800; color:#78350f; margin:4px 2px;">📝 یادداشت <span id="clTimeStamp" style="font-size:12px; color:var(--muted); font-weight:600;"></span></div>
         <textarea id="custLoanNote" dir="rtl" placeholder="کس کام کے لیے • کہاں • کس بندے کو دیا" style="width:100%; padding:8px; border:1.5px solid #fcd34d; background:#fffbeb; border-radius:10px; font-family:inherit; font-size:15px; min-height:54px; text-align:right; box-sizing:border-box;"></textarea>
-        <div class="modalBtns">
+        <div class="modalBtns" id="clEditBtns">
           <button class="cancelBtn" onclick="closeCustLoanModal()" style="font-family:inherit;">منسوخ</button>
           <button class="saveBtn" onclick="saveCustLoan()" style="font-family:inherit; background:linear-gradient(135deg,#ea580c,#9a3412);">✅ محفوظ کریں</button>
         </div>
+        <div id="clSavedActions" class="loanSavedActions" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- ---------- 📥 FM29SEP (صدام کی ہدایت): بیوپاری سے نقد ادھار لیا — بالکل گاہک والے فارم جیسا ٹیبل + یادداشت ---------- -->
+    <div class="modalOverlay" id="supLoanModal" onclick="if(event.target===this) closeSupLoanModal()" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
+      <div class="modalBox" style="max-width:430px;">
+        <div style="background:linear-gradient(135deg,#059669,#064e3b); color:#fff; border-radius:14px; padding:10px 14px; margin-bottom:8px; box-shadow:0 4px 0 rgba(0,0,0,.25); display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div style="font-size:20px; font-weight:800;">📥 نقد ادھار لیا</div>
+          <div id="supLoanName" style="font-size:16px; opacity:.95;"></div>
+        </div>
+        <div id="slSavedBanner" class="loanSavedBanner" style="display:none;">✅ محفوظ ہو گیا</div>
+        <table class="clTable">
+          <tr class="clInRow"><td style="background:#d1fae5; color:#065f46;">📥 دستی کیش لیا</td>
+            <td style="background:#d1fae5;"><input type="number" id="supLoanAmount" inputmode="numeric" placeholder="0" onfocus="this.select()" oninput="updateSupLoanHint()" style="border:2px solid #34d399;"></td></tr>
+          <tr><td style="background:#eff6ff; color:#1e3a8a;">📊 سابقہ بقایا <span style="font-size:12px;">(ہم نے دینا)</span></td><td id="slPrev" style="background:#eff6ff; color:#1e3a8a;">0</td></tr>
+          <tr id="slWalletRow" style="display:none;"><td style="background:#fef9c3; color:#854d0e;">💳 ہمارا ایڈوانس واپس</td><td id="slWallet" style="background:#fef9c3; color:#854d0e;">0</td></tr>
+          <tr><td style="background:#f1f5f9; color:#0f172a;">🧮 ٹوٹل رقم</td><td id="slTotal" style="background:#f1f5f9; color:#0f172a;">0</td></tr>
+          <tr class="clInRow"><td style="background:#fff7ed; color:#9a3412;">💸 ادائیگی <span style="font-size:12px;">(اگر ہو)</span></td>
+            <td style="background:#fff7ed;"><input type="number" id="supLoanPay" inputmode="numeric" placeholder="—" onfocus="this.select()" oninput="updateSupLoanHint()" style="border:2px solid #fdba74;"></td></tr>
+          <tr><td style="background:#065f46; color:#fff; font-size:17px;">✅ اب تک ٹوٹل بقایا</td><td id="slFinal" style="background:#065f46; color:#fff; font-size:19px;">0</td></tr>
+          <tr id="slExtraWalletRow" style="display:none;"><td style="background:#dcfce7; color:#15803d;">💳 والٹ میں جمع</td><td id="slExtraWallet" style="background:#dcfce7; color:#15803d;">0</td></tr>
+        </table>
+        <div style="font-size:14px; font-weight:800; color:#78350f; margin:4px 2px;">📝 یادداشت <span id="slTimeStamp" style="font-size:12px; color:var(--muted); font-weight:600;"></span></div>
+        <textarea id="supLoanNote" dir="rtl" placeholder="کس کام کے لیے • کہاں • کس بندے سے لیا" style="width:100%; padding:8px; border:1.5px solid #fcd34d; background:#fffbeb; border-radius:10px; font-family:inherit; font-size:15px; min-height:54px; text-align:right; box-sizing:border-box;"></textarea>
+        <div class="modalBtns" id="slEditBtns">
+          <button class="cancelBtn" onclick="closeSupLoanModal()" style="font-family:inherit;">منسوخ</button>
+          <button class="saveBtn" onclick="saveSupLoan()" style="font-family:inherit; background:linear-gradient(135deg,#059669,#065f46);">✅ محفوظ کریں</button>
+        </div>
+        <div id="slSavedActions" class="loanSavedActions" style="display:none;"></div>
       </div>
     </div>
 
@@ -8661,7 +8698,8 @@ function getDeveloperContact(){
 // 🆕 FM28SEPMO0751PM: گاہک کے پروفائل میں "💸 ادھار دیا" اور بیوپاری کے پروفائل میں "📥 ادھار لیا" — بغیر مال کے نقد رقم سیدھی کھاتے میں
 // 🆕 FM28SEPMO0835PM: بلال فروٹ فارم کی ایک بار والی صفائی کا کوڈ بھی مکمل ہٹا دیا — اب اس کا کوئی نشان باقی نہیں
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
-const APP_BUILD_VERSION = 'FM29SEPTU0310AM';
+// 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
+const APP_BUILD_VERSION = 'FM29/9/TU05:25AM#255'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -25293,6 +25331,7 @@ function normalizeSupplierBalance(s, reasonNote){
 }
 
 function openPaySupplierModal(supplierId, onlyMode){
+  if(onlyMode === 'receive'){ openSupLoanModal(supplierId); return; } // 📥 FM29SEP: نیا ٹیبل والا فارم
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
   activePaySupplierId = supplierId;
@@ -32219,6 +32258,7 @@ function openCustLoanModal(customerId){
   document.getElementById('custLoanNote').value = '';
   const now = new Date();
   document.getElementById('clTimeStamp').textContent = '— ' + now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  setLoanModalEditable('cl', ['custLoanAmount','custLoanRecovery','custLoanNote'], true);
   updateCustLoanHint();
   document.getElementById('custLoanModal').classList.add('show');
   setTimeout(() => { try{ document.getElementById('custLoanAmount').focus(); }catch(e){} }, 150);
@@ -32291,7 +32331,6 @@ function saveCustLoan(){
     note: `💸 دستی کیش ${clFmt(amount)} • سابقہ ${clFmt(sp.before)} • ٹوٹل ${clFmt(sp.total)} • وصولی ${sp.recovery > 0 ? clFmt(sp.recovery) : '—'} • بقایا ${clFmt(sp.after)}` + (memo ? ` • 📝 ${memo}` : '') + ` • 🕒 ${timeStr}`,
   });
 
-  closeCustLoanModal();
   persistAllData();
   pushCustomersToCloud();
   if(sp.recovery > 0) pushInvoicesToCloud();
@@ -32300,7 +32339,259 @@ function saveCustLoan(){
   if(currentProfileType === 'customers' && currentProfileId === c.customer_id && document.getElementById('profileModal').classList.contains('show')){
     openCustomerProfile(c.customer_id);
   }
-  sharePaymentReceiptImage(savedPayment.payment_id);
+  // ---------- 🧾 FM29SEP: فارم بند نہیں ہوتا — "محفوظ" حالت میں پرنٹ / سکرین شاٹ / پوسٹر کے بٹن آ جاتے ہیں ----------
+  const rows = [
+    { label: '💸 دستی کیش دیا', value: clFmt(amount), bg: '#ffedd5', fg: '#9a3412' },
+    { label: '📊 سابقہ بقایا', value: clFmt(sp.before), bg: '#eff6ff', fg: '#1e3a8a' },
+  ];
+  if(sp.fromWallet > 0) rows.push({ label: '💳 والٹ سے کٹا', value: '- ' + clFmt(sp.fromWallet), bg: '#f0fdf4', fg: '#15803d' });
+  rows.push({ label: '🧮 ٹوٹل رقم', value: clFmt(sp.total), bg: '#f1f5f9', fg: '#0f172a' });
+  rows.push({ label: '📥 وصولی', value: sp.recovery > 0 ? clFmt(sp.recovery) : '—', bg: '#ecfdf5', fg: '#166534' });
+  rows.push({ label: '✅ اب تک ٹوٹل بقایا', value: clFmt(sp.after), bg: '#991b1b', fg: '#ffffff', big: true });
+  if(sp.extraToWallet > 0) rows.push({ label: '💳 والٹ میں جمع', value: '+ ' + clFmt(sp.extraToWallet), bg: '#dcfce7', fg: '#15803d' });
+  showLoanSavedState('cl', ['custLoanAmount','custLoanRecovery','custLoanNote'], {
+    kind: 'customer', title: '💸 نقد ادھار دیا', party: c.name, headA: '#c2410c', headB: '#7c2d12',
+    rows, memo, date: now.toLocaleDateString('en-GB'), time: timeStr, paymentId: savedPayment.payment_id
+  }, 'closeCustLoanModal()');
+}
+
+/* =====================================================================
+   📥 FM29SEP (صدام کی ہدایت): بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل
+   حساب: پہلے ہمارا ایڈوانس (والٹ) واپس آئے، باقی رقم اس کے کھاتے میں چڑھے (ہم نے دینی)؛
+   اگر ساتھ ہی کچھ ادائیگی بھی کی تو وہ بقایا کم کرے، زیادہ ہو تو والٹ میں
+   ===================================================================== */
+let activeSupLoanId = null;
+function calcSupLoan(s, amount, pay){
+  pay = Math.max(0, pay || 0);
+  const wallet = Math.max(0, s.wallet_balance || 0);
+  const fromWallet = Math.min(wallet, amount);
+  const addPayable = amount - fromWallet;
+  const before = s.total_payable || 0;
+  const total = before + addPayable;
+  const toPayable = Math.min(total, pay);
+  const extraToWallet = pay - toPayable;
+  return { wallet, fromWallet, addPayable, before, total, pay, toPayable, extraToWallet,
+           after: total - toPayable, walletAfter: wallet - fromWallet + extraToWallet };
+}
+function openSupLoanModal(supplierId){
+  const s = suppliersData.find(x => x.supplier_id === supplierId);
+  if(!s) return;
+  activeSupLoanId = supplierId;
+  document.getElementById('supLoanName').textContent = '🧺 ' + s.name;
+  document.getElementById('supLoanAmount').value = '';
+  document.getElementById('supLoanPay').value = '';
+  document.getElementById('supLoanNote').value = '';
+  const now = new Date();
+  document.getElementById('slTimeStamp').textContent = '— ' + now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  setLoanModalEditable('sl', ['supLoanAmount','supLoanPay','supLoanNote'], true);
+  updateSupLoanHint();
+  document.getElementById('supLoanModal').classList.add('show');
+  setTimeout(() => { try{ document.getElementById('supLoanAmount').focus(); }catch(e){} }, 150);
+}
+function closeSupLoanModal(){
+  document.getElementById('supLoanModal').classList.remove('show');
+  activeSupLoanId = null;
+}
+function updateSupLoanHint(){
+  const s = suppliersData.find(x => x.supplier_id === activeSupLoanId);
+  if(!s) return;
+  const amount = Math.max(0, parseFloat(document.getElementById('supLoanAmount').value) || 0);
+  const pay = Math.max(0, parseFloat(document.getElementById('supLoanPay').value) || 0);
+  const sp = calcSupLoan(s, amount, pay);
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('slPrev', clFmt(sp.before));
+  set('slTotal', clFmt(sp.total));
+  set('slFinal', clFmt(sp.after));
+  document.getElementById('slWalletRow').style.display = sp.fromWallet > 0 ? '' : 'none';
+  set('slWallet', '- ' + clFmt(sp.fromWallet));
+  document.getElementById('slExtraWalletRow').style.display = sp.extraToWallet > 0 ? '' : 'none';
+  set('slExtraWallet', '+ ' + clFmt(sp.extraToWallet));
+}
+function saveSupLoan(){
+  const s = suppliersData.find(x => x.supplier_id === activeSupLoanId);
+  if(!s) return;
+  const amount = Math.max(0, parseFloat(document.getElementById('supLoanAmount').value) || 0);
+  const pay = Math.max(0, parseFloat(document.getElementById('supLoanPay').value) || 0);
+  if(amount <= 0){ alert('دستی کیش کی رقم لکھیں۔'); return; }
+  const sp = calcSupLoan(s, amount, pay);
+  const lines = [`📥 دستی کیش لیا: ${clFmt(amount)}`, `📊 سابقہ بقایا: ${clFmt(sp.before)}`];
+  if(sp.fromWallet > 0) lines.push(`💳 ہمارا ایڈوانس واپس: ${clFmt(sp.fromWallet)}`);
+  lines.push(`🧮 ٹوٹل رقم: ${clFmt(sp.total)}`, `💸 ادائیگی: ${sp.pay > 0 ? clFmt(sp.pay) : '—'}`, `✅ اب تک ٹوٹل بقایا: ${clFmt(sp.after)}`);
+  if(sp.extraToWallet > 0) lines.push(`💳 والٹ میں جمع: ${clFmt(sp.extraToWallet)}`);
+  if(!confirm(`🧺 ${s.name}\n\n${lines.join('\n')}\n\nمحفوظ کریں؟`)) return;
+
+  const memo = document.getElementById('supLoanNote').value.trim();
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const timeStr = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  const balanceBefore = s.total_payable || 0;
+  s.ledgerHistory = s.ledgerHistory || [];
+
+  financeDummy.cashInHand += amount - sp.pay;
+  s.ledgerHistory.unshift({ type: 'received', amount, date: today, time: timeStr, note: (memo ? memo + ' — ' : '') + '🕒 ' + timeStr });
+  if(sp.pay > 0) s.ledgerHistory.unshift({ type: 'payment', amount: sp.pay, date: today, time: timeStr, note: 'ادھار لیتے وقت ادائیگی' });
+  if(sp.extraToWallet > 0) s.ledgerHistory.unshift({ type: 'wallet_deposit', amount: sp.extraToWallet, date: today, note: 'زیادہ ادائیگی — والٹ (ایڈوانس) میں جمع' });
+  s.total_payable = sp.after;
+  s.wallet_balance = sp.walletAfter;
+
+  const summary = `📥 دستی کیش ${clFmt(amount)} • سابقہ ${clFmt(sp.before)} • ٹوٹل ${clFmt(sp.total)} • ادائیگی ${sp.pay > 0 ? clFmt(sp.pay) : '—'} • بقایا ${clFmt(sp.after)}` + (memo ? ` • 📝 ${memo}` : '') + ` • 🕒 ${timeStr}`;
+  const savedPayment = recordPaymentEntry({
+    direction: 'in', party_type: 'supplier', party_id: s.supplier_id, party_name: s.name,
+    amount, balance_before: balanceBefore, balance_after: s.total_payable, method: 'Cash', note: summary,
+  });
+  if(sp.pay > 0) recordPaymentEntry({
+    direction: 'out', party_type: 'supplier', party_id: s.supplier_id, party_name: s.name,
+    amount: sp.pay, balance_before: sp.total, balance_after: s.total_payable, method: 'Cash', note: 'ادھار لیتے وقت ادائیگی' + (memo ? ' — ' + memo : ''),
+  });
+
+  persistAllData();
+  pushSuppliersToCloud();
+  pushFinanceToCloud();
+  renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
+  if(currentProfileType === 'suppliers' && currentProfileId === s.supplier_id && document.getElementById('profileModal').classList.contains('show')){
+    openSupplierProfile(s.supplier_id);
+  }
+  const rows = [
+    { label: '📥 دستی کیش لیا', value: clFmt(amount), bg: '#d1fae5', fg: '#065f46' },
+    { label: '📊 سابقہ بقایا', value: clFmt(sp.before), bg: '#eff6ff', fg: '#1e3a8a' },
+  ];
+  if(sp.fromWallet > 0) rows.push({ label: '💳 ہمارا ایڈوانس واپس', value: '- ' + clFmt(sp.fromWallet), bg: '#fef9c3', fg: '#854d0e' });
+  rows.push({ label: '🧮 ٹوٹل رقم', value: clFmt(sp.total), bg: '#f1f5f9', fg: '#0f172a' });
+  rows.push({ label: '💸 ادائیگی', value: sp.pay > 0 ? clFmt(sp.pay) : '—', bg: '#fff7ed', fg: '#9a3412' });
+  rows.push({ label: '✅ اب تک ٹوٹل بقایا', value: clFmt(sp.after), bg: '#065f46', fg: '#ffffff', big: true });
+  if(sp.extraToWallet > 0) rows.push({ label: '💳 والٹ میں جمع', value: '+ ' + clFmt(sp.extraToWallet), bg: '#dcfce7', fg: '#15803d' });
+  showLoanSavedState('sl', ['supLoanAmount','supLoanPay','supLoanNote'], {
+    kind: 'supplier', title: '📥 نقد ادھار لیا', party: s.name, headA: '#059669', headB: '#064e3b',
+    rows, memo, date: now.toLocaleDateString('en-GB'), time: timeStr, paymentId: savedPayment.payment_id
+  }, 'closeSupLoanModal()');
+}
+
+/* ---------- 🧾 دونوں فارموں کا مشترکہ "محفوظ" حالت + پرنٹ / سکرین شاٹ / پوسٹر ---------- */
+let _loanReceipt = null;
+function setLoanModalEditable(prefix, inputIds, editable){
+  inputIds.forEach(id => { const el = document.getElementById(id); if(el){ el.readOnly = !editable; el.style.opacity = editable ? '1' : '.9'; } });
+  const eb = document.getElementById(prefix + 'EditBtns'); if(eb) eb.style.display = editable ? '' : 'none';
+  const sa = document.getElementById(prefix + 'SavedActions'); if(sa){ sa.style.display = editable ? 'none' : 'block'; if(editable) sa.innerHTML = ''; }
+  const bn = document.getElementById(prefix + 'SavedBanner'); if(bn) bn.style.display = editable ? 'none' : 'block';
+}
+function showLoanSavedState(prefix, inputIds, receipt, closeJs){
+  _loanReceipt = receipt;
+  setLoanModalEditable(prefix, inputIds, false);
+  document.getElementById(prefix + 'SavedActions').innerHTML = `
+    <div class="lsaRow">
+      <button type="button" style="background:linear-gradient(135deg,#334155,#0f172a);" onclick="printLoanReceiptThermal()"><span class="ic">🖨️</span>پرنٹ</button>
+      <button type="button" style="background:linear-gradient(135deg,#2563eb,#1e3a8a);" onclick="shareLoanScreenshot()"><span class="ic">📸</span>سکرین شاٹ اور شیئر</button>
+      <button type="button" style="background:linear-gradient(135deg,#22c55e,#15803d);" onclick="shareLoanPoster()"><span class="ic">🖼️</span>پوسٹر شیئر</button>
+    </div>
+    <button type="button" class="lsaClose" onclick="${closeJs}">✖ بند کریں</button>`;
+}
+function _loanWrap(ctx, text, maxW){
+  const words = String(text || '').split(/\s+/); const lines = []; let cur = '';
+  words.forEach(w => { const t = cur ? cur + ' ' + w : w; if(ctx.measureText(t).width > maxW && cur){ lines.push(cur); cur = w; } else cur = t; });
+  if(cur) lines.push(cur);
+  return lines;
+}
+async function _loanFonts(){
+  const urF = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif";
+  try{ await document.fonts.load(`bold 24px ${urF}`); await document.fonts.ready; }catch(e){}
+  return { urF, numF: "'Arial Black',Arial,sans-serif" };
+}
+// ---------- 📸 رنگین تصویر — بالکل فارم جیسی (ڈبے، رنگ) ----------
+async function drawLoanScreenshotCanvas(r){
+  const { urF, numF } = await _loanFonts();
+  const W = 720, pad = 28, rowH = 74, gap = 10;
+  const meas = document.createElement('canvas').getContext('2d');
+  meas.font = `24px ${urF}`;
+  const memoLines = r.memo ? _loanWrap(meas, r.memo, W - pad*2 - 30) : [];
+  const H = 70 + 110 + r.rows.length * (rowH + gap) + (memoLines.length ? 70 + memoLines.length * 44 : 0) + 70;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
+  const rr = (X, Y, w, h, rad, fill) => { x.beginPath(); x.moveTo(X+rad, Y); x.arcTo(X+w, Y, X+w, Y+h, rad); x.arcTo(X+w, Y+h, X, Y+h, rad); x.arcTo(X, Y+h, X, Y, rad); x.arcTo(X, Y, X+w, Y, rad); x.closePath(); x.fillStyle = fill; x.fill(); };
+  x.textAlign = 'center'; x.fillStyle = '#0f172a'; x.font = `bold 30px ${urF}`;
+  x.fillText(AppState.settings.businessName || 'صدام فروٹ منڈی', W/2, 50);
+  let y = 72;
+  const g = x.createLinearGradient(0, y, W, y + 90); g.addColorStop(0, r.headA); g.addColorStop(1, r.headB);
+  rr(pad, y, W - pad*2, 90, 20, g);
+  x.fillStyle = '#fff'; x.textAlign = 'right'; x.font = `bold 32px ${urF}`; x.fillText(r.title, W - pad - 22, y + 45);
+  x.textAlign = 'left'; x.font = `26px ${urF}`; x.fillText('👤 ' + r.party, pad + 22, y + 45);
+  x.font = `bold 16px ${numF}`; x.fillStyle = 'rgba(255,255,255,.85)'; x.fillText(`${r.date}  ${r.time}`, pad + 22, y + 76);
+  y += 110;
+  r.rows.forEach(row => {
+    rr(pad, y, W - pad*2, rowH, 16, row.bg);
+    x.fillStyle = row.fg; x.textAlign = 'right'; x.font = `bold ${row.big ? 30 : 26}px ${urF}`;
+    x.fillText(row.label, W - pad - 22, y + rowH/2 + 10);
+    x.textAlign = 'left'; x.font = `900 ${row.big ? 32 : 27}px ${numF}`;
+    x.fillText(row.value, pad + 22, y + rowH/2 + 10);
+    y += rowH + gap;
+  });
+  if(memoLines.length){
+    y += 6;
+    rr(pad, y, W - pad*2, 50 + memoLines.length * 44, 16, '#fffbeb');
+    x.fillStyle = '#78350f'; x.textAlign = 'right'; x.font = `bold 24px ${urF}`;
+    x.fillText('📝 یادداشت', W - pad - 20, y + 36);
+    x.font = `24px ${urF}`;
+    memoLines.forEach((ln, i) => x.fillText(ln, W - pad - 20, y + 80 + i * 44));
+    y += 60 + memoLines.length * 44;
+  }
+  return c;
+}
+// ---------- 🖨️ تھرمل (58/80mm) — سادہ سیاہ و سفید ----------
+async function drawLoanThermalCanvas(r){
+  const { urF, numF } = await _loanFonts();
+  const W = (AppState.settings.paperWidth || 80) === 80 ? 576 : 384;
+  const m = 12, rowH = W > 400 ? 52 : 44, fs = W > 400 ? 24 : 20;
+  const meas = document.createElement('canvas').getContext('2d');
+  meas.font = `${fs}px ${urF}`;
+  const memoLines = r.memo ? _loanWrap(meas, r.memo, W - m*2) : [];
+  const H = 150 + r.rows.length * rowH + (memoLines.length ? 50 + memoLines.length * (fs + 16) : 0) + 60;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.fillStyle = '#000';
+  x.textAlign = 'center';
+  x.font = `bold ${fs + 6}px ${urF}`; x.fillText(AppState.settings.businessName || 'صدام فروٹ منڈی', W/2, 36);
+  x.font = `bold ${fs + 2}px ${urF}`; x.fillText(r.title.replace(/^[^\u0600-\u06FF]+/, ''), W/2, 76);
+  x.font = `${fs}px ${urF}`; x.fillText(r.party, W/2, 110);
+  x.font = `bold ${fs - 6}px ${numF}`; x.fillText(`${r.date}  ${r.time}`, W/2, 136);
+  let y = 150;
+  x.fillRect(m, y - 4, W - m*2, 2);
+  r.rows.forEach(row => {
+    if(row.big){ x.fillRect(m, y, W - m*2, rowH - 4); x.fillStyle = '#fff'; }
+    x.textAlign = 'right'; x.font = `bold ${fs}px ${urF}`;
+    x.fillText(row.label.replace(/^[^\u0600-\u06FF]+/, ''), W - m - 6, y + rowH/2 + 7);
+    x.textAlign = 'left'; x.font = `900 ${fs}px ${numF}`;
+    x.fillText(row.value, m + 6, y + rowH/2 + 7);
+    x.fillStyle = '#000';
+    y += rowH;
+    if(!row.big) x.fillRect(m, y - 2, W - m*2, 1);
+  });
+  if(memoLines.length){
+    y += 14;
+    x.textAlign = 'right'; x.font = `bold ${fs}px ${urF}`; x.fillText('یادداشت:', W - m, y + fs);
+    y += fs + 14;
+    x.font = `${fs}px ${urF}`;
+    memoLines.forEach(ln => { x.fillText(ln, W - m, y + fs); y += fs + 16; });
+  }
+  x.textAlign = 'center'; x.font = `${fs - 4}px ${urF}`; x.fillText('— شکریہ —', W/2, H - 20);
+  return c;
+}
+async function printLoanReceiptThermal(){
+  if(!_loanReceipt) return;
+  const canvas = await drawLoanThermalCanvas(_loanReceipt);
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+}
+async function shareLoanScreenshot(){
+  if(!_loanReceipt) return;
+  const canvas = await drawLoanScreenshotCanvas(_loanReceipt);
+  showImageSharePreview(canvas, `Adhaar_${(_loanReceipt.party || '').replace(/\s+/g,'_')}.png`, _loanReceipt.title, `${_loanReceipt.title} — ${_loanReceipt.party}`);
+}
+function shareLoanPoster(){
+  if(!_loanReceipt || !_loanReceipt.paymentId) return;
+  sharePaymentReceiptImage(_loanReceipt.paymentId);
 }
 
 // ---------- Billing کے کسٹمر ڈراپ ڈاؤن کو customersData سے پُر کریں — ساتھ ساتھ City/Area فلٹر ڈراپ ڈاؤن بھی تازہ کریں ----------
