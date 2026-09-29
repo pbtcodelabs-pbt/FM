@@ -3908,6 +3908,8 @@
                 <option value="__TOGGLE_VIEW__" id="saViewModeBtn" style="display:none;">📊 جدول نظارہ</option>
                 <option value="__RENUMBER__">🔢 ترتیب دیں (1 سے نمبر)</option>
                 <option value="__TOGGLE_LOCK__" id="saLockToggleBtn">🔒 لسٹ لاک کریں</option>
+<option value="__SAVE_SERIAL_MASTER__">💾 موجودہ ترتیب محفوظ کریں</option>
+<option value="__RESTORE_SERIAL_MASTER__">↩️ محفوظ ترتیب بحال کریں</option>
               </select>
             </div>
             <div class="categoryDropdownItem" onclick="event.stopPropagation();">
@@ -7870,6 +7872,7 @@ function buildBackupObject(){
     nextAdvOrderId,
     recoveryList: recoveryListData,
     nextRecoveryId,
+    serialMaster: loadFromStorage('serialMaster', null), // 💾 FM299TU#259
     customCategories: customCategories,
     cashPurchases: (typeof cashPurchasesData !== 'undefined' ? cashPurchasesData : []),
     expiryAlertDays: expiryAlertDays,
@@ -8699,7 +8702,7 @@ function getDeveloperContact(){
 // 🆕 FM28SEPMO0835PM: بلال فروٹ فارم کی ایک بار والی صفائی کا کوڈ بھی مکمل ہٹا دیا — اب اس کا کوئی نشان باقی نہیں
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM299TU#258'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM299TU#259'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10761,6 +10764,8 @@ function handleStockAdjSortSelect(sel){
     toggleProductSerialLock();
     return;
   }
+  if(sel.value === '__SAVE_SERIAL_MASTER__'){ sel.value = 'serial'; saveSerialMaster(); return; }
+  if(sel.value === '__RESTORE_SERIAL_MASTER__'){ sel.value = 'serial'; restoreSerialMaster(); return; }
   renderStockAdjustmentScreen();
 }
 // ---------- 🗜️ صدام کی ہدایت (FM10SEPTH0844AM): رپورٹس/فلٹر ایک کولیپس ایبل باکس میں — صفحہ کھلتے ہی
@@ -11640,9 +11645,26 @@ function tryAutoLogin(){
   return true;
 }
 
+// ---------- 🔒 FM299TU#259: سیریل نمبر کی دیکھ بھال صرف ایڈمن کے فون پر — پہلے کلاؤڈ سے تازہ، پھر صرف خالی نمبر بھریں ----------
+async function runAdminSerialMaintenance(){
+  if(AppState.currentRole !== 'admin') return;
+  try{ await fetchProductsFromCloud(true); }catch(e){}
+  try{ await fetchCustomersFromCloud(true); }catch(e){}
+  try{ await fetchSuppliersFromCloud(true); }catch(e){}
+  try{
+    const beforeP = JSON.stringify(productsData.map(p => p.serial_no));
+    assignInitialProductSerials(); backfillMissingProductSerials();
+    if(JSON.stringify(productsData.map(p => p.serial_no)) !== beforeP){ saveProductsLight(); pushProductsToCloud(); }
+    const beforeC = JSON.stringify(customersData.map(c => c.serial_no)), beforeS = JSON.stringify(suppliersData.map(s => s.serial_no));
+    backfillMissingCustomerSerials(); backfillMissingSupplierSerials();
+    if(JSON.stringify(customersData.map(c => c.serial_no)) !== beforeC) pushCustomersToCloud();
+    if(JSON.stringify(suppliersData.map(s => s.serial_no)) !== beforeS) pushSuppliersToCloud();
+  }catch(e){ console.error('admin serial maintenance failed', e); }
+}
 function applyRole(role, name){
   AppState.currentUser = { name: name || (role==='admin' ? 'Saddam Hussain' : 'Abdul Wahab') };
   AppState.currentRole = role;
+  if(role === 'admin') setTimeout(() => { try{ runAdminSerialMaintenance(); }catch(e){} }, 2500); // 🔒 FM299TU#259
 
   document.body.classList.remove('role-admin','role-salesman','role-customer');
   document.body.classList.add('role-' + role);
@@ -15410,6 +15432,7 @@ let nextVariantId = loadFromStorage('nextVariantId', 28);
 // اگلا خالی نمبر (زیادہ سے زیادہ موجودہ نمبر + 1) مل جاتا ہے، تاکہ پرانے نمبر کبھی نہ ہلیں ---------- -->
 function assignInitialProductSerials(){
   if(loadFromStorage('productSerialsAssignedV1', false)) return; // پہلے ہی ہو چکا — دوبارہ نہیں کرنا
+  if(productsData.some(p => p.serial_no)){ saveToStorage('productSerialsAssignedV1', true); return; } // 🔒 FM299TU#259: پہلے سے نمبر ہیں تو کبھی دوبارہ ترتیب نہیں
   if(loadFromStorage('serialManualMode', false)) return; // ---------- صدام کی ہدایت (FM7SEPMO7): مینوئل موڈ میں خودکار نمبر ہرگز نہ لگیں ----------
   const sorted = [...productsData].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ur', {numeric:true, sensitivity:'base'}));
   sorted.forEach((p, idx) => { p.serial_no = idx + 1; });
@@ -15442,6 +15465,7 @@ function repairDuplicateProductSerials(){
   return true;
 }
 function backfillMissingProductSerials(){
+  if(typeof AppState === 'undefined' || AppState.currentRole !== 'admin') return; // 🔒 FM299TU#259: صرف ایڈمن
   try{ if(repairDuplicateProductSerials()){ try{ AppState.settings.productsPendingSync = true; }catch(e){} } }catch(e){}
   // ---------- 🔢 صدام کی ہدایت (FM7SEPMO7): اب نمبر خود اپنی مرضی سے دیں گے — خودکار بھرنے کا نظام بند،
   // ورنہ صاف کیے گئے (خالی چھوڑے گئے) نمبر ہر بار پیج کھلتے ہی خودکار دوبارہ بھر جاتے ---------- -->
@@ -21282,11 +21306,13 @@ let nextCustomerId = loadFromStorage('nextCustomerId', 4);
 // بالکل سبزیوں کی طرح۔ کسٹمر اور سپلائر کی نمبرنگ الگ الگ (آزاد) حوض ہیں — ایک کسٹمر کا #5 اور
 // ایک سپلائر کا #5 آپس میں نہیں ٹکراتے، ہر فہرست اپنی الگ گنتی رکھتی ہے ---------- -->
 function backfillMissingCustomerSerials(){
+  if(typeof AppState === 'undefined' || AppState.currentRole !== 'admin') return; // 🔒 FM299TU#259
   if(loadFromStorage('serialManualMode', false)) return;
   let maxSerial = customersData.reduce((m, c) => Math.max(m, c.serial_no || 0), 0);
   customersData.forEach(c => { if(!c.serial_no){ maxSerial++; c.serial_no = maxSerial; } });
 }
 function backfillMissingSupplierSerials(){
+  if(typeof AppState === 'undefined' || AppState.currentRole !== 'admin') return; // 🔒 FM299TU#259
   if(loadFromStorage('serialManualMode', false)) return;
   let maxSerial = suppliersData.reduce((m, s) => Math.max(m, s.serial_no || 0), 0);
   suppliersData.forEach(s => { if(!s.serial_no){ maxSerial++; s.serial_no = maxSerial; } });
@@ -29095,9 +29121,31 @@ function confirmRecoveryEntry(entryId){
     });
   }
 
+  // ---------- 🔗 FM299TU#259 (صدام کی ہدایت): اصل خرابی یہیں تھی — کھاتہ صرف اسی فون میں بدلتا تھا، کلاؤڈ پر
+  // جاتا ہی نہیں تھا؛ اگلی خودکار تازہ کاری پرانا بقایا واپس لے آتی۔ اب: (1) پرانے بلوں کا باقی بھی کم ہو،
+  // (2) نقد حصہ کیش میں، (3) ادائیگی کا ریکارڈ، (4) کسٹمر + بل + کیش تینوں فوراً کلاؤڈ پر ----------
+  pauseCloudPolling(10000);
+  let _left = entry.amount - excess;
+  invoicesData.filter(inv => inv.customer_id === c.customer_id && getInvoiceAmountDue(inv) > 0 && inv.status !== 'voided')
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    .forEach(inv => { if(_left <= 0) return; const d = getInvoiceAmountDue(inv); const ap = Math.min(d, _left); inv.amount_due = d - ap; _left -= ap; });
+  const _cashPart = getRecoverySplit(entry).filter(m => m.method === 'cash').reduce((a, m) => a + (Number(m.amount) || 0), 0);
+  if(_cashPart > 0) financeDummy.cashInHand += _cashPart;
+  try{
+    recordPaymentEntry({
+      direction: 'in', party_type: 'customer', party_id: c.customer_id, party_name: c.name,
+      amount: entry.amount, balance_before: c.total_receivable + (entry.amount - excess), balance_after: c.total_receivable,
+      method: recoverySplitLabel(entry) || 'Cash',
+      note: `ریکوری لسٹ — ${entry.employeeName}${entry.note ? ' — 📝 ' + entry.note : ''}${excess > 0 ? ' — 💳 Rs. ' + excess.toLocaleString() + ' والٹ میں' : ''}`
+    });
+  }catch(e){}
+
   entry.status = 'confirmed';
   entry.confirmedAt = new Date().toISOString();
   persistAllData();
+  pushCustomersToCloud();
+  pushInvoicesToCloud();
+  pushFinanceToCloud();
   pushRecoveryListToCloud(); // ---------- کلاؤڈ پر بھی "confirmed" حالت اپڈیٹ ہو جائے ----------
   renderRecoveryListAdminView();
 
@@ -34177,29 +34225,13 @@ let customersPollTimer = null;
 async function pushCustomersToCloud(){
   saveToStorage('customers', customersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
   saveToStorage('nextCustomerId', nextCustomerId);
-  // ---------- 🛡️ FM299TU#258 (صدام کی ہدایت): نئے فون پر ڈیفالٹ کسٹمر (یا ان میں سے کچھ ڈیلیٹ کر کے بچی لسٹ)
-  // کبھی کلاؤڈ پر نہ بھیجیں — ورنہ اصل کسٹمر لسٹ مٹ سکتی ہے۔ ایسی حالت میں پہلے کلاؤڈ سے منگوائیں ----------
+  // ---------- 🛡️ FM299TU#258: صرف ڈیفالٹ کسٹمر والی فہرست کبھی کلاؤڈ پر نہیں ----------
   const onlySeedOrLess = customersData.length <= CUSTOMERS_SEED_DATA.length &&
     customersData.every(c => CUSTOMERS_SEED_DATA.some(sd => sd.customer_id === c.customer_id && sd.name === c.name));
-  if(onlySeedOrLess){
-    console.warn('🛡️ صرف ڈیفالٹ کسٹمر — کلاؤڈ پر بھیجنا روک دیا گیا');
-    AppState.settings.customersPendingSync = false;
-    return false;
-  }
+  if(onlySeedOrLess){ AppState.settings.customersPendingSync = false; return false; }
   try{
-    const res = await authFirestoreFetch(`${CUSTOMERS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          json: { stringValue: JSON.stringify(customersData) },
-          nextCustomerId: { integerValue: String(nextCustomerId) },
-          updatedAt: { integerValue: String(Date.now()) }
-        }
-      })
-    });
-    const ok = !!(res && res.ok);
-    AppState.settings.customersPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    const ok = await _pushMerged(_custCfg()); // 🔗 FM299TU#259: ملاپ کے ساتھ — کسی فون کی وصولی/ادائیگی نہیں مٹے گی
+    AppState.settings.customersPendingSync = !ok;
     persistAllData();
     return ok;
   }catch(e){
@@ -34222,44 +34254,10 @@ function isCloudPollingPaused(){
 }
 
 async function fetchCustomersFromCloud(silent){
-  if(!silent && isCloudPollingPaused()) return false; // ---------- خاموش (پس منظر) پولنگ ہی روکیں — دستی ری فریش کو نہ روکیں ----------
-  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): اصل خطرناک خرابی یہیں ملی! پرانا کوڈ اگر customersPendingSync
-  // فلیگ کہیں پہلے (مثلاً براؤزر ڈیٹا صاف ہونے کے بعد پہلی بار آفلائن ناکامی پر) true پھنس جاتا تو یہ فنکشن
-  // ہمیشہ کے لیے صرف "push" کرتا رہتا — یعنی خالی/ڈیفالٹ (seed) ڈیٹا بار بار کلاؤڈ پر بھیج کر اصل محفوظ شدہ
-  // کسٹمر ڈیٹا کو اوور رائٹ کر دیتا! اب حفاظتی چیک: اگر مقامی ڈیٹا صرف وہی 3 خالی seed کسٹمر ہیں (یعنی
-  // حقیقی ڈیٹا لگتا ہی نہیں)، تو کبھی push نہ کریں — سیدھا کلاؤڈ سے pull کی کوشش کریں ---------- -->
-  const looksLikeUntouchedSeed = customersData.length <= CUSTOMERS_SEED_DATA.length &&
-    customersData.every(c => CUSTOMERS_SEED_DATA.some(s => s.customer_id === c.customer_id && s.name === c.name));
-  if(AppState.settings.customersPendingSync && !looksLikeUntouchedSeed){
-    const pushed = await pushCustomersToCloud();
-    if(pushed) return true;
-    return false;
-  }
+  if(!silent && isCloudPollingPaused()) return false;
   try{
-    const res = await authFirestoreFetch(`${CUSTOMERS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
-    if(!res.ok) return false;
-    const doc = await res.json();
-    const jsonStr = doc.fields?.json?.stringValue;
-    if(!jsonStr) return false;
-    const cloudCustomers = JSON.parse(jsonStr);
-    if(!Array.isArray(cloudCustomers)) return false;
-    // ---------- 🔒🔒 صدام کی ہدایت (FM13SEPSU): اصل جڑ — یہ فنکشن ہر 12 سیکنڈ بعد خودکار چلتا ہے (پولنگ) اور
-    // بغیر کسی چیک کے کلاؤڈ کا ڈیٹا مقامی ڈیٹا پر مکمل overwrite کر دیتا تھا! اگر کلاؤڈ پر پرانا/خراب/کم ڈیٹا
-    // پڑا ہو (چاہے ایک بار غلطی سے وہاں گیا ہو)، تو یہ ہر 12 سیکنڈ میں دوبارہ صحیح مقامی ڈیٹا کو مٹا کر اسی
-    // خراب ڈیٹا سے بدل دیتا — یہی وہ اصل وجہ تھی جس سے کسٹمر بار بار غائب ہوتے، بحال ہوتے، پھر چند منٹ بعد
-    // دوبارہ غائب ہو جاتے۔ اب حفاظتی اصول: اگر مقامی ڈیٹا حقیقی لگتا ہے (خالی seed سے زیادہ) اور کلاؤڈ کا
-    // ڈیٹا اس سے واضح طور پر کم ہے، تو overwrite بالکل نہ کریں — یہ مقامی ڈیٹا کو محفوظ رکھتا ہے ---------- -->
-    const localLooksReal = customersData.length > CUSTOMERS_SEED_DATA.length;
-    if(localLooksReal && cloudCustomers.length < customersData.length){
-      console.warn('⚠️ کلاؤڈ کسٹمر ڈیٹا مقامی ڈیٹا سے کم ہے — محفوظ رہنے کے لیے overwrite روک دیا گیا');
-      return false;
-    }
-    customersData = cloudCustomers;
-    const cloudNextId = parseInt(doc.fields?.nextCustomerId?.integerValue || '0');
-    if(cloudNextId > nextCustomerId) nextCustomerId = cloudNextId;
-    saveToStorage('customers', customersData);
-    saveToStorage('nextCustomerId', nextCustomerId);
+    const ok = await _fetchMerged(_custCfg()); // 🔗 FM299TU#259: اندھا اوور رائٹ نہیں — ملاپ
+    if(!ok) return false;
     if(!silent){
       if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList();
       if(typeof renderCustomerHomeScreen === 'function' && AppState.currentRole === 'customer') renderCustomerHomeScreen();
@@ -34302,87 +34300,32 @@ let suppliersPollTimer = null;
 async function pushSuppliersToCloud(){
   saveToStorage('suppliers', suppliersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
   saveToStorage('nextSupplierId', nextSupplierId);
+  const onlySeed = suppliersData.length <= SUPPLIERS_SEED_DATA.length &&
+    suppliersData.every(s => SUPPLIERS_SEED_DATA.some(sd => sd.supplier_id === s.supplier_id && sd.name === s.name));
+  if(onlySeed){ AppState.settings.suppliersPendingSync = false; return false; } // 🛡️ ڈیفالٹ فہرست کبھی کلاؤڈ پر نہیں
   try{
-    // ---------- 🔗🛡️ صدام کی ہدایت (24 ستمبر، سپلائر ہم آہنگی فکس): پراڈکٹس کی طرح یہاں بھی وہی خطرہ —
-    // اگر دو فون ایک ساتھ سپلائر/PO/واجب الادا میں تبدیلی کریں تو پش کرنے والا آخری فون کلاؤڈ کا پورا ریکارڈ
-    // بدل دیتا تھا، دوسرے فون کی نئی تبدیلی (مثلاً ابھی موصول شدہ شپمنٹ) مٹ جاتی۔ اب پش سے پہلے کلاؤڈ کی تازہ
-    // کاپی منگوا کر جو سپلائر صرف کلاؤڈ پر ہیں (اس فون تک ابھی نہیں پہنچے) وہ ملا کر ہی بھیجی جاتی ہے ---------- -->
-    try{
-      const cloudPeek = await authFirestoreFetch(`${SUPPLIERS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-      if(cloudPeek && cloudPeek.ok){
-        const cloudPeekDoc = await cloudPeek.json();
-        const cloudPeekStr = cloudPeekDoc.fields?.json?.stringValue;
-        if(cloudPeekStr){
-          const cloudPeekArr = JSON.parse(cloudPeekStr);
-          if(Array.isArray(cloudPeekArr)){
-            const localIds = new Set(suppliersData.map(s => s.supplier_id));
-            const cloudOnlyItems = cloudPeekArr.filter(s => !localIds.has(s.supplier_id));
-            if(cloudOnlyItems.length){
-              suppliersData = [...suppliersData, ...cloudOnlyItems];
-              saveToStorage('suppliers', suppliersData);
-            }
-          }
-        }
-      }
-    }catch(peekErr){ /* کلاؤڈ سے موازنہ نہ ہو سکے تو بھی مقامی ڈیٹا بھیج دیں گے، بہتر ہے رک نہ جائیں ---------- */ }
-    const res = await authFirestoreFetch(`${SUPPLIERS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          json: { stringValue: JSON.stringify(suppliersData) },
-          nextSupplierId: { integerValue: String(nextSupplierId) },
-          updatedAt: { integerValue: String(Date.now()) }
-        }
-      })
-    });
-    const ok = !!(res && res.ok);
-    AppState.settings.suppliersPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    const ok = await _pushMerged(_supCfg()); // 🔗 FM299TU#259: ملاپ کے ساتھ
+    AppState.settings.suppliersPendingSync = !ok;
     persistAllData();
     return ok;
   }catch(e){
     AppState.settings.suppliersPendingSync = true;
     persistAllData();
-    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+    return false;
   }
 }
 
 async function fetchSuppliersFromCloud(silent){
   if(!silent && isCloudPollingPaused()) return false;
-  // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): کسٹمر والی خرابی یہاں بھی — اگر مقامی seed جیسا (خالی) ڈیٹا ہو
-  // تو کبھی push نہ کریں، سیدھا pull کی کوشش کریں (ورنہ سٹک فلیگ خالی ڈیٹا سے کلاؤڈ کا اصل ڈیٹا اوور رائٹ کر دیتا) ---------- -->
-  const localSuppliersLookSeed = suppliersData.length <= SUPPLIERS_SEED_DATA.length &&
-    suppliersData.every(s => SUPPLIERS_SEED_DATA.some(sd => sd.supplier_id === s.supplier_id && sd.name === s.name));
-  if(AppState.settings.suppliersPendingSync && !localSuppliersLookSeed){
-    const pushed = await pushSuppliersToCloud();
-    if(pushed) return true;
-    return false;
-  }
   try{
-    const res = await authFirestoreFetch(`${SUPPLIERS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
-    if(!res.ok) return false;
-    const doc = await res.json();
-    const jsonStr = doc.fields?.json?.stringValue;
-    if(!jsonStr) return false;
-    const cloudSuppliers = JSON.parse(jsonStr);
-    if(!Array.isArray(cloudSuppliers)) return false;
-    // ---------- 🔒🛡️ صدام کی ہدایت (24 ستمبر، سپلائر ہم آہنگی فکس): پراڈکٹس کی طرح، "چھوٹا ہو تو مسترد کریں"
-    // کی بجائے اب دونوں فہرستیں ملا دی جاتی ہیں — کلاؤڈ بنیاد، اور جو سپلائر صرف مقامی طور پر موجود ہیں وہ
-    // ساتھ شامل — کسی کا ڈیٹا گم نہیں ہوگا ---------- -->
-    const cloudIdsNow = new Set(cloudSuppliers.map(s => s.supplier_id));
-    const localOnlySuppliers = suppliersData.filter(s => !cloudIdsNow.has(s.supplier_id));
-    suppliersData = localOnlySuppliers.length ? [...cloudSuppliers, ...localOnlySuppliers] : cloudSuppliers;
-    const cloudNextId = parseInt(doc.fields?.nextSupplierId?.integerValue || '0');
-    if(cloudNextId > nextSupplierId) nextSupplierId = cloudNextId;
-    saveToStorage('suppliers', suppliersData);
-    saveToStorage('nextSupplierId', nextSupplierId);
+    const ok = await _fetchMerged(_supCfg()); // 🔗 FM299TU#259: ملاپ
+    if(!ok) return false;
     if(!silent){
       if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList();
     }
     return true;
   }catch(e){
-    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+    return false;
   }
 }
 
@@ -34478,6 +34421,7 @@ function _mergeObj(b, l, r, isVariant){
   new Set([...Object.keys(r), ...Object.keys(l)]).forEach(f => {
     if(f === 'variants' || (isVariant && (f === 'chalans' || f === 'nextChalanNo' || f === 'image'))) return;
     if(isVariant && f === 'reserved'){ m[f] = r[f]; return; }
+    if(!isVariant && f === 'serial_no' && r[f] !== undefined && !(typeof AppState !== 'undefined' && AppState.currentRole === 'admin')){ m[f] = r[f]; return; } // 🔒 FM299TU#259: سیریل صرف ایڈمن کا
     if(isVariant && _SYNC_COUNTER_FIELDS.includes(f)){
       m[f] = Math.round(((Number(r[f])||0) + (Number(l[f])||0) - (Number(b[f])||0)) * 100) / 100;
       return;
@@ -34509,6 +34453,124 @@ function _mergeList(bArr, lArr, rArr, idField, mergeItem){
   return out;
 }
 function stripOne(x){ if(!x) return x; const {image, ...rest} = x; return rest; }
+
+
+/* =====================================================================
+   🔗🛡️ FM299TU#259 (صدام کی ہدایت): کسٹمر، بیوپاری اور بلوں کا "فول پروف" حساب
+   اصل خرابی: یہ تینوں فہرستیں پورے کی پوری کلاؤڈ پر لکھی جاتی تھیں (full overwrite)۔ جس فون کے پاس پرانی
+   فہرست ہوتی (مثلاً ملازم کا فون) وہ کچھ بھی محفوظ کرتا تو ایڈمن کی ابھی درج کی ہوئی وصولی/ادائیگی مٹ جاتی —
+   کھاتا دوبارہ پرانی رقم پر آ جاتا۔ اب پراڈکٹس کی طرح "تین طرفہ ملاپ": ہر فون صرف وہی بدلتا ہے جو اس نے
+   واقعی بدلا؛ رقمیں (بقایا، والٹ، واجب الادا، بل کا باقی) "فرق" کے طور پر جمع ہوتی ہیں — کسی فون کی تبدیلی نہیں مٹتی؛
+   لین دین کی تاریخ (والٹ/لیجر) دونوں طرف کی ملا دی جاتی ہے۔ سیریل نمبر صرف ایڈمن کا فون بدل سکتا ہے
+   ===================================================================== */
+function _mergeHistArr(b, l, r){
+  const k = x => _stableStr(x);
+  const bs = new Set((b || []).map(k)), ls = new Set((l || []).map(k)), rs = new Set((r || []).map(k));
+  const localNew = (l || []).filter(x => !bs.has(k(x)) && !rs.has(k(x)));
+  const remoteKeep = (r || []).filter(x => !(bs.has(k(x)) && !ls.has(k(x)))); // اس فون نے حذف کیا ہو تو نکال دیں
+  return [...localNew.map(_syncClone), ...remoteKeep.map(_syncClone)];
+}
+function _mergeRecordsThreeWay(base, local, remote, idField, counters, hists, seedArr){
+  const isSeed = x => Array.isArray(seedArr) && seedArr.some(sd => sd[idField] === x[idField] && sd.name === x.name);
+  if(!Array.isArray(base)){
+    const ids = new Set(remote.map(x => x[idField]));
+    return [..._syncClone(remote), ...local.filter(x => !ids.has(x[idField]) && !isSeed(x)).map(_syncClone)];
+  }
+  const isAdmin = (typeof AppState !== 'undefined' && AppState.currentRole === 'admin');
+  return _mergeList(base, local, remote, idField, (b, l, r) => {
+    if(!b) b = r;
+    const m = {};
+    new Set([...Object.keys(r), ...Object.keys(l)]).forEach(f => {
+      if(counters.includes(f)){
+        m[f] = Math.round(((Number(r[f])||0) + (Number(l[f])||0) - (Number(b[f])||0)) * 100) / 100;
+      } else if(hists.includes(f)){
+        m[f] = _mergeHistArr(b[f], l[f], r[f]);
+      } else if(f === 'serial_no' && !isAdmin && r[f] !== undefined){
+        m[f] = r[f]; // 🔒 سیریل صرف ایڈمن کا
+      } else {
+        m[f] = _syncEq(l[f], b[f]) ? _syncClone(r[f]) : _syncClone(l[f]);
+      }
+    });
+    return m;
+  });
+}
+// ---------- مشترکہ بھیجنا: کلاؤڈ پڑھو → ملاؤ → شرط کے ساتھ لکھو (اگر بیچ میں کسی نے لکھا ہو تو دوبارہ) ----------
+async function _pushMerged(cfg){
+  let ok = false;
+  for(let attempt = 0; attempt < 3 && !ok; attempt++){
+    let updateTime = null;
+    const peek = await authFirestoreFetch(`${cfg.path}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(peek && peek.ok){
+      const doc = await peek.json();
+      updateTime = doc.updateTime || null;
+      const str = doc.fields?.json?.stringValue;
+      if(str){
+        const remote = JSON.parse(str);
+        if(Array.isArray(remote)) cfg.set(_mergeRecordsThreeWay(cfg.getBase(), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed));
+      }
+      if(cfg.onDoc) cfg.onDoc(doc);
+    } else if(!(peek && peek.status === 404)){
+      throw new Error('peek failed');
+    }
+    const pre = updateTime ? `&currentDocument.updateTime=${encodeURIComponent(updateTime)}` : '';
+    const fields = Object.assign({ json: { stringValue: JSON.stringify(cfg.get()) }, updatedAt: { integerValue: String(Date.now()) } }, cfg.extra ? cfg.extra() : {});
+    const res = await authFirestoreFetch(`${cfg.path}?key=${FIREBASE_API_KEY}${pre}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields })
+    });
+    ok = !!(res && res.ok);
+    if(ok) cfg.setBase(cfg.get());
+    else if(!(res && (res.status === 400 || res.status === 409 || res.status === 412))) break;
+  }
+  cfg.save();
+  return ok;
+}
+// ---------- مشترکہ لینا: کلاؤڈ پڑھو → ملاؤ (کبھی اندھا دھند اوور رائٹ نہیں) → اسی فون کی تبدیلی ہو تو بھیجو ----------
+async function _fetchMerged(cfg){
+  const res = await authFirestoreFetch(`${cfg.path}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+  if(res.status === 404) return false;
+  if(!res.ok) return false;
+  const doc = await res.json();
+  const str = doc.fields?.json?.stringValue;
+  if(!str) return false;
+  const remote = JSON.parse(str);
+  if(!Array.isArray(remote)) return false;
+  const merged = _mergeRecordsThreeWay(cfg.getBase(), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
+  const hadLocal = !_syncEq(merged, remote);
+  cfg.set(merged);
+  cfg.setBase(remote);
+  if(cfg.onDoc) cfg.onDoc(doc);
+  cfg.save();
+  if(hadLocal) setTimeout(() => { try{ cfg.push(); }catch(e){} }, 400);
+  return true;
+}
+let customersSyncBase = loadFromStorage('customersSyncBase', null);
+let suppliersSyncBase = loadFromStorage('suppliersSyncBase', null);
+let invoicesSyncBase = loadFromStorage('invoicesSyncBase', null);
+function _custCfg(){
+  return { path: CUSTOMERS_DOC_PATH, id: 'customer_id', counters: ['total_receivable','wallet_balance'], hists: ['walletHistory'], seed: CUSTOMERS_SEED_DATA,
+    get: () => customersData, set: v => { customersData = v; },
+    getBase: () => customersSyncBase, setBase: v => { customersSyncBase = _syncClone(v); try{ saveToStorage('customersSyncBase', customersSyncBase); }catch(e){} },
+    extra: () => ({ nextCustomerId: { integerValue: String(nextCustomerId) } }),
+    onDoc: d => { const n = parseInt(d.fields?.nextCustomerId?.integerValue || '0'); if(n > nextCustomerId) nextCustomerId = n; },
+    save: () => { saveToStorage('customers', customersData); saveToStorage('nextCustomerId', nextCustomerId); },
+    push: () => pushCustomersToCloud() };
+}
+function _supCfg(){
+  return { path: SUPPLIERS_DOC_PATH, id: 'supplier_id', counters: ['total_payable','wallet_balance'], hists: ['ledgerHistory','purchaseHistory'], seed: SUPPLIERS_SEED_DATA,
+    get: () => suppliersData, set: v => { suppliersData = v; },
+    getBase: () => suppliersSyncBase, setBase: v => { suppliersSyncBase = _syncClone(v); try{ saveToStorage('suppliersSyncBase', suppliersSyncBase); }catch(e){} },
+    extra: () => ({ nextSupplierId: { integerValue: String(nextSupplierId) } }),
+    onDoc: d => { const n = parseInt(d.fields?.nextSupplierId?.integerValue || '0'); if(n > nextSupplierId) nextSupplierId = n; },
+    save: () => { saveToStorage('suppliers', suppliersData); saveToStorage('nextSupplierId', nextSupplierId); },
+    push: () => pushSuppliersToCloud() };
+}
+function _invCfg(){
+  return { path: INVOICES_DOC_PATH, id: 'invoice_id', counters: ['amount_due'], hists: [], seed: null,
+    get: () => invoicesData, set: v => { invoicesData = v; },
+    getBase: () => invoicesSyncBase, setBase: v => { invoicesSyncBase = _syncClone(v); try{ saveToStorage('invoicesSyncBase', invoicesSyncBase); }catch(e){} },
+    save: () => { saveToStorage('invoices', invoicesData); },
+    push: () => pushInvoicesToCloud() };
+}
 
 // ---------- اصل ملاپ: base = آخری معلوم کلاؤڈ حالت، local = یہ فون، remote = ابھی کا کلاؤڈ ---------- -->
 function mergeProductsThreeWay(base, local, remote){
@@ -34681,6 +34743,63 @@ async function fetchProductsFromCloud(silent){
 // میں محفوظ۔ جو فون اسے آن کرے، اسی فون پر localStorage میں ایک مقامی چھوٹ (maintenanceLocalBypass) بھی محفوظ
 // ہو جاتی ہے تاکہ خود ڈویلپر کو اوورلے نظر نہ آئے، باقی سب فونز پر (جن کے پاس یہ چھوٹ نہیں) اوورلے فوراً نظر
 // آئے گی۔ آف کرتے ہی اگلے پول (~4 سیکنڈ) پر سب فونز سے خودکار غائب ہو جائے گی ---------- -->
+
+/* =====================================================================
+   💾 FM299TU#259 (صدام کی ہدایت): سیریل نمبر کی "لاک شدہ محفوظ کاپی"
+   ایڈمن جب اپنی ترتیب ٹھیک کر لے تو "موجودہ ترتیب محفوظ کریں" دبائے — سبزیوں، کسٹمرز اور بیوپاریوں تینوں کے
+   سیریل نمبر + سبزیوں کی دستی ترتیب ایک کاپی میں (1) اسی فون، (2) کلاؤڈ کے الگ خانے، (3) گوگل ڈرائیو بیک اپ
+   میں چلے جاتے ہیں۔ کبھی ترتیب خراب ہو تو "محفوظ ترتیب بحال کریں" — ایک بٹن سے سب واپس، اور سب فونز پر بھی
+   ===================================================================== */
+const SERIAL_MASTER_DOC_PATH = 'shopData/serialMaster';
+function _buildSerialMaster(){
+  const map = (arr, id) => { const o = {}; (arr || []).forEach(x => { if(x && x[id] != null && x.serial_no != null) o[x[id]] = x.serial_no; }); return o; };
+  return {
+    savedAt: new Date().toISOString(),
+    by: (AppState.currentUser && AppState.currentUser.name) || 'admin',
+    products: map(productsData, 'product_id'),
+    customers: map(customersData, 'customer_id'),
+    suppliers: map(suppliersData, 'supplier_id'),
+    manualOrder: loadFromStorage(PRODUCT_MANUAL_ORDER_KEY, []) || []
+  };
+}
+async function saveSerialMaster(){
+  if(AppState.currentRole !== 'admin'){ alert('یہ کام صرف ایڈمن کر سکتا ہے'); return; }
+  const m = _buildSerialMaster();
+  saveToStorage('serialMaster', m);
+  let cloudOk = false;
+  try{
+    const res = await authFirestoreFetch(`${SERIAL_MASTER_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { json: { stringValue: JSON.stringify(m) }, updatedAt: { integerValue: String(Date.now()) } } })
+    });
+    cloudOk = !!(res && res.ok);
+  }catch(e){}
+  try{ if(typeof backupToGoogleDrive === 'function') backupToGoogleDrive(true); }catch(e){}
+  alert(`💾 ترتیب محفوظ ہو گئی\n\nسبزیاں: ${Object.keys(m.products).length}\nکسٹمر: ${Object.keys(m.customers).length}\nبیوپاری: ${Object.keys(m.suppliers).length}\n\n📱 اس فون میں ✅\n☁️ کلاؤڈ میں ${cloudOk ? '✅' : '⏳ (نیٹ آنے پر دوبارہ محفوظ کریں)'}\n📂 گوگل ڈرائیو بیک اپ میں ✅`);
+}
+async function restoreSerialMaster(){
+  if(AppState.currentRole !== 'admin'){ alert('یہ کام صرف ایڈمن کر سکتا ہے'); return; }
+  let m = null;
+  try{
+    const res = await authFirestoreFetch(`${SERIAL_MASTER_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(res && res.ok){ const d = await res.json(); const s = d.fields?.json?.stringValue; if(s) m = JSON.parse(s); }
+  }catch(e){}
+  if(!m) m = loadFromStorage('serialMaster', null);
+  if(!m){ alert('ابھی تک کوئی ترتیب محفوظ نہیں کی گئی۔ پہلے "💾 موجودہ ترتیب محفوظ کریں" دبائیں۔'); return; }
+  if(!confirm(`↩️ ${new Date(m.savedAt).toLocaleString('en-GB')} کو محفوظ کی گئی ترتیب بحال کریں؟\n\nسبزیوں، کسٹمرز اور بیوپاریوں کے سیریل نمبر اسی ترتیب پر واپس آ جائیں گے (باقی ڈیٹا نہیں بدلے گا)۔`)) return;
+  await fetchProductsFromCloud(true); await fetchCustomersFromCloud(true); await fetchSuppliersFromCloud(true);
+  const apply = (arr, id, map) => { let n = 0; (arr || []).forEach(x => { const v = map[x[id]]; if(v != null && x.serial_no !== v){ x.serial_no = v; n++; } }); return n; };
+  const np = apply(productsData, 'product_id', m.products || {});
+  const nc = apply(customersData, 'customer_id', m.customers || {});
+  const ns = apply(suppliersData, 'supplier_id', m.suppliers || {});
+  if(Array.isArray(m.manualOrder)) saveToStorage(PRODUCT_MANUAL_ORDER_KEY, m.manualOrder);
+  saveProductsLight();
+  await pushProductsToCloud(); await pushCustomersToCloud(); await pushSuppliersToCloud();
+  try{ renderStockAdjustmentScreen(); }catch(e){}
+  try{ if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList(); }catch(e){}
+  alert(`✅ ترتیب بحال ہو گئی\n\nسبزیاں درست: ${np}\nکسٹمر درست: ${nc}\nبیوپاری درست: ${ns}\n\nباقی فونز پر چند سیکنڈ میں خود درست ہو جائے گی۔`);
+}
+
 const MAINTENANCE_DOC_PATH = 'shopData/maintenance';
 let _maintenanceLastKnownOn = loadFromStorage('maintenanceLastOn', null); // آخری معلوم حالت — ایپ کھلتے ہی (نیٹ آنے سے پہلے بھی) لاگو
 let _maintenanceLastCheck = { ts: 0, err: '' };
@@ -34974,53 +35093,28 @@ let invoicesPollTimer = null;
 async function pushInvoicesToCloud(){
   saveToStorage('invoices', invoicesData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
   try{
-    const res = await authFirestoreFetch(`${INVOICES_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          json: { stringValue: JSON.stringify(invoicesData) },
-          updatedAt: { integerValue: String(Date.now()) }
-        }
-      })
-    });
-    const ok = !!(res && res.ok);
-    AppState.settings.invoicesPendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
+    const ok = await _pushMerged(_invCfg()); // 🔗 FM299TU#259: ملاپ — بل کا باقی (amount_due) بھی فرق کے طور پر
+    AppState.settings.invoicesPendingSync = !ok;
     persistAllData();
     return ok;
   }catch(e){
     AppState.settings.invoicesPendingSync = true;
     persistAllData();
-    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
+    return false;
   }
 }
 
 async function fetchInvoicesFromCloud(silent){
-  // ---------- اگر اسی فون پر کوئی بل تبدیلی (نیا بل، Void، ڈیلیٹ وغیرہ) ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
-  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
-  if(AppState.settings.invoicesPendingSync){
-    const pushed = await pushInvoicesToCloud();
-    if(pushed) return true;
-    return false;
-  }
   try{
-    const res = await authFirestoreFetch(`${INVOICES_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
-    if(!res.ok) return false;
-    const doc = await res.json();
-    const jsonStr = doc.fields?.json?.stringValue;
-    if(!jsonStr) return false;
-    const cloudInvoices = JSON.parse(jsonStr);
-    if(!Array.isArray(cloudInvoices)) return false;
-    invoicesData = cloudInvoices;
-    saveToStorage('invoices', invoicesData);
+    const ok = await _fetchMerged(_invCfg()); // 🔗 FM299TU#259: ملاپ
+    if(!ok) return false;
     if(!silent){
       if(typeof renderBillHistory === 'function' && currentScreenName === 'billhistory') renderBillHistory();
       if(typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner();
     }
     return true;
   }catch(e){
-    return false; // ---------- آف لائن — موجودہ (مقامی) فہرست پر ہی کام چلے گا ----------
+    return false;
   }
 }
 
@@ -44380,15 +44474,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // ---------- 🔢 صدام کی ہدایت (FM4SEPFR12): سبزیوں کو مستقل سیریل نمبر دیں — پہلی بار نام کی ترتیب سے،
   // اس کے بعد صرف نئے آئٹمز کو خالی نمبر بھریں، پرانے کبھی نہیں بدلتے ---------- -->
-  try{
-    assignInitialProductSerials(); backfillMissingProductSerials(); saveProductsLight();
-    pushProductsToCloud();
-  }catch(e){ console.error('product serial assignment failed', e); }
+  // 🔒 FM299TU#259: یہاں (ایپ کھلتے ہی، لاگ ان سے پہلے) ہر فون سیریل نمبر لگا کر کلاؤڈ پر بھیج دیتا تھا —
+  // ملازم کے نئے فون پر یہی ترتیب خراب کرتا تھا۔ اب یہ کام صرف ایڈمن لاگ ان پر ہوتا ہے (runAdminSerialMaintenance)
   // ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): کسٹمر/سپلائر کو بھی مستقل سیریل نمبر — نئے آئٹمز کو خالی نمبر ملتا ہے ---------- -->
-  try{
-    backfillMissingCustomerSerials(); backfillMissingSupplierSerials();
-    pushCustomersToCloud(); pushSuppliersToCloud();
-  }catch(e){ console.error('party serial assignment failed', e); }
+  // 🔒 FM299TU#259: کسٹمر/سپلائر سیریل بھی صرف ایڈمن لاگ ان پر
   // ---------- 💼 صدام کے پرانے کاغذی رجسٹر سے 166 کسٹمرز کا سابقہ بقایہ ایک بار خودکار شامل کریں (FM3SEPTH10) ----------
   try{ seedInitialLedgerCustomersOnce(); }catch(e){ console.error('seedInitialLedgerCustomersOnce failed', e); }
   // ---------- 💼 صدام کے پرانے کاغذی رجسٹر سے 14 سپلائرز کا سابقہ بقایہ ایک بار خودکار شامل کریں (FM3SEPTH10) ----------
