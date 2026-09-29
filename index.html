@@ -694,6 +694,21 @@
   tr.otSelRow td:first-child{ box-shadow:inset -6px 0 0 #1d4ed8; }
   tr.otTouchRow > td{ background:#dbeafe !important; }
   tr.otSelRow input.otQtyInput{ border:2.5px solid #1d4ed8 !important; background:#fff !important; color:#0b2a5b !important; }
+  /* ---------- 🧾 FM299TU#262 (صدام کی ہدایت): آرڈر بکنگ — اوپر کے بٹن ایک ہی لائن میں (پہلے آرڈر مکمل، پھر کسٹمر، پھر منڈی سیل
+     ریکارڈ، پھر سٹاک رپورٹ) تاکہ جگہ بچے؛ جدول کی ہر قطار اوپر سے نیچے موٹی + قطاروں کے درمیان فاصلہ، تاکہ انگلی
+     غلطی سے دوسری قطار کے بٹن پر نہ لگے۔ چوڑائی/کالم وہی — کوئی افقی سکرول نہیں ---------- */
+  #otTopBar > div:last-child{ flex-wrap:nowrap !important; justify-content:stretch !important; gap:5px !important; width:100%; direction:rtl; }
+  #otTopBar > div:last-child > button{ flex:1 1 0; min-width:0; padding:9px 3px !important; font-size:11.5px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #otTopBar > div:last-child > button:nth-child(5){ order:1; }
+  #otTopBar > div:last-child > button:nth-child(4){ order:2; }
+  #otTopBar > div:last-child > button:nth-child(2){ order:3; }
+  #otTopBar > div:last-child > button:nth-child(1){ order:4; }
+  #otTableScrollBox table{ border-spacing:0 7px !important; }
+  #otTableScrollBox tbody td{ padding-top:10px !important; padding-bottom:10px !important; border-top:1px solid #d6dde6 !important; border-bottom:1px solid #d6dde6 !important; }
+  #otTableScrollBox tbody td:first-child{ border-right:1px solid #d6dde6 !important; border-radius:0 10px 10px 0; }
+  #otTableScrollBox tbody td:last-child{ border-left:1px solid #d6dde6 !important; border-radius:10px 0 0 10px; }
+  #otTableScrollBox tbody input.otQtyInput{ min-height:36px; }
+  #otTableScrollBox tbody button{ min-height:36px; }
   .screen{display:none; animation:fadeIn .25s ease;}
   .screen.active{display:block;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
@@ -6005,6 +6020,8 @@
           <option value="lowest">📉 کم بقایہ</option>
           <option value="newest">🆕 نیا کسٹمر</option>
           <option value="oldest">📜 پرانا کسٹمر</option>
+          <option value="shortFirst">⚠️ کم وصولی والے اوپر</option>
+          <option value="shortOnly">⚠️ صرف کم وصولی والے</option>
         </select>
         <select id="drFontSelect" onchange="renderDailyRecoveryScreen()" title="فونٹ" style="width:130px; padding:6px 8px; border:1px solid #dbe1ea; border-radius:8px; font-size:11.5px;"></select>
         <select id="drNumAlignSelect" onchange="renderDailyRecoveryScreen()" title="رقموں کی سیدھ" style="width:100px; padding:6px 8px; border:1px solid #dbe1ea; border-radius:8px; font-size:11.5px;">
@@ -6021,6 +6038,8 @@
         <button type="button" onclick="shareDailyRecoveryImage()" style="padding:6px 10px; border-radius:8px; border:none; background:#25D366; color:#fff; font-size:11.5px; font-weight:700; cursor:pointer;">📤 واٹس ایپ شیئر</button>
       </div>
 
+      <!-- ---------- 📊 FM299TU#261 (صدام کی ہدایت): آج کی ریکوری کا خلاصہ — سب سے اوپر ---------- -->
+      <div id="drSummary" dir="rtl" style="margin:0 0 10px;"></div>
       <div id="drTableWrap" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
         <table id="drTable" style="border-collapse:collapse; font-size:12.5px;">
           <thead>
@@ -6031,7 +6050,9 @@
               <th style="padding:8px 6px; white-space:nowrap;">آج کا مال</th>
               <th style="padding:8px 6px; white-space:nowrap;">ٹوٹل بقایہ</th>
               <th style="padding:8px 6px; white-space:nowrap;">آج کی ریکوری</th>
+              <th style="padding:8px 6px; white-space:nowrap; background:#b91c1c;">⚠️ کم وصولی</th>
               <th style="padding:8px 6px; white-space:nowrap;">تازہ مکمل بقایہ</th>
+              <th class="drNoPrint" style="padding:8px 6px; white-space:nowrap;">رابطہ</th>
               <th style="padding:8px 6px; width:100%;">یادداشت / نوٹس</th>
             </tr>
           </thead>
@@ -8702,7 +8723,7 @@ function getDeveloperContact(){
 // 🆕 FM28SEPMO0835PM: بلال فروٹ فارم کی ایک بار والی صفائی کا کوڈ بھی مکمل ہٹا دیا — اب اس کا کوئی نشان باقی نہیں
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM299TU#259'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM299TU#262'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -24087,8 +24108,8 @@ function renderCustFilterBar(){
         <input type="checkbox" ${f.todayOnly?'checked':''} onchange="setCustFilter('todayOnly', this.checked)" style="margin:0;"> 🔥 آج کے خریدار
       </label>
     </div>
-    <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/کھوہ کھاتے فلٹر مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
-    <div style="display:none; gap:6px;">
+    <!-- ---------- 🔓 FM299TU#260 (صدام کی ہدایت): ایڈمن کے لیے حاضر/کھوہ کھاتے نظام دوبارہ بحال ---------- -->
+    <div style="display:${AppState.currentRole === 'admin' ? 'flex' : 'none'}; gap:6px;">
       <button onclick="setCustFilter('showDormant', false)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${!f.showDormant?'#134e2c':'#f1f5f9'}; color:${!f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🟢 حاضر موجود (${customersData.filter(c => !c.isDormant).length})</button>
       <button onclick="setCustFilter('showDormant', true)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${f.showDormant?'#78350f':'#f1f5f9'}; color:${f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🪦 کھوہ کھاتے (${customersData.filter(c => !!c.isDormant).length})</button>
     </div>
@@ -24104,8 +24125,9 @@ function setCustFilter(key, val){
 // ---------- فہرست پر فلٹر + ترتیب لاگو کریں — ہر جگہ (Customers/Recovery/Order Taking) اسی سے گزریں ----------
 function applyCustomerCategorization(list){
   const f = customerFilterState;
-  // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/کھوہ کھاتے فلٹر مکمل ہائیڈ — ہمیشہ سب کسٹمر ---------- -->
-  let out = list.slice();
+  // ---------- 🔓 FM299TU#260: حاضر/کھوہ کھاتے دوبارہ بحال — ایڈمن ٹیب سے چنتا ہے، ملازم کو صرف حاضر کسٹمر ----------
+  const showDormantNow = (AppState.currentRole === 'admin') ? !!f.showDormant : false;
+  let out = list.filter(c => !!c.isDormant === showDormantNow);
   if(f.area !== 'all') out = out.filter(c => c.rateArea === f.area);
   if(f.todayOnly) out = out.filter(c => customerBoughtToday(c.customer_id));
   if(f.sort === 'highest') out.sort((a,b) => (b.total_receivable||0) - (a.total_receivable||0));
@@ -24228,10 +24250,11 @@ function wireCustomerSwipeRows(){
     const hint = row.parentElement && row.parentElement.classList.contains('swipeOuterWrap')
       ? row.parentElement.querySelector('.swipeBgHint') : null;
 
-    let startX = 0, dx = 0, dragging = false;
-    const threshold = 70;
+    let startX = 0, dx = 0, dragging = false, startT = 0;
+    // 🔒 FM299TU#260: کھوہ کھاتے میں بھیجنا جان بوجھ کر لمبا (غلطی سے نہ ہو)، واپس حاضر کرنا آسان
+    const threshold = willBeDormant ? 150 : 70;
     row.addEventListener('pointerdown', e => {
-      startX = e.clientX; dragging = true; dx = 0;
+      startX = e.clientX; dragging = true; dx = 0; startT = Date.now();
       row.style.transition = '';
     });
     row.addEventListener('pointermove', e => {
@@ -24249,7 +24272,7 @@ function wireCustomerSwipeRows(){
       if(!dragging) return;
       dragging = false;
       row.style.transition = 'transform .12s, opacity .12s';
-      if(Math.abs(dx) > threshold){
+      if(Math.abs(dx) > threshold && (!willBeDormant || Date.now() - startT >= 400)){
         row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
         row.style.opacity = '0';
         setTimeout(() => animateAndToggleCustomer(customerId), 130);
@@ -24358,8 +24381,8 @@ function renderPartyList(query = ''){
         rowClickJs: `openCustomerProfile(${c.customer_id})`,
         deleteJs: `deleteCustomer(${c.customer_id})`,
         serialClickJs: `openSerialPicker('customers', ${c.customer_id}, ${c.serial_no ?? 'null'}, '${(c.name||'').replace(/'/g,"\\'")} کا سیریل نمبر')`,
-        // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر سوائپ مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
-        dormantJs: null,
+        // ---------- 🔓 FM299TU#260: ایڈمن کارڈ کو لمبا سرکا کر حاضر ⟷ کھوہ کھاتے کر سکتا ہے ----------
+        dormantJs: isAdmin ? 'toggle' : null,
         isDormant: c.isDormant
       });
     }).join('');
@@ -24628,6 +24651,7 @@ function openCustomerProfile(customerId){
     <button style="background:linear-gradient(155deg,#0f766e,#0b4a45);" onclick="startNewBillForCustomer(${c.customer_id})"><span class="sideIcon">🧾</span><span class="sideLabel">New Bill</span></button>
     <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});"><span class="sideIcon">📥</span><span class="sideLabel">وصولی</span></button>
     <button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustLoanModal(${c.customer_id});"><span class="sideIcon">💸</span><span class="sideLabel">ادھار دیا</span></button>
+    ${AppState.currentRole === 'admin' ? `<button style="background:linear-gradient(155deg,${c.isDormant ? '#22c55e,#15803d' : '#a16207,#78350f'});" onclick="closeProfileModal(); toggleCustomerActiveStatus(${c.customer_id}, ${c.isDormant ? 'true' : 'false'});"><span class="sideIcon">${c.isDormant ? '✅' : '🪦'}</span><span class="sideLabel">${c.isDormant ? 'حاضر کریں' : 'کھوہ کھاتے'}</span></button>` : ''}
     <button style="background:linear-gradient(155deg,#22c55e,#15803d);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});"><span class="sideIcon">➕</span><span class="sideLabel">Wallet</span></button>
     <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
     ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
@@ -27633,7 +27657,6 @@ function renderOtItemsTable(wrap){
   const colgroupHtml = '<colgroup>' + colWidths.map((w,i) => i===1 ? '<col style="width:auto;">' : `<col style="width:${w}px;">`).join('') + '</colgroup>';
   wrap.style.display = 'block';
   wrap.innerHTML = `
-    <div style="text-align:center; margin:2px 0 6px; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:17px; color:#15803d;">🟢 حاضر سبزیاں</div>
     <div id="otTableScrollBox" style="width:100%;max-width:100%;max-height:74vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overflow-anchor:none;border-radius:10px;border:1px solid #dbe1ea;">
       <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:100%;max-width:100%;table-layout:fixed;font-size:12.5px;">
         ${colgroupHtml}
@@ -28646,7 +28669,13 @@ function renderRecoveryListEmployeeView(){
     return;
   }
   const drAll = computeDailyRecoveryRows();
-  list.innerHTML = owing.map(c => buildRlEmployeeCard(c, drAll.find(r => r.c.customer_id === c.customer_id) || {})).join('');
+  // ---------- 📊 FM299TU#261: ملازم کو بھی اوپر آج کی اپنی کل وصولی ----------
+  const _myToday = recoveryListData.filter(e => e.employeeName === (AppState.currentUser?.name) && (e.createdAt || '').split('T')[0] === todayDateKey());
+  const _myTotal = _myToday.reduce((a, e) => a + (Number(e.amount) || 0), 0);
+  const _sumHtml = `<div dir="rtl" style="grid-column:1/-1; background:linear-gradient(135deg,#15803d,#065f46); color:#fff; border-radius:12px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+      <span style="font-weight:800;">📥 آج کی میری کل وصولی (${_myToday.length} گاہک)</span>
+      <span style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:18px; direction:ltr;">Rs. ${_myTotal.toLocaleString()}</span></div>`;
+  list.innerHTML = _sumHtml + owing.map(c => buildRlEmployeeCard(c, drAll.find(r => r.c.customer_id === c.customer_id) || {})).join('');
 }
 // ---------- صرف ایک کارڈ دوبارہ بنائیں (باقی فہرست اور لکھی ہوئی رقمیں ویسی ہی رہیں) ----------
 function rerenderRlCard(customerId){
@@ -28911,15 +28940,22 @@ function computeDailyRecoveryRows(){
       + (c.walletHistory || []).filter(h => h.type === 'cash_given' && h.date === todayStr).reduce((s, h) => s + (h.amount || 0), 0); // 💸 آج کا نقد ادھار بھی
 
     const todayRecoveryEntries = (c.walletHistory || []).filter(h => h.type === 'receivable_collected' && h.date === todayStr);
-    const todayRecovery = todayRecoveryEntries.reduce((s, h) => s + (h.amount || 0), 0);
+    const confirmedRecovery = todayRecoveryEntries.reduce((s, h) => s + (h.amount || 0), 0);
+    // ---------- 🧾 FM299TU#261 (صدام کی ہدایت): ریکوری والے لڑکے کی آج کی وصولی جو ابھی ایڈمن نے کھاتے میں درج نہیں کی
+    // (کچی) وہ بھی "آج کی ریکوری" میں — تاکہ آج کی اصل ریکوری پوری نظر آئے ----------
+    const pendingRecovery = recoveryListData.filter(e => e.customer_id === c.customer_id && e.status === 'pending' && (e.createdAt || '').split('T')[0] === todayStr)
+      .reduce((s, e) => s + (Number(e.amount) || 0), 0);
+    const todayRecovery = confirmedRecovery + pendingRecovery;
 
-    const finalBalance = c.total_receivable || 0;
-    // ---------- سابقہ بقایہ = آج کی ادھار سرگرمی سے پیچھے کا حساب (Final + آج کی ریکوری − آج کا ادھار مال) ----------
-    const openingBalance = finalBalance + todayRecovery - todayGoods;
+    // ---------- سابقہ بقایہ = آج کی ادھار سرگرمی سے پیچھے کا حساب (کھاتہ + آج درج شدہ ریکوری − آج کا ادھار مال) ----------
+    const openingBalance = (c.total_receivable || 0) + confirmedRecovery - todayGoods;
     const totalBalance = openingBalance + todayGoods;
+    const finalBalance = totalBalance - todayRecovery;
+    // ---------- ⚠️ کم وصولی: آج کی خریداری میں سے جتنا کم دیا — صرف دیکھنے کے لیے، کسی جمع/تفریق میں شامل نہیں ----------
+    const shortfall = todayGoods > 0 ? Math.max(0, todayGoods - todayRecovery) : 0;
     const hasToday = todayGoods > 0 || todayRecovery > 0;
 
-    return { c, openingBalance, todayGoods, totalBalance, todayRecovery, finalBalance, hasToday };
+    return { c, openingBalance, todayGoods, totalBalance, todayRecovery, confirmedRecovery, pendingRecovery, finalBalance, shortfall, hasToday };
   });
 }
 
@@ -28978,9 +29014,33 @@ function renderDailyRecoveryScreen(){
   else if(sortMode === 'lowest') rows.sort((a,b) => a.finalBalance - b.finalBalance);
   else if(sortMode === 'newest') rows.sort((a,b) => byCreated(b,a));
   else if(sortMode === 'oldest') rows.sort(byCreated);
+  else if(sortMode === 'shortFirst') rows.sort((a,b) => (b.shortfall - a.shortfall) || (b.hasToday - a.hasToday) || byName(a,b));
+  else if(sortMode === 'shortOnly'){ rows = rows.filter(r => r.shortfall > 0); rows.sort((a,b) => b.shortfall - a.shortfall); }
   else { // ---------- ڈیفالٹ: آج خریداری/ریکوری والے سب سے اوپر، پھر نام کے مطابق ----------
     rows.sort((a,b) => (b.hasToday - a.hasToday) || byName(a,b));
   }
+
+  // ---------- 📊 FM299TU#261: آج کا خلاصہ ----------
+  const allRows = computeDailyRecoveryRows();
+  const sumConf = allRows.reduce((a, r) => a + r.confirmedRecovery, 0);
+  const sumPend = allRows.reduce((a, r) => a + r.pendingRecovery, 0);
+  const sumGoods = allRows.reduce((a, r) => a + r.todayGoods, 0);
+  const shortRows = allRows.filter(r => r.shortfall > 0);
+  const sumShort = shortRows.reduce((a, r) => a + r.shortfall, 0);
+  const numF = "font-family:'Arial Black',Arial,sans-serif; font-weight:900;";
+  const sumBox = (bg, bd, fg, label, val, sub) => `<div style="flex:1; min-width:120px; background:${bg}; border:1.5px solid ${bd}; border-radius:12px; padding:8px 10px; text-align:center;">
+      <div style="font-size:12px; font-weight:800; color:${fg};">${label}</div>
+      <div style="${numF} font-size:19px; color:${fg}; direction:ltr;">Rs. ${Math.round(val).toLocaleString()}</div>
+      ${sub ? `<div style="font-size:10.5px; color:${fg}; opacity:.85;">${sub}</div>` : ''}</div>`;
+  const sumEl = document.getElementById('drSummary');
+  if(sumEl) sumEl.innerHTML = `<div style="display:flex; gap:8px; flex-wrap:wrap;">
+      ${sumBox('#f0fdf4','#86efac','#15803d','📥 آج کی کل ریکوری', sumConf + sumPend, `✅ کھاتے میں ${sumConf.toLocaleString()} • ⏳ کچی ${sumPend.toLocaleString()}`)}
+      ${sumBox('#fff7ed','#fdba74','#c2410c','🛒 آج کا ادھار مال', sumGoods, '')}
+      ${sumBox('#fef2f2','#fca5a5','#b91c1c','⚠️ آج کی کم وصولی', sumShort, `${shortRows.length} گاہک — صرف دیکھنے کے لیے`)}
+    </div>`;
+
+  const waNum = (ph) => { const d = (ph || '').replace(/[^0-9]/g, ''); return d ? (d.startsWith('92') ? d : d.startsWith('0') ? '92' + d.slice(1) : d) : ''; };
+  const contactBtn = (href, bg, ic, extra) => `<a href="${href}" ${extra || ''} style="display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center; border-radius:50%; background:${bg}; color:#fff; text-decoration:none; font-size:14px; margin:0 2px;">${ic}</a>`;
 
   tbody.innerHTML = rows.map((r, idx) => {
     const shade = idx % 2 === 0 ? '#F4F7F5' : '#fff';
@@ -28995,8 +29055,10 @@ function renderDailyRecoveryScreen(){
         <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${fmtCell(r.openingBalance)}</td>
         <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${r.todayGoods > 0 ? fmtCell(r.todayGoods, '#c2410c') : '—'}</td>
         <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${fmtCell(r.totalBalance)}</td>
-        <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${r.todayRecovery > 0 ? fmtCell(r.todayRecovery, '#15803d') : '—'}</td>
+        <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${r.todayRecovery > 0 ? fmtCell(r.todayRecovery, '#15803d') + (r.pendingRecovery > 0 ? '<div style="font-size:.72em; color:#b45309;">⏳ کچی ' + r.pendingRecovery.toLocaleString() + '</div>' : '') : '—'}</td>
+        <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap; ${r.shortfall > 0 ? 'background:#fee2e2;' : ''}">${r.shortfall > 0 ? fmtCell(r.shortfall, '#b91c1c') : '—'}</td>
         <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${fmtCell(r.finalBalance, 'var(--primary-dark)')}</td>
+        <td class="drNoPrint" style="padding:4px; border-bottom:1px solid #e5e9f0; white-space:nowrap; text-align:center;">${r.c.phone ? contactBtn('tel:' + r.c.phone, '#1565c0', '📞') + contactBtn('https://wa.me/' + waNum(r.c.phone) + '?text=' + encodeURIComponent(`السلام علیکم ${r.c.name}،\nآج کی خریداری: Rs. ${r.todayGoods.toLocaleString()}\nآج کی وصولی: Rs. ${r.todayRecovery.toLocaleString()}` + (r.shortfall > 0 ? `\n⚠️ کم وصولی: Rs. ${r.shortfall.toLocaleString()}` : '') + `\nکل بقایا: Rs. ${r.finalBalance.toLocaleString()}\n— ${AppState.settings.businessName || ''}`), '#25D366', '💬', 'target="_blank"') : '<span style="color:#cbd5e1; font-size:11px;">نمبر نہیں</span>'}</td>
         <td style="padding:5px; border-bottom:1px solid #e5e9f0;">
           <input type="text" value="${noteVal.replace(/"/g,'&quot;')}" placeholder="نوٹ لکھیں..." onchange="saveDailyRecoveryNote(${r.c.customer_id}, this.value)" style="width:100%; min-width:140px; padding:6px; border:1px solid #dbe1ea; border-radius:6px; font-size:0.95em; font-family:inherit;">
         </td>
@@ -29007,6 +29069,7 @@ function renderDailyRecoveryScreen(){
 
 // ---------- 🖨️ پرنٹ / PDF — براؤزر کا اپنا Print ڈائیلاگ (فون میں "Save as PDF" خودکار دستیاب) ----------
 function printDailyRecoveryReport(){
+  if(!document.getElementById('drNoPrintStyle')){ const st = document.createElement('style'); st.id = 'drNoPrintStyle'; st.textContent = '@media print{ .drNoPrint{ display:none !important; } }'; document.head.appendChild(st); }
   document.body.classList.add('printing-daily-recovery');
   setTimeout(() => {
     window.print();
@@ -29025,10 +29088,12 @@ async function shareDailyRecoveryImage(){
     else if(sortMode === 'za') sorted.sort((a,b) => byName(b,a));
     else if(sortMode === 'highest') sorted.sort((a,b) => b.finalBalance - a.finalBalance);
     else if(sortMode === 'lowest') sorted.sort((a,b) => a.finalBalance - b.finalBalance);
+    else if(sortMode === 'shortFirst') sorted.sort((a,b) => (b.shortfall - a.shortfall) || byName(a,b));
+    else if(sortMode === 'shortOnly'){ sorted = sorted.filter(r => r.shortfall > 0).sort((a,b) => b.shortfall - a.shortfall); }
     else sorted.sort((a,b) => (b.hasToday - a.hasToday) || byName(a,b));
 
-    const rowH = 34, headH = 44, padX = 14, w = 1000;
-    const h = headH + sorted.length * rowH + 40;
+    const rowH = 34, headH = 44, padX = 14, w = 1100, sumH = 50;
+    const h = sumH + headH + sorted.length * rowH + 40;
     const canvas = document.createElement('canvas');
     canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext('2d');
@@ -29036,13 +29101,22 @@ async function shareDailyRecoveryImage(){
     ctx.direction = 'rtl';
     ctx.textBaseline = 'middle';
 
+    // ---------- 📊 FM299TU#261: اوپر آج کا خلاصہ ----------
+    const _all = computeDailyRecoveryRows();
+    const _rec = _all.reduce((a, r) => a + r.todayRecovery, 0), _short = _all.reduce((a, r) => a + r.shortfall, 0);
+    ctx.fillStyle = '#f0fdf4'; ctx.fillRect(0, 0, w, sumH);
+    ctx.textAlign = 'center'; ctx.font = 'bold 18px sans-serif';
+    ctx.fillStyle = '#15803d'; ctx.fillText(`📥 آج کی کل ریکوری: Rs. ${_rec.toLocaleString()}`, w*0.72, sumH/2);
+    ctx.fillStyle = '#b91c1c'; ctx.fillText(`⚠️ آج کی کم وصولی: Rs. ${_short.toLocaleString()}`, w*0.28, sumH/2);
+    ctx.translate(0, sumH);
     const cols = [
       {label:'نمبر', x: w-40, align:'center'},
       {label:'کسٹمر کا نام', x: w-110, align:'right'},
       {label:'سابقہ بقایہ', x: w-420, align:'center'},
-      {label:'آج کا مال', x: w-560, align:'center'},
-      {label:'ٹوٹل بقایہ', x: w-700, align:'center'},
-      {label:'آج کی ریکوری', x: w-840, align:'center'},
+      {label:'آج کا مال', x: w-550, align:'center'},
+      {label:'ٹوٹل بقایہ', x: w-680, align:'center'},
+      {label:'آج کی ریکوری', x: w-810, align:'center'},
+      {label:'⚠️ کم وصولی', x: w-940, align:'center'},
       {label:'تازہ بقایہ', x: 60, align:'center'},
     ];
     ctx.fillStyle = '#134e2c'; ctx.fillRect(0,0,w,headH);
@@ -29059,14 +29133,16 @@ async function shareDailyRecoveryImage(){
       ctx.font = '15px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(r.openingBalance.toLocaleString(), w-420, y+rowH/2);
-      ctx.fillStyle = '#c2410c'; ctx.fillText(r.todayGoods > 0 ? r.todayGoods.toLocaleString() : '—', w-560, y+rowH/2);
-      ctx.fillStyle = '#1f2937'; ctx.fillText(r.totalBalance.toLocaleString(), w-700, y+rowH/2);
-      ctx.fillStyle = '#15803d'; ctx.fillText(r.todayRecovery > 0 ? r.todayRecovery.toLocaleString() : '—', w-840, y+rowH/2);
+      ctx.fillStyle = '#c2410c'; ctx.fillText(r.todayGoods > 0 ? r.todayGoods.toLocaleString() : '—', w-550, y+rowH/2);
+      ctx.fillStyle = '#1f2937'; ctx.fillText(r.totalBalance.toLocaleString(), w-680, y+rowH/2);
+      ctx.fillStyle = '#15803d'; ctx.fillText(r.todayRecovery > 0 ? r.todayRecovery.toLocaleString() : '—', w-810, y+rowH/2);
+      if(r.shortfall > 0){ ctx.fillStyle = '#fee2e2'; ctx.fillRect(w-1000, y+2, 120, rowH-4); }
+      ctx.fillStyle = '#b91c1c'; ctx.font = 'bold 15px sans-serif'; ctx.fillText(r.shortfall > 0 ? r.shortfall.toLocaleString() : '—', w-940, y+rowH/2); ctx.font = '15px sans-serif';
       ctx.fillStyle = '#134e2c'; ctx.font = 'bold 15px sans-serif'; ctx.fillText(r.finalBalance.toLocaleString(), 60, y+rowH/2);
       ctx.strokeStyle = '#e5e9f0'; ctx.beginPath(); ctx.moveTo(0, y+rowH); ctx.lineTo(w, y+rowH); ctx.stroke();
     });
     ctx.fillStyle = '#6B7280'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('صدام فروٹ منڈی — ' + todayDateKey(), w/2, h-18);
+    ctx.fillText('صدام فروٹ منڈی — ' + todayDateKey(), w/2, h-sumH-18);
 
     canvas.toBlob(async (blob) => {
       const file = new File([blob], 'daily-recovery-list.png', {type:'image/png'});
