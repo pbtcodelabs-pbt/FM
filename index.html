@@ -694,6 +694,15 @@
   tr.otSelRow td:first-child{ box-shadow:inset -6px 0 0 #1d4ed8; }
   tr.otTouchRow > td{ background:#dbeafe !important; }
   tr.otSelRow input.otQtyInput{ border:2.5px solid #1d4ed8 !important; background:#fff !important; color:#0b2a5b !important; }
+  /* ---------- 📋 FM299TU#264: روزانہ ریکوری لسٹ — لکیروں والا کمپیکٹ جدول ---------- */
+  #drTable{ width:100% !important; table-layout:fixed; border-collapse:collapse !important; }
+  #drTable th, #drTable td{ border:1px solid #b8c4d0 !important; padding:5px 1px !important; white-space:normal !important; word-break:break-word; line-height:1.35; text-align:center; vertical-align:middle; }
+  #drTable th{ font-size:.82em; font-weight:800; }
+  #drTable td .drNum{ font-family:Arial,Helvetica,sans-serif; font-weight:800; font-size:.76em; letter-spacing:-.3px; white-space:nowrap; }
+  #drTable th.drShort{ background:#b91c1c !important; color:#fff !important; border-left:2px solid #7f1d1d !important; border-right:2px solid #7f1d1d !important; }
+  #drTable td.drShort{ background:#fee2e2 !important; border-left:2px solid #dc2626 !important; border-right:2px solid #dc2626 !important; }
+  #drTable td.drShort .drNum{ color:#b91c1c; font-weight:900; font-size:.88em; }
+  #drTable .drNote{ font-size:.78em; color:#78350f; text-align:right; line-height:1.5; }
   /* ---------- 🧾 FM299TU#262 (صدام کی ہدایت): آرڈر بکنگ — اوپر کے بٹن ایک ہی لائن میں (پہلے آرڈر مکمل، پھر کسٹمر، پھر منڈی سیل
      ریکارڈ، پھر سٹاک رپورٹ) تاکہ جگہ بچے؛ جدول کی ہر قطار اوپر سے نیچے موٹی + قطاروں کے درمیان فاصلہ، تاکہ انگلی
      غلطی سے دوسری قطار کے بٹن پر نہ لگے۔ چوڑائی/کالم وہی — کوئی افقی سکرول نہیں ---------- */
@@ -703,12 +712,12 @@
   #otTopBar > div:last-child > button:nth-child(4){ order:2; }
   #otTopBar > div:last-child > button:nth-child(2){ order:3; }
   #otTopBar > div:last-child > button:nth-child(1){ order:4; }
-  #otTableScrollBox table{ border-spacing:0 7px !important; }
-  #otTableScrollBox tbody td{ padding-top:10px !important; padding-bottom:10px !important; border-top:1px solid #d6dde6 !important; border-bottom:1px solid #d6dde6 !important; }
+  #otTableScrollBox table{ border-spacing:0 10px !important; }
+  #otTableScrollBox tbody td{ padding-top:14px !important; padding-bottom:14px !important; border-top:1px solid rgba(255,255,255,.9) !important; box-shadow:0 5px 7px -3px rgba(15,23,42,.28); }
   #otTableScrollBox tbody td:first-child{ border-right:1px solid #d6dde6 !important; border-radius:0 10px 10px 0; }
   #otTableScrollBox tbody td:last-child{ border-left:1px solid #d6dde6 !important; border-radius:10px 0 0 10px; }
-  #otTableScrollBox tbody input.otQtyInput{ min-height:36px; }
-  #otTableScrollBox tbody button{ min-height:36px; }
+  #otTableScrollBox tbody input.otQtyInput{ min-height:40px; box-shadow:inset 0 2px 3px rgba(0,0,0,.08); }
+  #otTableScrollBox tbody button{ min-height:40px; box-shadow:0 3px 0 rgba(0,0,0,.18); }
   .screen{display:none; animation:fadeIn .25s ease;}
   .screen.active{display:block;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
@@ -5675,7 +5684,7 @@
          لسٹ (اردو نام + تعداد)۔ Submit کرنے پر ایڈوانس آرڈر کی طرح ایڈمن کے پاس ریویو کے لیے چلا جاتا ہے۔
          ===================================================================== -->
     <div class="screen customer-only" id="screen-orderTaking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
-      <div class="pageTitle">🧾 آرڈر بکنگ</div>
+      <div class="pageTitle" style="text-align:center; font-weight:900; font-size:24px;">🧾 آرڈر بکنگ</div>
 
       <!-- STEP 1: پہلے کسٹمر منتخب کریں — ایریا ریکارڈ سے خودبخود آ جائے گا -->
       <div id="otStepCustomer">
@@ -5727,8 +5736,8 @@
                پہلے بٹنوں کے ساتھ ایک ہی لائن میں دب/چھپ جاتا تھا، اب ہمیشہ صاف مکمل نظر آئے گا ---------- -->
           <div id="otTopBar" style="background:var(--bg); padding:8px 4px 4px; display:flex; flex-direction:column; gap:5px; border-bottom:2px solid var(--primary); margin-bottom:8px;">
             <div style="min-width:0;">
-              <div style="font-weight:900; font-size:17px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="otTopCustName"></div>
-              <div style="font-size:12px; color:var(--muted);" id="otTopCustArea"></div>
+              <div style="font-weight:900; font-size:21px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#0f172a;" id="otTopCustName"></div>
+              <div style="font-size:12px; color:var(--muted); text-align:center;" id="otTopCustArea"></div>
             </div>
             <div style="display:flex; gap:6px; flex:0 0 auto; flex-wrap:wrap; justify-content:flex-end;">
               <button type="button" onclick="openOtStockReport()" style="padding:9px 10px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 سٹاک رپورٹ</button>
@@ -5748,16 +5757,17 @@
                اندرونی سنکرونائزیشن/ہائی لائٹ منطق (syncOtVegNavigator/otVegNavGoToIndex) بدستور کام کرے ---------- -->
           <!-- ---------- 💊 صدام کی ہدایت (24 ستمبر): پرانا تیر/ویل/"اگلا آئٹم" والا پورا باکس ختم — اس کی جگہ ایک کیپسول جو نیچے جدول میں
              آپ جو سبزی ٹچ کریں (قطار/مقدار کا خانہ/➕➖) وہی سرخ سیریل بیج + موٹے نام کے ساتھ اوپر دکھاتا ہے ---------- -->
-          <div id="otSelCapsule" dir="rtl" style="display:flex; align-items:center; gap:12px; min-height:60px; padding:9px 16px; background:linear-gradient(180deg,#ffffff,#e0f2fe); border:2.5px solid var(--primary); border-radius:999px; box-shadow:0 3px 10px rgba(0,0,0,.14), inset 0 1px 0 #fff; box-sizing:border-box;">
-            <span id="otSelCapsuleBadge" style="display:none;"></span>
-            <div id="otSelCapsuleName" style="flex:1; min-width:0; text-align:right; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:19px; font-weight:900; line-height:1.5; color:#134e2c; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">نیچے فہرست میں سبزی ٹچ کریں</div>
-            <span id="otSelCapsuleQty" style="display:none; flex:0 0 auto; min-width:44px; text-align:center; font-family:Arial Black,Arial,Helvetica,sans-serif; font-size:38px; font-weight:900; line-height:1; color:#1d4ed8; letter-spacing:.5px; text-shadow:0 2px 0 #bfdbfe; direction:ltr;"></span>
+          <!-- ---------- 🧾 FM299TU#263 (صدام کی ہدایت): سرچ (دائیں) + منتخب سبزی کیپسول (بائیں) ایک ہی لائن میں — نیچے جگہ بچے ---------- -->
+          <div id="otSelSearchRow" dir="rtl" style="display:flex; gap:6px; align-items:stretch; margin-bottom:6px;">
+            <input type="text" id="otItemSearchInput" placeholder="🔍 نام یا سیریل" oninput="renderOtItemsPage()"
+                   style="flex:1 1 0; min-width:0; padding:8px 6px; border:2px solid var(--primary); border-radius:14px; font-size:13px; font-weight:700; text-align:center; margin:0; box-sizing:border-box;">
+            <div id="otSelCapsule" dir="rtl" style="flex:1 1 0; min-width:0; display:flex; align-items:center; gap:6px; min-height:46px; padding:4px 10px; background:linear-gradient(180deg,#ffffff,#e0f2fe); border:2.5px solid var(--primary); border-radius:999px; box-shadow:0 3px 10px rgba(0,0,0,.14), inset 0 1px 0 #fff; box-sizing:border-box;">
+              <span id="otSelCapsuleBadge" style="display:none;"></span>
+              <div id="otSelCapsuleName" style="flex:1; min-width:0; text-align:right; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif; font-size:14px; font-weight:900; line-height:1.5; color:#134e2c; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">سبزی ٹچ کریں</div>
+              <span id="otSelCapsuleQty" style="display:none; flex:0 0 auto; min-width:26px; text-align:center; font-family:Arial Black,Arial,Helvetica,sans-serif; font-size:21px; font-weight:900; line-height:1; color:#1d4ed8; letter-spacing:.5px; text-shadow:0 1px 0 #bfdbfe; direction:ltr;"></span>
+            </div>
           </div>
         </div>
-        <!-- ---------- 🔍 صدام کی ہدایت (FM15SEPTU): آئٹم لسٹ کے لیے سرچ بار — سیریل نمبر یا نام (جزوی لفظ)
-             دونوں سے تلاش، جامع (comprehensive) — بالکل کسٹمر سرچ بار جیسی ---------- -->
-        <input type="text" id="otItemSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر (مثلاً 25)" oninput="renderOtItemsPage()"
-               style="width:100%; padding:12px; border:2px solid var(--primary); border-radius:12px; font-size:15px; font-weight:700; text-align:center; margin-bottom:10px; box-sizing:border-box;">
         <div id="otItemsList" style="display:grid; grid-template-columns:1fr 1fr; gap:10px 8px; margin-bottom:10px;" dir="rtl"></div>
         <div id="otPager" style="position:sticky; bottom:8px; display:flex; align-items:center; gap:10px; padding-top:6px; margin-bottom:6px;"></div>
       </div>
@@ -6041,19 +6051,25 @@
       <!-- ---------- 📊 FM299TU#261 (صدام کی ہدایت): آج کی ریکوری کا خلاصہ — سب سے اوپر ---------- -->
       <div id="drSummary" dir="rtl" style="margin:0 0 10px;"></div>
       <div id="drTableWrap" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+        <!-- ---------- 📋 FM299TU#264 (صدام کی ہدایت): ہر خانے کے گرد لکیریں، جدول سکرین کے اندر (سائیڈ سکرول کے بغیر)،
+             کم وصولی کا کالم الگ سرخ، اور آخری کالم میں ریکوری والے کا لکھا نوٹ (یہاں لکھنے کا خانہ نہیں) ---------- -->
         <table id="drTable" style="border-collapse:collapse; font-size:12.5px;">
+          <colgroup>
+            <col style="width:5%"><col style="width:14%"><col style="width:10.5%"><col style="width:10.5%"><col style="width:10.5%">
+            <col style="width:10.5%"><col style="width:11.5%"><col style="width:10.5%"><col class="drNoPrint" style="width:7%"><col style="width:9.5%">
+          </colgroup>
           <thead>
             <tr id="drHeadRow" style="background:var(--primary-dark); color:#fff;">
-              <th style="padding:8px 6px; text-align:center; white-space:nowrap;">نمبر</th>
-              <th style="padding:8px 10px; text-align:right; white-space:nowrap;">کسٹمر کا نام</th>
-              <th style="padding:8px 6px; white-space:nowrap;">سابقہ بقایہ</th>
-              <th style="padding:8px 6px; white-space:nowrap;">آج کا مال</th>
-              <th style="padding:8px 6px; white-space:nowrap;">ٹوٹل بقایہ</th>
-              <th style="padding:8px 6px; white-space:nowrap;">آج کی ریکوری</th>
-              <th style="padding:8px 6px; white-space:nowrap; background:#b91c1c;">⚠️ کم وصولی</th>
-              <th style="padding:8px 6px; white-space:nowrap;">تازہ مکمل بقایہ</th>
-              <th class="drNoPrint" style="padding:8px 6px; white-space:nowrap;">رابطہ</th>
-              <th style="padding:8px 6px; width:100%;">یادداشت / نوٹس</th>
+              <th>نمبر</th>
+              <th style="text-align:right;">کسٹمر</th>
+              <th>سابقہ بقایا</th>
+              <th>آج کا مال</th>
+              <th>ٹوٹل بقایا</th>
+              <th>آج کی ریکوری</th>
+              <th class="drShort">⚠️ کم وصولی</th>
+              <th>تازہ بقایا</th>
+              <th class="drNoPrint">رابطہ</th>
+              <th>نوٹ</th>
             </tr>
           </thead>
           <tbody id="drTableBody"></tbody>
@@ -8723,7 +8739,7 @@ function getDeveloperContact(){
 // 🆕 FM28SEPMO0835PM: بلال فروٹ فارم کی ایک بار والی صفائی کا کوڈ بھی مکمل ہٹا دیا — اب اس کا کوئی نشان باقی نہیں
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM299TU#262'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM299TU#264'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -27302,7 +27318,7 @@ function backToOtCustomer(){
 
 // ---------- 💊 صدام کی ہدایت (24 ستمبر): سلیکٹڈ سبزی کیپسول — جدول/کارڈ میں جس قطار کو ٹچ کریں وہی اوپر کیپسول میں آ جائے
 // (وہی سرخ سیریل بیج، وہی نام موٹا)۔ کیپسول جدول سے باہر ہے اس لیے جدول دوبارہ بنے تو بھی قائم رہتا ہے ---------- -->
-const OT_SEL_PLACEHOLDER = 'نیچے فہرست میں سبزی ٹچ کریں';
+const OT_SEL_PLACEHOLDER = 'سبزی ٹچ کریں';
 let _otSelVariantId = null;
 function otSelCapsuleClear(){
   _otSelVariantId = null;
@@ -27321,7 +27337,7 @@ function otSelCapsuleShow(variantId){
   const pName = (productsData.find(p => p.product_id === v.product_id)?.name) || v.name;
   // وہی سرخ گول بیج، جدول والے سائز (30px) میں — کوئی ڈیزائن/سائز تبدیلی نہیں
   b.style.cssText = 'display:inline-flex; flex:0 0 auto;';
-  b.innerHTML = `<span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important;height:30px !important;min-width:30px !important;min-height:30px !important;font-size:12px !important;cursor:default !important;pointer-events:none !important;margin:0 !important;">${v.serial_no ?? '?'}</span>`;
+  b.innerHTML = `<span style="${SERIAL_BADGE_INLINE_STYLE} width:24px !important;height:24px !important;min-width:24px !important;min-height:24px !important;font-size:10.5px !important;cursor:default !important;pointer-events:none !important;margin:0 !important;">${v.serial_no ?? '?'}</span>`;
   n.textContent = pName + (v.label ? ' — ' + v.label : '');
   n.style.color = '#134e2c';
   n.style.fontWeight = '900';
@@ -27622,8 +27638,10 @@ function renderOtItemsTable(wrap){
     const { p, lv } = live[idx];
     const qty = otQtyMap[v.variant_id] || 0;
     const checked = qty > 0;
-    const rowBg = (idx % 2 === 0 ? '#ffffff' : '#dbe6da'); // سلیکٹڈ قطار کا رنگ CSS کلاس otSelRow سے
-    const rowTd = `background:${rowBg};`;
+    // ---------- 🎨 FM299TU#263 (صدام کی ہدایت): ہر سبزی کا کارڈ الگ رنگ + ابھرا ہوا (3D) — اوپر ہلکا، نیچے گہرا کنارہ ----------
+    const _pal = [['#fffbeb','#fde68a','#d97706'],['#f0fdf4','#bbf7d0','#16a34a'],['#eff6ff','#bfdbfe','#2563eb'],['#fdf2f8','#fbcfe8','#db2777'],['#f5f3ff','#ddd6fe','#7c3aed'],['#fff7ed','#fed7aa','#ea580c'],['#ecfeff','#a5f3fc','#0891b2']];
+    const [c1, c2, c3] = _pal[idx % _pal.length];
+    const rowTd = `background:linear-gradient(180deg,${c1} 0%,${c2} 100%); border-bottom:4px solid ${c3} !important;`;
     const pName = p ? p.name : v.name;
     const serialNo = p ? p.serial_no : v.serial_no;
     const swipePid = p ? p.product_id : v.product_id;
@@ -27642,7 +27660,7 @@ function renderOtItemsTable(wrap){
         <td style="${tdBase}${rowTd}padding:3px 2px;">
           <!-- ---------- 🖐️ صدام کی ہدایت (FM11SEP، 25SEP دوپہر): +/− بٹن اور مقدار کا خانہ اب پیج کے اندر ہی فٹ
                ہونے کے لیے کمپیکٹ — چھوٹے مگر پھر بھی الگ الگ آسانی سے دبائے جا سکیں ---------- -->
-          <div style="display:flex; align-items:center; justify-content:center; gap:3px; width:100%;">
+          <div style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%;">
             <input type="text" class="otQtyInput" data-vid="${v.variant_id}" inputmode="decimal" value="${qty || ''}" placeholder="0" onfocus="this.select()" onchange="setOtQtyTableManual(${v.variant_id}, this.value, this)" onkeydown="if(event.key==='Enter'){ this.blur(); }" style="width:60px;height:34px;box-sizing:border-box;padding:2px 1px;border:1.5px solid ${checked?'var(--primary)':'#dbe1ea'};border-radius:8px;font-size:17px;text-align:center;font-weight:900;background:#fff;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);flex:0 0 auto;">
             <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, 1)" style="width:26px;height:26px;border:none;border-radius:6px;background:#dcfce7;color:#15803d;font-size:13px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #86efac;">+</button>
             <button type="button" onclick="changeOtQtyTable(this, ${v.variant_id}, -1)" style="width:26px;height:26px;border:none;border-radius:6px;background:#fee2e2;color:#b91c1c;font-size:13px;font-weight:900;cursor:pointer;padding:0;flex:0 0 auto;line-height:1;box-shadow:0 2px 0 #fca5a5;">−</button>
@@ -29040,28 +29058,27 @@ function renderDailyRecoveryScreen(){
     </div>`;
 
   const waNum = (ph) => { const d = (ph || '').replace(/[^0-9]/g, ''); return d ? (d.startsWith('92') ? d : d.startsWith('0') ? '92' + d.slice(1) : d) : ''; };
-  const contactBtn = (href, bg, ic, extra) => `<a href="${href}" ${extra || ''} style="display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center; border-radius:50%; background:${bg}; color:#fff; text-decoration:none; font-size:14px; margin:0 2px;">${ic}</a>`;
+  const contactBtn = (href, bg, ic, extra) => `<a href="${href}" ${extra || ''} style="display:inline-flex; width:26px; height:26px; align-items:center; justify-content:center; border-radius:50%; background:${bg}; color:#fff; text-decoration:none; font-size:12px;">${ic}</a>`;
 
   tbody.innerHTML = rows.map((r, idx) => {
     const shade = idx % 2 === 0 ? '#F4F7F5' : '#fff';
     const noteKey = todayStr + '_' + r.c.customer_id;
-    const noteVal = dailyRecoveryNotes[noteKey] || recoveryListData.filter(e => e.customer_id === r.c.customer_id && (e.createdAt || '').split('T')[0] === todayStr && e.note).map(e => e.note).join(' — ');
+    const noteVal = recoveryListData.filter(e => e.customer_id === r.c.customer_id && (e.createdAt || '').split('T')[0] === todayStr && e.note).map(e => e.note).join(' — ') || dailyRecoveryNotes[noteKey] || '';
     const fmtCell = (n, color) => `<span style="color:${color || 'inherit'}; font-weight:700;">${n < 0 ? '('+Math.abs(n).toLocaleString()+')' : n.toLocaleString()}</span>`;
     // ---------- نمبر کالمز کی سیدھ منتخب کردہ الائنمنٹ کے مطابق — نام ہمیشہ رائٹ (کبھی نہیں بدلتی) ----------
+    const num = (n, color) => `<span class="drNum" style="color:${color || 'inherit'};">${n < 0 ? '(' + Math.abs(Math.round(n)).toLocaleString() + ')' : Math.round(n).toLocaleString()}</span>`;
     return `
-      <tr style="background:${shade}; ${r.hasToday ? 'border-right:3px solid #16a34a;' : ''}">
-        <td style="padding:7px 6px; text-align:center; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${idx+1}</td>
-        <td style="padding:7px 10px; text-align:right; border-bottom:1px solid #e5e9f0; font-weight:700; white-space:nowrap;">${r.c.name}</td>
-        <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${fmtCell(r.openingBalance)}</td>
-        <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${r.todayGoods > 0 ? fmtCell(r.todayGoods, '#c2410c') : '—'}</td>
-        <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${fmtCell(r.totalBalance)}</td>
-        <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${r.todayRecovery > 0 ? fmtCell(r.todayRecovery, '#15803d') + (r.pendingRecovery > 0 ? '<div style="font-size:.72em; color:#b45309;">⏳ کچی ' + r.pendingRecovery.toLocaleString() + '</div>' : '') : '—'}</td>
-        <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap; ${r.shortfall > 0 ? 'background:#fee2e2;' : ''}">${r.shortfall > 0 ? fmtCell(r.shortfall, '#b91c1c') : '—'}</td>
-        <td style="padding:7px 6px; text-align:${numAlign}; border-bottom:1px solid #e5e9f0; white-space:nowrap;">${fmtCell(r.finalBalance, 'var(--primary-dark)')}</td>
-        <td class="drNoPrint" style="padding:4px; border-bottom:1px solid #e5e9f0; white-space:nowrap; text-align:center;">${r.c.phone ? contactBtn('tel:' + r.c.phone, '#1565c0', '📞') + contactBtn('https://wa.me/' + waNum(r.c.phone) + '?text=' + encodeURIComponent(`السلام علیکم ${r.c.name}،\nآج کی خریداری: Rs. ${r.todayGoods.toLocaleString()}\nآج کی وصولی: Rs. ${r.todayRecovery.toLocaleString()}` + (r.shortfall > 0 ? `\n⚠️ کم وصولی: Rs. ${r.shortfall.toLocaleString()}` : '') + `\nکل بقایا: Rs. ${r.finalBalance.toLocaleString()}\n— ${AppState.settings.businessName || ''}`), '#25D366', '💬', 'target="_blank"') : '<span style="color:#cbd5e1; font-size:11px;">نمبر نہیں</span>'}</td>
-        <td style="padding:5px; border-bottom:1px solid #e5e9f0;">
-          <input type="text" value="${noteVal.replace(/"/g,'&quot;')}" placeholder="نوٹ لکھیں..." onchange="saveDailyRecoveryNote(${r.c.customer_id}, this.value)" style="width:100%; min-width:140px; padding:6px; border:1px solid #dbe1ea; border-radius:6px; font-size:0.95em; font-family:inherit;">
-        </td>
+      <tr style="background:${shade}; ${r.hasToday ? 'box-shadow:inset -3px 0 0 #16a34a;' : ''}">
+        <td><span class="drNum">${idx+1}</span></td>
+        <td style="text-align:right; font-weight:800;">${r.c.name}</td>
+        <td>${num(r.openingBalance)}</td>
+        <td>${r.todayGoods > 0 ? num(r.todayGoods, '#c2410c') : '—'}</td>
+        <td>${num(r.totalBalance)}</td>
+        <td>${r.todayRecovery > 0 ? num(r.todayRecovery, '#15803d') + (r.pendingRecovery > 0 ? '<div style="font-size:.68em; color:#b45309;">⏳ ' + r.pendingRecovery.toLocaleString() + '</div>' : '') : '—'}</td>
+        <td class="drShort">${r.shortfall > 0 ? num(r.shortfall) : '—'}</td>
+        <td>${num(r.finalBalance, 'var(--primary-dark)')}</td>
+        <td class="drNoPrint"><div style="display:flex; flex-direction:column; align-items:center; gap:4px;">${r.c.phone ? contactBtn('tel:' + r.c.phone, '#1565c0', '📞') + contactBtn('https://wa.me/' + waNum(r.c.phone) + '?text=' + encodeURIComponent(`السلام علیکم ${r.c.name}،\nآج کی خریداری: Rs. ${r.todayGoods.toLocaleString()}\nآج کی وصولی: Rs. ${r.todayRecovery.toLocaleString()}` + (r.shortfall > 0 ? `\n⚠️ کم وصولی: Rs. ${r.shortfall.toLocaleString()}` : '') + `\nکل بقایا: Rs. ${r.finalBalance.toLocaleString()}\n— ${AppState.settings.businessName || ''}`), '#25D366', '💬', 'target="_blank"') : '<span style="color:#cbd5e1; font-size:.7em;">—</span>'}</div></td>
+        <td><div class="drNote">${noteVal ? noteVal.replace(/</g,'&lt;') : ''}</div></td>
       </tr>`;
   }).join('');
   persistAllData();
