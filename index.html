@@ -8699,7 +8699,7 @@ function getDeveloperContact(){
 // 🆕 FM28SEPMO0835PM: بلال فروٹ فارم کی ایک بار والی صفائی کا کوڈ بھی مکمل ہٹا دیا — اب اس کا کوئی نشان باقی نہیں
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM299TU#257'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM299TU#258'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12170,7 +12170,7 @@ function goTo(screenName, _isHistoryNav){
     // ---------- 🔴 صدام کی ہدایت (FM3SEPTH10): اسی طرح Recovery List کا بیج بھی Home پر پہنچتے ہی تازہ ہو ----------
     if(AppState.currentRole === 'admin') fetchRecoveryListFromCloud(true).then(added => { if(added) renderHomeIconGrid(); });
     // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): کسٹمرز بھی خاموشی سے تازہ ہوں — تاکہ فوری رابطہ ڈراپ ڈاؤن ہمیشہ درست ہو ----------
-    if(AppState.currentRole === 'admin') fetchCustomersFromCloud(true).then(added => { if(added && typeof populateQuickContactDropdown === 'function') populateQuickContactDropdown(); });
+    fetchCustomersFromCloud(true).then(added => { if(added && typeof populateQuickContactDropdown === 'function' && AppState.currentRole === 'admin') populateQuickContactDropdown(); }); // 🔒 FM299TU#258: ہر رول (ملازم بھی)
     // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): Home پر پہنچتے ہی خاموشی سے پینڈنگ بلز بھی تازہ ہوں — تاکہ 🔔 بیج درست ہو ----------
     fetchPendingBillsFromCloud(true).then(added => { if(added && typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner(); });
   }
@@ -12294,6 +12294,10 @@ function goTo(screenName, _isHistoryNav){
     renderRecoveryListScreen();
     fetchRecoveryListFromCloud(false);
     startRecoveryListPolling();
+    // ---------- 🔒 FM299TU#258 (صدام کی ہدایت): نئے فون پر ریکوری والے ملازم کو اصل کسٹمر لسٹ نہیں ملتی تھی
+    // (صرف 3 ڈیفالٹ نظر آتے) — کیونکہ یہ اسکرین کسٹمر کلاؤڈ سے منگواتی ہی نہیں تھی۔ اب یہاں بھی فوراً + ہر 12 سیکنڈ ----------
+    fetchCustomersFromCloud(false).then(ok => { if(ok) renderRecoveryListScreen(); });
+    startCustomersPolling();
   }
   if(screenName === 'customers' || screenName === 'suppliers'){
     fetchCustomersFromCloud(false);
@@ -34173,6 +34177,15 @@ let customersPollTimer = null;
 async function pushCustomersToCloud(){
   saveToStorage('customers', customersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
   saveToStorage('nextCustomerId', nextCustomerId);
+  // ---------- 🛡️ FM299TU#258 (صدام کی ہدایت): نئے فون پر ڈیفالٹ کسٹمر (یا ان میں سے کچھ ڈیلیٹ کر کے بچی لسٹ)
+  // کبھی کلاؤڈ پر نہ بھیجیں — ورنہ اصل کسٹمر لسٹ مٹ سکتی ہے۔ ایسی حالت میں پہلے کلاؤڈ سے منگوائیں ----------
+  const onlySeedOrLess = customersData.length <= CUSTOMERS_SEED_DATA.length &&
+    customersData.every(c => CUSTOMERS_SEED_DATA.some(sd => sd.customer_id === c.customer_id && sd.name === c.name));
+  if(onlySeedOrLess){
+    console.warn('🛡️ صرف ڈیفالٹ کسٹمر — کلاؤڈ پر بھیجنا روک دیا گیا');
+    AppState.settings.customersPendingSync = false;
+    return false;
+  }
   try{
     const res = await authFirestoreFetch(`${CUSTOMERS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
       method: 'PATCH',
