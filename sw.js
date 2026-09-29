@@ -2,7 +2,7 @@
 // یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
 // صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
 // ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'FM299TU#256';
+const CACHE_VERSION = 'FM299TU#257';
 const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
 // ---------- 🔒🆕 صدام کی ہدایت (FM21SEPMO03): آف لائن نہ چلنے کی اصل جڑ یہاں ملی — پہلے تمام فائلیں
@@ -79,7 +79,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME && key.indexOf('saddam-fruit-mandi-') === 0) return caches.delete(key); // 🛡️ صرف اپنی ایپ کے پرانے کیش — ایک ہی فون پر دوسری ایپ (سبزی منڈی) کا کیش کبھی نہ مٹے
+          if (key !== CACHE_NAME) return caches.delete(key);
         })
       )
     ).then(() => self.clients.claim())
