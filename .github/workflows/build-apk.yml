@@ -1,0 +1,153 @@
+# 📱 خودکار APK بنانے والا — پلے سٹور کے بغیر (براہ راست انسٹال کے لیے)
+# چلانے کا طریقہ: Actions → "build-apk" → Run workflow   (یا .apk/config.json بدلنے پر خود چلتا ہے)
+# نتیجہ: Releases میں "apk-latest" — ہمیشہ ایک ہی لنک سے تازہ APK
+# ⚠️ یہ فائربیس والی ویب سائٹ کو نہیں چھیڑتا؛ صرف APK بناتا ہے
+name: build-apk
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.apk/**', '.github/workflows/build-apk.yml']
+permissions:
+  contents: write
+concurrency:
+  group: build-apk
+  cancel-in-progress: true
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: "1) ترتیب پڑھیں"
+        run: |
+          C=.apk/config.json
+          echo "APP_NAME=$(jq -r .appName $C)"            >> $GITHUB_ENV
+          echo "PKG=$(jq -r .packageId $C)"                >> $GITHUB_ENV
+          echo "URL=$(jq -r .url $C)"                      >> $GITHUB_ENV
+          echo "HOST=$(jq -r .url $C | sed -E 's#https?://([^/]+).*#\1#')" >> $GITHUB_ENV
+          echo "THEME=$(jq -r .themeColor $C)"             >> $GITHUB_ENV
+          echo "BG=$(jq -r .backgroundColor $C)"           >> $GITHUB_ENV
+          echo "ICON=$(jq -r .icon $C)"                    >> $GITHUB_ENV
+          echo "APK_NAME=$(jq -r .apkFileName $C)"         >> $GITHUB_ENV
+          echo "VNAME=$(jq -r .versionName $C).${{ github.run_number }}" >> $GITHUB_ENV
+          echo "KS=$(jq -r .keystore $C)"                  >> $GITHUB_ENV
+          echo "KALIAS=$(jq -r .keyAlias $C)"              >> $GITHUB_ENV
+          echo "KPASS=$(jq -r .keyPassword $C)"            >> $GITHUB_ENV
+
+      - name: "2) اینڈرائیڈ پروجیکٹ تیار کریں (Trusted Web Activity)"
+        run: |
+          set -e
+          P=twa; A=$P/app/src/main
+          mkdir -p $A/res/values $A/res/mipmap-xxxhdpi $A/res/mipmap-xxhdpi $A/res/mipmap-xhdpi $A/res/mipmap-hdpi $A/res/mipmap-mdpi
+          # چابی: متن (base64) سے اصل فائل — فون سے اپلوڈ آسان رہے
+          base64 -d "$KS" > $P/release.keystore
+          echo "sdk.dir=$ANDROID_HOME" > $P/local.properties
+          cat > $P/settings.gradle <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositories { google(); mavenCentral() } }
+          rootProject.name = 'twa'
+          include ':app'
+          EOF
+          cat > $P/build.gradle <<'EOF'
+          plugins { id 'com.android.application' version '8.5.2' apply false }
+          EOF
+          printf 'android.useAndroidX=true\norg.gradle.jvmargs=-Xmx2g\n' > $P/gradle.properties
+          cat > $P/app/build.gradle <<EOF
+          plugins { id 'com.android.application' }
+          android {
+            namespace '${PKG}'
+            compileSdk 34
+            defaultConfig {
+              applicationId '${PKG}'
+              minSdk 21
+              targetSdk 34
+              versionCode ${{ github.run_number }}
+              versionName '${VNAME}'
+            }
+            signingConfigs {
+              release {
+                storeFile file('../release.keystore')
+                storePassword '${KPASS}'
+                keyAlias '${KALIAS}'
+                keyPassword '${KPASS}'
+              }
+            }
+            buildTypes { release { minifyEnabled false; signingConfig signingConfigs.release } }
+            compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+          }
+          dependencies { implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0' }
+          EOF
+          cat > $A/AndroidManifest.xml <<EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <application android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:allowBackup="true" android:supportsRtl="true">
+              <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
+              <activity android:name="com.google.androidbrowserhelper.trusted.LauncherActivity" android:exported="true" android:label="@string/app_name" android:theme="@android:style/Theme.Translucent.NoTitleBar">
+                <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL" android:value="${URL}" />
+                <meta-data android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR" android:resource="@color/theme" />
+                <meta-data android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR" android:resource="@color/theme" />
+                <meta-data android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY" android:value="customtabs" />
+                <intent-filter>
+                  <action android:name="android.intent.action.MAIN" />
+                  <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+                <intent-filter android:autoVerify="true">
+                  <action android:name="android.intent.action.VIEW" />
+                  <category android:name="android.intent.category.DEFAULT" />
+                  <category android:name="android.intent.category.BROWSABLE" />
+                  <data android:scheme="https" android:host="${HOST}" />
+                </intent-filter>
+              </activity>
+            </application>
+          </manifest>
+          EOF
+          cat > $A/res/values/strings.xml <<EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+            <string name="app_name">${APP_NAME}</string>
+            <string name="asset_statements">[{ \"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": { \"namespace\": \"web\", \"site\": \"https://${HOST}\" } }]</string>
+          </resources>
+          EOF
+          cat > $A/res/values/colors.xml <<EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources><color name="theme">${THEME}</color></resources>
+          EOF
+          # آئیکن — ہر سائز میں (ImageMagick نہ ملے تو وہی تصویر)
+          for d in "mdpi 48" "hdpi 72" "xhdpi 96" "xxhdpi 144" "xxxhdpi 192"; do
+            set -- $d
+            if command -v convert >/dev/null; then convert "$ICON" -resize ${2}x${2} $A/res/mipmap-$1/ic_launcher.png; else cp "$ICON" $A/res/mipmap-$1/ic_launcher.png; fi
+          done
+
+      - name: "3) APK بنائیں"
+        run: gradle -p twa assembleRelease --no-daemon --stacktrace
+
+      - name: "4) APK کا نام"
+        run: |
+          mkdir -p out
+          cp twa/app/build/outputs/apk/release/app-release.apk "out/${APK_NAME}.apk"
+          ls -la out
+
+      - name: "5) GitHub پر محفوظ (Artifact)"
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APK_NAME }}-${{ github.run_number }}
+          path: out/*.apk
+
+      - name: "6) مستقل لنک (Release: apk-latest)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete apk-latest -y --cleanup-tag || true
+          gh release create apk-latest "out/${APK_NAME}.apk" --title "📱 ${APP_NAME} — APK ${VNAME}" --notes "خودکار بنی APK (بلڈ #${{ github.run_number }})۔ ڈاؤنلوڈ کر کے فون پر انسٹال کریں۔"
