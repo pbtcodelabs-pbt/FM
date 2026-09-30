@@ -6050,6 +6050,7 @@
 
       <!-- ---------- 📊 FM299TU#261 (صدام کی ہدایت): آج کی ریکوری کا خلاصہ — سب سے اوپر ---------- -->
       <div id="drSummary" dir="rtl" style="margin:0 0 10px;"></div>
+      <div style="text-align:left; margin:-4px 0 8px;"><button type="button" onclick="runCloudHealthCheck()" style="border:1px solid #cbd5e1; border-radius:999px; background:#fff; color:#334155; font-size:12px; padding:3px 10px; cursor:pointer;">🩺 کلاؤڈ چیک</button></div>
       <div id="drTableWrap" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
         <!-- ---------- 📋 FM299TU#264 (صدام کی ہدایت): ہر خانے کے گرد لکیریں، جدول سکرین کے اندر (سائیڈ سکرول کے بغیر)،
              کم وصولی کا کالم الگ سرخ، اور آخری کالم میں ریکوری والے کا لکھا نوٹ (یہاں لکھنے کا خانہ نہیں) ---------- -->
@@ -8740,7 +8741,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM309WE#266'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM309WE#267'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21330,13 +21331,17 @@ function jumpToProduct(productId){
    ===================================================================== */
 
 // ---------- Dummy Data (بعد میں یہ اصل DB سے آئے گا) ----------
-const CUSTOMERS_SEED_DATA = [
-  {customer_id:1, name:'Muhammad Usman', phone:'923001234567', address:'Gulberg, Lahore', keywords:'', wallet_balance:1500, total_receivable:3200,
-    walletHistory:[{type:'deposit', amount:2000, date:'2026-06-20'}, {type:'redeem', amount:500, date:'2026-06-25'}]},
-  {customer_id:2, name:'Fatima Store', phone:'923214567890', address:'Saddar, Karachi', keywords:'', wallet_balance:0, total_receivable:8500,
-    walletHistory:[]},
-  {customer_id:3, name:'Walk-in Customer — Ali', phone:'', address:'', keywords:'', wallet_balance:0, total_receivable:0, walletHistory:[]},
+// ---------- 🧹 FM309WE#267 (صدام کی ہدایت): نمونے کے (ڈیمو) کسٹمر مکمل ختم — نئے فون پر کبھی نظر نہیں آئیں گے ----------
+const CUSTOMERS_SEED_DATA = [];
+// پرانے فونز میں پڑے ڈیمو کسٹمر پہچان کر ہٹانے کے لیے (id + نام + فون تینوں ملیں تبھی)
+const LEGACY_DEMO_CUSTOMERS = [
+  {customer_id:1, name:'Muhammad Usman', phone:'923001234567'},
+  {customer_id:2, name:'Fatima Store', phone:'923214567890'},
+  {customer_id:3, name:'Walk-in Customer — Ali', phone:''},
 ];
+function isLegacyDemoCustomer(c){
+  return !!c && LEGACY_DEMO_CUSTOMERS.some(d => d.customer_id === c.customer_id && d.name === c.name && (d.phone || '') === (c.phone || ''));
+}
 let customersData = loadFromStorage('customers', CUSTOMERS_SEED_DATA);
 let nextCustomerId = loadFromStorage('nextCustomerId', 4);
 
@@ -21396,7 +21401,8 @@ let nextReturnId = loadFromStorage('nextReturnId', 1);
 // ایڈمن اصل کھاتے میں اندراج کے بعد تصدیق (Confirm) کرتا ہے، تب جا کر customer.total_receivable کم ہوتا ہے ----------
 let recoveryListData = loadFromStorage('recoveryList', []);
 let nextRecoveryId = loadFromStorage('nextRecoveryId', 1);
-let recoveryDeletedIds = loadFromStorage('recoveryDeletedIds', []); // 🗑️ FM28SEP شام: ایڈمن کے حذف کیے اندراج
+let recoveryDeletedIds = loadFromStorage('recoveryDeletedIds', []);
+try{ if(Array.isArray(customersData) && customersData.some(isLegacyDemoCustomer)){ customersData = customersData.filter(c => !isLegacyDemoCustomer(c)); saveToStorage('customers', customersData); } }catch(e){} // 🧹 FM309WE#267 // 🗑️ FM28SEP شام: ایڈمن کے حذف کیے اندراج
 // ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): منشی/آرڈر لینے والے کے "نیا سٹاک" فارم سے ہر بار جو سٹاک فیڈ ہو،
 // اس کا ایک مستقل، وقت کے ساتھ الگ الگ اندراج والا لاگ — تاکہ ایڈمن بعد میں دیکھ سکے کہ کب، کیا، کتنا شامل ہوا
 // (ایک ہی دن میں دو دفعہ اندراج ہو تو دونوں علیحدہ علیحدہ نظر آئیں، مدغم نہ ہوں) ---------- -->
@@ -28692,7 +28698,7 @@ function renderRecoveryListEmployeeView(){
   const _myToday = recoveryListData.filter(e => e.employeeName === (AppState.currentUser?.name) && (e.createdAt || '').split('T')[0] === todayDateKey());
   const _myTotal = _myToday.reduce((a, e) => a + (Number(e.amount) || 0), 0);
   const _sumHtml = `<div dir="rtl" style="grid-column:1/-1; background:linear-gradient(135deg,#15803d,#065f46); color:#fff; border-radius:12px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-      <span style="font-weight:800;">📥 آج کی میری کل وصولی (${_myToday.length} گاہک)</span>
+      <span style="font-weight:800;">📥 آج کی میری کل وصولی (${_myToday.length} گاہک) <button type="button" onclick="runCloudHealthCheck()" style="margin-right:6px; border:none; border-radius:999px; background:rgba(255,255,255,.2); color:#fff; font-size:11px; padding:2px 8px; cursor:pointer; font-family:inherit;">🩺 کلاؤڈ چیک</button></span>
       <span style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:18px; direction:ltr;">Rs. ${_myTotal.toLocaleString()}</span></div>`;
   list.innerHTML = _sumHtml + owing.map(c => buildRlEmployeeCard(c, drAll.find(r => r.c.customer_id === c.customer_id) || {})).join('');
 }
@@ -33676,6 +33682,36 @@ let advanceOrdersPollTimer = null;
 // ---------- 🔍 صدام کی ہدایت (FM6SEPSU8): آرڈر Sync تشخیص — کسٹمر یا ایڈمن، کسی بھی فون سے چلا کر
 // screenshot بھیجیں تو پتا چل جائے: مقامی (لوکل) ڈیٹا کیا ہے، کلاؤڈ پر اصل میں کیا محفوظ ہے،
 // اور fetch/push میں کوئی خرابی آ رہی ہے یا نہیں (window.__cloudSyncError میں محفوظ ہوتی ہے) ---------- -->
+
+// ---------- 🩺 FM309WE#267 (صدام کی ہدایت): کلاؤڈ چیک — کسی بھی فون/رول سے ایک بٹن؛ سکرین شاٹ بھیجیں تو فوراً پتا چلے
+// کہ یہ فون کلاؤڈ سے جڑ رہا ہے یا نہیں، اور کسٹمر/ملازم/ریکوری کلاؤڈ پر کتنے ہیں اور اس فون میں کتنے ----------
+async function runCloudHealthCheck(){
+  const L = [];
+  L.push('🌐 پتہ: ' + location.host);
+  L.push('👤 رول: ' + (AppState.currentRole || '—') + ' — ' + (AppState.currentUser?.name || ''));
+  L.push('🏷️ ورژن: ' + APP_BUILD_VERSION);
+  let token = null;
+  try{ token = await ensureFirebaseAuth(); }catch(e){}
+  L.push('🔑 کلاؤڈ اجازت: ' + (token ? '✅ ٹھیک' : '❌ ناکام'));
+  if(window.__cloudSyncError) L.push('⚠️ ' + window.__cloudSyncError);
+  const docs = [['کسٹمر', CUSTOMERS_DOC_PATH, customersData], ['ملازم', STAFF_DOC_PATH, usersData], ['ریکوری', RECOVERY_LIST_DOC_PATH, recoveryListData], ['بیوپاری', SUPPLIERS_DOC_PATH, suppliersData]];
+  for(const [label, path, local] of docs){
+    let line = `${label}: فون میں ${(local || []).length}`;
+    try{
+      const res = await authFirestoreFetch(`${path}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+      if(res.ok){
+        const d = await res.json(); const arr = JSON.parse(d.fields?.json?.stringValue || '[]');
+        line += ` • کلاؤڈ پر ${Array.isArray(arr) ? arr.length : '?'} ✅`;
+      } else line += ` • کلاؤڈ ❌ HTTP ${res.status}`;
+    }catch(e){ line += ' • کلاؤڈ ❌ ' + (e.message || 'error'); }
+    L.push(line);
+  }
+  alert('🩺 کلاؤڈ چیک\n\n' + L.join('\n') + '\n\n(اس پیغام کا سکرین شاٹ بھیجیں)');
+  // ساتھ ہی دوبارہ منگوا لیں
+  try{ await fetchCustomersFromCloud(false); await fetchUsersFromCloud(false); }catch(e){}
+  try{ if(currentScreenName === 'recoveryList') renderRecoveryListScreen(); }catch(e){}
+}
+
 async function runOrderSyncDiagnostic(){
   const lines = [];
   lines.push('📱 رول: ' + AppState.currentRole);
@@ -34320,9 +34356,8 @@ async function pushCustomersToCloud(){
   saveToStorage('customers', customersData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
   saveToStorage('nextCustomerId', nextCustomerId);
   // ---------- 🛡️ FM299TU#258: صرف ڈیفالٹ کسٹمر والی فہرست کبھی کلاؤڈ پر نہیں ----------
-  const onlySeedOrLess = customersData.length <= CUSTOMERS_SEED_DATA.length &&
-    customersData.every(c => CUSTOMERS_SEED_DATA.some(sd => sd.customer_id === c.customer_id && sd.name === c.name));
-  if(onlySeedOrLess){ AppState.settings.customersPendingSync = false; return false; }
+  // 🛡️ خالی فہرست یا صرف ڈیمو کسٹمر — کبھی کلاؤڈ پر نہیں (اصل فہرست مٹنے سے بچاؤ)
+  if(!customersData.some(c => !isLegacyDemoCustomer(c))){ AppState.settings.customersPendingSync = false; return false; }
   try{
     const ok = await _pushMerged(_custCfg()); // 🔗 FM299TU#259: ملاپ کے ساتھ — کسی فون کی وصولی/ادائیگی نہیں مٹے گی
     AppState.settings.customersPendingSync = !ok;
@@ -34565,6 +34600,11 @@ function _mergeHistArr(b, l, r){
   return [...localNew.map(_syncClone), ...remoteKeep.map(_syncClone)];
 }
 function _mergeRecordsThreeWay(base, local, remote, idField, counters, hists, seedArr){
+  if(idField === 'customer_id'){ // 🧹 FM309WE#267: ڈیمو کسٹمر کبھی نہ ملائیں، کلاؤڈ میں ہوں تو بھی ہٹ جائیں
+    const _r = _mergeRecordsThreeWay(base, (local || []).filter(c => !isLegacyDemoCustomer(c)), (remote || []).filter(c => !isLegacyDemoCustomer(c)), '__cust__', counters, hists, null);
+    return _r;
+  }
+  if(idField === '__cust__') idField = 'customer_id';
   const isSeed = x => Array.isArray(seedArr) && seedArr.some(sd => sd[idField] === x[idField] && sd.name === x.name);
   if(!Array.isArray(base)){
     const ids = new Set(remote.map(x => x[idField]));
