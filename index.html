@@ -8741,7 +8741,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM309WE#268'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM309WE#269'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -24131,6 +24131,7 @@ function renderCustFilterBar(){
         <input type="checkbox" ${f.todayOnly?'checked':''} onchange="setCustFilter('todayOnly', this.checked)" style="margin:0;"> 🔥 آج کے خریدار
       </label>
     </div>
+    ${(AppState.currentRole === 'admin' && ledgerCustomersMissingCount() > 0) ? `<button type="button" onclick="restoreLedgerCustomers()" style="width:100%; margin:0 0 8px; border:none; border-radius:12px; background:linear-gradient(135deg,#16a34a,#065f46); color:#fff; font-size:15px; font-weight:800; padding:10px; cursor:pointer; font-family:inherit; box-shadow:0 3px 0 rgba(0,0,0,.2);">📥 پرانے رجسٹر کے ${ledgerCustomersMissingCount()} کسٹمر واپس لائیں</button>` : ''}
     <div style="text-align:left; margin:0 0 6px; display:${AppState.currentRole === 'admin' ? 'block' : 'none'};"><button type="button" onclick="runCloudHealthCheck()" style="border:1px solid #cbd5e1; border-radius:999px; background:#fff; color:#334155; font-size:12px; padding:3px 10px; cursor:pointer;">🩺 کلاؤڈ چیک (کل کسٹمر: ${customersData.length})</button></div>
     <!-- ---------- 🔓 FM299TU#260 (صدام کی ہدایت): ایڈمن کے لیے حاضر/کھوہ کھاتے نظام دوبارہ بحال ---------- -->
     <div style="display:${AppState.currentRole === 'admin' ? 'flex' : 'none'}; gap:6px;">
@@ -33714,6 +33715,58 @@ async function runCloudHealthCheck(){
   // ساتھ ہی دوبارہ منگوا لیں
   try{ await fetchCustomersFromCloud(false); await fetchUsersFromCloud(false); }catch(e){}
   try{ if(currentScreenName === 'recoveryList') renderRecoveryListScreen(); }catch(e){}
+}
+
+
+// ---------- 📥 FM309WE#269 (صدام کی ہدایت): پرانے رجسٹر کے اصل کسٹمر (کوڈ میں محفوظ فہرست) دوبارہ ایپ میں —
+// صرف ایڈمن، تصدیق + ایڈمن PIN کے ساتھ۔ جس نام کا کسٹمر پہلے سے موجود ہو وہ دوبارہ نہیں بنتا (کوئی ڈپلیکیٹ نہیں)؛
+// سیریل نمبر = رجسٹر کا کھاتہ نمبر؛ بقایا = رجسٹر کا بقایا (باقی کھاتے ایڈمن بعد میں برابر کرے گا)؛
+// موجودہ کسٹمرز کو نہیں چھیڑا جاتا، صرف اگر ان کا سیریل رجسٹر کے کسی نمبر سے ٹکرائے تو انہیں آخر میں نیا نمبر ملتا ہے ----------
+function ledgerCustomersMissingCount(){
+  const have = new Set(customersData.map(c => (c.name || '').trim()));
+  return LEDGER_CUSTOMERS_SEED_V1.filter(r => !have.has(r.name.trim())).length;
+}
+async function restoreLedgerCustomers(){
+  if(AppState.currentRole !== 'admin'){ alert('یہ کام صرف ایڈمن کر سکتا ہے'); return; }
+  try{ await fetchCustomersFromCloud(true); }catch(e){}
+  const have = new Set(customersData.map(c => (c.name || '').trim()));
+  const missing = LEDGER_CUSTOMERS_SEED_V1.filter(r => !have.has(r.name.trim()));
+  if(!missing.length){ alert('✅ پرانے رجسٹر کے سب کسٹمر پہلے سے ایپ میں موجود ہیں — کچھ کرنے کی ضرورت نہیں۔'); return; }
+  if(!confirm(`📥 پرانے رجسٹر کے اصل کسٹمر واپس لائیں؟\n\n• رجسٹر میں کل: ${LEDGER_CUSTOMERS_SEED_V1.length}\n• جو ابھی ایپ میں نہیں: ${missing.length} (یہی شامل ہوں گے)\n• ایپ میں موجود ${customersData.length} کسٹمر ویسے ہی رہیں گے\n\nہر کسٹمر کا سیریل = رجسٹر کا کھاتہ نمبر، بقایا = رجسٹر کا بقایا۔`)) return;
+  if(typeof _askAdminPinForSerialMaster === 'function' && !(await _askAdminPinForSerialMaster('پرانے رجسٹر کے کسٹمر واپس لانے کے لیے'))) return;
+  pauseCloudPolling(15000);
+  const maxId = customersData.reduce((m, c) => Math.max(m, Number(c.customer_id) || 0), 0);
+  if(nextCustomerId <= maxId) nextCustomerId = maxId + 1;
+  const ledgerSerials = new Set(LEDGER_CUSTOMERS_SEED_V1.map(r => r.ledgerNo));
+  // موجودہ کسٹمر جن کا سیریل رجسٹر کے نمبر سے ٹکراتا ہے — انہیں آخر میں نئے نمبر
+  let nextSerial = Math.max(...LEDGER_CUSTOMERS_SEED_V1.map(r => r.ledgerNo), ...customersData.map(c => Number(c.serial_no) || 0)) + 1;
+  const ledgerNames = new Set(LEDGER_CUSTOMERS_SEED_V1.map(r => r.name.trim()));
+  const ledgerByName = {}; LEDGER_CUSTOMERS_SEED_V1.forEach(r => { ledgerByName[r.name.trim()] = r.ledgerNo; });
+  customersData.forEach(c => {
+    const ln = ledgerByName[(c.name || '').trim()];
+    if(ln){ c.serial_no = ln; c.ledgerNo = ln; }                                   // رجسٹر والا نام → اپنا کھاتہ نمبر
+    else if(c.serial_no && ledgerSerials.has(Number(c.serial_no))) c.serial_no = nextSerial++; // ٹکراؤ → آخر میں نیا نمبر
+  });
+  const today = new Date().toISOString().split('T')[0];
+  missing.forEach(row => {
+    customersData.push({
+      customer_id: nextCustomerId++,
+      serial_no: row.ledgerNo,
+      name: row.name,
+      phone: '', address: '', area: '', keywords: '', rateArea: '', photo: null,
+      wallet_balance: 0,
+      openingBalance: row.openingBalance,
+      total_receivable: row.openingBalance,
+      ledgerNo: row.ledgerNo,
+      createdAt: new Date().toISOString(),
+      walletHistory: [{ type: 'opening_balance', amount: Math.abs(row.openingBalance), direction: row.openingBalance >= 0 ? 'add' : 'reduce',
+        note: `پرانے رجسٹر سے واپس لایا گیا (کھاتہ #${row.ledgerNo})`, date: today }]
+    });
+  });
+  saveToStorage('customers', customersData); saveToStorage('nextCustomerId', nextCustomerId);
+  const ok = await pushCustomersToCloud();
+  try{ renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : ''); }catch(e){}
+  alert(`✅ ${missing.length} کسٹمر واپس آ گئے\n\nاب ایپ میں کل کسٹمر: ${customersData.length}\n☁️ کلاؤڈ: ${ok ? 'محفوظ ✅' : '⏳ نیٹ آنے پر خود محفوظ ہو گا'}\n\nباقی فونز پر چند سیکنڈ میں خود نظر آئیں گے۔`);
 }
 
 async function runOrderSyncDiagnostic(){
