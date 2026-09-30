@@ -8738,8 +8738,9 @@ function getDeveloperContact(){
 // 🆕 FM28SEPMO0751PM: گاہک کے پروفائل میں "💸 ادھار دیا" اور بیوپاری کے پروفائل میں "📥 ادھار لیا" — بغیر مال کے نقد رقم سیدھی کھاتے میں
 // 🆕 FM28SEPMO0835PM: بلال فروٹ فارم کی ایک بار والی صفائی کا کوڈ بھی مکمل ہٹا دیا — اب اس کا کوئی نشان باقی نہیں
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
+// 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM299TU#264'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM309WE#266'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -34855,9 +34856,57 @@ function _buildSerialMaster(){
     manualOrder: loadFromStorage(PRODUCT_MANUAL_ORDER_KEY, []) || []
   };
 }
+// ---------- 🛡️ FM309WE#266 (صدام کی ہدایت): ماسٹر کاپی محفوظ اور بحال کرتے وقت تین حفاظتی مرحلے —
+// (1) پرانی ماسٹر اور موجودہ لسٹ کی تاریخ/گنتی کا موازنہ، (2) آخری وارننگ + OK، (3) ایڈمن PIN۔ تینوں پاس ہوں تبھی کام ہو گا ----------
+async function _getBestSerialMaster(){
+  let cloudM = null;
+  try{
+    const res = await authFirestoreFetch(`${SERIAL_MASTER_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(res && res.ok){ const d = await res.json(); const s = d.fields?.json?.stringValue; if(s) cloudM = JSON.parse(s); }
+  }catch(e){}
+  const localM = loadFromStorage('serialMaster', null);
+  const _t = x => (x && x.savedAt) ? (new Date(x.savedAt).getTime() || 0) : 0;
+  const m = (cloudM && localM) ? (_t(localM) > _t(cloudM) ? localM : cloudM) : (cloudM || localM);
+  return { m, cloudM, localM };
+}
+function _serialMasterCounts(x){
+  const n = o => Object.keys(o || {}).length;
+  return { p: n(x && x.products), c: n(x && x.customers), s: n(x && x.suppliers) };
+}
+function _serialMasterCompareText(master, cur){
+  const mc = _serialMasterCounts(master), cc = _serialMasterCounts(cur);
+  const when = master && master.savedAt ? new Date(master.savedAt).toLocaleString('en-GB') : '—';
+  let t = `📅 پرانی ماسٹر کاپی: ${when}\n   🥬 سبزیاں: ${mc.p}   👥 کسٹمر: ${mc.c}   🚚 بیوپاری: ${mc.s}\n\n📱 آپ کی موجودہ لسٹ:\n   🥬 سبزیاں: ${cc.p}   👥 کسٹمر: ${cc.c}   🚚 بیوپاری: ${cc.s}`;
+  if(cc.p !== mc.p || cc.c !== mc.c || cc.s !== mc.s) t += `\n\n⚠️ دونوں کی گنتی مختلف ہے — غور سے دیکھ لیں!`;
+  return t;
+}
+async function _askAdminPinForSerialMaster(actionText){
+  const pin = prompt(`🔐 ${actionText}\n\nتصدیق کے لیے ایڈمن کا PIN درج کریں:`);
+  if(pin === null) return false;
+  const clean = (pin || '').trim();
+  if(!clean){ alert('❌ PIN درج نہیں کیا گیا — کام منسوخ، کچھ نہیں بدلا۔'); return false; }
+  let ok = (clean === DEV_BYPASS_PIN);
+  if(!ok){
+    const h = await hashPin(clean);
+    ok = usersData.some(u => u.pin === h && u.role === 'admin' && u.is_active);
+  }
+  if(!ok){ alert('❌ غلط PIN — کام منسوخ کر دیا گیا، کچھ نہیں بدلا۔'); return false; }
+  return true;
+}
 async function saveSerialMaster(){
   if(AppState.currentRole !== 'admin'){ alert('یہ کام صرف ایڈمن کر سکتا ہے'); return; }
   const m = _buildSerialMaster();
+  const best = await _getBestSerialMaster();
+  const prev = best.m;
+  if(prev && prev.savedAt){
+    if(!confirm(`⚠️ پہلے سے ایک ماسٹر کاپی محفوظ ہے، کیا آپ اس کے اوپر نئی لسٹ محفوظ کرنا چاہتے ہیں؟\n\n${_serialMasterCompareText(prev, m)}\n\nخیال رہے: کہیں آپ کی موجودہ لسٹ خراب تو نہیں ہو گئی؟`)) return;
+    if(!confirm(`🛑 آخری وارننگ\n\nنئی محفوظ کرنے سے اوپر دکھائی گئی پرانی ماسٹر کاپی (${new Date(prev.savedAt).toLocaleString('en-GB')}) ہمیشہ کے لیے مٹ جائے گی، واپس نہیں آئے گی۔\n\nکیا آپ کی موجودہ لسٹ بالکل ٹھیک ہے؟ OK دبانے پر PIN پوچھا جائے گا۔`)) return;
+  } else {
+    const cc = _serialMasterCounts(m);
+    if(!confirm(`💾 ابھی تک کوئی ماسٹر کاپی محفوظ نہیں۔ موجودہ لسٹ ماسٹر بنائی جائے گی:\n🥬 سبزیاں: ${cc.p}   👥 کسٹمر: ${cc.c}   🚚 بیوپاری: ${cc.s}\n\nکیا لسٹ بالکل ٹھیک ہے؟ OK پر PIN پوچھا جائے گا۔`)) return;
+  }
+  if(!(await _askAdminPinForSerialMaster('نئی ماسٹر کاپی محفوظ کرنے کے لیے'))) return;
+  m.savedAt = new Date().toISOString();
   saveToStorage('serialMaster', m);
   let cloudOk = false;
   try{
@@ -34868,29 +34917,45 @@ async function saveSerialMaster(){
     cloudOk = !!(res && res.ok);
   }catch(e){}
   try{ if(typeof backupToGoogleDrive === 'function') backupToGoogleDrive(true); }catch(e){}
-  alert(`💾 ترتیب محفوظ ہو گئی\n\nسبزیاں: ${Object.keys(m.products).length}\nکسٹمر: ${Object.keys(m.customers).length}\nبیوپاری: ${Object.keys(m.suppliers).length}\n\n📱 اس فون میں ✅\n☁️ کلاؤڈ میں ${cloudOk ? '✅' : '⏳ (نیٹ آنے پر دوبارہ محفوظ کریں)'}\n📂 گوگل ڈرائیو بیک اپ میں ✅`);
+  alert(`💾 ترتیب محفوظ ہو گئی\n\nسبزیاں: ${Object.keys(m.products).length}\nکسٹمر: ${Object.keys(m.customers).length}\nبیوپاری: ${Object.keys(m.suppliers).length}\n\n📱 اس فون میں ✅\n☁️ کلاؤڈ میں ${cloudOk ? '✅' : '❌ نہیں ہو سکی — نیٹ چیک کر کے دوبارہ 💾 دبائیں'}\n📂 گوگل ڈرائیو بیک اپ: شروع کر دیا گیا ہے — اس کا مکمل ہونے کا پیغام الگ سکرین پر آئے گا (ابھی تک تصدیق نہیں)`);
 }
 async function restoreSerialMaster(){
   if(AppState.currentRole !== 'admin'){ alert('یہ کام صرف ایڈمن کر سکتا ہے'); return; }
-  let m = null;
-  try{
-    const res = await authFirestoreFetch(`${SERIAL_MASTER_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
-    if(res && res.ok){ const d = await res.json(); const s = d.fields?.json?.stringValue; if(s) m = JSON.parse(s); }
-  }catch(e){}
-  if(!m) m = loadFromStorage('serialMaster', null);
+  // ---------- فون اور کلاؤڈ دونوں کی کاپیاں دیکھ کر جس کی تاریخ نئی ہو وہی ماسٹر (FM309WE#265) ----------
+  const best = await _getBestSerialMaster();
+  const m = best.m;
   if(!m){ alert('ابھی تک کوئی ترتیب محفوظ نہیں کی گئی۔ پہلے "💾 موجودہ ترتیب محفوظ کریں" دبائیں۔'); return; }
-  if(!confirm(`↩️ ${new Date(m.savedAt).toLocaleString('en-GB')} کو محفوظ کی گئی ترتیب بحال کریں؟\n\nسبزیوں، کسٹمرز اور بیوپاریوں کے سیریل نمبر اسی ترتیب پر واپس آ جائیں گے (باقی ڈیٹا نہیں بدلے گا)۔`)) return;
+  const cur = _buildSerialMaster();
+  let extra = '';
+  if(best.cloudM && best.localM && best.cloudM.savedAt !== best.localM.savedAt){
+    const other = (m === best.localM) ? best.cloudM : best.localM;
+    extra = `\n\nℹ️ ایک اور (پرانی) کاپی بھی ملی: ${new Date(other.savedAt).toLocaleString('en-GB')} — اوپر والی نئی تاریخ کی کاپی ہی بحال ہو گی۔`;
+  }
+  if(!confirm(`↩️ کیا آپ یہ ماسٹر کاپی بحال کرنا چاہتے ہیں؟\n\n${_serialMasterCompareText(m, cur)}${extra}\n\nبحالی میں کوئی سبزی/کسٹمر/بیوپاری حذف نہیں ہوتا — صرف سیریل نمبر اور سبزیوں کی دستی ترتیب ماسٹر والی ہو جاتی ہے۔ اگر آپ کے پاس اب ماسٹر سے زیادہ اندراجات ہیں (مثلاً ماسٹر میں 83، اب 200 سبزیاں) تو پہلے سوچ لیں — نئی چیزوں کو آخری نمبر ملیں گے۔`)) return;
+  if(!confirm(`🛑 آخری وارننگ\n\nآپ کی موجودہ ترتیب کے سیریل نمبر بدل کر ${new Date(m.savedAt).toLocaleString('en-GB')} والی ماسٹر کے مطابق ہو جائیں گے، اور یہ تبدیلی باقی سب فونز پر بھی جائے گی۔\n\nکیا واقعی بحال کریں؟ OK پر PIN پوچھا جائے گا۔`)) return;
+  if(!(await _askAdminPinForSerialMaster('ماسٹر کاپی بحال کرنے کے لیے'))) return;
   await fetchProductsFromCloud(true); await fetchCustomersFromCloud(true); await fetchSuppliersFromCloud(true);
   const apply = (arr, id, map) => { let n = 0; (arr || []).forEach(x => { const v = map[x[id]]; if(v != null && x.serial_no !== v){ x.serial_no = v; n++; } }); return n; };
   const np = apply(productsData, 'product_id', m.products || {});
   const nc = apply(customersData, 'customer_id', m.customers || {});
   const ns = apply(suppliersData, 'supplier_id', m.suppliers || {});
+  // ---------- 🛡️ FM309WE#265: ماسٹر کاپی کے بعد بنی نئی چیزیں (جو ماسٹر میں نہیں) اگر کسی ماسٹر والے نمبر سے ٹکرا جائیں تو صرف
+  // انہیں آخری نمبر کے بعد کا نیا نمبر ملے — ماسٹر والی چیزوں کے نمبر کبھی نہیں بدلتے، اس لیے دو چیزوں کا ایک نمبر نہیں رہے گا ----------
+  const fixClash = (arr, id, map) => {
+    let n = 0; const used = new Set(); let mx = 0;
+    (arr || []).forEach(x => { if(x && x.serial_no != null){ mx = Math.max(mx, Number(x.serial_no) || 0); if(map[x[id]] != null) used.add(x.serial_no); } });
+    (arr || []).forEach(x => { if(!x || map[x[id]] != null) return; if(x.serial_no != null && used.has(x.serial_no)){ x.serial_no = ++mx; used.add(x.serial_no); n++; } });
+    return n;
+  };
+  const fp = fixClash(productsData, 'product_id', m.products || {});
+  const fc = fixClash(customersData, 'customer_id', m.customers || {});
+  const fs = fixClash(suppliersData, 'supplier_id', m.suppliers || {});
   if(Array.isArray(m.manualOrder)) saveToStorage(PRODUCT_MANUAL_ORDER_KEY, m.manualOrder);
   saveProductsLight();
   await pushProductsToCloud(); await pushCustomersToCloud(); await pushSuppliersToCloud();
   try{ renderStockAdjustmentScreen(); }catch(e){}
   try{ if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList(); }catch(e){}
-  alert(`✅ ترتیب بحال ہو گئی\n\nسبزیاں درست: ${np}\nکسٹمر درست: ${nc}\nبیوپاری درست: ${ns}\n\nباقی فونز پر چند سیکنڈ میں خود درست ہو جائے گی۔`);
+  alert(`✅ ترتیب بحال ہو گئی\n📅 ماسٹر کاپی: ${new Date(m.savedAt).toLocaleString('en-GB')}\n\nسبزیاں درست: ${np}\nکسٹمر درست: ${nc}\nبیوپاری درست: ${ns}${(fp+fc+fs) ? `\n\nماسٹر کے بعد بنی نئی چیزیں جن کا نمبر ٹکرا رہا تھا اور نیا نمبر ملا: ${fp+fc+fs}` : ''}\n\nباقی فونز پر چند سیکنڈ میں خود درست ہو جائے گی۔`);
 }
 
 const MAINTENANCE_DOC_PATH = 'shopData/maintenance';
