@@ -8198,6 +8198,7 @@ async function backupToGoogleDrive(silent){
       }catch(e){ /* اگر ای میل نہ ملے تو بھی بیک اپ کامیاب ہی شمار ہوگا، صرف پیغام میں ای میل نہیں دکھے گا */ }
 
       finishGDriveProgress('✅ بیک اپ مکمل!');
+      try{ renderDriveBackupReminder(); }catch(e){}
     }catch(err){
       hideGDriveProgress();
       if(!silent) alert('Could not upload to Google Drive: ' + err.message);
@@ -8741,7 +8742,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM309WE#269'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM309WE#270'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12224,6 +12225,7 @@ function goTo(screenName, _isHistoryNav){
     fetchFinanceFromCloud(true).then(added => { if(added) renderKpiCards(); });
   }
   if(screenName === 'home') {
+    try{ setTimeout(renderDriveBackupReminder, 300); }catch(e){}
     renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI();
     renderQuickContactPanel(); // ---------- 📇 صدام کی ہدایت (6 ستمبر): فوری رابطہ پینل — رول کے مطابق مختلف مواد ----------
     // ---------- ☁️ Home پر پہنچتے ہی خاموشی سے تازہ ترین Pending Orders منگوا لیں — تاکہ گنتی کا بیج (🔴) درست ہو ----------
@@ -24132,7 +24134,7 @@ function renderCustFilterBar(){
       </label>
     </div>
     ${(AppState.currentRole === 'admin' && ledgerCustomersMissingCount() > 0) ? `<button type="button" onclick="restoreLedgerCustomers()" style="width:100%; margin:0 0 8px; border:none; border-radius:12px; background:linear-gradient(135deg,#16a34a,#065f46); color:#fff; font-size:15px; font-weight:800; padding:10px; cursor:pointer; font-family:inherit; box-shadow:0 3px 0 rgba(0,0,0,.2);">📥 پرانے رجسٹر کے ${ledgerCustomersMissingCount()} کسٹمر واپس لائیں</button>` : ''}
-    <div style="text-align:left; margin:0 0 6px; display:${AppState.currentRole === 'admin' ? 'block' : 'none'};"><button type="button" onclick="runCloudHealthCheck()" style="border:1px solid #cbd5e1; border-radius:999px; background:#fff; color:#334155; font-size:12px; padding:3px 10px; cursor:pointer;">🩺 کلاؤڈ چیک (کل کسٹمر: ${customersData.length})</button></div>
+    <div style="text-align:left; margin:0 0 6px; display:${AppState.currentRole === 'admin' ? 'block' : 'none'};"><button type="button" onclick="restoreFromCloudSnapshot()" style="border:1px solid #86efac; border-radius:999px; background:#f0fdf4; color:#166534; font-size:12px; padding:3px 10px; cursor:pointer; margin-left:6px;">🗓️ پچھلے دنوں کی کاپی</button><button type="button" onclick="runCloudHealthCheck()" style="border:1px solid #cbd5e1; border-radius:999px; background:#fff; color:#334155; font-size:12px; padding:3px 10px; cursor:pointer;">🩺 کلاؤڈ چیک (کل کسٹمر: ${customersData.length})</button></div>
     <!-- ---------- 🔓 FM299TU#260 (صدام کی ہدایت): ایڈمن کے لیے حاضر/کھوہ کھاتے نظام دوبارہ بحال ---------- -->
     <div style="display:${AppState.currentRole === 'admin' ? 'flex' : 'none'}; gap:6px;">
       <button onclick="setCustFilter('showDormant', false)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${!f.showDormant?'#134e2c':'#f1f5f9'}; color:${!f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🟢 حاضر موجود (${customersData.filter(c => !c.isDormant).length})</button>
@@ -33769,6 +33771,90 @@ async function restoreLedgerCustomers(){
   alert(`✅ ${missing.length} کسٹمر واپس آ گئے\n\nاب ایپ میں کل کسٹمر: ${customersData.length}\n☁️ کلاؤڈ: ${ok ? 'محفوظ ✅' : '⏳ نیٹ آنے پر خود محفوظ ہو گا'}\n\nباقی فونز پر چند سیکنڈ میں خود نظر آئیں گے۔`);
 }
 
+
+// ---------- 🗓️ FM309WE#270 (صدام کی ہدایت): روزانہ خودکار کلاؤڈ کاپی — ایڈمن کا فون دن میں ایک بار کسٹمر، بیوپاری اور
+// سبزیوں کی پوری فہرست کلاؤڈ کے الگ خانوں میں رکھتا ہے (ہفتے کے 7 دن = 7 خانے، پرانا خود بدلتا ہے)۔ گوگل کی اجازت
+// کی ضرورت نہیں — اسی لیے یہ ہمیشہ چلتا ہے۔ کبھی کچھ کم ہو تو "پچھلے دنوں کی کاپی" سے صرف غائب چیزیں واپس ----------
+const SNAP_LISTS = [
+  { key: 'customers', label: 'کسٹمر', id: 'customer_id', get: () => customersData, set: v => { customersData = v; }, push: () => pushCustomersToCloud() },
+  { key: 'suppliers', label: 'بیوپاری', id: 'supplier_id', get: () => suppliersData, set: v => { suppliersData = v; }, push: () => pushSuppliersToCloud() },
+  { key: 'products', label: 'سبزیاں', id: 'product_id', get: () => productsData, set: v => { productsData = v; }, push: () => { saveProductsLight(); return pushProductsToCloud(); } },
+];
+async function takeDailyCloudSnapshot(force){
+  if(AppState.currentRole !== 'admin' || !navigator.onLine) return;
+  const today = todayDateKey();
+  if(!force && AppState.settings.lastCloudSnapshotDate === today) return;
+  const slot = new Date().getDay();
+  let okAll = true;
+  for(const L of SNAP_LISTS){
+    const arr = L.get() || [];
+    if(!arr.length) continue;
+    try{
+      const res = await authFirestoreFetch(`shopData/snap${slot}_${L.key}?key=${FIREBASE_API_KEY}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { json: { stringValue: JSON.stringify(arr) }, date: { stringValue: today }, count: { integerValue: String(arr.length) }, savedAt: { integerValue: String(Date.now()) } } })
+      });
+      if(!res || !res.ok) okAll = false;
+    }catch(e){ okAll = false; }
+  }
+  if(okAll){ AppState.settings.lastCloudSnapshotDate = today; persistAllData(); }
+}
+setTimeout(() => { try{ takeDailyCloudSnapshot(false); }catch(e){} }, 20000);
+setInterval(() => { try{ takeDailyCloudSnapshot(false); }catch(e){} }, 30 * 60 * 1000);
+
+async function restoreFromCloudSnapshot(){
+  if(AppState.currentRole !== 'admin'){ alert('یہ کام صرف ایڈمن کر سکتا ہے'); return; }
+  const found = [];
+  for(let d = 0; d < 7; d++){
+    try{
+      const res = await authFirestoreFetch(`shopData/snap${d}_customers?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+      if(res && res.ok){ const doc = await res.json(); found.push({ slot: d, date: doc.fields?.date?.stringValue || '', c: parseInt(doc.fields?.count?.integerValue || '0') }); }
+    }catch(e){}
+  }
+  if(!found.length){ alert('ابھی تک کوئی روزانہ کلاؤڈ کاپی نہیں بنی (ایڈمن کا فون روزانہ خود بناتا ہے)۔'); return; }
+  found.sort((a, b) => b.date.localeCompare(a.date));
+  const menu = found.map((f, i) => `${i + 1}) ${f.date} — کسٹمر: ${f.c}`).join('\n');
+  const pick = prompt(`🗓️ پچھلے دنوں کی کلاؤڈ کاپی\n\nموجودہ: کسٹمر ${customersData.length} • بیوپاری ${suppliersData.length} • سبزیاں ${productsData.length}\n\n${menu}\n\nکس دن کی کاپی سے غائب چیزیں واپس لائیں؟ نمبر لکھیں:`);
+  const n = parseInt(pick || '');
+  if(!n || n < 1 || n > found.length) return;
+  const f = found[n - 1];
+  const adds = [];
+  for(const L of SNAP_LISTS){
+    try{
+      const res = await authFirestoreFetch(`shopData/snap${f.slot}_${L.key}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+      if(!res || !res.ok) continue;
+      const doc = await res.json(); const arr = JSON.parse(doc.fields?.json?.stringValue || '[]');
+      const have = new Set((L.get() || []).map(x => x[L.id]));
+      const missing = arr.filter(x => x && !have.has(x[L.id]));
+      if(missing.length) adds.push({ L, missing });
+    }catch(e){}
+  }
+  if(!adds.length){ alert(`✅ ${f.date} کی کاپی کی ہر چیز پہلے سے موجود ہے — کچھ غائب نہیں۔`); return; }
+  const summary = adds.map(a => `${a.L.label}: ${a.missing.length} (${a.missing.slice(0, 5).map(x => x.name).join('، ')}${a.missing.length > 5 ? '…' : ''})`).join('\n');
+  if(!confirm(`↩️ ${f.date} کی کاپی سے یہ غائب چیزیں واپس آئیں گی:\n\n${summary}\n\nموجودہ ڈیٹا نہیں بدلے گا — صرف غائب واپس آئیں گے۔ جاری رکھیں؟`)) return;
+  if(!(await _askAdminPinForSerialMaster('غائب چیزیں واپس لانے کے لیے'))) return;
+  pauseCloudPolling(15000);
+  for(const a of adds){ a.L.set((a.L.get() || []).concat(a.missing)); await a.L.push(); }
+  try{ renderPartyList(''); }catch(e){}
+  alert(`✅ واپس آ گئے:\n\n${adds.map(a => `${a.L.label}: ${a.missing.length}`).join('\n')}`);
+}
+
+// ---------- 📂 FM309WE#270: گوگل ڈرائیو بیک اپ یاد دہانی — خودکار ڈرائیو بیک اپ کے لیے گوگل ہر بار اجازت (ٹیپ) مانگتا ہے،
+// اس لیے خاموش بیک اپ اکثر نہیں ہوتا۔ 24 گھنٹے سے زیادہ ہو جائیں تو ایڈمن کے ہوم پر ایک بٹن ----------
+function renderDriveBackupReminder(){
+  const home = document.getElementById('screen-home'); if(!home) return;
+  let el = document.getElementById('driveBackupReminder');
+  const last = AppState.settings.lastGDriveBackupAt ? new Date(AppState.settings.lastGDriveBackupAt).getTime() : 0;
+  const need = AppState.currentRole === 'admin' && (Date.now() - last > 24 * 3600 * 1000);
+  if(!need){ if(el) el.remove(); return; }
+  if(!el){ el = document.createElement('div'); el.id = 'driveBackupReminder'; home.insertBefore(el, home.firstChild); }
+  const days = last ? Math.floor((Date.now() - last) / 86400000) : null;
+  el.innerHTML = `<div dir="rtl" style="margin:6px 0 10px; background:#fff7ed; border:2px solid #fb923c; border-radius:12px; padding:8px 10px; display:flex; align-items:center; gap:8px; justify-content:space-between;">
+    <span style="font-weight:800; color:#9a3412; font-size:14px;">📂 گوگل ڈرائیو بیک اپ ${days === null ? 'ابھی تک نہیں ہوا' : days + ' دن سے نہیں ہوا'}</span>
+    <button type="button" onclick="backupToGoogleDrive(false)" style="border:none; border-radius:10px; background:#ea580c; color:#fff; font-weight:800; padding:7px 12px; cursor:pointer; font-family:inherit;">ابھی لیں</button></div>`;
+}
+setInterval(() => { try{ renderDriveBackupReminder(); }catch(e){} }, 60 * 1000);
+
 async function runOrderSyncDiagnostic(){
   const lines = [];
   lines.push('📱 رول: ' + AppState.currentRole);
@@ -34649,6 +34735,27 @@ function stripOne(x){ if(!x) return x; const {image, ...rest} = x; return rest; 
    واقعی بدلا؛ رقمیں (بقایا، والٹ، واجب الادا، بل کا باقی) "فرق" کے طور پر جمع ہوتی ہیں — کسی فون کی تبدیلی نہیں مٹتی؛
    لین دین کی تاریخ (والٹ/لیجر) دونوں طرف کی ملا دی جاتی ہے۔ سیریل نمبر صرف ایڈمن کا فون بدل سکتا ہے
    ===================================================================== */
+
+// ---------- 🔒 FM309WE#270 (صدام کی ہدایت): "کمی کا تالا" — کوئی بھی فون ایک ساتھ 3 سے زیادہ کسٹمر/بیوپاری/سبزیاں
+// کلاؤڈ سے نہیں مٹا سکتا۔ ملازم کا فون ہو تو مٹنے والے خود بخود واپس؛ ایڈمن ہو تو تصدیق + PIN کے بغیر نہیں ----------
+const SHRINK_LOCK_LIMIT = 3;
+async function _shrinkLockCheck(remoteArr, mergedArr, idField, label){
+  if(!Array.isArray(remoteArr) || !Array.isArray(mergedArr)) return mergedArr;
+  const keep = new Set(mergedArr.map(x => x && x[idField]));
+  const removed = remoteArr.filter(x => x && !keep.has(x[idField]));
+  if(removed.length <= SHRINK_LOCK_LIMIT) return mergedArr;
+  let allow = false;
+  if(typeof AppState !== 'undefined' && AppState.currentRole === 'admin'){
+    const names = removed.slice(0, 8).map(x => x.name || x[idField]).join('، ');
+    if(confirm(`🔒 حفاظتی تالا\n\nایک ساتھ ${removed.length} ${label} حذف ہونے جا رہے ہیں:\n${names}${removed.length > 8 ? '…' : ''}\n\nکیا واقعی آپ یہ سب مٹانا چاہتے ہیں؟ (عام طور پر یہ غلطی ہوتی ہے — Cancel دبائیں)`)){
+      allow = (typeof _askAdminPinForSerialMaster === 'function') ? await _askAdminPinForSerialMaster(`${removed.length} ${label} حذف کرنے کے لیے`) : false;
+    }
+  }
+  if(allow) return mergedArr;
+  console.warn(`🔒 کمی کا تالا: ${removed.length} ${label} واپس رکھے گئے`);
+  return mergedArr.concat(removed.map(x => JSON.parse(JSON.stringify(x))));
+}
+
 function _mergeHistArr(b, l, r){
   const k = x => _stableStr(x);
   const bs = new Set((b || []).map(k)), ls = new Set((l || []).map(k)), rs = new Set((r || []).map(k));
@@ -34697,7 +34804,11 @@ async function _pushMerged(cfg){
       const str = doc.fields?.json?.stringValue;
       if(str){
         const remote = JSON.parse(str);
-        if(Array.isArray(remote)) cfg.set(_mergeRecordsThreeWay(cfg.getBase(), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed));
+        if(Array.isArray(remote)){
+          let merged = _mergeRecordsThreeWay(cfg.getBase(), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
+          if(cfg.label) merged = await _shrinkLockCheck(remote.filter(x => !(cfg.id === 'customer_id' && isLegacyDemoCustomer(x))), merged, cfg.id, cfg.label); // 🔒 FM309WE#270
+          cfg.set(merged);
+        }
       }
       if(cfg.onDoc) cfg.onDoc(doc);
     } else if(!(peek && peek.status === 404)){
@@ -34738,7 +34849,7 @@ let customersSyncBase = loadFromStorage('customersSyncBase', null);
 let suppliersSyncBase = loadFromStorage('suppliersSyncBase', null);
 let invoicesSyncBase = loadFromStorage('invoicesSyncBase', null);
 function _custCfg(){
-  return { path: CUSTOMERS_DOC_PATH, id: 'customer_id', counters: ['total_receivable','wallet_balance'], hists: ['walletHistory'], seed: CUSTOMERS_SEED_DATA,
+  return { path: CUSTOMERS_DOC_PATH, id: 'customer_id', label: 'کسٹمر', counters: ['total_receivable','wallet_balance'], hists: ['walletHistory'], seed: CUSTOMERS_SEED_DATA,
     get: () => customersData, set: v => { customersData = v; },
     getBase: () => customersSyncBase, setBase: v => { customersSyncBase = _syncClone(v); try{ saveToStorage('customersSyncBase', customersSyncBase); }catch(e){} },
     extra: () => ({ nextCustomerId: { integerValue: String(nextCustomerId) } }),
@@ -34747,7 +34858,7 @@ function _custCfg(){
     push: () => pushCustomersToCloud() };
 }
 function _supCfg(){
-  return { path: SUPPLIERS_DOC_PATH, id: 'supplier_id', counters: ['total_payable','wallet_balance'], hists: ['ledgerHistory','purchaseHistory'], seed: SUPPLIERS_SEED_DATA,
+  return { path: SUPPLIERS_DOC_PATH, id: 'supplier_id', label: 'بیوپاری', counters: ['total_payable','wallet_balance'], hists: ['ledgerHistory','purchaseHistory'], seed: SUPPLIERS_SEED_DATA,
     get: () => suppliersData, set: v => { suppliersData = v; },
     getBase: () => suppliersSyncBase, setBase: v => { suppliersSyncBase = _syncClone(v); try{ saveToStorage('suppliersSyncBase', suppliersSyncBase); }catch(e){} },
     extra: () => ({ nextSupplierId: { integerValue: String(nextSupplierId) } }),
@@ -34807,7 +34918,7 @@ async function pushProductsToCloud(){
         if(pstr){
           const remote = JSON.parse(pstr);
           if(Array.isArray(remote)){
-            productsData = _reattachLocalImages(mergeProductsThreeWay(productsSyncBase, productsData, remote), productsData);
+            productsData = _reattachLocalImages(await _shrinkLockCheck(remote, mergeProductsThreeWay(productsSyncBase, productsData, remote), 'product_id', 'سبزیاں'), productsData); // 🔒 FM309WE#270
             try{ repairDuplicateProductSerials(); }catch(e){}
             try{ recomputeReservedFromOrders(); }catch(e){}
             saveProductsLight();
