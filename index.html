@@ -8741,7 +8741,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM309WE#267'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM309WE#268'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -24131,6 +24131,7 @@ function renderCustFilterBar(){
         <input type="checkbox" ${f.todayOnly?'checked':''} onchange="setCustFilter('todayOnly', this.checked)" style="margin:0;"> 🔥 آج کے خریدار
       </label>
     </div>
+    <div style="text-align:left; margin:0 0 6px; display:${AppState.currentRole === 'admin' ? 'block' : 'none'};"><button type="button" onclick="runCloudHealthCheck()" style="border:1px solid #cbd5e1; border-radius:999px; background:#fff; color:#334155; font-size:12px; padding:3px 10px; cursor:pointer;">🩺 کلاؤڈ چیک (کل کسٹمر: ${customersData.length})</button></div>
     <!-- ---------- 🔓 FM299TU#260 (صدام کی ہدایت): ایڈمن کے لیے حاضر/کھوہ کھاتے نظام دوبارہ بحال ---------- -->
     <div style="display:${AppState.currentRole === 'admin' ? 'flex' : 'none'}; gap:6px;">
       <button onclick="setCustFilter('showDormant', false)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${!f.showDormant?'#134e2c':'#f1f5f9'}; color:${!f.showDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🟢 حاضر موجود (${customersData.filter(c => !c.isDormant).length})</button>
@@ -28690,7 +28691,8 @@ function renderRecoveryListEmployeeView(){
   const list = document.getElementById('rlEmployeeList');
   if(!list) return;
   if(owing.length === 0){
-    list.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">فی الحال کسی کسٹمر کا بقایہ نہیں</div>`;
+    list.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">فی الحال کسی کسٹمر کا بقایہ نہیں<br><span style="font-size:12px;">(فون میں کل کسٹمر: ${customersData.length})</span><br>
+      <button type="button" onclick="runCloudHealthCheck()" style="margin-top:10px; border:none; border-radius:999px; background:#0f766e; color:#fff; font-size:15px; padding:8px 18px; cursor:pointer; font-family:inherit;">🩺 کلاؤڈ چیک</button></div>`;
     return;
   }
   const drAll = computeDailyRecoveryRows();
@@ -33706,6 +33708,8 @@ async function runCloudHealthCheck(){
     }catch(e){ line += ' • کلاؤڈ ❌ ' + (e.message || 'error'); }
     L.push(line);
   }
+  const _dorm = customersData.filter(c => c.isDormant).length;
+  L.push(`👥 فون میں کسٹمر: حاضر ${customersData.length - _dorm} • 🪦 کھوہ کھاتے ${_dorm}`);
   alert('🩺 کلاؤڈ چیک\n\n' + L.join('\n') + '\n\n(اس پیغام کا سکرین شاٹ بھیجیں)');
   // ساتھ ہی دوبارہ منگوا لیں
   try{ await fetchCustomersFromCloud(false); await fetchUsersFromCloud(false); }catch(e){}
