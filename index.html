@@ -401,7 +401,7 @@
   }
   /* ---------- 🍇 صدام کی ہدایت پر: ہوم پیج پر لمبی عمودی لائن کی بجائے اب صرف 3 باریک آئٹم ایک ہی
        قطار میں (Pending Orders / Customers / Suppliers) — باقی مین ایریا خالی رہتا ہے ---------- */
-  body:not(.role-admin) #otPresenceBtnRow{display:none !important;} /* 🔒 26 ستمبر: حاضر/غیر حاضر صرف ایڈمن */
+  /* ✅ FM110TH273 (صدام کی ہدایت): 26 ستمبر والی پابندی ختم — ملازم/منشی آرڈر بکنگ سے خود بھی سبزیاں حاضر/غیر حاضر کر سکے */
   .homeIconGrid{display:grid; grid-template-columns:repeat(var(--homeCols,3), 1fr); gap:6px 4px; margin-top:2px;}
   /* 🎨 26 ستمبر: سفید ڈبے/بارڈر/سایہ ختم — صرف رنگین آئیکن اور اس کے نیچے نستعلیق نام، کم جگہ میں زیادہ آئیکن */
   .homeIconGrid .homeIconTile{background:transparent !important; box-shadow:none !important; border:none !important; padding:6px 2px 2px !important; gap:3px !important; border-radius:14px !important; justify-content:flex-start !important;}
@@ -5763,6 +5763,11 @@
               <div style="font-weight:900; font-size:21px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#0f172a;" id="otTopCustName"></div>
               <div style="font-size:12px; color:var(--muted); text-align:center;" id="otTopCustArea"></div>
             </div>
+            <!-- ---------- 🟢🔴 FM110TH273 (صدام کی ہدایت): سبزیاں چنتے ہوئے ہی، کھڑے کھڑے حاضر/غیر حاضر کر سکیں ---------- -->
+            <div id="otPresenceBtnRow2" dir="rtl" style="display:flex; gap:6px;">
+              <button type="button" id="otPresenceBtnPresent2" onclick="openOtPresenceModal('present')" style="flex:1; padding:9px 4px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">🟢 حاضر سبزیاں</button>
+              <button type="button" id="otPresenceBtnAbsent2" onclick="openOtPresenceModal('absent')" style="flex:1; padding:9px 4px; background:linear-gradient(180deg,#ef4444,#b91c1c); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">🔴 غیر حاضر سبزیاں</button>
+            </div>
             <div style="display:flex; gap:6px; flex:0 0 auto; flex-wrap:wrap; justify-content:flex-end;">
               <button type="button" onclick="openOtStockReport()" style="padding:9px 10px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer;">📊 سٹاک رپورٹ</button>
               <!-- ---------- 🧾 صدام کی ہدایت (17 ستمبر، صبح 7:35): "منڈی سیل ریکارڈ (برائے منشی)" — منشی/مزدور
@@ -8766,7 +8771,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM110TH272'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM110TH273'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -27221,6 +27226,9 @@ function updateOtPresenceButtonLabels(){
   const aBtn = document.getElementById('otPresenceBtnAbsent');
   if(pBtn) pBtn.textContent = `🟢 حاضر سبزیاں (${presentCount})`;
   if(aBtn) aBtn.textContent = `🔴 غیر حاضر سبزیاں (${absentCount})`;
+  const pBtn2 = document.getElementById('otPresenceBtnPresent2'), aBtn2 = document.getElementById('otPresenceBtnAbsent2'); // FM110TH273
+  if(pBtn2) pBtn2.textContent = `🟢 حاضر سبزیاں (${presentCount})`;
+  if(aBtn2) aBtn2.textContent = `🔴 غیر حاضر سبزیاں (${absentCount})`;
 }
 function openOtPresenceModal(mode){
   otPresenceFilterMode = mode;
