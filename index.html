@@ -6866,6 +6866,13 @@
       <div id="devCloudSyncStatus" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:8px 12px; margin-bottom:12px; font-size:11.5px; font-weight:600; text-align:left; line-height:1.5;"></div>
       <button class="testPrintBtn" style="margin-bottom:14px; background:#eef2ff; color:var(--primary-dark);" onclick="devEnterAppDirectly()">🚀 Enter App Now (skip PIN / activation code)</button>
 
+      <!-- ---------- 👁️ FM110TH275: سب اکاؤنٹس اور ان کے PIN (صرف ڈویلپر) ---------- -->
+      <div id="devPinBox" style="background:#ecfeff; border:1.5px solid #67e8f9; border-radius:12px; padding:12px; margin-bottom:14px;" dir="rtl">
+        <div style="font-size:12.5px; font-weight:800; color:#155e75; margin-bottom:4px;">👥 اکاؤنٹس اور ان کے PIN (صرف ڈویلپر)</div>
+        <div style="font-size:11px; color:#64748b; margin-bottom:8px; line-height:1.6;">👁️ دبائیں تو PIN 20 سیکنڈ نظر آ کر چھپ جاتا ہے۔ صرف رہنمائی کے لیے — کسی کو نہ بتائیں۔</div>
+        <div id="devPinListWrap"></div>
+      </div>
+
       <!-- ---------- 🚧 صدام کی ہدایت (25 ستمبر، دوپہر): مینٹیننس موڈ بٹن — دبانے پر باقی سب فونز پر فوری
            "انتظار فرمائیں" اوورلے آ جائے گی، صرف اسی ڈویلپر فون پر نہیں ---------- -->
       <div style="background:#fef3c7; border:1.5px solid #fcd34d; border-radius:12px; padding:12px; margin-bottom:14px;" dir="rtl">
@@ -8771,7 +8778,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM110TH274'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM110TH275'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8990,6 +8997,106 @@ async function fmPushShopLicense(){
     });
   }catch(e){}
 }
+
+/* =====================================================================
+   👁️ FM110TH275 (صدام کی ہدایت): اکاؤنٹس کے PIN دیکھنے کی سہولت
+   • ایڈمن کی "🔑 ملازمین" سکرین میں ہر اکاؤنٹ (اپنا اور ملازموں کا) پر "👁️ دیکھیں" — 10 سیکنڈ نظر آ کر خود چھپ جاتا ہے
+   • ڈویلپر پینل میں سب اکاؤنٹس کا خانہ (صرف صدام والی ایپ میں) — ملازم/مالک پھنس جائیں تو رہنمائی ہو سکے
+   • طریقہ: PIN اب بھی hash ہی میں محفوظ ہے (کچھ نیا محفوظ نہیں ہوتا) — 4 سے 6 ہندسوں کا عددی PIN hash سے واپس نکال کر دکھایا جاتا ہے؛
+     اس سے لمبا/غیر عددی PIN ہو تو "دکھانا ممکن نہیں، نیا PIN سیٹ کریں" لکھا آتا ہے
+   ===================================================================== */
+const _SHA_K = new Int32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+const _SHA_W = new Int32Array(64);
+// ایک بلاک (≤ 7 بائٹ پیغام) کا SHA-256 — صرف پہلا 32-بٹ لفظ لوٹاتا ہے (موازنے کے لیے کافی؛ ملنے پر پورا ہیش الگ سے پرکھا جاتا ہے)
+function _sha256FirstWord(w0, w1, bitLen){
+  const W = _SHA_W;
+  W[0] = w0; W[1] = w1; for(let i = 2; i < 15; i++) W[i] = 0; W[15] = bitLen;
+  for(let i = 16; i < 64; i++){
+    const a = W[i - 15], b = W[i - 2];
+    const s0 = ((a >>> 7) | (a << 25)) ^ ((a >>> 18) | (a << 14)) ^ (a >>> 3);
+    const s1 = ((b >>> 17) | (b << 15)) ^ ((b >>> 19) | (b << 13)) ^ (b >>> 10);
+    W[i] = (W[i - 16] + s0 + W[i - 7] + s1) | 0;
+  }
+  let a = 0x6a09e667 | 0, b = 0xbb67ae85 | 0, c = 0x3c6ef372 | 0, d = 0xa54ff53a | 0, e = 0x510e527f | 0, f = 0x9b05688c | 0, g = 0x1f83d9ab | 0, h = 0x5be0cd19 | 0;
+  for(let i = 0; i < 64; i++){
+    const S1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+    const ch = (e & f) ^ (~e & g);
+    const t1 = (h + S1 + ch + _SHA_K[i] + W[i]) | 0;
+    const S0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+    const maj = (a & b) ^ (a & c) ^ (b & c);
+    const t2 = (S0 + maj) | 0;
+    h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+  }
+  return (0x6a09e667 + a) | 0;
+}
+// hash سے عددی PIN (4 سے 6 ہندسے) واپس نکالیں — خالی/نہ ملے تو null
+function fmRecoverPin(hash, maxMs){
+  return new Promise(resolve => {
+    try{
+      hash = String(hash || '').toLowerCase();
+      if(!/^[0-9a-f]{64}$/.test(hash)){ resolve(null); return; }
+      const target = parseInt(hash.slice(0, 8), 16) | 0;
+      let n = 4, k = 0, limit = 10000;
+      const t0 = Date.now(), deadline = t0 + (maxMs || 60000);
+      const step = async () => {
+        const tickEnd = Date.now() + 14;
+        while(Date.now() < tickEnd){
+          if(k >= limit){ n++; if(n > 6){ resolve(null); return; } k = 0; limit = limit * 10; }
+          // k کو n ہندسوں میں (آگے صفر کے ساتھ) بدلیں
+          let x = k, w0 = 0, w1 = 0;
+          for(let p = n - 1; p >= 0; p--){
+            const byte = 48 + (x % 10); x = (x - (x % 10)) / 10;
+            if(p < 4) w0 |= byte << (24 - 8 * p); else w1 |= byte << (24 - 8 * (p - 4));
+          }
+          w1 |= 0x80 << (24 - 8 * (n - 4)); // پیڈنگ کا بٹ
+          if(_sha256FirstWord(w0, w1, n * 8) === target){
+            const cand = String(k).padStart(n, '0');
+            if((await hashPin(cand)) === hash){ resolve(cand); return; }
+          }
+          k++;
+        }
+        if(Date.now() > deadline){ resolve(null); return; }
+        setTimeout(step, 0);
+      };
+      step();
+    }catch(e){ resolve(null); }
+  });
+}
+const FM_PIN_NOTFOUND_MSG = 'PIN دکھانا ممکن نہیں (6 ہندسوں سے لمبا یا غیر عددی) — نیا PIN سیٹ کریں';
+async function uiRevealUserPin(userId, btn){
+  if(AppState.currentRole !== 'admin') return;
+  const u = usersData.find(x => x.user_id === userId); const el = document.getElementById('uc2Pw_' + userId);
+  if(!u || !el) return;
+  if(btn) btn.disabled = true;
+  const old = '•••• — تبدیل کرنے کے لیے دبائیں';
+  el.textContent = '⏳ تلاش ہو رہی ہے…';
+  const pin = await fmRecoverPin(u.pin);
+  if(pin) el.innerHTML = `<b style="font-family:Arial,sans-serif; letter-spacing:4px; font-size:22px; direction:ltr; display:inline-block;">${pin}</b> <span style="font-size:11px; opacity:.75;">(10 سیکنڈ بعد چھپ جائے گا)</span>`;
+  else el.textContent = FM_PIN_NOTFOUND_MSG;
+  setTimeout(() => { el.textContent = old; if(btn) btn.disabled = false; }, 10000);
+}
+// ---------- ڈویلپر پینل: سب اکاؤنٹس اور ان کے PIN (صرف صدام والی ایپ) ----------
+function renderDevPinList(){
+  const wrap = document.getElementById('devPinListWrap'); if(!wrap) return;
+  if(!_fmShopLicOn()){ const box = document.getElementById('devPinBox'); if(box) box.style.display = 'none'; return; }
+  const roleLabel = { admin: '👑 ایڈمن', salesman: '🧑‍💼 ملازم' };
+  const list = usersData.filter(u => u.role === 'admin' || u.role === 'salesman');
+  wrap.innerHTML = list.map(u => `
+    <div style="display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:8px 10px; margin-bottom:6px;">
+      <div style="flex:1; min-width:0; font-size:13.5px; font-weight:800;">${roleLabel[u.role] || u.role} — ${u.name}${u.is_active ? '' : ' <span style="color:#b91c1c; font-weight:600;">(بند)</span>'}</div>
+      <div id="devPin_${u.user_id}" style="min-width:64px; text-align:center; font-family:Arial,sans-serif; font-weight:900; font-size:17px; letter-spacing:3px; color:#0f766e; direction:ltr;">••••</div>
+      <button type="button" onclick="devRevealPin(${u.user_id}, this)" style="width:auto; margin:0; padding:7px 11px; border:none; border-radius:9px; background:#e0f2fe; color:#075985; font-weight:800; cursor:pointer;">👁️</button>
+    </div>`).join('') || '<div style="color:#64748b; font-size:12px;">کوئی اکاؤنٹ نہیں</div>';
+}
+async function devRevealPin(userId, btn){
+  const u = usersData.find(x => x.user_id === userId); const el = document.getElementById('devPin_' + userId); if(!u || !el) return;
+  if(btn) btn.disabled = true; el.textContent = '⏳';
+  const pin = await fmRecoverPin(u.pin);
+  el.textContent = pin || '؟';
+  if(!pin) el.title = FM_PIN_NOTFOUND_MSG;
+  setTimeout(() => { el.textContent = '••••'; if(btn) btn.disabled = false; }, 20000);
+}
+
 async function fmPullShopLicense(){
   if(!_fmShopLicOn()) return false;
   const st = AppState.settings;
@@ -36180,8 +36287,9 @@ function renderUserList(){
         <div class="uc2RoleBadge role-${u.role}">${roleLabel[u.role] || u.role}</div>
       </div>
       <div class="uc2PasswordBox" onclick="setCustomUserPin(${u.user_id})">
-        <div class="uc2PwLabel">🔑 پاسورڈ</div>
-        <div class="uc2PwValue">•••• — تبدیل کرنے کے لیے دبائیں</div>
+        <div class="uc2PwLabel" style="display:flex; align-items:center; justify-content:space-between; gap:8px;"><span>🔑 پاسورڈ</span>
+          <button type="button" onclick="event.stopPropagation(); uiRevealUserPin(${u.user_id}, this)" style="width:auto; margin:0; padding:4px 12px; border:none; border-radius:999px; background:#e0f2fe; color:#075985; font-size:12.5px; font-weight:800; cursor:pointer;">👁️ دیکھیں</button></div>
+        <div class="uc2PwValue" id="uc2Pw_${u.user_id}">•••• — تبدیل کرنے کے لیے دبائیں</div>
       </div>
       <div class="uc2Columns">
         <div class="uc2ColLeft">
@@ -40141,6 +40249,7 @@ async function unlockDevSecretPanel(){
   document.getElementById('devSecretLocked').style.display = 'none';
   document.getElementById('devSecretUnlocked').style.display = 'block';
   renderMarqueeDevList();
+  try{ renderDevPinList(); }catch(e){} // 👁️ FM110TH275
   refreshMaintenanceToggleBtnLabel();
 
   // ---------- 🩺 کلاؤڈ سنک کی خرابی اب کسٹمر کو نظر نہیں آتی — صرف یہاں، ڈویلپر پینل کے اندر ----------
