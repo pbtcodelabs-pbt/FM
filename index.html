@@ -703,6 +703,19 @@
   #drTable td.drShort{ background:#fee2e2 !important; border-left:2px solid #dc2626 !important; border-right:2px solid #dc2626 !important; }
   #drTable td.drShort .drNum{ color:#b91c1c; font-weight:900; font-size:.88em; }
   #drTable .drNote{ font-size:.78em; color:#78350f; text-align:right; line-height:1.5; }
+  /* ---------- FM110TH272: کالم چوڑے (6 ہندسے + کاما صاف پڑھے جائیں)، کوئی خانہ نہ کٹے، باقی جگہ کے لیے سائیڈ سکرول؛ نوٹ کا خانہ برقرار ---------- */
+  @media screen{
+    #drTable{ width:84em !important; min-width:84em !important; table-layout:fixed !important; }
+    #drTable col:nth-child(1){ width:3.6em !important; }
+    #drTable col:nth-child(2){ width:11em !important; }
+    #drTable col:nth-child(3), #drTable col:nth-child(4), #drTable col:nth-child(5), #drTable col:nth-child(6), #drTable col:nth-child(7), #drTable col:nth-child(8){ width:8em !important; }
+    #drTable col:nth-child(9){ width:4.4em !important; }
+    #drTable col:nth-child(10){ width:15em !important; }
+    #drTable td .drNum{ font-size:1em !important; letter-spacing:0 !important; }
+    #drTable td.drShort .drNum{ font-size:1.05em !important; }
+    #drTable th, #drTable td{ padding:7px 3px !important; }
+    #drTable th{ font-size:.9em; }
+  }
   /* ---------- 🧾 FM299TU#262 (صدام کی ہدایت): آرڈر بکنگ — اوپر کے بٹن ایک ہی لائن میں (پہلے آرڈر مکمل، پھر کسٹمر، پھر منڈی سیل
      ریکارڈ، پھر سٹاک رپورٹ) تاکہ جگہ بچے؛ جدول کی ہر قطار اوپر سے نیچے موٹی + قطاروں کے درمیان فاصلہ، تاکہ انگلی
      غلطی سے دوسری قطار کے بٹن پر نہ لگے۔ چوڑائی/کالم وہی — کوئی افقی سکرول نہیں ---------- */
@@ -1607,6 +1620,17 @@
   .stockAdjRow{display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #eef1f5; border-radius:12px; padding:10px 12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,.04);}
   .stockAdjRow.negativeRow{border-color:var(--danger); box-shadow:0 0 0 1.5px var(--danger) inset;}
   .stockAdjRow.negativeRow .stockAdjName, .stockAdjRow.negativeRow .stockAdjInput{color:var(--danger); font-weight:800;}
+
+  /* ---------- 🎨 FM110TH272: ڈیٹا ڈالنے والے فارموں کی قطاروں میں باری باری نرم رنگ (لکھائی گہری ہی رہتی ہے) ---------- */
+  #otAddStockListWrap > div:nth-child(4n+1){ background:#e8f7ee !important; border-color:#86d3a3 !important; }
+  #otAddStockListWrap > div:nth-child(4n+2){ background:#e6f0fd !important; border-color:#93b8ee !important; }
+  #otAddStockListWrap > div:nth-child(4n+3){ background:#fdf3dc !important; border-color:#e6c36e !important; }
+  #otAddStockListWrap > div:nth-child(4n+4){ background:#f5e9fb !important; border-color:#c9a2e0 !important; }
+  #stockAdjustmentListWrap .stockAdjRow:nth-child(4n+1){ background:#e8f7ee; border-color:#86d3a3; }
+  #stockAdjustmentListWrap .stockAdjRow:nth-child(4n+2){ background:#e6f0fd; border-color:#93b8ee; }
+  #stockAdjustmentListWrap .stockAdjRow:nth-child(4n+3){ background:#fdf3dc; border-color:#e6c36e; }
+  #stockAdjustmentListWrap .stockAdjRow:nth-child(4n+4){ background:#f5e9fb; border-color:#c9a2e0; }
+  #stockAdjustmentListWrap .stockAdjRow.negativeRow{ background:#fee2e2; border-color:var(--danger); }
   .stockAdjName{flex:2; font-size:12.5px; font-weight:700; color:var(--text); line-height:1.3;}
   .stockAdjInput{flex:1; width:0; min-width:0; padding:8px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; text-align:center; font-weight:700; color:var(--primary-dark);}
   .stockAdjEmptyState{text-align:center; color:#94a3b8; padding:40px 10px; font-size:14px;}
@@ -8742,7 +8766,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM309WE#270'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM110TH272'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -18264,6 +18288,7 @@ function renderChalanRateModal(){
         </div>
         <div style="display:flex; gap:6px; margin-top:6px;">
           <button type="button" id="chSrc_${key}" data-value="${srcSel}" onclick="openChSupplierPicker('${key}')" style="flex:1; min-width:0; height:40px; border:2px solid #0369a1; border-radius:10px; background:#fff; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:15px; color:#0c4a6e; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 8px;">${_chSrcLabel(srcSel)} ▾</button>
+          ${need ? `<button type="button" onclick="openChalanSplit(${v.variant_id}, ${c.chalanNo})" title="چالان کئی بیوپاریوں میں تقسیم کریں" style="flex:0 0 46px; height:38px; border:none; border-radius:9px; background:#7c3aed; color:#fff; font-size:17px; cursor:pointer; box-shadow:0 3px 0 #4c1d95;">✂️</button>` : ''}
           <button type="button" onclick="saveChalanAccounting(${v.variant_id}, ${c.chalanNo})" style="flex:0 0 52px; height:38px; border:none; border-radius:9px; background:#16a34a; color:#fff; font-size:18px; cursor:pointer; box-shadow:0 3px 0 #14532d;">✅</button>
         </div>
       </div>`;
@@ -18371,6 +18396,281 @@ function saveChalanAccounting(variantId, chalanNo){
 }
 // ---------- پرانا نام — اسی نئے مکمل حساب پر چلتا ہے ---------- -->
 function saveChalanRate(variantId, chalanNo){ return saveChalanAccounting(variantId, chalanNo); }
+
+/* =====================================================================
+   ✂️ FM110TH271 (صدام کی ہدایت): چالان تقسیم — ایک چالان کی مقدار کئی بیوپاریوں میں بانٹیں
+   مثال: منشی نے 15 توری کا ایک چالان بھیجا، مگر 13 احمد سے آئی اور 2 بلال سے۔ "✂️" دبائیں تو ہر حصہ الگ پورا چالان بن جاتا
+   ہے — اپنی مقدار، اپنا خرید ریٹ، مزدوری، اسلام آباد/راولپنڈی ریٹ، اپنا بیوپاری؛ ہر بیوپاری کے اپنے کھاتے میں اپنی رقم۔
+   ساتھ ہی ہر بیوپاری کے سامنے "آج کا کل مال، آج کی ادائیگی، سابقہ/نیا بقایا" اور "آج کتنا دیا" کا خانہ۔
+   سٹاک کا کل مجموعہ بالکل وہی رہتا ہے (صرف چالانوں میں بٹتا ہے)۔ پہلا حصہ پرانا چالان نمبر برقرار رکھتا ہے (پرانے بلوں کے
+   حوالے نہیں ٹوٹتے)، باقی حصے نئے چالان نمبر لیتے ہیں۔
+   ===================================================================== */
+let chSplitState = null; // {variantId, chalanNo, orig, parts:[{qty, rate, labor, isb, rwp, src, pay}]}
+function _chPn(x){ const n = parseFloat(String(x == null ? '' : x).replace(',', '.')); return isFinite(n) ? n : 0; }
+
+// ---------- حساب کا مرکزی کام (saveChalanAccounting جیسا ہی) — اب تقسیم کے ہر حصے کے لیے بھی ----------
+function _chAccountCore(variantId, chalanNo, vals){
+  const {p, v} = findProductAndVariant(variantId); if(!v) return false;
+  const c = (v.chalans || []).find(x => x.chalanNo === chalanNo); if(!c) return false;
+  const rate = vals.rate, labor = vals.labor, isb = vals.isb, rwp = vals.rwp, src = vals.src;
+  const qtyForBill = Number(c.origQty != null ? c.origQty : c.qty) || 0;
+  const newSupplier = src === 'cash' ? null : suppliersData.find(s => String(s.supplier_id) === String(src));
+  if(src !== 'cash' && !newSupplier) return false;
+  const newAmount = newSupplier ? Math.round(qtyForBill * rate) : 0;
+  if(c.bookedSupplierId != null){
+    const so = suppliersData.find(s => s.supplier_id === c.bookedSupplierId);
+    if(so){ so.total_payable = (Number(so.total_payable) || 0) - (Number(c.bookedAmount) || 0); normalizeSupplierBalance(so); }
+  }
+  if(newSupplier){ newSupplier.total_payable = (Number(newSupplier.total_payable) || 0) + newAmount; normalizeSupplierBalance(newSupplier); }
+  c.bookedSupplierId = newSupplier ? newSupplier.supplier_id : null;
+  c.bookedAmount = newAmount;
+  c.rate = rate; c.ratePending = false;
+  c.sellLabor = labor; c.retail = isb; c.wholesale = rwp;
+  c.isCash = !newSupplier;
+  c.supplierId = newSupplier ? newSupplier.supplier_id : null;
+  c.supplierName = newSupplier ? newSupplier.name : '';
+  c.accounted = true;
+  c.rateBy = (AppState.currentUser && AppState.currentUser.name) || '';
+  c.rateTs = Date.now();
+  v.purchase = rate; v.sellLabor = labor; v.retail = isb; v.wholesale = rwp;
+  const ck = chalanKeyOf(v, c);
+  _chRemoveFromDailyRecords(ck);
+  const dateKey = _chTodayKey(c.ts);
+  const line = {ck, variant_id: variantId, name: p ? p.name : '', label: v.label || '', chalanNo, qty: qtyForBill, cost: rate};
+  if(newSupplier){
+    newSupplier.purchaseHistory = newSupplier.purchaseHistory || [];
+    _chAddToDailyRecord(newSupplier.purchaseHistory, dateKey, line, () => ({poId: 'D' + dateKey, isDaily: true, date: dateKey, status: 'received', receivedDate: dateKey, items: [], total: 0, note: 'روزانہ خریداری (چالان)'}));
+  } else {
+    cashPurchasesData = cashPurchasesData || [];
+    _chAddToDailyRecord(cashPurchasesData, dateKey, line, () => ({id: 'D' + dateKey, isDaily: true, date: dateKey, items: [], total: 0}));
+    saveToStorage('cashPurchases', cashPurchasesData);
+  }
+  if(c.poRef != null){
+    (suppliersData || []).forEach(s => (s.purchaseHistory || []).forEach(po => {
+      if(po.poId !== c.poRef) return;
+      (po.items || []).forEach(it => { if(it.variant_id === variantId) it.cost = rate; });
+      po.total = (po.items || []).reduce((sm, it) => sm + (Number(it.qty)||0) * (Number(it.cost)||0), 0);
+      po.accountedInDaily = true;
+    }));
+  }
+  return true;
+}
+
+// ---------- بیوپاری کو نقد ادائیگی (confirmPaySupplier کے 'pay' موڈ جیسی) ----------
+function _chPaySupplierNow(s, amount, note){
+  const sp = calcSupplierSplit(s, amount, 0, 'pay');
+  const balanceBefore = s.total_payable || 0;
+  const today = new Date().toISOString().split('T')[0];
+  s.ledgerHistory = s.ledgerHistory || [];
+  s.total_payable = sp.payableAfter;
+  s.wallet_balance = sp.walletAfter;
+  financeDummy.cashInHand -= amount;
+  s.ledgerHistory.unshift({type:'payment', amount, date: today, note});
+  if(sp.toWallet > 0) s.ledgerHistory.unshift({type:'wallet_deposit', amount: sp.toWallet, date: today, note: 'زیادہ ادائیگی — والٹ (ایڈوانس) میں جمع'});
+  return recordPaymentEntry({
+    direction: 'out', party_type: 'supplier', party_id: s.supplier_id, party_name: s.name,
+    amount, balance_before: balanceBefore, balance_after: s.total_payable,
+    wallet_added: sp.toWallet, wallet_after: s.wallet_balance, discount: 0, method: 'Cash', note
+  });
+}
+
+// ---------- بیوپاری کا آج کا خلاصہ (کھاتے سے) ----------
+function _chSupTodayStats(s){
+  const key = toLocalDateStr(new Date()), iso = new Date().toISOString().split('T')[0];
+  let qty = 0, amt = 0;
+  (s.purchaseHistory || []).forEach(po => {
+    if(!po.isDaily || po.date !== key) return;
+    (po.items || []).forEach(it => { qty += Number(it.qty) || 0; amt += (Number(it.qty) || 0) * (Number(it.cost) || 0); });
+  });
+  let paid = 0;
+  (s.ledgerHistory || []).forEach(h => { if(h.type === 'payment' && !h.isDiscount && (h.date === key || h.date === iso)) paid += Number(h.amount) || 0; });
+  return {qty: _chRound(qty), amt: Math.round(amt), paid: Math.round(paid)};
+}
+
+function openChalanSplit(variantId, chalanNo){
+  if(!isChalanAdmin()){ alert('صرف ایڈمن چالان تقسیم کر سکتا ہے'); return; }
+  const {p, v} = findProductAndVariant(variantId); if(!v) return;
+  const c = (v.chalans || []).find(x => x.chalanNo === chalanNo); if(!c) return;
+  if(c.accounted){ alert('اس چالان کا حساب پہلے ہی لگ چکا ہے'); return; }
+  const reserved = Number((getChalanReservedMap(variantId) || {})[String(chalanNo)]) || 0;
+  if(reserved > 0){ alert(`⚠️ اس چالان سے ${reserved} مال آرڈرز میں بک ہے۔\n\nپہلے وہ آرڈر مکمل/ختم کریں، پھر چالان تقسیم کریں۔`); return; }
+  const orig = _chRound(Number(c.origQty != null ? c.origQty : c.qty) || 0);
+  if(!(orig > 0)){ alert('اس چالان کی مقدار صفر ہے'); return; }
+  const base = {
+    rate: c.ratePending ? '' : (c.rate ?? ''),
+    labor: c.sellLabor ?? (Number(v.sellLabor) || ''),
+    isb: c.retail ?? (Number(v.retail) || ''),
+    rwp: c.wholesale ?? (Number(v.wholesale) || ''),
+    src: '', pay: ''
+  };
+  chSplitState = { variantId, chalanNo, orig, parts: [ {...base, qty: ''}, {...base, qty: ''} ] };
+  renderChalanSplit();
+  document.getElementById('chalanSplitModal').classList.add('show');
+}
+function closeChalanSplit(){ const m = document.getElementById('chalanSplitModal'); if(m) m.classList.remove('show'); chSplitState = null; }
+function chSplitSet(i, field, val){
+  if(!chSplitState || !chSplitState.parts[i]) return;
+  chSplitState.parts[i][field] = val;
+  chSplitUpdateSummaries();
+}
+function chSplitAdd(){
+  if(!chSplitState) return;
+  const last = chSplitState.parts[chSplitState.parts.length - 1];
+  const done = _chRound(chSplitState.parts.reduce((a, pt) => a + _chPn(pt.qty), 0));
+  const left = _chRound(chSplitState.orig - done);
+  chSplitState.parts.push({ qty: left > 0 ? String(left) : '', rate: last.rate, labor: last.labor, isb: last.isb, rwp: last.rwp, src: '', pay: '' });
+  renderChalanSplit();
+}
+function chSplitRemove(i){
+  if(!chSplitState || chSplitState.parts.length <= 2) return;
+  chSplitState.parts.splice(i, 1);
+  renderChalanSplit();
+}
+function renderChalanSplit(){
+  const st = chSplitState; if(!st) return;
+  const {p, v} = findProductAndVariant(st.variantId);
+  let m = document.getElementById('chalanSplitModal');
+  if(!m){
+    m = document.createElement('div');
+    m.className = 'modalOverlay'; m.id = 'chalanSplitModal'; m.style.zIndex = '10055';
+    document.body.appendChild(m);
+  }
+  const inp = (i, field, val, ph, color, flex) => `<div style="flex:${flex || 1}; min-width:0; text-align:center;"><div style="font-size:10px; font-weight:900; color:${color}; line-height:1.3;">${ph}</div><input type="text" inputmode="decimal" id="chS_${field}_${i}" value="${val ?? ''}" placeholder="0" onfocus="this.select()" oninput="chSplitSet(${i}, '${field}', this.value)" style="width:100%; height:34px; box-sizing:border-box; border:2px solid ${color}; border-radius:9px; text-align:center; font-weight:900; font-size:14px; font-family:Arial,Helvetica,sans-serif;"></div>`;
+  const partsHtml = st.parts.map((pt, i) => `
+    <div style="padding:9px 10px; margin-bottom:10px; border-radius:12px; background:linear-gradient(155deg,#faf5ff,#f3e8ff); border:2px solid #c084fc;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+        <span style="font-weight:900; color:#6b21a8; font-size:14px;">✂️ حصہ ${i + 1}</span>
+        ${st.parts.length > 2 ? `<button type="button" onclick="chSplitRemove(${i})" style="width:30px; height:30px; border:none; border-radius:50%; background:#fee2e2; color:#b91c1c; font-weight:900; cursor:pointer;">✕</button>` : ''}
+      </div>
+      <div style="display:flex; gap:5px;">
+        ${inp(i, 'qty', pt.qty, '📦 مقدار (ناگ)', '#1e3a8a', 1)}
+        ${inp(i, 'rate', pt.rate, '💰 خرید', '#b45309', 1)}
+        ${inp(i, 'labor', pt.labor, '💪 مزدوری', '#7c3aed', 1)}
+      </div>
+      <div style="display:flex; gap:5px; margin-top:6px;">
+        ${inp(i, 'isb', pt.isb, '🔴 اسلام آباد', '#dc2626', 1)}
+        ${inp(i, 'rwp', pt.rwp, '🟢 راولپنڈی', '#16a34a', 1)}
+      </div>
+      <div style="margin-top:6px;">
+        <button type="button" id="chSrc_split${i}" data-value="${pt.src}" onclick="openChSupplierPicker('split${i}')" style="width:100%; height:40px; border:2px solid #0369a1; border-radius:10px; background:#fff; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:15px; color:#0c4a6e; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 8px;">${_chSrcLabel(pt.src)} ▾</button>
+      </div>
+      <div id="chS_paywrap_${i}" style="margin-top:6px; display:flex; gap:6px; align-items:flex-end;">
+        ${inp(i, 'pay', pt.pay, '💸 آج اسے دیا (روپے)', '#0f766e', 1)}
+      </div>
+      <div id="chS_info_${i}" style="margin-top:6px; font-size:12.5px; line-height:1.7; color:#334155;"></div>
+    </div>`).join('');
+  m.innerHTML = `
+    <div class="modalBox" dir="rtl" style="max-width:430px; max-height:92vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+      <h3 style="margin:0 0 4px;">✂️ چالان تقسیم #${st.chalanNo}</h3>
+      <div style="font-weight:900; font-size:15px; color:#134e2c; margin-bottom:6px;">${p ? p.name : ''}${v && v.label ? ` <span style="font-size:12px; color:#1e3a8a;">(${v.label})</span>` : ''}</div>
+      <div style="display:flex; gap:6px; margin-bottom:8px; font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:13px;">
+        <span style="flex:1; text-align:center; background:#eff6ff; color:#1e3a8a; border-radius:9px; padding:5px;">کل آمد: ${st.orig}</span>
+        <span id="chS_done" style="flex:1; text-align:center; background:#dcfce7; color:#14532d; border-radius:9px; padding:5px;"></span>
+        <span id="chS_left" style="flex:1; text-align:center; border-radius:9px; padding:5px;"></span>
+      </div>
+      ${partsHtml}
+      <button type="button" onclick="chSplitAdd()" style="width:100%; padding:10px; border:2px dashed #7c3aed; border-radius:12px; background:#faf5ff; color:#6b21a8; font-size:15px; font-weight:900; cursor:pointer; margin-bottom:8px; font-family:inherit;">➕ ایک اور بیوپاری</button>
+      <div style="display:flex; gap:8px;">
+        <button type="button" onclick="closeChalanSplit()" style="flex:1; padding:12px; border:none; border-radius:12px; background:#f1f5f9; color:#334155; font-size:15px; cursor:pointer; font-family:inherit;">منسوخ</button>
+        <button type="button" onclick="saveChalanSplit()" style="flex:2; padding:12px; border:none; border-radius:12px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; font-size:16px; font-weight:900; cursor:pointer; box-shadow:0 3px 0 #14532d; font-family:inherit;">✅ تقسیم اور حساب محفوظ کریں</button>
+      </div>
+    </div>`;
+  chSplitUpdateSummaries();
+}
+function chSplitUpdateSummaries(){
+  const st = chSplitState; if(!st) return;
+  const nums = st.parts.map(pt => ({ q: _chRound(_chPn(pt.qty)), r: _chPn(pt.rate), pay: Math.max(0, _chPn(pt.pay)) }));
+  const done = _chRound(nums.reduce((a, x) => a + x.q, 0)), left = _chRound(st.orig - done);
+  const set = (id, t, extra) => { const el = document.getElementById(id); if(el){ el.textContent = t; if(extra){ el.style.background = extra.bg; el.style.color = extra.fg; } } };
+  set('chS_done', 'تقسیم: ' + done);
+  set('chS_left', left === 0 ? '✅ پورا' : (left > 0 ? 'باقی: ' + left : 'زیادہ: ' + Math.abs(left)), left === 0 ? {bg:'#dcfce7', fg:'#14532d'} : {bg:'#fee2e2', fg:'#b91c1c'});
+  const agg = {};
+  st.parts.forEach((pt, i) => {
+    if(pt.src && pt.src !== 'cash'){
+      const a = agg[pt.src] = agg[pt.src] || {qty: 0, amt: 0, pay: 0};
+      a.qty += nums[i].q; a.amt += Math.round(nums[i].q * nums[i].r); a.pay += nums[i].pay;
+    }
+  });
+  const rs = (n) => 'Rs. ' + Math.round(n).toLocaleString();
+  st.parts.forEach((pt, i) => {
+    const info = document.getElementById('chS_info_' + i), payWrap = document.getElementById('chS_paywrap_' + i);
+    if(!info) return;
+    if(payWrap) payWrap.style.display = (pt.src && pt.src !== 'cash') ? 'flex' : 'none';
+    if(!pt.src){ info.innerHTML = '<span style="color:#b45309;">👆 پہلے بیوپاری یا نقد چنیں</span>'; return; }
+    if(pt.src === 'cash'){ info.innerHTML = `💵 نقد خریداری — کسی بیوپاری کا بقایا نہیں بنے گا • رقم: <b style="font-family:Arial,sans-serif;">${rs(nums[i].q * nums[i].r)}</b>`; return; }
+    const s = suppliersData.find(x => String(x.supplier_id) === String(pt.src)); if(!s){ info.textContent = ''; return; }
+    const t = _chSupTodayStats(s), a = agg[pt.src] || {qty: 0, amt: 0, pay: 0};
+    const before = Number(s.total_payable) || 0, wallet = Number(s.wallet_balance) || 0;
+    const net = before - wallet + a.amt - a.pay;
+    const after = net >= 0 ? `بقایا <b style="color:#b91c1c; font-family:Arial,sans-serif;">${rs(net)}</b>` : `💳 والٹ (ہمارا ایڈوانس) <b style="color:#15803d; font-family:Arial,sans-serif;">${rs(-net)}</b>`;
+    info.innerHTML = `📦 آج اس سے کل: <b style="font-family:Arial,sans-serif;">${_chRound(t.qty + a.qty)}</b> ناگ — <b style="font-family:Arial,sans-serif;">${rs(t.amt + a.amt)}</b><br>`
+      + `💸 آج کی ادائیگی: <b style="font-family:Arial,sans-serif;">${rs(t.paid + a.pay)}</b><br>`
+      + `📊 سابقہ بقایا ${rs(before - wallet)} ← نیا ${after}`;
+  });
+}
+function saveChalanSplit(){
+  const st = chSplitState; if(!st) return;
+  if(!isChalanAdmin()){ alert('صرف ایڈمن'); return; }
+  const {p, v} = findProductAndVariant(st.variantId); if(!v) return;
+  const c = (v.chalans || []).find(x => x.chalanNo === st.chalanNo);
+  if(!c || c.accounted){ alert('یہ چالان اب پہلے جیسا نہیں رہا — دوبارہ کھولیں'); closeChalanSplit(); return; }
+  const parts = st.parts.map((pt, i) => ({ i, qty: _chRound(_chPn(pt.qty)), rate: _chPn(pt.rate), labor: _chPn(pt.labor), isb: _chPn(pt.isb), rwp: _chPn(pt.rwp), src: pt.src, pay: Math.max(0, Math.round(_chPn(pt.pay))) }));
+  for(const pt of parts){
+    const nm = 'حصہ ' + (pt.i + 1);
+    if(!(pt.qty > 0)){ alert(`⚠️ ${nm}: مقدار لکھیں`); return; }
+    if(!(pt.rate > 0)){ alert(`⚠️ ${nm}: خرید قیمت لکھیں`); return; }
+    if(!(pt.isb > 0)){ alert(`⚠️ ${nm}: اسلام آباد ریٹ لکھیں`); return; }
+    if(!(pt.rwp > 0)){ alert(`⚠️ ${nm}: راولپنڈی ریٹ لکھیں`); return; }
+    if(!pt.src){ alert(`⚠️ ${nm}: بیوپاری یا نقد چنیں`); return; }
+    if(pt.src !== 'cash' && !suppliersData.find(s => String(s.supplier_id) === String(pt.src))){ alert(`⚠️ ${nm}: بیوپاری نہیں ملا`); return; }
+    if(pt.src === 'cash') pt.pay = 0;
+  }
+  const total = _chRound(parts.reduce((a, x) => a + x.qty, 0));
+  if(Math.abs(total - st.orig) > 0.001){ alert(`⚠️ حصوں کا مجموعہ ${total} ہے، چالان کی آمد ${st.orig} ہے — دونوں برابر ہونے چاہییں`); return; }
+  const payBySup = {};
+  parts.forEach(pt => { if(pt.src !== 'cash' && pt.pay > 0) payBySup[pt.src] = (payBySup[pt.src] || 0) + pt.pay; });
+  const payTotal = Object.values(payBySup).reduce((a, x) => a + x, 0);
+  const lines = parts.map(pt => {
+    const sn = pt.src === 'cash' ? '💵 نقد' : '🏭 ' + (suppliersData.find(s => String(s.supplier_id) === String(pt.src)) || {}).name;
+    return `• ${sn}: ${pt.qty} ناگ × ${pt.rate} = Rs. ${Math.round(pt.qty * pt.rate).toLocaleString()}`;
+  });
+  if(payTotal > 0) lines.push('', `💸 کل ادائیگی: Rs. ${payTotal.toLocaleString()}`);
+  if(!confirm(`✂️ ${p ? p.name : ''} #${st.chalanNo}\n\n${lines.join('\n')}\n\nتقسیم کر کے حساب محفوظ کریں؟`)) return;
+  if(payTotal > financeDummy.cashInHand && !confirm(`ادائیگی (Rs. ${payTotal.toLocaleString()}) آپ کے موجودہ نقد (Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)) return;
+
+  // ---------- چالان بانٹیں: بک چکا مال پہلے حصوں سے مانا جاتا ہے، کل سٹاک وہی رہتا ہے ----------
+  const sold = _chRound(Math.max(0, st.orig - (Number(c.qty) || 0)));
+  let soldLeft = sold;
+  parts.forEach((pt, idx) => {
+    const take = Math.min(pt.qty, soldLeft); soldLeft = _chRound(soldLeft - take);
+    const remain = _chRound(pt.qty - take);
+    if(idx === 0){ c.origQty = pt.qty; c.qty = remain; pt.chalanNo = c.chalanNo; c.splitParts = parts.length; }
+    else {
+      const no = v.nextChalanNo || ((v.chalans || []).reduce((mx, x) => Math.max(mx, x.chalanNo || 0), 0) + 1);
+      v.chalans.push({ chalanNo: no, qty: remain, origQty: pt.qty, rate: null, ratePending: true, source: c.source || '', supplierId: null, supplierName: '', poRef: null, by: c.by || '', ts: c.ts, splitFrom: c.chalanNo });
+      v.nextChalanNo = no + 1;
+      pt.chalanNo = no;
+    }
+  });
+  let okAll = true;
+  parts.forEach(pt => { if(!_chAccountCore(st.variantId, pt.chalanNo, {rate: pt.rate, labor: pt.labor, isb: pt.isb, rwp: pt.rwp, src: pt.src})) okAll = false; });
+  const paidNames = [];
+  Object.keys(payBySup).forEach(sid => {
+    const s = suppliersData.find(x => String(x.supplier_id) === String(sid)); if(!s) return;
+    _chPaySupplierNow(s, payBySup[sid], `چالان #${st.chalanNo} (${p ? p.name : ''}) کی تقسیم پر ادائیگی`);
+    paidNames.push(`${s.name}: Rs. ${payBySup[sid].toLocaleString()}`);
+  });
+  persistAllData();
+  pushProductsToCloud();
+  try{ pushSuppliersToCloud(); }catch(e){}
+  if(payTotal > 0){ try{ pushFinanceToCloud(); }catch(e){} }
+  try{ pauseCloudPolling(20000); }catch(e){}
+  closeChalanSplit();
+  renderChalanRateModal();
+  refreshChalanRateFab();
+  try{ if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || ''); }catch(e){}
+  alert(`✅ چالان ${parts.length} حصوں میں تقسیم ہو کر ہر بیوپاری کے کھاتے میں چڑھ گیا${paidNames.length ? '\n\n💸 ادائیگی:\n' + paidNames.join('\n') : ''}${okAll ? '' : '\n\n⚠️ کچھ حصے مکمل نہیں ہوئے — "حساب باقی" میں دیکھ لیں'}`);
+}
 
 /* =====================================================================
    🧾 بیوپاری کی چٹ — ایک بیوپاری (یا سب) کی مقررہ دن کی خریداری، سابقہ بقایا، ادائیگی، باقی
@@ -18568,6 +18868,12 @@ function pickChSupplier(val){
   const b = document.getElementById('chSrc_' + _chSupplierPickKey);
   if(b){ b.dataset.value = String(val); b.textContent = _chSrcLabel(String(val)) + ' ▾'; }
   document.getElementById('chSupplierPickModal')?.classList.remove('show');
+  // ✂️ FM110TH271: چالان تقسیم کا حصہ ہو تو اسی حصے کا بیوپاری محفوظ + خلاصہ تازہ
+  if(String(_chSupplierPickKey).indexOf('split') === 0 && chSplitState){
+    const i = parseInt(String(_chSupplierPickKey).slice(5), 10);
+    if(chSplitState.parts[i]) chSplitState.parts[i].src = String(val);
+    chSplitUpdateSummaries();
+  }
 }
 
 
@@ -22710,7 +23016,7 @@ async function zeroAllStock(){
   if(!confirm('❗ آخری تصدیق: کیا آپ واقعی سارا سٹاک زیرو کرنا چاہتے ہیں؟ اس کے بعد واپسی ممکن نہیں — "OK" دبائیں تو سٹاک زیرو ہو جائے گا۔')) return;
   const pinOk = await confirmAdminPinForStockZero();
   if(!pinOk) return;
-  getLiveVariantList().forEach(item => { item.variant.stock = 0; });
+  getLiveVariantList().forEach(item => { item.variant.stock = 0; (item.variant.chalans || []).forEach(c => { c.qty = 0; }); if(item.variant.batches) item.variant.batches = []; }); // FM110TH272: چالانوں کی باقی مقدار بھی صفر
   persistAllData();
   pushProductsToCloud();
   pauseCloudPolling(20000); // ---------- 🔒 خودکار کلاؤڈ pull تھوڑی دیر روکیں، ورنہ 12-سیکنڈ پولنگ یہ تازہ تبدیلی پلٹ سکتی ہے ---------- -->
@@ -29073,7 +29379,7 @@ function renderDailyRecoveryScreen(){
   const contactBtn = (href, bg, ic, extra) => `<a href="${href}" ${extra || ''} style="display:inline-flex; width:26px; height:26px; align-items:center; justify-content:center; border-radius:50%; background:${bg}; color:#fff; text-decoration:none; font-size:12px;">${ic}</a>`;
 
   tbody.innerHTML = rows.map((r, idx) => {
-    const shade = idx % 2 === 0 ? '#F4F7F5' : '#fff';
+    const shade = ['#e8f7ee','#e6f0fd','#fdf3dc','#f5e9fb'][idx % 4]; // FM110TH272: چار نرم رنگ باری باری
     const noteKey = todayStr + '_' + r.c.customer_id;
     const noteVal = recoveryListData.filter(e => e.customer_id === r.c.customer_id && (e.createdAt || '').split('T')[0] === todayStr && e.note).map(e => e.note).join(' — ') || dailyRecoveryNotes[noteKey] || '';
     const fmtCell = (n, color) => `<span style="color:${color || 'inherit'}; font-weight:700;">${n < 0 ? '('+Math.abs(n).toLocaleString()+')' : n.toLocaleString()}</span>`;
@@ -36653,7 +36959,22 @@ function getBillSummaryRows(invoice){
   }
 
   if(walletApplied > 0) rows.push(['Wallet سے ادا', walletApplied]);
-  rows.push(['ابھی وصول', cashNow]);
+  // ---------- FM110TH272: بل بننے کے بعد ریپ کی لائی ہوئی وصولی (کچی یا بعد میں تصدیق شدہ) — صرف اس کسٹمر کے آخری بل پر ----------
+  let laterRecovery = 0;
+  try{
+    if(invoice.customer_id && invoice.invoice_id !== 'DRAFT' && hasOldCredit){
+      const mine = invoicesData.filter(x => x.customer_id === invoice.customer_id);
+      const latest = mine.reduce((m, x) => (!m || (x.created_at || '') > (m.created_at || '')) ? x : m, null);
+      if(latest && latest.invoice_id === invoice.invoice_id){
+        const cu = customersData.find(c => c.customer_id === invoice.customer_id);
+        const pend = recoveryListData.filter(r => r.customer_id === invoice.customer_id && r.status === 'pending').reduce((a, r) => a + (Number(r.amount) || 0), 0);
+        const confirmedLater = cu ? Math.max(0, (Number(invoice.new_balance) || 0) - (Number(cu.total_receivable) || 0)) : 0;
+        laterRecovery = pend + confirmedLater;
+      }
+    }
+  }catch(e){}
+  rows.push(['ابھی وصول', cashNow + laterRecovery]);
+  if(laterRecovery > 0) finalValue = Math.max(0, finalValue - laterRecovery);
 
   return {rows, finalLabel, finalValue};
 }
