@@ -8771,7 +8771,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM110TH273'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM110TH274'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -8960,6 +8960,79 @@ async function _legacyCheckAndLockTrialOnline(){
 // ---------- ☁️ صدام کی ہدایت (نئی تجویز): پیڈ سبسکرپشن کی expiry کو بھی UID کے خلاف Firestore کے
 // devices/{uid} میں محفوظ رکھیں — تاکہ ایپ 10 دفعہ crash/reinstall ہو، UID وہی رہے (fingerprint سے بنتی ہے)،
 // اور Firestore سے صحیح expiry خودکار واپس مل جائے۔ صارف کو دوبارہ کوڈ نہ مانگنا پڑے ---------- -->
+
+/* =====================================================================
+   🏪 FM110TH274 (صدام کی ہدایت): پوری دکان کی ایک ہی سبسکرپشن — مالک (صدام) کے فون پر کوڈ لگے، باقی ملازموں کے فون
+   خود بخود وہی سبسکرپشن/میعاد لے لیں (ہر فون کے لیے الگ کوڈ نہ لینا پڑے)۔ پیکج: P1+2 = ایک مالک + 2 ملازم۔
+   • مالک کے فون کی پیڈ سبسکرپشن کلاؤڈ (shopData/shopLicense) پر "آئینہ" بنتی ہے (صرف آگے بڑھتی ہے، پیچھے نہیں جاتی)
+   • جس فون کے پاس اپنا پیڈ کوڈ نہ ہو وہ ایپ کھلتے ہی یہی آئینہ پڑھ لیتا ہے اور اسے چلتے رہنے کے لیے الگ کوڈ نہیں چاہیے
+   • ایسے ملازم کے فون پر لاگ ان صفحے پر سبسکرپشن/دن/ایکسپائری کچھ نظر نہیں آتا (ختم ہو جائے تو صرف سادہ پیغام)
+   • پہلے سے لگے ہوئے کسی فون کے اپنے کوڈ کو یہ بالکل نہیں چھیڑتا — صرف اضافی راستہ ہے، کچھ بند نہیں ہوتا
+   ===================================================================== */
+const FM_PLAN_NAME = 'P1+2', FM_PLAN_STAFF = 2;
+function _fmShopLicOn(){ return typeof smShopBase === 'undefined'; } // سبزی منڈی میں اپنا نظام ہے، یہ صرف صدام والی ایپ کے لیے
+function _fmYMD(d){ return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+async function fmPushShopLicense(){
+  if(!_fmShopLicOn()) return;
+  const st = AppState.settings;
+  if(!st.subscriptionExpiry || st.isOnFreeTrial || !st.lastActivationCode) return; // صرف اپنے پیڈ کوڈ والا فون (مالک) بناتا ہے
+  try{
+    const res = await authFirestoreFetch(`shopData/shopLicense?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(res && res.ok){
+      const d = await res.json(); const cur = d.fields && d.fields.expiry && d.fields.expiry.stringValue;
+      if(cur && cur >= st.subscriptionExpiry) return; // آئینہ پہلے ہی برابر یا آگے ہے
+    }
+    await authFirestoreFetch(`shopData/shopLicense?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: {
+        expiry: { stringValue: String(st.subscriptionExpiry) }, activatedOn: { stringValue: String(st.subscriptionActivatedOn || '') },
+        plan: { stringValue: FM_PLAN_NAME }, by: { stringValue: String(st.deviceUID || '') }, updatedAt: { integerValue: String(Date.now()) } } })
+    });
+  }catch(e){}
+}
+async function fmPullShopLicense(){
+  if(!_fmShopLicOn()) return false;
+  const st = AppState.settings;
+  try{
+    const res = await authFirestoreFetch(`shopData/shopLicense?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(!res || !res.ok) return false;
+    const d = await res.json(); const f = d.fields || {};
+    const exp = f.expiry && f.expiry.stringValue; if(!exp) return false;
+    const today = _fmYMD(new Date());
+    if(exp < today) return false; // آئینہ بھی ختم — ہر کوئی ختم
+    const hasOwnPaid = !!st.subscriptionExpiry && !st.isOnFreeTrial;
+    if(hasOwnPaid && st.subscriptionExpiry >= exp) return false; // اپنی میعاد برابر/زیادہ — کچھ نہ بدلیں
+    st.subscriptionExpiry = exp;
+    st.subscriptionActivatedOn = (f.activatedOn && f.activatedOn.stringValue) || st.subscriptionActivatedOn || today;
+    st.isOnFreeTrial = false; st.trialLockConfirmedOnline = true;
+    st.licenseViaShop = !st.lastActivationCode; // اپنا کوڈ نہیں تو یہ ملازم کا فون ہے
+    persistAllData();
+    try{ if(typeof setupLoginScreen === 'function') setupLoginScreen(); }catch(e){}
+    try{ if(typeof renderSubscriptionBanner === 'function') renderSubscriptionBanner(); }catch(e){}
+    const g = document.getElementById('subscriptionGateScreen');
+    if(g && g.style.display !== 'none' && g.style.display !== ''){
+      const m = document.getElementById('subGateMsg');
+      if(m){ m.style.color = 'var(--success)'; m.textContent = '✅ دکان کی سبسکرپشن مل گئی — ایپ کھل رہی ہے...'; }
+      setTimeout(() => { try{ location.reload(); }catch(e){} }, 1200);
+    }
+    return true;
+  }catch(e){ return false; }
+}
+// ملازم کے فون پر لاگ ان صفحے سے سبسکرپشن/دن/ایکسپائری چھپائیں (ختم ہو تو صرف سادہ پیغام)
+function fmStaffCleanLogin(){
+  try{
+    const st = AppState.settings; if(!_fmShopLicOn() || !st.licenseViaShop) return;
+    const pill = document.getElementById('loginSubStatus');
+    if(pill){
+      if(isSubscriptionActive()) pill.style.display = 'none';
+      else { pill.style.display = ''; pill.textContent = '⚠️ دکان کی سبسکرپشن ختم ہے — مالک سے کہیں کہ تجدید کروائیں'; }
+    }
+    const box = document.getElementById('loginLicenseInfoBox'); if(box) box.style.display = 'none';
+  }catch(e){}
+}
+setTimeout(() => { try{ fmPullShopLicense().then(() => fmPushShopLicense()); }catch(e){} }, 9000);
+setInterval(() => { try{ fmPullShopLicense().then(() => fmPushShopLicense()); }catch(e){} }, 30 * 60 * 1000);
+
 async function syncSubscriptionToCloud(){
   const uid = AppState.settings.deviceUID;
   if(!uid || AppState.settings.isOnFreeTrial) return; // ---------- صرف پیڈ سبسکرپشن کلاؤڈ میں محفوظ ہوگی، فری ٹرائل نہیں ----------
@@ -8977,6 +9050,7 @@ async function syncSubscriptionToCloud(){
       })
     });
   }catch(e){ /* آف لائن — کوئی مسئلہ نہیں، اگلی بار activation/سنک پر دوبارہ کوشش ہوگی */ }
+  try{ fmPushShopLicense(); }catch(e){} // 🏪 FM110TH274: پوری دکان کے لیے آئینہ
 }
 
 // ---------- ☁️ ایپ کھلتے ہی چیک کریں: اگر اس UID کے خلاف Firestore میں پیڈ سبسکرپشن کی expiry موجود ہو
@@ -9136,7 +9210,7 @@ function renderSubscriptionBanner(){
   // ---------- صرف Home صفحے پر نظر آئے — باقی صفحات پر چھپی رہے (اب یہ ایلیمنٹ سیدھا screen-home کے اندر ہی رہتا ہے) ----------
   const activeScreen = document.querySelector('.screen.active');
   const isHomePage = activeScreen && activeScreen.id === 'screen-home';
-  if(!isHomePage || !isSubscriptionActive()){ row.style.display = 'none'; return; }
+  if(!isHomePage || !isSubscriptionActive() || AppState.currentRole !== 'admin'){ row.style.display = 'none'; return; } // 🏪 FM110TH274: ملازم کو دن/ایکسپائری نہیں
 
   const daysLeft = daysLeftInSubscription();
   document.getElementById('subBoxStartLabel').textContent = AppState.settings.isOnFreeTrial ? '🎁 Free Trial' : 'Subscribed';
@@ -9641,6 +9715,7 @@ async function setupLoginScreen(){
       subscriptionExpired = true;
     }
 
+    try{ fmStaffCleanLogin(); }catch(e){} // 🏪 FM110TH274
     // ---------- 🍇 صدام کی ہدایت (FM3SEPTH12): یہ تشخیصی بینر کسٹمر کو خوفزدہ/پریشان کرتا تھا، اس لیے لاگ ان
     // اسکرین پر اب کبھی نظر نہیں آئے گا۔ خرابی خاموشی سے یاد رکھی جاتی ہے — صرف Developer Panel کے اندر،
     // تالے پر 7 دفعہ ٹیپ کر کے، جا کر دیکھی جا سکتی ہے (نیچے openDevSecretPanel میں) ---------- */
@@ -19216,6 +19291,7 @@ async function restoreSubscriptionFromCloud(){
   if(isSubscriptionActive() && !AppState.settings.isOnFreeTrial) return false;
   if(_licRestoreBusy) return _licRestoreBusy;
   _licRestoreBusy = (async () => {
+    try{ if(await fmPullShopLicense()) return true; }catch(e){} // 🏪 FM110TH274: مالک کے فون کی دکان والی سبسکرپشن
     const uid = getOrCreateDeviceUID();
     if(!uid) return false;
     const best = await _licFindByUid(uid);
@@ -36287,6 +36363,10 @@ async function saveNewUser(){
   if(!name || !username || pin.length < 4){
     alert('Please fill all fields correctly (PIN at least 4 digits).');
     return;
+  }
+  if(_fmShopLicOn() && role !== 'customer'){ // 📦 FM110TH274: صدام کا پیکج P1+2 — مالک + 2 ملازم (پہلے سے بنے ملازم نہیں چھیڑے جاتے، صرف نیا بنانے پر حد)
+    const _cnt = usersData.filter(u => u.role !== 'admin' && u.role !== 'customer' && u.is_active !== false).length;
+    if(_cnt >= FM_PLAN_STAFF){ alert(`📦 آپ کا پیکج ${FM_PLAN_NAME} (مالک + ${FM_PLAN_STAFF} ملازم) ہے — ملازموں کی حد پوری ہو گئی۔\n\nمزید ملازم کے لیے پیکج بڑھائیں (ڈویلپر: 03206793793)۔`); return; }
   }
   if(role === 'salesman' && screens.length === 0){
     alert('Please select at least one screen this staff member is allowed to use.');
