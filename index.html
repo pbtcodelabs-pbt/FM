@@ -8794,7 +8794,8 @@ function getDeveloperContact(){
 // 🆕 FM310SA287: روزانہ ریکوری لسٹ — کاروباری تاریخ (ایڈمن کے ڈیٹ اینڈ کرنے تک نہیں بدلتی، دو بار تصدیق)، پچھلی تاریخ PIN سے کھلے/دوبارہ لاک، ایک لائن بٹن اور خلاصہ، وضاحتی پیغام ختم
 // 🆕 FM310SA288: ریکوری لسٹ — تاریخ سبز/سفید، PDF/شیئر اوپر کی لائن میں، بڑے ابھرے زوم بٹن، جدول کالم مواد کے برابر (نام کا کالم سب سے لمبے نام جتنا، باقی جگہ نوٹ کو)
 // 🆕 FM310SA289: ریکوری لسٹ — کلاؤڈ چیک بٹن عنوان کی لائن میں بائیں کونے پر، باقی صفحہ اوپر
-const APP_BUILD_VERSION = 'FM310SA289'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM310SA290: رابطہ کالم — کال/واٹس ایپ بٹن ہمیشہ نظر آئیں (نمبر نہ ہو تو دھندلے، دبانے پر پیغام)، ساتھ ساتھ ایک قطار میں
+const APP_BUILD_VERSION = 'FM310SA290'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29780,7 +29781,7 @@ function renderDailyRecoveryScreen(){
         <td>${r.todayRecovery > 0 ? num(r.todayRecovery, '#15803d') + (r.pendingRecovery > 0 ? '<div style="font-size:.68em; color:#b45309;">⏳ ' + r.pendingRecovery.toLocaleString() + '</div>' : '') : '—'}</td>
         <td class="drShort">${r.shortfall > 0 ? num(r.shortfall) : '—'}</td>
         <td>${num(r.finalBalance, 'var(--primary-dark)')}</td>
-        <td class="drNoPrint"><div style="display:flex; flex-direction:column; align-items:center; gap:4px;">${r.c.phone ? contactBtn('tel:' + r.c.phone, '#1565c0', '📞') + contactBtn('https://wa.me/' + waNum(r.c.phone) + '?text=' + encodeURIComponent(`السلام علیکم ${r.c.name}،\nآج کی خریداری: Rs. ${r.todayGoods.toLocaleString()}\nآج کی وصولی: Rs. ${r.todayRecovery.toLocaleString()}` + (r.shortfall > 0 ? `\n⚠️ کم وصولی: Rs. ${r.shortfall.toLocaleString()}` : '') + `\nکل بقایا: Rs. ${r.finalBalance.toLocaleString()}\n— ${AppState.settings.businessName || ''}`), '#25D366', '💬', 'target="_blank"') : '<span style="color:#cbd5e1; font-size:.7em;">—</span>'}</div></td>
+        <td class="drNoPrint"><div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:5px;">${r.c.phone ? contactBtn('tel:' + r.c.phone, '#1565c0', '📞') + contactBtn('https://wa.me/' + waNum(r.c.phone) + '?text=' + encodeURIComponent(`السلام علیکم ${r.c.name}،\nآج کی خریداری: Rs. ${r.todayGoods.toLocaleString()}\nآج کی وصولی: Rs. ${r.todayRecovery.toLocaleString()}` + (r.shortfall > 0 ? `\n⚠️ کم وصولی: Rs. ${r.shortfall.toLocaleString()}` : '') + `\nکل بقایا: Rs. ${r.finalBalance.toLocaleString()}\n— ${AppState.settings.businessName || ''}`), '#25D366', '💬', 'target="_blank"') : contactBtn('javascript:void(0)', '#94a3b8', '📞', 'onclick="alert(\'اس کسٹمر کا فون نمبر محفوظ نہیں — کسٹمر پروفائل میں نمبر لکھیں\'); return false;"') + contactBtn('javascript:void(0)', '#94a3b8', '💬', 'onclick="alert(\'اس کسٹمر کا فون نمبر محفوظ نہیں — کسٹمر پروفائل میں نمبر لکھیں\'); return false;"')}</div></td>
         <td><div class="drNote">${noteVal ? noteVal.replace(/</g,'&lt;') : ''}</div></td>
       </tr>`;
   }).join('');
