@@ -3937,9 +3937,13 @@
                🔒 FM22SEPTU09: یہ بٹن اب مکمل چھپا دیا — نیچے ڈراپ ڈاؤن میں وہی عمل پہلے سے ایک انٹری کے طور پر موجود ہے ---------- -->
           <button type="button" onclick="openMunshiStockLogReport()" title="🧑‍🌾 منشی کا شامل کردہ سٹاک دیکھیں" style="flex:0 0 auto; padding:4px 6px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:9px; white-space:nowrap; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);">🧑‍🌾 منشی سٹاک</button>
         </div>
-        <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:1 1 100%; min-width:0; max-width:none;">
-          <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="width:100%; justify-content:center; padding:9px 3px; font-size:10.5px; font-weight:900; max-width:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-radius:10px;">
-            <span>📊 رپورٹ</span>
+        <!-- ---------- 🗜️ FM310SA283 (صدام کی ہدایت): ایک ہی لائن میں تین برابر بٹن — دائیں: حاضر سبزیاں، درمیان: غیر حاضر سبزیاں، بائیں: رپورٹ ---------- -->
+        <div dir="rtl" style="display:flex; gap:6px; align-items:stretch; flex:1 1 100%; min-width:0; margin:0 0 6px;">
+        <button id="saProdPresenceBtnPresent" type="button" onclick="setProductPresenceFilter('present')" style="flex:1 1 0; min-width:0; height:38px; box-sizing:border-box; padding:0 4px; border-radius:10px; border:none; font-size:11.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.12);">🟢 حاضر سبزیاں</button>
+        <button id="saProdPresenceBtnAbsent" type="button" onclick="setProductPresenceFilter('absent')" style="flex:1 1 0; min-width:0; height:38px; box-sizing:border-box; padding:0 4px; border-radius:10px; border:none; font-size:11.5px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.12);">🔴 غیر حاضر سبزیاں</button>
+        <div class="categoryDropdownWrap" id="stockAdjReportsDropdownWrap" style="margin:0; flex:1 1 0; min-width:0; max-width:none; display:block;">
+          <button type="button" class="categoryDropdownBtn" onclick="toggleStockAdjReportsDropdown(event)" style="width:100%; height:38px; box-sizing:border-box; justify-content:center; padding:0 4px; font-size:11.5px; font-weight:900; max-width:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.12);">
+            <span>📊 رپورٹس</span>
             <span class="categoryDropdownArrow">▾</span>
           </button>
           <div class="categoryDropdownPanel" id="stockAdjReportsDropdownPanel">
@@ -3981,11 +3985,6 @@
                 <span class="cdiName">📦 انوینٹری ٹریک کریں</span>
               </label>
             </div>
-            <!-- ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر نظام دوبارہ بحال (FM16SEPWE0518AM2 والا ہائیڈ واپس لیا) ---------- -->
-            <div style="display:flex; gap:6px; padding:4px 0;">
-              <button id="saProdPresenceBtnPresent" onclick="setProductPresenceFilter('present')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer;">🟢 حاضر</button>
-              <button id="saProdPresenceBtnAbsent" onclick="setProductPresenceFilter('absent')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer;">🔴 غیر حاضر</button>
-            </div>
             <!-- ---------- 🆕🔒 صدام کی ہدایت (FM21SEPMO0N): سٹاک زیرو کرنے کے دو بٹن — منشی کا رپورٹ چیک کرنے کے
                  بعد اس کا سٹاک زیرو کرنے کے لیے، اور ایڈمن کا اپنا عمومی زیرو بٹن۔ دونوں ایک ہی محفوظ فنکشن
                  (zeroAllStock) بلاتے ہیں — دو وارننگ + ایڈمن پن، تینوں پاس ہوں تبھی سٹاک زیرو ہوگا ---------- -->
@@ -3994,6 +3993,7 @@
               <button type="button" onclick="closeStockAdjReportsDropdown(); zeroAllStock();" style="padding:9px; background:linear-gradient(180deg,#dc2626,#7f1d1d); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:11.5px; cursor:pointer;">🔑 ایڈمن: تمام سٹاک زیرو کریں</button>
             </div>
           </div>
+        </div>
         </div>
       </div>
 
@@ -8790,7 +8790,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM310SA283'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM310SA284'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
