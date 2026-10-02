@@ -8774,7 +8774,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM210FR277'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM210FR278'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -40249,9 +40249,11 @@ async function devPasswordOk(entered){
   const enteredHash = await hashPin(String(entered || '').trim());
   return (enteredHash === DEFAULT_DEV_PANEL_PASSWORD_HASH) || (!!AppState.settings.devPanelPasswordHash && enteredHash === AppState.settings.devPanelPasswordHash);
 }
-// 🔐 FM210FR277: "ڈویلپر کا فون" — صرف اسی فون پر جہاں ڈویلپر پاسورڈ درست لگا ہو (یہ نشان صرف اسی فون میں رہتا ہے، کلاؤڈ پر نہیں جاتا)
-function isDevDevice(){ try{ return localStorage.getItem('fmDevDeviceTrusted') === '1'; }catch(e){ return false; } }
-function markDevDevice(){ try{ localStorage.setItem('fmDevDeviceTrusted', '1'); }catch(e){} try{ refreshMaintenanceQuickUi(); }catch(e){} }
+// 🔐 FM210FR278: "ڈویلپر کا فون" صرف اسی وقت تک جب تک ایپ کھلی ہے (sessionStorage) — ایپ بند ہوتے ہی یہ فون پھر
+// عام دکاندار کا فون؛ دکاندار کے فون پر ڈویلپر پینل کھولنے سے وہ ہمیشہ کے لیے "ڈویلپر کا فون" نہیں بنتا۔ کلاؤڈ پر کبھی نہیں جاتا
+try{ localStorage.removeItem('fmDevDeviceTrusted'); }catch(e){} // 🧹 FM210FR277 والا مستقل نشان ہٹائیں
+function isDevDevice(){ try{ return sessionStorage.getItem('fmDevDeviceTrusted') === '1'; }catch(e){ return false; } }
+function markDevDevice(){ try{ sessionStorage.setItem('fmDevDeviceTrusted', '1'); }catch(e){} try{ refreshMaintenanceQuickUi(); }catch(e){} }
 
 async function unlockDevSecretPanel(){
   const entered = (document.getElementById('devSecretPasswordInput').value || '').trim();
