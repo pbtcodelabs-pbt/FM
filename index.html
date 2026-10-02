@@ -8774,7 +8774,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM210FR276'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM210FR277'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -35800,6 +35800,18 @@ function maintSecretTap(){
   _maintTapTimer = setTimeout(() => { _maintTapCount = 0; }, 2500);
   if(_maintTapCount >= 7){
     _maintTapCount = 0;
+    clearTimeout(_maintTapTimer);
+    // 🔐 FM210FR277: مینٹیننس صرف ڈویلپر کا کام — دوسرے فون پر پہلے ڈویلپر پاسورڈ لازمی
+    if(!isDevDevice()){
+      const pw = prompt('🔐 Developer Password');
+      if(pw === null) return;
+      devPasswordOk(pw).then(ok => {
+        if(!ok){ alert('❌ Incorrect password.'); return; }
+        markDevDevice();
+        openMaintQuickPanel();
+      });
+      return;
+    }
     openMaintQuickPanel();
   }
 }
@@ -35812,6 +35824,7 @@ function ensureMaintQuickUi(){
     el.setAttribute('dir', 'rtl');
     el.onclick = maintSecretTap;
     el.style.cssText = "text-align:center; margin:14px auto 6px; padding:6px 14px; width:fit-content; border-radius:20px; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:13px; font-weight:800; cursor:pointer; user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;";
+    if(id === 'maintQuickLabelLogin' && !isDevDevice()) el.style.display = 'none'; // 🔐 FM210FR277
     parent.appendChild(el);
   };
   const loginBox = document.getElementById('loginScreen')?.querySelector('.loginBox') || document.getElementById('loginScreen');
@@ -35858,6 +35871,7 @@ function ensureMaintQuickUi(){
   }
 }
 async function openMaintQuickPanel(){
+  if(!isDevDevice()) return; // 🔐 FM210FR277: صرف ڈویلپر کے فون پر
   ensureMaintQuickUi();
   document.getElementById('maintQuickModal').classList.add('show');
   refreshMaintenanceQuickUi();
@@ -35878,6 +35892,8 @@ function refreshMaintenanceQuickUi(){
     el.style.boxShadow = on ? '0 3px 0 #78350f' : 'none';
     // 🔒 26 ستمبر: ہوم صفحے والا لفظ صرف ایڈمن کو — ملازم/منشی کے ہوم پر نظر نہ آئے
     if(el.id === 'maintQuickLabelHome') el.style.display = 'none';
+    // 🔐 FM210FR277: لاگ ان صفحے کا "مینٹیننس" لفظ صرف ڈویلپر کے فون پر — دکاندار/ملازم کو نظر ہی نہ آئے
+    if(el.id === 'maintQuickLabelLogin') el.style.display = isDevDevice() ? '' : 'none';
   });
   const st = document.getElementById('maintQuickStatus');
   const btn = document.getElementById('maintQuickToggleBtn');
@@ -40228,17 +40244,25 @@ function devEnterAppDirectly(){
   finishLogin({ user_id: 0, name: 'Developer', role: 'admin', is_active: true, screens: [] }, false);
 }
 
+// 🔐 FM210FR277: ڈویلپر پاسورڈ کی ایک ہی جانچ (ماسٹر پاسورڈ ہمیشہ؛ پینل سے بدلا ہوا الگ پاسورڈ بھی)
+async function devPasswordOk(entered){
+  const enteredHash = await hashPin(String(entered || '').trim());
+  return (enteredHash === DEFAULT_DEV_PANEL_PASSWORD_HASH) || (!!AppState.settings.devPanelPasswordHash && enteredHash === AppState.settings.devPanelPasswordHash);
+}
+// 🔐 FM210FR277: "ڈویلپر کا فون" — صرف اسی فون پر جہاں ڈویلپر پاسورڈ درست لگا ہو (یہ نشان صرف اسی فون میں رہتا ہے، کلاؤڈ پر نہیں جاتا)
+function isDevDevice(){ try{ return localStorage.getItem('fmDevDeviceTrusted') === '1'; }catch(e){ return false; } }
+function markDevDevice(){ try{ localStorage.setItem('fmDevDeviceTrusted', '1'); }catch(e){} try{ refreshMaintenanceQuickUi(); }catch(e){} }
+
 async function unlockDevSecretPanel(){
   const entered = (document.getElementById('devSecretPasswordInput').value || '').trim();
-  const enteredHash = await hashPin(entered);
-  // 🔐 FM210FR276: ڈویلپر کا ماسٹر پاسورڈ ہمیشہ چلے؛ پینل سے بدلا ہوا الگ پاسورڈ بھی چلتا رہے
-  const okHash = (enteredHash === DEFAULT_DEV_PANEL_PASSWORD_HASH) || (!!AppState.settings.devPanelPasswordHash && enteredHash === AppState.settings.devPanelPasswordHash);
+  const okHash = await devPasswordOk(entered);
   if(!okHash){
     document.getElementById('devSecretError').textContent = '❌ Incorrect password.';
     return;
   }
   document.getElementById('devSecretError').textContent = '';
   document.getElementById('devSecretPasswordInput').value = '';
+  markDevDevice(); // 🔐 FM210FR277: یہ فون اب ڈویلپر کا فون ہے — مینٹیننس کا لفظ صرف یہاں نظر آئے گا
   document.getElementById('devSecretLocked').style.display = 'none';
   document.getElementById('devSecretUnlocked').style.display = 'block';
   renderMarqueeDevList();
