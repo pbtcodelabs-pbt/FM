@@ -8795,7 +8795,8 @@ function getDeveloperContact(){
 // 🆕 FM310SA288: ریکوری لسٹ — تاریخ سبز/سفید، PDF/شیئر اوپر کی لائن میں، بڑے ابھرے زوم بٹن، جدول کالم مواد کے برابر (نام کا کالم سب سے لمبے نام جتنا، باقی جگہ نوٹ کو)
 // 🆕 FM310SA289: ریکوری لسٹ — کلاؤڈ چیک بٹن عنوان کی لائن میں بائیں کونے پر، باقی صفحہ اوپر
 // 🆕 FM310SA290: رابطہ کالم — کال/واٹس ایپ بٹن ہمیشہ نظر آئیں (نمبر نہ ہو تو دھندلے، دبانے پر پیغام)، ساتھ ساتھ ایک قطار میں
-const APP_BUILD_VERSION = 'FM310SA290'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM310SA291: غیر حاضر سبزی میں سٹاک ہو تو غیر حاضر نہیں ہوگی (وارننگ)، اور غیر حاضر سبزیاں رپورٹوں/پرنٹ فہرستوں سے غائب
+const APP_BUILD_VERSION = 'FM310SA291'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11421,10 +11422,21 @@ async function vmRunPush(){
   if(vmPushAgain){ vmPushAgain = false; vmQueuePush(); }
 }
 // تبدیلی فوراً لاگو + یاد رکھنا + کلاؤڈ کے لیے قطار
+// ---------- 🔒 FM310SA291 (صدام کی ہدایت): سبزی میں سٹاک موجود ہو تو غیر حاضر نہیں ہو سکتی — پہلے سٹاک سیل/زیرو/بک کریں ----------
+function presenceStockGuard(p){
+  if(!p) return false;
+  const tot = (p.variants || []).reduce((a, v) => a + (Number(v.stock) > 0 ? Number(v.stock) : 0), 0);
+  if(tot > 0){
+    alert(`⚠️ "${p.name}" غیر حاضر نہیں ہو سکتی — اس میں ابھی سٹاک موجود ہے (${tot}).\n\nپہلے اس کا سٹاک سیل کریں، بک کریں یا ایڈمن/آرڈر ٹیکنگ والا سٹاک زیرو کر دے، پھر غیر حاضر کریں۔`);
+    return true;
+  }
+  return false;
+}
 function vmCommitPresence(pid, toAbsent){
   const key = String(pid);
   const p = productsData.find(x => String(x.product_id) === key);
   if(!p) return null;
+  if(toAbsent && presenceStockGuard(p)) return null;
   p.isDormant = toAbsent;
   vmPresenceOverrides[key] = { dormant: toAbsent, t: Date.now() };
   try{ persistAllData(); }catch(e){}
@@ -11444,6 +11456,7 @@ function vmPresenceTick(productId, chkEl, opts){
     chkEl.dataset.vmBusy = '1'; chkEl.disabled = true;
   }
   const toAbsent = !p.isDormant;
+  if(toAbsent && presenceStockGuard(p)){ if(chkEl){ chkEl.checked = false; chkEl.disabled = false; delete chkEl.dataset.vmBusy; } return; }
   vmCommitPresence(key, toAbsent);
   const rowEl = chkEl ? chkEl.closest('tr, .vmPresRow') : null;
   vmPresenceFx(rowEl, toAbsent, () => { vmRefreshPresenceScreens(); });
@@ -11460,6 +11473,7 @@ function toggleProductPresenceInSheet(productId, checkboxEl){
   setTimeout(() => {
     const p = productsData.find(x => x.product_id === productId);
     if(!p) return;
+    if(!p.isDormant && presenceStockGuard(p)){ if(tr) tr.style.opacity = ''; if(checkboxEl) checkboxEl.checked = false; return; }
     p.isDormant = !p.isDormant;
     persistAllData();
     pushProductsToCloud();
@@ -17288,6 +17302,7 @@ function toggleProductPresence(productId, makePresent){
   if(AppState.currentRole !== 'admin'){ alert('صرف ایڈمن یہ تبدیل کر سکتا ہے'); return; }
   const p = productsData.find(x => x.product_id === productId);
   if(!p) return;
+  if(!makePresent && presenceStockGuard(p)){ renderProductList(document.getElementById('productSearchInput')?.value || ''); return; }
   p.isDormant = !makePresent;
   persistAllData();
   pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): حاضر/غیر حاضر کی تبدیلی فوراً کلاؤڈ میں ----------
@@ -17306,6 +17321,7 @@ function animateAndTogglePresence(cardId, productId){
   if(card && card.dataset.vmBusy === '1') return;
   if(card) card.dataset.vmBusy = '1';
   const toAbsent = !p.isDormant;
+  if(toAbsent && presenceStockGuard(p)){ if(card) delete card.dataset.vmBusy; return; }
   vmCommitPresence(key, toAbsent);
   vmPresenceFx(card, toAbsent, () => { vmRefreshPresenceScreens(); });
 }
@@ -21751,7 +21767,7 @@ function getAllExpiringItems(){
   const today = new Date();
   today.setHours(0,0,0,0);
   const items = [];
-  productsData.forEach(p => p.variants.forEach(v => {
+  productsData.filter(p => !p.isDormant).forEach(p => p.variants.forEach(v => {
     if(v.batches && v.batches.length){
       v.batches.forEach(b => {
         if(!b.expiryDate || b.qty <= 0) return;
@@ -21803,7 +21819,7 @@ function renderDashDate(){
 function renderHealthBand(){
   // کل اسٹاک ویلیو = تمام variants کی (purchase price × stock) کا مجموعہ
   let stockValue = 0;
-  productsData.forEach(p => p.variants.forEach(v => stockValue += variantStockValue(v))); // 🧾 ہر چالان اپنے ریٹ سے
+  productsData.filter(p => !p.isDormant).forEach(p => p.variants.forEach(v => stockValue += variantStockValue(v))); // 🧾 ہر چالان اپنے ریٹ سے
 
   // ---------- Receivable/Payable اب لائیو حساب ہیں — کسٹمرز اور سپلائرز کے اصل موجودہ ریکارڈ سے، پرانی جامد (static) قیمت سے نہیں ----------
   const totalReceivable = customersData.reduce((sum, c) => sum + (c.total_receivable || 0), 0);
@@ -21884,7 +21900,7 @@ function scrollToAlertsSection(){
 // --- Helpers: صرف گنتی نکالنے کے لیے (KPI بیج میں استعمال ہوتی ہیں) ---
 function countLowStockItems(){
   let count = 0;
-  productsData.forEach(p => p.variants.forEach(v => { if(v.stock <= v.lowStockAt) count++; }));
+  productsData.filter(p => !p.isDormant).forEach(p => p.variants.forEach(v => { if(v.stock <= v.lowStockAt) count++; }));
   return count;
 }
 // ---------- ایکسپائری الرٹ ونڈو — صارف اپنی مرضی کے دنوں کی تعداد منتخب کر سکتا ہے (7/15/30/60/90/کوئی بھی عدد) ----------
@@ -21920,7 +21936,7 @@ function renderLowStockAlerts(){
   const grid = document.getElementById('lowStockGrid');
   const badge = document.getElementById('lowStockCount');
   const lowItems = [];
-  productsData.forEach(p => p.variants.forEach(v => {
+  productsData.filter(p => !p.isDormant).forEach(p => p.variants.forEach(v => {
     if(v.stock <= v.lowStockAt) lowItems.push({product_id: p.product_id, name: `${p.name} ${v.label}`, stock: v.stock, threshold: v.lowStockAt});
   }));
 
@@ -23412,7 +23428,7 @@ async function renderStockValueReportToCanvas(canvasEl){
 
   // ---------- ڈیٹا تیار کریں: ہر variant کی الگ لائن — خرید، راولپنڈی (منافع سمیت)، اسلام آباد (منافع سمیت) ---------- -->
   const rows = [];
-  productsData.forEach(p => {
+  productsData.filter(p => !p.isDormant).forEach(p => {
     p.variants.forEach(v => {
       const qty = v.stock || 0;
       if(qty === 0) return; // ---------- جس چیز کا سٹاک صفر ہے اسے رپورٹ میں شامل کرنے کا کوئی فائدہ نہیں ----------
@@ -23710,7 +23726,7 @@ function buildVegListRows(){
   productsData
     // ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر فلٹر دوبارہ بحال (FM16SEPWE0518AM2 والا ہائیڈ واپس
     // لیا گیا) — present=صرف حاضر، absent=صرف غیر حاضر، both=دونوں ---------- -->
-    .filter(p => vegListMode === 'both' ? true : (vegListMode === 'present' ? !p.isDormant : !!p.isDormant))
+    .filter(p => vegListMode === 'absent' ? !!p.isDormant : !p.isDormant) // FM310SA291: غیر حاضر رپورٹ/پرنٹ سے غائب (صرف خاص "غیر حاضر" فہرست الگ)
     .sort((a,b) => (a.serial_no||0) - (b.serial_no||0))
     .forEach(p => {
       (p.variants || []).forEach(v => {
@@ -27638,6 +27654,7 @@ function wireOtPresenceSwipeRows(){ /* ☑️ FM210FR282: سلائیڈ نظام 
 function otTogglePresence(productId){
   const p = productsData.find(x => x.product_id === productId);
   if(!p) return;
+  if(!p.isDormant && presenceStockGuard(p)) return;
   p.isDormant = !p.isDormant;
   persistAllData();
   pushProductsToCloud();
@@ -42314,7 +42331,7 @@ let currentReportCategories = [];
 // ---------- کیٹگری کے حساب سے فلیٹ کی گئی پراڈکٹ/ویرینٹ فہرست — ہر ویرینٹ ایک لائن، لو سٹاک لمٹ سمیت ----------
 function getReportFlatItems(){
   const flat = [];
-  productsData.forEach(p => {
+  productsData.filter(p => !p.isDormant).forEach(p => {
     const cat = p.category && p.category.trim() ? p.category.trim() : 'Uncategorized';
     (p.variants || []).forEach(v => {
       flat.push({
