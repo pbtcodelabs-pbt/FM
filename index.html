@@ -278,6 +278,21 @@
   /* ---------- 🔎 صدام کی ہدایت (FM3SEPTH10): جاری کردہ کوڈز کی فہرست — حالت فلٹر بٹن ---------- */
   /* ---------- 🎬 صدام کی ہدایت (FM3SEPTH10): ٹک لگانے پر قطار/کارڈ آہستہ سے دائیں طرف سلائیڈ ہو کر غائب ---------- */
   .slideOutRow{ transform:translateX(100%); opacity:0; transition:transform .28s ease, opacity .28s ease; pointer-events:none; }
+
+  /* ---------- 💨 FM210FR282: حاضر/غیر حاضر کرتے وقت — قطار دھواں بن کر دھندلی ہوتی اور سلائیڈ ہو کر غائب (یا ابھر کر آتی) ---------- */
+  @keyframes vmSlideOutR{ 0%{transform:translateX(0) scale(1); opacity:1; filter:blur(0)} 35%{transform:translateX(6%) scale(1.01); opacity:.85; filter:blur(1px)} 100%{transform:translateX(105%) scale(.94); opacity:0; filter:blur(7px)} }
+  @keyframes vmSlideOutL{ 0%{transform:translateX(0) scale(1); opacity:1; filter:blur(0)} 35%{transform:translateX(-6%) scale(1.01); opacity:.85; filter:blur(1px)} 100%{transform:translateX(-105%) scale(.94); opacity:0; filter:blur(7px)} }
+  .vmFxOutR{ animation:vmSlideOutR .75s ease-in forwards; pointer-events:none; }
+  .vmFxOutL{ animation:vmSlideOutL .75s ease-in forwards; pointer-events:none; }
+  tr.vmFxOutR, tr.vmFxOutL{ animation:none; }
+  tr.vmFxOutR > td{ animation:vmSlideOutR .75s ease-in forwards; }
+  tr.vmFxOutL > td{ animation:vmSlideOutL .75s ease-in forwards; }
+  @keyframes vmSmokeRise{ 0%{transform:translate(0,0) scale(.35); opacity:0} 20%{opacity:.85} 100%{transform:translate(var(--vmdx,0px),-46px) scale(2.3); opacity:0} }
+  .vmSmokePuff{ position:fixed; z-index:99999; width:34px; height:34px; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle at 40% 40%, rgba(235,235,235,.95), rgba(150,150,150,.55) 55%, rgba(120,120,120,0) 72%);
+    filter:blur(3px); animation:vmSmokeRise .85s ease-out forwards; }
+  .vmSmokePuff.vmGreen{ background:radial-gradient(circle at 40% 40%, rgba(220,252,231,.95), rgba(74,222,128,.5) 55%, rgba(34,197,94,0) 72%); }
+  .vmPresChk{ width:22px; height:22px; margin:0; cursor:pointer; accent-color:#b91c1c; }
   .codeStatusFilterBtn{background:#f1f5f9; color:var(--text);}
   .codeStatusFilterBtn.active{background:var(--primary-dark); color:#fff;}
   .dobPicker{display:flex; gap:6px; align-items:center; margin:8px 0;}
@@ -5860,6 +5875,12 @@
           <span style="flex:0 0 auto; font-weight:800; font-size:13px; color:#92400e;">🧾 مال کہاں سے آیا:</span>
           <select id="otAddStockSource" style="flex:1; min-width:0; padding:7px; border:1.5px solid #f59e0b; border-radius:8px; font-size:13px; font-weight:800; background:#fff;"></select>
         </div>
+        <!-- ---------- ☑️ FM210FR282 (صدام کی ہدایت): چالان/نیا سٹاک فیڈ کرتے وقت سبزی حاضر/غیر حاضر کرنے کا نظام —
+             ہر سبزی کے ساتھ خالی ٹک ڈبہ؛ ٹک لگاتے ہی دھواں + سلائیڈ کے ساتھ دوسری فہرست میں چلی جاتی ہے ---------- -->
+        <div dir="rtl" style="display:flex; gap:8px; margin-bottom:10px;">
+          <button type="button" id="otAddStockBtnPresent" onclick="setOtAddStockPresenceMode('present')" style="flex:1; padding:10px 4px; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">🟢 حاضر سبزیاں</button>
+          <button type="button" id="otAddStockBtnAbsent" onclick="setOtAddStockPresenceMode('absent')" style="flex:1; padding:10px 4px; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">🔴 غیر حاضر سبزیاں</button>
+        </div>
         <input type="text" id="otAddStockSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر" oninput="renderOtAddStockList(this.value)"
                style="width:100%; padding:10px; border:2px solid var(--primary); border-radius:10px; font-size:13.5px; font-weight:700; text-align:center; margin-bottom:10px; box-sizing:border-box;">
         <div id="otAddStockListWrap"></div>
@@ -5875,7 +5896,7 @@
     <div class="modalOverlay" id="otPresenceModal" onclick="if(event.target===this) closeOtPresenceModal()">
       <div class="modalBox" style="max-width:460px; max-height:90vh; overflow-y:auto; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
         <h3 id="otPresenceModalTitle" style="margin-top:0;">🟢 حاضر سبزیاں</h3>
-        <div dir="rtl" style="text-align:center; font-size:12px; font-weight:700; color:var(--muted); background:#f8fafc; border-radius:8px; padding:6px 8px; margin-bottom:10px;">➡️⬅️ سبزی کی قطار کو انگلی سے سرکائیں (سلائیڈ کریں) تاکہ اس کی حالت بدل جائے</div>
+        <div dir="rtl" style="text-align:center; font-size:12px; font-weight:700; color:var(--muted); background:#f8fafc; border-radius:8px; padding:6px 8px; margin-bottom:10px;">☑️ سبزی کے خالی ڈبے پر ٹک لگائیں — وہ دوسری فہرست میں چلی جائے گی</div>
         <input type="text" id="otPresenceSearchInput" placeholder="🔍 نام لکھیں یا سیریل نمبر" oninput="renderOtPresenceList(this.value)"
                style="width:100%; padding:10px; border:2px solid var(--primary); border-radius:10px; font-size:13.5px; font-weight:700; text-align:center; margin-bottom:10px; box-sizing:border-box;">
         <div id="otPresenceListWrap"></div>
@@ -8774,7 +8795,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM210FR281'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM210FR282'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11301,6 +11322,67 @@ function flashSavedInput(el){
   el._flashTimer = setTimeout(() => { el.style.backgroundColor = prevBg || '#fff'; }, 550);
 }
 
+
+// =====================================================================
+// ☑️💨 FM210FR282 — صدام کی ہدایت: سلائیڈ (سوائپ) والا حاضر/غیر حاضر نظام مکمل ختم۔ اب ہر جگہ خالی ڈبہ — ٹک لگاتے ہی
+// سبزی دوسری فہرست (حاضر ⟷ غیر حاضر) میں چلی جاتی ہے، دھواں بن کر ابھرتی اور سلائیڈ ہو کر ختم ہوتی نظر آتی ہے۔
+// ڈبہ ہمیشہ خالی ہی دکھتا ہے (غیر حاضر فہرست میں بھی) — ٹک لگانا = "دوسری طرف بھیجو" ----------
+function vmPresenceFx(rowEl, toAbsent, done){
+  let finished = false;
+  const finish = () => { if(finished) return; finished = true; try{ done && done(); }catch(e){ console.error(e); } };
+  if(!rowEl){ finish(); return; }
+  try{
+    const r = rowEl.getBoundingClientRect();
+    for(let i = 0; i < 7; i++){
+      const puff = document.createElement('div');
+      puff.className = 'vmSmokePuff' + (toAbsent ? '' : ' vmGreen');
+      const x = r.left + Math.random() * Math.max(10, r.width - 34);
+      const y = r.top + (r.height / 2) - 17 + (Math.random() * 14 - 7);
+      puff.style.left = x + 'px'; puff.style.top = y + 'px';
+      puff.style.setProperty('--vmdx', (Math.random() * 40 - 20) + 'px');
+      puff.style.animationDelay = (Math.random() * 0.25) + 's';
+      document.body.appendChild(puff);
+      setTimeout(() => { try{ puff.remove(); }catch(e){} }, 1300);
+    }
+    rowEl.classList.add(toAbsent ? 'vmFxOutR' : 'vmFxOutL');
+  }catch(e){ finish(); return; }
+  setTimeout(finish, 760);
+}
+function vmRefreshPresenceScreens(){
+  try{
+    otFlatCache = applyManualCardOrder(getFlatVariants().sort((a, b) => {
+      const sa = a.serial_no, sb = b.serial_no;
+      if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
+      if(sa == null) return 1;
+      if(sb == null) return -1;
+      return sa - sb;
+    }));
+  }catch(e){}
+  try{ if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || ''); }catch(e){}
+  try{ if(document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || ''); }catch(e){}
+  try{ if(document.getElementById('otPresenceListWrap') && document.getElementById('otPresenceModal')?.classList.contains('show')) renderOtPresenceList(document.getElementById('otPresenceSearchInput')?.value || ''); }catch(e){}
+  try{ updateOtPresenceButtonLabels(); }catch(e){}
+  try{ renderOtItemsPage(); }catch(e){}
+  try{ if(document.getElementById('otAddStockListWrap')) renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || ''); }catch(e){}
+}
+// ---------- ایک ہی مشترکہ فنکشن: جدول/کارڈ/موڈل — ہر جگہ کا ٹک یہیں آتا ہے ----------
+function vmPresenceTick(productId, chkEl, opts){
+  opts = opts || {};
+  if(opts.adminOnly && AppState.currentRole !== 'admin'){ alert('صرف ایڈمن یہ تبدیل کر سکتا ہے'); if(chkEl) chkEl.checked = false; return; }
+  const p = productsData.find(x => x.product_id === productId);
+  if(!p){ if(chkEl) chkEl.checked = false; return; }
+  if(chkEl) chkEl.disabled = true; // ڈبل ٹیپ سے دوبارہ نہ بدلے
+  const rowEl = chkEl ? chkEl.closest('tr, .vmPresRow') : null;
+  const toAbsent = !p.isDormant;
+  vmPresenceFx(rowEl, toAbsent, () => {
+    p.isDormant = toAbsent;
+    persistAllData();
+    try{ pushProductsToCloud(); }catch(e){}
+    try{ pauseCloudPolling(20000); }catch(e){} // ابھی کی تبدیلی پولنگ سے واپس نہ پلٹے
+    vmRefreshPresenceScreens();
+  });
+}
+
 // ---------- ✅ صدام کی ہدایت (FM10SEPTH0530PM): جدول/شیٹ نظارے میں ہی حاضر/غیر حاضر چیک باکس — کارڈ نظارے
 // جیسا ہی سلائیڈ اثر (ہلکا سا دھندلا ہو کر قطار غائب)، پھر فہرست خودکار تازہ۔ Stock Adjustment اور Products
 // دونوں سکرینز ایک ہی productsData استعمال کرتی ہیں، اس لیے یہاں سے تبدیلی دونوں جگہ فوراً نظر آئے گی —
@@ -11327,6 +11409,7 @@ function toggleProductPresenceInSheet(productId, checkboxEl){
 // حاضر⟷غیر حاضر بدلتی ہے۔ <tr> کے اندر آزاد <div> اوورلے درست HTML نہیں بنتا، اس لیے یہاں پوری قطار کا
 // پس منظر رنگ (سبز/سرخ) ہی سرکاتے وقت اشارہ دیتا ہے ---------- -->
 function wireProductSwipeRows(tableId){
+  return; // ☑️ FM210FR282: سلائیڈ/سوائپ نظام مکمل ختم — اب جدول کی ہر قطار میں خالی ٹک ڈبہ ہے (vmPresenceTick)
   // ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر نظام دوبارہ بحال — سوائپ گیسچر واپس فعال
   // (FM16SEPWE0518AM2 والا early-return ہٹا دیا گیا) ---------- -->
   const table = document.getElementById(tableId);
@@ -11519,8 +11602,9 @@ function renderProductSpreadsheet(filtered, wrap){
   // کا واحد راستہ اوپر والے مستقل پینل کا 🗑️ بٹن ہے (منتخب سبزی کے لیے)، جو پہلے تصدیق پھر ایڈمن پاسورڈ مانگتا
   // ہے (deleteProduct دیکھیں)۔ اس لیے کالم/فنکشن یہاں سے نکال دیا (فنکشن deleteProductRowInSheet محفوظ ہے،
   // بس اب کہیں سے نہیں بلایا جاتا) ---------- -->
-  const colWidths = [serialW, nameW, packingW, stockW, bookingW];
-  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
+  const chkW = 40; // ☑️ FM210FR282: حاضر/غیر حاضر کا خالی ٹک ڈبہ — سب سے دائیں، منجمد
+  const colWidths = [chkW, serialW, nameW, packingW, stockW, bookingW];
+  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1], colWidths[0]+colWidths[1]+colWidths[2]];
   const rows = filtered.map((p, idx) => {
     const v = p.variants[0] || {};
     // ---------- 🦓 صدام کی ہدایت (FM10SEPTH0530PM): زیبرا رنگ — ایک قطار گہری، ایک ہلکی؛ منتخب شدہ قطار کا
@@ -11532,28 +11616,29 @@ function renderProductSpreadsheet(filtered, wrap){
     const packingBtnStyle = "width:100%;min-width:0;box-sizing:border-box;padding:6px 2px;border:1.5px solid #d3d8de;border-radius:11px;font-size:11.5px;text-align:center;background:#fff;cursor:pointer;" + urduFont;
     const packingSelectHtml = `<button type="button" style="${packingBtnStyle}" onclick="openPackingPicker(${p.product_id}, ${v.variant_id}, '${(v.label||'').replace(/'/g,"\\'")}', '${wrap.id}')">${v.label || '❓'}</button>`;
     return `
-      <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative; touch-action:pan-y;" onclick="selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')">
+      <tr data-product-id="${p.product_id}" data-swipe-id="${p.product_id}" class="prodSwipeRow" style="position:relative;" onclick="selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')">
         <!-- ---------- 🔓 صدام کی ہدایت (FM21SEPMO0M): حاضر/غیر حاضر نظام دوبارہ بحال — selectVcInlineRow میں
              کوئی isDormant شرط نہیں، اس لیے ہر قطار پر ٹیپ پہلے کی طرح کام کرتا رہے گا ---------- -->
-        <td style="${tdBase}${frozenTd(0)}"><button type="button" class="serialBadgeBtn" data-serial-pid="${p.product_id}" data-serial-vid="${v.variant_id}" data-serial-val="${p.serial_no ?? ''}" data-serial-name="${(p.name||'').replace(/"/g,'&quot;')}" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important;">${p.serial_no ?? '?'}</button></td>
+        <td style="${tdBase}${frozenTd(0)}" onclick="event.stopPropagation()"><input type="checkbox" class="vmPresChk" ${isAdmin ? '' : 'disabled'} title="${productPresenceFilter === 'absent' ? 'ٹک لگائیں — حاضر میں بھیجیں' : 'ٹک لگائیں — غیر حاضر میں بھیجیں'}" onclick="event.stopPropagation(); vmPresenceTick(${p.product_id}, this, {adminOnly:true})"></td>
+        <td style="${tdBase}${frozenTd(1)}"><button type="button" class="serialBadgeBtn" data-serial-pid="${p.product_id}" data-serial-vid="${v.variant_id}" data-serial-val="${p.serial_no ?? ''}" data-serial-name="${(p.name||'').replace(/"/g,'&quot;')}" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important;">${p.serial_no ?? '?'}</button></td>
         <!-- ---------- 🔒 صدام کی ہدایت (FM16SEPWE3): ✏️ بٹن مکمل ختم — اب پوری قطار پر ٹیپ کرنے سے ہی سامنے
              کا مستقل پینل اسی سبزی کی تفصیل دکھا دیتا ہے (قطار نیلی ہو کر منتخب نظر آتی ہے) ---------- -->
-        <td style="${tdBase}${frozenTd(1)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
-        <td style="${tdBase}${frozenTd(2)}">${packingSelectHtml}</td>
+        <td style="${tdBase}${frozenTd(2)}"><input type="text" style="${nameInputStyle}" value="${p.name}" onclick="event.stopPropagation(); selectVcInlineRow(${p.product_id}, ${v.variant_id}, '${wrap.id}')" onchange="updateProductName(${p.product_id}, this.value, this)"></td>
+        <td style="${tdBase}${frozenTd(3)}">${packingSelectHtml}</td>
         <td style="${tdBase}${rowTd}"><input type="number" style="${inputStyle}" value="${v.stock||0}" onfocus="this.select()" onchange="updateVariantField(${p.product_id},${v.variant_id},'stock',this.value,this)"></td>
         <!-- ---------- 🔖 صدام کی ہدایت (22 ستمبر): بکنگ (v.reserved) صرف دکھانے کے لیے — جان بوجھ کر input نہیں
         بنایا، تاکہ منشی کے پینڈنگ آرڈرز کا نظام غلطی سے دستی تبدیلی سے خراب نہ ہو (یہ نمبر خود بخود اپڈیٹ ہوتا ہے) ---------- -->
         <td style="${tdBase}${rowTd}"><div onclick="event.stopPropagation(); openBookingDetails(${v.variant_id}, true)" style="cursor:pointer;width:100%;box-sizing:border-box;padding:6px 2px;border-radius:11px;font-size:13px;font-weight:900;text-align:center;${numFont}background:${(v.reserved||0)>0 ? '#ffedd5' : '#f1f5f9'};color:${(v.reserved||0)>0 ? '#c2410c' : '#94a3b8'};border:1.5px solid ${(v.reserved||0)>0 ? '#fdba74' : '#e2e8f0'};">${v.reserved||0}</div></td>
       </tr>`;
   }).join('');
-  const headers = ['#','نام','پیکنگ','📦 سٹاک','🔖 بکنگ'];
+  const headers = ['☑️','#','نام','پیکنگ','📦 سٹاک','🔖 بکنگ'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
-    const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
+    const frozen = i < 4 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
   }).join('') + '</tr>';
   // ---------- 🆕 صدام کی ہدایت (17 ستمبر، شام): نام والا کالم (index 1) اب فکس چوڑائی نہیں — بچی ہوئی خالی
   // جگہ خودکار اسی میں چلی جاتی ہے (جدول ہمیشہ پورے چوڑائی تک پھیلا رہے، دائیں/بائیں خالی پٹی نہ بچے) ---------- -->
-  const colgroupHtml = '<colgroup>' + colWidths.map((w,i) => i===1 ? '<col style="width:auto;">' : `<col style="width:${w}px;">`).join('') + '</colgroup>';
+  const colgroupHtml = '<colgroup>' + colWidths.map((w,i) => i===2 ? '<col style="width:auto;">' : `<col style="width:${w}px;">`).join('') + '</colgroup>';
   const totalTableW = colWidths.reduce((a,b) => a+b, 0);
   // ---------- 🧭 صدام کی ہدایت (FM10SEPTH0530PM) فکس: پہلے ہر بار innerHTML بدلتے ہی سکرول واپس شروع
   // (دائیں/اوپر) پر چلا جاتا تھا — لکھتے ہوئے ایسا لگتا تھا کہ صفحہ "بھاگ کر" پہلے نمبر پر آ گیا۔ اب پرانا
@@ -17146,13 +17231,19 @@ function toggleProductPresence(productId, makePresent){
 // ---------- 🎬 صدام کی ہدایت (FM3SEPTH10): ٹک لگاتے ہی کارڈ دائیں طرف سلائیڈ ہو کر آہستہ سے غائب ہو —
 // اس کے بعد ہی اصل فہرست تبدیل ہو، تاکہ صاف نظر آئے کہ کون سا آئٹم کہاں گیا ---------- -->
 function animateAndTogglePresence(cardId, productId){
+  // ☑️💨 FM210FR282: اب وہی مشترکہ دھواں + سلائیڈ ایفیکٹ (vmPresenceFx)
+  if(AppState.currentRole !== 'admin'){ alert('صرف ایڈمن یہ تبدیل کر سکتا ہے'); return; }
+  const p = productsData.find(x => x.product_id === productId);
+  if(!p) return;
   const card = document.getElementById(cardId);
-  if(card) card.classList.add('slideOutRow');
-  setTimeout(() => {
-    const p = productsData.find(x => x.product_id === productId);
-    if(!p) return;
-    toggleProductPresence(productId, !!p.isDormant); // ---------- موجودہ حالت الٹ دیں ----------
-  }, 100);
+  const toAbsent = !p.isDormant;
+  vmPresenceFx(card, toAbsent, () => {
+    p.isDormant = toAbsent;
+    persistAllData();
+    try{ pushProductsToCloud(); }catch(e){}
+    try{ pauseCloudPolling(20000); }catch(e){}
+    vmRefreshPresenceScreens();
+  });
 }
 
 // ---------- 🟩🟥 صدام کی ہدایت (FM4SEPFR25): راولپنڈی/اسلام آباد ریٹ + سٹاک ہمیشہ اسی رنگ سکیم میں دکھائیں —
@@ -22926,7 +23017,7 @@ function renderStockAdjustmentScreen(query){
     <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="sa-pcard-${p.product_id}" data-pid="${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id}, 'sa-pcard-${p.product_id}')" dir="rtl">
         <label class="pPresenceCheck" title="${p.isDormant ? 'ٹک لگائیں — واپس حاضر کریں' : 'ٹک لگائیں — غیر حاضر کریں'}" style="${isAdmin ? 'cursor:pointer;' : 'cursor:default;'}" onclick="event.stopPropagation();">
-          <input type="checkbox" ${p.isDormant ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('sa-pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
+          <input type="checkbox" ${isAdmin ? '' : 'disabled'} onclick="animateAndTogglePresence('sa-pcard-${p.product_id}', ${p.product_id})" style="width:20px; height:20px; margin:0;">
         </label>
         <!-- ---------- 🔢 صدام کی ہدایت (FM10SEPTH0844AM): سیریل بیج کو pNameWrap سے نکال کر اپنا مخصوص، ہمیشہ
              46px والا الگ کالم دیا — اب کسی صورت میں سکڑ/کٹ نہیں سکتا ---------- -->
@@ -27423,7 +27514,7 @@ function updateOtPresenceButtonLabels(){
 function openOtPresenceModal(mode){
   otPresenceFilterMode = mode;
   const title = document.getElementById('otPresenceModalTitle');
-  if(title) title.textContent = mode === 'present' ? '🟢 حاضر سبزیاں — سرکا کر غیر حاضر کریں' : '🔴 غیر حاضر سبزیاں — سرکا کر واپس حاضر کریں';
+  if(title) title.textContent = mode === 'present' ? '🟢 حاضر سبزیاں — ٹک لگا کر غیر حاضر کریں' : '🔴 غیر حاضر سبزیاں — ٹک لگا کر واپس حاضر کریں';
   const searchEl = document.getElementById('otPresenceSearchInput');
   if(searchEl) searchEl.value = '';
   renderOtPresenceList('');
@@ -27445,80 +27536,15 @@ function renderOtPresenceList(query){
     return;
   }
   wrap.innerHTML = list.map(p => `
-    <div class="otPresenceSwipeRow" data-swipe-pid="${p.product_id}" style="display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid #e5e9f0; border-radius:10px; padding:11px 10px; margin-bottom:7px; touch-action:pan-y; user-select:none; -webkit-user-select:none;" dir="rtl">
+    <div class="vmPresRow" data-swipe-pid="${p.product_id}" style="display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid #e5e9f0; border-radius:10px; padding:11px 10px; margin-bottom:7px; user-select:none; -webkit-user-select:none;" dir="rtl">
       ${p.serial_no ? `<span style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; margin:0; cursor:default; pointer-events:none;">${p.serial_no}</span>` : ''}
       <div style="flex:1; min-width:0; text-align:right; font-weight:800; font-size:14px; pointer-events:none;">${p.name}</div>
-      <div style="font-size:16px; pointer-events:none;">${otPresenceFilterMode === 'present' ? '⬅️' : '➡️'}</div>
+      <input type="checkbox" class="vmPresChk" title="${otPresenceFilterMode === 'present' ? 'ٹک لگائیں — غیر حاضر میں بھیجیں' : 'ٹک لگائیں — حاضر میں بھیجیں'}" onclick="vmPresenceTick(${p.product_id}, this)">
     </div>`).join('');
-  wireOtPresenceSwipeRows();
 }
 // ---------- سادہ سوائپ گیسچر — ایڈمن والے prodSwipeRow جیسا ہی احساس، مگر یہاں سادہ flex قطاریں ہیں
 // (sticky کالم منجمد کرنے کی ضرورت نہیں) ---------- -->
-function wireOtPresenceSwipeRows(){
-  const wrap = document.getElementById('otPresenceListWrap');
-  if(!wrap || wrap.dataset.swipeWired) return;
-  wrap.dataset.swipeWired = '1';
-  let activeRow = null, startX = 0, startY = 0, dx = 0, dragging = false, lockedHorizontal = false, pointerDownTime = 0;
-  const easyThreshold = 70; // ---------- غیر حاضر → حاضر: تیز/آسان ---------- -->
-  const hardThreshold = 170; // ---------- حاضر → غیر حاضر: جان بوجھ کر مشکل — غلطی سے نہ ہو ---------- -->
-  const hardMinHoldMs = 450;
-  const getX = e => (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-  const getY = e => (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-  const resetRow = () => {
-    if(activeRow){
-      activeRow.style.transition = 'transform .15s, background .15s';
-      activeRow.style.transform = '';
-      activeRow.style.background = '#fff';
-    }
-    dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
-  };
-  const onStart = e => {
-    const row = e.target.closest('.otPresenceSwipeRow');
-    if(!row || !wrap.contains(row)) return;
-    activeRow = row; startX = getX(e); startY = getY(e); dx = 0; dragging = true; lockedHorizontal = false;
-    pointerDownTime = Date.now();
-    row.style.transition = '';
-  };
-  const onMove = e => {
-    if(!dragging || !activeRow) return;
-    const x = getX(e), y = getY(e);
-    dx = x - startX; const dy = y - startY;
-    if(!lockedHorizontal){
-      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-      if(Math.abs(dy) > Math.abs(dx)){ resetRow(); return; }
-      lockedHorizontal = true;
-    }
-    if(e.cancelable) e.preventDefault();
-    activeRow.style.transform = `translateX(${dx}px)`;
-    const willBeAbsent = otPresenceFilterMode === 'present';
-    activeRow.style.background = willBeAbsent ? '#fecaca' : '#bbf7d0';
-  };
-  const onEnd = () => {
-    if(!dragging || !activeRow){ resetRow(); return; }
-    const row = activeRow;
-    const productId = parseInt(row.dataset.swipePid, 10);
-    const willBeAbsent = otPresenceFilterMode === 'present';
-    const heldMs = Date.now() - pointerDownTime;
-    const commitOk = lockedHorizontal && (willBeAbsent
-      ? (Math.abs(dx) > hardThreshold && heldMs >= hardMinHoldMs)
-      : (Math.abs(dx) > easyThreshold));
-    if(commitOk){
-      row.style.transition = 'opacity .15s';
-      row.style.opacity = '0.15';
-      setTimeout(() => { otTogglePresence(productId); }, 110);
-      dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
-    } else {
-      resetRow();
-    }
-  };
-  wrap.addEventListener('touchstart', onStart, {passive:true});
-  wrap.addEventListener('touchmove', onMove, {passive:false});
-  wrap.addEventListener('touchend', onEnd);
-  wrap.addEventListener('touchcancel', resetRow);
-  wrap.addEventListener('pointerdown', onStart);
-  wrap.addEventListener('pointermove', onMove);
-  wrap.addEventListener('pointerup', onEnd);
-}
+function wireOtPresenceSwipeRows(){ /* ☑️ FM210FR282: سلائیڈ نظام ختم — اب ٹک ڈبہ (vmPresenceTick) */ }
 function otTogglePresence(productId){
   const p = productsData.find(x => x.product_id === productId);
   if(!p) return;
@@ -27538,21 +27564,38 @@ function otTogglePresence(productId){
   try{ renderOtItemsPage(); }catch(e){}
   try{ renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || ''); }catch(e){}
 }
+// ---------- ☑️ FM210FR282: چالان فیڈ کرنے والی فہرست کا حاضر/غیر حاضر موڈ ----------
+let otAddStockPresenceMode = 'present';
+function setOtAddStockPresenceMode(mode){
+  otAddStockPresenceMode = mode;
+  renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || '');
+}
 function renderOtAddStockList(query){
   const wrap = document.getElementById('otAddStockListWrap');
   if(!wrap) return;
   const q = (query || '').trim().toLowerCase();
+  // حاضر/غیر حاضر بٹن — تعداد اور نمایاں حالت
+  const _pc = productsData.filter(p => !p.isDormant).length, _ac = productsData.filter(p => !!p.isDormant).length;
+  const _pb = document.getElementById('otAddStockBtnPresent'), _ab = document.getElementById('otAddStockBtnAbsent');
+  const _isP = otAddStockPresenceMode === 'present';
+  if(_pb && _ab){
+    _pb.textContent = `🟢 حاضر سبزیاں (${_pc})`; _ab.textContent = `🔴 غیر حاضر سبزیاں (${_ac})`;
+    _pb.style.background = _isP ? '#134e2c' : '#f1f5f9'; _pb.style.color = _isP ? '#fff' : 'var(--text)';
+    _ab.style.background = !_isP ? '#78350f' : '#f1f5f9'; _ab.style.color = !_isP ? '#fff' : 'var(--text)';
+  }
   const rows = [];
   productsData.slice().sort((a,b) => (a.serial_no||0) - (b.serial_no||0)).forEach(p => {
+    if(!!p.isDormant !== !_isP) return;
     if(q && !p.name.toLowerCase().includes(q) && String(p.serial_no ?? '').indexOf(q) === -1) return;
     (p.variants || []).forEach(v => rows.push({p, v}));
   });
   if(rows.length === 0){
-    wrap.innerHTML = `<div class="placeholder" style="text-align:center; padding:16px 0; color:var(--muted);">کوئی سبزی نہیں ملی</div>`;
+    wrap.innerHTML = `<div class="placeholder" style="text-align:center; padding:16px 0; color:var(--muted);">${_isP ? 'کوئی سبزی نہیں ملی' : '✅ فی الحال کوئی سبزی غیر حاضر نہیں'}</div>`;
     return;
   }
   wrap.innerHTML = rows.map(({p, v}) => `
-    <div style="display:flex; align-items:center; gap:6px; background:#fff; border:1.5px solid #e5e9f0; border-radius:10px; padding:8px; margin-bottom:7px;" dir="rtl">
+    <div class="vmPresRow" style="display:flex; align-items:center; gap:6px; background:#fff; border:1.5px solid #e5e9f0; border-radius:10px; padding:8px; margin-bottom:7px;" dir="rtl">
+      <input type="checkbox" class="vmPresChk" title="${_isP ? 'ٹک لگائیں — غیر حاضر میں بھیجیں' : 'ٹک لگائیں — حاضر میں بھیجیں'}" onclick="vmPresenceTick(${p.product_id}, this)">
       ${p.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; font-size:12px !important; margin:0; cursor:default;">${p.serial_no}</span>` : ''}
       <div style="flex:1; min-width:0; text-align:right;">
         <div style="font-weight:800; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
@@ -28210,75 +28253,7 @@ function renderOtItemsTable(wrap){
 // قطار سیدھی سرک سکتی ہے۔ منشی (کوئی بھی رول) یہاں سے یہ کر سکتا ہے — یہی otTogglePresence فنکشن استعمال ہوتا
 // ہے جو 🔴 غیر حاضر سبزیاں والے موڈل میں بھی استعمال ہوتا ہے، اس لیے دونوں جگہ سے تبدیلی ہمیشہ ہم آہنگ رہتی ہے۔
 // واپس "حاضر" کرنے کے لیے اوپر 🔴 غیر حاضر سبزیاں بٹن سے موڈل کھول کر وہاں سے سرکا کر واپس لایا جا سکتا ہے ---------- -->
-function wireOtTableSwipeRows(wrap){
-  return; // 🔒 26 ستمبر: آرڈر بکنگ میں قطاریں لاک — سلائیڈ نہیں ہوگی
-  if(!wrap || wrap.dataset.otTableSwipeWired) return;
-  wrap.dataset.otTableSwipeWired = '1';
-  let activeRow = null, startX = 0, startY = 0, dx = 0, dragging = false, lockedHorizontal = false, pointerDownTime = 0;
-  const dormantThreshold = 170; // ---------- جان بوجھ کر لمبا سرکانا — غلطی سے سبزی غیر حاضر نہ ہو جائے ----------
-  const dormantMinHoldMs = 450;
-  const getX = e => (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-  const getY = e => (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-  const resetRow = () => {
-    if(activeRow){
-      activeRow.style.transition = 'transform .15s, opacity .15s, background .15s';
-      activeRow.style.transform = '';
-      activeRow.style.opacity = '';
-      activeRow.style.background = '';
-      activeRow.querySelectorAll('td').forEach(td => { td.style.background = ''; });
-    }
-    dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
-  };
-  const onStart = e => {
-    if(e.target.closest('button,a')) return;
-    if(AppState.currentRole !== 'admin') return; // 🔒 26 ستمبر: منشی سبزی غیر حاضر نہیں کر سکتا
-    const row = e.target.closest('.otTableSwipeRow');
-    if(!row || !wrap.contains(row)) return;
-    activeRow = row; startX = getX(e); startY = getY(e); dx = 0; dragging = true; lockedHorizontal = false;
-    pointerDownTime = Date.now();
-    row.style.transition = '';
-  };
-  const onMove = e => {
-    if(!dragging || !activeRow) return;
-    const x = getX(e), y = getY(e);
-    dx = x - startX; const dy = y - startY;
-    if(!lockedHorizontal){
-      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-      if(Math.abs(dy) > Math.abs(dx)){ resetRow(); return; }
-      lockedHorizontal = true;
-    }
-    if(e.cancelable) e.preventDefault();
-    activeRow.style.position = 'relative';
-    activeRow.style.zIndex = '4';
-    activeRow.style.transform = `translateX(${dx}px)`;
-    const tint = Math.abs(dx) > dormantThreshold ? '#fca5a5' : '#fecaca';
-    activeRow.querySelectorAll('td').forEach(td => { td.style.background = tint; });
-  };
-  const onEnd = () => {
-    if(!dragging || !activeRow){ resetRow(); return; }
-    const row = activeRow;
-    const productId = parseInt(row.dataset.swipePid, 10);
-    const heldMs = Date.now() - pointerDownTime;
-    const commitOk = lockedHorizontal && Math.abs(dx) > dormantThreshold && heldMs >= dormantMinHoldMs;
-    if(commitOk){
-      row.style.transition = 'transform .12s, opacity .12s';
-      row.style.transform = `translateX(${dx > 0 ? '120%' : '-120%'})`;
-      row.style.opacity = '0';
-      dragging = false; activeRow = null; dx = 0; lockedHorizontal = false;
-      setTimeout(() => { otTogglePresence(productId); }, 130);
-    } else {
-      resetRow();
-    }
-  };
-  wrap.addEventListener('touchstart', onStart, {passive:true});
-  wrap.addEventListener('touchmove', onMove, {passive:false});
-  wrap.addEventListener('touchend', onEnd);
-  wrap.addEventListener('touchcancel', resetRow);
-  wrap.addEventListener('pointerdown', e => { if(e.pointerType === 'touch') return; onStart(e); });
-  wrap.addEventListener('pointermove', e => { if(e.pointerType === 'touch') return; onMove(e); });
-  wrap.addEventListener('pointerup', e => { if(e.pointerType === 'touch') return; onEnd(); });
-  wrap.addEventListener('pointercancel', e => { if(e.pointerType === 'touch') return; resetRow(); });
-}
+function wireOtTableSwipeRows(wrap){ /* ☑️ FM210FR282: آرڈر ٹیکنگ سے سلائیڈ نظام مکمل ختم */ }
 // ---------- 🐞 صدام کی ہدایت (FM18SEPFR): اصل خرابی — یہ فنکشن اور نیچے موجود ویل والا setOtQtyDirect(...)
 // دونوں کا نام ایک جیسا "setOtQtyDirect" تھا۔ جاوا اسکرپٹ میں ایک ہی نام کے دو function ہوں تو بعد والا
 // (ویل والا) پہلے والے کو مکمل ختم/اووررائٹ کر دیتا ہے — اس لیے جدول (Table View) میں مقدار ہاتھ سے ٹائپ کرنے پر
