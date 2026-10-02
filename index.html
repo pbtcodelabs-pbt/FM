@@ -8774,7 +8774,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM210FR278'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM210FR280'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -18016,6 +18016,21 @@ function chalanPickerSave(){
   const sum = chalanAllocSum(ctx.alloc);
   if(sum > ctx.needQty){ alert(`⚠️ منتخب مقدار (${sum}) مطلوبہ (${ctx.needQty}) سے زیادہ ہے — کم کریں`); return; }
   const {v} = findProductAndVariant(ctx.variantId);
+  // 🧾 FM210FR279: چالان پورے منتخب ہوں تبھی محفوظ — مطلوبہ سے کم پر محفوظ نہیں (صاف کر کے خالی محفوظ کرنا ٹھیک ہے)
+  if(sum > 0 && _chRound(sum) < ctx.needQty){
+    const reservedAll = getChalanReservedMap(ctx.variantId, ctx.excludeOrderId);
+    const totalAvail = _chRound((v && v.chalans || []).reduce((t, c) => t + Math.max(0, (Number(c.qty) || 0) - (Number(reservedAll[c.chalanNo]) || 0)), 0));
+    const short = _chRound(ctx.needQty - sum);
+    if(totalAvail >= ctx.needQty){
+      alert(`⚠️ ابھی ${short} باقی ہیں — مطلوبہ ${ctx.needQty} ہے، آپ نے ${sum} منتخب کیے ہیں۔\n\nباقی ${short} بھی کسی چالان سے منتخب کریں، پھر محفوظ کریں۔`);
+      return;
+    }
+    if(_chRound(sum) < totalAvail){
+      alert(`⚠️ ابھی ${short} باقی ہیں — چالانوں میں کل ${totalAvail} دستیاب ہیں، پہلے وہ سب منتخب کریں۔`);
+      return;
+    }
+    if(!confirm(`⚠️ سٹاک کم ہے: مطلوبہ ${ctx.needQty} ہے مگر تمام چالانوں میں صرف ${totalAvail} دستیاب ہیں۔\n\nکیا یہی ${sum} محفوظ کر دیں؟ (باقی ${short} کا چالان بعد میں)`)) return;
+  }
   if(v){
     for(const no of Object.keys(ctx.alloc)){
       const c = v.chalans.find(x => String(x.chalanNo) === String(no));
@@ -25397,12 +25412,12 @@ function renderPurchaseOrdersScreen(){
           <div class="bMeta">${po.date} | ${po.items.length} آئٹم | Rs. ${po.total.toLocaleString()}</div>
         </div>
         <div class="billActions">
-          <button class="btnPrint" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})">🖨️ پرنٹ</button>
+          <button class="btnPrint" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})" ${isPending ? '' : 'style="min-width:130px; padding:12px 18px; font-size:15px; font-weight:900;"'}>🖨️ پرنٹ</button>
           ${isPending
             ? `<button class="btnReceiveShipment" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 مال وصول کریں</button>
                <button class="btnPrint" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 یاد دہانی</button>
                <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="deletePendingPurchaseOrder(${po.supplier_id}, ${po.po_idx}); renderPurchaseOrdersScreen();">🗑️ حذف کریں</button>`
-            : `<button class="btnPrint" onclick="openSupplierReturnModal(${po.supplier_id}, ${po.po_idx})">↩️ مال واپس کریں</button>`}
+            : ''}<!-- 🧾 FM210FR280: "مال واپس کریں" بٹن ہٹا دیا (صدام کی ہدایت — واپسی کا کام نہیں ہوتا) -->
         </div>
       </div>`;
   }).join('');
@@ -31335,6 +31350,30 @@ function getCurrentPreviewPo(){
 
 // ---------- 🧾 صدام کی ہدایت (26 ستمبر): بیوپاری خریداری کی رسید — اب مکمل اردو، نستعلیق کشیدہ، دائیں سے بائیں
 // (بل کے انداز میں)؛ پرنٹ، شیئر اور WhatsApp پہلے والے بٹنوں سے ہی ---------- -->
+// 🧾 FM210FR280: بیوپاری کا اس دن کا کھاتہ — اس دن کی ساری خریداری اکٹھی + سابقہ/ادائیگی/تازہ بقایا
+function poDayStatement(s, D){
+  D = String(D || '');
+  const poAmt = p => Math.round((p.items || []).reduce((t, it) => t + (Number(it.qty) || 0) * (Number(it.cost) || 0), 0));
+  const hist = (s.purchaseHistory || []).filter(p => p && p.status === 'received');
+  const dayPos = hist.filter(p => String(p.date || '') === D);
+  const dayBuy = dayPos.reduce((t, p) => t + poAmt(p), 0);
+  const led = s.ledgerHistory || [];
+  const sumLed = (pred) => led.filter(pred).reduce((t, e) => {
+    const a = Number(e.amount) || 0;
+    if(e.type === 'payment') return t + a;       // ادائیگی/چھوٹ → بقایا کم
+    if(e.type === 'received') return t - a;      // بیوپاری سے لیا → بقایا زیادہ
+    return t;
+  }, 0);
+  const dayPaid = sumLed(e => String(e.date || '') === D && !e.isDiscount);
+  const dayDisc = led.filter(e => String(e.date || '') === D && e.type === 'payment' && e.isDiscount).reduce((t, e) => t + (Number(e.amount) || 0), 0);
+  const buyAfter = hist.filter(p => String(p.date || '') > D).reduce((t, p) => t + poAmt(p), 0);
+  const paidAfter = sumLed(e => String(e.date || '') > D);
+  const currentNet = Math.round((Number(s.total_payable) || 0) - (Number(s.wallet_balance) || 0));
+  const closing = Math.round(currentNet - buyAfter + paidAfter);
+  const prev = Math.round(closing - dayBuy + dayPaid + dayDisc);
+  return { dayPos, dayBuy, dayPaid, dayDisc, prev, closing };
+}
+
 async function renderPoToCanvas(){
   const ref = getCurrentPreviewPo();
   const canvas = document.getElementById('poCanvas');
@@ -31351,7 +31390,9 @@ async function renderPoToCanvas(){
   const k = (pxWidth / 576) * (useA4 ? 1.1 : 1) * fscale;
   const fsBiz = Math.round(30 * k), fsTitle = Math.round(24 * k), fsTxt = Math.round(19 * k), fsHead = Math.round(17 * k), fsItem = Math.round(19 * k);
   const margin = useA4 ? 36 : 8, left = margin, right = pxWidth - margin, W = right - left;
-  const items = (po.items || []);
+  // 🧾 FM210FR280: اس بیوپاری سے اس دن کی ساری خریداری اکٹھی ایک رسید میں
+  const stm = received ? poDayStatement(s, po.date) : null;
+  const items = (stm && stm.dayPos.length) ? stm.dayPos.flatMap(p => p.items || []) : (po.items || []);
   const hasCh = items.some(it => it.chalanNo != null);
   const defs = [{k:'n', l:'#', f:.07}, {k:'name', l:'سبزی'}, {k:'pack', l:'پیکنگ', f:.14}];
   if(hasCh) defs.push({k:'ch', l:'چالان', f:.1});
@@ -31360,7 +31401,7 @@ async function renderPoToCanvas(){
   let cx = right; const cols = defs.map(d => { const w = d.f ? Math.round(W * d.f) : W - fixed; cx -= w; return {...d, w, x: cx}; });
   const rowH = Math.round(fsItem * 2.3), headH = Math.round(fsHead * 2.4), sumH = Math.round(fsTxt * 2.3);
   canvas.width = pxWidth;
-  canvas.height = 420 * k + items.length * rowH + sumH * 4 + 200;
+  canvas.height = 560 * k + items.length * rowH + sumH * 10 + 260;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, pxWidth, canvas.height);
   ctx.direction = 'rtl';
@@ -31381,7 +31422,15 @@ async function renderPoToCanvas(){
   y += boxH + Math.round(fsTxt * 1.7);
   ctx.fillStyle = '#000';
   const line = (label, val) => { ctx.textAlign = 'right'; fit(label, W * .45, fsTxt, 'bold'); ctx.fillText(label, right - 4, y); ctx.textAlign = 'left'; const isN = isNum(val); fit(val, W * .52, fsTxt, '', isN ? num : ur); ctx.fillText(val, left + 4, y); y += Math.round(fsTxt * 1.75); };
-  line('بیوپاری:', s.name);
+  // 🧾 FM210FR280: بیوپاری کا نام بڑا اور موٹا
+  { const fsName = Math.round(fsTitle * 1.15); ctx.textAlign = 'center'; ctx.fillStyle = '#000'; fit('🏭 ' + s.name, W - 10, fsName, 'bold'); ctx.fillText('🏭 ' + s.name, pxWidth/2, y + Math.round(fsName * .2)); y += Math.round(fsName * 1.7); }
+  // 🧾 FM210FR280: سرخی میں ساری سبزیاں (جو مال خریدا)
+  { const names = [...new Set(items.map(it => { let nm = it.name || '', pk = it.label || ''; if(pk && nm.endsWith(pk)) nm = nm.slice(0, nm.length - pk.length).trim(); return nm; }).filter(Boolean))];
+    if(names.length){ const t = names.join('، '); ctx.textAlign = 'center'; ctx.fillStyle = '#134e2c';
+      ctx.font = `bold ${fsTxt}px ${ur}`; const words = t.split(' '); let ln = '', lines = [];
+      words.forEach(w => { const tst = ln ? ln + ' ' + w : w; if(ctx.measureText(tst).width > W - 16 && ln){ lines.push(ln); ln = w; } else ln = tst; }); if(ln) lines.push(ln);
+      lines.slice(0, 4).forEach(l => { ctx.fillText(l, pxWidth/2, y); y += Math.round(fsTxt * 1.6); });
+      ctx.fillStyle = '#000'; y += 4; } }
   line('تاریخ:', String(po.date || ''));
   if(received && po.receivedDate && po.receivedDate !== po.date) line('وصولی:', String(po.receivedDate));
   y += 4;
@@ -31406,11 +31455,21 @@ async function renderPoToCanvas(){
     y += rowH;
   });
   y += 6;
-  const sums = [
-    [`اقسام: ${items.length}  —  کل مقدار: ${Math.round(tq * 100) / 100}`, null],
-    ['کل رقم', tot],
-    ['بیوپاری کا کل بقایا (ہم نے دینا ہے)', Math.round(Number(s.total_payable) || 0)],
-  ];
+  // 🧾 FM210FR280: مکمل خلاصہ — سابقہ بقایا، آج کی خریداری، کل، آج کی ادائیگی، تازہ بقایا
+  const isToday = String(po.date || '') === new Date().toISOString().split('T')[0];
+  const dw = isToday ? 'آج' : 'اس دن';
+  const sums = [[`اقسام: ${items.length}  —  کل مقدار: ${Math.round(tq * 100) / 100}`, null]];
+  if(stm){
+    sums.push([`${dw} سے پہلے کا بقایا`, stm.prev]);
+    sums.push([`${dw} کی خریداری`, stm.dayBuy]);
+    sums.push(['کل (ٹوٹل)', stm.prev + stm.dayBuy]);
+    sums.push([`${dw} کی ادائیگی`, stm.dayPaid]);
+    if(stm.dayDisc > 0) sums.push(['چھوٹ (ڈسکاؤنٹ)', stm.dayDisc]);
+    sums.push(['تازہ بقایا (ہم نے دینا ہے)', stm.closing]);
+  } else {
+    sums.push(['کل رقم', tot]);
+    sums.push(['بیوپاری کا کل بقایا (ہم نے دینا ہے)', Math.round(Number(s.total_payable) || 0)]);
+  }
   sums.forEach(([lbl, val], i) => {
     const last = i === sums.length - 1;
     ctx.fillStyle = last ? '#fef3c7' : '#fff'; ctx.fillRect(left, y, W, sumH);
@@ -31418,7 +31477,7 @@ async function renderPoToCanvas(){
     ctx.fillStyle = '#000';
     if(val === null){ ctx.textAlign = 'center'; fit(lbl, W - 10, Math.round(fsTxt * .95)); ctx.fillText(lbl, pxWidth/2, y + sumH/2 + fsTxt * .32); }
     else { ctx.textAlign = 'right'; fit(lbl, W * .6, fsTxt, 'bold'); ctx.fillText(lbl, right - 8, y + sumH/2 + fsTxt * .32);
-      ctx.textAlign = 'left'; const v = 'Rs. ' + (val || 0).toLocaleString(); fit(v, W * .38, Math.round(fsTxt * 1.1), 'bold', num); ctx.fillText(v, left + 8, y + sumH/2 + fsTxt * .35); }
+      ctx.textAlign = 'left'; const vv = Math.round(val || 0); const v = vv < 0 ? 'Rs. ' + Math.abs(vv).toLocaleString() + ' (ایڈوانس)' : 'Rs. ' + vv.toLocaleString(); fit(v, W * .38, Math.round(fsTxt * (last ? 1.3 : 1.1)), 'bold', vv < 0 ? ur : num); ctx.fillText(v, left + 8, y + sumH/2 + fsTxt * .35); }
     y += sumH;
   });
   y += Math.round(fsTxt * 1.8);
