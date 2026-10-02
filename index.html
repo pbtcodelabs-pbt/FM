@@ -720,17 +720,21 @@
   #drTable .drNote{ font-size:.78em; color:#78350f; text-align:right; line-height:1.5; }
   /* ---------- FM110TH272: کالم چوڑے (6 ہندسے + کاما صاف پڑھے جائیں)، کوئی خانہ نہ کٹے، باقی جگہ کے لیے سائیڈ سکرول؛ نوٹ کا خانہ برقرار ---------- */
   @media screen{
-    #drTable{ width:84em !important; min-width:84em !important; table-layout:fixed !important; }
-    #drTable col:nth-child(1){ width:3.6em !important; }
-    #drTable col:nth-child(2){ width:11em !important; }
-    #drTable col:nth-child(3), #drTable col:nth-child(4), #drTable col:nth-child(5), #drTable col:nth-child(6), #drTable col:nth-child(7), #drTable col:nth-child(8){ width:8em !important; }
-    #drTable col:nth-child(9){ width:4.4em !important; }
-    #drTable col:nth-child(10){ width:15em !important; }
+    /* ---------- FM310SA288: ہر کالم صرف اپنے مواد جتنا (نام کا کالم سب سے لمبے نام جتنا)، بچی ہوئی ساری جگہ آخری "نوٹ" کالم کو ---------- */
+    #drTable{ width:100% !important; min-width:0 !important; table-layout:auto !important; }
+    #drTable col{ width:auto !important; }
+    #drTable th, #drTable td{ padding:7px 5px !important; white-space:nowrap !important; word-break:normal !important; width:1%; }
+    #drTable th{ white-space:normal !important; font-size:.88em; line-height:1.25; }
+    #drTable th:last-child, #drTable td:last-child{ width:auto !important; white-space:normal !important; word-break:break-word !important; }
+    #drTable td:nth-child(2){ text-align:right; }
     #drTable td .drNum{ font-size:1em !important; letter-spacing:0 !important; }
     #drTable td.drShort .drNum{ font-size:1.05em !important; }
-    #drTable th, #drTable td{ padding:7px 3px !important; }
-    #drTable th{ font-size:.9em; }
   }
+  .drZoomBtn{ width:34px; height:38px; border-radius:10px; border:1px solid #b8c4d0; background:linear-gradient(#ffffff,#e3e9f0); box-shadow:0 3px 0 #a9b6c4, 0 5px 7px rgba(15,23,42,.22); font-size:21px; font-weight:900; color:#0f3d3e; line-height:1; cursor:pointer; padding:0; }
+  .drZoomBtn:active{ transform:translateY(2px); box-shadow:0 1px 0 #a9b6c4, 0 2px 3px rgba(15,23,42,.2); }
+  .drGreenSel{ background:#15803d !important; color:#fff !important; border:1px solid #166534 !important; font-weight:800; }
+  .drGreenSel.drPast{ background:#92400e !important; border-color:#78350f !important; }
+  .drGreenSel option{ background:#fff; color:#111; }
   /* ---------- 🧾 FM299TU#262 (صدام کی ہدایت): آرڈر بکنگ — اوپر کے بٹن ایک ہی لائن میں (پہلے آرڈر مکمل، پھر کسٹمر، پھر منڈی سیل
      ریکارڈ، پھر سٹاک رپورٹ) تاکہ جگہ بچے؛ جدول کی ہر قطار اوپر سے نیچے موٹی + قطاروں کے درمیان فاصلہ، تاکہ انگلی
      غلطی سے دوسری قطار کے بٹن پر نہ لگے۔ چوڑائی/کالم وہی — کوئی افقی سکرول نہیں ---------- */
@@ -6066,8 +6070,8 @@
       <div id="drDayBar" dir="rtl" style="display:flex; gap:5px; align-items:center; margin:2px 0 6px; flex-wrap:nowrap; overflow-x:auto;"></div>
 
       <!-- ---------- کمپیکٹ کنٹرول پٹی — ترتیب / فونٹ / سائز(زوم) / نمبروں کی سیدھ / پرنٹ / شیئر ---------- -->
-      <div id="drControlsBar" style="display:flex; gap:4px; align-items:center; margin:4px 0 6px; flex-wrap:nowrap; overflow-x:auto;">
-        <select id="drSortSelect" onchange="renderDailyRecoveryScreen()" title="ترتیب" style="width:84px; padding:4px 3px; border:1px solid #dbe1ea; border-radius:7px; font-size:10.5px;">
+      <div id="drControlsBar" style="display:flex; gap:5px; align-items:center; margin:4px 0 8px; flex-wrap:nowrap; overflow-x:auto; padding:2px 0 6px;">
+        <select id="drSortSelect" onchange="renderDailyRecoveryScreen()" title="ترتیب" style="width:88px; flex:0 0 auto; padding:4px 1px; border:1px solid #dbe1ea; border-radius:8px; font-size:10.5px; height:38px;">
           <option value="todayFirst">🔥 آج والے اوپر</option>
           <option value="az">🔤 نام A→Z</option>
           <option value="za">🔤 نام Z→A</option>
@@ -6078,19 +6082,17 @@
           <option value="shortFirst">⚠️ کم وصولی والے اوپر</option>
           <option value="shortOnly">⚠️ صرف کم وصولی والے</option>
         </select>
-        <select id="drFontSelect" onchange="renderDailyRecoveryScreen()" title="فونٹ" style="width:78px; padding:4px 3px; border:1px solid #dbe1ea; border-radius:7px; font-size:10.5px;"></select>
-        <select id="drNumAlignSelect" onchange="renderDailyRecoveryScreen()" title="رقموں کی سیدھ" style="width:66px; padding:4px 3px; border:1px solid #dbe1ea; border-radius:7px; font-size:10.5px;">
+        <select id="drFontSelect" onchange="renderDailyRecoveryScreen()" title="فونٹ" style="width:88px; flex:0 0 auto; padding:4px 1px; border:1px solid #dbe1ea; border-radius:8px; font-size:10.5px; height:38px;"></select>
+        <select id="drNumAlignSelect" onchange="renderDailyRecoveryScreen()" title="رقموں کی سیدھ" style="width:76px; flex:0 0 auto; padding:4px 1px; border:1px solid #dbe1ea; border-radius:8px; font-size:10.5px; height:38px;">
           <option value="center">↔️ درمیان</option>
           <option value="right">➡️ دائیں</option>
           <option value="left">⬅️ بائیں</option>
         </select>
-        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto;">
-          <button type="button" onclick="adjustDrZoom(-10)" style="width:22px; height:24px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:12px;">−</button>
-          <span id="drZoomVal" style="font-size:10px; font-weight:700; width:30px; text-align:center;">100%</span>
-          <button type="button" onclick="adjustDrZoom(10)" style="width:22px; height:24px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:12px;">+</button>
+        <div style="display:flex; align-items:center; gap:8px; flex:0 0 auto; margin-right:auto;" dir="rtl">
+          <button type="button" class="drZoomBtn" onclick="adjustDrZoom(-10)" title="چھوٹا">−</button>
+          <span id="drZoomVal" style="font-size:11px; font-weight:800; width:34px; text-align:center;">100%</span>
+          <button type="button" class="drZoomBtn" onclick="adjustDrZoom(10)" title="بڑا">+</button>
         </div>
-        <button type="button" onclick="printDailyRecoveryReport()" style="flex:0 0 auto; padding:5px 7px; border-radius:7px; border:none; background:var(--primary-dark); color:#fff; font-size:10.5px; font-weight:700;">🖨️ PDF</button>
-        <button type="button" onclick="shareDailyRecoveryImage()" style="flex:0 0 auto; padding:5px 8px; border-radius:7px; border:none; background:#25D366; color:#fff; font-size:11px; font-weight:700;">📤</button>
       </div>
 
       <!-- ---------- 📊 FM299TU#261 (صدام کی ہدایت): آج کی ریکوری کا خلاصہ — سب سے اوپر ---------- -->
@@ -8791,7 +8793,8 @@ function getDeveloperContact(){
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
 // 🆕 FM310SA287: روزانہ ریکوری لسٹ — کاروباری تاریخ (ایڈمن کے ڈیٹ اینڈ کرنے تک نہیں بدلتی، دو بار تصدیق)، پچھلی تاریخ PIN سے کھلے/دوبارہ لاک، ایک لائن بٹن اور خلاصہ، وضاحتی پیغام ختم
-const APP_BUILD_VERSION = 'FM310SA287'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM310SA288: ریکوری لسٹ — تاریخ سبز/سفید، PDF/شیئر اوپر کی لائن میں، بڑے ابھرے زوم بٹن، جدول کالم مواد کے برابر (نام کا کالم سب سے لمبے نام جتنا، باقی جگہ نوٹ کو)
+const APP_BUILD_VERSION = 'FM310SA288'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29642,11 +29645,14 @@ function renderBizDayBar(){
   const cur = todayDateKey(), eff = drEffDate();
   const closed = Object.keys(bizDayState.closed || {}).sort().reverse();
   const opts = [cur].concat(closed.filter(x => x !== cur)).map(x => `<option value="${x}" ${x === eff ? 'selected' : ''}>${bizFmt(x)}${x === cur ? (bizOverride ? ' 🔓' : ' • جاری') : ' 🔒'}</option>`).join('');
-  const bs = 'padding:5px 9px;border:none;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;white-space:nowrap;color:#fff;';
-  el.innerHTML = `<span style="font-size:12px;font-weight:800;white-space:nowrap;">📅</span>
-    <select onchange="setDrViewDate(this.value)" style="padding:5px 6px;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;font-weight:700;min-width:104px;">${opts}</select>
-    ${bizIsAdmin() ? `<button type="button" onclick="endBizDay()" style="${bs}background:#b91c1c;">🔒 ڈیٹ اینڈ</button><button type="button" onclick="openBizUnlockDialog()" style="${bs}background:#b45309;">🔓 پچھلی ڈیٹ</button>` : ''}
-    ${eff !== cur ? '<span style="font-size:11px;color:#b45309;font-weight:800;white-space:nowrap;">صرف دیکھنے کے لیے</span>' : ''}`;
+  const bs = 'padding:5px 7px;border:none;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;color:#fff;';
+  const isPast = eff !== cur;
+  el.style.paddingRight = '0'; el.style.marginRight = '-3px';
+  el.innerHTML = `<select onchange="setDrViewDate(this.value)" class="drGreenSel ${isPast ? 'drPast' : ''}" style="padding:6px 4px;border-radius:8px;font-size:12px;min-width:100px;height:34px;flex:0 0 auto;">${opts}</select>
+    ${bizIsAdmin() ? `<button type="button" onclick="endBizDay()" style="${bs}background:#b91c1c;flex:0 0 auto;height:34px;">🔒 ڈیٹ اینڈ</button><button type="button" onclick="openBizUnlockDialog()" style="${bs}background:#b45309;flex:0 0 auto;height:34px;">🔓 پچھلی ڈیٹ</button>` : ''}
+    <button type="button" onclick="printDailyRecoveryReport()" style="${bs}background:var(--primary-dark);flex:0 0 auto;height:34px;">🖨️ PDF</button>
+    <button type="button" onclick="shareDailyRecoveryImage()" style="${bs}background:#25D366;flex:0 0 auto;height:34px;">📤</button>
+    ${isPast ? '<span style="font-size:10.5px;color:#b45309;font-weight:800;white-space:nowrap;">صرف دیکھنے کے لیے</span>' : ''}`;
 }
 
 function computeDailyRecoveryRows(dateStr){
