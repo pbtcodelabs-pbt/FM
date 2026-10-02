@@ -4742,6 +4742,11 @@
         <button type="button" onclick="openPoLowStockPicker()" style="display:none; width:100%; padding:11px; margin-bottom:10px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer; font-family:inherit;">📥 کم سٹاک آئٹمز سے حاصل کریں</button>
         <div class="billingCategoryRail" id="poCategoryRail" style="margin-bottom:8px;"></div>
         <div style="width:100%; margin-bottom:8px; font-size:11.5px; font-weight:700; color:var(--muted); text-align:center;">↕️ ترتیب: سیریل نمبر کے مطابق — بالکل 🧮 سٹاک مینجمنٹ جیسی (پکی، کبھی نہیں بدلتی)</div>
+        <!-- ---------- ☑️ FM310SA283 (صدام کی ہدایت): چالان فیڈ کرتے وقت سبزی حاضر/غیر حاضر کرنے کا نظام — خالی ٹک ڈبہ ---------- -->
+        <div id="poPresenceBtnRow" dir="rtl" style="display:none; gap:8px; margin-bottom:8px;">
+          <button type="button" id="poPresenceBtnPresent" onclick="setPoPresenceMode('present')" style="flex:1; padding:9px 4px; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer;">🟢 حاضر سبزیاں</button>
+          <button type="button" id="poPresenceBtnAbsent" onclick="setPoPresenceMode('absent')" style="flex:1; padding:9px 4px; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer;">🔴 غیر حاضر سبزیاں</button>
+        </div>
         <div id="poBrowseList" style="margin-bottom:10px;"></div>
 
         <div class="searchRow" style="margin-bottom:8px;">
@@ -5723,7 +5728,7 @@
          لسٹ (اردو نام + تعداد)۔ Submit کرنے پر ایڈوانس آرڈر کی طرح ایڈمن کے پاس ریویو کے لیے چلا جاتا ہے۔
          ===================================================================== -->
     <div class="screen customer-only" id="screen-orderTaking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
-      <div class="pageTitle" style="text-align:center; font-weight:900; font-size:24px;">🧾 آرڈر بکنگ</div>
+      <div class="pageTitle" style="text-align:center; font-weight:900; font-size:18px; margin-bottom:8px; padding-bottom:5px;">🧾 آرڈر بکنگ</div>
 
       <!-- STEP 1: پہلے کسٹمر منتخب کریں — ایریا ریکارڈ سے خودبخود آ جائے گا -->
       <div id="otStepCustomer">
@@ -5732,34 +5737,24 @@
         <!-- ---------- 📝 صدام کی ہدایت (FM10SEPTH04:12PM): ڈرافٹ آرڈرز کی الگ فہرست — جب تک صدام کو حتمی طور پر
              نہ بھیجا جائے، ملازم یہاں سے دیکھ/ترمیم/حذف کر سکتا ہے ---------- -->
         <!-- ---------- 🔽 صدام کی ہدایت (FM11SEP): پہلے یہ دو بڑے فُل-وڈتھ بار تھے، اب چھوٹے کمپیکٹ بٹن ایک ہی لائن میں ---------- -->
-        <div style="display:flex; gap:8px; margin-bottom:10px;">
-          <button type="button" onclick="openMyDraftOrders()" style="flex:1; padding:10px 6px; background:linear-gradient(180deg,#c2790f,#8a530a); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">📝 ڈرافٹ</button>
-          <button type="button" onclick="openMySentOrders()" style="flex:1; padding:10px 6px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">✅ فائنل سینڈ آرڈر</button>
+        <!-- ---------- 🗜️ FM310SA283 (صدام کی ہدایت): آرڈر بکنگ صفحہ کمپیکٹ — صرف دو لائنیں:
+             لائن 1: ڈرافٹ | فائنل بھیجے گئے آرڈر
+             لائن 2: (بائیں) 📥 چالان فیڈ | (درمیان) سرچ بار | (دائیں) ➕ نیا کسٹمر
+             حاضر/غیر حاضر والے بٹن، بڑے سبز "نیا کسٹمر ایڈ کریں" اور بڑے نارنجی چالان بٹن ختم ---------- -->
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <button type="button" onclick="openMyDraftOrders()" style="flex:1; padding:7px 4px; background:linear-gradient(180deg,#c2790f,#8a530a); color:#fff; border:none; border-radius:9px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15); white-space:nowrap;">📝 ڈرافٹ</button>
+          <button type="button" onclick="openMySentOrders()" style="flex:1; padding:7px 4px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:9px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15); white-space:nowrap;">✅ فائنل سینڈ آرڈر</button>
         </div>
-        <!-- ---------- 🔓 صدام کی ہدایت (FM15SEPTU): سرچ بار واپس بحال — فلٹر بٹنوں کے ساتھ ہی، تاکہ سکرول کیے
-             بغیر ٹائپ کر کے سیدھا کسٹمر مل جائے (سیریل نمبر یا نام دونوں سے) ---------- -->
-        <!-- ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): منشی/آرڈر لینے والے کو یہیں سے نیا کسٹمر شامل کرنے کی اجازت ---------- -->
-        <!-- ---------- 🆕 صدام کی ہدایت (19 ستمبر، شام): "نیا سٹاک" اور "نیا کسٹمر" دونوں بٹن ہوم پیج پر —
-             ایک ہی لائن میں برابر تقسیم، نیا سٹاک دائیں طرف، نیا کسٹمر بائیں طرف ---------- -->
-        <div style="display:flex; gap:8px; width:86%; max-width:340px; margin:0 auto 10px;" dir="rtl">
-          <!-- 🧾 26 ستمبر (دوپہر): منشی کا ایک ہی سادہ بٹن — صرف سبزی اور مقدار، نہ بیوپاری نہ قیمت -->
-          <button type="button" onclick="openStockFeedModal()" style="flex:1; padding:12px 4px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15);">📥 مال آیا (چالان فیڈ کریں)</button>
+        <div dir="ltr" style="display:flex; gap:5px; align-items:stretch; margin:0 0 6px;">
+          <button type="button" onclick="openStockFeedModal()" style="flex:0 0 auto; padding:6px 7px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:9px; font-size:11px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15); white-space:nowrap; line-height:1.3;">📥 چالان فیڈ</button>
+          <input type="text" id="otCustSearch" dir="rtl" placeholder="🔍 کسٹمر کا نام یا نمبر" oninput="renderOtCustomerList(this.value)"
+                 style="flex:1 1 auto; min-width:0; padding:6px 6px; border:2px solid var(--primary); border-radius:9px; font-size:13px; font-weight:800; text-align:center; box-sizing:border-box;">
+          <button type="button" onclick="openOtNewCustomer()" style="flex:0 0 auto; padding:6px 7px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:9px; font-size:11px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15); white-space:nowrap; line-height:1.3;">➕ نیا کسٹمر</button>
         </div>
-        <div style="display:flex; gap:8px; width:86%; max-width:340px; margin:0 auto 10px;" dir="rtl">
-          <button type="button" onclick="openOtNewCustomer()" style="flex:1; padding:11px 4px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:12px; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">➕ نیا کسٹمر ایڈ کریں</button>
-        </div>
-        <!-- ---------- 🟢🔴 صدام کی ہدایت (22 ستمبر): منشی خود بھی یہیں سے سبزیاں حاضر/غیر حاضر کر سکے —
-             بالکل ایڈمن والا نظام، اسی سلائیڈ (سوائپ) طریقے سے ---------- -->
-        <div id="otPresenceBtnRow" class="admin-only-flex" style="display:flex; gap:8px; width:86%; max-width:340px; margin:0 auto 10px;" dir="rtl">
-          <button type="button" id="otPresenceBtnPresent" onclick="openOtPresenceModal('present')" style="flex:1; padding:10px 4px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:12px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">🟢 حاضر سبزیاں</button>
-          <button type="button" id="otPresenceBtnAbsent" onclick="openOtPresenceModal('absent')" style="flex:1; padding:10px 4px; background:linear-gradient(180deg,#ef4444,#b91c1c); color:#fff; border:none; border-radius:12px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.15); white-space:nowrap;">🔴 غیر حاضر سبزیاں</button>
-        </div>
-        <input type="text" id="otCustSearch" placeholder="🔍 کسٹمر کا نام یا سیریل نمبر لکھیں" oninput="renderOtCustomerList(this.value)"
-               style="width:86%; max-width:340px; display:block; margin:0 auto 10px; padding:11px; border:2px solid var(--primary); border-radius:12px; font-size:14.5px; font-weight:800; text-align:center; box-sizing:border-box;">
-        <div style="display:flex; gap:6px; margin-bottom:10px;">
-          <button type="button" id="otAreaFilterRetail" onclick="setOtAreaFilter('retail')" style="flex:1; padding:11px 4px; background:#b91c1c; color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">🏷️ اسلام آباد</button>
-          <button type="button" id="otAreaFilterWholesale" onclick="setOtAreaFilter('wholesale')" style="flex:1; padding:11px 4px; background:#15803d; color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">📦 راولپنڈی</button>
-          <button type="button" id="otAreaFilterToday" onclick="setOtAreaFilter('today')" style="flex:1; padding:11px 4px; background:#0369a1; color:#fff; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">🛒 آج کے خریدار</button>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <button type="button" id="otAreaFilterRetail" onclick="setOtAreaFilter('retail')" style="flex:1; padding:7px 4px; background:#b91c1c; color:#fff; border:none; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">🏷️ اسلام آباد</button>
+          <button type="button" id="otAreaFilterWholesale" onclick="setOtAreaFilter('wholesale')" style="flex:1; padding:7px 4px; background:#15803d; color:#fff; border:none; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">📦 راولپنڈی</button>
+          <button type="button" id="otAreaFilterToday" onclick="setOtAreaFilter('today')" style="flex:1; padding:7px 4px; background:#0369a1; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">🛒 آج کے خریدار</button>
         </div>
         <div id="otCustomerListWrap" style="max-height:65vh; overflow-y:auto; padding-bottom:20px;"></div>
       </div>
@@ -8795,7 +8790,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM210FR282'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM310SA283'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11364,23 +11359,88 @@ function vmRefreshPresenceScreens(){
   try{ updateOtPresenceButtonLabels(); }catch(e){}
   try{ renderOtItemsPage(); }catch(e){}
   try{ if(document.getElementById('otAddStockListWrap')) renderOtAddStockList(document.getElementById('otAddStockSearchInput')?.value || ''); }catch(e){}
+  try{ if(document.getElementById('poBrowseList') && document.getElementById('poModal')?.classList.contains('show')) renderPoBrowseList(); }catch(e){}
 }
-// ---------- ایک ہی مشترکہ فنکشن: جدول/کارڈ/موڈل — ہر جگہ کا ٹک یہیں آتا ہے ----------
+// ---------- 🛡️ FM310SA283: جدول/کارڈ/موڈل — ہر جگہ کا ٹک یہیں آتا ہے ----------
+// ---------- 🛡️ FM310SA283: ٹک کی خرابی کا اصل علاج ----------
+// پہلے ٹک لگانے کے 0.75 سیکنڈ بعد تبدیلی ہوتی تھی، اور اسی دوران کلاؤڈ ملاپ (push/poll) پوری فہرست نئی بنا کر
+// بدل دیتا تھا — تبدیلی پرانی کاپی پر لگ کر ضائع ہو جاتی (سبزی دوبارہ کھڑی، بار بار ٹک)۔ اب:
+//   1) تبدیلی ٹک لگاتے ہی فوراً، اور ہمیشہ تازہ فہرست میں سے product_id کے ذریعے سبزی ڈھونڈ کر ہوتی ہے
+//   2) ہر تبدیلی "vmPresenceOverrides" میں یاد رہتی ہے اور ہر کلاؤڈ ملاپ کے بعد دوبارہ لاگو ہوتی ہے
+//   3) کلاؤڈ پر بھیجنا ایک وقت میں ایک ہی (ڈبل پش نہیں) — اور بھیجنے کے بعد دوبارہ تصدیق
+const VM_OVR_TTL = 5 * 60 * 1000;
+let vmPresenceOverrides = {}; // product_id(str) -> {dormant:bool, t:ms}
+function vmApplyPresenceOverrides(arr, remote){
+  const now = Date.now();
+  let remoteMap = null;
+  if(Array.isArray(remote)){ remoteMap = new Map(); remote.forEach(x => remoteMap.set(String(x.product_id), !!x.isDormant)); }
+  Object.keys(vmPresenceOverrides).forEach(k => {
+    const o = vmPresenceOverrides[k];
+    if(!o || now - o.t > VM_OVR_TTL){ delete vmPresenceOverrides[k]; return; }
+    if(remoteMap && remoteMap.has(k) && remoteMap.get(k) === o.dormant){ delete vmPresenceOverrides[k]; return; } // کلاؤڈ میں پہلے ہی یہی حالت ہے
+    const p = (arr || []).find(x => String(x.product_id) === k);
+    if(p) p.isDormant = o.dormant;
+  });
+  return arr;
+}
+let vmPushTimer = null, vmPushBusy = false, vmPushAgain = false;
+function vmQueuePush(){
+  clearTimeout(vmPushTimer);
+  vmPushTimer = setTimeout(vmRunPush, 600);
+}
+async function vmRunPush(){
+  if(vmPushBusy){ vmPushAgain = true; return; }
+  vmPushBusy = true;
+  const startTs = Date.now();
+  let ok = false;
+  try{ ok = await pushProductsToCloud(); }catch(e){ ok = false; }
+  try{
+    // push پوری فہرست نئی بنا کر لگاتا ہے — اگر اس دوران کوئی ٹک ضائع ہوا ہو تو دوبارہ لگائیں
+    let mismatch = false;
+    Object.keys(vmPresenceOverrides).forEach(k => {
+      const o = vmPresenceOverrides[k];
+      const p = productsData.find(x => String(x.product_id) === k);
+      if(p && !!p.isDormant !== o.dormant){ mismatch = true; }
+    });
+    if(mismatch){
+      vmApplyPresenceOverrides(productsData);
+      try{ persistAllData(); }catch(e){}
+      vmPushAgain = true;
+      vmRefreshPresenceScreens();
+    } else if(ok){
+      Object.keys(vmPresenceOverrides).forEach(k => { if(vmPresenceOverrides[k].t <= startTs) delete vmPresenceOverrides[k]; });
+    }
+  }catch(e){}
+  vmPushBusy = false;
+  if(vmPushAgain){ vmPushAgain = false; vmQueuePush(); }
+}
+// تبدیلی فوراً لاگو + یاد رکھنا + کلاؤڈ کے لیے قطار
+function vmCommitPresence(pid, toAbsent){
+  const key = String(pid);
+  const p = productsData.find(x => String(x.product_id) === key);
+  if(!p) return null;
+  p.isDormant = toAbsent;
+  vmPresenceOverrides[key] = { dormant: toAbsent, t: Date.now() };
+  try{ persistAllData(); }catch(e){}
+  try{ pauseCloudPolling(20000); }catch(e){} // ابھی کی تبدیلی پولنگ سے واپس نہ پلٹے
+  vmQueuePush();
+  return p;
+}
+// ---------- ایک ہی مشترکہ فنکشن: جدول/موڈل — ہر جگہ کا ٹک یہیں آتا ہے ----------
 function vmPresenceTick(productId, chkEl, opts){
   opts = opts || {};
   if(opts.adminOnly && AppState.currentRole !== 'admin'){ alert('صرف ایڈمن یہ تبدیل کر سکتا ہے'); if(chkEl) chkEl.checked = false; return; }
-  const p = productsData.find(x => x.product_id === productId);
+  const key = String(productId);
+  const p = productsData.find(x => String(x.product_id) === key);
   if(!p){ if(chkEl) chkEl.checked = false; return; }
-  if(chkEl) chkEl.disabled = true; // ڈبل ٹیپ سے دوبارہ نہ بدلے
-  const rowEl = chkEl ? chkEl.closest('tr, .vmPresRow') : null;
+  if(chkEl){
+    if(chkEl.dataset.vmBusy === '1') return; // ڈبل ٹیپ — ایک ہی بار
+    chkEl.dataset.vmBusy = '1'; chkEl.disabled = true;
+  }
   const toAbsent = !p.isDormant;
-  vmPresenceFx(rowEl, toAbsent, () => {
-    p.isDormant = toAbsent;
-    persistAllData();
-    try{ pushProductsToCloud(); }catch(e){}
-    try{ pauseCloudPolling(20000); }catch(e){} // ابھی کی تبدیلی پولنگ سے واپس نہ پلٹے
-    vmRefreshPresenceScreens();
-  });
+  vmCommitPresence(key, toAbsent);
+  const rowEl = chkEl ? chkEl.closest('tr, .vmPresRow') : null;
+  vmPresenceFx(rowEl, toAbsent, () => { vmRefreshPresenceScreens(); });
 }
 
 // ---------- ✅ صدام کی ہدایت (FM10SEPTH0530PM): جدول/شیٹ نظارے میں ہی حاضر/غیر حاضر چیک باکس — کارڈ نظارے
@@ -17231,19 +17291,17 @@ function toggleProductPresence(productId, makePresent){
 // ---------- 🎬 صدام کی ہدایت (FM3SEPTH10): ٹک لگاتے ہی کارڈ دائیں طرف سلائیڈ ہو کر آہستہ سے غائب ہو —
 // اس کے بعد ہی اصل فہرست تبدیل ہو، تاکہ صاف نظر آئے کہ کون سا آئٹم کہاں گیا ---------- -->
 function animateAndTogglePresence(cardId, productId){
-  // ☑️💨 FM210FR282: اب وہی مشترکہ دھواں + سلائیڈ ایفیکٹ (vmPresenceFx)
+  // ☑️💨 FM310SA283: وہی مشترکہ محفوظ طریقہ (فوری تبدیلی + دھواں/سلائیڈ ایفیکٹ)
   if(AppState.currentRole !== 'admin'){ alert('صرف ایڈمن یہ تبدیل کر سکتا ہے'); return; }
-  const p = productsData.find(x => x.product_id === productId);
+  const key = String(productId);
+  const p = productsData.find(x => String(x.product_id) === key);
   if(!p) return;
   const card = document.getElementById(cardId);
+  if(card && card.dataset.vmBusy === '1') return;
+  if(card) card.dataset.vmBusy = '1';
   const toAbsent = !p.isDormant;
-  vmPresenceFx(card, toAbsent, () => {
-    p.isDormant = toAbsent;
-    persistAllData();
-    try{ pushProductsToCloud(); }catch(e){}
-    try{ pauseCloudPolling(20000); }catch(e){}
-    vmRefreshPresenceScreens();
-  });
+  vmCommitPresence(key, toAbsent);
+  vmPresenceFx(card, toAbsent, () => { vmRefreshPresenceScreens(); });
 }
 
 // ---------- 🟩🟥 صدام کی ہدایت (FM4SEPFR25): راولپنڈی/اسلام آباد ریٹ + سٹاک ہمیشہ اسی رنگ سکیم میں دکھائیں —
@@ -26194,6 +26252,7 @@ let cashPurchasesData = loadFromStorage('cashPurchases', []); // 🆕 نقد خ�
 let activePoCategory = 'all';
 
 function openPoModal(supplierId){
+  poFeedMode = false; // 🛡️ FM310SA283: پچھلی بار کا فیڈ موڈ نہ رہ جائے (openStockFeedModal اس کے بعد خود لگاتا ہے)
   let s = null;
   if(supplierId){
     s = suppliersData.find(x => x.supplier_id === supplierId);
@@ -26271,12 +26330,31 @@ function refreshOtAfterStockChange(){
 }
 
 let poFeedMode = false;
+// ---------- ☑️ FM310SA283: چالان فیڈ سکرین کا حاضر/غیر حاضر موڈ ----------
+let poPresenceMode = 'present';
+function setPoPresenceMode(m){ poPresenceMode = m; renderPoBrowseList(); }
+function poUpdatePresenceButtons(){
+  const row = document.getElementById('poPresenceBtnRow');
+  if(!row) return;
+  row.style.display = poFeedMode ? 'flex' : 'none';
+  if(!poFeedMode) return;
+  const pc = productsData.filter(p => !p.isDormant).length, ac = productsData.filter(p => !!p.isDormant).length;
+  const pb = document.getElementById('poPresenceBtnPresent'), ab = document.getElementById('poPresenceBtnAbsent');
+  const isP = poPresenceMode === 'present';
+  if(pb && ab){
+    pb.textContent = `🟢 حاضر سبزیاں (${pc})`; ab.textContent = `🔴 غیر حاضر سبزیاں (${ac})`;
+    pb.style.background = isP ? '#134e2c' : '#f1f5f9'; pb.style.color = isP ? '#fff' : 'var(--text)';
+    ab.style.background = !isP ? '#78350f' : '#f1f5f9'; ab.style.color = !isP ? '#fff' : 'var(--text)';
+  }
+}
 function openStockFeedModal(){
   openPoModal(null);
   poCashMode = false;
   poFeedMode = true;
+  poPresenceMode = 'present';
   document.getElementById('poModalTitle').textContent = '📥 مال آیا — چالان فیڈ کریں';
   const b = document.getElementById('poSaveBtn'); if(b) b.textContent = '✅ محفوظ کریں (نیا چالان — سٹاک میں فوراً شامل)';
+  renderPoBrowseList(); // 🛡️ FM310SA283: فیڈ موڈ لگنے کے بعد فہرست دوبارہ (ٹک ڈبے کے ساتھ)
   renderPoCart();
 }
 function openCashPurchaseModal(){
@@ -26340,7 +26418,9 @@ function renderPoBrowseList(){
   const wrap = document.getElementById('poBrowseList');
   if(!wrap) return;
 
-  let list = productsData.filter(p => !p.isDormant);
+  poUpdatePresenceButtons();
+  const _poAbsentView = poFeedMode && poPresenceMode === 'absent';
+  let list = productsData.filter(p => poFeedMode ? (!!p.isDormant === _poAbsentView) : !p.isDormant);
   if(activePoCategory !== 'all'){
     list = list.filter(p => (p.category && p.category.trim() ? p.category.trim() : 'Uncategorized') === activePoCategory);
   }
@@ -26349,7 +26429,7 @@ function renderPoBrowseList(){
   applyManualCardOrder(list);
 
   if(list.length === 0){
-    wrap.innerHTML = `<div class="placeholder">اس کیٹیگری میں کوئی آئٹم نہیں</div>`;
+    wrap.innerHTML = `<div class="placeholder">${_poAbsentView ? '✅ فی الحال کوئی سبزی غیر حاضر نہیں' : 'اس کیٹیگری میں کوئی آئٹم نہیں'}</div>`;
     return;
   }
 
@@ -26367,8 +26447,11 @@ function renderPoBrowseList(){
   const stockW = 40;
   const qtyW = 124;
 
-  const colWidths = [serialW, nameW, packingW, stockW, qtyW];
-  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1]];
+  // ☑️ FM310SA283: چالان فیڈ موڈ میں سب سے دائیں (سیریل کے ساتھ) خالی ٹک ڈبے کا کالم
+  const _off = poFeedMode ? 1 : 0;
+  const chkW = 34;
+  const colWidths = poFeedMode ? [chkW, serialW, nameW, packingW, stockW, qtyW] : [serialW, nameW, packingW, stockW, qtyW];
+  const rightOffsets = [0, colWidths[0], colWidths[0]+colWidths[1], colWidths[0]+colWidths[1]+colWidths[2]];
 
   const rows = list.map((p, idx) => {
     const isSingle = p.variants.length === 1;
@@ -26408,6 +26491,7 @@ function renderPoBrowseList(){
 
     return `
       <tr style="background:${rowBg};">
+        ${poFeedMode ? `<td style="${tdBase}${frozenTd(0)}"><input type="checkbox" class="vmPresChk" title="${_poAbsentView ? 'ٹک لگائیں — حاضر میں بھیجیں' : 'ٹک لگائیں — غیر حاضر میں بھیجیں'}" onclick="vmPresenceTick(${p.product_id}, this)"></td>` : ''}
         <td style="${tdBase}${frozenTd(0)}"><span style="${SERIAL_BADGE_INLINE_STYLE} width:28px !important;height:28px !important;min-width:28px !important;min-height:28px !important;font-size:11px !important;cursor:default !important;pointer-events:none !important;">${p.serial_no ?? '?'}</span></td>
         <td style="${tdBase}${frozenTd(1)}${urduFont}font-size:12.5px;font-weight:800;white-space:normal;word-break:break-word;line-height:1.35;text-align:right;padding-inline-end:4px;">${p.name}</td>
         <td style="${tdBase}${frozenTd(2)}">${packingCellHtml}</td>
@@ -26416,13 +26500,13 @@ function renderPoBrowseList(){
       </tr>`;
   }).join('');
 
-  const headers = ['#','نام','پیکنگ','📦 سٹاک','مقدار'];
+  const headers = poFeedMode ? ['☑️','#','نام','پیکنگ','📦 سٹاک','مقدار'] : ['#','نام','پیکنگ','📦 سٹاک','مقدار'];
   const theadHtml = '<tr>' + headers.map((h,i) => {
-    const frozen = i < 3 ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
+    const frozen = i < 3 + _off ? `position:-webkit-sticky;position:sticky;right:${rightOffsets[i]}px;z-index:12;` : '';
     return `<th style="${thBase}width:${colWidths[i]}px;${frozen}">${h}</th>`;
   }).join('') + '</tr>';
 
-  const colgroupHtml = '<colgroup>' + colWidths.map((w,i) => i===1 ? '<col style="width:auto;">' : `<col style="width:${w}px;">`).join('') + '</colgroup>';
+  const colgroupHtml = '<colgroup>' + colWidths.map((w,i) => i===1+_off ? '<col style="width:auto;">' : `<col style="width:${w}px;">`).join('') + '</colgroup>';
   const totalTableW = colWidths.reduce((a,b)=>a+b,0);
 
   const oldScrollEl = document.getElementById('poBrowseScrollWrap');
@@ -35399,6 +35483,9 @@ function _invCfg(){
 
 // ---------- اصل ملاپ: base = آخری معلوم کلاؤڈ حالت، local = یہ فون، remote = ابھی کا کلاؤڈ ---------- -->
 function mergeProductsThreeWay(base, local, remote){
+  return vmApplyPresenceOverrides(_mergeProductsThreeWayCore(base, local, remote), remote); // 🛡️ FM310SA283
+}
+function _mergeProductsThreeWayCore(base, local, remote){
   if(!Array.isArray(base)){
     // ---------- پہلی بار (base نہیں): کلاؤڈ بنیاد، صرف مقامی نئے آئٹم شامل (پرانا محفوظ رویہ) ---------- -->
     const ids = new Set(remote.map(p => p.product_id));
