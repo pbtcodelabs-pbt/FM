@@ -3154,7 +3154,7 @@
          ہے) — کوڈ محفوظ ہے، مستقبل میں ضرورت پڑنے پر واپس دکھایا جا سکتا ہے ---------- -->
     <div class="navItem admin-only" data-screen="products" data-navkey="products" data-navlabel="Products" onclick="goTo('products')" style="display:none; background:#EA580C; color:#fff;">📦 پراڈکٹس<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "پرچیز آرڈر" ٹیب دوبارہ فعال — سپلائر سے خرید و اسٹاک وصولی ---------- -->
-    <div class="navItem admin-only" data-screen="purchaseorders" data-navkey="purchaseorders" data-navlabel="Purchase Orders" onclick="goTo('purchaseorders')" style="background:#C026D3; color:#fff;">📦 پرچیز آرڈر<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="purchaseorders" data-navkey="purchaseorders" data-navlabel="Purchase Orders" onclick="goTo('purchaseorders')" style="display:none !important; background:#C026D3; color:#fff;">📦 پرچیز آرڈر<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-hide-only" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">💰 ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایڈمن کے مینیو میں نام الگ — تاکہ الجھن نہ ہو کہ یہ ملازم والی
          "ریکوری لسٹ" جیسی ہی چیز ہے؛ دونوں ایک ہی سکرین (data-screen="recoveryList") کھولتے ہیں، مگر رول کے
@@ -8790,7 +8790,7 @@ function getDeveloperContact(){
 // 🆕 FM29SEPTU0310AM: گاہک کو نقد ادھار — بل جیسا حساب ٹیبل (دستی کیش، سابقہ، ٹوٹل، وصولی، اب تک ٹوٹل بقایا) + یادداشت وقت کے ساتھ
 // 🆕 FM309WE#265: سیریل ماسٹر کاپی — صرف ہاتھ سے محفوظ/بحال (کوئی خودکار نظام نہیں)؛ نئی محفوظ کرنے سے پہلے تصدیق، بحالی میں فون/کلاؤڈ کی نئی کاپی، ٹکراؤ والے نئے نمبر درست، ڈرائیو کا جھوٹا ✅ ختم
 // 🆕 FM29SEPTU0525AM: بیوپاری سے نقد ادھار لیا — گاہک والے فارم جیسا ٹیبل؛ دونوں فارموں میں محفوظ کے بعد پرنٹ (تھرمل) / سکرین شاٹ اور شیئر / پوسٹر شیئر
-const APP_BUILD_VERSION = 'FM310SA284'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM310SA286'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9577,6 +9577,7 @@ function renderHomeIconGrid(){
     // ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): "پراڈکٹس" کا ہوم آئیکن مکمل چھپا دیا (سٹاک مینجمنٹ اب وہی کام
     // کرتی ہے) — کوڈ/فنکشن/ASSIGNABLE_SCREENS اندراج بالکل محفوظ ہے، صرف یہاں سے فلٹر کیا گیا ---------- -->
     if(key === 'products') return null;
+    if(key === 'purchaseorders') return null; // 🛒 FM310SA285: ہوم سے "بیوپاری خریداری" بٹن ختم — اب بیوپاری کے اندر "خریداری" ہے
     const def = ASSIGNABLE_SCREENS.find(s => s.key === key);
     if(!def) return null;
     const spaceIdx = def.label.indexOf(' ');
@@ -25652,8 +25653,8 @@ function openSupplierProfile(supplierId){
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم؛ Transactions سب سے نیچے ---
   document.getElementById('profileQuickActions').innerHTML = `
-    <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "نیا پرچیز آرڈر" بٹن دوبارہ فعال — یہیں سے openPoModal کھلتا ہے ---------- -->
-    <button style="background:linear-gradient(155deg,#0ea5e9,#0369a1);" onclick="openPoModal(${s.supplier_id});"><span class="sideIcon">📦</span><span class="sideLabel">نیا آرڈر</span></button>
+    <!-- ---------- 🛒 FM310SA285 (صدام کی ہدایت): "نیا آرڈر" کی جگہ "خریداری" — بیوپاری خریداری کا پورا نظام (openPoModal) اسی بیوپاری کے اندر؛ ہوم کا الگ "بیوپاری خریداری" بٹن ختم ---------- -->
+    <button style="background:linear-gradient(155deg,#0ea5e9,#0369a1);" onclick="openPoModal(${s.supplier_id});"><span class="sideIcon">📦</span><span class="sideLabel">خریداری</span></button>
     <button style="background:linear-gradient(155deg,#f59e0b,#b45309);" onclick="document.getElementById('profileModal').classList.remove('show'); openSupplierSlipReport(${s.supplier_id});"><span class="sideIcon">🧾</span><span class="sideLabel">چٹ</span></button>
     <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id}, 'pay');"><span class="sideIcon">💵</span><span class="sideLabel">ادائیگی</span></button>
     <button style="background:linear-gradient(155deg,#10b981,#047857);" onclick="openPaySupplierModal(${s.supplier_id}, 'receive');"><span class="sideIcon">📥</span><span class="sideLabel">ادھار لیا</span></button>
@@ -44012,11 +44013,12 @@ async function renderPurchaseChalanReportToCanvas(){
   ]);
   const chalanCols = layoutCols([
     {key:'name', label:'سبزی / چالان'},
-    {key:'inQty', label:'آمد', frac:0.1, num:true},
-    {key:'soldQty', label:'بکا', frac:0.1, num:true},
-    {key:'left', label:'باقی', frac:0.1, num:true},
-    {key:'rate', label:'ریٹ', frac:0.13, num:true},
-    {key:'profit', label:'منافع', frac:0.16, num:true},
+    // 🧾 FM310SA286 (صدام کی ہدایت): کیپشن اور ترتیب (دائیں سے بائیں): حاضر سٹاک، ریٹ، سیل ہوا، باقی سٹاک، منافع — ڈیٹا ہر کالم کے ساتھ ہی شفٹ
+    {key:'inQty', label:'حاضر سٹاک', frac:0.125, num:true},
+    {key:'rate', label:'ریٹ', frac:0.11, num:true},
+    {key:'soldQty', label:'سیل ہوا', frac:0.11, num:true},
+    {key:'left', label:'باقی سٹاک', frac:0.125, num:true},
+    {key:'profit', label:'منافع', frac:0.14, num:true},
   ]);
 
   // ---------- خاکہ (blocks) — پہلے اونچائی ناپیں، پھر بنائیں ---------- -->
@@ -44045,7 +44047,7 @@ async function renderPurchaseChalanReportToCanvas(){
   blocks.push({t:'gap'});
   blocks.push({t:'summary', text:`نقد: ${cashTotal.toLocaleString()}   |   بیوپاری: ${supTotal.toLocaleString()}   |   کل خرید: ${(cashTotal + supTotal).toLocaleString()}`});
   blocks.push({t:'gap'});
-  blocks.push({t:'section', text:'🧾 چالان وار — آمد، فروخت، باقی، منافع', color:'#134e2c'});
+  blocks.push({t:'section', text:'🧾 چالان وار — حاضر سٹاک، ریٹ، سیل ہوا، باقی سٹاک، منافع', color:'#134e2c'});
   blocks.push({t:'head', cols: chalanCols});
   let profitTotal = 0;
   if(data.chalanRows.length === 0) blocks.push({t:'empty', text:'کوئی چالان نہیں'});
