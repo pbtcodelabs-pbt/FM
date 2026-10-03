@@ -1,11 +1,11 @@
-// ---------- 🥬 سبزی منڈی (جنرل ایپ) — Service Worker ----------
+// ---------- 🏷️ صدام فروٹ منڈی — Service Worker ----------
 // یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
 // صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
 // ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'SM410SU041';
-const CACHE_NAME = 'sabzi-mandi-general-' + CACHE_VERSION;
+const CACHE_VERSION = 'FM410SU301';
+const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
-// ---------- 🔒🆕 ہدایت (FM21SEPMO03): آف لائن نہ چلنے کی اصل جڑ یہاں ملی — پہلے تمام فائلیں
+// ---------- 🔒🆕 صدام کی ہدایت (FM21SEPMO03): آف لائن نہ چلنے کی اصل جڑ یہاں ملی — پہلے تمام فائلیں
 // ایک ہی فہرست میں تھیں اور ہر ایک کی precache ناکامی خاموشی سے نظرانداز (صرف console.warn) ہو جاتی تھی۔
 // اگر کمزور/ٹوٹے نیٹ ورک کے دوران خود index.html ہی کیش ہونے میں ناکام رہے، تب بھی install "کامیاب" مان کر
 // self.skipWaiting() چل جاتا، پرانا (مکمل/درست) کیش صاف ہو جاتا، اور نیا ورژن قبضہ لے لیتا — نتیجہ: اگلی
@@ -24,17 +24,17 @@ const OPTIONAL_URLS = [
   './icons/icon-512.png',
   './fonts/JameelNooriNastaleeq-Regular.ttf',
   './fonts/JameelNooriNastaleeq-Kasheeda.ttf',
-  // ---------- 🆕 ہدایت (FM8SEPTU4): 3 نئے فونٹ — fonts/ فولڈر میں ---------- -->
+  // ---------- 🆕 صدام کی ہدایت (FM8SEPTU4): 3 نئے فونٹ — fonts/ فولڈر میں ---------- -->
   './fonts/PTSimpleBoldRuled.ttf',
   './fonts/ThuluthAlsmt.ttf',
   './fonts/JameelKhushkhati.ttf',
-  // ---------- 🗑️ ہدایت (FM13SEPSU): 4 فونٹ (Gandhara Suls, Akram Unicode, AlQalam Khawar, AlFars Aban)
+  // ---------- 🗑️ صدام کی ہدایت (FM13SEPSU): 4 فونٹ (Gandhara Suls, Akram Unicode, AlQalam Khawar, AlFars Aban)
   // فہرست سے ہٹا دیے گئے، اس لیے یہ precache انٹریز بھی ہٹا دی گئیں ---------- -->
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
 // ---------- انسٹال — نیا ورژن آتے ہی سب ضروری فائلیں پیشگی کیش کر لیں ----------
-// ---------- 🔒 ہدایت (17 ستمبر، دوپہر): پہلے یہاں سے self.skipWaiting() ہٹا کر مینوئل بٹن پر
+// ---------- 🔒 صدام کی ہدایت (17 ستمبر، دوپہر): پہلے یہاں سے self.skipWaiting() ہٹا کر مینوئل بٹن پر
 // منحصر کر دیا گیا تھا — غلط تھا، کیونکہ آپ کے لیے نیا بلڈ اپلوڈ ہوتے ہی خودکار اپڈیٹ ہونا ضروری ہے
 // (کوئی بٹن دبانے کی ضرورت نہیں)۔ واپس خودکار skipWaiting بحال — اصل مسئلہ یہ نہیں تھا، اصل مسئلہ یہ تھا
 // کہ صفحہ فوراً ری لوڈ ہو جاتا تھا چاہے صارف لکھ رہا ہو — وہ فکس index.html میں الگ سے کیا گیا ہے
@@ -42,7 +42,7 @@ const OPTIONAL_URLS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      // ---------- 🔒🆕 ہدایت (FM21SEPMO06): "نیا ورژن اپ لوڈ کے بعد بھی پرانا ٹائم شو ہو رہا ہے" کی
+      // ---------- 🔒🆕 صدام کی ہدایت (FM21SEPMO06): "نیا ورژن اپ لوڈ کے بعد بھی پرانا ٹائم شو ہو رہا ہے" کی
       // اصل جڑ — یہ addAll() فائل کے نام سے فیچ کرتا تھا (بغیر cache:'reload' کے)، جس کی وجہ سے اگر براؤزر کی
       // اپنی HTTP کیش (GitHub Pages Cache-Control ہیڈر کی بنا پر) ابھی تک index.html/manifest.json کو "تازہ"
       // سمجھ رہی ہو، تو یہ خود بخود وہی پرانی کاپی استعمال کر لیتا — چاہے سرور پر نئی فائل موجود ہو۔ نتیجہ: SW
@@ -90,12 +90,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
-  // SM110TH026: privacy/terms pages are plain pages, never served from the app cache
-  if (/\/(privacy|terms)\.html$/.test(new URL(req.url).pathname)) return;
 
   const url = new URL(req.url);
 
-  // ---------- 🐛 ہدایت: مخصوص، محفوظ CDN فائلیں (jsPDF، گوگل فونٹس) بھی کیش ہوں —
+  // ---------- 🐛 صدام کی ہدایت: مخصوص، محفوظ CDN فائلیں (jsPDF، گوگل فونٹس) بھی کیش ہوں —
   // باقی سب (Firestore کالز وغیرہ) ہمیشہ کی طرح براہ راست نیٹ ورک پر ہی رہیں ---------- -->
   const CACHEABLE_CROSS_ORIGIN_HOSTS = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
   if (url.origin !== self.location.origin) {
@@ -116,7 +114,7 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(req).then((cached) => {
-      // ---------- 🔒 ہدایت (FM21SEPMO06): یہاں بھی وہی HTTP-کیش بگ — بیک گراؤنڈ میں تازہ کاپی لانے
+      // ---------- 🔒 صدام کی ہدایت (FM21SEPMO06): یہاں بھی وہی HTTP-کیش بگ — بیک گراؤنڈ میں تازہ کاپی لانے
       // کی یہ کوشش پہلے req کو براہ راست fetch کرتی تھی، جو براؤزر کی اپنی HTTP کیش سے پرانا جواب دوبارہ لا
       // سکتی تھی۔ اب cache:'reload' سے ہمیشہ سرور سے حقیقی تازہ کاپی ہی آئے گی ---------- -->
       const networkFetch = fetch(req.url, { cache: 'reload' }).then((res) => {
@@ -127,7 +125,7 @@ self.addEventListener('fetch', (event) => {
         return res;
       }).catch(() => {
         if (cached) return cached;
-        // ---------- 🛟 ہدایت (FM21SEPMO03): نیٹ ورک ناکام اور یہی مخصوص فائل کیش میں بھی نہیں —
+        // ---------- 🛟 صدام کی ہدایت (FM21SEPMO03): نیٹ ورک ناکام اور یہی مخصوص فائل کیش میں بھی نہیں —
         // اگر یہ صفحہ کھولنے کی درخواست ہے تو خالی/ٹوٹا صفحہ دکھانے کی بجائے کم از کم ایپ شیل
         // (index.html) دکھا دیں، تاکہ ایپ بہرحال کھلے ---------- -->
         if (req.mode === 'navigate' || req.destination === 'document') {
@@ -138,7 +136,7 @@ self.addEventListener('fetch', (event) => {
 
       if (cached) return cached; // ---------- کیش میں پہلے سے موجود — فوراً دکھائیں، نیٹ ورک پس منظر میں تازہ کرتا رہے ---------- -->
 
-      // ---------- 🆕🔒 ہدایت (FM21SEPMO0O): شام کو نیٹ/ڈیٹا پیکج ختم ہونے پر ایپ بالکل نہ کھلنے کی اصل جڑ
+      // ---------- 🆕🔒 صدام کی ہدایت (FM21SEPMO0O): شام کو نیٹ/ڈیٹا پیکج ختم ہونے پر ایپ بالکل نہ کھلنے کی اصل جڑ
       // یہاں ملی — "ڈیٹا پیکج ختم" اکثر صاف/فوری بند کنکشن نہیں ہوتا، بلکہ آدھا زندہ/بہت سست کنکشن ہوتا ہے:
       // درخواست بھیج تو دی جاتی ہے مگر جواب کبھی نہیں آتا (نہ کامیابی نہ ناکامی)۔ اوپر fetch() کا کوئی ٹائم
       // آؤٹ نہیں تھا — اگر یہی صفحہ (یا اس کا مخصوص URL، مثلاً ہوم سکرین آئیکن کا لانچ URL) عین اسی شکل میں
