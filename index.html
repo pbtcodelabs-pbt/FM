@@ -3164,6 +3164,7 @@
          "ریکوری لسٹ" جیسی ہی چیز ہے؛ دونوں ایک ہی سکرین (data-screen="recoveryList") کھولتے ہیں، مگر رول کے
          مطابق مختلف مواد نظر آتا ہے ---------- -->
     <div class="navItem admin-only" data-screen="recoveryList" data-navkey="recoveryConfirm" data-navlabel="Recovery Confirmation" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">💰 وصولی کھاتے اپڈیٹ<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="safevault" data-navkey="safevault" data-navlabel="Safe Almari" onclick="goTo('safevault')" style="background:#7c2d12; color:#fff;">🗄️ سیف الماری<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): "روزانہ ریکوری لسٹ" پہلے صرف رپورٹس سینٹر کے اندر چھپی ہوئی تھی —
          اب اپنا الگ مینیو آئٹم، تاکہ یہ مخصوص ملازم (یوزرز سکرین کی اجازتی فہرست) کو الاٹ کی جا سکے ---------- -->
     <div class="navItem" data-screen="dailyRecovery" data-navkey="dailyRecovery" data-navlabel="Daily Recovery List" onclick="goTo('dailyRecovery')" style="background:#0D9488; color:#fff;">📋 روزانہ ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
@@ -6004,6 +6005,12 @@
       </div>
     </div>
 
+    <!-- ---------- 🗄️ سیف الماری (FM410SU298): ایڈمن PIN سے کھلنے والی مستقل الماری — بل / آرڈرز / ریکوری ---------- -->
+    <div class="screen admin-only" id="screen-safevault">
+      <div class="pageTitle">🗄️ سیف الماری</div>
+      <div id="svRoot"></div>
+    </div>
+
     <!-- =====================================================================
          💰 RECOVERY LIST — ملازم کے لیے: کسٹمرز سے آج جو ادھار وصول ہوا وہ درج کرے، بغیر اصل
          کھاتہ (Ledger) سکرین دیکھے۔ ایڈمن کے لیے: تمام ملازمین کی جمع کرائی گئی وصولی، طریقہ ادائیگی کے
@@ -7912,6 +7919,7 @@ function persistAllData(){
   if(typeof expenseData !== 'undefined') saveToStorage('expenses', expenseData);
   if(typeof nextExpenseId !== 'undefined') saveToStorage('nextExpenseId', nextExpenseId);
   if(typeof marqueeSettings !== 'undefined') saveToStorage('marqueeSettings', marqueeSettings);
+  try{ if(typeof svTick === 'function') svTick(); }catch(e){} // 🗄️ سیف الماری: ہر 3 سیکنڈ میں نئی چیزوں کی کاپی
   try{ if(typeof extraSyncScheduleCheck === 'function') extraSyncScheduleCheck(); }catch(e){}
 }
 setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خودکار محفوظ (fail-safe) ----------
@@ -8797,12 +8805,13 @@ function getDeveloperContact(){
 // 🆕 FM310SA290: رابطہ کالم — کال/واٹس ایپ بٹن ہمیشہ نظر آئیں (نمبر نہ ہو تو دھندلے، دبانے پر پیغام)، ساتھ ساتھ ایک قطار میں
 // 🆕 FM310SA292: (1) سیلزمین کے بل کی منظوری پر مزدوری/اضافی چارجز جمع (2) Record Payment میں بینک/والٹ سے کیش نہ بدلے (3) Void پر واپس شدہ مقدار دوبارہ سٹاک میں نہ جائے (4) ادھار بل کی واپسی پہلے بقایا سے کٹے (5) ریکوری دوبارہ کنفرم نہ ہو
 // 🆕 FM310SA291: غیر حاضر سبزی میں سٹاک ہو تو غیر حاضر نہیں ہوگی (وارننگ)، اور غیر حاضر سبزیاں رپورٹوں/پرنٹ فہرستوں سے غائب
+// 🆕 FM410SU298: 🗄️ سیف الماری — منشی کے بل، آرڈر ٹیکنگ کے آرڈرز اور ریکوری رپورٹس کی مستقل کاپی، ایڈمن PIN سے بند، حذف تین وارننگ + PIN کے بعد، تاریخ/مہینہ/سال فلٹر
 // 🆕 FM410SU297: بل کی "ابھی وصول" لائن — اگلا بل بننے کے بعد بھی پرانے بل پر وصولی وہی رہے (اس کے وقت سے اگلے بل کے وقت تک کی وصولیاں)
 // 🆕 FM410SU296: بل کی "ابھی وصول" لائن — منسوخ بل کو آخری بل نہ گننا، اور تصدیق شدہ وصولی ریکوری لسٹ کی انٹری سے بھی گننا
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM410SU297'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM410SU298'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9490,6 +9499,7 @@ const HOME_SHORTCUT_OPTIONS = [
   {key:'customers',     icon:'👥', label:'گاہک',      screen:'customers'},
   {key:'suppliers',     icon:'🚚', label:'بیوپاری',      screen:'suppliers'},
   {key:'recoveryList',  icon:'💰', label:'وصولی لسٹ',  screen:'recoveryList'},
+  {key:'safevault',     icon:'🗄️', label:'سیف الماری', screen:'safevault'},
   // ---------- 🍇 صدام کی ہدایت پر: Dashboard, Categories, Purchase Orders, Stock Adjustment, Trends —
   // یہ پانچوں ہوم شارٹ کٹ آپشنز سے مکمل ہٹا دیے گئے ہیں (کوڈ/فیچر محفوظ ہے، صرف سامنے نہیں دکھائے جا رہے) ----------
   {key:'billhistory',   icon:'🧾', label:'پرانے بل',   screen:'billhistory'},
@@ -12520,6 +12530,9 @@ let navBackStack = [];
 let navForwardStack = [];
 
 function goTo(screenName, _isHistoryNav){
+  // ---------- 🗄️ سیف الماری: بغیر ایڈمن PIN کے کسی راستے (مینیو، بیک بٹن، سرچ، ہوم شارٹ کٹ) سے نہیں کھلے گی ----------
+  if(screenName === 'safevault' && !window.__svUnlocked){ svAskAndOpen(); return; }
+  if(screenName !== 'safevault' && window.__svUnlocked){ window.__svUnlocked = false; }
   try{ if(screenName === 'payments' || screenName === 'mydiary'){ const _d = EXTRA_SYNC_DEFS.find(d => d.key === (screenName === 'payments' ? 'payments' : 'diary')); if(_d) setTimeout(() => extraSyncOne(_d), 300); } }catch(e){}
   // ---------- 🍇 Fruit Mandi POS: صدام کی حتمی ہدایت پر — Admin کا Home اب ایک عام Home اسکرین ہے (بالکل
   // Salesman کی طرح)، اپنی منتخب کردہ Shortcut اسکرینوں کے آئیکن گرڈ کے ساتھ۔ Billing/پراڈکٹ گرڈ کبھی بھی
@@ -12727,6 +12740,7 @@ function goTo(screenName, _isHistoryNav){
     fetchReturnRequestsFromCloud(false);
     startReturnRequestsPolling();
   }
+  if(screenName === 'safevault'){ svRender(); svSyncRecent(); }
   if(screenName === 'recoveryList'){
     renderRecoveryListScreen();
     fetchRecoveryListFromCloud(false);
@@ -15198,6 +15212,7 @@ function submitBillForApproval(customer, method, subtotal){
   };
   // TODO: یہاں pending_bills table میں INSERT ہوگا
   pendingBillsData.unshift(pending);
+  try{ svTick(true); }catch(e){} // 🗄️ سیف الماری: بل بھیجتے ہی اسی لمحے کاپی
 
   Billing.cart = [];
   Billing.sourceAdvanceOrderId = null; // ---------- 🔒 FM22SEPTU: سیلزمین کا بل منظوری کی قطار میں گیا، حتمی فائنل نہیں ہوا — Pending Order کا ربط یہاں ختم، وہ آرڈر خود Pending میں محفوظ رہے گا ----------
@@ -20141,6 +20156,362 @@ function extraSyncScheduleCheck(){
 }
 // ایپ کھلنے کے کچھ دیر بعد ایک بار مکمل ہم آہنگی (ہر فہرست ایک ریڈ)
 setTimeout(() => { try{ extraSyncAll(); }catch(e){} }, 6000);
+
+/* =====================================================================
+   🗄️ سیف الماری (FM410SU298) — صدام کی ہدایت: منشی کے بھیجے بل، آرڈر ٹیکنگ والے کے آرڈرز اور ریکوری والے کی رپورٹس
+   کی ایک مستقل، الگ، ایڈمن پن سے بند الماری۔ اصل نظام (پینڈنگ بلز، ایڈوانس آرڈرز، ریکوری لسٹ) کو ذرہ برابر نہیں چھیڑا —
+   وہ ویسے ہی چلتے رہیں گے۔ یہاں صرف ہر آنے والی چیز کی ایک "کاپی" خودکار محفوظ ہوتی ہے (svSweep)، جو اصل فہرست سے
+   غائب ہو جانے یا ڈیلیٹ ہونے پر بھی یہیں رہتی ہے۔ حذف صرف ایڈمن PIN + تین وارننگوں کے بعد۔
+   ذخیرہ: IndexedDB (localStorage کی 5MB حد سے بچنے کے لیے) + کلاؤڈ (shopData/sv_...) 6 دن کے ٹکڑوں میں
+   ===================================================================== */
+const SV_KINDS = {
+  bill:     { label: 'بل',      icon: '📄', title: 'منشی کے بھیجے گئے بل' },
+  order:    { label: 'آرڈرز',   icon: '📦', title: 'آرڈر ٹیکنگ والے کے آرڈرز' },
+  recovery: { label: 'ریکوری',  icon: '💰', title: 'ریکوری رپورٹس' }
+};
+const SV_DB_NAME = 'fmSafeVaultDB', SV_STORE = 'entries';
+let svDb = null, svReady = false, svLoadFailed = false;
+const svMem = new Map();      // vid -> entry
+const svDirty = new Set();    // IndexedDB میں لکھنے والی vids
+const svDirtyKeys = new Set();// کلاؤڈ پر بھیجنے والے ٹکڑے
+const svLastSig = {};         // اس فون نے ماخذ (اصل فہرست) کی آخری حالت کیا دیکھی
+let svLastTick = 0, svSyncTimer = null;
+const _svBusy = {};
+
+function svOpenDb(){
+  return new Promise((res, rej) => {
+    if(!window.indexedDB){ rej(new Error('IndexedDB نہیں ہے')); return; }
+    const r = indexedDB.open(SV_DB_NAME, 1);
+    r.onupgradeneeded = () => { if(!r.result.objectStoreNames.contains(SV_STORE)) r.result.createObjectStore(SV_STORE, { keyPath: 'vid' }); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function svLoad(){
+  try{
+    svDb = await svOpenDb();
+    const all = await new Promise((res, rej) => {
+      const q = svDb.transaction(SV_STORE, 'readonly').objectStore(SV_STORE).getAll();
+      q.onsuccess = () => res(q.result || []); q.onerror = () => rej(q.error);
+    });
+    all.forEach(e => { if(e && e.vid && !svMem.has(e.vid)) svMem.set(e.vid, e); });
+  }catch(e){ svLoadFailed = true; console.warn('سیف الماری: ڈیٹا بیس نہیں کھلا', e); }
+  svReady = true;
+  setTimeout(() => { try{ svTick(true); svSyncRecent(); }catch(e){} }, 1500);
+}
+function svFlush(){
+  if(!svDb || svDirty.size === 0) return;
+  const ids = Array.from(svDirty); svDirty.clear();
+  try{
+    const st = svDb.transaction(SV_STORE, 'readwrite').objectStore(SV_STORE);
+    ids.forEach(id => { const e = svMem.get(id); if(e) st.put(e); });
+  }catch(e){ ids.forEach(id => svDirty.add(id)); }
+}
+
+// ---------- کلاؤڈ ٹکڑے کا نام: sv_<قسم>_<YYYYMM>_<0..5> (ہر ٹکڑا 6 دن، تاکہ ایک دستاویز کبھی بھاری نہ ہو) ----------
+function svBucket(kind, iso){
+  const d = new Date(iso); const dt = isNaN(d) ? new Date() : d;
+  return 'sv_' + kind.charAt(0) + '_' + (dt.getFullYear() * 100 + dt.getMonth() + 1) + '_' + Math.min(5, Math.floor((dt.getDate() - 1) / 6));
+}
+function svSources(){
+  const out = [];
+  try{ (pendingBillsData || []).forEach(p => { if(!p || p.type === 'payment') return; if(p.salesman_name === 'Aslam Bhai' && p.pending_id <= 2) return; out.push(['bill', p]); }); }catch(e){}
+  try{ (advanceOrdersData || []).forEach(o => { if(o) out.push(['order', o]); }); }catch(e){}
+  try{ (recoveryListData || []).forEach(r => { if(r) out.push(['recovery', r]); }); }catch(e){}
+  return out;
+}
+function svInfo(kind, s){
+  if(kind === 'bill') return { id: s.pending_id, ts: s.submitted_at, cust: s.customer_name || '', by: s.salesman_name || '', st: s.status || 'pending',
+    amt: (s.items || []).reduce((a, i) => a + (Number(i.qty) || 0) * (Number(i.unitPrice) || 0), 0) };
+  if(kind === 'order') return { id: s.id, ts: s.createdAt, cust: s.customerName || '', by: s.employeeName || (s.placedByCustomer ? 'کسٹمر خود' : ''), st: s.isDraft ? 'draft' : (s.status || 'pending'), amt: 0 };
+  return { id: s.id, ts: s.createdAt, cust: s.customerName || '', by: s.employeeName || '', st: s.status || 'pending', amt: Number(s.amount) || 0 };
+}
+function svVid(kind, info){ return kind + '_' + info.id + '_' + (Date.parse(info.ts) || 0); }
+function svRank(st){ return st === 'draft' ? 0 : st === 'pending' ? 1 : 2; }
+
+// ---------- اصل فہرستوں کو دیکھ کر نئی چیزیں الماری میں ڈالنا — کبھی کچھ ہٹاتا نہیں ----------
+function svSweep(){
+  if(!svReady) return;
+  svSources().forEach(([kind, src]) => {
+    try{
+      const info = svInfo(kind, src);
+      if(info.id == null) return;
+      const vid = svVid(kind, info);
+      const ex = svMem.get(vid);
+      if(ex && ex.del) return; // ایڈمن نے جان بوجھ کر حذف کیا تھا — دوبارہ نہ ڈالیں
+      const snap = JSON.parse(JSON.stringify(_xHeavyStrip(src)));
+      const sig = JSON.stringify(snap);
+      const nowTs = info.ts || new Date().toISOString();
+      if(!ex){
+        svMem.set(vid, { vid, k: kind, bk: svBucket(kind, nowTs), ts: nowTs, sv: new Date().toISOString(), u: Date.now(), cust: info.cust, by: info.by, amt: info.amt, st: info.st, snap });
+        svDirty.add(vid); svDirtyKeys.add(svBucket(kind, nowTs)); svLastSig[vid] = sig; return;
+      }
+      const first = svLastSig[vid] === undefined;
+      const changed = !first && svLastSig[vid] !== sig;
+      const higher = first && svRank(info.st) > svRank(ex.st);
+      svLastSig[vid] = sig;
+      if(changed || higher){
+        ex.snap = snap; ex.st = info.st; ex.cust = info.cust; ex.by = info.by; ex.amt = info.amt; ex.u = Date.now();
+        svDirty.add(vid); svDirtyKeys.add(ex.bk);
+      }
+    }catch(e){ console.warn('سیف الماری sweep:', e); }
+  });
+}
+function svTick(force){
+  if(!svReady) return;
+  const now = Date.now();
+  if(!force && now - svLastTick < 3000) return;
+  svLastTick = now;
+  svSweep(); svFlush();
+  if(svDirtyKeys.size) svScheduleSync();
+}
+
+// ---------- کلاؤڈ ہم آہنگی: صرف جمع ہوتی ہے (union) — حذف شدہ نشان (del) سب پر غالب، باقی میں نیا u جیتتا ہے ----------
+function svMerge(local, cloud){
+  const m = new Map();
+  const put = x => {
+    if(!x || !x.vid) return;
+    const o = m.get(x.vid);
+    if(!o){ m.set(x.vid, x); return; }
+    if(o.del) return;
+    if(x.del){ m.set(x.vid, x); return; }
+    if((x.u || 0) > (o.u || 0)) m.set(x.vid, x);
+  };
+  (local || []).forEach(put); (cloud || []).forEach(put);
+  return Array.from(m.values()).sort((a, b) => a.vid < b.vid ? -1 : 1);
+}
+async function svSyncOne(key){
+  if(_svBusy[key]) return; _svBusy[key] = true;
+  try{
+    for(let a = 0; a < 3; a++){
+      const cloud = await _xReadCloud({ key });
+      if(!cloud.ok) break;
+      const local = Array.from(svMem.values()).filter(e => e.bk === key);
+      const merged = svMerge(local, cloud.list);
+      merged.forEach(x => { const cur = svMem.get(x.vid); if(!cur || JSON.stringify(cur) !== JSON.stringify(x)){ svMem.set(x.vid, x); svDirty.add(x.vid); } });
+      svFlush();
+      const body = JSON.stringify(merged);
+      const cloudSorted = JSON.stringify((cloud.list || []).slice().sort((x, y) => x.vid < y.vid ? -1 : 1));
+      if(body === cloudSorted) break;
+      if(body.length > 950000){ console.warn('سیف الماری: ٹکڑا بہت بڑا', key, body.length); break; }
+      const pre = cloud.updateTime ? `&currentDocument.updateTime=${encodeURIComponent(cloud.updateTime)}` : '';
+      const res = await authFirestoreFetch(`shopData/${key}?key=${FIREBASE_API_KEY}${pre}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { json: { stringValue: body }, updatedAt: { integerValue: String(Date.now()) } } })
+      });
+      if(res && res.ok) break;
+      if(!(res && (res.status === 400 || res.status === 409 || res.status === 412))) break;
+    }
+  }catch(e){ /* آف لائن — اگلی بار */ }
+  _svBusy[key] = false;
+}
+function svScheduleSync(){
+  if(svSyncTimer) return;
+  svSyncTimer = setTimeout(() => {
+    svSyncTimer = null;
+    const keys = Array.from(svDirtyKeys); svDirtyKeys.clear();
+    keys.forEach(k => svSyncOne(k));
+  }, 3000);
+}
+// ---------- پچھلے ~18 دن کے ٹکڑے: ہر قسم کے موجودہ اور پچھلے دو ----------
+function svRecentKeys(){
+  const keys = new Set();
+  [0, 6, 12, 18].forEach(daysBack => {
+    const d = new Date(Date.now() - daysBack * 86400000);
+    Object.keys(SV_KINDS).forEach(k => keys.add(svBucket(k, d.toISOString())));
+  });
+  return Array.from(keys);
+}
+function svSyncRecent(){
+  try{ if(AppState.currentRole !== 'admin') return; }catch(e){ return; }
+  svRecentKeys().forEach(k => svSyncOne(k));
+}
+setInterval(() => { try{ if(svReady) svSyncRecent(); }catch(e){} }, 10 * 60 * 1000);
+svLoad();
+
+// =====================================================================
+//  سکرین — پن سے کھلتی ہے، تین خانے: بل / آرڈرز / ریکوری
+// =====================================================================
+let svTab = 'bill', svFilter = 'all', svOlderDays = 0, svFrom = '', svTo = '', svQuery = '';
+function svAskAndOpen(){
+  if(AppState.currentRole !== 'admin'){ alert('❌ سیف الماری صرف ایڈمن کھول سکتا ہے۔'); return; }
+  _askAdminPinForSerialMaster('🗄️ سیف الماری کھولنے کے لیے').then(ok => {
+    if(!ok) return;
+    window.__svUnlocked = true;
+    goTo('safevault');
+  });
+}
+function svLock(){ window.__svUnlocked = false; goTo('home'); }
+function svEsc(t){ return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function svFmtDate(iso){ const d = new Date(iso); if(isNaN(d)) return '—'; return d.toLocaleDateString('en-GB') + ' — ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); }
+function svStatusInfo(kind, st){
+  const m = {
+    bill:     { pending: ['پینڈنگ', '#b45309'], approved: ['منظور شدہ', '#15803d'], rejected: ['مسترد', '#b91c1c'] },
+    order:    { draft: ['ڈرافٹ', '#64748b'], pending: ['پینڈنگ', '#b45309'], fulfilled: ['مکمل', '#15803d'] },
+    recovery: { pending: ['ایڈمن کے پاس زیرِ التوا', '#b45309'], confirmed: ['کھاتے میں درج', '#15803d'] }
+  };
+  return (m[kind] && m[kind][st]) || [st || '—', '#475569'];
+}
+function svInRange(iso){
+  const t = Date.parse(iso); if(isNaN(t)) return svFilter === 'all';
+  const now = new Date(), d = new Date(t);
+  const sod = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  switch(svFilter){
+    case 'today': return sod(d) === sod(now);
+    case 'week': return t >= Date.now() - 7 * 86400000;
+    case 'thismonth': return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    case 'lastmonth': { const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1); return d.getFullYear() === lm.getFullYear() && d.getMonth() === lm.getMonth(); }
+    case 'lastyear': return d.getFullYear() === now.getFullYear() - 1;
+    case 'older': return t < Date.now() - svOlderDays * 86400000;
+    case 'custom': {
+      const f = svFrom ? Date.parse(svFrom + 'T00:00:00') : -Infinity, e = svTo ? Date.parse(svTo + 'T23:59:59') : Infinity;
+      return t >= f && t <= e;
+    }
+    default: return true;
+  }
+}
+function svFiltered(){
+  const q = svQuery.trim().toLowerCase();
+  return Array.from(svMem.values()).filter(e => !e.del && e.k === svTab && svInRange(e.ts) &&
+    (!q || (String(e.cust || '') + ' ' + String(e.by || '')).toLowerCase().includes(q)))
+    .sort((a, b) => Date.parse(b.ts) - Date.parse(a.ts));
+}
+function svFilterLabel(){
+  const l = { all: 'تمام', today: 'آج', week: 'پچھلے 7 دن', thismonth: 'اس مہینے', lastmonth: 'پچھلا مہینہ', lastyear: 'پچھلا سال' };
+  if(svFilter === 'older') return `${svOlderLabel(svOlderDays)} سے پرانے`;
+  if(svFilter === 'custom') return `${svFrom || '...'} سے ${svTo || '...'} تک`;
+  return l[svFilter] || '';
+}
+function svOlderLabel(d){ return d >= 365 ? `${Math.round(d / 365)} سال` : d >= 30 ? `${Math.round(d / 30)} مہینے` : `${d} دن`; }
+function svSetTab(t){ svTab = t; svRender(); }
+function svSetFilter(f){ svFilter = f; if(f !== 'older') svOlderDays = 0; svRender(); }
+function svSetOlder(v){ const n = Number(v) || 0; if(!n){ svSetFilter('all'); return; } svOlderDays = n; svFilter = 'older'; svRender(); }
+function svSetRange(){ svFrom = document.getElementById('svFrom')?.value || ''; svTo = document.getElementById('svTo')?.value || ''; svFilter = 'custom'; svRender(); }
+function svSearchInput(v){ svQuery = v; svRenderList(); }
+
+function svRender(){
+  const root = document.getElementById('svRoot'); if(!root) return;
+  if(!window.__svUnlocked){ root.innerHTML = '<div style="text-align:center;padding:40px 10px;color:var(--muted);">🔒 سیف الماری بند ہے</div>'; return; }
+  const counts = {}; Object.keys(SV_KINDS).forEach(k => counts[k] = 0);
+  svMem.forEach(e => { if(!e.del && counts[e.k] !== undefined) counts[e.k]++; });
+  const chip = (key, label) => `<button type="button" onclick="svSetFilter('${key}')" style="padding:7px 12px;border-radius:18px;font-size:12.5px;font-weight:800;cursor:pointer;border:1.5px solid ${svFilter === key ? '#7c2d12' : '#d6d3d1'};background:${svFilter === key ? '#7c2d12' : '#fff'};color:${svFilter === key ? '#fff' : '#44403c'};">${label}</button>`;
+  const olderOpts = [[0, 'سے پرانے…'], [7, '1 ہفتہ'], [30, '1 مہینہ'], [60, '2 مہینے'], [90, '3 مہینے'], [180, '6 مہینے'], [270, '9 مہینے'], [365, '1 سال']]
+    .map(([v, l]) => `<option value="${v}" ${svFilter === 'older' && svOlderDays === v ? 'selected' : ''}>${v ? l + ' سے پرانے' : l}</option>`).join('');
+  root.innerHTML = `
+    <div style="background:linear-gradient(135deg,#7c2d12,#431407);color:#fff;border-radius:14px;padding:12px 14px;margin-bottom:10px;">
+      <div style="font-size:12.5px;line-height:1.7;opacity:.95;">یہاں ہر بل، آرڈر اور ریکوری کی مستقل کاپی محفوظ ہوتی ہے۔ اصل فہرست سے ڈیلیٹ یا غائب ہو جائے تب بھی یہاں رہتی ہے۔ یہاں سے حذف صرف ایڈمن PIN اور تین وارننگوں کے بعد ہوتا ہے۔</div>
+      <button type="button" onclick="svLock()" style="margin-top:8px;padding:7px 14px;border-radius:9px;border:none;background:#fff;color:#7c2d12;font-weight:900;font-size:12.5px;cursor:pointer;">🔒 الماری بند کریں</button>
+    </div>
+    ${svLoadFailed ? '<div style="background:#fef2f2;border:1.5px solid #fca5a5;color:#b91c1c;border-radius:10px;padding:8px 10px;font-size:12.5px;font-weight:700;margin-bottom:10px;">⚠️ اس براؤزر میں مستقل ذخیرہ نہیں کھل سکا — ریکارڈ صرف کلاؤڈ اور اس سیشن میں رہے گا۔</div>' : ''}
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      ${Object.keys(SV_KINDS).map(k => `<button type="button" onclick="svSetTab('${k}')" style="flex:1;padding:10px 4px;border-radius:12px;font-weight:900;font-size:13px;cursor:pointer;border:2px solid ${svTab === k ? '#7c2d12' : '#e7e5e4'};background:${svTab === k ? '#fff7ed' : '#fff'};color:${svTab === k ? '#7c2d12' : '#57534e'};">${SV_KINDS[k].icon} ${SV_KINDS[k].label}<div style="font-size:11px;font-weight:700;">${counts[k]}</div></button>`).join('')}
+    </div>
+    <input type="search" placeholder="🔍 گاہک یا بھیجنے والے کا نام" value="${svEsc(svQuery)}" oninput="svSearchInput(this.value)" style="width:100%;padding:10px;border:1.5px solid #d6d3d1;border-radius:10px;font-size:14px;margin-bottom:8px;box-sizing:border-box;">
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+      ${chip('all', 'تمام')}${chip('today', 'آج')}${chip('week', 'پچھلے 7 دن')}${chip('thismonth', 'اس مہینے')}${chip('lastmonth', 'پچھلا مہینہ')}${chip('lastyear', 'پچھلا سال')}
+      <select onchange="svSetOlder(this.value)" style="padding:7px 8px;border-radius:18px;font-size:12.5px;font-weight:800;border:1.5px solid ${svFilter === 'older' ? '#7c2d12' : '#d6d3d1'};background:${svFilter === 'older' ? '#7c2d12' : '#fff'};color:${svFilter === 'older' ? '#fff' : '#44403c'};">${olderOpts}</select>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;font-size:12px;color:var(--muted);">
+      📅 <input type="date" id="svFrom" value="${svEsc(svFrom)}" style="flex:1;padding:7px;border:1.5px solid #d6d3d1;border-radius:9px;min-width:0;"> سے
+      <input type="date" id="svTo" value="${svEsc(svTo)}" style="flex:1;padding:7px;border:1.5px solid #d6d3d1;border-radius:9px;min-width:0;"> تک
+      <button type="button" onclick="svSetRange()" style="padding:8px 12px;border-radius:9px;border:none;background:#7c2d12;color:#fff;font-weight:800;cursor:pointer;">دیکھیں</button>
+    </div>
+    <div id="svListWrap"></div>`;
+  svRenderList();
+}
+function svRenderList(){
+  const wrap = document.getElementById('svListWrap'); if(!wrap) return;
+  const list = svFiltered();
+  const total = list.reduce((a, e) => a + (e.amt || 0), 0);
+  const live = new Set(svSources().map(([k, s]) => { const i = svInfo(k, s); return svVid(k, i); }));
+  const shown = list.slice(0, 150);
+  wrap.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;background:#f5f5f4;border-radius:10px;padding:9px 12px;margin-bottom:8px;font-size:13px;font-weight:800;">
+      <span>${SV_KINDS[svTab].icon} ${list.length} ریکارڈ (${svFilterLabel()})</span>
+      ${svTab !== 'order' ? `<span style="color:#15803d;">Rs. ${total.toLocaleString()}</span>` : ''}
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <button type="button" onclick="svExport()" ${list.length ? '' : 'disabled'} style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #0f766e;background:#f0fdfa;color:#0f766e;font-weight:900;font-size:13px;cursor:pointer;">💾 کاپی ڈاؤن لوڈ</button>
+      <button type="button" onclick="svDeleteFiltered()" ${list.length ? '' : 'disabled'} style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #fca5a5;background:#fef2f2;color:#b91c1c;font-weight:900;font-size:13px;cursor:pointer;">🗑️ یہ ${list.length} حذف کریں</button>
+    </div>
+    ${list.length === 0 ? '<div style="text-align:center;color:var(--muted);padding:30px 10px;">اس فلٹر میں کوئی ریکارڈ نہیں</div>' : ''}
+    ${shown.map(e => svCardHtml(e, live)).join('')}
+    ${list.length > shown.length ? `<div style="text-align:center;color:var(--muted);font-size:12px;padding:8px;">پہلے ${shown.length} دکھائے گئے — باقی دیکھنے کے لیے فلٹر چھوٹا کریں</div>` : ''}`;
+}
+function svItemsHtml(e){
+  const s = e.snap || {};
+  if(e.k === 'recovery'){
+    let how = ''; try{ how = recoverySplitLabel(s); }catch(x){}
+    return `<div style="font-size:13px;margin-top:6px;">💳 ${svEsc(how)}</div>${s.note ? `<div style="font-size:13px;color:#78350f;background:#fffbeb;border-radius:7px;padding:4px 8px;margin-top:4px;">📝 ${svEsc(s.note)}</div>` : ''}`;
+  }
+  const items = s.items || [];
+  if(!items.length) return '';
+  const rows = items.map(i => `<tr><td style="padding:3px 4px;">${svEsc(i.name)}${i.label ? ' <span style="color:var(--muted);">(' + svEsc(i.label) + ')</span>' : ''}</td><td style="padding:3px 4px;text-align:center;">${svEsc(i.qty)}</td>${e.k === 'bill' ? `<td style="padding:3px 4px;text-align:left;">${(Number(i.unitPrice) || 0).toLocaleString()}</td>` : ''}</tr>`).join('');
+  return `<details style="margin-top:6px;"><summary style="cursor:pointer;font-size:12.5px;font-weight:800;color:#7c2d12;">👁️ ${items.length} آئٹمز دیکھیں</summary>
+    <table style="width:100%;font-size:12.5px;border-collapse:collapse;margin-top:4px;"><tr style="background:#f5f5f4;"><th style="padding:3px 4px;text-align:right;">آئٹم</th><th>تعداد</th>${e.k === 'bill' ? '<th style="text-align:left;">ریٹ</th>' : ''}</tr>${rows}</table></details>`;
+}
+function svCardHtml(e, live){
+  const [stLabel, stColor] = svStatusInfo(e.k, e.st);
+  const missing = e.st === 'pending' && !live.has(e.vid);
+  return `<div style="background:#fff;border:1.5px solid ${missing ? '#f59e0b' : '#e7e5e4'};border-radius:12px;padding:11px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.05);">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+      <span style="font-weight:900;font-size:15px;">🧑 ${svEsc(e.cust || '—')}</span>
+      <span style="font-size:10.5px;color:#fff;background:${stColor};border-radius:7px;padding:2px 8px;font-weight:800;white-space:nowrap;">${svEsc(stLabel)}</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:3px;">🕐 ${svFmtDate(e.ts)}${e.by ? ' — 👤 ' + svEsc(e.by) : ''}</div>
+    ${e.k !== 'order' ? `<div style="font-size:14px;color:#15803d;font-weight:900;margin-top:3px;">Rs. ${(e.amt || 0).toLocaleString()}</div>` : ''}
+    ${missing ? '<div style="font-size:12px;font-weight:800;color:#b45309;background:#fffbeb;border-radius:7px;padding:4px 8px;margin-top:5px;">⚠️ یہ ایڈمن کی عام فہرست میں نظر نہیں آ رہا — الماری میں محفوظ ہے</div>' : ''}
+    ${svItemsHtml(e)}
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      ${missing && e.k === 'bill' ? `<button type="button" onclick="svRestoreBill('${e.vid}')" style="flex:1;padding:8px;border-radius:9px;border:none;background:#15803d;color:#fff;font-weight:800;font-size:12.5px;cursor:pointer;">↩️ ایڈمن کی فہرست میں واپس ڈالیں</button>` : ''}
+      <button type="button" onclick="svDeleteOne('${e.vid}')" style="padding:8px 14px;border-radius:9px;border:1px solid #fca5a5;background:#fef2f2;color:#b91c1c;font-weight:800;font-size:12.5px;cursor:pointer;">🗑️</button>
+    </div>
+  </div>`;
+}
+
+// ---------- گم شدہ بل کو ایڈمن کی پینڈنگ فہرست میں واپس لانا (صرف بل، صرف جو وہاں نہیں ہے) ----------
+function svRestoreBill(vid){
+  const e = svMem.get(vid); if(!e || e.k !== 'bill') return;
+  if(!confirm(`↩️ ${e.cust} کا یہ بل ایڈمن کی "بلز منظوری" فہرست میں واپس ڈالنا ہے؟`)) return;
+  const s = JSON.parse(JSON.stringify(e.snap)); s.status = 'pending';
+  if(pendingBillsData.some(p => p.pending_id === s.pending_id && p.submitted_at === s.submitted_at)){ alert('یہ بل پہلے سے فہرست میں موجود ہے۔'); return; }
+  if(pendingBillsData.some(p => p.pending_id === s.pending_id)) s.pending_id = nextPendingId++;
+  pendingBillsData.unshift(s);
+  persistAllData(); pushPendingBillsToCloud();
+  alert('✅ بل واپس ایڈمن کی فہرست میں آ گیا۔'); svRender();
+}
+
+// ---------- ڈاؤن لوڈ ----------
+function svExport(){
+  const list = svFiltered(); if(!list.length) return;
+  const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), kind: svTab, filter: svFilterLabel(), count: list.length, entries: list }, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `SafeAlmari_${svTab}_${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+// ---------- حذف: تین وارننگیں + ایڈمن PIN ----------
+function svDeleteOne(vid){ const e = svMem.get(vid); if(e) svDeleteFlow([e], `${e.cust || ''} کا ایک ریکارڈ`); }
+function svDeleteFiltered(){ const l = svFiltered(); if(l.length) svDeleteFlow(l, `${SV_KINDS[svTab].label} کے ${l.length} ریکارڈ (${svFilterLabel()})`); }
+async function svDeleteFlow(list, what){
+  if(AppState.currentRole !== 'admin'){ alert('❌ صرف ایڈمن حذف کر سکتا ہے۔'); return; }
+  if(!confirm(`🗑️ وارننگ 1/3\n\nآپ سیف الماری سے ${what} حذف کرنے جا رہے ہیں۔\n\nیہ ریکارڈ الماری سے ہمیشہ کے لیے مٹ جائیں گے۔ (ایڈمن کی عام فہرست متاثر نہیں ہوگی۔) جاری رکھیں؟`)) return;
+  if(!confirm(`⚠️ وارننگ 2/3\n\n${list.length} ریکارڈ مٹنے والے ہیں اور واپس نہیں آئیں گے۔\n\nکیا آپ نے پہلے "💾 کاپی ڈاؤن لوڈ" کر لی ہے؟ اگر نہیں، تو Cancel دبا کر پہلے کاپی لے لیں۔`)) return;
+  const word = prompt(`🛑 آخری وارننگ 3/3\n\n${list.length} ریکارڈ حذف ہونے لگے ہیں۔ تصدیق کے لیے نیچے لفظ  حذف  لکھیں:`);
+  if(word === null) return;
+  if(word.trim() !== 'حذف'){ alert('❌ لفظ درست نہیں لکھا — کچھ حذف نہیں ہوا۔'); return; }
+  if(!(await _askAdminPinForSerialMaster(`سیف الماری سے ${list.length} ریکارڈ حذف کرنے کے لیے`))) return;
+  const now = Date.now();
+  list.forEach(e => {
+    svMem.set(e.vid, { vid: e.vid, k: e.k, bk: e.bk, ts: e.ts, del: 1, u: now }); // چھوٹا "حذف شدہ" نشان — تاکہ sweep یا دوسرا فون اسے دوبارہ نہ ڈال دے
+    svDirty.add(e.vid); svDirtyKeys.add(e.bk);
+  });
+  svFlush(); svScheduleSync();
+  alert(`✅ ${list.length} ریکارڈ سیف الماری سے حذف ہو گئے۔`);
+  svRender();
+}
 
 
 /* =====================================================================
@@ -28748,6 +29119,7 @@ async function openOtReview(){
   }
   persistAllData();
   pushAdvanceOrdersToCloud(); // ---------- ⚡ فوراً کلاؤڈ پر بھیجیں (بیک گراؤنڈ میں) — ایڈمن کے فون پر اگلے 12 سیکنڈ میں خودکار نظر آ جائے گا ----------
+  try{ svTick(true); }catch(e){} // 🗄️ سیف الماری
 
   document.getElementById('otStepItems').style.display = 'none';
   document.getElementById('otStepReview').style.display = '';
@@ -29467,6 +29839,7 @@ function submitSingleRecovery(customerId){
   recoveryListData.unshift(entry);
   if(entry.note) saveDailyRecoveryNote(customerId, entry.note);
   persistAllData();
+  try{ svTick(true); }catch(e){} // 🗄️ سیف الماری
   pushRecoveryListToCloud(); // ---------- ⚡ فوراً کلاؤڈ پر ----------
   delete rlSplitMap[customerId]; delete rlNoteMap[customerId];
   rlReopenIds = rlReopenIds.filter(x => x !== customerId);
@@ -29504,6 +29877,7 @@ function submitRecoveryList(){
     delete rlSplitMap[id]; delete rlNoteMap[id];
   });
   persistAllData();
+  try{ svTick(true); }catch(e){} // 🗄️ سیف الماری
   pushRecoveryListToCloud();
   alert('آج کی وصولی جمع ہو گئی — ایڈمن اصل کھاتے میں اندراج کے بعد تصدیق کریں گے۔');
   goTo('home');
