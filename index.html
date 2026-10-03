@@ -3158,7 +3158,7 @@
          ہے) — کوڈ محفوظ ہے، مستقبل میں ضرورت پڑنے پر واپس دکھایا جا سکتا ہے ---------- -->
     <div class="navItem admin-only" data-screen="products" data-navkey="products" data-navlabel="Products" onclick="goTo('products')" style="display:none; background:#EA580C; color:#fff;">📦 پراڈکٹس<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔄 صدام کی ہدایت (FM3SEPTH10): "پرچیز آرڈر" ٹیب دوبارہ فعال — سپلائر سے خرید و اسٹاک وصولی ---------- -->
-    <div class="navItem admin-only" data-screen="purchaseorders" data-navkey="purchaseorders" data-navlabel="Purchase Orders" onclick="goTo('purchaseorders')" style="display:none !important; background:#C026D3; color:#fff;">📦 پرچیز آرڈر<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="purchaseorders" data-navkey="purchaseorders" data-navlabel="Supplier Purchases" onclick="goTo('purchaseorders')" style="background:#C026D3; color:#fff;">📦 بیوپاری خریداری<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-hide-only" data-screen="recoveryList" data-navkey="recoveryList" data-navlabel="Recovery List" onclick="goTo('recoveryList')" style="background:#16A34A; color:#fff;">💰 ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایڈمن کے مینیو میں نام الگ — تاکہ الجھن نہ ہو کہ یہ ملازم والی
          "ریکوری لسٹ" جیسی ہی چیز ہے؛ دونوں ایک ہی سکرین (data-screen="recoveryList") کھولتے ہیں، مگر رول کے
@@ -5194,23 +5194,43 @@
     <div class="screen admin-only" id="screen-purchaseorders" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="pageTitle">📦 بیوپاری خریداری</div>
 
-      <div class="modeToggle" style="width:100%; margin-bottom:10px;">
-        <button id="poFilterall" class="active" onclick="setPoListFilter('all')" style="flex:1;">سب</button>
-        <button id="poFilterpending" onclick="setPoListFilter('pending')" style="flex:1;">⏳ زیرِ التوا</button>
-        <button id="poFilterreceived" onclick="setPoListFilter('received')" style="flex:1;">✅ موصول شدہ</button>
+      <!-- ---------- 📦 FM410SU300: فلٹر اب اوپر سے نیچے سیدھی قطاروں میں، کم سے کم جگہ — نیچے زیادہ بل نظر آئیں ---------- -->
+      <style>
+        #screen-purchaseorders .poCapRow{display:grid; gap:6px; margin-bottom:6px;}
+        #screen-purchaseorders .poCapRow.c3{grid-template-columns:repeat(3,1fr);}
+        #screen-purchaseorders .poCapRow.c2{grid-template-columns:repeat(2,1fr);}
+        #screen-purchaseorders .poCap{height:34px; border:1.5px solid #d8c2e6; background:#fff; color:#6b21a8; border-radius:17px; font-size:14.5px; font-weight:700; font-family:inherit; cursor:pointer; padding:0 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; line-height:1;}
+        #screen-purchaseorders .poCap.active{background:#C026D3; border-color:#C026D3; color:#fff;}
+        #screen-purchaseorders select.poCap{appearance:none; -webkit-appearance:none; text-align-last:center; padding:0 8px;}
+        #screen-purchaseorders .poCap.pay{background:#15803d; border-color:#15803d; color:#fff;}
+        #screen-purchaseorders .poSum{display:flex; justify-content:space-between; align-items:center; background:#f5f3ff; border-radius:12px; padding:6px 12px; margin:2px 0 8px; font-size:13.5px; font-weight:700; color:#6b21a8;}
+        #screen-purchaseorders .poCard{background:#fff; border:1.5px solid #ece4f3; border-radius:14px; padding:9px 11px; margin-bottom:7px; box-shadow:0 1px 4px rgba(0,0,0,.05);}
+        #screen-purchaseorders .poCard .poTop{display:flex; justify-content:space-between; align-items:center; gap:6px;}
+        #screen-purchaseorders .poCard .poName{font-size:16.5px; font-weight:800; color:#1f2937;}
+        #screen-purchaseorders .poCard .poMeta{font-size:12.5px; color:#6b7280; margin-top:2px;}
+        #screen-purchaseorders .poCard .poBal{font-size:13px; font-weight:800; margin-top:3px;}
+        #screen-purchaseorders .poActs{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px;}
+        #screen-purchaseorders .poActs button{height:32px; padding:0 12px; border:none; border-radius:16px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer;}
+      </style>
+      <div class="poCapRow c3">
+        <button id="poFilterall" class="poCap active" onclick="setPoListFilter('all')">سب</button>
+        <button id="poFilterpending" class="poCap" onclick="setPoListFilter('pending')">⏳ زیرِ التوا</button>
+        <button id="poFilterreceived" class="poCap" onclick="setPoListFilter('received')">✅ موصول شدہ</button>
       </div>
-
-      <div class="partyToolbar">
-        <select id="poSortSelect" onchange="renderPurchaseOrdersScreen()" dir="rtl" style="flex:1; padding:10px; border-radius:10px; border:1px solid #dbe1ea; font-size:15px; font-family:inherit;">
+      <div class="poCapRow c2">
+        <select id="poSortSelect" class="poCap" onchange="renderPurchaseOrdersScreen()" dir="rtl">
           <option value="newest">🕐 نئے پہلے</option>
           <option value="oldest">🕐 پرانے پہلے</option>
         </select>
-        <select id="poSupplierFilterSelect" onchange="renderPurchaseOrdersScreen()" dir="rtl" style="flex:1; padding:10px; border-radius:10px; border:1px solid #dbe1ea; font-size:15px; font-family:inherit;">
-          <option value="all">🏭 تمام سپلائرز</option>
+        <select id="poSupplierFilterSelect" class="poCap" onchange="renderPurchaseOrdersScreen()" dir="rtl">
+          <option value="all">🏭 تمام بیوپاری</option>
         </select>
       </div>
+      <div class="poCapRow" style="grid-template-columns:1fr;">
+        <button type="button" class="poCap pay" onclick="poPayFromTop()">💵 بیوپاری کو پیمنٹ</button>
+      </div>
 
-      <div class="billSummaryBar" id="poSummaryBar"></div>
+      <div class="poSum" id="poSummaryBar"></div>
 
       <div id="poListWrap"></div>
     </div>
@@ -8805,6 +8825,7 @@ function getDeveloperContact(){
 // 🆕 FM310SA290: رابطہ کالم — کال/واٹس ایپ بٹن ہمیشہ نظر آئیں (نمبر نہ ہو تو دھندلے، دبانے پر پیغام)، ساتھ ساتھ ایک قطار میں
 // 🆕 FM310SA292: (1) سیلزمین کے بل کی منظوری پر مزدوری/اضافی چارجز جمع (2) Record Payment میں بینک/والٹ سے کیش نہ بدلے (3) Void پر واپس شدہ مقدار دوبارہ سٹاک میں نہ جائے (4) ادھار بل کی واپسی پہلے بقایا سے کٹے (5) ریکوری دوبارہ کنفرم نہ ہو
 // 🆕 FM310SA291: غیر حاضر سبزی میں سٹاک ہو تو غیر حاضر نہیں ہوگی (وارننگ)، اور غیر حاضر سبزیاں رپورٹوں/پرنٹ فہرستوں سے غائب
+// 🆕 FM410SU300: 📦 "بیوپاری خریداری" مینیو/ہوم میں واپس (نام ایک ہی)، سکرین سے ہی بیوپاری کو پیمنٹ، فلٹر کیپسول عمودی اور کم جگہ میں
 // 🆕 FM410SU299: سیف الماری — اردو ہنٹ ختم، پوری الماری دائیں سے بائیں (RTL)، آئٹم فہرست صاف ستھری
 // 🆕 FM410SU298: 🗄️ سیف الماری — منشی کے بل، آرڈر ٹیکنگ کے آرڈرز اور ریکوری رپورٹس کی مستقل کاپی، ایڈمن PIN سے بند، حذف تین وارننگ + PIN کے بعد، تاریخ/مہینہ/سال فلٹر
 // 🆕 FM410SU297: بل کی "ابھی وصول" لائن — اگلا بل بننے کے بعد بھی پرانے بل پر وصولی وہی رہے (اس کے وقت سے اگلے بل کے وقت تک کی وصولیاں)
@@ -8812,7 +8833,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM410SU299'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM410SU300'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9499,6 +9520,7 @@ const HOME_SHORTCUT_OPTIONS = [
   {key:'advanceorders', icon:'📝', label:'Pending Orders', screen:'advanceorders'},
   {key:'customers',     icon:'👥', label:'گاہک',      screen:'customers'},
   {key:'suppliers',     icon:'🚚', label:'بیوپاری',      screen:'suppliers'},
+  {key:'purchaseorders', icon:'📦', label:'بیوپاری خریداری', screen:'purchaseorders'},
   {key:'recoveryList',  icon:'💰', label:'وصولی لسٹ',  screen:'recoveryList'},
   {key:'safevault',     icon:'🗄️', label:'سیف الماری', screen:'safevault'},
   // ---------- 🍇 صدام کی ہدایت پر: Dashboard, Categories, Purchase Orders, Stock Adjustment, Trends —
@@ -9600,7 +9622,7 @@ function renderHomeIconGrid(){
     // ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): "پراڈکٹس" کا ہوم آئیکن مکمل چھپا دیا (سٹاک مینجمنٹ اب وہی کام
     // کرتی ہے) — کوڈ/فنکشن/ASSIGNABLE_SCREENS اندراج بالکل محفوظ ہے، صرف یہاں سے فلٹر کیا گیا ---------- -->
     if(key === 'products') return null;
-    if(key === 'purchaseorders') return null; // 🛒 FM310SA285: ہوم سے "بیوپاری خریداری" بٹن ختم — اب بیوپاری کے اندر "خریداری" ہے
+    // 📦 FM410SU300: "بیوپاری خریداری" ہوم آئیکن واپس (صدام کی ہدایت) — بیوپاری کے اندر والی "خریداری" ویسے ہی قائم
     const def = ASSIGNABLE_SCREENS.find(s => s.key === key);
     if(!def) return null;
     const spaceIdx = def.label.indexOf(' ');
@@ -25940,7 +25962,7 @@ function renderPurchaseOrdersScreen(){
   const supplierSelect = document.getElementById('poSupplierFilterSelect');
   const currentSupplierVal = supplierSelect.value || 'all';
   const uniqueSuppliers = [...new Map(allOrders.map(po => [po.supplier_id, po.supplier_name])).entries()];
-  supplierSelect.innerHTML = `<option value="all">🏭 تمام سپلائرز</option>` +
+  supplierSelect.innerHTML = `<option value="all">🏭 تمام بیوپاری</option>` +
     uniqueSuppliers.map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
   supplierSelect.value = uniqueSuppliers.some(([id]) => String(id) === currentSupplierVal) ? currentSupplierVal : 'all';
 
@@ -25958,7 +25980,7 @@ function renderPurchaseOrdersScreen(){
 
   // ---------- خلاصہ پٹی ----------
   const totalAmount = filtered.reduce((s,po) => s + po.total, 0);
-  document.getElementById('poSummaryBar').innerHTML = `<span>پرچیز آرڈرز</span><span>${filtered.length} آرڈر • Rs. ${totalAmount.toLocaleString()}</span>`;
+  document.getElementById('poSummaryBar').innerHTML = `<span>📦 بیوپاری خریداری</span><span>${filtered.length} آرڈر • Rs. ${totalAmount.toLocaleString()}</span>`;
 
   const wrap = document.getElementById('poListWrap');
   if(filtered.length === 0){
@@ -25969,25 +25991,44 @@ function renderPurchaseOrdersScreen(){
   wrap.innerHTML = filtered.map(po => {
     const isPending = po.status !== 'received';
     const daysPending = daysSince(po.date);
+    const sup = suppliersData.find(x => x.supplier_id === po.supplier_id) || {};
+    const bal = Number(sup.total_payable) || 0, wal = Number(sup.wallet_balance) || 0;
     const statusTag = isPending
       ? `<span class="pendingStatusTag pending">⏳ زیرِ التوا • ${daysPending} دن</span>`
-      : `<span class="pendingStatusTag approved">✅ موصول ہو چکا</span>`;
+      : `<span class="pendingStatusTag approved">✅ موصول</span>`;
+    const balHtml = bal > 0
+      ? `<span style="color:#b91c1c;">📤 بقایا (ہم نے دینا): Rs. ${bal.toLocaleString()}</span>`
+      : (wal > 0 ? `<span style="color:#15803d;">💳 ایڈوانس اس کے پاس: Rs. ${wal.toLocaleString()}</span>` : `<span style="color:#15803d;">✅ کھاتہ صاف</span>`);
     return `
-      <div class="billCard" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
-        <div>
-          <div class="bNo">🏭 ${po.supplier_name} ${statusTag}</div>
-          <div class="bMeta">${po.date} | ${po.items.length} آئٹم | Rs. ${po.total.toLocaleString()}</div>
-        </div>
-        <div class="billActions">
-          <button class="btnPrint" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})" ${isPending ? '' : 'style="min-width:130px; padding:12px 18px; font-size:15px; font-weight:900;"'}>🖨️ پرنٹ</button>
+      <div class="poCard" dir="rtl">
+        <div class="poTop"><span class="poName">🏭 ${po.supplier_name}</span>${statusTag}</div>
+        <div class="poMeta">${po.date} | ${po.items.length} آئٹم | Rs. ${po.total.toLocaleString()}</div>
+        <div class="poBal">${balHtml}</div>
+        <div class="poActs">
+          <button style="background:#eef2ff; color:var(--primary-dark);" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})">🖨️ پرنٹ</button>
+          <button style="background:#dcfce7; color:#166534;" onclick="poPaySupplier(${po.supplier_id})">💵 پیمنٹ</button>
           ${isPending
-            ? `<button class="btnReceiveShipment" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 مال وصول کریں</button>
-               <button class="btnPrint" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 یاد دہانی</button>
-               <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="deletePendingPurchaseOrder(${po.supplier_id}, ${po.po_idx}); renderPurchaseOrdersScreen();">🗑️ حذف کریں</button>`
-            : ''}<!-- 🧾 FM210FR280: "مال واپس کریں" بٹن ہٹا دیا (صدام کی ہدایت — واپسی کا کام نہیں ہوتا) -->
+            ? `<button style="background:var(--primary); color:#fff;" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 مال وصول</button>
+               <button style="background:#eef2ff; color:var(--primary-dark);" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 یاد دہانی</button>
+               <button style="background:#fee2e2; color:#b91c1c;" onclick="deletePendingPurchaseOrder(${po.supplier_id}, ${po.po_idx}); renderPurchaseOrdersScreen();">🗑️ حذف</button>`
+            : ''}
         </div>
       </div>`;
   }).join('');
+}
+
+// ---------- 💵 FM410SU300: بیوپاری خریداری سکرین سے ہی بیوپاری کو پیمنٹ — وہی موجودہ ادائیگی کا نظام (بقایا/والٹ/کیش/رسید)،
+// بس ادائیگی کے بعد پروفائل کھلنے کی بجائے یہی سکرین تازہ ہوتی ہے۔ رسید پر پچھلا اور نیا بقایا آتا ہے،
+// اور اسی دن کی خریداری کا 🖨️ پرنٹ کھولیں تو اس میں بھی ادائیگی اور آخری بقایا درج ہوتا ہے ----------
+function poPaySupplier(supplierId){
+  openPaySupplierModal(supplierId, 'pay');
+  window.__payFromPo = true;
+}
+function poPayFromTop(){
+  const sel = document.getElementById('poSupplierFilterSelect');
+  const v = sel ? sel.value : 'all';
+  if(!v || v === 'all'){ alert('پہلے اوپر والی فہرست سے بیوپاری منتخب کریں، پھر پیمنٹ کا بٹن دبائیں۔\n\n(یا کسی بھی آرڈر کے نیچے 💵 پیمنٹ دبائیں)'); return; }
+  poPaySupplier(Number(v));
 }
 
 // ---------- کسٹمر کو بقایہ رقم کا ریمائنڈر بھیجیں — انفرادی بلوں کی فہرست + میرے پیمنٹ اکاؤنٹس کے ساتھ ----------
@@ -26480,6 +26521,7 @@ function normalizeSupplierBalance(s, reasonNote){
 }
 
 function openPaySupplierModal(supplierId, onlyMode){
+  window.__payFromPo = false; // 💵 FM410SU300: پیمنٹ بٹن (poPaySupplier) خود اسے اس کے بعد true کرتا ہے
   if(onlyMode === 'receive'){ openSupLoanModal(supplierId); return; } // 📥 FM29SEP: نیا ٹیبل والا فارم
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
@@ -26593,6 +26635,7 @@ function confirmPaySupplier(){
   const s = suppliersData.find(x => x.supplier_id === activePaySupplierId);
   if(!s) return;
 
+  const _fromPo = !!window.__payFromPo; // 💵 FM410SU300
   const sp = calcSupplierSplit(s, amount, discount, mode);
   // ---------- 💳 صدام کی ہدایت (FM28SEP شام): زیادہ ادائیگی یا وصولی پر تصدیقی پیغام میں پورا حساب لکھا آئے ----------
   if(sp.toWallet > 0 || mode === 'receive'){
@@ -26653,7 +26696,9 @@ function confirmPaySupplier(){
   pushSuppliersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 2): ادائیگی کے بعد بقایا فوراً کلاؤڈ میں ----------
   pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): Cash in Hand کی تبدیلی فوراً کلاؤڈ میں ----------
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
-  openSupplierProfile(s.supplier_id); // پروفائل فوراً تازہ ترین حالت (بقایا + والٹ خانہ) میں دوبارہ کھلے
+  window.__payFromPo = false;
+  if(_fromPo){ try{ renderPurchaseOrdersScreen(); }catch(e){} } // 💵 FM410SU300: خریداری سکرین پر ہی رہیں
+  else openSupplierProfile(s.supplier_id); // پروفائل فوراً تازہ ترین حالت (بقایا + والٹ خانہ) میں دوبارہ کھلے
   if(savedPayment) sharePaymentReceiptImage(savedPayment.payment_id);
 }
 
