@@ -8797,7 +8797,9 @@ function getDeveloperContact(){
 // 🆕 FM310SA290: رابطہ کالم — کال/واٹس ایپ بٹن ہمیشہ نظر آئیں (نمبر نہ ہو تو دھندلے، دبانے پر پیغام)، ساتھ ساتھ ایک قطار میں
 // 🆕 FM310SA292: (1) سیلزمین کے بل کی منظوری پر مزدوری/اضافی چارجز جمع (2) Record Payment میں بینک/والٹ سے کیش نہ بدلے (3) Void پر واپس شدہ مقدار دوبارہ سٹاک میں نہ جائے (4) ادھار بل کی واپسی پہلے بقایا سے کٹے (5) ریکوری دوبارہ کنفرم نہ ہو
 // 🆕 FM310SA291: غیر حاضر سبزی میں سٹاک ہو تو غیر حاضر نہیں ہوگی (وارننگ)، اور غیر حاضر سبزیاں رپورٹوں/پرنٹ فہرستوں سے غائب
-const APP_BUILD_VERSION = 'FM310SA292'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
+// 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
+const APP_BUILD_VERSION = 'FM410SU294'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -44120,7 +44122,11 @@ function getPurchaseChalanReportData(){
         if(sold && !c.ratePending){
           profit = Math.round(sold.revenue - sold.qty * ((Number(c.rate) || 0) + (Number(v.labor) || 0)));
         }
-        chalanRows.push({...base, source: chalanSourceLabel(c).replace(/^\S+\s/, ''), inQty: pq, soldQty: sold ? Math.round(sold.qty * 100) / 100 : 0, left: Number(c.qty) || 0,
+        // 🆕 FM410SU293 (صدام کی ہدایت): "سیل ہوا" کی جگہ اسلام آباد کی قیمت فروخت — چالان کی اپنی، نہ ہو تو (پرانے چالان) ورائنٹ کی
+        let sellIsb = Number(c.retail);
+        if(!(sellIsb > 0) && (isLegacyChalan(c) || !chalanNeedsAccounting(c))) sellIsb = Number(v.retail);
+        if(!(sellIsb > 0)) sellIsb = null;
+        chalanRows.push({...base, source: chalanSourceLabel(c).replace(/^\S+\s/, ''), inQty: pq, soldQty: sold ? Math.round(sold.qty * 100) / 100 : 0, sellIsb, left: Number(c.qty) || 0,
           rate: c.ratePending ? null : Number(c.rate) || 0, profit});
       }
     });
@@ -44187,7 +44193,7 @@ async function renderPurchaseChalanReportToCanvas(){
     // 🧾 FM310SA286 (صدام کی ہدایت): کیپشن اور ترتیب (دائیں سے بائیں): حاضر سٹاک، ریٹ، سیل ہوا، باقی سٹاک، منافع — ڈیٹا ہر کالم کے ساتھ ہی شفٹ
     {key:'inQty', label:'حاضر سٹاک', frac:0.125, num:true},
     {key:'rate', label:'ریٹ', frac:0.11, num:true},
-    {key:'soldQty', label:'سیل ہوا', frac:0.11, num:true},
+    {key:'sellIsb', label:'قیمتیں فروخت', frac:0.13, num:true},
     {key:'left', label:'باقی سٹاک', frac:0.125, num:true},
     {key:'profit', label:'منافع', frac:0.14, num:true},
   ]);
@@ -44218,17 +44224,17 @@ async function renderPurchaseChalanReportToCanvas(){
   blocks.push({t:'gap'});
   blocks.push({t:'summary', text:`نقد: ${cashTotal.toLocaleString()}   |   بیوپاری: ${supTotal.toLocaleString()}   |   کل خرید: ${(cashTotal + supTotal).toLocaleString()}`});
   blocks.push({t:'gap'});
-  blocks.push({t:'section', text:'🧾 چالان وار — حاضر سٹاک، ریٹ، سیل ہوا، باقی سٹاک، منافع', color:'#134e2c'});
+  blocks.push({t:'section', text:'🧾 چالان وار — حاضر سٹاک، ریٹ، قیمتیں فروخت، باقی سٹاک، منافع', color:'#134e2c'});
   blocks.push({t:'head', cols: chalanCols});
   let profitTotal = 0;
   if(data.chalanRows.length === 0) blocks.push({t:'empty', text:'کوئی چالان نہیں'});
   data.chalanRows.forEach((r, i) => {
     if(r.profit) profitTotal += r.profit;
-    blocks.push({t:'row', cols: chalanCols, idx:i, cells:{name: r.name, sub: `#${r.chalanNo} — ${r.source}${r.label ? ' — ' + r.label : ''}`, serial: r.serial, inQty: r.inQty, soldQty: r.soldQty, left: r.left, rate: fmt(r.rate), profit: r.soldQty ? fmt(r.profit) : '—'}, profitColor: r.profit});
+    blocks.push({t:'row', cols: chalanCols, idx:i, cells:{name: r.name, trader: r.source, sub3: `#${r.chalanNo}${r.label ? ' — ' + r.label : ''}`, serial: r.serial, inQty: r.inQty, sellIsb: fmt(r.sellIsb), left: r.left, rate: fmt(r.rate), profit: r.soldQty ? fmt(r.profit) : '—'}, profitColor: r.profit});
   });
   if(data.chalanRows.length) blocks.push({t:'total', cols: chalanCols, cells:{name:'کل منافع', profit: profitTotal.toLocaleString()}});
 
-  const hOf = (b) => b.t === 'section' ? sectionH : b.t === 'sub' ? Math.round(fsItem * 2.3) : b.t === 'head' ? headerRowH : b.t === 'gap' ? gapH : b.t === 'summary' ? Math.round(fsSection * 2.4) : rowH;
+  const hOf = (b) => b.t === 'section' ? sectionH : b.t === 'sub' ? Math.round(fsItem * 2.3) : b.t === 'head' ? headerRowH : b.t === 'gap' ? gapH : b.t === 'summary' ? Math.round(fsSection * 2.4) : (b.t === 'row' && b.cols === chalanCols) ? Math.round(rowH * 1.55) : rowH;
 
   // ---------- سرخی ---------- -->
   const fitFont = (text, maxW, px, weight, fam) => {
@@ -44322,6 +44328,24 @@ async function renderPurchaseChalanReportToCanvas(){
           const hasBadge = b.cells.serial !== null && b.cells.serial !== undefined;
           const tx = cellX(c) - (hasBadge ? badgeD + 4 : 0);
           ctx.textAlign = 'right';
+          if(b.cells.trader){
+            // 🆕 FM410SU293: چالان وار قطار — اوپر سبزی، بیچ میں بیوپاری کا نام موٹا اور صاف، نیچے چالان نمبر/پیکنگ
+            const wAvail = c.width - 8 - (hasBadge ? badgeD + 4 : 0);
+            const q1 = fitFont(v, wAvail, fsItem, 'bold');
+            const l1 = y + h * 0.32;
+            ctx.fillText(v, tx, l1);
+            ctx.fillStyle = '#1e3a8a';
+            fitFont(b.cells.trader, wAvail, fsItem, 'bold');
+            ctx.fillText(b.cells.trader, tx, y + h * 0.62);
+            if(b.cells.sub3){
+              ctx.fillStyle = '#475569';
+              fitFont(b.cells.sub3, wAvail, Math.round(q1 * 0.78));
+              ctx.fillText(b.cells.sub3, tx, y + h * 0.90);
+            }
+            ctx.restore();
+            if(hasBadge){ try{ drawSerialBadge(ctx, cellX(c) - badgeD/2, l1 - Math.round(q1 * 0.3), badgeD/2, b.cells.serial); }catch(e){} }
+            return;
+          }
           const p1 = fitFont(v, c.width - 8 - (hasBadge ? badgeD + 4 : 0), fsItem, 'bold');
           ctx.fillText(v, tx, y + h/2 - 2);
           if(b.cells.sub){
@@ -44337,6 +44361,11 @@ async function renderPurchaseChalanReportToCanvas(){
         ctx.textAlign = c.num ? 'center' : 'right';
         if(c.key === 'profit' && typeof b.profitColor === 'number') ctx.fillStyle = b.profitColor < 0 ? '#b91c1c' : '#15803d';
         if(String(v).includes('⏳')) ctx.fillStyle = '#b45309';
+        // 🆕 FM410SU294 (صدام کی ہدایت): چالان وار قطار میں "باقی سٹاک" صفر سے زیادہ ہو تو اس خانے کا بیک گراؤنڈ سرخ اور لکھائی سفید؛ صفر یا ڈیش ہو تو عام رنگ
+        if(c.key === 'left' && b.t === 'row' && b.cols === chalanCols && Number(v) > 0){
+          ctx.fillStyle = '#dc2626'; ctx.fillRect(c.x + 1, y + 1, c.width - 1, h - 1);
+          ctx.fillStyle = '#ffffff';
+        }
         const weight = (b.t === 'total' || c.key === 'amount' || c.key === 'profit') ? '900' : '';
         fitFont(String(v), c.width - 6, fsItem, weight, isNumTxt ? numFontFam : fontFam);
         ctx.fillText(String(v), cellX(c), y + h/2 + fsItem * 0.32);
