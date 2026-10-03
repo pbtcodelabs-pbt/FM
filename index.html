@@ -8797,9 +8797,12 @@ function getDeveloperContact(){
 // 🆕 FM310SA290: رابطہ کالم — کال/واٹس ایپ بٹن ہمیشہ نظر آئیں (نمبر نہ ہو تو دھندلے، دبانے پر پیغام)، ساتھ ساتھ ایک قطار میں
 // 🆕 FM310SA292: (1) سیلزمین کے بل کی منظوری پر مزدوری/اضافی چارجز جمع (2) Record Payment میں بینک/والٹ سے کیش نہ بدلے (3) Void پر واپس شدہ مقدار دوبارہ سٹاک میں نہ جائے (4) ادھار بل کی واپسی پہلے بقایا سے کٹے (5) ریکوری دوبارہ کنفرم نہ ہو
 // 🆕 FM310SA291: غیر حاضر سبزی میں سٹاک ہو تو غیر حاضر نہیں ہوگی (وارننگ)، اور غیر حاضر سبزیاں رپورٹوں/پرنٹ فہرستوں سے غائب
+// 🆕 FM410SU297: بل کی "ابھی وصول" لائن — اگلا بل بننے کے بعد بھی پرانے بل پر وصولی وہی رہے (اس کے وقت سے اگلے بل کے وقت تک کی وصولیاں)
+// 🆕 FM410SU296: بل کی "ابھی وصول" لائن — منسوخ بل کو آخری بل نہ گننا، اور تصدیق شدہ وصولی ریکوری لسٹ کی انٹری سے بھی گننا
+// 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM410SU294'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM410SU297'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -37462,13 +37465,26 @@ function getBillSummaryRows(invoice){
   let laterRecovery = 0;
   try{
     if(invoice.customer_id && invoice.invoice_id !== 'DRAFT' && hasOldCredit){
-      const mine = invoicesData.filter(x => x.customer_id === invoice.customer_id);
-      const latest = mine.reduce((m, x) => (!m || (x.created_at || '') > (m.created_at || '')) ? x : m, null);
-      if(latest && latest.invoice_id === invoice.invoice_id){
+      // 🔧 FM410SU297 (صدام کی ہدایت): جو وصولی کسی بل کے بعد، اگلا بل بننے سے پہلے آئی وہ اسی بل کی ہے — اگلا بل بننے کے بعد بھی
+      // دوبارہ پرنٹ/شیئر پر وہی رہے گی، کبھی صفر نہیں ہوگی۔ اگلے بل کی اپنی صورتحال اس کے اپنے وقت سے شروع ہوتی ہے۔
+      // (پچھلے ورژن میں صرف "آخری بل" کو وصولی ملتی تھی، اس لیے نیا بل بنتے ہی پرانے بل پر صفر آ جاتا تھا)
+      const _ts = (v) => new Date(v || 0).getTime() || 0;
+      const mine = invoicesData.filter(x => x.customer_id === invoice.customer_id && x.status !== 'voided');
+      const billTs = _ts(invoice.created_at);
+      const laterBills = mine.filter(x => x.invoice_id !== invoice.invoice_id && _ts(x.created_at) > billTs).sort((a, b) => _ts(a.created_at) - _ts(b.created_at));
+      const recEntries = recoveryListData.filter(r => r.customer_id === invoice.customer_id && (r.status === 'pending' || r.status === 'confirmed'));
+      if(laterBills.length === 0){
+        // ---------- یہی اس کسٹمر کا آخری بل ہے: کچی وصولی + تصدیق شدہ وصولی (بقایہ کے فرق یا ریکوری لسٹ کی انٹری، جو بڑی ہو) ----------
         const cu = customersData.find(c => c.customer_id === invoice.customer_id);
-        const pend = recoveryListData.filter(r => r.customer_id === invoice.customer_id && r.status === 'pending').reduce((a, r) => a + (Number(r.amount) || 0), 0);
+        const pend = recEntries.filter(r => r.status === 'pending').reduce((a, r) => a + (Number(r.amount) || 0), 0);
         const confirmedLater = cu ? Math.max(0, (Number(invoice.new_balance) || 0) - (Number(cu.total_receivable) || 0)) : 0;
-        laterRecovery = pend + confirmedLater;
+        const confirmedFromList = recEntries.filter(r => r.status === 'confirmed' && _ts(r.createdAt || r.confirmedAt) >= billTs).reduce((a, r) => a + (Number(r.amount) || 0), 0);
+        laterRecovery = pend + Math.max(confirmedLater, confirmedFromList);
+      } else {
+        // ---------- اس کے بعد اور بل بن چکے ہیں: صرف وہ وصولیاں جو اس بل کے وقت سے اگلے بل کے وقت تک کی ہیں ----------
+        const nextTs = _ts(laterBills[0].created_at);
+        laterRecovery = recEntries.filter(r => { const t = _ts(r.createdAt || r.confirmedAt); return t >= billTs && t < nextTs; })
+          .reduce((a, r) => a + (Number(r.amount) || 0), 0);
       }
     }
   }catch(e){}
@@ -44192,8 +44208,8 @@ async function renderPurchaseChalanReportToCanvas(){
     {key:'name', label:'سبزی / چالان'},
     // 🧾 FM310SA286 (صدام کی ہدایت): کیپشن اور ترتیب (دائیں سے بائیں): حاضر سٹاک، ریٹ، سیل ہوا، باقی سٹاک، منافع — ڈیٹا ہر کالم کے ساتھ ہی شفٹ
     {key:'inQty', label:'حاضر سٹاک', frac:0.125, num:true},
-    {key:'rate', label:'ریٹ', frac:0.11, num:true},
-    {key:'sellIsb', label:'قیمتیں فروخت', frac:0.13, num:true},
+    {key:'rate', label:'خرید ریٹ', frac:0.12, num:true},
+    {key:'sellIsb', label:'فروخت ریٹ', frac:0.12, num:true},
     {key:'left', label:'باقی سٹاک', frac:0.125, num:true},
     {key:'profit', label:'منافع', frac:0.14, num:true},
   ]);
@@ -44224,7 +44240,7 @@ async function renderPurchaseChalanReportToCanvas(){
   blocks.push({t:'gap'});
   blocks.push({t:'summary', text:`نقد: ${cashTotal.toLocaleString()}   |   بیوپاری: ${supTotal.toLocaleString()}   |   کل خرید: ${(cashTotal + supTotal).toLocaleString()}`});
   blocks.push({t:'gap'});
-  blocks.push({t:'section', text:'🧾 چالان وار — حاضر سٹاک، ریٹ، قیمتیں فروخت، باقی سٹاک، منافع', color:'#134e2c'});
+  blocks.push({t:'section', text:'🧾 چالان وار — حاضر سٹاک، خرید ریٹ، فروخت ریٹ، باقی سٹاک، منافع', color:'#134e2c'});
   blocks.push({t:'head', cols: chalanCols});
   let profitTotal = 0;
   if(data.chalanRows.length === 0) blocks.push({t:'empty', text:'کوئی چالان نہیں'});
