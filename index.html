@@ -8833,7 +8833,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM410SU301'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM410SU302'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16794,47 +16794,46 @@ function showProductImportPreview(){
 
 function confirmProductCsvImport(){
   const rows = pendingProductImportRows;
-  const byName = new Map();
-  rows.forEach(r => {
-    const name = r['product name'];
-    if(!byName.has(name)) byName.set(name, []);
-    byName.get(name).push(r);
-  });
-
+  // ---------- 📦 FM410SU302: صدام کی ایپ کا اصول — ہر سبزی کی ایک ہی پیکنگ (ایک پراڈکٹ = ایک ویرینٹ)۔
+  // پہلے ایک ہی نام کی قطاریں ایک پراڈکٹ کے کئی ویرینٹ بن جاتی تھیں (پیاز لال: شاپر + فی کلو) — آرڈر بکنگ اور
+  // "مال آیا" میں پیکنگ کی جگہ "چنیں" اور پرانا انگریزی ڈبہ کھلتا تھا۔ اب ہر قطار الگ سبزی بنتی ہے؛
+  // نام + پیکنگ دونوں پہلے سے موجود ہوں تو وہی سبزی اپڈیٹ ہوتی ہے ---------- -->
   let addedProducts = 0, addedVariants = 0, updatedVariants = 0;
-
-  byName.forEach((variantRows, name) => {
-    let product = productsData.find(p => p.name.toLowerCase() === name.toLowerCase());
-    if(!product){
-      product = {product_id: nextProductId++, name, category: variantRows[0]['category'] || '', variants: []};
-      productsData.push(product);
-      addedProducts++;
-    }
-    variantRows.forEach(vr => {
-      const label = vr['variant label'] || 'Default';
-      let variant = product.variants.find(v => v.label.toLowerCase() === label.toLowerCase());
-      const data = {
-        label,
-        barcode: vr['barcode'] || '',
-        purchase: parseFloat(vr['purchase price']) || 0,
-        retail: parseFloat(vr['retail price']) || 0,
-        wholesale: parseFloat(vr['wholesale price']) || 0,
-        stock: parseFloat(vr['stock']) || 0,
-        lowStockAt: parseFloat(vr['low stock alert']) || 5,
-        expiryDate: vr['expiry date (yyyy-mm-dd)'] || '',
-        location: vr['location'] || '',
-      };
-      if(variant){
-        Object.assign(variant, data);
-        updatedVariants++;
-      } else {
-        product.variants.push({variant_id: nextVariantId++, ...data, image: null, salesCount: 0});
-        addedVariants++;
-      }
+  rows.forEach(vr => {
+    const name = String(vr['product name'] || '').trim();
+    if(!name) return;
+    const label = String(vr['variant label'] || '').trim() || 'Default';
+    const data = {
+      label,
+      barcode: vr['barcode'] || '',
+      purchase: parseFloat(vr['purchase price']) || 0,
+      retail: parseFloat(vr['retail price']) || 0,
+      wholesale: parseFloat(vr['wholesale price']) || 0,
+      stock: parseFloat(vr['stock']) || 0,
+      lowStockAt: parseFloat(vr['low stock alert']) || 5,
+      expiryDate: vr['expiry date (yyyy-mm-dd)'] || '',
+      location: vr['location'] || '',
+    };
+    let variant = null;
+    productsData.some(p => {
+      if(String(p.name || '').trim().toLowerCase() !== name.toLowerCase()) return false;
+      variant = (p.variants || []).find(v => String(v.label || '').trim().toLowerCase() === label.toLowerCase()) || null;
+      return !!variant;
     });
+    if(variant){
+      Object.assign(variant, data);
+      updatedVariants++;
+    } else {
+      productsData.push({product_id: nextProductId++, name, category: vr['category'] || '', variants: [{variant_id: nextVariantId++, ...data, image: null, salesCount: 0}]});
+      addedProducts++;
+      addedVariants++;
+    }
   });
 
   backfillMissingProductSerials(); // ---------- امپورٹ کی گئی نئی سبزیوں کو بھی سیریل نمبر مل جائے ---------- -->
+  // ☁️ FM410SU302: امپورٹ فوراً فون میں محفوظ + کلاؤڈ پر، تاکہ ملازمین کے فون پر بھی سبزیاں آئیں
+  try{ persistAllData(); }catch(e){}
+  try{ AppState.settings.productsPendingSync = true; pushProductsToCloud(); }catch(e){}
   document.getElementById('productImportPreviewModal').classList.remove('show');
   pendingProductImportRows = [];
   refreshAllScreens();
