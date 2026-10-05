@@ -8883,7 +8883,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM510MO307'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM510MO308'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -25160,7 +25160,7 @@ function enterPartyPage(tab){
 }
 
 // ---------- 🔎 صدام کی ہدایت (FM3SEPTH23): سپلائرز کے لیے بھی کسٹمرز جیسا فلٹر — کم بقایہ/زیادہ بقایہ ----------
-let supplierSortMode = loadFromStorage('supplierSortMode', 'name'); // 'name' | 'highest' | 'lowest'
+let supplierSortMode = loadFromStorage('supplierSortMode', 'newest'); // 'name' | 'highest' | 'lowest'
 function setSupplierSortMode(mode){
   supplierSortMode = mode;
   saveToStorage('supplierSortMode', mode);
@@ -25557,18 +25557,12 @@ function renderPartyList(query = ''){
     // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر فعال فلٹر مکمل ہائیڈ — ہمیشہ سب سپلائرز ---------- -->
     let filtered = suppliersData.filter(s => partyMatchesQuery(s, query));
     // ---------- 🔎 صدام کی ہدایت (FM3SEPTH23): کم/زیادہ بقایہ کی ترتیب ----------
-    if(supplierSortMode === 'highest') filtered.sort((a,b) => (b.total_payable||0) - (a.total_payable||0));
-    else if(supplierSortMode === 'lowest') filtered.sort((a,b) => (a.total_payable||0) - (b.total_payable||0));
-    // ---------- 🔢 صدام کی ہدایت (FM6SEPSU13): سپلائر کی اپنی مرضی کی ترتیب بھی — بالکل کسٹمر جیسی ---------- -->
-    else if(supplierSortMode === 'serial') filtered.sort((a,b) => (a.serial_no||a.supplier_id||0) - (b.serial_no||b.supplier_id||0));
-    else filtered.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ur'));
+    filtered = sortSuppliersList(filtered, supplierSortMode); // 🚚 FM510MO308: نئے/پرانے/زیادہ/کم بقایا/نام/سیریل
 
-    // ---------- فلٹر بار — دائیں سے بائیں (RTL) ---------- -->
-    const sortBtn = (val, label) => `<button onclick="setSupplierSortMode('${val}')" style="flex:1; padding:8px 4px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer; background:${supplierSortMode===val?'var(--primary)':'#f1f5f9'}; color:${supplierSortMode===val?'#fff':'var(--text)'};">${label}</button>`;
     const dormantCount = suppliersData.filter(s => !!s.isDormant).length;
     const presentCount = suppliersData.filter(s => !s.isDormant).length;
     // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر فعال فلٹر بار مکمل ہائیڈ (فنکشن محفوظ) ---------- -->
-    const filterBarHtml = `<div dir="rtl" style="display:flex; gap:6px; margin-bottom:8px;">${sortBtn('name','🔤 نام')}${sortBtn('serial','🔢 سیریل')}${sortBtn('highest','📈 زیادہ بقایہ پہلے')}${sortBtn('lowest','📉 کم بقایہ پہلے')}</div>
+    const filterBarHtml = supFilterRowHtml(null) + `
       <div dir="rtl" style="display:none; gap:6px; margin-bottom:12px;">
         <button onclick="setSupplierShowDormant(false)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${!supplierShowDormant?'#134e2c':'#f1f5f9'}; color:${!supplierShowDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🟢 حاضر سپلائرز (${presentCount})</button>
         <button onclick="setSupplierShowDormant(true)" style="flex:1; padding:8px; border-radius:8px; border:none; background:${supplierShowDormant?'#78350f':'#f1f5f9'}; color:${supplierShowDormant?'#fff':'var(--text)'}; font-size:12px; font-weight:800; cursor:pointer;">🪦 غیر فعال (${dormantCount})</button>
@@ -25766,6 +25760,7 @@ function startNewBillForCustomer(customerId){
 let profileMainMode = 'bills'; // 'bills' | 'transactions' — سائیڈبار کے "Transactions" بٹن سے بدلتا ہے
 
 function openCustomerProfile(customerId){
+  try{ hideSupProfileSwitchBar(); }catch(e){} // 🚚 FM510MO308
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
 
@@ -26170,6 +26165,7 @@ function openSupplierProfile(supplierId){
   `;
 
   renderSupplierMainContent(s.supplier_id);
+  try{ renderSupProfileSwitchBar(s.supplier_id); }catch(e){} // 🚚 FM510MO308: پروفائل کے اندر سے دوسرا بیوپاری
   document.getElementById('profileModal').classList.add('show');
 }
 
@@ -26569,6 +26565,284 @@ function normalizeSupplierBalance(s, reasonNote){
   }
 }
 
+// ---------- 🚚 FM510MO308 (صدام کی ہدایت): بیوپاری کی ترتیب + "تمام بیوپاری" چناؤ — فہرست اور پروفائل دونوں میں ایک ہی لائن،
+// تاکہ ایک بیوپاری کی پروفائل میں کام کرتے کرتے وہیں سے دوسرے کی پروفائل کھل جائے ---------- -->
+const SUP_SORT_OPTIONS = [
+  ['newest', '🕐 نئے پہلے'], ['oldest', '🕐 پرانے پہلے'],
+  ['highest', '📈 زیادہ بقایا پہلے'], ['lowest', '📉 کم بقایا پہلے'],
+  ['name', '🔤 نام سے'], ['serial', '🔢 سیریل سے']
+];
+function sortSuppliersList(list, mode){
+  const arr = list.slice();
+  const pay = s => Number(s.total_payable) || 0;
+  if(mode === 'newest') arr.sort((a,b) => (b.supplier_id||0) - (a.supplier_id||0));
+  else if(mode === 'oldest') arr.sort((a,b) => (a.supplier_id||0) - (b.supplier_id||0));
+  else if(mode === 'highest') arr.sort((a,b) => pay(b) - pay(a));
+  else if(mode === 'lowest') arr.sort((a,b) => pay(a) - pay(b));
+  else if(mode === 'serial') arr.sort((a,b) => (a.serial_no||a.supplier_id||0) - (b.serial_no||b.supplier_id||0));
+  else arr.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ur'));
+  return arr;
+}
+function supFilterRowHtml(currentId){
+  const capCss = "flex:1; min-width:0; height:38px; border:1.5px solid #d8c2e6; background:#fff; color:#6b21a8; border-radius:19px; font-size:15px; font-weight:700; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; padding:0 10px; appearance:none; -webkit-appearance:none; text-align-last:center; cursor:pointer;";
+  const sortOpts = SUP_SORT_OPTIONS.map(([v,l]) => `<option value="${v}" ${supplierSortMode===v?'selected':''}>${l}</option>`).join('');
+  const sups = sortSuppliersList(suppliersData, supplierSortMode);
+  const supOpts = `<option value="">🏭 تمام بیوپاری (${sups.length})</option>` + sups.map(s => {
+    const p = Number(s.total_payable) || 0;
+    const tag = p > 0 ? ` — Rs. ${p.toLocaleString()}` : '';
+    return `<option value="${s.supplier_id}" ${s.supplier_id===currentId?'selected':''}>${(s.name||'').replace(/</g,'&lt;')}${tag}</option>`;
+  }).join('');
+  return `<div dir="rtl" style="display:flex; gap:6px; margin-bottom:8px;">
+    <select style="${capCss}" onchange="setSupplierSortMode(this.value)">${sortOpts}</select>
+    <select style="${capCss}" onchange="if(this.value) openSupplierProfile(Number(this.value))">${supOpts}</select>
+  </div>`;
+}
+function renderSupProfileSwitchBar(supplierId){
+  const fig = document.getElementById('profileFigures');
+  if(!fig || !fig.parentNode) return;
+  let bar = document.getElementById('supProfileSwitchBar');
+  if(!bar){ bar = document.createElement('div'); bar.id = 'supProfileSwitchBar'; }
+  const head = document.getElementById('profileHeadContacts');
+  const anchor = (head && head.parentNode === fig.parentNode) ? head.nextSibling : fig;
+  fig.parentNode.insertBefore(bar, anchor);
+  bar.style.display = '';
+  bar.style.margin = '6px 0 4px';
+  bar.innerHTML = supFilterRowHtml(supplierId);
+}
+function hideSupProfileSwitchBar(){
+  const bar = document.getElementById('supProfileSwitchBar');
+  if(bar) bar.style.display = 'none';
+}
+
+// ---------- 🗨️ FM510MO308: اردو نستعلیق تصدیقی/اطلاعی ڈبہ — فون کا انگریزی/ایریل والا چھوٹا پیغام نہیں ---------- -->
+function uDialog(opts){
+  opts = opts || {};
+  return new Promise(resolve => {
+    let ov = document.getElementById('uDialogOverlay');
+    if(!ov){
+      ov = document.createElement('div');
+      ov.id = 'uDialogOverlay';
+      ov.style.cssText = 'position:fixed; inset:0; z-index:99990; background:rgba(15,23,42,.55); display:none; align-items:center; justify-content:center; padding:16px;';
+      document.body.appendChild(ov);
+    }
+    const urF = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif";
+    const tone = opts.tone || 'green';
+    const head = tone === 'red' ? 'linear-gradient(135deg,#dc2626,#7f1d1d)' : (tone === 'amber' ? 'linear-gradient(135deg,#f59e0b,#92400e)' : 'linear-gradient(135deg,#16a34a,#14532d)');
+    const rows = (opts.rows || []).map(r => `<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 12px; margin-top:6px; border-radius:12px; background:${r.big ? '#14532d' : (r.bg || '#f1f5f9')}; color:${r.big ? '#fff' : (r.fg || '#0f172a')};">
+        <span style="font-size:${r.big ? 20 : 17}px; font-weight:700;">${r.label}</span>
+        <span dir="ltr" style="font-family:Arial,sans-serif; font-weight:900; font-size:${r.big ? 19 : 16}px; white-space:nowrap;">${r.value}</span></div>`).join('');
+    const msg = opts.message ? `<div style="font-size:18px; line-height:2; margin-top:4px;">${opts.message}</div>` : '';
+    ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:400px; background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 18px 50px rgba(0,0,0,.35); font-family:${urF};">
+      <div style="background:${head}; color:#fff; padding:12px 16px; font-size:22px; font-weight:700; text-align:center; line-height:1.9;">${opts.title || 'تصدیق'}</div>
+      <div style="padding:10px 14px 4px; color:#0f172a;">${msg}${rows}</div>
+      <div style="display:flex; gap:8px; padding:12px 14px 14px;">
+        ${opts.cancelText === null ? '' : `<button type="button" id="uDialogNo" style="flex:1; height:46px; border:none; border-radius:14px; background:#e2e8f0; color:#334155; font-family:${urF}; font-size:18px; font-weight:700; cursor:pointer;">${opts.cancelText || 'منسوخ'}</button>`}
+        <button type="button" id="uDialogYes" style="flex:1.4; height:46px; border:none; border-radius:14px; background:${head}; color:#fff; font-family:${urF}; font-size:19px; font-weight:700; cursor:pointer;">${opts.okText || 'ٹھیک ہے'}</button>
+      </div></div>`;
+    ov.style.display = 'flex';
+    const done = v => { ov.style.display = 'none'; ov.innerHTML = ''; resolve(v); };
+    ov.querySelector('#uDialogYes').onclick = () => done(true);
+    const no = ov.querySelector('#uDialogNo'); if(no) no.onclick = () => done(false);
+    ov.onclick = e => { if(e.target === ov && opts.cancelText !== null) done(false); };
+  });
+}
+function uAlert(title, message, tone){ return uDialog({ title, message, okText: 'ٹھیک ہے', cancelText: null, tone: tone || 'amber' }); }
+
+// ---------- 🧾 FM510MO308: بیوپاری کی ادائیگی/وصولی کی رسید — تھرمل پرنٹر (58/80mm) کے لیے اردو نستعلیق، دائیں سے بائیں،
+// اوپر بیوپاری کی تصویر، نام، موبائل، پورا حساب، آخری لین دین، اور نیچے دکان کا رابطہ نمبر ---------- -->
+let _supRcptPaymentId = null, _supRcptCanvas = null;
+function _supLedgerLabel(e){
+  if(!e) return '';
+  if(e.type === 'payment') return e.isDiscount ? 'چھوٹ (ڈسکاؤنٹ)' : 'ادائیگی (ہم نے دیے)';
+  if(e.type === 'received') return 'وصولی (ہم نے لیے)';
+  if(e.type === 'return') return 'مال واپسی';
+  if(e.type === 'wallet_deposit') return 'ایڈوانس (والٹ) میں جمع';
+  if(e.type === 'wallet_adjust') return 'ایڈوانس سے کٹوتی';
+  return e.type || '';
+}
+async function drawSupplierReceiptCanvas(p){
+  const urF = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif";
+  const numF = "'Arial Black',Arial,sans-serif";
+  try{ await document.fonts.load(`bold 30px ${urF}`); await document.fonts.ready; }catch(e){}
+  const s = suppliersData.find(x => x.supplier_id === p.party_id) || {};
+  const W = (AppState.settings.paperWidth || 80) === 58 ? 384 : 576;
+  const k = W / 576;
+  const m = Math.round(14 * k), fs = Math.round(25 * k), rowH = Math.round(54 * k);
+  const isPay = p.direction !== 'in';
+  const fmt = n => 'Rs. ' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString();
+  const disc = Number(p.discount) || 0;
+  const walletAdded = Number(p.wallet_added) || 0;
+  const walletAfter = Number(p.wallet_after != null ? p.wallet_after : (s.wallet_balance || 0)) || 0;
+  const before = Number(p.balance_before) || 0;
+  const after = Number(p.balance_after != null ? p.balance_after : (s.total_payable || 0)) || 0;
+
+  const rows = [];
+  rows.push({ label: 'سابقہ بقایا (ہم نے دینا تھا)', value: fmt(before) });
+  if(disc > 0) rows.push({ label: 'چھوٹ (ڈسکاؤنٹ)', value: '- ' + fmt(disc) });
+  rows.push({ label: isPay ? 'ادا کی گئی رقم' : 'بیوپاری سے لی گئی رقم', value: fmt(p.amount), big: true });
+  if(isPay && walletAdded > 0){
+    rows.push({ label: 'بقایا', value: 'مکمل صاف ✓' });
+    rows.push({ label: 'ایڈوانس (ہمارا اس کے پاس)', value: fmt(walletAfter) });
+  } else {
+    rows.push({ label: 'اب باقی بقایا', value: fmt(after), strong: true });
+    if(walletAfter > 0) rows.push({ label: 'ایڈوانس (ہمارا اس کے پاس)', value: fmt(walletAfter) });
+  }
+  const method = (p.method && p.method !== 'Cash') ? p.method : 'نقد';
+  rows.push({ label: 'طریقہ', value: method + (p.account_number ? '  ' + p.account_number : '') });
+
+  const ledger = (s.ledgerHistory || []).filter(e => e && e.type !== 'wallet_adjust').slice(0, 6);
+  const meas = document.createElement('canvas').getContext('2d');
+  meas.font = `${fs - 2}px ${urF}`;
+  const userNote = String(p.note || '').split(' — ').filter(x => !/^(🏷️|💳|➕)/.test(x.trim())).join(' — ').trim();
+  const noteLines = userNote ? _loanWrap(meas, userNote, W - m * 2 - 10) : [];
+
+  const AV = Math.round(62 * k);
+  let photo = null;
+  if(s.photo){ try{ photo = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = s.photo; }); }catch(e){ photo = null; } }
+
+  let H = 70 * k + 66 * k + (AV * 2 + 20 * k) + 120 * k + rows.length * rowH + 30 * k;
+  if(noteLines.length) H += 20 * k + noteLines.length * (fs + 14 * k);
+  if(ledger.length) H += 70 * k + ledger.length * (fs + 20 * k);
+  H += 200 * k;
+  H = Math.round(H);
+
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.fillStyle = '#000';
+  x.textAlign = 'center';
+  let y = Math.round(48 * k);
+  x.font = `bold ${Math.round(38 * k)}px ${urF}`; x.fillText(AppState.settings.businessName || 'منڈی', W/2, y);
+  y += Math.round(18 * k);
+  // عنوان — سیاہ پٹی پر سفید
+  x.fillRect(m, y, W - m*2, Math.round(52 * k));
+  x.fillStyle = '#fff'; x.font = `bold ${Math.round(29 * k)}px ${urF}`;
+  x.fillText(isPay ? 'بیوپاری کو ادائیگی کی رسید' : 'بیوپاری سے وصولی کی رسید', W/2, y + Math.round(37 * k));
+  x.fillStyle = '#000';
+  y += Math.round(52 * k + 14 * k);
+  // تصویر
+  const cx = W/2, cy = y + AV;
+  x.save(); x.beginPath(); x.arc(cx, cy, AV, 0, Math.PI*2); x.closePath(); x.clip();
+  if(photo){
+    const sc = Math.max(AV*2/photo.width, AV*2/photo.height);
+    x.filter = 'grayscale(1) contrast(1.15)';
+    x.drawImage(photo, cx - photo.width*sc/2, cy - photo.height*sc/2, photo.width*sc, photo.height*sc);
+    x.filter = 'none';
+  } else {
+    x.fillStyle = '#e5e7eb'; x.fillRect(cx-AV, cy-AV, AV*2, AV*2);
+    x.fillStyle = '#000'; x.font = `${Math.round(54 * k)}px sans-serif`; x.fillText('🏭', cx, cy + Math.round(19 * k));
+  }
+  x.restore();
+  x.lineWidth = Math.max(2, 3 * k); x.strokeStyle = '#000'; x.beginPath(); x.arc(cx, cy, AV, 0, Math.PI*2); x.stroke();
+  y = cy + AV + Math.round(44 * k);
+  x.fillStyle = '#000';
+  x.font = `bold ${Math.round(33 * k)}px ${urF}`; x.fillText(s.name || p.party_name || '', W/2, y);
+  y += Math.round(36 * k);
+  x.font = `bold ${Math.round(21 * k)}px ${numF}`;
+  x.fillText(s.phone ? '📱 ' + s.phone : '', W/2, y);
+  y += Math.round(32 * k);
+  const dt = p.created_at ? new Date(p.created_at) : new Date();
+  x.font = `bold ${Math.round(17 * k)}px ${numF}`;
+  x.fillText(`${dt.toLocaleDateString('en-GB')}  ${dt.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})}   #${p.payment_id}`, W/2, y);
+  y += Math.round(16 * k);
+  x.fillRect(m, y, W - m*2, Math.max(2, 3 * k));
+  y += Math.round(8 * k);
+  rows.forEach(r => {
+    if(r.big){ x.fillRect(m, y, W - m*2, rowH - 4); x.fillStyle = '#fff'; }
+    x.textAlign = 'right'; x.font = `bold ${r.big ? fs + 3 : fs}px ${urF}`;
+    x.fillText(r.label, W - m - 8, y + rowH/2 + 8 * k);
+    x.textAlign = 'left'; x.font = `900 ${r.big ? fs + 1 : fs - 2}px ${numF}`;
+    x.fillText(r.value, m + 8, y + rowH/2 + 8 * k);
+    x.fillStyle = '#000';
+    y += rowH;
+    if(!r.big) x.fillRect(m, y - 2, W - m*2, 1);
+  });
+  if(noteLines.length){
+    y += Math.round(12 * k);
+    x.textAlign = 'right'; x.font = `${fs - 2}px ${urF}`;
+    noteLines.forEach((ln, i) => { x.fillText((i === 0 ? 'نوٹ: ' : '') + ln, W - m - 4, y + fs); y += fs + Math.round(14 * k); });
+  }
+  if(ledger.length){
+    y += Math.round(16 * k);
+    x.textAlign = 'center'; x.font = `bold ${fs}px ${urF}`;
+    x.fillText('📒 کھاتے کا آخری لین دین', W/2, y + fs);
+    y += fs + Math.round(16 * k);
+    x.fillRect(m, y, W - m*2, 1);
+    ledger.forEach(e => {
+      y += fs + Math.round(12 * k);
+      x.textAlign = 'right'; x.font = `${fs - 3}px ${urF}`;
+      x.fillText(_supLedgerLabel(e), W - m - 4, y);
+      x.textAlign = 'left'; x.font = `bold ${Math.round(17 * k)}px ${numF}`;
+      x.fillText(`${(e.date || '').split('-').reverse().join('/')}   ${fmt(e.amount)}`, m + 4, y);
+      y += Math.round(8 * k);
+      x.fillRect(m, y, W - m*2, 1);
+    });
+  }
+  // نیچے رابطہ
+  y += Math.round(24 * k);
+  x.lineWidth = Math.max(2, 2.5 * k);
+  x.strokeRect(m, y, W - m*2, Math.round(124 * k));
+  x.textAlign = 'center'; x.font = `${fs - 3}px ${urF}`;
+  x.fillText('اگر کھاتے میں کوئی غلطی یا الجھن ہو', W/2, y + Math.round(38 * k));
+  x.fillText('تو ہم سے رابطہ کریں', W/2, y + Math.round(72 * k));
+  x.font = `900 ${Math.round(27 * k)}px ${numF}`;
+  x.fillText('📞 ' + (AppState.settings.businessPhone || ''), W/2, y + Math.round(110 * k));
+  y += Math.round(124 * k + 34 * k);
+  x.font = `${fs - 4}px ${urF}`; x.fillText('— شکریہ —', W/2, y);
+  return c;
+}
+async function openSupplierReceipt(paymentId){
+  const p = paymentsData.find(x => x.payment_id === paymentId);
+  if(!p) return;
+  _supRcptPaymentId = paymentId;
+  _supRcptCanvas = await drawSupplierReceiptCanvas(p);
+  let ov = document.getElementById('supRcptOverlay');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'supRcptOverlay';
+    ov.style.cssText = 'position:fixed; inset:0; z-index:99980; background:rgba(15,23,42,.6); display:none; align-items:center; justify-content:center; padding:12px;';
+    document.body.appendChild(ov);
+  }
+  const urF = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif";
+  const btn = (bg, js, t) => `<button type="button" onclick="${js}" style="flex:1; height:48px; border:none; border-radius:14px; background:${bg}; color:#fff; font-family:${urF}; font-size:18px; font-weight:700; cursor:pointer;">${t}</button>`;
+  ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:420px; max-height:94vh; display:flex; flex-direction:column; background:#fff; border-radius:20px; overflow:hidden; font-family:${urF};">
+    <div style="background:linear-gradient(135deg,#16a34a,#14532d); color:#fff; text-align:center; font-size:22px; font-weight:700; padding:10px; line-height:1.9;">✅ محفوظ ہو گیا — رسید تیار ہے</div>
+    <div style="flex:1; overflow:auto; background:#f1f5f9; padding:10px;"><img src="${_supRcptCanvas.toDataURL('image/png')}" style="width:100%; display:block; background:#fff; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.15);"></div>
+    <div style="display:flex; gap:8px; padding:10px 12px 6px;">
+      ${btn('linear-gradient(135deg,#334155,#0f172a)', 'printSupplierReceipt()', '🖨️ پرنٹ')}
+      ${btn('linear-gradient(135deg,#25D366,#128C7E)', 'shareSupplierReceipt()', '💬 واٹس ایپ / شیئر')}
+    </div>
+    <div style="padding:0 12px 12px;">${btn('#e2e8f0; color:#334155', 'closeSupplierReceipt()', '✖ بند کریں')}</div>
+  </div>`;
+  ov.style.display = 'flex';
+}
+function closeSupplierReceipt(){ const ov = document.getElementById('supRcptOverlay'); if(ov){ ov.style.display = 'none'; ov.innerHTML = ''; } }
+function printSupplierReceipt(){
+  if(!_supRcptCanvas) return;
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${_supRcptCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+}
+function shareSupplierReceipt(){
+  if(!_supRcptCanvas) return;
+  const p = paymentsData.find(x => x.payment_id === _supRcptPaymentId) || {};
+  const name = (p.party_name || 'supplier').replace(/\s+/g, '_');
+  _supRcptCanvas.toBlob(async blob => {
+    if(!blob) return;
+    const file = new File([blob], `Raseed_${name}_${p.payment_id || ''}.png`, {type: 'image/png'});
+    const text = `${AppState.settings.businessName || ''} — ${p.direction === 'in' ? 'وصولی' : 'ادائیگی'} کی رسید: ${p.party_name || ''} — Rs. ${(Number(p.amount)||0).toLocaleString()}`;
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({ files:[file], title: 'رسید', text }); }catch(e){}
+    } else {
+      const u = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(u), 4000);
+      uAlert('📥 رسید محفوظ ہو گئی', 'تصویر فون کی گیلری / ڈاؤن لوڈز میں آ گئی ہے — وہاں سے واٹس ایپ پر بھیج دیں۔', 'green');
+    }
+  }, 'image/png');
+}
+
 function openPaySupplierModal(supplierId, onlyMode){
   window.__payFromPo = false; // 💵 FM410SU301: پیمنٹ بٹن (poPaySupplier) خود اسے اس کے بعد true کرتا ہے
   if(onlyMode === 'receive'){ openSupLoanModal(supplierId); return; } // 📥 FM29SEP: نیا ٹیبل والا فارم
@@ -26673,12 +26947,12 @@ function updatePaySupplierRemainingHint(){
   hint.innerHTML = buildSupplierSplitLines(sp, amount, false) +
     (discount > sp.payable && sp.mode === 'pay' ? `<br><span style="color:var(--danger);">⚠️ چھوٹ بقایا سے زیادہ نہیں ہو سکتی — صرف Rs. ${sp.discEff.toLocaleString()} لگے گی</span>` : '');
 }
-function confirmPaySupplier(){
+async function confirmPaySupplier(){
   const amount = parseFloat(document.getElementById('paySupplierAmount').value) || 0;
   const discount = parseFloat(document.getElementById('paySupplierDiscount').value) || 0;
   const mode = activePaySupplierMode;
   if(amount < 0 || discount < 0 || (amount <= 0 && (mode === 'receive' || discount <= 0))){
-    alert('براہ کرم درست رقم درج کریں۔');
+    await uAlert('⚠️ رقم درج کریں', 'براہ کرم درست رقم لکھیں — رقم صفر یا خالی نہیں ہو سکتی۔');
     return;
   }
   const s = suppliersData.find(x => x.supplier_id === activePaySupplierId);
@@ -26686,13 +26960,34 @@ function confirmPaySupplier(){
 
   const _fromPo = !!window.__payFromPo; // 💵 FM410SU301
   const sp = calcSupplierSplit(s, amount, discount, mode);
-  // ---------- 💳 صدام کی ہدایت (FM28SEP شام): زیادہ ادائیگی یا وصولی پر تصدیقی پیغام میں پورا حساب لکھا آئے ----------
-  if(sp.toWallet > 0 || mode === 'receive'){
-    if(!confirm(`${mode === 'pay' ? '💵' : '📥'} ${s.name}\n\n${buildSupplierSplitLines(sp, amount, true)}\n\nکیا یہ درست ہے؟`)) return;
+  // ---------- 🗨️ FM510MO308 (صدام کی ہدایت): ہر ادائیگی/وصولی پر ایک ہی صاف اردو تصدیقی ڈبہ — پورا حساب سامنے۔
+  // پرانا "یہ آپ کے موجودہ نقد (Rs. 0) سے زیادہ ہے" والا سوال ختم — وہ ایپ کے کیش حساب سے آتا تھا جو دکان پر استعمال
+  // ہی نہیں ہوتا، اس لیے ہر ادائیگی پر بلاوجہ "صفر سے زیادہ" لکھا آتا تھا ---------- -->
+  const fmtR = n => 'Rs. ' + (Number(n) || 0).toLocaleString();
+  const cRows = [];
+  if(mode === 'pay'){
+    cRows.push({ label: '📊 اس کا بقایا (ہم نے دینا)', value: fmtR(sp.payable) });
+    if(sp.wallet > 0) cRows.push({ label: '💳 پہلے سے ایڈوانس اس کے پاس', value: fmtR(sp.wallet), bg: '#f0fdf4', fg: '#166534' });
+    if(sp.discEff > 0) cRows.push({ label: '🏷️ چھوٹ (ڈسکاؤنٹ)', value: '- ' + fmtR(sp.discEff), bg: '#fff7ed', fg: '#9a3412' });
+    cRows.push({ label: '💸 آپ ادا کر رہے ہیں', value: fmtR(amount), big: true });
+    if(sp.toWallet > 0){
+      cRows.push({ label: '✅ بقایا', value: 'مکمل صاف', bg: '#dcfce7', fg: '#166534' });
+      cRows.push({ label: '💳 زائد رقم ایڈوانس میں جمع', value: '+ ' + fmtR(sp.toWallet), bg: '#dcfce7', fg: '#166534' });
+      cRows.push({ label: '💰 نیا ایڈوانس اس کے پاس', value: fmtR(sp.walletAfter), bg: '#dcfce7', fg: '#166534' });
+    } else {
+      cRows.push({ label: '📉 ادائیگی کے بعد باقی بقایا', value: fmtR(sp.payableAfter), bg: '#eef2ff', fg: '#1e3a8a' });
+    }
+  } else {
+    cRows.push({ label: '📥 بیوپاری سے لے رہے ہیں', value: fmtR(amount), big: true });
+    if(sp.fromWallet > 0) cRows.push({ label: '💳 ہمارا ایڈوانس واپس آیا', value: fmtR(sp.fromWallet) });
+    if(sp.addPayable > 0) cRows.push({ label: '➕ اس کے کھاتے میں جمع', value: '+ ' + fmtR(sp.addPayable) });
+    cRows.push({ label: '📊 بقایا (ہم نے دینا)', value: fmtR(sp.payable) + ' ← ' + fmtR(sp.payableAfter) });
   }
-  if(mode === 'pay' && amount > financeDummy.cashInHand && !confirm(`یہ آپ کے موجودہ نقد (Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)){
-    return;
-  }
+  const ok = await uDialog({
+    title: (mode === 'pay' ? '💵 ادائیگی کی تصدیق' : '📥 وصولی کی تصدیق') + ' — ' + s.name,
+    rows: cRows, okText: mode === 'pay' ? '✅ ادائیگی محفوظ کریں' : '✅ وصولی محفوظ کریں', cancelText: '✖ واپس'
+  });
+  if(!ok) return;
 
   let note = document.getElementById('paySupplierNote').value.trim();
   const accIdx = document.getElementById('paySupplierAccountSelect').value;
@@ -26748,7 +27043,7 @@ function confirmPaySupplier(){
   window.__payFromPo = false;
   if(_fromPo){ try{ renderPurchaseOrdersScreen(); }catch(e){} } // 💵 FM410SU301: خریداری سکرین پر ہی رہیں
   else openSupplierProfile(s.supplier_id); // پروفائل فوراً تازہ ترین حالت (بقایا + والٹ خانہ) میں دوبارہ کھلے
-  if(savedPayment) sharePaymentReceiptImage(savedPayment.payment_id);
+  if(savedPayment) openSupplierReceipt(savedPayment.payment_id); // 🧾 FM510MO308: نئی اردو تھرمل رسید (پرنٹ + واٹس ایپ)
 }
 
 /* =====================================================================
@@ -33826,18 +34121,18 @@ function updateSupLoanHint(){
   document.getElementById('slExtraWalletRow').style.display = sp.extraToWallet > 0 ? '' : 'none';
   set('slExtraWallet', '+ ' + clFmt(sp.extraToWallet));
 }
-function saveSupLoan(){
+async function saveSupLoan(){
   const s = suppliersData.find(x => x.supplier_id === activeSupLoanId);
   if(!s) return;
   const amount = Math.max(0, parseFloat(document.getElementById('supLoanAmount').value) || 0);
   const pay = Math.max(0, parseFloat(document.getElementById('supLoanPay').value) || 0);
-  if(amount <= 0){ alert('دستی کیش کی رقم لکھیں۔'); return; }
+  if(amount <= 0){ await uAlert('⚠️ رقم درج کریں', 'دستی کیش کی رقم لکھیں۔'); return; }
   const sp = calcSupLoan(s, amount, pay);
   const lines = [`📥 دستی کیش لیا: ${clFmt(amount)}`, `📊 سابقہ بقایا: ${clFmt(sp.before)}`];
   if(sp.fromWallet > 0) lines.push(`💳 ہمارا ایڈوانس واپس: ${clFmt(sp.fromWallet)}`);
   lines.push(`🧮 ٹوٹل رقم: ${clFmt(sp.total)}`, `💸 ادائیگی: ${sp.pay > 0 ? clFmt(sp.pay) : '—'}`, `✅ اب تک ٹوٹل بقایا: ${clFmt(sp.after)}`);
   if(sp.extraToWallet > 0) lines.push(`💳 والٹ میں جمع: ${clFmt(sp.extraToWallet)}`);
-  if(!confirm(`🧺 ${s.name}\n\n${lines.join('\n')}\n\nمحفوظ کریں؟`)) return;
+  if(!(await uDialog({ title: '🧺 ' + s.name, message: lines.join('<br>'), okText: '✅ محفوظ کریں', cancelText: '✖ واپس' }))) return; // 🗨️ FM510MO308: اردو ڈبہ
 
   const memo = document.getElementById('supLoanNote').value.trim();
   const now = new Date();
@@ -34608,6 +34903,7 @@ async function renderPaymentReceiptToCanvas(p){
 async function sharePaymentReceiptImage(paymentId){
   const p = paymentsData.find(x => x.payment_id === paymentId);
   if(!p) return;
+  if(p.party_type === 'supplier'){ openSupplierReceipt(paymentId); return; } // 🧾 FM510MO308: بیوپاری کی ہر رسید اردو تھرمل
   try{ await document.fonts.load(`800 24px Poppins`); await document.fonts.ready; }catch(e){}
   const canvas = await renderPaymentReceiptToCanvas(p);
   showImageSharePreview(canvas, `Payment_${p.payment_id}.png`, 'Payment Receipt', `${p.direction === 'in' ? 'Payment received from' : 'Payment paid to'} ${p.party_name}: Rs. ${p.amount.toLocaleString()}`);
