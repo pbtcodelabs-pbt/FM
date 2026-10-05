@@ -3239,19 +3239,27 @@ function __appHostKind(h, p){
       <!-- ---------- 💰 FM510MO310 (صدام کی ہدایت): کاروبار کی جمع تفریق — تین کیپسول، دائیں سے بائیں:
            بیوپاریوں کے دینے ہیں | گاہکوں سے لینے ہیں | کاروبار منافع/خسارے میں (لینے − دینے) — صرف ایڈمن ---------- -->
       <style>
-        #homeMoneyRow{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:2px 0 10px; direction:rtl;}
-        #homeMoneyRow .hmCap{border-radius:18px; padding:8px 6px 9px; text-align:center; min-width:0; box-shadow:0 3px 10px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.7); border:1.5px solid transparent;}
-        #homeMoneyRow .hmLbl{font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:15px; font-weight:700; line-height:1.65; white-space:nowrap;}
-        #homeMoneyRow .hmVal{font-family:Arial,'Helvetica Neue',sans-serif; font-weight:900; font-size:19px; line-height:1.25; direction:ltr; white-space:nowrap; overflow:hidden; letter-spacing:-.2px;}
-        #homeMoneyRow .hmPay{background:linear-gradient(160deg,#fff7ed,#ffedd5); border-color:#fdba74;} #homeMoneyRow .hmPay .hmLbl{color:#9a3412;} #homeMoneyRow .hmPay .hmVal{color:#c2410c;}
-        #homeMoneyRow .hmRec{background:linear-gradient(160deg,#eff6ff,#dbeafe); border-color:#93c5fd;} #homeMoneyRow .hmRec .hmLbl{color:#1e3a8a;} #homeMoneyRow .hmRec .hmVal{color:#1d4ed8;}
-        #homeMoneyRow .hmNet.profit{background:linear-gradient(160deg,#f0fdf4,#dcfce7); border-color:#86efac;} #homeMoneyRow .hmNet.profit .hmLbl{color:#14532d;} #homeMoneyRow .hmNet.profit .hmVal{color:#15803d;}
-        #homeMoneyRow .hmNet.loss{background:linear-gradient(160deg,#fef2f2,#fee2e2); border-color:#fca5a5;} #homeMoneyRow .hmNet.loss .hmLbl{color:#7f1d1d;} #homeMoneyRow .hmNet.loss .hmVal{color:#dc2626;}
+        /* 🎨 FM510MO311 (صدام کی ہدایت): عنوان اور رقم الگ الگ کیپسول — ہر ایک کا اپنا رنگ */
+        /* 💰 FM510MO311: ابھرا ہوا 3D ڈیزائن — اوپر رنگین کیپشن، نیچے الگ سفید رقم والا کیپسول */
+        #homeMoneyRow{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:4px 2px 14px; direction:rtl;}
+        #homeMoneyRow .hmCap{position:relative; border-radius:20px; padding:7px 6px 8px; text-align:center; min-width:0; cursor:pointer;
+          box-shadow:0 5px 0 var(--hmEdge), 0 10px 18px rgba(0,0,0,.22), inset 0 2px 0 rgba(255,255,255,.45), inset 0 -3px 6px rgba(0,0,0,.12);
+          background:linear-gradient(165deg,var(--hmA) 0%,var(--hmB) 100%); transition:transform .12s, box-shadow .12s;}
+        #homeMoneyRow .hmCap:active{transform:translateY(4px); box-shadow:0 1px 0 var(--hmEdge), 0 4px 8px rgba(0,0,0,.2), inset 0 2px 0 rgba(255,255,255,.4);}
+        #homeMoneyRow .hmCap::before{content:''; position:absolute; left:8%; right:8%; top:3px; height:38%; border-radius:16px 16px 40px 40px; background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,0)); pointer-events:none;}
+        #homeMoneyRow .hmLbl{position:relative; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:15px; font-weight:700; line-height:1.6; white-space:nowrap; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); padding:0 2px 5px;}
+        #homeMoneyRow .hmPill{position:relative; background:linear-gradient(180deg,#ffffff,var(--hmPill)); border-radius:14px; padding:6px 4px 5px;
+          box-shadow:inset 0 2px 4px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.9), 0 1px 0 rgba(255,255,255,.5); border:1px solid rgba(0,0,0,.08);}
+        #homeMoneyRow .hmVal{font-family:Arial,'Helvetica Neue',sans-serif; font-weight:900; font-size:19px; line-height:1.25; direction:ltr; white-space:nowrap; overflow:hidden; letter-spacing:-.2px; color:var(--hmNum); text-shadow:0 1px 0 rgba(255,255,255,.8);}
+        #homeMoneyRow .hmPay{--hmA:#fb923c; --hmB:#c2410c; --hmEdge:#9a3412; --hmPill:#fff1e6; --hmNum:#c2410c;}
+        #homeMoneyRow .hmRec{--hmA:#60a5fa; --hmB:#1d4ed8; --hmEdge:#1e3a8a; --hmPill:#e8f1ff; --hmNum:#1d4ed8;}
+        #homeMoneyRow .hmNet.profit{--hmA:#4ade80; --hmB:#15803d; --hmEdge:#14532d; --hmPill:#e9fbef; --hmNum:#15803d;}
+        #homeMoneyRow .hmNet.loss{--hmA:#f87171; --hmB:#b91c1c; --hmEdge:#7f1d1d; --hmPill:#fff0f0; --hmNum:#dc2626;}
       </style>
       <div id="homeMoneyRow" class="admin-only">
-        <div class="hmCap hmPay" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاریوں کے<br>دینے ہیں</div><div class="hmVal" id="hmPayVal">0</div></div>
-        <div class="hmCap hmRec" onclick="goTo('customers')"><div class="hmLbl">گاہکوں سے<br>لینے ہیں</div><div class="hmVal" id="hmRecVal">0</div></div>
-        <div class="hmCap hmNet profit" id="hmNetCap"><div class="hmLbl" id="hmNetLbl">کاروبار<br>منافع میں ہے</div><div class="hmVal" id="hmNetVal">0</div></div>
+        <div class="hmCap hmPay" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاریوں کے<br>دینے ہیں</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
+        <div class="hmCap hmRec" onclick="goTo('customers')"><div class="hmLbl">گاہکوں سے<br>لینے ہیں</div><div class="hmPill"><div class="hmVal" id="hmRecVal">0</div></div></div>
+        <div class="hmCap hmNet profit" id="hmNetCap"><div class="hmLbl" id="hmNetLbl">کاروبار<br>منافع میں ہے</div><div class="hmPill"><div class="hmVal" id="hmNetVal">0</div></div></div>
       </div>
 
       <div id="homeTopControlsRow">
@@ -8901,7 +8909,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM510MO310'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM510MO311'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
