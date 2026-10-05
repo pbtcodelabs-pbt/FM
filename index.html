@@ -3240,26 +3240,35 @@ function __appHostKind(h, p){
            بیوپاریوں کے دینے ہیں | گاہکوں سے لینے ہیں | کاروبار منافع/خسارے میں (لینے − دینے) — صرف ایڈمن ---------- -->
       <style>
         /* 🎨 FM510MO311 (صدام کی ہدایت): عنوان اور رقم الگ الگ کیپسول — ہر ایک کا اپنا رنگ */
-        /* 💰 FM510MO311: ابھرا ہوا 3D ڈیزائن — اوپر رنگین کیپشن، نیچے الگ سفید رقم والا کیپسول */
-        #homeMoneyRow{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:4px 2px 14px; direction:rtl;}
-        #homeMoneyRow .hmCap{position:relative; border-radius:20px; padding:7px 6px 8px; text-align:center; min-width:0; cursor:pointer;
-          box-shadow:0 5px 0 var(--hmEdge), 0 10px 18px rgba(0,0,0,.22), inset 0 2px 0 rgba(255,255,255,.45), inset 0 -3px 6px rgba(0,0,0,.12);
+        /* 💰 FM510MO312: آدھی اونچائی، ایک لائن کا مختصر عنوان، 3D انداز وہی — اوپر رنگین کیپشن، نیچے الگ رقم کا کیپسول */
+        #homeMoneyWrap{display:flex; align-items:stretch; gap:6px; margin:4px 2px 12px; direction:rtl;}
+        #homeMoneyRow{flex:1; display:grid; grid-template-columns:repeat(3,1fr); gap:7px; min-width:0;}
+        #homeMoneyRow .hmCap{position:relative; border-radius:15px; padding:3px 4px 4px; text-align:center; min-width:0; cursor:pointer;
+          box-shadow:0 4px 0 var(--hmEdge), 0 7px 12px rgba(0,0,0,.2), inset 0 2px 0 rgba(255,255,255,.45), inset 0 -2px 5px rgba(0,0,0,.12);
           background:linear-gradient(165deg,var(--hmA) 0%,var(--hmB) 100%); transition:transform .12s, box-shadow .12s;}
-        #homeMoneyRow .hmCap:active{transform:translateY(4px); box-shadow:0 1px 0 var(--hmEdge), 0 4px 8px rgba(0,0,0,.2), inset 0 2px 0 rgba(255,255,255,.4);}
-        #homeMoneyRow .hmCap::before{content:''; position:absolute; left:8%; right:8%; top:3px; height:38%; border-radius:16px 16px 40px 40px; background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,0)); pointer-events:none;}
-        #homeMoneyRow .hmLbl{position:relative; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:15px; font-weight:700; line-height:1.6; white-space:nowrap; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); padding:0 2px 5px;}
-        #homeMoneyRow .hmPill{position:relative; background:linear-gradient(180deg,#ffffff,var(--hmPill)); border-radius:14px; padding:6px 4px 5px;
-          box-shadow:inset 0 2px 4px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.9), 0 1px 0 rgba(255,255,255,.5); border:1px solid rgba(0,0,0,.08);}
-        #homeMoneyRow .hmVal{font-family:Arial,'Helvetica Neue',sans-serif; font-weight:900; font-size:19px; line-height:1.25; direction:ltr; white-space:nowrap; overflow:hidden; letter-spacing:-.2px; color:var(--hmNum); text-shadow:0 1px 0 rgba(255,255,255,.8);}
-        #homeMoneyRow .hmPay{--hmA:#fb923c; --hmB:#c2410c; --hmEdge:#9a3412; --hmPill:#fff1e6; --hmNum:#c2410c;}
-        #homeMoneyRow .hmRec{--hmA:#60a5fa; --hmB:#1d4ed8; --hmEdge:#1e3a8a; --hmPill:#e8f1ff; --hmNum:#1d4ed8;}
-        #homeMoneyRow .hmNet.profit{--hmA:#4ade80; --hmB:#15803d; --hmEdge:#14532d; --hmPill:#e9fbef; --hmNum:#15803d;}
-        #homeMoneyRow .hmNet.loss{--hmA:#f87171; --hmB:#b91c1c; --hmEdge:#7f1d1d; --hmPill:#fff0f0; --hmNum:#dc2626;}
+        #homeMoneyRow .hmCap:active{transform:translateY(3px); box-shadow:0 1px 0 var(--hmEdge), 0 3px 6px rgba(0,0,0,.2);}
+        #homeMoneyRow .hmCap::before{content:''; position:absolute; left:8%; right:8%; top:2px; height:40%; border-radius:12px 12px 30px 30px; background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0)); pointer-events:none;}
+        #homeMoneyRow .hmLbl{position:relative; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:14px; font-weight:700; line-height:1.55; white-space:nowrap; overflow:hidden; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); padding:0 2px 2px;}
+        #homeMoneyRow .hmPill{position:relative; background:linear-gradient(180deg,#ffffff,var(--hmPill)); border-radius:11px; padding:2px 3px 1px;
+          box-shadow:inset 0 2px 3px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.9); border:1px solid rgba(0,0,0,.08);}
+        #homeMoneyRow .hmVal{font-family:Arial,'Helvetica Neue',sans-serif; font-weight:900; font-size:17px; line-height:1.3; direction:ltr; white-space:nowrap; overflow:hidden; letter-spacing:-.2px; color:var(--hmNum);}
+        #homeMoneyRow .hmPay{--hmA:#f87171; --hmB:#b91c1c; --hmEdge:#7f1d1d; --hmPill:#fff0f0; --hmNum:#dc2626;}
+        #homeMoneyRow .hmRec{--hmA:#4ade80; --hmB:#15803d; --hmEdge:#14532d; --hmPill:#e9fbef; --hmNum:#15803d;}
+        #homeMoneyRow .hmNet.profit{--hmA:#34d399; --hmB:#047857; --hmEdge:#064e3b; --hmPill:#e7fbf3; --hmNum:#047857;}
+        #homeMoneyRow .hmNet.loss{--hmA:#fb7185; --hmB:#be123c; --hmEdge:#881337; --hmPill:#fff1f2; --hmNum:#e11d48;}
+        #homeMoneyToggle{flex:0 0 30px; border:none; border-radius:12px; background:linear-gradient(165deg,#94a3b8,#475569); color:#fff; font-size:15px; cursor:pointer; box-shadow:0 3px 0 #334155, 0 5px 9px rgba(0,0,0,.18); padding:0;}
+        #homeMoneyWrap.hmHidden #homeMoneyRow{display:none;}
+        #homeMoneyWrap .hmHiddenNote{display:none; flex:1; align-items:center; justify-content:center; border-radius:12px; background:#f1f5f9; color:#475569; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:14px; font-weight:700; line-height:1.6; cursor:pointer; border:1.5px dashed #cbd5e1;}
+        #homeMoneyWrap.hmHidden .hmHiddenNote{display:flex;}
       </style>
-      <div id="homeMoneyRow" class="admin-only">
-        <div class="hmCap hmPay" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاریوں کے<br>دینے ہیں</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
-        <div class="hmCap hmRec" onclick="goTo('customers')"><div class="hmLbl">گاہکوں سے<br>لینے ہیں</div><div class="hmPill"><div class="hmVal" id="hmRecVal">0</div></div></div>
-        <div class="hmCap hmNet profit" id="hmNetCap"><div class="hmLbl" id="hmNetLbl">کاروبار<br>منافع میں ہے</div><div class="hmPill"><div class="hmVal" id="hmNetVal">0</div></div></div>
+      <div id="homeMoneyWrap" class="admin-only">
+        <div id="homeMoneyRow">
+          <div class="hmCap hmPay" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاریوں کا قرض</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
+          <div class="hmCap hmRec" onclick="goTo('customers')"><div class="hmLbl">گاہکوں کا ادھار</div><div class="hmPill"><div class="hmVal" id="hmRecVal">0</div></div></div>
+          <div class="hmCap hmNet profit" id="hmNetCap"><div class="hmLbl" id="hmNetLbl">کاروبار کی کیفیت</div><div class="hmPill"><div class="hmVal" id="hmNetVal">0</div></div></div>
+        </div>
+        <div class="hmHiddenNote" onclick="toggleHomeMoneyRow()">💰 کاروبار کا حساب چھپا ہوا ہے — دیکھنے کے لیے دبائیں</div>
+        <button type="button" id="homeMoneyToggle" onclick="toggleHomeMoneyRow()" title="دکھائیں / چھپائیں">🙈</button>
       </div>
 
       <div id="homeTopControlsRow">
@@ -8909,7 +8918,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM510MO311'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM510MO312'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9671,6 +9680,8 @@ function toggleHomeEditMode(){
 function renderHomeMoneySummary(){
   const row = document.getElementById('homeMoneyRow');
   if(!row) return;
+  applyHomeMoneyHidden();
+  if(loadFromStorage('homeMoneyHidden', false)) return;
   const pay = Math.round((suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_payable) || 0), 0));
   const rec = Math.round((customersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_receivable) || 0), 0));
   const net = rec - pay;
@@ -9680,17 +9691,31 @@ function renderHomeMoneySummary(){
   const cap = document.getElementById('hmNetCap');
   cap.classList.toggle('profit', net >= 0);
   cap.classList.toggle('loss', net < 0);
-  document.getElementById('hmNetLbl').innerHTML = net >= 0 ? 'کاروبار<br>منافع میں ہے' : 'کاروبار<br>خسارے میں ہے';
+  document.getElementById('hmNetLbl').textContent = 'کاروبار کی کیفیت';
+  document.getElementById('hmNetCap').title = net >= 0 ? 'کاروبار منافع میں ہے' : 'کاروبار خسارے میں ہے';
+  applyHomeMoneyHidden();
   document.getElementById('hmNetVal').textContent = (net < 0 ? '- ' : '') + f(net);
   // کروڑوں والی بڑی رقم بھی خانے میں پوری آئے — ضرورت ہو تو حروف خود چھوٹے
   row.querySelectorAll('.hmVal').forEach(el => {
-    let size = 19; el.style.fontSize = size + 'px';
+    let size = 17; el.style.fontSize = size + 'px';
     while(el.scrollWidth > el.clientWidth && size > 11){ size -= 1; el.style.fontSize = size + 'px'; }
   });
 }
 setInterval(() => {
   try{ const h = document.getElementById('screen-home'); if(h && h.classList.contains('active')) renderHomeMoneySummary(); }catch(e){}
 }, 4000);
+// 🙈 FM510MO312: ایڈمن اپنی مرضی سے حساب چھپا / دکھا سکے — فون پر یاد رہتا ہے
+function applyHomeMoneyHidden(){
+  const w = document.getElementById('homeMoneyWrap'); if(!w) return;
+  const hidden = !!loadFromStorage('homeMoneyHidden', false);
+  w.classList.toggle('hmHidden', hidden);
+  const b = document.getElementById('homeMoneyToggle'); if(b) b.textContent = hidden ? '👁️' : '🙈';
+}
+function toggleHomeMoneyRow(){
+  saveToStorage('homeMoneyHidden', !loadFromStorage('homeMoneyHidden', false));
+  applyHomeMoneyHidden();
+  if(!loadFromStorage('homeMoneyHidden', false)) renderHomeMoneySummary();
+}
 
 function renderHomeIconGrid(){
   try{ renderHomeMoneySummary(); }catch(e){} // 💰 FM510MO310
