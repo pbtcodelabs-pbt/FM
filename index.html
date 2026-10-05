@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html lang="ur" dir="ltr">
 <head>
+<script>
+/* ---------- ⛔ FM510MO305: غلط ریپو پہرہ — اگر کسی ایپ کی فائل دوسری ایپ کی جگہ اپلوڈ ہو جائے (SM کی FM میں یا FM کی SM میں)
+   تو ایپ کھلے گی ہی نہیں: کوئی ڈیٹا نہیں پڑھے/لکھے گی، صرف لال پیغام۔ پتہ ہیش سے پہچانا جاتا ہے ---------- */
+var __APP_KIND = 'FM';
+function __appHostKind(h, p){
+  h = String(h || '').toLowerCase(); p = String(p || '');
+  var x = 5381; for(var i = 0; i < h.length; i++){ x = (((x * 33) >>> 0) ^ h.charCodeAt(i)) >>> 0; }
+  if(x === 3796688142 || x === 1729952530) return 'FM';
+  if((/\.github\.io$/.test(h) && /^\/SM(\/|$)/i.test(p)) || /sabzi-mandi/.test(h)) return 'SM';
+  return '';
+}
+(function(){
+  try{
+    var hk = __appHostKind(location.hostname, location.pathname);
+    if(!hk || hk === __APP_KIND) return;
+    var nm = function(k){ return k === 'SM' ? 'سبزی منڈی (SM)' : 'فروٹ منڈی (FM)'; };
+    window.__APP_WRONG_REPO = true;
+    document.write('<div dir="rtl" style="position:fixed;inset:0;z-index:2147483647;background:#7f1d1d;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;font:700 19px/1.9 Tahoma,Arial,sans-serif;">'
+      + '<div style="font-size:54px;">⛔</div><div style="font-size:23px;">غلط فائل اپلوڈ ہو گئی ہے</div>'
+      + '<div>یہ ' + nm(__APP_KIND) + ' کی فائل ' + nm(hk) + ' کی جگہ لگ گئی ہے۔</div>'
+      + '<div>ریپو میں صحیح فائل (' + hk + '…) دوبارہ اپلوڈ کریں۔</div>'
+      + '<div style="font-size:15px;opacity:.9;margin-top:8px;">آپ کا ڈیٹا محفوظ ہے — اس فائل نے کچھ نہیں پڑھا، کچھ نہیں بدلا۔</div></div>'
+      + '<plaintext style="display:none">');
+  }catch(e){}
+})();
+</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -7955,6 +7981,23 @@ setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خو
 // کبھی آپس میں گڈمڈ نہ ہوں، صاف پتا چلے کہ یہ فائل کس ورژن سے آئی ----------
 // ---------- بیک اپ فائل کا نام — یہ Fruit Mandi POS فائل ہے، اس لیے نام بالکل اسی ورژن سٹرنگ کے فارمیٹ میں بنتا ہے
 // جیسا خود ایپ کا ورژن ہے — BKFM{دن}{مہینہ}{دن کا نام}{وقت}{AM/PM}.JSON — مثال: BKFM318MO0607AM.JSON ----------
+// ---------- 🔐 FM410SU304: ہر بیک اپ پر ایپ کی پہچان (FM / SM) — فروٹ منڈی کی بیک اپ سبزی منڈی میں اور سبزی منڈی کی
+// فروٹ منڈی میں بحال نہ ہو سکے (ورنہ ایک دکان کا سارا ڈیٹا دوسری دکان کی ایپ میں چلا جاتا) ---------- -->
+function appKindCode(){ return String(typeof APP_BUILD_VERSION !== 'undefined' ? APP_BUILD_VERSION : '').slice(0, 2).toUpperCase() === 'SM' ? 'SM' : 'FM'; }
+function backupKindOf(b){
+  if(b && (b.appKind === 'FM' || b.appKind === 'SM')) return b.appKind;
+  // پرانی فائلیں (پہچان کے بغیر): سبزی منڈی کی سیٹنگ میں ہمیشہ sm... والی چیزیں ہوتی ہیں (smRegistered, smPlan وغیرہ)
+  const s = (b && b.settings) || {};
+  return Object.keys(s).some(k => /^sm[A-Z]/.test(k)) ? 'SM' : 'FM';
+}
+function backupKindErrorMsg(b){
+  const k = backupKindOf(b);
+  if(k === appKindCode()) return '';
+  return k === 'FM'
+    ? '❌ یہ فروٹ منڈی (FM) کی بیک اپ فائل ہے — سبزی منڈی (SM) کی ایپ میں نہیں لگ سکتی۔'
+    : '❌ یہ سبزی منڈی (SM) کی بیک اپ فائل ہے — فروٹ منڈی (FM) کی ایپ میں نہیں لگ سکتی۔';
+}
+
 function generateBackupFileName(){
   const now = new Date();
   const dayNames = ['SU','MO','TU','WE','TH','FR','SA'];
@@ -7966,12 +8009,13 @@ function generateBackupFileName(){
   hh = hh % 12; if(hh === 0) hh = 12;
   const hhStr = String(hh).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
-  return `BKFM${date}${month}${dayCode}${hhStr}${mm}${ampm}.JSON`;
+  return `BK${appKindCode()}${date}${month}${dayCode}${hhStr}${mm}${ampm}.JSON`; // 🔐 FM410SU304: BKFM… / BKSM…
 }
 
 function buildBackupObject(){
   return {
     exportedAt: new Date().toISOString(),
+    appKind: appKindCode(), // 🔐 FM410SU304: FM یا SM
     products: productsData,
     customers: customersData,
     suppliers: suppliersData,
@@ -8342,7 +8386,7 @@ async function restoreFromGoogleDrive(){
       const listRes = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } });
       if(!listRes.ok) throw new Error('List failed: ' + listRes.status);
       const listData = await listRes.json();
-      const files = (listData.files || []).filter(f => f.name.startsWith('BKFM'));
+      const files = (listData.files || []).filter(f => /^BK(FM|SM)/i.test(f.name)); // 🔐 FM410SU304: نئی SM فائلیں BKSM… — غلط ایپ کی فائل بحالی پر خود رک جاتی ہے
       renderGDriveFileList(files);
       hideGDriveProgress();
       document.getElementById('gdriveRestoreModal').classList.add('show');
@@ -8412,6 +8456,7 @@ async function selectGDriveBackupFile(fileId, fileName){
       return;
     }
     // ---------- اسی موجودہ تصدیقی پاپ اپ کا استعمال — بالکل جیسے مقامی فائل سے بحال کرتے وقت ہوتا ہے ----------
+    if(backupKindErrorMsg(backup)){ hideGDriveProgress(); gdriveOpActive = false; showBackupConfirmModal('error', fileName, {message: backupKindErrorMsg(backup)}); return; } // 🔐 FM410SU304
     pendingImportBackup = backup;
     pendingImportFileName = fileName + ' (Google Drive)';
     document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
@@ -8478,6 +8523,7 @@ function importBackupData(event){
         return;
       }
       // ---------- منتخب فائل عارضی طور پر یاد رکھیں — اصل بحالی صرف اسی وقت ہو جب صارف خوبصورت تصدیقی پیغام میں "Yes, Restore" دبائے ----------
+      if(backupKindErrorMsg(backup)){ showBackupConfirmModal('error', file.name, {message: backupKindErrorMsg(backup)}); return; } // 🔐 FM410SU304
       pendingImportBackup = backup;
       pendingImportFileName = file.name;
       document.getElementById('importConfirmFileChip').textContent = '📄 ' + file.name;
@@ -8505,6 +8551,9 @@ function proceedWithImport(){
   const fileName = pendingImportFileName;
   document.getElementById('importConfirmModal').classList.remove('show');
   if(!backup) return;
+  // 🔐 FM410SU304: آخری پہرہ — ہر بحالی (فائل، گوگل ڈرائیو، نیا ڈرائیو بیک اپ) یہیں سے گزرتی ہے
+  const _kindErr = backupKindErrorMsg(backup);
+  if(_kindErr){ pendingImportBackup = null; pendingImportFileName = ''; try{ gdriveOpActive = false; }catch(e){} showBackupConfirmModal('error', fileName, {message: _kindErr}); return; }
 
   try{
       productsData.length = 0; productsData.push(...backup.products);
@@ -8588,7 +8637,7 @@ function showBackupConfirmModal(type, fileName, info){
       <div class="backupFileChip">📄 ${fileName}</div>
       <p>Saved to your <b>Downloads</b> folder.</p>
       <p>${info.products} products • ${info.customers} customers • ${info.invoices} invoices</p>
-      <p class="backupHintText">Next time, tap "Import Backup" and look for a file starting with <b>"BKFM"</b> in your Downloads.</p>
+      <p class="backupHintText">Next time, tap "Import Backup" and look for a file starting with <b>"BK${appKindCode()}"</b> in your Downloads.</p>
     `;
   } else if(type === 'import'){
     icon.textContent = '✅';
@@ -8833,7 +8882,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM410SU302'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM510MO306'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -44546,6 +44595,29 @@ function getPurchaseChalanReportData(){
   });
 
   productsData.slice().sort((a,b) => (a.serial_no ?? 1e9) - (b.serial_no ?? 1e9)).forEach(p => (p.variants || []).forEach(v => {
+    // ---------- 📦 FM410SU303: "باقی سٹاک" = چالان کا وہ مال جو ابھی کسی آرڈر میں بُک نہیں — پہلے آرڈر بکنگ میں بک ہو چکا
+    // (بل ابھی نہیں بنا) مال بھی باقی دکھتا تھا، اس لیے سارا مال بک ہونے کے بعد بھی لال خانے میں نمبر آتا تھا۔
+    // جس چالان سے بکنگ ہوئی وہیں سے کٹے؛ باقی بکنگ (چالان کے بغیر) پرانے چالان سے پہلے ---------- -->
+    const _bookLeft = {};
+    try{
+      const _chs = ensureVariantChalans(v);
+      const _rmap = getChalanReservedMap(v.variant_id) || {};
+      let _rTotal = Object.values(_rmap).reduce((s, q) => s + (Number(q) || 0), 0);
+      _rTotal = Math.max(_rTotal, Number(v.reserved) || 0);
+      let _rest = _rTotal;
+      _chs.forEach(c => {
+        const q = Math.max(0, Number(c.qty) || 0);
+        const take = Math.min(q, Number(_rmap[c.chalanNo]) || 0);
+        _bookLeft[c.chalanNo] = q - take;
+        _rest -= take;
+      });
+      _chs.forEach(c => {
+        if(_rest <= 0) return;
+        const take = Math.min(_bookLeft[c.chalanNo] || 0, _rest);
+        _bookLeft[c.chalanNo] = _chRound((_bookLeft[c.chalanNo] || 0) - take);
+        _rest = _chRound(_rest - take);
+      });
+    }catch(e){}
     ensureVariantChalans(v).forEach(c => {
       const base = {serial: p.serial_no, name: p.name, label: v.label || '', chalanNo: c.chalanNo, c, v};
       const pq = Number(c.origQty != null ? c.origQty : c.qty) || 0;
@@ -44572,7 +44644,7 @@ function getPurchaseChalanReportData(){
         let sellIsb = Number(c.retail);
         if(!(sellIsb > 0) && (isLegacyChalan(c) || !chalanNeedsAccounting(c))) sellIsb = Number(v.retail);
         if(!(sellIsb > 0)) sellIsb = null;
-        chalanRows.push({...base, source: chalanSourceLabel(c).replace(/^\S+\s/, ''), inQty: pq, soldQty: sold ? Math.round(sold.qty * 100) / 100 : 0, sellIsb, left: Number(c.qty) || 0,
+        chalanRows.push({...base, source: chalanSourceLabel(c).replace(/^\S+\s/, ''), inQty: pq, soldQty: sold ? Math.round(sold.qty * 100) / 100 : 0, sellIsb, left: (_bookLeft[c.chalanNo] != null ? _bookLeft[c.chalanNo] : (Number(c.qty) || 0)),
           rate: c.ratePending ? null : Number(c.rate) || 0, profit});
       }
     });
@@ -44592,7 +44664,10 @@ async function renderPurchaseChalanReportToCanvas(){
   const fontScale = (AppState.settings.reportFontScale || 100) / 100;
   const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
   // ---------- 🔒 صدام کی ہدایت: رپورٹ ہمیشہ اردو نستعلیق میں، دائیں سے بائیں ---------- -->
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
+  // ---------- 🔤 FM410SU303: یہ رپورٹ ہمیشہ نستعلیق میں — پہلے رپورٹ کی عام فونٹ سیٹنگ (مثلاً 'segoe' جو فہرست میں ہے ہی نہیں)
+  // سے Tahoma/Arial آ جاتا تھا۔ اب منتخب فونٹ نستعلیق نہ ہو تو جمیل نوری نستعلیق (کشیدہ) ---------- -->
+  const _pcPicked = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda'));
+  const selectedFontPreset = (_pcPicked && _pcPicked.isNastaleeq) ? _pcPicked : (FONT_PRESETS.find(f => f.id === 'jameelnastaleeqkasheeda') || FONT_PRESETS[0]);
   const fontFam = selectedFontPreset.family;
   const numberPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportNumberFontId) || FONT_PRESETS.find(f => f.id === 'tahoma') || selectedFontPreset;
   const numFontFam = numberPreset.family;

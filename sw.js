@@ -2,7 +2,7 @@
 // یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
 // صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
 // ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'FM410SU302';
+const CACHE_VERSION = 'FM510MO306';
 const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
 // ---------- 🔒🆕 صدام کی ہدایت (FM21SEPMO03): آف لائن نہ چلنے کی اصل جڑ یہاں ملی — پہلے تمام فائلیں
@@ -39,6 +39,33 @@ const OPTIONAL_URLS = [
 // (کوئی بٹن دبانے کی ضرورت نہیں)۔ واپس خودکار skipWaiting بحال — اصل مسئلہ یہ نہیں تھا، اصل مسئلہ یہ تھا
 // کہ صفحہ فوراً ری لوڈ ہو جاتا تھا چاہے صارف لکھ رہا ہو — وہ فکس index.html میں الگ سے کیا گیا ہے
 // (ری لوڈ اب صارف کے لکھنا بند کرنے تک انتظار کرتا ہے، نئے ورژن کا لوڈ ہونا خودکار ہی رہتا ہے) ---------- -->
+// ---------- ⛔ FM510MO305: غلط ریپو پہرہ — یہ sw.js کسی دوسری ایپ کی جگہ لگ جائے (SM کی FM میں یا FM کی SM میں) تو انسٹال
+// ہی ناکام: پرانا صحیح ورژن چلتا رہے۔ اور دوسری ایپ کی index.html کبھی کیش میں نہ رکھی جائے ---------- -->
+const __APP_KIND = String(CACHE_VERSION).slice(0, 2).toUpperCase() === 'SM' ? 'SM' : 'FM';
+function __appHostKind(h, p){
+  h = String(h || '').toLowerCase(); p = String(p || '');
+  let x = 5381; for(let i = 0; i < h.length; i++){ x = (((x * 33) >>> 0) ^ h.charCodeAt(i)) >>> 0; }
+  if(x === 3796688142 || x === 1729952530) return 'FM';
+  if((/\.github\.io$/.test(h) && /^\/SM(\/|$)/i.test(p)) || /sabzi-mandi/.test(h)) return 'SM';
+  return '';
+}
+const __WRONG_REPO = (() => { const k = __appHostKind(self.location.hostname, self.location.pathname); return !!k && k !== __APP_KIND; })();
+self.addEventListener('install', (event) => {
+  if(__WRONG_REPO) event.waitUntil(Promise.reject(new Error('⛔ غلط ایپ کی sw.js — انسٹال روک دی گئی')));
+});
+// صفحہ (HTML) کیش میں رکھنے سے پہلے دیکھیں کہ یہ اسی ایپ کا ہے
+function __safeCachePut(req, res){
+  try{
+    const isHtml = req.mode === 'navigate' || /\/$|\.html$/.test(new URL(req.url).pathname) || /text\/html/.test(res.headers.get('content-type') || '');
+    if(!isHtml) return caches.open(CACHE_NAME).then((cache) => cache.put(req, res));
+    return res.clone().text().then((txt) => {
+      const m = txt.match(/APP_BUILD_VERSION = '([A-Za-z]{2})/);
+      if(m && m[1].toUpperCase() !== __APP_KIND) return; // دوسری ایپ کا صفحہ — کیش نہیں
+      return caches.open(CACHE_NAME).then((cache) => cache.put(req, res));
+    });
+  }catch(e){ return caches.open(CACHE_NAME).then((cache) => cache.put(req, res)); }
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
@@ -120,7 +147,7 @@ self.addEventListener('fetch', (event) => {
       const networkFetch = fetch(req.url, { cache: 'reload' }).then((res) => {
         if (res && res.status === 200) {
           const resClone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+          __safeCachePut(req, resClone);
         }
         return res;
       }).catch(() => {
