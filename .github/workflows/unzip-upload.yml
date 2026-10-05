@@ -1,1 +1,50 @@
-{"name":"unzip-upload","on":["push","workflow_dispatch"],"permissions":{"contents":"write","checks":"write","pull-requests":"write"},"concurrency":{"group":"fm-zip-deploy","cancel-in-progress":false},"jobs":{"unzip_and_deploy":{"runs-on":"ubuntu-latest","steps":[{"uses":"actions/checkout@v4"},{"name":"Extract zip","id":"ex","run":"shopt -s nullglob; zips=( *.zip ); if [ ${#zips[@]} -eq 0 ]; then echo no-zip; exit 0; fi; for z in \"${zips[@]}\"; do unzip -o \"$z\" -d . && rm -f \"$z\"; done; git config user.name zip-bot; git config user.email zip-bot@users.noreply.github.com; git add -A; git commit -m unzip-upload && git push; echo found=1 >> \"$GITHUB_OUTPUT\""},{"name":"Deploy to Firebase","if":"steps.ex.outputs.found == '1'","uses":"FirebaseExtended/action-hosting-deploy@v0","with":{"repoToken":"${{ secrets.GITHUB_TOKEN }}","firebaseServiceAccount":"${{ secrets.FIREBASE_SERVICE_ACCOUNT_FM_SADDAM_MANDI }}","channelId":"live","projectId":"fm-saddam-mandi"}}]}}}
+name: unzip-upload
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.zip'
+      - '**.ZIP'
+permissions:
+  contents: write
+jobs:
+  unzip_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract zip
+        id: unzip
+        run: |
+          EXP=FM
+          shopt -s nullglob
+          zips=( *.zip *.ZIP )
+          if [ ${#zips[@]} -eq 0 ]; then echo no-zip; exit 0; fi
+          git config user.name zip-bot
+          git config user.email zip-bot@users.noreply.github.com
+          for z in "${zips[@]}"; do
+            n=$(basename "$z" | tr 'a-z' 'A-Z')
+            rm -rf /tmp/chk && mkdir -p /tmp/chk && unzip -q -o "$z" -d /tmp/chk
+            k1=$(grep -o "APP_BUILD_VERSION = '[A-Za-z][A-Za-z]" /tmp/chk/index.html 2>/dev/null | head -1 | sed "s/.*'//" | tr 'a-z' 'A-Z')
+            k2=$(grep -o "CACHE_VERSION = '[A-Za-z][A-Za-z]" /tmp/chk/sw.js 2>/dev/null | head -1 | sed "s/.*'//" | tr 'a-z' 'A-Z')
+            if [[ "$n" != "$EXP"* ]] || { [ -n "$k1" ] && [ "$k1" != "$EXP" ]; } || { [ -n "$k2" ] && [ "$k2" != "$EXP" ]; }; then
+              echo "::error::WRONG ZIP $z (name/index/sw = $n / $k1 / $k2) - this is $EXP repo - deleted, nothing deployed"
+              git rm -q "$z"
+              git commit -q -m "WRONG ZIP REMOVED: $z (only $EXP allowed)"
+              git push
+              exit 1
+            fi
+            unzip -o "$z" -x '.github/*' -d . && rm -f "$z"
+          done
+          git add -A
+          git commit -m unzip-upload && git push
+          echo found=1 >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Firebase
+        if: steps.unzip.outputs.found == '1'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FM_SADDAM_MANDI }}
+          projectId: fm-saddam-mandi
+          channelId: live
