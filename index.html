@@ -3236,6 +3236,24 @@ function __appHostKind(h, p){
       <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں (صرف Admin کو نظر آئیں) ---------- -->
       <!-- ---------- ✏️ صدام کی ہدایت (FM20SEPSU1140AM): آئیکن ترتیب بدلیں بٹن یہاں، سبسکرپشن پٹی کے ساتھ
            ایک ہی لائن میں — نیچے اپنی پوری لائن اب ختم (دیکھیں #homeTopControlsRow) ---------- -->
+      <!-- ---------- 💰 FM510MO310 (صدام کی ہدایت): کاروبار کی جمع تفریق — تین کیپسول، دائیں سے بائیں:
+           بیوپاریوں کے دینے ہیں | گاہکوں سے لینے ہیں | کاروبار منافع/خسارے میں (لینے − دینے) — صرف ایڈمن ---------- -->
+      <style>
+        #homeMoneyRow{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:2px 0 10px; direction:rtl;}
+        #homeMoneyRow .hmCap{border-radius:18px; padding:8px 6px 9px; text-align:center; min-width:0; box-shadow:0 3px 10px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.7); border:1.5px solid transparent;}
+        #homeMoneyRow .hmLbl{font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:15px; font-weight:700; line-height:1.65; white-space:nowrap;}
+        #homeMoneyRow .hmVal{font-family:Arial,'Helvetica Neue',sans-serif; font-weight:900; font-size:19px; line-height:1.25; direction:ltr; white-space:nowrap; overflow:hidden; letter-spacing:-.2px;}
+        #homeMoneyRow .hmPay{background:linear-gradient(160deg,#fff7ed,#ffedd5); border-color:#fdba74;} #homeMoneyRow .hmPay .hmLbl{color:#9a3412;} #homeMoneyRow .hmPay .hmVal{color:#c2410c;}
+        #homeMoneyRow .hmRec{background:linear-gradient(160deg,#eff6ff,#dbeafe); border-color:#93c5fd;} #homeMoneyRow .hmRec .hmLbl{color:#1e3a8a;} #homeMoneyRow .hmRec .hmVal{color:#1d4ed8;}
+        #homeMoneyRow .hmNet.profit{background:linear-gradient(160deg,#f0fdf4,#dcfce7); border-color:#86efac;} #homeMoneyRow .hmNet.profit .hmLbl{color:#14532d;} #homeMoneyRow .hmNet.profit .hmVal{color:#15803d;}
+        #homeMoneyRow .hmNet.loss{background:linear-gradient(160deg,#fef2f2,#fee2e2); border-color:#fca5a5;} #homeMoneyRow .hmNet.loss .hmLbl{color:#7f1d1d;} #homeMoneyRow .hmNet.loss .hmVal{color:#dc2626;}
+      </style>
+      <div id="homeMoneyRow" class="admin-only">
+        <div class="hmCap hmPay" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاریوں کے<br>دینے ہیں</div><div class="hmVal" id="hmPayVal">0</div></div>
+        <div class="hmCap hmRec" onclick="goTo('customers')"><div class="hmLbl">گاہکوں سے<br>لینے ہیں</div><div class="hmVal" id="hmRecVal">0</div></div>
+        <div class="hmCap hmNet profit" id="hmNetCap"><div class="hmLbl" id="hmNetLbl">کاروبار<br>منافع میں ہے</div><div class="hmVal" id="hmNetVal">0</div></div>
+      </div>
+
       <div id="homeTopControlsRow">
         <div class="subBoxRow admin-only" id="subBoxRow" style="display:none;">
           <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
@@ -8883,7 +8901,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM510MO309'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM510MO310'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9641,7 +9659,33 @@ function toggleHomeEditMode(){
   homeEditMode = !homeEditMode;
   renderHomeIconGrid();
 }
+// ---------- 💰 FM510MO310: ہوم کے تین کیپسول کا حساب — بیوپاریوں کا کل بقایا، گاہکوں کا کل بقایا، اور فرق ---------- -->
+function renderHomeMoneySummary(){
+  const row = document.getElementById('homeMoneyRow');
+  if(!row) return;
+  const pay = Math.round((suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_payable) || 0), 0));
+  const rec = Math.round((customersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_receivable) || 0), 0));
+  const net = rec - pay;
+  const f = n => Math.abs(n).toLocaleString('en-US');
+  document.getElementById('hmPayVal').textContent = f(pay);
+  document.getElementById('hmRecVal').textContent = f(rec);
+  const cap = document.getElementById('hmNetCap');
+  cap.classList.toggle('profit', net >= 0);
+  cap.classList.toggle('loss', net < 0);
+  document.getElementById('hmNetLbl').innerHTML = net >= 0 ? 'کاروبار<br>منافع میں ہے' : 'کاروبار<br>خسارے میں ہے';
+  document.getElementById('hmNetVal').textContent = (net < 0 ? '- ' : '') + f(net);
+  // کروڑوں والی بڑی رقم بھی خانے میں پوری آئے — ضرورت ہو تو حروف خود چھوٹے
+  row.querySelectorAll('.hmVal').forEach(el => {
+    let size = 19; el.style.fontSize = size + 'px';
+    while(el.scrollWidth > el.clientWidth && size > 11){ size -= 1; el.style.fontSize = size + 'px'; }
+  });
+}
+setInterval(() => {
+  try{ const h = document.getElementById('screen-home'); if(h && h.classList.contains('active')) renderHomeMoneySummary(); }catch(e){}
+}, 4000);
+
 function renderHomeIconGrid(){
+  try{ renderHomeMoneySummary(); }catch(e){} // 💰 FM510MO310
   renderHomeUnfinishedCartCard();
   const grid = document.getElementById('homeIconGrid');
   if(!grid) return;
