@@ -4122,6 +4122,7 @@ function __appHostKind(h, p){
         </div>
 
         <div class="productMain" style="width:100%; flex:1 1 100%;">
+          <div class="admin-only" id="bulkDelProductsBtnWrap" style="width:100%;"></div><!-- 🗑️ FM510MO318 -->
           <div class="productList" id="stockAdjustmentListWrap" style="width:100%;">
             <!-- JS سے سبزیوں کے کارڈز یہاں بنیں گی -->
           </div>
@@ -8925,7 +8926,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM510MO317'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM510MO319'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -22644,11 +22645,11 @@ let munshiStockLogData = loadFromStorage('munshiStockLog', []);
 let nextMunshiLogId = loadFromStorage('nextMunshiLogId', 1);
 
 const SUPPLIERS_SEED_DATA = [
-  {supplier_id:1, name:'Unilever Pakistan', phone:'923001112223', address:'Karachi', keywords:'', total_payable:12500},
-  {supplier_id:2, name:'Local Grocery Supplier', phone:'923337778889', address:'Lahore', keywords:'', total_payable:6000},
+  // 🧹 FM510MO318: نمونے کے بیوپاری (Unilever وغیرہ) ختم — یہی نئے فون سے بار بار واپس آتے تھے
 ];
 let suppliersData = loadFromStorage('suppliers', SUPPLIERS_SEED_DATA);
 let nextSupplierId = loadFromStorage('nextSupplierId', 3);
+try{ setTimeout(() => { if(typeof isLegacyDemoSupplier === 'function') suppliersData = suppliersData.filter(s => !isLegacyDemoSupplier(s)); }, 0); }catch(e){} // 🧹 FM510MO318
 
 /* =====================================================================
    💳 PAYMENTS HUB — تمام پیمنٹس کا مرکزی، متحدہ ریکارڈ (کسٹمر سے وصولی + سپلائر کو ادائیگی)
@@ -25630,7 +25631,7 @@ function renderPartyList(query = ''){
       return;
     }
     const isAdmin = AppState.currentRole === 'admin';
-    wrap.innerHTML = filtered.map(c => {
+    wrap.innerHTML = (isAdmin ? bulkDelBtnHtml('customers') : '') + filtered.map(c => { // 🗑️ FM510MO318 عارضی بڑا بٹن
       const areaBadgeHtml = c.rateArea
         ? `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#fff; background:${c.rateArea==='retail'?'#b91c1c':'#15803d'}; border:none; border-radius:7px; padding:2px 5px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">${c.rateArea==='retail'?'اسلام آباد':'راولپنڈی'}</button>`
         : `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#5b21b6; background:#ede9fe; border:1.5px solid #c4b5fd; border-radius:7px; padding:2px 5px; cursor:pointer;">❔</button>`;
@@ -26255,6 +26256,8 @@ function openSupplierProfile(supplierId){
     <button style="background:linear-gradient(155deg,#10b981,#047857);" onclick="openPaySupplierModal(${s.supplier_id}, 'receive');"><span class="sideIcon">📥</span><span class="sideLabel">ادھار لیا</span></button>
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">پروفائل</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">لین دین</span></button>
+    <!-- 🗑️ FM510MO318: صرف ایڈمن — دو تنبیہ + PIN -->
+    ${AppState.currentRole === 'admin' ? `<button style="background:linear-gradient(155deg,#f87171,#7f1d1d);" onclick="deleteSupplierWithConfirm(${s.supplier_id})"><span class="sideIcon">🗑️</span><span class="sideLabel">حذف</span></button>` : ''}
   `;
 
   renderSupplierMainContent(s.supplier_id);
@@ -26724,7 +26727,8 @@ function uDialog(opts){
     const rows = (opts.rows || []).map(r => `<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 12px; margin-top:6px; border-radius:12px; background:${r.big ? '#14532d' : (r.bg || '#f1f5f9')}; color:${r.big ? '#fff' : (r.fg || '#0f172a')};">
         <span style="font-size:${r.big ? 20 : 17}px; font-weight:700;">${r.label}</span>
         <span dir="ltr" style="font-family:Arial,sans-serif; font-weight:900; font-size:${r.big ? 19 : 16}px; white-space:nowrap;">${r.value}</span></div>`).join('');
-    const msg = opts.message ? `<div style="font-size:18px; line-height:2; margin-top:4px;">${opts.message}</div>` : '';
+    const msg = (opts.message ? `<div style="font-size:18px; line-height:2; margin-top:4px;">${opts.message}</div>` : '')
+      + (opts.input ? `<input id="uDialogInput" type="${opts.input}" inputmode="numeric" autocomplete="off" style="width:100%; box-sizing:border-box; height:48px; margin-top:8px; border:2px solid #cbd5e1; border-radius:12px; text-align:center; font:900 22px Arial; letter-spacing:6px;">` : '');
     ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:400px; background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 18px 50px rgba(0,0,0,.35); font-family:${urF};">
       <div style="background:${head}; color:#fff; padding:12px 16px; font-size:22px; font-weight:700; text-align:center; line-height:1.9;">${opts.title || 'تصدیق'}</div>
       <div style="padding:10px 14px 4px; color:#0f172a;">${msg}${rows}</div>
@@ -26734,9 +26738,11 @@ function uDialog(opts){
       </div></div>`;
     ov.style.display = 'flex';
     const done = v => { ov.style.display = 'none'; ov.innerHTML = ''; resolve(v); };
-    ov.querySelector('#uDialogYes').onclick = () => done(true);
-    const no = ov.querySelector('#uDialogNo'); if(no) no.onclick = () => done(false);
-    ov.onclick = e => { if(e.target === ov && opts.cancelText !== null) done(false); };
+    const inp = ov.querySelector('#uDialogInput');
+    if(inp){ setTimeout(() => inp.focus(), 50); inp.onkeydown = e => { if(e.key === 'Enter') done(inp.value); }; }
+    ov.querySelector('#uDialogYes').onclick = () => done(inp ? inp.value : true);
+    const no = ov.querySelector('#uDialogNo'); if(no) no.onclick = () => done(inp ? null : false);
+    ov.onclick = e => { if(e.target === ov && opts.cancelText !== null) done(inp ? null : false); };
   });
 }
 function uAlert(title, message, tone){ return uDialog({ title, message, okText: 'ٹھیک ہے', cancelText: null, tone: tone || 'amber' }); }
@@ -26935,6 +26941,186 @@ function shareSupplierReceipt(){
     }
   }, 'image/png');
 }
+
+// ---------- 🗑️ FM510MO318 (صدام کی ہدایت): ایک ساتھ کئی گاہک / سبزیاں حذف کرنا — عارضی بڑا بٹن، چیک باکس فہرست،
+// دو بار اردو تنبیہ + ایڈمن PIN۔ اور بیوپاری کی پروفائل میں "حذف" بٹن (دو تنبیہ + PIN) ---------- -->
+let _bulkDel = { kind: null, sel: new Set(), dupOnly: false, q: '' };
+function _bulkItems(kind){
+  if(kind === 'customers'){
+    const key = c => String(c.name || '').trim().toLowerCase();
+    const cnt = {}; customersData.forEach(c => { const k = key(c); cnt[k] = (cnt[k] || 0) + 1; });
+    return customersData.map(c => ({
+      id: c.customer_id, title: c.name || '', serial: c.serial_no,
+      sub: `بقایا Rs. ${(Number(c.total_receivable) || 0).toLocaleString()}${(Number(c.wallet_balance) || 0) > 0 ? ' • والٹ Rs. ' + Number(c.wallet_balance).toLocaleString() : ''}${c.phone ? ' • ' + c.phone : ''}${c.isDormant ? ' • غیر فعال' : ''}`,
+      dup: cnt[key(c)], money: Number(c.total_receivable) || 0, dormant: !!c.isDormant
+    })).sort((a, b) => a.title.localeCompare(b.title, 'ur') || (a.serial || 0) - (b.serial || 0));
+  }
+  const key = p => String(p.name || '').trim() + '|' + ((p.variants && p.variants[0] && p.variants[0].label) || '');
+  const cnt = {}; productsData.forEach(p => { const k = key(p); cnt[k] = (cnt[k] || 0) + 1; });
+  return productsData.map(p => {
+    const v = (p.variants && p.variants[0]) || {};
+    return { id: p.product_id, title: p.name || '', serial: p.serial_no,
+      sub: `پیکنگ: ${v.label || '-'} • سٹاک ${Number(v.stock) || 0}${p.isDormant ? ' • غیر حاضر' : ''}`,
+      dup: cnt[key(p)], safe: _isSafeProductDup(p, cnt[key(p)]), dormant: !!p.isDormant };
+  }).sort((a, b) => a.title.localeCompare(b.title, 'ur') || (a.serial || 0) - (b.serial || 0));
+}
+function _isSafeProductDup(p, dupCount){
+  if(!(dupCount > 1) || !p.isDormant || (p.variants || []).length !== 1) return false;
+  const v = p.variants[0];
+  if((Number(v.stock) || 0) !== 0) return false;
+  if((v.chalans || []).some(c => (Number(c.qty) || 0) > 0)) return false;
+  const pendingUse = (advanceOrdersData || []).some(o => o.status === 'pending' && (o.items || []).some(it => it.variant_id === v.variant_id));
+  return !pendingUse;
+}
+function openBulkDeleteModal(kind){
+  if(AppState.currentRole !== 'admin'){ uAlert('🔒 صرف ایڈمن', 'یہ کام صرف ایڈمن کر سکتا ہے۔'); return; }
+  _bulkDel = { kind, sel: new Set(), dupOnly: false, q: '' };
+  let ov = document.getElementById('bulkDelOverlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'bulkDelOverlay'; document.body.appendChild(ov); }
+  ov.style.cssText = 'position:fixed; inset:0; z-index:99970; background:rgba(15,23,42,.6); display:flex; align-items:stretch; justify-content:center; padding:8px;';
+  renderBulkDeleteModal();
+}
+function closeBulkDeleteModal(){ const ov = document.getElementById('bulkDelOverlay'); if(ov){ ov.style.display = 'none'; ov.innerHTML = ''; } }
+function renderBulkDeleteModal(){
+  const ov = document.getElementById('bulkDelOverlay'); if(!ov) return;
+  const urF = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif";
+  const isC = _bulkDel.kind === 'customers';
+  let items = _bulkItems(_bulkDel.kind);
+  const q = _bulkDel.q.trim().toLowerCase();
+  if(q) items = items.filter(x => x.title.toLowerCase().includes(q) || String(x.serial || '') === q);
+  if(_bulkDel.dupOnly) items = items.filter(x => x.dup > 1);
+  const rows = items.map(x => `<label style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-bottom:1px solid #eef2f7; background:${_bulkDel.sel.has(x.id) ? '#fee2e2' : '#fff'}; cursor:pointer;">
+      <input type="checkbox" ${_bulkDel.sel.has(x.id) ? 'checked' : ''} onchange="toggleBulkSel(${x.id}, this.checked)" style="width:22px; height:22px; flex:0 0 22px; accent-color:#dc2626;">
+      <span style="flex:0 0 auto; min-width:34px; text-align:center; font:700 13px Arial; color:#475569; background:#f1f5f9; border-radius:8px; padding:2px 5px;">${x.serial != null ? x.serial : '-'}</span>
+      <span style="flex:1; min-width:0;">
+        <span style="display:block; font-size:17px; font-weight:700; line-height:1.7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${String(x.title).replace(/</g,'&lt;')}
+          ${x.dup > 1 ? `<span style="font:700 11px Arial; color:#9a3412; background:#ffedd5; border-radius:6px; padding:1px 5px; margin-right:4px;">ڈپلیکیٹ ×${x.dup}</span>` : ''}</span>
+        <span style="display:block; font:600 12px Arial; color:#64748b; direction:rtl;">${x.sub}</span>
+      </span></label>`).join('') || '<div style="padding:24px; text-align:center; color:#64748b;">کچھ نہیں ملا</div>';
+  const btn = (bg, fg, js, txt, extra) => `<button type="button" onclick="${js}" style="flex:1; height:42px; border:none; border-radius:12px; background:${bg}; color:${fg}; font-family:${urF}; font-size:16px; font-weight:700; cursor:pointer; ${extra || ''}">${txt}</button>`;
+  ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:520px; background:#fff; border-radius:18px; display:flex; flex-direction:column; overflow:hidden; font-family:${urF};">
+    <div style="background:linear-gradient(135deg,#dc2626,#7f1d1d); color:#fff; padding:8px 12px; display:flex; align-items:center; gap:8px;">
+      <div style="flex:1; font-size:20px; font-weight:700; line-height:1.9;">🗑️ ایک ساتھ کئی ${isC ? 'گاہک' : 'سبزیاں'} حذف کریں</div>
+      <button type="button" onclick="closeBulkDeleteModal()" style="border:none; background:rgba(255,255,255,.2); color:#fff; width:34px; height:34px; border-radius:10px; font-size:18px; cursor:pointer;">✖</button>
+    </div>
+    <div style="padding:8px 10px; display:flex; flex-direction:column; gap:6px; border-bottom:1px solid #e2e8f0;">
+      <input type="text" placeholder="🔍 نام یا سیریل لکھیں…" value="${_bulkDel.q.replace(/"/g,'&quot;')}" oninput="_bulkDel.q=this.value; renderBulkDeleteModal(); const i=document.querySelector('#bulkDelOverlay input[type=text]'); if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); }" style="height:40px; border:1.5px solid #cbd5e1; border-radius:12px; padding:0 12px; font-family:${urF}; font-size:16px;">
+      <div style="display:flex; gap:6px;">
+        ${btn(_bulkDel.dupOnly ? '#9a3412' : '#ffedd5', _bulkDel.dupOnly ? '#fff' : '#9a3412', '_bulkDel.dupOnly=!_bulkDel.dupOnly; renderBulkDeleteModal();', _bulkDel.dupOnly ? '✓ صرف ڈپلیکیٹ' : 'صرف ڈپلیکیٹ دکھائیں')}
+        ${!isC ? btn('#fef3c7', '#92400e', 'bulkPickSafeProductDups()', '✨ فالتو ڈپلیکیٹ خود چنیں') : ''}
+        ${btn('#f1f5f9', '#334155', '_bulkDel.sel.clear(); renderBulkDeleteModal();', 'سب ہٹائیں')}
+      </div>
+    </div>
+    <div style="flex:1; overflow:auto;">${rows}</div>
+    <div style="padding:8px 10px 10px; border-top:1px solid #e2e8f0; display:flex; gap:8px; align-items:center;">
+      <div style="flex:0 0 auto; font-size:16px; font-weight:700; color:#7f1d1d;">چنے گئے: <span style="font:900 16px Arial;">${_bulkDel.sel.size}</span></div>
+      ${btn(_bulkDel.sel.size ? 'linear-gradient(135deg,#dc2626,#7f1d1d)' : '#e2e8f0', _bulkDel.sel.size ? '#fff' : '#94a3b8', 'confirmBulkDelete()', '🗑️ چنے ہوئے حذف کریں')}
+    </div></div>`;
+}
+function toggleBulkSel(id, on){ if(on) _bulkDel.sel.add(id); else _bulkDel.sel.delete(id); renderBulkDeleteModal(); }
+function bulkPickSafeProductDups(){
+  // ہر ڈپلیکیٹ گروپ میں ایک (حاضر/پہلے سیریل والی) رہے، باقی صرف وہ چنی جائیں جو غیر حاضر، سٹاک صفر، کسی زیر التوا آرڈر میں نہیں
+  const key = p => String(p.name || '').trim() + '|' + ((p.variants && p.variants[0] && p.variants[0].label) || '');
+  const groups = {}; productsData.forEach(p => { (groups[key(p)] = groups[key(p)] || []).push(p); });
+  let n = 0;
+  Object.values(groups).filter(g => g.length > 1).forEach(g => {
+    const keeper = g.slice().sort((a, b) => (!!a.isDormant - !!b.isDormant) || ((a.serial_no || 1e9) - (b.serial_no || 1e9)))[0];
+    g.forEach(p => { if(p !== keeper && _isSafeProductDup(p, g.length)){ _bulkDel.sel.add(p.product_id); n++; } });
+  });
+  _bulkDel.dupOnly = true;
+  renderBulkDeleteModal();
+  uAlert(n ? '✨ ' + n + ' فالتو ڈپلیکیٹ چن لی گئیں' : 'کوئی فالتو ڈپلیکیٹ نہیں ملی', n ? 'صرف وہ چنی ہیں جو غیر حاضر ہیں، سٹاک صفر ہے اور کسی آرڈر میں نہیں — ہر سبزی کی ایک کاپی باقی رہے گی۔ اب نیچے "حذف کریں" دبائیں۔' : '', 'green');
+}
+async function confirmBulkDelete(){
+  const isC = _bulkDel.kind === 'customers';
+  const ids = Array.from(_bulkDel.sel);
+  if(!ids.length){ uAlert('⚠️ کچھ نہیں چنا', 'پہلے فہرست میں چیک باکس پر ٹک لگائیں۔'); return; }
+  const rows = [{ label: isC ? 'گاہک حذف ہوں گے' : 'سبزیاں حذف ہوں گی', value: String(ids.length), big: true }];
+  if(isC){
+    const money = customersData.filter(c => ids.includes(c.customer_id)).reduce((s, c) => s + (Number(c.total_receivable) || 0), 0);
+    rows.push({ label: 'ان کا کل بقایا (کھاتے سے نکل جائے گا)', value: 'Rs. ' + Math.round(money).toLocaleString(), bg: '#fee2e2', fg: '#7f1d1d' });
+  } else {
+    const stock = productsData.filter(p => ids.includes(p.product_id)).reduce((s, p) => s + (p.variants || []).reduce((a, v) => a + (Number(v.stock) || 0), 0), 0);
+    if(stock > 0) rows.push({ label: 'ان میں موجود سٹاک', value: String(stock), bg: '#fee2e2', fg: '#7f1d1d' });
+  }
+  // 🗑️ FM510MO319 (صدام کی ہدایت): صفائی کے دوران صرف ایک تنبیہ، PIN نہیں — صفائی مکمل ہونے کے بعد PIN واپس لگے گا
+  if(!(await uDialog({ title: '⚠️ حذف کی تصدیق', message: 'کیا آپ واقعی یہ سب حذف کرنا چاہتے ہیں؟ حذف کرنے کے بعد یہ <b>دوبارہ واپس نہیں آئیں گے</b>۔ پرانے بل اپنی جگہ رہیں گے۔', rows, okText: '🗑️ حذف کر دیں', cancelText: '✖ واپس', tone: 'red' }))) return;
+  window.__shrinkAllowUntil = Date.now() + 90000; // ایڈمن نے خود اجازت دی — کمی کا تالا دوبارہ نہ پوچھے
+  if(isC){
+    customersData = customersData.filter(c => !ids.includes(c.customer_id));
+    persistAllData();
+    try{ pushCustomersToCloud(); }catch(e){}
+    try{ renderPartyList(''); }catch(e){}
+  } else {
+    productsData = productsData.filter(p => !ids.includes(p.product_id));
+    persistAllData();
+    AppState.settings.productsPendingSync = true;
+    try{ pushProductsToCloud(); }catch(e){}
+    try{ refreshAllScreens(); }catch(e){}
+  }
+  closeBulkDeleteModal();
+  uAlert('✅ حذف ہو گئے', ids.length + (isC ? ' گاہک' : ' سبزیاں') + ' حذف کر دیے گئے۔', 'green');
+}
+async function deleteSupplierWithConfirm(supplierId){
+  if(AppState.currentRole !== 'admin'){ uAlert('🔒 صرف ایڈمن', 'یہ کام صرف ایڈمن کر سکتا ہے۔'); return; }
+  const s = suppliersData.find(x => x.supplier_id === supplierId); if(!s) return;
+  const rows = [{ label: 'بیوپاری', value: s.name, big: true }];
+  if((Number(s.total_payable) || 0) !== 0) rows.push({ label: 'اس کا بقایا (ہم نے دینا)', value: 'Rs. ' + Number(s.total_payable).toLocaleString(), bg: '#fee2e2', fg: '#7f1d1d' });
+  if((Number(s.wallet_balance) || 0) !== 0) rows.push({ label: 'ایڈوانس اس کے پاس', value: 'Rs. ' + Number(s.wallet_balance).toLocaleString(), bg: '#fee2e2', fg: '#7f1d1d' });
+  if(!(await uDialog({ title: '⚠️ بیوپاری حذف کریں؟', message: 'کیا آپ واقعی یہ بیوپاری حذف کرنا چاہتے ہیں؟', rows, okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'red' }))) return;
+  if(!(await uDialog({ title: '⛔ آخری تنبیہ', message: 'حذف کرنے کے بعد یہ بیوپاری <b>دوبارہ واپس نہیں آئے گا</b>۔ پرانے بل اور ادائیگیاں اپنی جگہ رہیں گی۔', okText: '🗑️ حذف کر دیں', cancelText: '✖ نہیں', tone: 'red' }))) return;
+  if(!(await _askAdminPinForSerialMaster('بیوپاری "' + s.name + '" حذف کرنا'))) return;
+  suppliersData = suppliersData.filter(x => x.supplier_id !== supplierId);
+  persistAllData();
+  try{ pushSuppliersToCloud(); }catch(e){}
+  document.getElementById('profileModal').classList.remove('show');
+  try{ renderPartyList(''); }catch(e){}
+  uAlert('✅ حذف ہو گیا', 'بیوپاری "' + s.name + '" حذف کر دیا گیا۔', 'green');
+}
+// پرانے نمونے کے (ڈیمو) بیوپاری — نئے/پرانے فون سے بار بار واپس نہ آئیں
+const LEGACY_DEMO_SUPPLIERS = [
+  {supplier_id:1, name:'Unilever Pakistan', phone:'923001112223'},
+  {supplier_id:2, name:'Local Grocery Supplier', phone:'923337778889'},
+];
+function isLegacyDemoSupplier(s){
+  return !!s && LEGACY_DEMO_SUPPLIERS.some(d => d.supplier_id === s.supplier_id && d.name === s.name && (d.phone || '') === (s.phone || '')) && !(Number(s.total_payable) || 0) && !(Number(s.wallet_balance) || 0);
+}
+
+function bulkDelBtnHtml(kind){
+  return `<button type="button" onclick="openBulkDeleteModal('${kind}')" style="width:100%; margin:4px 0 10px; height:46px; border:2px dashed #dc2626; border-radius:14px; background:#fef2f2; color:#b91c1c; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:18px; font-weight:700; cursor:pointer;">🗑️ ایک ساتھ کئی ${kind === 'customers' ? 'گاہک' : 'سبزیاں'} حذف کریں</button>`;
+}
+// ---------- ✨ FM510MO318: ایڈمن فون پر ایک بار — بالکل فالتو ڈپلیکیٹ سبزیاں خود صاف (صرف غیر حاضر، سٹاک صفر، کسی آرڈر میں نہیں؛
+// ہر سبزی کی ایک کاپی ہمیشہ باقی) ---------- -->
+function autoCleanSafeProductDuplicatesOnce(){
+  if(AppState.currentRole !== 'admin' || loadFromStorage('autoProdDupCleanV318', false)) return;
+  if(!Array.isArray(productsData) || productsData.length < 2) return;
+  const key = p => String(p.name || '').trim() + '|' + ((p.variants && p.variants[0] && p.variants[0].label) || '');
+  const groups = {}; productsData.forEach(p => { (groups[key(p)] = groups[key(p)] || []).push(p); });
+  const del = new Set();
+  Object.values(groups).filter(g => g.length > 1).forEach(g => {
+    const keeper = g.slice().sort((a, b) => (!!a.isDormant - !!b.isDormant) || ((a.serial_no || 1e9) - (b.serial_no || 1e9)))[0];
+    g.forEach(p => { if(p !== keeper && _isSafeProductDup(p, g.length)) del.add(p.product_id); });
+  });
+  saveToStorage('autoProdDupCleanV318', true);
+  if(!del.size) return;
+  window.__shrinkAllowUntil = Date.now() + 90000;
+  productsData = productsData.filter(p => !del.has(p.product_id));
+  persistAllData();
+  AppState.settings.productsPendingSync = true;
+  try{ pushProductsToCloud(); }catch(e){}
+  try{ refreshAllScreens(); }catch(e){}
+  console.log('✨ FM510MO318: ' + del.size + ' فالتو ڈپلیکیٹ سبزیاں صاف');
+}
+document.addEventListener('DOMContentLoaded', () => { const w = document.getElementById('bulkDelProductsBtnWrap'); if(w) w.innerHTML = bulkDelBtnHtml('products'); });
+setTimeout(() => { const w = document.getElementById('bulkDelProductsBtnWrap'); if(w && !w.innerHTML) w.innerHTML = bulkDelBtnHtml('products'); }, 0);
+setInterval(() => {
+  try{
+    if(AppState.currentRole === 'admin' && navigator.onLine && !loadFromStorage('autoProdDupCleanV318', false)){
+      const app = document.getElementById('app');
+      if(app && getComputedStyle(app).display !== 'none') autoCleanSafeProductDuplicatesOnce();
+    }
+  }catch(e){}
+}, 9000);
 
 function openPaySupplierModal(supplierId, onlyMode){
   window.__payFromPo = false; // 💵 FM410SU301: پیمنٹ بٹن (poPaySupplier) خود اسے اس کے بعد true کرتا ہے
@@ -36392,6 +36578,7 @@ function stripOne(x){ if(!x) return x; const {image, ...rest} = x; return rest; 
 const SHRINK_LOCK_LIMIT = 3;
 async function _shrinkLockCheck(remoteArr, mergedArr, idField, label){
   if(!Array.isArray(remoteArr) || !Array.isArray(mergedArr)) return mergedArr;
+  if((window.__shrinkAllowUntil || 0) > Date.now() && typeof AppState !== 'undefined' && AppState.currentRole === 'admin') return mergedArr; // 🗑️ FM510MO318: ایڈمن نے PIN سے خود حذف کیا
   const keep = new Set(mergedArr.map(x => x && x[idField]));
   const removed = remoteArr.filter(x => x && !keep.has(x[idField]));
   if(removed.length <= SHRINK_LOCK_LIMIT) return mergedArr;
@@ -36420,6 +36607,10 @@ function _mergeRecordsThreeWay(base, local, remote, idField, counters, hists, se
     return _r;
   }
   if(idField === '__cust__') idField = 'customer_id';
+  if(idField === 'supplier_id'){ // 🧹 FM510MO318: ڈیمو بیوپاری کبھی نہ ملائیں، کلاؤڈ میں ہوں تو بھی ہٹ جائیں
+    return _mergeRecordsThreeWay(base, (local || []).filter(s => !isLegacyDemoSupplier(s)), (remote || []).filter(s => !isLegacyDemoSupplier(s)), '__sup__', counters, hists, null);
+  }
+  if(idField === '__sup__') idField = 'supplier_id';
   const isSeed = x => Array.isArray(seedArr) && seedArr.some(sd => sd[idField] === x[idField] && sd.name === x.name);
   if(!Array.isArray(base)){
     const ids = new Set(remote.map(x => x[idField]));
@@ -36757,16 +36948,20 @@ function _serialMasterCompareText(master, cur){
   return t;
 }
 async function _askAdminPinForSerialMaster(actionText){
-  const pin = prompt(`🔐 ${actionText}\n\nتصدیق کے لیے ایڈمن کا PIN درج کریں:`);
-  if(pin === null) return false;
+  // 🗨️ FM510MO318: فون کے چھوٹے انگریزی ڈبے کی بجائے اردو نستعلیق PIN ڈبہ
+  const pin = (typeof uDialog === 'function')
+    ? await uDialog({ title: '🔐 ایڈمن PIN', message: actionText + '<br>تصدیق کے لیے ایڈمن کا PIN درج کریں:', input: 'password', okText: '✅ تصدیق', cancelText: '✖ منسوخ', tone: 'amber' })
+    : prompt(`🔐 ${actionText}\n\nتصدیق کے لیے ایڈمن کا PIN درج کریں:`);
+  if(pin === null || pin === false) return false;
   const clean = (pin || '').trim();
-  if(!clean){ alert('❌ PIN درج نہیں کیا گیا — کام منسوخ، کچھ نہیں بدلا۔'); return false; }
+  const say = (m) => (typeof uAlert === 'function') ? uAlert('❌ کام منسوخ', m, 'red') : alert(m);
+  if(!clean){ await say('PIN درج نہیں کیا گیا — کام منسوخ، کچھ نہیں بدلا۔'); return false; }
   let ok = false;
   if(!ok){
     const h = await hashPin(clean);
     ok = usersData.some(u => u.pin === h && u.role === 'admin' && u.is_active);
   }
-  if(!ok){ alert('❌ غلط PIN — کام منسوخ کر دیا گیا، کچھ نہیں بدلا۔'); return false; }
+  if(!ok){ await say('غلط PIN — کام منسوخ کر دیا گیا، کچھ نہیں بدلا۔'); return false; }
   return true;
 }
 async function saveSerialMaster(){
