@@ -3194,7 +3194,7 @@ function __appHostKind(h, p){
     <!-- ---------- 🔒 صدام کی ہدایت (FM13SEPSU): "روزانہ ریکوری لسٹ" پہلے صرف رپورٹس سینٹر کے اندر چھپی ہوئی تھی —
          اب اپنا الگ مینیو آئٹم، تاکہ یہ مخصوص ملازم (یوزرز سکرین کی اجازتی فہرست) کو الاٹ کی جا سکے ---------- -->
     <div class="navItem" data-screen="dailyRecovery" data-navkey="dailyRecovery" data-navlabel="Daily Recovery List" onclick="goTo('dailyRecovery')" style="background:#0D9488; color:#fff;">📋 روزانہ ریکوری لسٹ<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="" data-navkey="reports" data-navlabel="Reports" onclick="closeSidebar(); openReportCenterModal();" style="background:#2563EB; color:#fff;">📑 رپورٹس<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="" data-navkey="reports" data-navlabel="Reports" onclick="closeSidebar(); openReportCenterModal();" style="display:none !important; background:#2563EB; color:#fff;"><!-- 🙈 FM510MO316: مینیو سے رپورٹس چھپا دیا -->📑 رپورٹس<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="settings" data-navkey="settings" data-navlabel="Settings" onclick="goTo('settings')" style="background:#CA8A04; color:#fff;">⚙️ سیٹنگز<span class="navDragHandle">⠿</span></div>
     <!-- ---------- 🔄 صدام کی ہدایت (FM4SEPFR25): Stock Adjustment دوبارہ فعال — مینیو اور یوزر اسکرین اجازت دونوں میں نظر آئے ---------- -->
     <div class="navItem admin-only" data-screen="stockadjustment" data-navkey="stockadjustment" data-navlabel="Stock Adjustment" onclick="goTo('stockadjustment')" style="background:#E11D48; color:#fff;">🧮 سٹاک مینجمنٹ<span class="navDragHandle">⠿</span></div>
@@ -3241,6 +3241,7 @@ function __appHostKind(h, p){
       <style>
         /* 🎨 FM510MO311 (صدام کی ہدایت): عنوان اور رقم الگ الگ کیپسول — ہر ایک کا اپنا رنگ */
         /* 💰 FM510MO313: ایک مشترکہ گہرا نیلا پینل، تینوں ڈبے بیچ میں، کم اونچائی، صرف آنکھ کا نشان (بغیر ڈبے) */
+        .navItem[data-navkey="reports"]{display:none !important;} /* 🙈 FM510MO316 */
         #homeMoneyWrap{position:relative; margin:6px 2px 12px; direction:rtl;}
         #homeMoneyPanel{background:linear-gradient(160deg,#1e3a8a 0%,#172554 100%); border-radius:18px; padding:7px 8px 9px;
           box-shadow:0 4px 12px rgba(23,37,84,.35), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -2px 6px rgba(0,0,0,.25);}
@@ -4032,7 +4033,9 @@ function __appHostKind(h, p){
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openSupplierSlipReport(null);">🧾 بیوپاریوں کی چٹ (سب)</span></div>
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openPurchaseChalanReport();">🧾 خرید (نقد / بیوپاری) اور چالان رپورٹ</span></div>
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openMunshiStockLogReport();">🧑‍🌾 منشی کا شامل کردہ سٹاک</span></div>
-            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openDailyStockProfitReport();">🧾 منڈی سیل ریکارڈ (برائے ایڈمن)</span></div>
+            <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openDailyStockProfitReport();">📊 روزانہ سٹاک/منافع رپورٹ (منڈی سیل ریکارڈ — ایڈمن)</span></div>
+            <!-- ---------- 📋 FM510MO316 (صدام کی ہدایت): روزانہ ریکوری لسٹ بھی یہیں — ہوم/مینیو والا "رپورٹس" ڈبہ ختم ---------- -->
+            <div class="categoryDropdownItem admin-only"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); goTo('dailyRecovery');">📋 روزانہ ریکوری لسٹ</span></div>
             <div class="stockAdjReportsSortBlock">
               <div class="stockAdjReportsSortLabel">ترتیب دیں:</div>
               <select id="stockAdjSortFilter" onchange="handleStockAdjSortSelect(this); closeStockAdjReportsDropdown();" onclick="event.stopPropagation();">
@@ -6896,7 +6899,7 @@ function __appHostKind(h, p){
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">⚠️ Low Stock Items</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Only items at or below their low-stock limit, category-wise</div>
       </button>
-      <button onclick="openTodaySaleReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+      <button onclick="openTodaySaleReport()" style="display:none; /* 🙈 FM510MO315: صدام کی ہدایت — چھپا دیا */ text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📅 Today's Sale Report</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Bills, sales, payments, expenses &amp; best-sellers for today</div>
       </button>
@@ -8922,7 +8925,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM510MO314'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM510MO317'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9759,6 +9762,7 @@ function renderHomeIconGrid(){
   const myTiles = assignedKeys.map(key => {
     // ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): "پراڈکٹس" کا ہوم آئیکن مکمل چھپا دیا (سٹاک مینجمنٹ اب وہی کام
     // کرتی ہے) — کوڈ/فنکشن/ASSIGNABLE_SCREENS اندراج بالکل محفوظ ہے، صرف یہاں سے فلٹر کیا گیا ---------- -->
+    if(key === 'reports') return null; // 🙈 FM510MO316: ہوم سے "رپورٹس" آئیکن ختم — دونوں رپورٹیں 🧮 سٹاک ← رپورٹس میں
     if(key === 'products') return null;
     // 📦 FM410SU301: "بیوپاری خریداری" ہوم آئیکن واپس (صدام کی ہدایت) — بیوپاری کے اندر والی "خریداری" ویسے ہی قائم
     const def = ASSIGNABLE_SCREENS.find(s => s.key === key);
@@ -19517,17 +19521,18 @@ async function pushAdvanceOrdersToCloud(){
       saveToStorage('advanceOrders', advanceOrdersData);
       try{ recomputeReservedFromOrders(); }catch(e){}
       const pre = cloud.updateTime ? `&currentDocument.updateTime=${encodeURIComponent(cloud.updateTime)}` : '';
+      const sentAdvJson = JSON.stringify(advanceOrdersData); // 🐞 FM510MO317
       const res = await authFirestoreFetch(`${ADVANCE_ORDERS_DOC_PATH}?key=${FIREBASE_API_KEY}${pre}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: {
-          json: { stringValue: JSON.stringify(advanceOrdersData) },
+          json: { stringValue: sentAdvJson },
           nextAdvOrderId: { integerValue: String(nextAdvOrderId) },
           deletedIds: { stringValue: JSON.stringify(advDeletedIds) },
           updatedAt: { integerValue: String(Date.now()) }
         }})
       });
-      if(res && res.ok){ _advSetBase(advanceOrdersData); break; }
+      if(res && res.ok){ _advSetBase(JSON.parse(sentAdvJson)); if(JSON.stringify(advanceOrdersData) !== sentAdvJson) _advPushAgain = true; break; } // 🐞 FM510MO317
       if(!(res && (res.status === 400 || res.status === 409 || res.status === 412))) break; // دوسری غلطی — اگلی بار
     }
   }catch(e){ /* آف لائن — مقامی محفوظ ہے */ }
@@ -36461,12 +36466,16 @@ async function _pushMerged(cfg){
       throw new Error('peek failed');
     }
     const pre = updateTime ? `&currentDocument.updateTime=${encodeURIComponent(updateTime)}` : '';
-    const fields = Object.assign({ json: { stringValue: JSON.stringify(cfg.get()) }, updatedAt: { integerValue: String(Date.now()) } }, cfg.extra ? cfg.extra() : {});
+    const sentJson = JSON.stringify(cfg.get()); // 🐞 FM510MO317: بھیجی جانے والی اسی لمحے کی کاپی
+    const fields = Object.assign({ json: { stringValue: sentJson }, updatedAt: { integerValue: String(Date.now()) } }, cfg.extra ? cfg.extra() : {});
     const res = await authFirestoreFetch(`${cfg.path}?key=${FIREBASE_API_KEY}${pre}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields })
     });
     ok = !!(res && res.ok);
-    if(ok) cfg.setBase(cfg.get());
+    if(ok){
+      cfg.setBase(JSON.parse(sentJson)); // 🐞 FM510MO317: بنیاد = جو واقعی لکھا گیا
+      if(JSON.stringify(cfg.get()) !== sentJson && cfg.push) setTimeout(() => { try{ cfg.push(); }catch(e){} }, 300); // بیچ میں ہوئی تبدیلی بھی جائے
+    }
     else if(!(res && (res.status === 400 || res.status === 409 || res.status === 412))) break;
   }
   cfg.save();
@@ -36544,6 +36553,7 @@ function _reattachLocalImages(merged, local){
   return merged;
 }
 
+let _prodPushAgain = false; // 🐞 FM510MO317
 async function pushProductsToCloud(){
   saveProductsLight(); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں (تصویریں الگ IndexedDB میں)
   saveToStorage('nextProductId', nextProductId);
@@ -36579,12 +36589,15 @@ async function pushProductsToCloud(){
         throw new Error('peek failed');
       }
       const pre = updateTime ? `&currentDocument.updateTime=${encodeURIComponent(updateTime)}` : '';
+      // 🐞 FM510MO317 (صدام: آلو/پیاز/پالک/دھنیا/ساگ میں 10-10 "بھوت" سٹاک): جو فہرست کلاؤڈ پر جا رہی ہے اس کی اسی لمحے کی
+      // کاپی — لکھائی کے انتظار (نیٹ ورک) کے دوران بننے والا نیا بل اب "پہلے سے بھیجا ہوا" نہیں سمجھا جائے گا
+      const sentProductsJson = JSON.stringify(productsData);
       const res = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}${pre}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fields: {
-            json: { stringValue: JSON.stringify(productsData) },
+            json: { stringValue: sentProductsJson },
             nextProductId: { integerValue: String(nextProductId) },
             nextVariantId: { integerValue: String(nextVariantId) },
             updatedAt: { integerValue: String(Date.now()) },
@@ -36596,10 +36609,16 @@ async function pushProductsToCloud(){
         })
       });
       ok = !!(res && res.ok);
-      if(ok) _syncSetBase(productsData);
+      if(ok){
+        // 🐞 FM510MO317: بنیاد = بالکل وہی جو کلاؤڈ پر لکھا گیا (پہلے یہ فون کی ابھی کی فہرست تھی — اگر بھیجنے کے دوران
+        // کوئی بل بنا تو اس کی سٹاک کٹوتی "بھیجی ہوئی" مان لی جاتی اور اگلے ملاپ میں کلاؤڈ کا پرانا سٹاک واپس آ جاتا)
+        _syncSetBase(JSON.parse(sentProductsJson));
+        if(JSON.stringify(productsData) !== sentProductsJson){ _prodPushAgain = true; }
+      }
       else if(!(res && (res.status === 400 || res.status === 409 || res.status === 412))) break;
     }
-    AppState.settings.productsPendingSync = !ok;
+    AppState.settings.productsPendingSync = !ok || _prodPushAgain;
+    if(ok && _prodPushAgain){ _prodPushAgain = false; setTimeout(() => { try{ pushProductsToCloud(); }catch(e){} }, 300); }
     persistAllData();
     return ok;
   }catch(e){
