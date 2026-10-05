@@ -3240,35 +3240,39 @@ function __appHostKind(h, p){
            بیوپاریوں کے دینے ہیں | گاہکوں سے لینے ہیں | کاروبار منافع/خسارے میں (لینے − دینے) — صرف ایڈمن ---------- -->
       <style>
         /* 🎨 FM510MO311 (صدام کی ہدایت): عنوان اور رقم الگ الگ کیپسول — ہر ایک کا اپنا رنگ */
-        /* 💰 FM510MO312: آدھی اونچائی، ایک لائن کا مختصر عنوان، 3D انداز وہی — اوپر رنگین کیپشن، نیچے الگ رقم کا کیپسول */
-        #homeMoneyWrap{display:flex; align-items:stretch; gap:6px; margin:4px 2px 12px; direction:rtl;}
-        #homeMoneyRow{flex:1; display:grid; grid-template-columns:repeat(3,1fr); gap:7px; min-width:0;}
-        #homeMoneyRow .hmCap{position:relative; border-radius:15px; padding:3px 4px 4px; text-align:center; min-width:0; cursor:pointer;
-          box-shadow:0 4px 0 var(--hmEdge), 0 7px 12px rgba(0,0,0,.2), inset 0 2px 0 rgba(255,255,255,.45), inset 0 -2px 5px rgba(0,0,0,.12);
+        /* 💰 FM510MO313: ایک مشترکہ گہرا نیلا پینل، تینوں ڈبے بیچ میں، کم اونچائی، صرف آنکھ کا نشان (بغیر ڈبے) */
+        #homeMoneyWrap{position:relative; margin:6px 2px 12px; direction:rtl;}
+        #homeMoneyPanel{background:linear-gradient(160deg,#1e3a8a 0%,#172554 100%); border-radius:18px; padding:7px 8px 9px;
+          box-shadow:0 4px 12px rgba(23,37,84,.35), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -2px 6px rgba(0,0,0,.25);}
+        #homeMoneyRow{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; min-width:0;}
+        #homeMoneyRow .hmCap{position:relative; border-radius:14px; padding:2px 4px 4px; text-align:center; min-width:0; cursor:pointer;
+          box-shadow:0 3px 0 var(--hmEdge), 0 5px 9px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.45), inset 0 -2px 4px rgba(0,0,0,.12);
           background:linear-gradient(165deg,var(--hmA) 0%,var(--hmB) 100%); transition:transform .12s, box-shadow .12s;}
-        #homeMoneyRow .hmCap:active{transform:translateY(3px); box-shadow:0 1px 0 var(--hmEdge), 0 3px 6px rgba(0,0,0,.2);}
-        #homeMoneyRow .hmCap::before{content:''; position:absolute; left:8%; right:8%; top:2px; height:40%; border-radius:12px 12px 30px 30px; background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0)); pointer-events:none;}
-        #homeMoneyRow .hmLbl{position:relative; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:14px; font-weight:700; line-height:1.55; white-space:nowrap; overflow:hidden; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); padding:0 2px 2px;}
-        #homeMoneyRow .hmPill{position:relative; background:linear-gradient(180deg,#ffffff,var(--hmPill)); border-radius:11px; padding:2px 3px 1px;
+        #homeMoneyRow .hmCap:active{transform:translateY(3px); box-shadow:0 0 0 var(--hmEdge), 0 2px 5px rgba(0,0,0,.3);}
+        #homeMoneyRow .hmCap::before{content:''; position:absolute; left:8%; right:8%; top:2px; height:38%; border-radius:12px 12px 30px 30px; background:linear-gradient(180deg,rgba(255,255,255,.33),rgba(255,255,255,0)); pointer-events:none;}
+        #homeMoneyRow .hmLbl{position:relative; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:13.5px; font-weight:700; line-height:1.55; white-space:nowrap; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); padding:0 1px 1px;}
+        #homeMoneyRow .hmPill{position:relative; background:linear-gradient(180deg,#ffffff,var(--hmPill)); border-radius:10px; padding:1px 3px;
           box-shadow:inset 0 2px 3px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.9); border:1px solid rgba(0,0,0,.08);}
-        #homeMoneyRow .hmVal{font-family:Arial,'Helvetica Neue',sans-serif; font-weight:900; font-size:17px; line-height:1.3; direction:ltr; white-space:nowrap; overflow:hidden; letter-spacing:-.2px; color:var(--hmNum);}
+        #homeMoneyRow .hmVal{font-family:Arial,'Helvetica Neue',sans-serif; font-weight:900; font-size:16px; line-height:1.3; direction:ltr; white-space:nowrap; overflow:hidden; letter-spacing:-.2px; color:var(--hmNum);}
         #homeMoneyRow .hmPay{--hmA:#f87171; --hmB:#b91c1c; --hmEdge:#7f1d1d; --hmPill:#fff0f0; --hmNum:#dc2626;}
         #homeMoneyRow .hmRec{--hmA:#4ade80; --hmB:#15803d; --hmEdge:#14532d; --hmPill:#e9fbef; --hmNum:#15803d;}
         #homeMoneyRow .hmNet.profit{--hmA:#34d399; --hmB:#047857; --hmEdge:#064e3b; --hmPill:#e7fbf3; --hmNum:#047857;}
         #homeMoneyRow .hmNet.loss{--hmA:#fb7185; --hmB:#be123c; --hmEdge:#881337; --hmPill:#fff1f2; --hmNum:#e11d48;}
-        #homeMoneyToggle{flex:0 0 30px; border:none; border-radius:12px; background:linear-gradient(165deg,#94a3b8,#475569); color:#fff; font-size:15px; cursor:pointer; box-shadow:0 3px 0 #334155, 0 5px 9px rgba(0,0,0,.18); padding:0;}
-        #homeMoneyWrap.hmHidden #homeMoneyRow{display:none;}
-        #homeMoneyWrap .hmHiddenNote{display:none; flex:1; align-items:center; justify-content:center; border-radius:12px; background:#f1f5f9; color:#475569; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:14px; font-weight:700; line-height:1.6; cursor:pointer; border:1.5px dashed #cbd5e1;}
-        #homeMoneyWrap.hmHidden .hmHiddenNote{display:flex;}
+        #homeMoneyToggle{position:absolute; left:-6px; top:-11px; width:30px; height:24px; border:none; background:none; padding:0; cursor:pointer; line-height:0; z-index:2; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45));}
+        #homeMoneyToggle svg{width:30px; height:24px; display:block;}
+        #homeMoneyWrap.hmHidden{margin:0 2px 4px; height:24px;}
+        #homeMoneyWrap.hmHidden #homeMoneyPanel{display:none;}
+        #homeMoneyWrap.hmHidden #homeMoneyToggle{top:0; left:2px;}
       </style>
       <div id="homeMoneyWrap" class="admin-only">
-        <div id="homeMoneyRow">
-          <div class="hmCap hmPay" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاریوں کا قرض</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
-          <div class="hmCap hmRec" onclick="goTo('customers')"><div class="hmLbl">گاہکوں کا ادھار</div><div class="hmPill"><div class="hmVal" id="hmRecVal">0</div></div></div>
-          <div class="hmCap hmNet profit" id="hmNetCap"><div class="hmLbl" id="hmNetLbl">کاروبار کی کیفیت</div><div class="hmPill"><div class="hmVal" id="hmNetVal">0</div></div></div>
+        <div id="homeMoneyPanel">
+          <div id="homeMoneyRow">
+            <div class="hmCap hmPay" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاریوں کا قرض</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
+            <div class="hmCap hmRec" onclick="goTo('customers')"><div class="hmLbl">گاہکوں کا ادھار</div><div class="hmPill"><div class="hmVal" id="hmRecVal">0</div></div></div>
+            <div class="hmCap hmNet profit" id="hmNetCap"><div class="hmLbl" id="hmNetLbl">کاروبار کی کیفیت</div><div class="hmPill"><div class="hmVal" id="hmNetVal">0</div></div></div>
+          </div>
         </div>
-        <div class="hmHiddenNote" onclick="toggleHomeMoneyRow()">💰 کاروبار کا حساب چھپا ہوا ہے — دیکھنے کے لیے دبائیں</div>
-        <button type="button" id="homeMoneyToggle" onclick="toggleHomeMoneyRow()" title="دکھائیں / چھپائیں">🙈</button>
+        <button type="button" id="homeMoneyToggle" onclick="toggleHomeMoneyRow()" aria-label="eye"></button>
       </div>
 
       <div id="homeTopControlsRow">
@@ -6876,15 +6880,15 @@ function __appHostKind(h, p){
     <button onclick="closeReportCenterModal()" style="position:absolute; top:10px; left:10px; background:#f1f5f9; border:none; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--text);">✕</button>
     <div class="pageTitle" style="margin-top:2px;">🖨️ Reports</div>
     <div style="display:flex; flex-direction:column; gap:12px;">
-      <button onclick="openReportCategoryPicker('pricelist')" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+      <button onclick="openReportCategoryPicker('pricelist')" style="display:none; /* 🙈 FM510MO314: صدام کی ہدایت — چھپا دیا */ text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📋 Price List</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Item + price only — great for sending to customers</div>
       </button>
-      <button onclick="openReportCategoryPicker('inventory')" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+      <button onclick="openReportCategoryPicker('inventory')" style="display:none; /* 🙈 FM510MO314: صدام کی ہدایت — چھپا دیا */ text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📦 Inventory Report</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Stock levels, low-stock limit, stock value (purchase &amp; sales)</div>
       </button>
-      <button onclick="openReportCategoryPicker('profit')" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+      <button onclick="openReportCategoryPicker('profit')" style="display:none; /* 🙈 FM510MO314: صدام کی ہدایت — چھپا دیا */ text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">💰 Purchase / Sale / Profit</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Purchase &amp; selling price, profit amount and profit % per item</div>
       </button>
@@ -7125,7 +7129,7 @@ function __appHostKind(h, p){
   <div class="invoicePreviewBox">
     <div class="previewHeader">
       <!-- ---------- 🏷️ FM510MO307 (صدام کی ہدایت): رپورٹ کی ہیڈنگ بیچ میں، جمیل نوری نستعلیق کشیدہ میں موٹی اور خوبصورت ---------- -->
-      <strong id="reportPreviewTitle" dir="rtl" style="flex:1; min-width:0; text-align:center; padding-left:30px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:26px; font-weight:700; line-height:1.9; color:#134e2c; letter-spacing:0; text-shadow:0 1px 0 rgba(255,255,255,.9), 0.4px 0 0 currentColor, -0.4px 0 0 currentColor;">🖨️ Report Preview</strong>
+      <strong id="reportPreviewTitle" dir="rtl" style="flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-align:center; padding-left:30px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:26px; font-weight:700; line-height:1.9; color:#134e2c; letter-spacing:0; text-shadow:0 1px 0 rgba(255,255,255,.9), 0.4px 0 0 currentColor, -0.4px 0 0 currentColor;">🖨️ Report Preview</strong>
       <span style="cursor:pointer; flex:0 0 30px; text-align:center;" onclick="closeReportPreview()">✖</span>
     </div>
 
@@ -8918,7 +8922,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM510MO312'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM510MO314'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9709,7 +9713,14 @@ function applyHomeMoneyHidden(){
   const w = document.getElementById('homeMoneyWrap'); if(!w) return;
   const hidden = !!loadFromStorage('homeMoneyHidden', false);
   w.classList.toggle('hmHidden', hidden);
-  const b = document.getElementById('homeMoneyToggle'); if(b) b.textContent = hidden ? '👁️' : '🙈';
+  const b = document.getElementById('homeMoneyToggle');
+  if(b){
+    // صاف خوبصورت آنکھ — کھلی (دکھانے کے لیے) یا کٹی ہوئی (چھپانے کے لیے)، بغیر کسی ڈبے کے
+    const eye = '<path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z" fill="#ffffff" stroke="#1e3a8a" stroke-width="1.6" stroke-linejoin="round"/>'
+      + '<circle cx="12" cy="12" r="4.3" fill="#1d4ed8"/><circle cx="12" cy="12" r="2" fill="#0b1220"/><circle cx="13.4" cy="10.6" r="1.1" fill="#fff"/>';
+    const slash = '<path d="M3.5 3.5L20.5 20.5" stroke="#dc2626" stroke-width="2.4" stroke-linecap="round"/>';
+    b.innerHTML = `<svg viewBox="0 0 24 24">${eye}${hidden ? '' : slash}</svg>`;
+  }
 }
 function toggleHomeMoneyRow(){
   saveToStorage('homeMoneyHidden', !loadFromStorage('homeMoneyHidden', false));
@@ -38300,11 +38311,31 @@ function getBillSummaryRows(invoice){
     rows.push([`ٹیکس (${invoice.tax_percent}%)`, invoice.tax_amount]);
   }
 
+  // ---------- 💰 FM510MO314 (صدام کی ہدایت): بل بننے سے پہلے اسی دن (پچھلے بل کے بعد) جو وصولی ہوئی، وہ بھی اسی بل میں
+  // "ابھی وصول" میں آئے — پہلے یہ وصولی بقایہ سے تو کٹ جاتی تھی مگر بل پر صفر لکھا آتا تھا (صدام کے ڈیٹا میں 36 میں سے 31
+  // وصولیاں بل سے پہلے ہوتی ہیں)۔ سابقہ بقایہ وصولی سے پہلے والا دکھایا جاتا ہے تاکہ اوپر سے نیچے حساب پورا ملے:
+  // سابقہ (وصولی سے پہلے) + یہ بل = تازہ ٹوٹل؛ تازہ ٹوٹل − ابھی وصول = حتمی بقایہ ---------- -->
+  let recBefore = 0;
+  try{
+    if(invoice.customer_id){
+      const _ts2 = (v) => new Date(v || 0).getTime() || 0;
+      const billTs2 = invoice.created_at ? _ts2(invoice.created_at) : Date.now();
+      const dayStart = new Date(billTs2); dayStart.setHours(0, 0, 0, 0);
+      const prevBills = invoicesData.filter(x => x.customer_id === invoice.customer_id && x.status !== 'voided' && x.invoice_id !== invoice.invoice_id && _ts2(x.created_at) < billTs2);
+      const prevTs = prevBills.reduce((m, x) => Math.max(m, _ts2(x.created_at)), 0);
+      const fromTs = Math.max(prevTs, dayStart.getTime());
+      recBefore = (paymentsData || []).filter(pm => pm && pm.party_type === 'customer' && pm.party_id === invoice.customer_id && pm.direction === 'in'
+          && _ts2(pm.created_at) > fromTs && _ts2(pm.created_at) <= billTs2)
+        .reduce((a, pm) => a + (Number(pm.amount) || 0), 0);
+    }
+  }catch(e){ recBefore = 0; }
+
   let finalLabel, finalValue;
-  if(hasOldCredit){
-    rows.push(['سابقہ بقایہ', invoice.previous_balance]);
+  if(hasOldCredit || recBefore > 0){
+    const prevGross = (Number(invoice.previous_balance) || 0) + recBefore;
+    rows.push(['سابقہ بقایہ', prevGross]);
     if(!shownThisBillAlready) rows.push(['یہ بل', invoice.grand_total]);
-    rows.push(['تازہ ٹوٹل', invoice.previous_balance + invoice.grand_total]);
+    rows.push(['تازہ ٹوٹل', prevGross + invoice.grand_total]);
     finalLabel = 'حتمی بقایہ رقم';
     finalValue = invoice.new_balance || 0;
   } else {
@@ -38341,7 +38372,7 @@ function getBillSummaryRows(invoice){
       }
     }
   }catch(e){}
-  rows.push(['ابھی وصول', cashNow + laterRecovery]);
+  rows.push(['ابھی وصول', cashNow + recBefore + laterRecovery]); // 💰 FM510MO314: بل سے پہلے والی آج کی وصولی بھی
   if(laterRecovery > 0) finalValue = Math.max(0, finalValue - laterRecovery);
 
   return {rows, finalLabel, finalValue};
@@ -43291,6 +43322,24 @@ function closeReportPreview(){
 
 // ---------- 📅 Today's Sale Report — کیٹگری کی ضرورت نہیں (پراڈکٹ کیٹگری بیسڈ نہیں)، سیدھا پریویو کھلتی ہے ----------
 // ---------- 📊 صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ ---------- -->
+// 🏷️ FM510MO314: رپورٹ کی ہیڈنگ ایک ہی لائن میں — لمبی ہو تو فونٹ خود چھوٹا (کبھی دو لائن یا کٹی ہوئی نہیں)
+function fitReportPreviewTitle(){
+  const el = document.getElementById('reportPreviewTitle');
+  if(!el || !el.clientWidth) return;
+  let px = 26; el.style.fontSize = px + 'px';
+  while(el.scrollWidth > el.clientWidth && px > 14){ px -= 1; el.style.fontSize = px + 'px'; }
+}
+(function(){
+  const go = () => {
+    const el = document.getElementById('reportPreviewTitle');
+    if(!el) return;
+    new MutationObserver(() => requestAnimationFrame(fitReportPreviewTitle)).observe(el, {childList:true, characterData:true, subtree:true});
+    const m = document.getElementById('reportPreviewModal');
+    if(m) new MutationObserver(() => setTimeout(fitReportPreviewTitle, 60)).observe(m, {attributes:true, attributeFilter:['class']});
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+})();
+
 function openDailyStockProfitReport(){
   currentReportType = 'stockprofit';
   currentReportCategories = [];
@@ -44338,7 +44387,8 @@ async function renderDailyStockProfitReportToCanvas(){
   const fontScale = (AppState.settings.reportFontScale || 100) / 100;
   const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
   const bold = AppState.settings.reportBoldItems !== false;
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
+  // 🔤 FM510MO314: منتخب فونٹ فہرست میں نہ ہو (صدام کی پرانی 'segoe') تو Tahoma/Arial کی بجائے جمیل نوری نستعلیق (سادہ)
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeq')) || FONT_PRESETS.find(f => f.id === 'jameelnastaleeq') || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.family;
   // ---------- 🔤🔢 صدام کی ہدایت (16 ستمبر، شام): نام/پیکنگ اور ہیڈر لیبل ہمیشہ منتخب شدہ اردو فونٹ (نستعلیق/کشیدہ وغیرہ)
   // میں رہیں گے، مگر خالص ہندسوں والے خانے ایک صاف انگریزی/لاطینی فونٹ میں دکھائے جائیں گے — نستعلیق فونٹس میں
@@ -44372,7 +44422,7 @@ async function renderDailyStockProfitReportToCanvas(){
   const tableLeft = margin, tableRight = pxWidth - margin;
   const totalW = tableRight - tableLeft;
   const baseRowH = Math.round(fsItem * 2.6 * rowScaleSetting);
-  const headerRowH = Math.round(fsHeader * 2.8 * rowScaleSetting);
+  const headerRowH = Math.round(fsHeader * 4.4 * Math.max(0.85, rowScaleSetting)); // 🆕 FM510MO314: ہیڈر دو لائنوں میں
 
   // ---------- 🆕 صدام کی ہدایت (22 ستمبر): نیا کالم ڈھانچہ — سیریل نمبر اب علیحدہ کالم نہیں، نام کے ساتھ ہی
   // گول سرخ بیج میں (drawSerialBadge، بالکل منشی سٹاک لاگ رپورٹ جیسا)؛ پیکنگ اپنے مکمل علیحدہ کالم میں؛
@@ -44404,22 +44454,64 @@ async function renderDailyStockProfitReportToCanvas(){
   // گمراہ کن تھا۔ دونوں شہروں کے لیے الگ الگ کالم بنانے سے 58mm پرنٹر پر جگہ کم پڑ جاتی۔ فیصلہ: دونوں شہروں
   // کا منافع خود ہی جمع ہو کر نیچے "ٹوٹل منافع" میں آ جاتا ہے (ہر بل کی اپنی unitPrice سے حساب ہوتا ہے، چاہے
   // وہ پنڈی ریٹ ہو یا اسلام آباد ریٹ) — اس لیے صرف ٹوٹل یونٹ فروخت اور ٹوٹل منافع ہی کافی/درست ہیں ---------- -->
-  const wNum = Math.round((totalW - wName - wPack) / 5);
-  wName = totalW - wPack - wNum * 5; // ---------- گول کرنے سے بچی/بڑھی چوڑائی نام کے کالم میں جذب ---------- -->
+  // ---------- 📏 FM510MO314: ہر ہندسے والا کالم اپنے سب سے لمبے نمبر اور ہیڈر کے سب سے لمبے لفظ جتنا؛ بچی جگہ نام کو —
+  // نام کا کالم سب سے لمبی سبزی کے حساب سے، کچھ بھی نہ کٹے نہ اوپر چڑھے ---------- -->
+  const numKeys = [['total','حاضر سٹاک'],['cost','قیمت خرید'],['sold','تعداد فروخت'],['remaining','باقی سٹاک'],['profit','منافع']];
+  const numNeed = numKeys.map(([k, lbl]) => {
+    ctx.font = `${fsItem}px ${numFontFam}`;
+    let w = 0; rows.forEach(r => { w = Math.max(w, ctx.measureText(String(r[k])).width); });
+    ctx.font = `bold ${fsHeader}px ${fontFam}`;
+    lbl.split(' ').forEach(word => { w = Math.max(w, ctx.measureText(word).width); });
+    return Math.ceil(w + Math.max(8, fsItem * 0.6));
+  });
+  const nameNeed = Math.round(maxNameTextW + namePad + badgeD + badgeGap);
+  const sumNum = numNeed.reduce((a, b) => a + b, 0);
+  let wNums;
+  if(nameNeed + wPack + sumNum <= totalW){
+    const extra = totalW - nameNeed - wPack - sumNum;
+    const toName = Math.round(extra * 0.5);
+    const per = (extra - toName) / numNeed.length;
+    wNums = numNeed.map(n => Math.floor(n + per));
+  } else {
+    // جگہ کم ہو (58mm) تو ہر کالم اپنی ضرورت کے تناسب سے — نام، پیکنگ اور ہندسے سب برابر تناسب میں چھوٹے
+    const packNeed = Math.round(maxPackTextW + namePad);
+    const sc = (totalW) / (nameNeed + packNeed + sumNum);
+    wPack = Math.floor(packNeed * sc);
+    wNums = numNeed.map(n => Math.floor(n * sc));
+  }
+  wName = totalW - wPack - wNums.reduce((a, b) => a + b, 0); // باقی ساری جگہ نام کو
 
   const cols = [
     {key:'name', label:'نام', width:wName},
     {key:'packing', label:'پیکنگ', width:wPack},
-    {key:'total', label:'حاضر سٹاک', width:wNum},
-    {key:'cost', label:'قیمت خرید', width:wNum},
-    {key:'sold', label:'تعداد فروخت', width:wNum},
-    {key:'remaining', label:'باقی سٹاک', width:wNum},
-    {key:'profit', label:'منافع', width:wNum},
+    {key:'total', label:'حاضر سٹاک', width:wNums[0]},
+    {key:'cost', label:'قیمت خرید', width:wNums[1]},
+    {key:'sold', label:'تعداد فروخت', width:wNums[2]},
+    {key:'remaining', label:'باقی سٹاک', width:wNums[3]},
+    {key:'profit', label:'منافع', width:wNums[4]},
   ];
   // ---------- ð ØµØ¯Ø§Ù Ú©Û ÛØ¯Ø§ÛØª (FM16SEPWE10): Ú©Ø§ÙÙÚ Ù¾ÙÙÛ Ø¨Ø§ÛÛÚ (Ø§ÙÚ¯ÙØ´) Ø³Ú Ø³Û Ø´Ø±ÙØ¹ ÛÙ Ú©Ø± Ø¯Ø§ÛÛÛÚº Ø·Ø±Ù Ø¬Ø§ØªÛ ØªÛÛ Ø§Ø¨ Ø¯Ø§ÛÛÛ Ø³Û Ø´Ø±ÙØ¹ Ú©ÛØ§ Ø¬Ø§ØªØ§ ÛÛ Ù Ø¨Ø§ÛÛÚº Ø¬Ø§ Ú©Ø± (Ø§Ø±Ø¯Ù RTL Ø·Ø±Ø²), Ù¾ÙÙØ§ Ú©Ø§ÙÙ (ÙØ«ÙØ§Ù #) Ø§Ø¨ Ø³Ø¨ Ø³Û Ø¯Ø§ÛÛÛ ÙØ¸Ø± Ø¢Ø¦Û Ú¯Ø§ ---------- -->
   let cxPos = tableRight;
   cols.forEach(c => { cxPos -= c.width; c.x = cxPos; });
   const colTextX = (c) => c.x + c.width/2;
+  // 🔠 FM510MO314: سب ہیڈر ایک ہی سائز میں، اور سب ہندسے ایک ہی سائز میں (کوئی خانہ چھوٹا کوئی بڑا نہیں)
+  let hdrPx = fsHeader;
+  cols.forEach(c => {
+    const w = c.label.split(' ');
+    (w.length > 1 ? [w[0], w.slice(1).join(' ')] : [c.label]).forEach(ln => {
+      let px = fsHeader; ctx.font = `bold ${px}px ${fontFam}`;
+      while(ctx.measureText(ln).width > c.width - 6 && px > 7){ px -= 0.5; ctx.font = `bold ${px}px ${fontFam}`; }
+      hdrPx = Math.min(hdrPx, px);
+    });
+  });
+  let numPx = fsItem;
+  cols.filter(c => c.key !== 'name' && c.key !== 'packing').forEach(c => {
+    rows.forEach(r => {
+      const txt = String(r[c.key]); let px = numPx; ctx.font = `${px}px ${numFontFam}`;
+      while(ctx.measureText(txt).width > c.width - 4 && px > 6){ px -= 0.5; ctx.font = `${px}px ${numFontFam}`; }
+      numPx = Math.min(numPx, px);
+    });
+  });
 
   const fitCenteredLines = (text, maxWidth, basePx, weight) => {
     const w = weight ? weight + ' ' : '';
@@ -44436,7 +44528,7 @@ async function renderDailyStockProfitReportToCanvas(){
   let headerBandH = useA4 ? 90 : 56;
   let bodyTop = headerBandH + headerRowH;
   // ---------- ٹوٹل رو (ہر کالم کا مجموعہ) + نیچے کل منافع کی لائن کے لیے بھی جگہ شامل ---------- -->
-  const totalsRowH = Math.round(baseRowH * 1.05);
+  const totalsRowH = Math.round(baseRowH * 1.25);
   const estimatedHeight = bodyTop + (rows.length * baseRowH) + totalsRowH + Math.round(fsSubtitle * 4) + 40;
 
   canvas.width = pxWidth;
@@ -44484,7 +44576,16 @@ async function renderDailyStockProfitReportToCanvas(){
     ctx.textAlign = align;
     ctx.font = `bold ${fsHeader}px ${fontFam}`;
     ctx.save(); ctx.beginPath(); ctx.rect(c.x, headerTop, c.width, headerRowH); ctx.clip();
-    ctx.fillText(c.label, xForCol(c, align), headerTop + headerRowH/2 + fsHeader*0.32);
+    // 🆕 FM510MO314: دو لفظی ہیڈر دو لائنوں میں، ہر لائن خانے کے اندر سکڑ کر فٹ، بیچ میں
+    const hWords = c.label.split(' ');
+    const hLines = hWords.length > 1 ? [hWords[0], hWords.slice(1).join(' ')] : [c.label];
+    ctx.textAlign = 'center';
+    hLines.forEach((ln, li) => {
+      ctx.font = `bold ${hdrPx}px ${fontFam}`;
+      const lineY = hLines.length === 1 ? headerTop + headerRowH/2 + fsHeader*0.32
+                                        : headerTop + headerRowH * (li === 0 ? 0.42 : 0.82);
+      ctx.fillText(ln, c.x + c.width/2, lineY);
+    });
     ctx.restore();
     ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
   });
@@ -44553,7 +44654,7 @@ async function renderDailyStockProfitReportToCanvas(){
         } else {
           const txt = String(r[c.key]);
           if(c.key === 'profit') ctx.fillStyle = r.profit >= 0 ? '#065f2b' : '#991b1b';
-          const px2 = fitCellFont(txt, c.width-4, fsItem, numFontFam);
+          const px2 = fitCellFont(txt, c.width-4, numPx, numFontFam);
           ctx.font = `${px2}px ${numFontFam}`;
           ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
           ctx.fillText(txt, tx, y + rh/2 + fsItem*0.32);
@@ -44571,21 +44672,26 @@ async function renderDailyStockProfitReportToCanvas(){
   if(rows.length > 0){
     let totalProfitSum = 0;
     rows.forEach(r => { totalProfitSum += r.profit; });
-    const trh = Math.round(baseRowH * 1.05);
+    const trh = Math.round(baseRowH * 1.25);
     ctx.fillStyle = rc.bg;
     ctx.fillRect(tableLeft, y, totalW, trh);
     ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
     ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, trh);
-    const profitCol = cols.find(c => c.key === 'profit');
-    const align = alignForCol('profit');
-    ctx.textAlign = align;
-    const tx = xForCol(profitCol, align);
-    const txt = `ٹوٹل منافع: ${Math.round(totalProfitSum).toLocaleString()}`;
+    // 🧮 FM510MO314: "ٹوٹل منافع" پوری پٹی کے بیچ میں — پہلے آخری تنگ کالم سے باہر نکل کر کٹ جاتا تھا
+    const lblTxt = 'ٹوٹل منافع:  ';
+    const numTxt = (totalProfitSum < 0 ? '- ' : '') + Math.abs(Math.round(totalProfitSum)).toLocaleString();
     ctx.fillStyle = totalProfitSum >= 0 ? '#065f2b' : '#991b1b';
-    const px3 = fitCellFont(txt, totalW - 8, fsItem, fontFam);
-    ctx.font = `bold ${px3}px ${fontFam}`;
+    let tpx = Math.round(fsItem * 1.15);
+    const measureBoth = () => { ctx.font = `bold ${tpx}px ${fontFam}`; const a = ctx.measureText(lblTxt).width; ctx.font = `900 ${tpx}px ${numFontFam}`; return [a, ctx.measureText(numTxt).width]; };
+    let [lw, nw] = measureBoth();
+    while(lw + nw > totalW - 16 && tpx > 7){ tpx -= 0.5; [lw, nw] = measureBoth(); }
+    const startX = pxWidth/2 + (lw + nw)/2;
+    const baseY = y + trh/2 + tpx*0.34;
     ctx.save(); ctx.beginPath(); ctx.rect(tableLeft, y, totalW, trh); ctx.clip();
-    ctx.fillText(txt, tx, y + trh/2 + fsItem*0.32);
+    const _dir = ctx.direction;
+    ctx.direction = 'rtl'; ctx.textAlign = 'right'; ctx.font = `bold ${tpx}px ${fontFam}`; ctx.fillText(lblTxt.trim(), startX, baseY);
+    ctx.direction = 'ltr'; ctx.textAlign = 'left'; ctx.font = `900 ${tpx}px ${numFontFam}`; ctx.fillText(numTxt, startX - lw - nw, baseY);
+    ctx.direction = _dir;
     ctx.restore();
     y += trh;
   }
