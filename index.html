@@ -8883,7 +8883,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM510MO308'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM510MO309'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -26690,7 +26690,7 @@ async function drawSupplierReceiptCanvas(p){
   const method = (p.method && p.method !== 'Cash') ? p.method : 'نقد';
   rows.push({ label: 'طریقہ', value: method + (p.account_number ? '  ' + p.account_number : '') });
 
-  const ledger = (s.ledgerHistory || []).filter(e => e && e.type !== 'wallet_adjust').slice(0, 6);
+  const ledger = []; // 🧾 FM510MO309 (صدام کی ہدایت): پرانا لین دین رسید پر نہیں — الجھن بنتی تھی؛ صرف اسی ادائیگی کا حساب
   const meas = document.createElement('canvas').getContext('2d');
   meas.font = `${fs - 2}px ${urF}`;
   const userNote = String(p.note || '').split(' — ').filter(x => !/^(🏷️|💳|➕)/.test(x.trim())).join(' — ').trim();
@@ -26811,7 +26811,7 @@ async function openSupplierReceipt(paymentId){
       ${btn('linear-gradient(135deg,#334155,#0f172a)', 'printSupplierReceipt()', '🖨️ پرنٹ')}
       ${btn('linear-gradient(135deg,#25D366,#128C7E)', 'shareSupplierReceipt()', '💬 واٹس ایپ / شیئر')}
     </div>
-    <div style="padding:0 12px 12px;">${btn('#e2e8f0; color:#334155', 'closeSupplierReceipt()', '✖ بند کریں')}</div>
+    <div style="padding:0 12px 12px;"><button type="button" onclick="closeSupplierReceipt()" style="width:100%; height:46px; border:1.5px solid #cbd5e1; border-radius:14px; background:#f1f5f9; color:#334155; font-family:${urF}; font-size:18px; font-weight:700; cursor:pointer;">✖ بند کریں</button></div>
   </div>`;
   ov.style.display = 'flex';
 }
