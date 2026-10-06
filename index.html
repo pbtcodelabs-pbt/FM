@@ -8928,7 +8928,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM610TU324'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM610TU325'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -18837,7 +18837,7 @@ function renderChalanRateModal(){
           <div style="flex:0 0 auto; background:#134e2c; color:#fff; border-radius:9px; padding:3px 8px; font-family:Arial,Helvetica,sans-serif; font-weight:900;">#${c.chalanNo}</div>
         </div>
         <div style="display:flex; align-items:center; gap:6px; margin-top:4px; font-size:11.5px; flex-wrap:wrap;">
-          <span style="font-weight:900; color:#1e3a8a; background:#eff6ff; border-radius:7px; padding:2px 7px; font-family:Arial,Helvetica,sans-serif;">آمد: ${c.origQty ?? c.qty}</span>
+          <span style="font-weight:900; color:#1e3a8a; background:#eff6ff; border-radius:7px; padding:2px 7px; font-family:Arial,Helvetica,sans-serif;">آمد: ${c.origQty ?? c.qty}${c.munshiQty != null && c.munshiQty !== (c.origQty ?? c.qty) ? ` <s style="color:#94a3b8; font-size:10px;">${c.munshiQty}</s>` : ''}</span>${isChalanAdmin() ? `<button type="button" onclick="editChalanQty(${v.variant_id}, ${c.chalanNo})" title="آمد کی مقدار درست کریں" style="height:26px; padding:0 9px; border:none; border-radius:8px; background:#1d4ed8; color:#fff; font-weight:900; font-size:12px; cursor:pointer; box-shadow:0 2px 0 #1e3a8a; font-family:inherit;">✏️ ایڈٹ</button>` : ''}
           <span style="font-weight:900; color:#134e2c; background:#dcfce7; border-radius:7px; padding:2px 7px; font-family:Arial,Helvetica,sans-serif;">باقی: ${c.qty}</span>
           <span style="color:var(--muted); font-family:Arial,Helvetica,sans-serif; font-size:10.5px;">${chalanDateLabel(c.ts)}</span>${c.by ? `<span style="color:var(--muted); font-size:11px;">✍️ ${c.by}</span>` : ''}
         </div>
@@ -18957,6 +18957,55 @@ function saveChalanAccounting(variantId, chalanNo){
 }
 // ---------- پرانا نام — اسی نئے مکمل حساب پر چلتا ہے ---------- -->
 function saveChalanRate(variantId, chalanNo){ return saveChalanAccounting(variantId, chalanNo); }
+// ---------- ✏️ FM610TU325 (صدام کی ہدایت): ایڈمن چالان کی آمد درست کر سکے — منشی نے 240 لکھا، اصل 250 آیا
+// سٹاک اور چالان کا باقی اسی فرق سے بدلتا ہے؛ حساب لگ چکا ہو تو بیوپاری کا کھاتہ اور روزانہ خریداری بھی نئی مقدار پر ----------
+async function editChalanQty(variantId, chalanNo){
+  if(!isChalanAdmin()){ await uAlert('🔒 صرف ایڈمن', 'چالان صرف ایڈمن درست کر سکتا ہے۔'); return; }
+  const {p, v} = findProductAndVariant(variantId); if(!v) return;
+  const c = (v.chalans || []).find(x => x.chalanNo === chalanNo); if(!c) return;
+  const old = Number(c.origQty != null ? c.origQty : c.qty) || 0;
+  const sold = Math.max(0, _chRound(old - (Number(c.qty) || 0)));
+  const nm = (p ? p.name : '') + (v.label ? ' (' + v.label + ')' : '');
+  const ans = await uDialog({ title: '✏️ چالان #' + chalanNo + ' کی آمد', message: `<b>${nm}</b><br>ابھی آمد: <b>${old}</b>${sold > 0 ? ` • اس میں سے <b>${sold}</b> بک چکا` : ''}<br>اصل وصول شدہ مقدار لکھیں:`, input: 'text', okText: 'آگے', cancelText: '✖ واپس', tone: 'amber' });
+  if(ans === null || ans === false) return;
+  const nq = _chRound(parseFloat(String(ans).replace(',', '.')));
+  if(!(nq >= 0) || isNaN(nq)){ await uAlert('⚠️ غلط مقدار', 'صرف ہندسے لکھیں۔'); return; }
+  if(nq === old) return;
+  if(nq < sold){ await uAlert('⚠️ کم نہیں ہو سکتی', `اس چالان سے ${sold} پہلے ہی بک چکا ہے — آمد ${sold} سے کم نہیں ہو سکتی۔`, 'red'); return; }
+  const delta = _chRound(nq - old);
+  const rows = [{ label: 'پرانی آمد', value: String(old) }, { label: 'نئی آمد', value: String(nq), big: true }, { label: 'سٹاک میں فرق', value: (delta > 0 ? '+' : '') + delta, bg: delta > 0 ? '#dcfce7' : '#fee2e2', fg: delta > 0 ? '#14532d' : '#7f1d1d' }];
+  const booked = c.bookedSupplierId != null && Number(c.rate) > 0;
+  if(booked) rows.push({ label: 'بیوپاری کے کھاتے میں فرق', value: 'Rs. ' + Math.round(delta * Number(c.rate)).toLocaleString('en-US') });
+  if(!(await uDialog({ title: '✅ تصدیق', message: `<b>${nm}</b> — چالان #${chalanNo} کی آمد بدلیں؟`, rows, okText: '✅ ہاں، درست کریں', cancelText: '✖ نہیں', tone: 'green' }))) return;
+  if(c.munshiQty == null) c.munshiQty = old; // منشی کی لکھی اصل مقدار یاد رہے
+  c.origQty = nq;
+  c.qty = Math.max(0, _chRound((Number(c.qty) || 0) + delta));
+  v.stock = _chRound((Number(v.stock) || 0) + delta);
+  c.qtyEditBy = (AppState.currentUser && AppState.currentUser.name) || '';
+  c.qtyEditTs = Date.now();
+  let suppliersChanged = false;
+  if(c.bookedSupplierId != null){
+    const so = suppliersData.find(s => s.supplier_id === c.bookedSupplierId);
+    const newAmt = Math.round(nq * (Number(c.rate) || 0));
+    if(so){ so.total_payable = (Number(so.total_payable) || 0) + (newAmt - (Number(c.bookedAmount) || 0)); normalizeSupplierBalance(so); suppliersChanged = true; }
+    c.bookedAmount = newAmt;
+  }
+  // روزانہ خریداری کے ریکارڈ میں اسی چالان کی لائن کی مقدار
+  const ck = chalanKeyOf(v, c);
+  const fix = rec => { let ch = false; (rec.items || []).forEach(it => { if(it.ck === ck){ it.qty = nq; ch = true; } }); if(ch) rec.total = (rec.items || []).reduce((sm, it) => sm + (Number(it.qty) || 0) * (Number(it.cost) || 0), 0); return ch; };
+  (suppliersData || []).forEach(s => (s.purchaseHistory || []).forEach(po => { if(po.isDaily && fix(po)) suppliersChanged = true; }));
+  let cashChanged = false; (cashPurchasesData || []).forEach(cp => { if(cp.isDaily && fix(cp)) cashChanged = true; });
+  if(cashChanged) saveToStorage('cashPurchases', cashPurchasesData);
+  persistAllData();
+  AppState.settings.productsPendingSync = true;
+  try{ pauseCloudPolling(20000); }catch(e){}
+  try{ pushProductsToCloud(); }catch(e){}
+  if(suppliersChanged){ try{ pushSuppliersToCloud(); }catch(e){} }
+  try{ renderChalanRateModal(); }catch(e){}
+  try{ if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || ''); }catch(e){}
+  uAlert('✅ درست ہو گیا', `${nm} — چالان #${chalanNo} کی آمد ${old} سے ${nq} ہو گئی، سٹاک ${delta > 0 ? '+' : ''}${delta}۔`, 'green');
+}
+
 
 /* =====================================================================
    ✂️ FM110TH271 (صدام کی ہدایت): چالان تقسیم — ایک چالان کی مقدار کئی بیوپاریوں میں بانٹیں
