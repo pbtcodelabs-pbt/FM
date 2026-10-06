@@ -8928,7 +8928,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM710WE328'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM710WE329'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -37261,6 +37261,7 @@ async function _pushMerged(cfg){
           if(cfg.label) merged = await _shrinkLockCheck((cfg.dg ? _dgFilter(cfg.dg, remote) : remote).filter(x => !(cfg.id === 'customer_id' && isLegacyDemoCustomer(x))), merged, cfg.id, cfg.label); // 🔒 FM309WE#270
           if(cfg.dg) merged = _dgFilter(cfg.dg, merged); // 🛡️ FM610TU320: حذف شدہ کبھی واپس نہیں
           cfg.set(merged);
+          cfg.setBase(remote); // 🐞 FM710WE329: ملاپ کے بعد بنیاد = کلاؤڈ — ناکام لکھائی پر بقایا/والٹ دوگنا نہیں ہوگا
         }
       }
       if(cfg.onDoc) cfg.onDoc(doc);
@@ -37382,7 +37383,8 @@ async function pushProductsToCloud(){
         if(pstr){
           const remote = JSON.parse(pstr);
           if(Array.isArray(remote)){
-            productsData = _dgFilter('products', _reattachLocalImages(await _shrinkLockCheck(_dgFilter('products', remote), mergeProductsThreeWay(productsSyncBase, productsData, remote), 'product_id', 'سبزیاں'), productsData)); // 🛡️ FM610TU320 // 🔒 FM309WE#270
+            productsData = _dgFilter('products', _reattachLocalImages(await _shrinkLockCheck(_dgFilter('products', remote), mergeProductsThreeWay(productsSyncBase, productsData, remote), 'product_id', 'سبزیاں'), productsData)); // 🛡️ FM610TU320
+            _syncSetBase(remote); // 🐞 FM710WE329: کلاؤڈ ملا لیا — اب بنیاد یہی، تاکہ دوبارہ کوشش پر دوسرے فون کی تبدیلی دوبارہ نہ جڑے (دستی ترمیم والے فالتو سٹاک کی جڑ) // 🔒 FM309WE#270
             try{ repairDuplicateProductSerials(); }catch(e){}
             try{ recomputeReservedFromOrders(); }catch(e){}
             saveProductsLight();
