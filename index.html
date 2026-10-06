@@ -8928,7 +8928,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM610TU325'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM610TU326'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -19495,6 +19495,16 @@ function pickChSupplier(val){
    ===================================================================== */
 let advDeletedIds = loadFromStorage('advDeletedIds', []);
 let advOrdersSyncBase = loadFromStorage('advOrdersSyncBase', null); // {id: stableStr} — کلاؤڈ کی آخری معلوم حالت
+// 🛡️ FM610TU326: نیا آرڈر نمبر — کبھی کسی حذف شدہ یا پہلے سے موجود آرڈر کے نمبر سے نہیں ٹکرائے گا
+// (ورنہ وہ آرڈر "حذف شدہ" سمجھ کر ایڈمن تک کبھی نہیں پہنچتا تھا)
+function takeNewAdvOrderId(){
+  const used = new Set([...(advDeletedIds || []), ...(advanceOrdersData || []).map(o => o.id)]);
+  let id = Math.max(Number(nextAdvOrderId) || 1, ...(advDeletedIds || []).map(x => (Number(x) || 0) + 1), 1);
+  while(used.has(id)) id++;
+  nextAdvOrderId = id + 1;
+  try{ saveToStorage('nextAdvOrderId', nextAdvOrderId); }catch(e){}
+  return id;
+}
 function _advRememberDeleted(id){
   if(id === null || id === undefined) return;
   if(!advDeletedIds.includes(id)) advDeletedIds.push(id);
@@ -24006,7 +24016,8 @@ async function zeroAllStock(){
   // 🧹 FM610TU324 (صدام کی ہدایت): بالکل تازہ — سٹاک، تمام چالان، خرید ریٹ صفر؛ نام/پیکنگ/سیریل/فروخت ریٹ محفوظ
   (productsData || []).forEach(p => (p.variants || []).forEach(v => { v.stock = 0; v.chalans = []; v.reserved = 0; v.purchase = 0; if(v.batches) v.batches = []; }));
   // منشی کا سارا ریکارڈ صاف — باقی فونز کا پرانا ریکارڈ بھی واپس نہ آئے (clearedAt)
-  try{ munshiStockLogData.length = 0; saveToStorage('munshiLogClearedAt', Date.now()); saveToStorage('munshiStockLog', munshiStockLogData); pushMunshiStockLogToCloud(); }catch(e){}
+  try{ await fetchMunshiStockLogFromCloud(true); }catch(e){} // 🛡️ FM610TU326: سب فونز کا ریکارڈ پہلے ملا لیں
+  try{ saveToStorage('munshiLogClearedMaxId', Math.max(0, ...munshiStockLogData.map(x => Number(x.id) || 0), (Number(nextMunshiLogId) || 1) - 1)); munshiStockLogData.length = 0; saveToStorage('munshiLogClearedAt', Date.now()); saveToStorage('munshiStockLog', munshiStockLogData); pushMunshiStockLogToCloud(); }catch(e){}
   // آرڈر بکنگ کے زیرِ التوا (بل نہ بنے) آرڈر ختم — بل بنے ہوئے آرڈر ریکارڈ میں رہیں گے
   try{
     const _pend = (advanceOrdersData || []).filter(o => o.status === 'pending');
@@ -28592,7 +28603,7 @@ async function saveAdvanceOrder(){
     }
   } else {
     advanceOrdersData.unshift({
-      id: nextAdvOrderId++,
+      id: takeNewAdvOrderId(), // 🛡️ FM610TU326
       customerName, customerPhone, note,
       items: JSON.parse(JSON.stringify(advOrderCart)),
       status: 'pending',
@@ -29844,6 +29855,7 @@ async function openOtReview(){
   const itemsForSave = items.map(i => ({variant_id: i.variant_id, name: i.name, label: i.label, qty: i.qty, unitPrice: 0, chalanAlloc: i.chalanAlloc || null}));
   // ---------- 📦 صدام کی ہدایت (FM10SEPTH): آرڈر محفوظ/اپڈیٹ ہوتے ہی سٹاک "بک" کریں — پہلے اگر یہی آرڈر
   // پہلے سے محفوظ تھا تو اس کی پرانی مقدار واپس کریں، پھر نئی مقدار بک کریں (تاکہ ترمیم پر دگنی کٹوتی نہ ہو) ---------- -->
+  if(otSavedOrderId && (!advanceOrdersData.some(o => o.id === otSavedOrderId) || (advDeletedIds || []).includes(otSavedOrderId))) otSavedOrderId = null; // 🛡️ FM610TU326: حذف شدہ پرانا آرڈر — نیا بنے
   if(otSavedOrderId){
     const existing = advanceOrdersData.find(o => o.id === otSavedOrderId);
     if(existing) releaseOrderStock(existing.items);
@@ -29856,7 +29868,7 @@ async function openOtReview(){
     if(existing) existing.items = itemsForSave;
   } else {
     const newOrder = {
-      id: nextAdvOrderId++,
+      id: takeNewAdvOrderId(), // 🛡️ FM610TU326
       customerName: otCustomer.name,
       customerPhone: otCustomer.phone || '',
       customerArea: otCustomer.area || '',
@@ -36415,6 +36427,7 @@ async function pushMunshiStockLogToCloud(){
           json: { stringValue: JSON.stringify(munshiStockLogData) },
           nextMunshiLogId: { integerValue: String(nextMunshiLogId) },
           clearedAt: { integerValue: String(Number(loadFromStorage('munshiLogClearedAt', 0)) || 0) }, // 🧹 FM610TU324
+          clearedMaxId: { integerValue: String(Number(loadFromStorage('munshiLogClearedMaxId', 0)) || 0) },
           updatedAt: { integerValue: String(Date.now()) }
         }
       })
@@ -36436,13 +36449,17 @@ async function fetchMunshiStockLogFromCloud(silent){
     const _cClr = parseInt(doc.fields?.clearedAt?.integerValue || '0');
     let _clr = Number(loadFromStorage('munshiLogClearedAt', 0)) || 0;
     if(_cClr > _clr){ _clr = _cClr; saveToStorage('munshiLogClearedAt', _clr); }
-    if(_clr){ const _n = munshiStockLogData.length; munshiStockLogData = munshiStockLogData.filter(x => (Number(x.ts) || 0) > _clr); if(munshiStockLogData.length !== _n) addedAny = true; }
+    const _cMax = parseInt(doc.fields?.clearedMaxId?.integerValue || '0');
+    let _mx = Number(loadFromStorage('munshiLogClearedMaxId', 0)) || 0;
+    if(_cMax > _mx){ _mx = _cMax; saveToStorage('munshiLogClearedMaxId', _mx); }
+    const _isOld = x => (Number(x.ts) || 0) <= _clr && (Number(x.id) || 0) <= _mx; // 🛡️ FM610TU326: وقت اور نمبر دونوں پرانے ہوں تب ہی
+    if(_clr){ const _n = munshiStockLogData.length; munshiStockLogData = munshiStockLogData.filter(x => !_isOld(x)); if(munshiStockLogData.length !== _n) addedAny = true; }
     if(jsonStr){
       const cloudList = JSON.parse(jsonStr);
       if(Array.isArray(cloudList)){
         const localIds = new Set(munshiStockLogData.map(x => x.id));
         cloudList.forEach(entry => {
-          if(_clr && (Number(entry.ts) || 0) <= _clr) return;
+          if(_clr && _isOld(entry)) return;
           if(!localIds.has(entry.id)){ munshiStockLogData.push(entry); addedAny = true; }
         });
       }
