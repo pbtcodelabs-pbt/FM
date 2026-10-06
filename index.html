@@ -8928,7 +8928,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM610TU326'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM610TU327'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -25747,7 +25747,7 @@ function renderPartyList(query = ''){
       </div>`;
 
     if(filtered.length === 0){
-      wrap.innerHTML = filterBarHtml + `<div class="placeholder">کوئی سپلائر نہیں ملا</div>`;
+      wrap.innerHTML = filterBarHtml + `<div class="placeholder">${supplierSortMode === 'today' ? '📅 آج ابھی تک کسی بیوپاری سے لین دین نہیں ہوا' : 'کوئی سپلائر نہیں ملا'}</div>`;
       return;
     }
     const isAdminSup = AppState.currentRole === 'admin';
@@ -26753,8 +26753,25 @@ function normalizeSupplierBalance(s, reasonNote){
 const SUP_SORT_OPTIONS = [
   ['newest', '🕐 نئے پہلے'], ['oldest', '🕐 پرانے پہلے'],
   ['highest', '📈 زیادہ بقایا پہلے'], ['lowest', '📉 کم بقایا پہلے'],
-  ['name', '🔤 نام سے'], ['serial', '🔢 سیریل سے']
+  ['name', '🔤 نام سے'], ['serial', '🔢 سیریل سے'],
+  ['today', '📅 آج کا لین دین'] // 📅 FM610TU327 (صدام کی ہدایت): صرف وہ بیوپاری جن سے آج لین دین ہوا
 ];
+// ---------- 📅 FM610TU327: آج اس بیوپاری سے کتنا لین دین ہوا — ادائیگی/وصولی/واپسی، خریداری (چالان)، ادائیگی ریکارڈ ----------
+function supplierTodayActivity(s){
+  const keys = new Set([new Date().toISOString().split('T')[0]]);
+  try{ keys.add(toLocalDateStr(new Date())); }catch(e){}
+  try{ keys.add(localDateKey(new Date())); }catch(e){}
+  let n = 0, last = 0;
+  (s.ledgerHistory || []).forEach(h => { if(h && keys.has(String(h.date || '').slice(0, 10))){ n++; } });
+  (s.purchaseHistory || []).forEach(po => { const d = String(po.date || po.receivedDate || '').slice(0, 10); if(keys.has(d) && ((po.items || []).length || Number(po.total))){ n++; } });
+  (typeof paymentsData !== 'undefined' ? paymentsData : []).forEach(pm => {
+    if(pm && pm.party_type === 'supplier' && pm.party_id === s.supplier_id){
+      const t = new Date(pm.created_at || 0); let d = ''; try{ d = toLocalDateStr(t); }catch(e){ d = String(pm.created_at || '').slice(0, 10); }
+      if(keys.has(d) || keys.has(String(pm.created_at || '').slice(0, 10))){ n++; last = Math.max(last, t.getTime() || 0); }
+    }
+  });
+  return { n, last };
+}
 function sortSuppliersList(list, mode){
   const arr = list.slice();
   const pay = s => Number(s.total_payable) || 0;
@@ -26763,6 +26780,10 @@ function sortSuppliersList(list, mode){
   else if(mode === 'highest') arr.sort((a,b) => pay(b) - pay(a));
   else if(mode === 'lowest') arr.sort((a,b) => pay(a) - pay(b));
   else if(mode === 'serial') arr.sort((a,b) => (a.serial_no||a.supplier_id||0) - (b.serial_no||b.supplier_id||0));
+  else if(mode === 'today'){ // 📅 FM610TU327: صرف آج والے، زیادہ لین دین والا اوپر
+    const act = new Map(arr.map(x => [x, supplierTodayActivity(x)]));
+    return arr.filter(x => act.get(x).n > 0).sort((a,b) => (act.get(b).last - act.get(a).last) || (act.get(b).n - act.get(a).n) || (a.name||'').localeCompare(b.name||'', 'ur'));
+  }
   else arr.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ur'));
   return arr;
 }
