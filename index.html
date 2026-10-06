@@ -8928,7 +8928,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM710WE329'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM710WE330'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -30440,7 +30440,8 @@ function rlIsDone(customerId){
 
 function renderRecoveryListEmployeeView(){
   // ---------- اس کسٹمر کا بقایا ہو، یا آج اس سے وصولی ہو چکی ہو (تاکہ مکمل ادائیگی کے بعد بھی ڈبہ غائب نہ ہو) ----------
-  let owing = customersData.filter(c => (c.total_receivable > 0) || rlTodayEntriesFor(c.customer_id).length > 0);
+  // 📋 FM710WE330 (صدام کی ہدایت): وصولی والے کو پوری گاہک لسٹ — بقایا صفر ہو تب بھی (کھوہ کھاتے والے نہیں، جب تک بقایا/آج کی وصولی نہ ہو)
+  let owing = customersData.filter(c => !c.isDormant || (c.total_receivable > 0) || rlTodayEntriesFor(c.customer_id).length > 0);
   const rlQ = (document.getElementById('rlCustSearch')?.value || '').trim().toLowerCase();
   if(rlQ){
     owing = owing.filter(c => (c.name || '').toLowerCase().includes(rlQ) || String(c.serial_no ?? '').includes(rlQ));
