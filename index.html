@@ -3974,6 +3974,8 @@ function __appHostKind(h, p){
       <!-- ---------- 🔙 صدام کی ہدایت (17 ستمبر، صبح 8:10): position:fixed کی کوشش نے مزید خرابی کر دی
            (اوپر والے مارکی/بینر کے ساتھ اوورلیپ، جدول کا سبز ہیڈر الگ چپک گیا) — واپس position:sticky پر
            لوٹا دیا، جو پہلے زیادہ تر صحیح کام کر رہا تھا ---------- -->
+      <!-- 🧹 FM610TU323: عارضی تربیتی بٹن — صرف ایڈمن -->
+      <div id="tmpZeroStockWrap" style="display:none; margin:0 0 8px;"><button type="button" onclick="zeroAllStock()" style="width:100%; height:44px; border:2px dashed #dc2626; border-radius:12px; background:#fef2f2; color:#b91c1c; font-family:inherit; font-size:18px; font-weight:700; cursor:pointer;">🧹 تمام سٹاک زیرو کریں (عارضی)</button></div>
       <div id="stockAdjStickyHeader" style="position:-webkit-sticky; position:sticky; top:0; z-index:40; background:var(--bg,#f4f6f5); padding-top:2px;">
       <!-- ---------- 🔧 صدام کی ہدایت (FM21SEPMO04): یہ لائن (عنوان + 3 بٹن) تنگ فون سکرین پر دونوں کناروں سے
            کٹ رہی تھی — دو وجوہات: (1) عنوان والے div میں min-width:0 نہیں تھا تو وہ سکڑ کر "..." نہیں دکھاتا تھا
@@ -6209,7 +6211,7 @@ function __appHostKind(h, p){
               <th>آج کا مال</th>
               <th>ٹوٹل بقایا</th>
               <th>آج کی ریکوری</th>
-              <th class="drShort">⚠️ کم وصولی</th>
+              <th class="drShort">⚠️ کل کم وصولی</th>
               <th>تازہ بقایا</th>
               <th class="drNoPrint">رابطہ</th>
               <th>نوٹ</th>
@@ -8926,7 +8928,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM610TU322'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM610TU324'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -23942,15 +23944,34 @@ async function confirmAdminPinForStockZero(){
 // زیرو ہوگا، ورنہ کچھ نہیں بدلتا۔ سیریل نمبر، نام، قیمتیں، حاضر/غیر حاضر حالت — کچھ بھی نہیں چھیڑا جاتا،
 // صرف ہر variant کا stock=0 کیا جاتا ہے ---------- -->
 async function zeroAllStock(){
-  if(!confirm('⚠️ خبردار! آپ تمام سبزیوں کا پورا سٹاک زیرو کرنے لگے ہیں۔ اس سے موجودہ سارا سٹاک ختم ہو جائے گا اور یہ واپس نہیں آئے گا۔ کیا آپ جاری رکھنا چاہتے ہیں؟')) return;
-  if(!confirm('❗ آخری تصدیق: کیا آپ واقعی سارا سٹاک زیرو کرنا چاہتے ہیں؟ اس کے بعد واپسی ممکن نہیں — "OK" دبائیں تو سٹاک زیرو ہو جائے گا۔')) return;
-  const pinOk = await confirmAdminPinForStockZero();
-  if(!pinOk) return;
-  getLiveVariantList().forEach(item => { item.variant.stock = 0; (item.variant.chalans || []).forEach(c => { c.qty = 0; }); if(item.variant.batches) item.variant.batches = []; }); // FM110TH272: چالانوں کی باقی مقدار بھی صفر
+  // 🧹 FM610TU323 (صدام کی ہدایت): عارضی تربیتی بٹن — پہلی تنبیہ → دوسری تنبیہ → ایڈمن PIN
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'سٹاک زیرو صرف ایڈمن کر سکتا ہے۔'); return; }
+  const _items = getLiveVariantList();
+  const _withStock = _items.filter(it => (Number(it.variant.stock) || 0) !== 0).length;
+  const _chCount = _items.reduce((a, it) => a + ((it.variant.chalans || []).length), 0);
+  const _pendOrders = (advanceOrdersData || []).filter(o => o.status === 'pending').length;
+  if(!(await uDialog({ title: '⚠️ پہلی تنبیہ', message: 'آپ <b>سٹاک کا سارا نظام صفر</b> کرنے لگے ہیں: ہر سبزی کا سٹاک، تمام چالان، خرید ریٹ، منشی کا سارا ریکارڈ اور آرڈر بکنگ کے زیرِ التوا آرڈر۔<br>سبزیوں کے نام، پیکنگ اور سیریل نمبر ویسے ہی رہیں گے۔', rows: [{ label: 'سٹاک والی سبزیاں', value: String(_withStock), big: true }, { label: 'چالان', value: String(_chCount) }, { label: 'منشی کا ریکارڈ', value: String((munshiStockLogData || []).length) }, { label: 'زیرِ التوا آرڈر', value: String(_pendOrders) }], okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'amber' }))) return;
+  if(!(await uDialog({ title: '⛔ دوسری تنبیہ', message: 'سٹاک زیرو ہونے کے بعد <b>واپس نہیں آئے گا</b>۔ یہ ہر فون پر (آرڈر بکنگ، بل، سٹاک) زیرو ہو جائے گا۔ <b>کیا پکا؟</b>', okText: '🧹 ہاں، زیرو کریں', cancelText: '✖ نہیں', tone: 'red' }))) return;
+  if(!(await _askAdminPinForSerialMaster('تمام سٹاک زیرو کرنے کے لیے'))) return;
+  try{ saveToStorage('zeroStockBackup', { at: new Date().toISOString(), list: _items.map(it => ({ v: it.variant.variant_id, s: it.variant.stock })) }); }catch(e){}
+  // 🧹 FM610TU324 (صدام کی ہدایت): بالکل تازہ — سٹاک، تمام چالان، خرید ریٹ صفر؛ نام/پیکنگ/سیریل/فروخت ریٹ محفوظ
+  (productsData || []).forEach(p => (p.variants || []).forEach(v => { v.stock = 0; v.chalans = []; v.reserved = 0; v.purchase = 0; if(v.batches) v.batches = []; }));
+  // منشی کا سارا ریکارڈ صاف — باقی فونز کا پرانا ریکارڈ بھی واپس نہ آئے (clearedAt)
+  try{ munshiStockLogData.length = 0; saveToStorage('munshiLogClearedAt', Date.now()); saveToStorage('munshiStockLog', munshiStockLogData); pushMunshiStockLogToCloud(); }catch(e){}
+  // آرڈر بکنگ کے زیرِ التوا (بل نہ بنے) آرڈر ختم — بل بنے ہوئے آرڈر ریکارڈ میں رہیں گے
+  try{
+    const _pend = (advanceOrdersData || []).filter(o => o.status === 'pending');
+    _pend.forEach(o => _advRememberDeleted(o.id));
+    advanceOrdersData = (advanceOrdersData || []).filter(o => o.status !== 'pending');
+    saveToStorage('advanceOrders', advanceOrdersData);
+    pushAdvanceOrdersToCloud();
+  }catch(e){}
+  try{ recomputeReservedFromOrders(); }catch(e){}
   persistAllData();
-  pushProductsToCloud();
+  AppState.settings.productsPendingSync = true;
   pauseCloudPolling(20000); // ---------- 🔒 خودکار کلاؤڈ pull تھوڑی دیر روکیں، ورنہ 12-سیکنڈ پولنگ یہ تازہ تبدیلی پلٹ سکتی ہے ---------- -->
-  alert('✅ تمام سٹاک زیرو ہو گیا۔');
+  try{ await pushProductsToCloud(); }catch(e){}
+  uAlert('✅ سٹاک زیرو ہو گیا', 'تمام سبزیوں کا سٹاک زیرو کر دیا گیا — باقی فونز پر بھی چند سیکنڈ میں زیرو نظر آئے گا۔', 'green');
   // ---------- جو بھی سکرین اس وقت کھلی ہو وہیں فوراً نظر آئے — سٹاک مینجمنٹ، پراڈکٹس، اور آرڈر ٹیکنگ (منشی) ---------- -->
   if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || '');
   if(document.getElementById('productListWrap')) renderProductList(document.getElementById('productSearchInput')?.value || '');
@@ -25634,7 +25655,7 @@ function renderPartyList(query = ''){
       return;
     }
     const isAdmin = AppState.currentRole === 'admin';
-    wrap.innerHTML = filtered.map(c => { // 🗑️ FM510MO318 عارضی بڑا بٹن
+    wrap.innerHTML = (isAdmin ? fmZeroBalBtnHtml('customers') : '') + filtered.map(c => { // 🧹 FM610TU323 عارضی زیرو بٹن
       const areaBadgeHtml = c.rateArea
         ? `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#fff; background:${c.rateArea==='retail'?'#b91c1c':'#15803d'}; border:none; border-radius:7px; padding:2px 5px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">${c.rateArea==='retail'?'اسلام آباد':'راولپنڈی'}</button>`
         : `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#5b21b6; background:#ede9fe; border:1.5px solid #c4b5fd; border-radius:7px; padding:2px 5px; cursor:pointer;">❔</button>`;
@@ -25670,7 +25691,7 @@ function renderPartyList(query = ''){
       return;
     }
     const isAdminSup = AppState.currentRole === 'admin';
-    wrap.innerHTML = filterBarHtml + filtered.map(s => buildCompactPartyRow({
+    wrap.innerHTML = filterBarHtml + (isAdminSup ? fmZeroBalBtnHtml('suppliers') : '') + filtered.map(s => buildCompactPartyRow({
       id: s.supplier_id, name: s.name, phone: s.phone, serial: s.serial_no, keywords: s.keywords,
       areaBadgeHtml: '', balance: s.total_payable || 0, wallet: s.wallet_balance || 0,
       rowClickJs: `openSupplierProfile(${s.supplier_id})`,
@@ -30751,30 +30772,92 @@ function renderBizDayBar(){
     ${isPast ? '<span style="font-size:10.5px;color:#b45309;font-weight:800;white-space:nowrap;">صرف دیکھنے کے لیے</span>' : ''}`;
 }
 
+// ---------- 📋 FM610TU323: کسی دن کا مال = بل بنتے وقت کا ادھار (ٹوٹل − اسی وقت ادا) — بعد کی وصولی سے یہ نہیں بدلتا
+// (پہلے بل کا "باقی" amount_due لیا جاتا تھا جو وصولی کے ساتھ گھٹ جاتا تھا، اس لیے پرانے دن کی کم وصولی غلط آتی تھی) ----------
+function _drGoodsOrig(inv){
+  if(!inv || inv.status === 'voided') return 0;
+  const g = Number(inv.grand_total) || 0;
+  const paid = (inv.paid_now !== undefined && inv.paid_now !== null) ? (Number(inv.paid_now) || 0) : (g - (Number(inv.amount_due) || 0));
+  return Math.max(0, Math.round((g - paid) * 100) / 100);
+}
+function drCustomerDay(c, D){
+  const hist = c.walletHistory || [];
+  const gDay = {}, rDay = {}, pDay = {};
+  const add = (o, d, v) => { if(!d) return; o[d] = (o[d] || 0) + (Number(v) || 0); };
+  invoicesData.forEach(inv => { if(inv.customer_id === c.customer_id) add(gDay, invDay(inv), _drGoodsOrig(inv)); });
+  hist.forEach(h => { if(h.type === 'cash_given') add(gDay, h.date, h.amount); else if(h.type === 'receivable_collected') add(rDay, h.date, h.amount); });
+  recoveryListData.forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') add(pDay, recDay(e), e.amount); });
+  const sumW = (o, pred) => Object.keys(o).filter(pred).reduce((s, k) => s + o[k], 0);
+  const todayGoods = gDay[D] || 0;
+  const goodsAfter = sumW(gDay, d => d > D);
+  const confirmedRecovery = rDay[D] || 0;
+  const recAfter = sumW(rDay, d => d > D);
+  const pendingRecovery = pDay[D] || 0;
+  const todayRecovery = confirmedRecovery + pendingRecovery;
+  const endBal = (c.total_receivable || 0) + recAfter - goodsAfter; // ---------- اس تاریخ کے اختتام پر بقایہ (کھاتے کے مطابق) ----------
+  const openingBalance = endBal + confirmedRecovery - todayGoods;
+  const totalBalance = openingBalance + todayGoods;
+  const finalBalance = totalBalance - todayRecovery;
+  const dayShort = todayGoods > 0 ? Math.max(0, todayGoods - todayRecovery) : 0;
+  // ⚠️ آج تک کی کل کم وصولی — ہر دن: اس دن کا مال − اس دن کی وصولی (صرف دیکھنے کے لیے، کسی حساب میں شامل نہیں)
+  let lifeShort = 0;
+  Object.keys(gDay).forEach(d => { if(d <= D && gDay[d] > 0) lifeShort += Math.max(0, gDay[d] - (rDay[d] || 0) - (pDay[d] || 0)); });
+  lifeShort = Math.round(lifeShort);
+  const hasToday = todayGoods > 0 || todayRecovery > 0;
+  return { c, openingBalance, todayGoods, totalBalance, todayRecovery, confirmedRecovery, pendingRecovery, finalBalance, shortfall: lifeShort, dayShort, hasToday };
+}
 function computeDailyRecoveryRows(dateStr){
   const D = dateStr || todayDateKey();
-  return customersData.map(c => {
-    const hist = c.walletHistory || [];
-    const invs = invoicesData.filter(inv => inv.customer_id === c.customer_id);
-    const goodsOf = (pred) => invs.filter(inv => pred(invDay(inv))).reduce((s, inv) => s + (inv.amount_due || 0), 0)
-      + hist.filter(h => h.type === 'cash_given' && pred(h.date)).reduce((s, h) => s + (h.amount || 0), 0);
-    const recOf = (pred) => hist.filter(h => h.type === 'receivable_collected' && pred(h.date)).reduce((s, h) => s + (h.amount || 0), 0);
-    const todayGoods = goodsOf(d => d === D);
-    const goodsAfter = goodsOf(d => d > D);
-    const confirmedRecovery = recOf(d => d === D);
-    const recAfter = recOf(d => d > D);
-    const pendingRecovery = recoveryListData.filter(e => e.customer_id === c.customer_id && e.status === 'pending' && recDay(e) === D)
-      .reduce((s, e) => s + (Number(e.amount) || 0), 0);
-    const todayRecovery = confirmedRecovery + pendingRecovery;
-    const endBal = (c.total_receivable || 0) + recAfter - goodsAfter; // ---------- اس تاریخ کے اختتام پر بقایہ (کھاتے کے مطابق) ----------
-    const openingBalance = endBal + confirmedRecovery - todayGoods;
-    const totalBalance = openingBalance + todayGoods;
-    const finalBalance = totalBalance - todayRecovery;
-    const shortfall = todayGoods > 0 ? Math.max(0, todayGoods - todayRecovery) : 0;
-    const hasToday = todayGoods > 0 || todayRecovery > 0;
-    return { c, openingBalance, todayGoods, totalBalance, todayRecovery, confirmedRecovery, pendingRecovery, finalBalance, shortfall, hasToday };
-  });
+  return customersData.map(c => drCustomerDay(c, D));
 }
+
+
+// ---------- 🧹 FM610TU323 (صدام کی ہدایت): عارضی تربیتی بٹن — تمام گاہکوں / بیوپاریوں کا بقایا زیرو
+// پہلی تنبیہ → دوسری تنبیہ → ایڈمن PIN۔ پرانی رقمیں حفاظت کے لیے فون میں محفوظ (zeroBalBackup_*) ----------
+function fmZeroBalBtnHtml(kind){
+  const isC = kind === 'customers';
+  return `<button type="button" onclick="fmZeroAllBalances('${kind}')" style="width:100%; margin:2px 0 10px; height:44px; border:2px dashed #dc2626; border-radius:12px; background:#fef2f2; color:#b91c1c; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:17px; font-weight:700; cursor:pointer;">🧹 تمام ${isC ? 'گاہکوں' : 'بیوپاریوں'} کا بقایا زیرو کریں (عارضی)</button>`;
+}
+async function fmZeroAllBalances(kind){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'یہ کام صرف ایڈمن کر سکتا ہے۔'); return; }
+  const isC = kind === 'customers';
+  const arr = isC ? customersData : suppliersData;
+  const balF = isC ? 'total_receivable' : 'total_payable';
+  const f = n => 'Rs. ' + Math.round(n).toLocaleString('en-US');
+  const sumBal = arr.reduce((a, x) => a + (Number(x[balF]) || 0), 0);
+  const sumWal = arr.reduce((a, x) => a + (Number(x.wallet_balance) || 0), 0);
+  const cnt = arr.filter(x => (Number(x[balF]) || 0) !== 0 || (Number(x.wallet_balance) || 0) !== 0).length;
+  const who = isC ? 'گاہکوں' : 'بیوپاریوں';
+  const rows = [{ label: 'جن کا بقایا/ایڈوانس ہے', value: String(cnt), big: true },
+    { label: isC ? 'کل بقایا (لینے ہیں)' : 'کل بقایا (دینے ہیں)', value: f(sumBal), bg: '#fee2e2', fg: '#7f1d1d' }];
+  if(sumWal) rows.push({ label: 'کل ایڈوانس (والٹ)', value: f(sumWal), bg: '#fee2e2', fg: '#7f1d1d' });
+  if(!(await uDialog({ title: '⚠️ پہلی تنبیہ', message: `آپ <b>تمام ${who} کا پورا بقایا اور ایڈوانس زیرو</b> کرنے لگے ہیں۔ ${who} کے نام، فون اور پرانے بل اپنی جگہ رہیں گے۔`, rows, okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'amber' }))) return;
+  if(!(await uDialog({ title: '⛔ دوسری تنبیہ', message: `زیرو کرنے کے بعد یہ رقمیں <b>واپس نہیں آئیں گی</b> اور ہر فون پر زیرو ہو جائیں گی۔ <b>کیا پکا؟</b>`, okText: '🧹 ہاں، زیرو کریں', cancelText: '✖ نہیں', tone: 'red' }))) return;
+  if(!(await _askAdminPinForSerialMaster(`تمام ${who} کا بقایا زیرو کرنے کے لیے`))) return;
+  try{ saveToStorage('zeroBalBackup_' + kind, { at: new Date().toISOString(), list: arr.map(x => ({ id: x[isC ? 'customer_id' : 'supplier_id'], name: x.name, bal: x[balF], wal: x.wallet_balance })) }); }catch(e){}
+  try{ pauseCloudPolling(20000); }catch(e){}
+  arr.forEach(x => { x[balF] = 0; x.wallet_balance = 0; });
+  if(isC){
+    // گاہکوں کے پرانے بلوں کا باقی بھی صفر — تاکہ آگے کی وصولی پرانے بلوں میں نہ جائے
+    (invoicesData || []).forEach(inv => { if(inv && inv.customer_id && (Number(inv.amount_due) || 0) !== 0) inv.amount_due = 0; });
+    // 🧹 FM610TU324: ریکوری والے کی منظوری کی منتظر پرانی وصولیاں بھی ختم — ورنہ منظوری پر بقایا منفی ہو جاتا
+    try{
+      (recoveryListData || []).filter(r => r.status === 'pending').forEach(r => { if(!recoveryDeletedIds.includes(r.id)) recoveryDeletedIds.push(r.id); });
+      saveToStorage('recoveryDeletedIds', recoveryDeletedIds);
+      recoveryListData = (recoveryListData || []).filter(r => r.status !== 'pending');
+      saveToStorage('recoveryList', recoveryListData);
+      pushRecoveryListToCloud();
+    }catch(e){}
+  }
+  persistAllData();
+  try{ if(isC){ await pushCustomersToCloud(); await pushInvoicesToCloud(); } else { await pushSuppliersToCloud(); } }catch(e){}
+  try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+  try{ renderHomeMoneySummary(); }catch(e){}
+  uAlert('✅ زیرو ہو گیا', `تمام ${who} کا بقایا اور ایڈوانس زیرو کر دیا گیا۔`, 'green');
+}
+setInterval(() => {
+  try{ const w = document.getElementById('tmpZeroStockWrap'); if(w) w.style.display = (AppState.currentRole === 'admin') ? 'block' : 'none'; }catch(e){}
+}, 1500);
 
 function saveDailyRecoveryNote(customerId, value){
   const key = todayDateKey() + '_' + customerId;
@@ -30853,7 +30936,7 @@ function renderDailyRecoveryScreen(){
   if(sumEl) sumEl.innerHTML = `<div style="display:flex; gap:4px; flex-wrap:nowrap;">
       ${sumBox('#fff7ed','#fdba74','#c2410c','🛒 آج کا ادھار مال', sumGoods)}
       ${sumBox('#f0fdf4','#86efac','#15803d','📥 آج کی ریکوری', sumConf + sumPend)}
-      ${sumBox('#fef2f2','#fca5a5','#b91c1c','⚠️ کم وصولی', sumShort)}
+      ${sumBox('#fef2f2','#fca5a5','#b91c1c','⚠️ کل کم وصولی', sumShort)}
     </div>`;
 
   const waNum = (ph) => { const d = (ph || '').replace(/[^0-9]/g, ''); return d ? (d.startsWith('92') ? d : d.startsWith('0') ? '92' + d.slice(1) : d) : ''; };
@@ -30923,7 +31006,7 @@ async function shareDailyRecoveryImage(){
     ctx.fillStyle = '#f0fdf4'; ctx.fillRect(0, 0, w, sumH);
     ctx.textAlign = 'center'; ctx.font = 'bold 18px sans-serif';
     ctx.fillStyle = '#15803d'; ctx.fillText(`📥 آج کی کل ریکوری: Rs. ${_rec.toLocaleString()}`, w*0.72, sumH/2);
-    ctx.fillStyle = '#b91c1c'; ctx.fillText(`⚠️ آج کی کم وصولی: Rs. ${_short.toLocaleString()}`, w*0.28, sumH/2);
+    ctx.fillStyle = '#b91c1c'; ctx.fillText(`⚠️ کل کم وصولی (آج تک): Rs. ${_short.toLocaleString()}`, w*0.28, sumH/2);
     ctx.translate(0, sumH);
     const cols = [
       {label:'نمبر', x: w-40, align:'center'},
@@ -30932,7 +31015,7 @@ async function shareDailyRecoveryImage(){
       {label:'آج کا مال', x: w-550, align:'center'},
       {label:'ٹوٹل بقایہ', x: w-680, align:'center'},
       {label:'آج کی ریکوری', x: w-810, align:'center'},
-      {label:'⚠️ کم وصولی', x: w-940, align:'center'},
+      {label:'⚠️ کل کم وصولی', x: w-940, align:'center'},
       {label:'تازہ بقایہ', x: 60, align:'center'},
     ];
     ctx.fillStyle = '#134e2c'; ctx.fillRect(0,0,w,headH);
@@ -36282,6 +36365,7 @@ async function pushMunshiStockLogToCloud(){
         fields: {
           json: { stringValue: JSON.stringify(munshiStockLogData) },
           nextMunshiLogId: { integerValue: String(nextMunshiLogId) },
+          clearedAt: { integerValue: String(Number(loadFromStorage('munshiLogClearedAt', 0)) || 0) }, // 🧹 FM610TU324
           updatedAt: { integerValue: String(Date.now()) }
         }
       })
@@ -36299,11 +36383,17 @@ async function fetchMunshiStockLogFromCloud(silent){
     const doc = await res.json();
     const jsonStr = doc.fields?.json?.stringValue;
     let addedAny = false;
+    // 🧹 FM610TU324: "سٹاک زیرو" کے وقت سے پہلے کا منشی ریکارڈ کبھی واپس نہیں
+    const _cClr = parseInt(doc.fields?.clearedAt?.integerValue || '0');
+    let _clr = Number(loadFromStorage('munshiLogClearedAt', 0)) || 0;
+    if(_cClr > _clr){ _clr = _cClr; saveToStorage('munshiLogClearedAt', _clr); }
+    if(_clr){ const _n = munshiStockLogData.length; munshiStockLogData = munshiStockLogData.filter(x => (Number(x.ts) || 0) > _clr); if(munshiStockLogData.length !== _n) addedAny = true; }
     if(jsonStr){
       const cloudList = JSON.parse(jsonStr);
       if(Array.isArray(cloudList)){
         const localIds = new Set(munshiStockLogData.map(x => x.id));
         cloudList.forEach(entry => {
+          if(_clr && (Number(entry.ts) || 0) <= _clr) return;
           if(!localIds.has(entry.id)){ munshiStockLogData.push(entry); addedAny = true; }
         });
       }
@@ -38988,6 +39078,90 @@ function getBillSummaryRows(invoice){
   return {rows, finalLabel, finalValue};
 }
 
+
+// ---------- 🧾 FM610TU323 (صدام کی ہدایت): بل کے نیچے ادائیگی کے ڈبوں کا ناپ — 🔠 فونٹ سائز اور ↕ قطار دونوں کنٹرول سے بڑا/چھوٹا ----------
+function _billPayLayout(invoice, fscale, rowScale){
+  const sumRowH = Math.max(Math.round(22 * rowScale), Math.round(30 * fscale));
+  const titleH = Math.max(Math.round(26 * rowScale), Math.round(32 * fscale));
+  const n = getBillSummaryRows(invoice).rows.length + 1;
+  const boxH = titleH + n * sumRowH + 2;
+  const y = getYesterdayPayInfo(invoice);
+  const yTitleH = Math.round(54 * fscale);
+  const redH = (y && y.dayShort > 0) ? Math.round(40 * fscale) + 8 : 0;
+  const yH = y ? (yTitleH + 5 * sumRowH + 2 + redH) : 0;
+  return { sumRowH, titleH, boxH, yTitleH, redH, yH, y };
+}
+// ---------- 📅 بل کی تاریخ سے ایک دن پہلے (کل) کی ادائیگی — بالکل روزانہ ریکوری رپورٹ والا حساب، صرف دیکھنے کے لیے ----------
+function getYesterdayPayInfo(invoice){
+  try{
+    if(!invoice || !invoice.customer_id) return null;
+    const c = customersData.find(x => x.customer_id === invoice.customer_id); if(!c) return null;
+    const base = (invoice.invoice_id === 'DRAFT' || !invoice.created_at) ? todayDateKey() : invDay(invoice);
+    const dt = new Date(base + 'T12:00:00'); dt.setDate(dt.getDate() - 1);
+    const D = localDateKey(dt);
+    const r = drCustomerDay(c, D);
+    const p = D.split('-');
+    return { D, label: p[2] + '-' + p[1] + '-' + p[0], opening: r.openingBalance, goods: r.todayGoods, total: r.totalBalance, paid: r.todayRecovery, final: r.finalBalance, dayShort: r.dayShort };
+  }catch(e){ return null; }
+}
+function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
+  const W = R - L, labelW = Math.round(W * 0.56), valueX = R - labelW;
+  let rowTop = top;
+  rows.forEach(([label, val, isFinal], idx) => {
+    if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(L + 0.5, rowTop + 0.5, W - 1, rowH); }
+    if(isFinal){ ctx.fillStyle = '#e2e8f0'; ctx.fillRect(L + 0.5, rowTop + 0.5, W - 1, rowH); }
+    let fpx = isFinal ? 18 : 15;
+    ctx.font = FP(`${bw}${fpx}px`);
+    while(ctx.measureText(label).width > labelW - 10 && fpx > 9){ fpx -= 1; ctx.font = FP(`${bw}${fpx}px`); }
+    ctx.fillStyle = '#000'; ctx.textAlign = 'right';
+    ctx.fillText(label, R - 6, rowTop + rowH / 2 + Math.round(5 * fscale));
+    let vpx = isFinal ? 18 : 16;
+    const vs = Math.round(val).toLocaleString();
+    ctx.font = FP(`bold ${vpx}px`);
+    while(ctx.measureText(vs).width > (W - labelW) - 10 && vpx > 9){ vpx -= 1; ctx.font = FP(`bold ${vpx}px`); }
+    ctx.textAlign = 'left';
+    ctx.fillText(vs, L + 6, rowTop + rowH / 2 + Math.round(5 * fscale));
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(valueX, rowTop); ctx.lineTo(valueX, rowTop + rowH); ctx.stroke();
+    rowTop += rowH;
+    ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(L, rowTop); ctx.lineTo(R, rowTop); ctx.stroke();
+  });
+  return rowTop;
+}
+function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
+  const y = lay.y; if(!y) return top;
+  const boxH = lay.yTitleH + 5 * lay.sumRowH + 2;
+  ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
+  ctx.strokeRect(L + 0.5, top + 0.5, R - L, boxH);
+  ctx.textAlign = 'center'; ctx.fillStyle = '#000';
+  let fpx = 15; ctx.font = FP(`bold ${fpx}px`);
+  const t1 = 'کل کی ادائیگی کی تفصیل';
+  while(ctx.measureText(t1).width > (R - L) - 10 && fpx > 9){ fpx -= 1; ctx.font = FP(`bold ${fpx}px`); }
+  ctx.fillText(t1, (L + R) / 2, top + Math.round(22 * fscale));
+  ctx.font = `bold ${Math.round(14 * fscale)}px Arial, sans-serif`;
+  ctx.fillText(y.label, (L + R) / 2, top + Math.round(44 * fscale));
+  const rTop = top + lay.yTitleH;
+  ctx.strokeStyle = rc.border; ctx.beginPath(); ctx.moveTo(L, rTop); ctx.lineTo(R, rTop); ctx.stroke();
+  _drawPayRows(ctx, FP, L, R, rTop, lay.sumRowH, [
+    ['سابقہ بقایا', y.opening], ['کل کی خریداری', y.goods], ['ٹوٹل', y.total], ['کل ادا کیا', y.paid], ['بقایا', y.final, true]
+  ], rc, bw, fscale);
+  let bottom = top + boxH;
+  if(y.dayShort > 0){
+    const rh = Math.round(40 * fscale), rt = bottom + 8;
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(L + 0.5, rt, R - L, rh);
+    ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
+    let px = 16; const txt = 'کل کے بل میں سے کم دیے:  ' + Math.round(y.dayShort).toLocaleString();
+    ctx.font = FP(`bold ${px}px`);
+    while(ctx.measureText(txt).width > (R - L) - 10 && px > 9){ px -= 1; ctx.font = FP(`bold ${px}px`); }
+    ctx.fillText(txt, (L + R) / 2, rt + rh / 2 + Math.round(6 * fscale));
+    bottom = rt + rh;
+  }
+  ctx.fillStyle = '#000';
+  return bottom;
+}
+
 async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchKey = null){
   const canvas0 = document.getElementById('invoiceCanvas');
   try{
@@ -39142,8 +39316,9 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   if(AppState.settings.businessPhone) estimatedHeight += 16;
   let summaryBlockH = 0, accountBlockH = 0;
   if(invoice.customer_id){
-    const summary = getBillSummaryRows(invoice);
-    summaryBlockH = Math.round(26*rowScale) + ((summary.rows.length + 1) * Math.round(22*rowScale)) + 6;
+    const _lay = _billPayLayout(invoice, fscale, rowScale); // 🧾 FM610TU323
+    summaryBlockH = receiptAccounts.length ? _lay.boxH : Math.max(_lay.boxH, _lay.yH);
+    if(receiptAccounts.length && _lay.yH) estimatedHeight += _lay.yH + 14;
   } else {
     const laborChk = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
     if((invoice.discount && invoice.discount > 0) || laborChk > 0) estimatedHeight += 44;
@@ -39479,57 +39654,35 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   // بائیں طرف بچنے والی جگہ (Item کالم جتنی) میں پیمنٹ اکاؤنٹ + QR کوڈ ساتھ ساتھ — بل غیرضروری لمبا نہ ہو ----------
   let paymentBoxTop = y;
   let summaryBottom = y, accountBottom = y, summaryBlockHForCentering = 0;
+  let _payLay = null;
+  const _bw = AppState.settings.printBoldItems === false ? '' : 'bold ';
   if(invoice.customer_id){
+    // 🧾 FM610TU323 (صدام کی ہدایت): ادائیگی کی تفصیل — بڑی لکھائی، اوپر والے 🔠/↕/Bold کنٹرول کا پورا اثر
     const summary = getBillSummaryRows(invoice);
-    // ---------- 🔁 FM3SEPTH23: RTL کے بعد Qty+Price+Total کالمز اب بائیں طرف ہیں، اس لیے Payment Summary باکس بھی بائیں طرف ----------
+    _payLay = _billPayLayout(invoice, fscale, rowScale);
     const sumLeft = colX[0];
     const sumRight = colX[4];
     const sumBoxW = sumRight - sumLeft;
-    const sumLabelW = Math.round(sumBoxW * 0.5);
-    const sumValueX = sumRight - sumLabelW; // ---------- 🐛 FM3SEPTH25: لیبل اب دائیں طرف ہے، تو تقسیم کی لکیر بھی دائیں کنارے سے ناپی جائے ----------
-    const sumRowH = Math.round(22 * rowScale);
     const boxTop = paymentBoxTop;
-    const titleH = Math.round(26 * rowScale);
-    const boxH = titleH + ((summary.rows.length + 1) * sumRowH) + 6;
+    const titleH = _payLay.titleH;
+    const boxH = _payLay.boxH;
     ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.strokeRect(sumLeft + 0.5, boxTop + 0.5, sumBoxW, boxH);
-    let ty = boxTop + 18;
-    ctx.font = FP('bold 12px');
+    ctx.font = FP('bold 16px');
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000';
-    ctx.fillText('ادائیگی کی تفصیل', sumLeft + sumBoxW/2, ty);
-    let rowTop = boxTop + titleH;
+    ctx.fillText('ادائیگی کی تفصیل', sumLeft + sumBoxW/2, boxTop + titleH/2 + Math.round(6 * fscale));
+    const rowTop0 = boxTop + titleH;
     ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
-
-    const allSummaryRows = [...summary.rows, [summary.finalLabel, summary.finalValue, true]];
-    allSummaryRows.forEach(([label, val, isFinal], idx) => {
-      if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(sumLeft+0.5, rowTop+0.5, sumBoxW-1, sumRowH); }
-      let fpx = isFinal ? 13 : 11; // ---------- خانہ اب تنگ ہے، اسی مناسبت سے فونٹ بھی تھوڑا چھوٹا ----------
-      ctx.font = FP(`bold ${fpx}px`);
-      ctx.fillStyle = '#000';
-      // ---------- 🐛 صدام کی ہدایت (FM3SEPTH23): لمبا اردو لیبل (جیسے "حتمی بقایہ رقم") پہلے قیمت کے اوپر چڑھ جاتا تھا —
-      // اب لیبل کا فونٹ خودکار سکڑ کر اپنے آدھے خانے میں فٹ ہو جاتا ہے، کبھی رقم سے اوورلیپ نہیں کرے گا ---------- -->
-      const labelMaxW = sumLabelW - 10;
-      while(ctx.measureText(label).width > labelMaxW && fpx > 7){
-        fpx -= 1;
-        ctx.font = FP(`bold ${fpx}px`);
-      }
-      // ---------- 🐛 صدام کی ہدایت (FM3SEPTH25): اردو کی فطری RTL ترتیب کے مطابق — ٹائٹل (Grand Total/Subtotal وغیرہ)
-      // اب دائیں طرف، اور پیسے/رقم اب بائیں طرف — بالکل اسی طرح جیسے اوپر آئٹمز ٹیبل میں "نام" دائیں اور "ٹوٹل" بائیں ہے ---------- -->
-      ctx.textAlign = 'right';
-      ctx.fillText(label, sumRight - 6, rowTop + sumRowH/2 + 4);
-      ctx.font = FP(isFinal ? 'bold 13px' : 'bold 11px'); // ---------- قیمت کا فونٹ لیبل سے آزاد، اپنا مقررہ سائز ----------
-      ctx.textAlign = 'left';
-      ctx.fillText(Math.round(val).toLocaleString(), sumLeft + 6, rowTop + sumRowH/2 + 4);
-      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
-      rowTop += sumRowH;
-      ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
-    });
+    ctx.beginPath(); ctx.moveTo(sumLeft, rowTop0); ctx.lineTo(sumRight, rowTop0); ctx.stroke();
+    _drawPayRows(ctx, FP, sumLeft, sumRight, rowTop0, _payLay.sumRowH, [...summary.rows, [summary.finalLabel, summary.finalValue, true]], rc, _bw, fscale);
     summaryBottom = boxTop + boxH;
     summaryBlockHForCentering = boxH;
+    // 📅 کل کی ادائیگی — دائیں طرف کی خالی جگہ میں (اکاؤنٹ/QR لگا ہو تو نیچے پوری چوڑائی میں)
+    if(_payLay.y && !receiptAccounts.length){
+      const yb = _drawYesterdayBox(ctx, FP, colX[4] + 8, tableRight, paymentBoxTop, _payLay, rc, _bw, fscale);
+      summaryBottom = Math.max(summaryBottom, yb);
+    }
   }
 
   // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع، عمودی طور پر درمیان میں ----------
@@ -39582,6 +39735,10 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     accountBottom = ly;
   }
 
+  if(_payLay && _payLay.y && receiptAccounts.length){
+    const _t = Math.max(summaryBottom, accountBottom) + 14;
+    summaryBottom = _drawYesterdayBox(ctx, FP, colX[0], tableRight, _t, _payLay, rc, _bw, fscale);
+  }
   y = Math.max(summaryBottom, accountBottom, paymentBoxTop) + 24;
 
   ctx.textAlign = 'center';
