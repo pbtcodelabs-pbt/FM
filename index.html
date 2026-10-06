@@ -3149,8 +3149,8 @@ function __appHostKind(h, p){
     <!-- ---------- 🔤↕️ صدام کی ہدایت (FM3SEPTH10): A→Z / Z→A سورٹ بٹن + ہر آئٹم پر ✋ ڈریگ ہینڈل —
          اپنی مرضی سے ترتیب دیں، یہ ترتیب اسی ڈیوائس پر ہمیشہ کے لیے محفوظ رہتی ہے (initSidebarNavCustomize دیکھیں) ---------- -->
     <div class="navSortRow">
-      <button type="button" class="navSortBtn" onclick="sortSidebarNav('asc')">A→Z ⬇️</button>
-      <button type="button" class="navSortBtn" onclick="sortSidebarNav('desc')">Z→A ⬆️</button>
+      <button type="button" class="navSortBtn" onclick="sortSidebarNav('asc')">1 سے آخر ⬇️</button>
+      <button type="button" class="navSortBtn" onclick="sortSidebarNav('desc')">آخر سے 1 ⬆️</button>
     </div>
 
     <!-- ---------- 🔤 صدام کی ہدایت پر تمام مینیو آئٹمز (اوپر کی سیٹنگز) الفابیٹیکلی (A-Z) ترتیب دیے گئے ہیں —
@@ -8926,7 +8926,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM610TU320'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM610TU322'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -13051,9 +13051,10 @@ function sortSidebarNav(direction){
     if(!divider) return;
     const items = getSortableNavItems();
     items.sort((a, b) => {
-      const la = (a.getAttribute('data-navlabel') || '').toLowerCase();
-      const lb = (b.getAttribute('data-navlabel') || '').toLowerCase();
-      return direction === 'desc' ? lb.localeCompare(la) : la.localeCompare(lb);
+      const mp = (typeof getModuleNumberMap === 'function') ? getModuleNumberMap() : {};
+      const na = mp[_MOD_ALIAS[a.getAttribute('data-navkey')] || a.getAttribute('data-navkey')] || 999;
+      const nb = mp[_MOD_ALIAS[b.getAttribute('data-navkey')] || b.getAttribute('data-navkey')] || 999;
+      return direction === 'desc' ? nb - na : na - nb; // 🔤 FM610TU321: اردو نمبر کی ترتیب
     });
     items.forEach(el => divider.parentNode.insertBefore(el, divider));
     saveSidebarNavOrder();
@@ -36887,6 +36888,11 @@ function moduleNoTagHtml(key){
   const n = getModuleNumberMap()[_MOD_ALIAS[key] || key];
   return n ? `<span class="modNoTag" title="ماڈیول نمبر ${n}">${n}</span>` : '';
 }
+function sidebarHomeName(navkey){
+  if(navkey === 'recoveryConfirm') return '💰 وصولی کھاتے اپڈیٹ';   // ایڈمن کا نام (ہوم پر بھی یہی)
+  const d = (typeof ASSIGNABLE_SCREENS !== 'undefined' ? ASSIGNABLE_SCREENS : []).find(s => s.key === navkey);
+  return d ? d.label : null;                                          // جیسے "🧑‍🤝‍🧑 گاہک"، "🚚 بیوپاری"
+}
 function numberSidebarModules(){
   try{
     const map = getModuleNumberMap();
@@ -36897,6 +36903,13 @@ function numberSidebarModules(){
       if(!n){ if(chip) chip.remove(); return; }
       if(!chip){ chip = document.createElement('span'); chip.className = 'modNoChip'; el.insertBefore(chip, el.firstChild); }
       chip.textContent = n;
+      // 🏷️ FM610TU321: مینیو میں بالکل وہی اردو نام اور آئیکن جو ہوم آئیکن پر ہے
+      const nm = sidebarHomeName(el.getAttribute('data-navkey'));
+      if(nm){
+        const txt = Array.from(el.childNodes).filter(x => x.nodeType === 3 && x.textContent.trim());
+        if(txt.length){ txt[0].textContent = ' ' + nm + ' '; txt.slice(1).forEach(x => x.remove()); }
+        else el.insertBefore(document.createTextNode(' ' + nm + ' '), chip.nextSibling);
+      }
     });
     // ایک بار: مینیو کو بھی نمبر کی ترتیب سے لگا دیں (بعد میں ⠿ سے جیسے چاہیں بدلیں)
     if(!loadFromStorage('navNumSorted320', false)){
@@ -36915,13 +36928,19 @@ function numberSidebarModules(){
   const css = document.createElement('style');
   css.textContent = `
   .homeIconGrid .hitIconWrap{position:relative !important; overflow:visible !important;}
-  .modNoTag{position:absolute; top:-5px; right:-4px; z-index:3; min-width:19px; height:24px; padding:0 4px 5px; box-sizing:border-box;
-    display:flex; align-items:center; justify-content:center; font:800 12px/1 Arial,sans-serif; color:#3b2500; direction:ltr;
-    background:linear-gradient(180deg,#fef08a,#f59e0b); clip-path:polygon(0 0,100% 0,100% 100%,50% 80%,0 100%);
-    filter:drop-shadow(0 1px 1px rgba(0,0,0,.35)); pointer-events:none;}
-  #sidebar .navItem .modNoChip{flex:0 0 auto; min-width:24px; height:22px; padding:0 4px; box-sizing:border-box; border-radius:6px;
-    display:inline-flex; align-items:center; justify-content:center; font:800 12.5px/1 Arial,sans-serif !important; direction:ltr;
-    background:#fef08a; color:#3b2500; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15);}
+  /* 🔢 FM610TU322: نمبر آئیکن کے نیچے والے کنارے پر پوری چوڑائی کی سفید پٹی میں، کالا ہندسہ — تصویر اوپر */
+  .homeIconGrid .hitIconWrap .hitIcon{transform:translateY(-15%);}
+  .modNoTag{position:absolute; left:0; right:0; bottom:0; z-index:3; height:27%; min-height:17px; box-sizing:border-box;
+    display:flex; align-items:center; justify-content:center; direction:ltr;
+    font:900 calc(var(--homeIconBox,64px) * .2)/1 Arial,sans-serif; color:#111827; letter-spacing:.5px;
+    background:#ffffff; border-top:2px solid rgba(0,0,0,.18);
+    border-radius:0 0 calc(var(--homeIconBox,64px) * .28) calc(var(--homeIconBox,64px) * .28);
+    box-shadow:inset 0 -2px 0 rgba(0,0,0,.08); pointer-events:none;}
+  #sidebar .navItem .modNoChip{flex:0 0 auto; min-width:28px; height:26px; padding:0 5px; box-sizing:border-box; border-radius:8px;
+    display:inline-flex; align-items:center; justify-content:center; direction:ltr;
+    font:900 15px/1 Arial,sans-serif !important; color:#111827 !important; text-shadow:none !important;
+    background:#ffffff !important; border:2px solid rgba(0,0,0,.25); box-shadow:0 1px 3px rgba(0,0,0,.35);}
+  #sidebar .navItem[data-navkey]{opacity:1 !important;}
   #sidebar .navItem[data-navkey]{justify-content:flex-start !important;}
   #sidebar .navItem[data-navkey] .navDragHandle{margin-right:auto;}
   .homeIconGrid .homeIconTile{-webkit-touch-callout:none; -webkit-user-select:none; user-select:none;}
