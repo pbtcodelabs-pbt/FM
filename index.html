@@ -8926,7 +8926,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM510MO319'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM610TU320'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9787,15 +9787,16 @@ function renderHomeIconGrid(){
   }
 
   const myTileHtml = (t) => `
-    <button class="homeIconTile" style="position:relative;" onclick="${t.action ? t.action + '()' : `goTo('${t.screen}')`}">
+    <button class="homeIconTile" data-key="${t.screen}" style="position:relative;" onclick="${t.action ? t.action + '()' : `goTo('${t.screen}')`}">
       ${(AppState.currentRole === 'admin' && homeEditMode) ? `<span class="hitRemoveBtn" title="ہوم سے ہٹائیں" onclick="event.stopPropagation(); removeScreenFromMyHomeGrid('${t.screen}')">✖</span>` : ''}
       ${t.screen === 'advanceorders' && pendingCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingCount}</span>` : ''}
       ${t.screen === 'recoveryList' && pendingRecoveryCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingRecoveryCount}</span>` : ''}
       ${t.screen === 'returnReview' && pendingReturnCount > 0 ? `<span style="position:absolute; top:2px; right:2px; background:var(--danger); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px;">${pendingReturnCount}</span>` : ''}
-      <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span></span>
+      <span class="hitIconWrap"><span class="hitIcon">${t.icon}</span>${moduleNoTagHtml(t.screen)}</span>
       <span class="hitLabel">${t.label}</span>
     </button>`;
-  grid.innerHTML = myTiles.map(myTileHtml).join('');
+  grid.innerHTML = applyHomeTileOrder(myTiles).map(myTileHtml).join(''); // ✋🔢 FM610TU320
+  try{ bindHomeTileDrag(grid); numberSidebarModules(); }catch(e){}
 }
 
 // ---------- 📂 "دیگر فیچرز" ڈراپ ڈاؤن بھریں — ہر چیز ایک لائن میں، ٹیپ کرنے پر سیدھا وہی اسکرین کھلے ----------
@@ -12140,9 +12141,8 @@ async function deleteProductRowInSheet(productId){
     && !(v0.purchase) && !(v0.labor) && !(v0.sellLabor) && !(v0.retail) && !(v0.wholesale) && !(v0.stock);
   if(!isEmptyRow){
     // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): غلطی سے حذف ہونے کی شکایت پر — اب دو دفعہ تصدیق لازمی ---------- -->
-    if(!confirm(`⚠️ کیا آپ واقعی "${product.name || 'یہ قطار'}" کو حذف کرنا چاہتے ہیں؟`)) return;
-    // ---------- 🔴 صدام کی ہدایت (17 ستمبر، صبح): دوسری تصدیق کی بجائے اب ایڈمن پاسورڈ لازمی ---------- -->
-    if(!(await confirmAdminPinForDelete(product.name || 'یہ قطار'))) return;
+    if(!(await fmDeleteConfirmFlow('products', product))) return; // 🗑️ FM610TU320: دو تنبیہ + سٹاک تنبیہ + PIN
+    _dgAddTomb('products', product);
   }
   snapshotProductsForUndo();
   if(productId === draftNewProductId) draftNewProductId = null;
@@ -21989,6 +21989,7 @@ function addVariantRow(productId){
 }
 
 function deleteVariant(productId, variantId){
+  { const _p = productsData.find(p => p.product_id === productId); if(_p && (_p.variants || []).length <= 1) return deleteProduct(productId); } // 🗑️ FM610TU320
   if(!confirm('کیا آپ واقعی یہ پیکنگ حذف کرنا چاہتے ہیں؟')) return;
   idbDeleteImage('product_' + variantId); // ---------- تصویر بھی صاف کریں تاکہ IndexedDB میں بے کار ڈیٹا جمع نہ ہو ----------
   const product = productsData.find(p => p.product_id === productId);
@@ -22290,7 +22291,8 @@ function saveNewProduct(){
 }
 
 // ---------- پورا پراڈکٹ (سب variants سمیت) ڈیلیٹ کریں ----------
-async function deleteProduct(productId){
+async function deleteProduct(productId){ return fmDeleteRecordSafe('products', productId); } // 🗑️ FM610TU320
+async function _oldDeleteProduct(productId){
   const product = productsData.find(p => p.product_id === productId);
   if(!product) return;
   // ---------- 🔒 صدام کی ہدایت (FM13SEPSU، اپڈیٹ 17 ستمبر): ایک ہی ٹچ سے ڈیلیٹ نہ ہو — اب تصدیق کے ساتھ
@@ -25366,7 +25368,7 @@ function renderCustFilterBar(){
         <input type="checkbox" ${f.todayOnly?'checked':''} onchange="setCustFilter('todayOnly', this.checked)" style="margin:0;"> 🔥 آج کے خریدار
       </label>
     </div>
-    ${(AppState.currentRole === 'admin' && ledgerCustomersMissingCount() > 0) ? `<button type="button" onclick="restoreLedgerCustomers()" style="width:100%; margin:0 0 8px; border:none; border-radius:12px; background:linear-gradient(135deg,#16a34a,#065f46); color:#fff; font-size:15px; font-weight:800; padding:10px; cursor:pointer; font-family:inherit; box-shadow:0 3px 0 rgba(0,0,0,.2);">📥 پرانے رجسٹر کے ${ledgerCustomersMissingCount()} کسٹمر واپس لائیں</button>` : ''}
+    ${(false /* 🗑️ FM610TU320: پرانے رجسٹر سے واپس لانے کا بٹن ہمیشہ کے لیے ختم */ && ledgerCustomersMissingCount() > 0) ? `<button type="button" onclick="restoreLedgerCustomers()" style="width:100%; margin:0 0 8px; border:none; border-radius:12px; background:linear-gradient(135deg,#16a34a,#065f46); color:#fff; font-size:15px; font-weight:800; padding:10px; cursor:pointer; font-family:inherit; box-shadow:0 3px 0 rgba(0,0,0,.2);">📥 پرانے رجسٹر کے ${ledgerCustomersMissingCount()} کسٹمر واپس لائیں</button>` : ''}
     <div style="text-align:left; margin:0 0 6px; display:${AppState.currentRole === 'admin' ? 'block' : 'none'};"><button type="button" onclick="restoreFromCloudSnapshot()" style="border:1px solid #86efac; border-radius:999px; background:#f0fdf4; color:#166534; font-size:12px; padding:3px 10px; cursor:pointer; margin-left:6px;">🗓️ پچھلے دنوں کی کاپی</button><button type="button" onclick="runCloudHealthCheck()" style="border:1px solid #cbd5e1; border-radius:999px; background:#fff; color:#334155; font-size:12px; padding:3px 10px; cursor:pointer;">🩺 کلاؤڈ چیک (کل کسٹمر: ${customersData.length})</button></div>
     <!-- ---------- 🔓 FM299TU#260 (صدام کی ہدایت): ایڈمن کے لیے حاضر/کھوہ کھاتے نظام دوبارہ بحال ---------- -->
     <div style="display:${AppState.currentRole === 'admin' ? 'flex' : 'none'}; gap:6px;">
@@ -25631,7 +25633,7 @@ function renderPartyList(query = ''){
       return;
     }
     const isAdmin = AppState.currentRole === 'admin';
-    wrap.innerHTML = (isAdmin ? bulkDelBtnHtml('customers') : '') + filtered.map(c => { // 🗑️ FM510MO318 عارضی بڑا بٹن
+    wrap.innerHTML = filtered.map(c => { // 🗑️ FM510MO318 عارضی بڑا بٹن
       const areaBadgeHtml = c.rateArea
         ? `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#fff; background:${c.rateArea==='retail'?'#b91c1c':'#15803d'}; border:none; border-radius:7px; padding:2px 5px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">${c.rateArea==='retail'?'اسلام آباد':'راولپنڈی'}</button>`
         : `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#5b21b6; background:#ede9fe; border:1.5px solid #c4b5fd; border-radius:7px; padding:2px 5px; cursor:pointer;">❔</button>`;
@@ -25683,7 +25685,8 @@ function renderPartyList(query = ''){
 }
 
 // ---------- کسٹمر ڈیلیٹ کریں — اگر بقایہ رقم ہو تو خاص طور پر واضح انتباہ دیں تاکہ غلطی سے مالی ریکارڈ ضائع نہ ہو ----------
-function deleteCustomer(customerId){
+function deleteCustomer(customerId){ return fmDeleteRecordSafe('customers', customerId); } // 🗑️ FM610TU320
+function _oldDeleteCustomer(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
   // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایک ہی ٹچ سے ڈیلیٹ نہ ہو — اب یہاں بھی دو دفعہ تصدیق لازمی ---------- -->
@@ -25701,7 +25704,8 @@ function deleteCustomer(customerId){
 }
 
 // ---------- سپلائر ڈیلیٹ کریں — اگر واجب الادا رقم ہو تو خاص طور پر واضح انتباہ دیں ----------
-function deleteSupplier(supplierId){
+function deleteSupplier(supplierId){ return fmDeleteRecordSafe('suppliers', supplierId); } // 🗑️ FM610TU320
+function _oldDeleteSupplier(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
   // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): ایک ہی ٹچ سے ڈیلیٹ نہ ہو — اب یہاں بھی دو دفعہ تصدیق لازمی ---------- -->
@@ -25912,6 +25916,7 @@ function openCustomerProfile(customerId){
     ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareCustomerProfile(${c.customer_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
+    ${AppState.currentRole === 'admin' ? `<button style="background:linear-gradient(155deg,#dc2626,#7f1d1d);" onclick="deleteCustomerFromProfile(${c.customer_id})"><span class="sideIcon">🗑️</span><span class="sideLabel">حذف</span></button>` : ''}
   `;
 
   renderCustomerMainContent(c.customer_id);
@@ -26973,6 +26978,7 @@ function _isSafeProductDup(p, dupCount){
   return !pendingUse;
 }
 function openBulkDeleteModal(kind){
+  uAlert('⛔ بند', 'ایک ساتھ کئی حذف کرنے کا نظام ختم کر دیا گیا ہے۔ اب ہر ایک کو اس کی پروفائل سے الگ حذف کریں۔'); return; // 🗑️ FM610TU320
   if(AppState.currentRole !== 'admin'){ uAlert('🔒 صرف ایڈمن', 'یہ کام صرف ایڈمن کر سکتا ہے۔'); return; }
   _bulkDel = { kind, sel: new Set(), dupOnly: false, q: '' };
   let ov = document.getElementById('bulkDelOverlay');
@@ -27032,6 +27038,7 @@ function bulkPickSafeProductDups(){
   uAlert(n ? '✨ ' + n + ' فالتو ڈپلیکیٹ چن لی گئیں' : 'کوئی فالتو ڈپلیکیٹ نہیں ملی', n ? 'صرف وہ چنی ہیں جو غیر حاضر ہیں، سٹاک صفر ہے اور کسی آرڈر میں نہیں — ہر سبزی کی ایک کاپی باقی رہے گی۔ اب نیچے "حذف کریں" دبائیں۔' : '', 'green');
 }
 async function confirmBulkDelete(){
+  closeBulkDeleteModal(); return; // 🗑️ FM610TU320: اجتماعی حذف ختم
   const isC = _bulkDel.kind === 'customers';
   const ids = Array.from(_bulkDel.sel);
   if(!ids.length){ uAlert('⚠️ کچھ نہیں چنا', 'پہلے فہرست میں چیک باکس پر ٹک لگائیں۔'); return; }
@@ -27061,7 +27068,8 @@ async function confirmBulkDelete(){
   closeBulkDeleteModal();
   uAlert('✅ حذف ہو گئے', ids.length + (isC ? ' گاہک' : ' سبزیاں') + ' حذف کر دیے گئے۔', 'green');
 }
-async function deleteSupplierWithConfirm(supplierId){
+async function deleteSupplierWithConfirm(supplierId){ return fmDeleteRecordSafe('suppliers', supplierId); } // 🗑️ FM610TU320
+async function _oldDeleteSupplierWithConfirm(supplierId){
   if(AppState.currentRole !== 'admin'){ uAlert('🔒 صرف ایڈمن', 'یہ کام صرف ایڈمن کر سکتا ہے۔'); return; }
   const s = suppliersData.find(x => x.supplier_id === supplierId); if(!s) return;
   const rows = [{ label: 'بیوپاری', value: s.name, big: true }];
@@ -27087,11 +27095,13 @@ function isLegacyDemoSupplier(s){
 }
 
 function bulkDelBtnHtml(kind){
+  return ''; // 🗑️ FM610TU320: اجتماعی حذف کا بٹن ختم
   return `<button type="button" onclick="openBulkDeleteModal('${kind}')" style="width:100%; margin:4px 0 10px; height:46px; border:2px dashed #dc2626; border-radius:14px; background:#fef2f2; color:#b91c1c; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:18px; font-weight:700; cursor:pointer;">🗑️ ایک ساتھ کئی ${kind === 'customers' ? 'گاہک' : 'سبزیاں'} حذف کریں</button>`;
 }
 // ---------- ✨ FM510MO318: ایڈمن فون پر ایک بار — بالکل فالتو ڈپلیکیٹ سبزیاں خود صاف (صرف غیر حاضر، سٹاک صفر، کسی آرڈر میں نہیں؛
 // ہر سبزی کی ایک کاپی ہمیشہ باقی) ---------- -->
 function autoCleanSafeProductDuplicatesOnce(){
+  return; // 🗑️ FM610TU320: خودکار حذف بند
   if(AppState.currentRole !== 'admin' || loadFromStorage('autoProdDupCleanV318', false)) return;
   if(!Array.isArray(productsData) || productsData.length < 2) return;
   const key = p => String(p.name || '').trim() + '|' + ((p.variants && p.variants[0] && p.variants[0].label) || '');
@@ -35566,6 +35576,7 @@ function ledgerCustomersMissingCount(){
   return LEDGER_CUSTOMERS_SEED_V1.filter(r => !have.has(r.name.trim())).length;
 }
 async function restoreLedgerCustomers(){
+  uAlert('⛔ بند', 'پرانے رجسٹر سے واپس لانے کا نظام ختم کر دیا گیا ہے — حذف شدہ گاہک واپس نہیں آئیں گے۔'); return; // 🗑️ FM610TU320
   if(AppState.currentRole !== 'admin'){ alert('یہ کام صرف ایڈمن کر سکتا ہے'); return; }
   try{ await fetchCustomersFromCloud(true); }catch(e){}
   const have = new Set(customersData.map(c => (c.name || '').trim()));
@@ -35662,7 +35673,7 @@ async function restoreFromCloudSnapshot(){
       if(!res || !res.ok) continue;
       const doc = await res.json(); const arr = JSON.parse(doc.fields?.json?.stringValue || '[]');
       const have = new Set((L.get() || []).map(x => x[L.id]));
-      const missing = arr.filter(x => x && !have.has(x[L.id]));
+      const missing = arr.filter(x => x && !have.has(x[L.id]) && !_dgBlocked(L.key, x)); // 🛡️ FM610TU320: حذف شدہ واپس نہیں
       if(missing.length) adds.push({ L, missing });
     }catch(e){}
   }
@@ -36635,6 +36646,365 @@ function _mergeRecordsThreeWay(base, local, remote, idField, counters, hists, se
   });
 }
 // ---------- مشترکہ بھیجنا: کلاؤڈ پڑھو → ملاؤ → شرط کے ساتھ لکھو (اگر بیچ میں کسی نے لکھا ہو تو دوبارہ) ----------
+// ---------- 🛡️ FM610TU320 (ہدایت): "حذف شدہ کبھی واپس نہیں" — حذف کا پکا ریکارڈ (کلاؤڈ + فون دونوں میں)
+// (1) ہر حذف شدہ گاہک/بیوپاری/سبزی کا نشان (id + نام + وقت)۔ (2) "پکی فہرست" تالا: ایڈمن کی منظور کی ہوئی فہرست کے
+// وقت جو چیز اس میں نہیں تھی اور پرانے نمبر کی ہے، وہ کسی پرانے فون/پرانی کاپی سے کبھی واپس نہیں آئے گی۔
+// نئی بنائی گئی چیزیں (نیا نمبر) اس سے متاثر نہیں ہوتیں ----------
+const _DG_ID = { customers: 'customer_id', suppliers: 'supplier_id', products: 'product_id' };
+function _dgNorm(s){ return String(s || '').trim().replace(/\s+/g, ' ').toLowerCase(); }
+function _dgLoad(kind){
+  let g = null; try{ g = loadFromStorage('delGuard_' + kind, null); }catch(e){}
+  if(!g || typeof g !== 'object') g = {};
+  if(!Array.isArray(g.t)) g.t = [];
+  if(!g.lock || typeof g.lock !== 'object') g.lock = null;
+  return g;
+}
+function _dgSave(kind, g){ try{ saveToStorage('delGuard_' + kind, g); }catch(e){} }
+function _dgField(kind){ return { stringValue: JSON.stringify(_dgLoad(kind)) }; }
+function _dgMergeInto(kind, other){
+  if(!other || typeof other !== 'object') return false;
+  const g = _dgLoad(kind); let changed = false;
+  const has = new Set(g.t.map(x => x.id + '|' + x.n));
+  (Array.isArray(other.t) ? other.t : []).forEach(x => { if(x && x.id != null && !has.has(x.id + '|' + x.n)){ g.t.push(x); has.add(x.id + '|' + x.n); changed = true; } });
+  if(other.lock && other.lock.at && (!g.lock || (other.lock.at > (g.lock.at || 0)))){ g.lock = other.lock; changed = true; }
+  if(changed){ if(g.t.length > 3000) g.t = g.t.slice(-3000); _dgSave(kind, g); }
+  return changed;
+}
+function _dgMergeRemote(kind, doc){
+  try{ const s = doc && doc.fields && doc.fields.delGuard && doc.fields.delGuard.stringValue; if(s) _dgMergeInto(kind, JSON.parse(s)); }catch(e){}
+}
+function _dgCreatedMs(x){ const t = Date.parse((x && (x.createdAt || x.created_at)) || ''); return isNaN(t) ? 0 : t; }
+function _dgBlockedWith(g, kind, x){
+  if(!x) return false;
+  const id = x[_DG_ID[kind]];
+  if(id == null) return false;
+  const cm = _dgCreatedMs(x);
+  const n = _dgNorm(x.name);
+  if(g.t.some(t => t.id === id && t.n === n && !(cm && cm > (t.at || 0)))) return true;
+  const L = g.lock;
+  if(L && Array.isArray(L.keep) && Number(id) < Number(L.next || 0) && !(cm && cm > (L.at || 0))){
+    if(!L._set) Object.defineProperty(L, '_set', { value: new Set(L.keep), enumerable: false });
+    if(!L._set.has(id)) return true;
+  }
+  return false;
+}
+function _dgBlocked(kind, x){ return _dgBlockedWith(_dgLoad(kind), kind, x); }
+function _dgFilter(kind, arr){
+  if(!Array.isArray(arr) || !_DG_ID[kind]) return arr;
+  const g = _dgLoad(kind);
+  if(!g.t.length && !g.lock) return arr;
+  return arr.filter(x => !_dgBlockedWith(g, kind, x));
+}
+function _dgAddTomb(kind, rec){
+  if(!rec) return;
+  const g = _dgLoad(kind);
+  g.t.push({ id: rec[_DG_ID[kind]], n: _dgNorm(rec.name), at: Date.now() });
+  if(g.t.length > 3000) g.t = g.t.slice(-3000);
+  _dgSave(kind, g);
+  try{
+    const log = loadFromStorage('deletedRecordsLog', []) || [];
+    log.push({ kind, at: new Date().toISOString(), rec: JSON.parse(JSON.stringify(rec, (k, v) => (k === 'photo' || k === 'image') ? undefined : v)) });
+    saveToStorage('deletedRecordsLog', log.slice(-40));
+  }catch(e){}
+}
+// ---------- فون پر پڑی فہرستوں سے بلاک شدہ چیزیں ہٹانا (پرانی بیک اپ بحالی/پرانا فون) ----------
+function _dgCleanLocal(){
+  let any = false;
+  try{ const a = _dgFilter('customers', customersData); if(a.length !== customersData.length){ customersData = a; saveToStorage('customers', customersData); any = true; } }catch(e){}
+  try{ const a = _dgFilter('suppliers', suppliersData); if(a.length !== suppliersData.length){ suppliersData = a; saveToStorage('suppliers', suppliersData); any = true; } }catch(e){}
+  try{ const a = _dgFilter('products', productsData); if(a.length !== productsData.length){ productsData = a; saveProductsLight(); any = true; } }catch(e){}
+  return any;
+}
+
+// ---------- 🗑️ FM610TU320 (صدام کی ہدایت): اجتماعی حذف ختم — اب صرف ایک ایک کر کے حذف (گاہک، بیوپاری، سبزی):
+// پہلی تنبیہ → دوسری تنبیہ → (کھاتے میں پیسے/سٹاک ہو تو) سخت تیسری تنبیہ → ایڈمن PIN ----------
+function _fmDelInfo(kind, rec){
+  const f = n => 'Rs. ' + Math.abs(Math.round(Number(n) || 0)).toLocaleString('en-US');
+  const red = { bg: '#fee2e2', fg: '#7f1d1d' };
+  const money = [];
+  if(kind === 'customers'){
+    const due = Number(rec.total_receivable) || 0, wal = Number(rec.wallet_balance) || 0;
+    if(due > 0) money.push(Object.assign({ label: 'گاہک سے آپ نے لینے ہیں', value: f(due), big: true }, red));
+    if(due < 0) money.push(Object.assign({ label: 'گاہک کو آپ نے دینے ہیں', value: f(due), big: true }, red));
+    if(wal !== 0) money.push(Object.assign({ label: 'اس کا ایڈوانس (والٹ)', value: f(wal) }, red));
+    return { what: 'گاہک', money };
+  }
+  if(kind === 'suppliers'){
+    const pay = Number(rec.total_payable) || 0, wal = Number(rec.wallet_balance) || 0;
+    if(pay > 0) money.push(Object.assign({ label: 'بیوپاری کو آپ نے دینے ہیں', value: f(pay), big: true }, red));
+    if(pay < 0) money.push(Object.assign({ label: 'بیوپاری سے آپ نے لینے ہیں', value: f(pay), big: true }, red));
+    if(wal !== 0) money.push(Object.assign({ label: 'ایڈوانس اس کے پاس', value: f(wal) }, red));
+    return { what: 'بیوپاری', money };
+  }
+  const stock = (rec.variants || []).reduce((s, v) => s + (Number(v.stock) || 0), 0);
+  const vids = new Set((rec.variants || []).map(v => v.variant_id));
+  const pend = (typeof advanceOrdersData !== 'undefined' ? advanceOrdersData : []).filter(o => o.status === 'pending' && (o.items || []).some(it => vids.has(it.variant_id))).length;
+  if(stock > 0) money.push(Object.assign({ label: 'اس میں ابھی سٹاک موجود ہے', value: String(Math.round(stock * 100) / 100), big: true }, red));
+  if(pend > 0) money.push(Object.assign({ label: 'زیر التوا آرڈرز میں شامل', value: String(pend) }, red));
+  return { what: 'سبزی', money };
+}
+async function fmDeleteConfirmFlow(kind, rec){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'حذف کرنے کا کام صرف ایڈمن کر سکتا ہے۔'); return false; }
+  if(!rec) return false;
+  const info = _fmDelInfo(kind, rec);
+  const nm = String(rec.name || '').replace(/</g, '&lt;');
+  const base = [{ label: info.what, value: rec.name || '-', big: true }];
+  if(rec.serial_no != null) base.push({ label: 'سیریل نمبر', value: String(rec.serial_no) });
+  if(!(await uDialog({ title: '⚠️ پہلی تنبیہ', message: `کیا آپ واقعی یہ ${info.what} <b>"${nm}"</b> حذف کرنا چاہتے ہیں؟`, rows: base, okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'amber' }))) return false;
+  if(!(await uDialog({ title: '⛔ دوسری تنبیہ', message: `حذف کرنے کے بعد <b>"${nm}"</b> دوبارہ <b>کبھی واپس نہیں آئے گا</b> — کسی فون یا پرانی کاپی سے بھی نہیں۔ پرانے بل اور رسیدیں اپنی جگہ رہیں گی۔`, okText: 'ہاں، پکا', cancelText: '✖ نہیں', tone: 'red' }))) return false;
+  if(info.money.length){
+    const msg = kind === 'products'
+      ? `اس سبزی میں ابھی مال موجود ہے یا یہ آرڈرز میں شامل ہے۔ حذف کرنے سے یہ سٹاک <b>ضائع</b> ہو جائے گا۔<br><b>کیا پھر بھی حذف کرنا ہے؟</b>`
+      : `<b>"${nm}"</b> کے کھاتے میں ابھی پیسے کھڑے ہیں! حذف کرنے سے یہ رقم کھاتے سے نکل جائے گی — <b>یہ پیسے آپ کے ضائع ہو جائیں گے۔</b><br>پہلے حساب صاف کر لیں۔ <b>کیا پھر بھی حذف کرنا ہے؟</b>`;
+    if(!(await uDialog({ title: kind === 'products' ? '📦 سٹاک موجود ہے!' : '💰 کھاتے میں پیسے کھڑے ہیں!', message: msg, rows: info.money, okText: 'پھر بھی حذف کریں', cancelText: '✖ نہیں، رکیں', tone: 'red' }))) return false;
+  }
+  return !!(await _askAdminPinForSerialMaster(`${info.what} "${nm}" حذف کرنے کے لیے`));
+}
+async function fmDeleteRecordSafe(kind, id){
+  const arr = kind === 'customers' ? customersData : (kind === 'suppliers' ? suppliersData : productsData);
+  const idF = _DG_ID[kind];
+  const rec = (arr || []).find(x => x[idF] === id);
+  if(!rec) return false;
+  if(!(await fmDeleteConfirmFlow(kind, rec))) return false;
+  _dgAddTomb(kind, rec);
+  try{ pauseCloudPolling(15000); }catch(e){}
+  if(kind === 'customers'){
+    try{ idbDeleteImage('customer_' + id); }catch(e){}
+    customersData = customersData.filter(x => x.customer_id !== id);
+    persistAllData();
+    try{ pushCustomersToCloud(); }catch(e){}
+  } else if(kind === 'suppliers'){
+    try{ idbDeleteImage('supplier_' + id); }catch(e){}
+    suppliersData = suppliersData.filter(x => x.supplier_id !== id);
+    persistAllData();
+    try{ pushSuppliersToCloud(); }catch(e){}
+  } else {
+    try{ (rec.variants || []).forEach(v => idbDeleteImage('product_' + v.variant_id)); }catch(e){}
+    productsData = productsData.filter(p => p.product_id !== id);
+    persistAllData();
+    AppState.settings.productsPendingSync = true;
+    try{ pushProductsToCloud(); }catch(e){}
+  }
+  try{ document.getElementById('profileModal')?.classList.remove('show'); }catch(e){}
+  try{ if(kind !== 'products' && typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+  if(kind === 'products'){
+    try{ renderProductList(document.getElementById('productSearchInput')?.value || ''); }catch(e){}
+    try{ if(typeof renderStockAdjustmentScreen === 'function') renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || ''); }catch(e){}
+    try{ renderBillingProductGrid(); }catch(e){}
+  }
+  await uAlert('✅ حذف ہو گیا', `"${String(rec.name || '').replace(/</g, '&lt;')}" حذف کر دیا گیا۔ یہ اب کسی فون پر واپس نہیں آئے گا۔`, 'green');
+  return true;
+}
+// ---------- 🔒 FM610TU320: ایک بار — ابھی کی صاف کی ہوئی فہرست کو "پکی فہرست" بنانا (پرانے حذف شدہ واپس نہ آئیں) ----------
+async function fmMaybeAskLockList(){
+  try{
+    if(!String(APP_BUILD_VERSION || '').startsWith('FM')) return;
+    if(window.__dgAsked || typeof AppState === 'undefined' || AppState.currentRole !== 'admin' || !navigator.onLine) return;
+    const app = document.getElementById('app'); if(!app || getComputedStyle(app).display === 'none') return;
+    const ov = document.getElementById('uDialogOverlay'); if(ov && ov.style.display === 'flex') return;
+    window.__dgAsked = true;
+    let ok = false;
+    try{ ok = await fetchCustomersFromCloud(true); }catch(e){}
+    try{ await fetchSuppliersFromCloud(true); }catch(e){}
+    try{ await fetchProductsFromCloud(true); }catch(e){}
+    if(!ok){ window.__dgAsked = false; return; }
+    if(_dgLoad('customers').lock) return;
+    const yes = await uDialog({ title: '🔒 موجودہ فہرست پکی کریں',
+      message: 'ابھی کلاؤڈ میں یہ فہرست ہے۔ اگر یہی <b>صحیح اور تازہ</b> ہے تو "ہاں" دبائیں — پھر پہلے حذف کیے گئے گاہک، بیوپاری اور سبزیاں <b>کسی بھی فون یا پرانی کاپی سے کبھی واپس نہیں آئیں گے</b>۔ نئی چیزیں ویسے ہی بنتی رہیں گی۔',
+      rows: [{ label: 'گاہک', value: String(customersData.length), big: true }, { label: 'بیوپاری', value: String(suppliersData.length) }, { label: 'سبزیاں', value: String(productsData.length) }],
+      okText: '✅ ہاں، یہی پکی ہے', cancelText: 'ابھی نہیں', tone: 'green' });
+    if(!yes) return;
+    const at = Date.now();
+    const mk = (arr, idF, nextId) => {
+      const ids = (arr || []).map(x => x[idF]).filter(v => v != null);
+      return { keep: ids, next: Math.max(Number(nextId) || 0, ids.reduce((m, v) => Math.max(m, Number(v) || 0), 0) + 1), at };
+    };
+    [['customers', customersData, 'customer_id', nextCustomerId], ['suppliers', suppliersData, 'supplier_id', nextSupplierId], ['products', productsData, 'product_id', nextProductId]]
+      .forEach(([k, arr, idF, nx]) => { const g = _dgLoad(k); g.lock = mk(arr, idF, nx); _dgSave(k, g); });
+    try{ await pushCustomersToCloud(); }catch(e){}
+    try{ await pushSuppliersToCloud(); }catch(e){}
+    try{ AppState.settings.productsPendingSync = true; await pushProductsToCloud(); }catch(e){}
+    await uAlert('✅ فہرست پکی ہو گئی', `گاہک ${customersData.length} • بیوپاری ${suppliersData.length} • سبزیاں ${productsData.length}<br>اب پرانے حذف شدہ کبھی واپس نہیں آئیں گے۔`, 'green');
+  }catch(e){ console.warn('lock ask', e); }
+}
+setInterval(() => {
+  try{
+    if(typeof AppState === 'undefined') return;
+    if(_dgCleanLocal()){
+      try{ if(typeof renderPartyList === 'function' && document.getElementById('partyListWrap')) renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+    }
+    fmMaybeAskLockList();
+  }catch(e){}
+}, 10000);
+
+async function deleteCustomerFromProfile(customerId){ const ok = await fmDeleteRecordSafe('customers', customerId); if(ok){ try{ closeProfileModal(); }catch(e){} } return ok; } // 🗑️ FM610TU320
+
+// ---------- 🔢 FM610TU320 (صدام کی ہدایت): ہر ماڈیول کا پکا سیریل نمبر — اردو حروفِ تہجی کی ترتیب سے (الف، ب، پ، ت …)۔
+// یہ گنتی نہیں، ماڈیول کی پہچان ہے: ہوم آئیکن پر اوپر دائیں چھوٹا سنہری ٹیگ، اور تین لائن مینیو میں بھی وہی نمبر ----------
+const _UR_ALPHA = 'آابپتٹثجچحخدڈذرڑزژسشصضطظعغفقکگلمنںوہھءئیے';
+function _urKey(s){
+  s = String(s || '').replace(/[كﻙ]/g, 'ک').replace(/[يى]/g, 'ی').replace(/[ةۃه]/g, 'ہ').replace(/أ|إ/g, 'ا');
+  const out = [];
+  for(const ch of s){
+    if(ch === ' ') { out.push(0); continue; }
+    const i = _UR_ALPHA.indexOf(ch);
+    if(i > -1) out.push(i + 1);
+  }
+  return out;
+}
+function _urCompare(a, b){
+  const x = _urKey(a), y = _urKey(b);
+  for(let i = 0; i < Math.min(x.length, y.length); i++){ if(x[i] !== y[i]) return x[i] - y[i]; }
+  return x.length - y.length;
+}
+const _MOD_ALIAS = { recoveryConfirm: 'recoveryList' };
+let _modNoCache = null;
+function getModuleNumberMap(){
+  if(_modNoCache) return _modNoCache;
+  const isSM = String(typeof APP_BUILD_VERSION !== 'undefined' ? APP_BUILD_VERSION : '').startsWith('SM');
+  const list = [];
+  const seen = new Set();
+  (typeof ASSIGNABLE_SCREENS !== 'undefined' ? ASSIGNABLE_SCREENS : []).forEach(d => {
+    if(d.key === 'reports') return;                 // ہوم اور مینیو دونوں سے چھپا ہوا
+    if(d.key === 'products' && !isSM) return;       // فروٹ منڈی میں مال کی فہرست کہیں نظر نہیں آتی
+    const sp = d.label.indexOf(' ');
+    list.push({ key: d.key, label: sp > -1 ? d.label.slice(sp + 1) : d.label }); seen.add(d.key);
+  });
+  document.querySelectorAll('#sidebar .navItem[data-navkey]').forEach(el => {
+    let k = el.getAttribute('data-navkey'); k = _MOD_ALIAS[k] || k;
+    if(seen.has(k)) return;
+    const st = (el.getAttribute('style') || '').replace(/\s/g, '');
+    if(/display:none/.test(st)) return;
+    const txt = Array.from(el.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent).join(' ').replace(/[^؀-ۿ\s]/g, '').trim();
+    if(!txt) return;
+    list.push({ key: k, label: txt }); seen.add(k);
+  });
+  list.sort((a, b) => _urCompare(a.label, b.label));
+  _modNoCache = {}; list.forEach((m, i) => { _modNoCache[m.key] = i + 1; });
+  return _modNoCache;
+}
+function moduleNoTagHtml(key){
+  const n = getModuleNumberMap()[_MOD_ALIAS[key] || key];
+  return n ? `<span class="modNoTag" title="ماڈیول نمبر ${n}">${n}</span>` : '';
+}
+function numberSidebarModules(){
+  try{
+    const map = getModuleNumberMap();
+    document.querySelectorAll('#sidebar .navItem[data-navkey]').forEach(el => {
+      let k = el.getAttribute('data-navkey'); k = _MOD_ALIAS[k] || k;
+      const n = map[k];
+      let chip = el.querySelector(':scope > .modNoChip');
+      if(!n){ if(chip) chip.remove(); return; }
+      if(!chip){ chip = document.createElement('span'); chip.className = 'modNoChip'; el.insertBefore(chip, el.firstChild); }
+      chip.textContent = n;
+    });
+    // ایک بار: مینیو کو بھی نمبر کی ترتیب سے لگا دیں (بعد میں ⠿ سے جیسے چاہیں بدلیں)
+    if(!loadFromStorage('navNumSorted320', false)){
+      const div = document.getElementById('navDivider');
+      if(div){
+        const items = Array.from(document.querySelectorAll('#sidebar .navItem[data-navkey]'));
+        const num = el => { const k = el.getAttribute('data-navkey'); return map[_MOD_ALIAS[k] || k] || 999; };
+        items.map((el, i) => ({ el, i })).sort((a, b) => (num(a.el) - num(b.el)) || (a.i - b.i)).forEach(x => div.parentNode.insertBefore(x.el, div));
+        try{ saveSidebarNavOrder(); }catch(e){}
+        saveToStorage('navNumSorted320', true);
+      }
+    }
+  }catch(e){}
+}
+(function(){
+  const css = document.createElement('style');
+  css.textContent = `
+  .homeIconGrid .hitIconWrap{position:relative !important; overflow:visible !important;}
+  .modNoTag{position:absolute; top:-5px; right:-4px; z-index:3; min-width:19px; height:24px; padding:0 4px 5px; box-sizing:border-box;
+    display:flex; align-items:center; justify-content:center; font:800 12px/1 Arial,sans-serif; color:#3b2500; direction:ltr;
+    background:linear-gradient(180deg,#fef08a,#f59e0b); clip-path:polygon(0 0,100% 0,100% 100%,50% 80%,0 100%);
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.35)); pointer-events:none;}
+  #sidebar .navItem .modNoChip{flex:0 0 auto; min-width:24px; height:22px; padding:0 4px; box-sizing:border-box; border-radius:6px;
+    display:inline-flex; align-items:center; justify-content:center; font:800 12.5px/1 Arial,sans-serif !important; direction:ltr;
+    background:#fef08a; color:#3b2500; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15);}
+  #sidebar .navItem[data-navkey]{justify-content:flex-start !important;}
+  #sidebar .navItem[data-navkey] .navDragHandle{margin-right:auto;}
+  .homeIconGrid .homeIconTile{-webkit-touch-callout:none; -webkit-user-select:none; user-select:none;}
+  .homeIconTile.hitDragSrc{opacity:.25;}
+  .hitDragGhost{position:fixed; z-index:99999; pointer-events:none; transform:scale(1.12); opacity:.95; filter:drop-shadow(0 8px 14px rgba(0,0,0,.35));}
+  body.hitDragging, body.hitDragging *{touch-action:none !important;}
+  `;
+  document.head.appendChild(css);
+})();
+document.addEventListener('DOMContentLoaded', () => setTimeout(numberSidebarModules, 300));
+setTimeout(numberSidebarModules, 1500);
+
+// ---------- ✋ FM610TU320: ہوم آئیکن انگلی سے دبا کر (آدھا سیکنڈ) کھینچیں اور کسی بھی جگہ چھوڑیں — ترتیب اسی فون پر ہر صارف کی اپنی محفوظ ----------
+function _homeOrderKey(){ return 'homeTileOrder_' + (AppState.currentRole || '') + '_' + ((AppState.currentUser && AppState.currentUser.name) || ''); }
+function applyHomeTileOrder(tiles){
+  let ord = null; try{ ord = loadFromStorage(_homeOrderKey(), null); }catch(e){}
+  if(!Array.isArray(ord) || !ord.length){
+    // پہلی بار: نمبر کی ترتیب سے — 1، 2، 3 … (بعد میں صارف جیسے کھینچے ویسے)
+    const mp = getModuleNumberMap();
+    return tiles.map((t, i) => ({ t, i })).sort((a, b) => ((mp[a.t.screen] || 999) - (mp[b.t.screen] || 999)) || (a.i - b.i)).map(x => x.t);
+  }
+  const pos = {}; ord.forEach((k, i) => { pos[k] = i; });
+  return tiles.map((t, i) => ({ t, i })).sort((a, b) => {
+    const pa = pos[a.t.screen], pb = pos[b.t.screen];
+    if(pa != null && pb != null) return pa - pb;
+    if(pa != null) return -1; if(pb != null) return 1;
+    return a.i - b.i;
+  }).map(x => x.t);
+}
+function bindHomeTileDrag(grid){
+  if(!grid || grid.__dragBound) return;
+  grid.__dragBound = true;
+  let timer = null, start = null, drag = null, suppressClick = false;
+  const tileAt = (x, y) => { const el = document.elementFromPoint(x, y); return el && el.closest ? el.closest('#homeIconGrid .homeIconTile[data-key]') : null; };
+  const cancel = () => { if(timer){ clearTimeout(timer); timer = null; } start = null; };
+  const begin = (tile, x, y) => {
+    const r = tile.getBoundingClientRect();
+    const ghost = tile.cloneNode(true); ghost.classList.add('hitDragGhost');
+    ghost.style.width = r.width + 'px'; ghost.style.height = r.height + 'px'; ghost.style.left = r.left + 'px'; ghost.style.top = r.top + 'px';
+    document.body.appendChild(ghost);
+    tile.classList.add('hitDragSrc');
+    document.body.classList.add('hitDragging');
+    drag = { tile, ghost, dx: x - r.left, dy: y - r.top };
+    try{ navigator.vibrate && navigator.vibrate(30); }catch(e){}
+  };
+  const move = (x, y) => {
+    drag.ghost.style.left = (x - drag.dx) + 'px'; drag.ghost.style.top = (y - drag.dy) + 'px';
+    const over = tileAt(x, y);
+    if(over && over !== drag.tile){
+      const tiles = Array.from(grid.querySelectorAll('.homeIconTile[data-key]'));
+      const a = tiles.indexOf(drag.tile), b = tiles.indexOf(over);
+      if(a < b) over.after(drag.tile); else over.before(drag.tile);
+    }
+    // کنارے پر پہنچیں تو صفحہ خود اوپر/نیچے سرکے
+    const sc = document.getElementById('mainArea');
+    if(sc){ const h = window.innerHeight; if(y < 90) sc.scrollTop -= 12; else if(y > h - 90) sc.scrollTop += 12; }
+  };
+  const finish = () => {
+    const d = drag; drag = null;
+    document.body.classList.remove('hitDragging');
+    if(!d) return;
+    d.ghost.remove(); d.tile.classList.remove('hitDragSrc');
+    suppressClick = true; setTimeout(() => { suppressClick = false; }, 450);
+    const order = Array.from(grid.querySelectorAll('.homeIconTile[data-key]')).map(t => t.getAttribute('data-key'));
+    try{ saveToStorage(_homeOrderKey(), order); }catch(e){}
+  };
+  grid.addEventListener('pointerdown', e => {
+    if(e.button > 0) return;
+    const tile = e.target.closest('.homeIconTile[data-key]'); if(!tile || e.target.closest('.hitRemoveBtn')) return;
+    start = { x: e.clientX, y: e.clientY, tile };
+    timer = setTimeout(() => { timer = null; if(start) begin(start.tile, start.x, start.y); }, 450);
+  });
+  window.addEventListener('pointermove', e => {
+    if(drag){ e.preventDefault(); move(e.clientX, e.clientY); return; }
+    if(start && (Math.abs(e.clientX - start.x) > 10 || Math.abs(e.clientY - start.y) > 10)) cancel();
+  }, { passive: false });
+  window.addEventListener('pointerup', () => { cancel(); finish(); });
+  window.addEventListener('pointercancel', () => { cancel(); finish(); });
+  document.addEventListener('touchmove', e => { if(drag) e.preventDefault(); }, { passive: false });
+  grid.addEventListener('contextmenu', e => { if(e.target.closest('.homeIconTile')) e.preventDefault(); });
+  grid.addEventListener('click', e => { if(suppressClick){ e.stopPropagation(); e.preventDefault(); } }, true);
+}
+
 async function _pushMerged(cfg){
   let ok = false;
   for(let attempt = 0; attempt < 3 && !ok; attempt++){
@@ -36642,13 +37012,15 @@ async function _pushMerged(cfg){
     const peek = await authFirestoreFetch(`${cfg.path}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
     if(peek && peek.ok){
       const doc = await peek.json();
+      if(cfg.dg) _dgMergeRemote(cfg.dg, doc); // 🛡️ FM610TU320
       updateTime = doc.updateTime || null;
       const str = doc.fields?.json?.stringValue;
       if(str){
         const remote = JSON.parse(str);
         if(Array.isArray(remote)){
           let merged = _mergeRecordsThreeWay(cfg.getBase(), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
-          if(cfg.label) merged = await _shrinkLockCheck(remote.filter(x => !(cfg.id === 'customer_id' && isLegacyDemoCustomer(x))), merged, cfg.id, cfg.label); // 🔒 FM309WE#270
+          if(cfg.label) merged = await _shrinkLockCheck((cfg.dg ? _dgFilter(cfg.dg, remote) : remote).filter(x => !(cfg.id === 'customer_id' && isLegacyDemoCustomer(x))), merged, cfg.id, cfg.label); // 🔒 FM309WE#270
+          if(cfg.dg) merged = _dgFilter(cfg.dg, merged); // 🛡️ FM610TU320: حذف شدہ کبھی واپس نہیں
           cfg.set(merged);
         }
       }
@@ -36682,7 +37054,9 @@ async function _fetchMerged(cfg){
   if(!str) return false;
   const remote = JSON.parse(str);
   if(!Array.isArray(remote)) return false;
-  const merged = _mergeRecordsThreeWay(cfg.getBase(), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
+  if(cfg.dg) _dgMergeRemote(cfg.dg, doc); // 🛡️ FM610TU320
+  let merged = _mergeRecordsThreeWay(cfg.getBase(), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
+  if(cfg.dg) merged = _dgFilter(cfg.dg, merged);
   const hadLocal = !_syncEq(merged, remote);
   cfg.set(merged);
   cfg.setBase(remote);
@@ -36698,7 +37072,7 @@ function _custCfg(){
   return { path: CUSTOMERS_DOC_PATH, id: 'customer_id', label: 'کسٹمر', counters: ['total_receivable','wallet_balance'], hists: ['walletHistory'], seed: CUSTOMERS_SEED_DATA,
     get: () => customersData, set: v => { customersData = v; },
     getBase: () => customersSyncBase, setBase: v => { customersSyncBase = _syncClone(v); try{ saveToStorage('customersSyncBase', customersSyncBase); }catch(e){} },
-    extra: () => ({ nextCustomerId: { integerValue: String(nextCustomerId) } }),
+    dg: 'customers', extra: () => ({ nextCustomerId: { integerValue: String(nextCustomerId) }, delGuard: _dgField('customers') }),
     onDoc: d => { const n = parseInt(d.fields?.nextCustomerId?.integerValue || '0'); if(n > nextCustomerId) nextCustomerId = n; },
     save: () => { saveToStorage('customers', customersData); saveToStorage('nextCustomerId', nextCustomerId); },
     push: () => pushCustomersToCloud() };
@@ -36707,7 +37081,7 @@ function _supCfg(){
   return { path: SUPPLIERS_DOC_PATH, id: 'supplier_id', label: 'بیوپاری', counters: ['total_payable','wallet_balance'], hists: ['ledgerHistory','purchaseHistory'], seed: SUPPLIERS_SEED_DATA,
     get: () => suppliersData, set: v => { suppliersData = v; },
     getBase: () => suppliersSyncBase, setBase: v => { suppliersSyncBase = _syncClone(v); try{ saveToStorage('suppliersSyncBase', suppliersSyncBase); }catch(e){} },
-    extra: () => ({ nextSupplierId: { integerValue: String(nextSupplierId) } }),
+    dg: 'suppliers', extra: () => ({ nextSupplierId: { integerValue: String(nextSupplierId) }, delGuard: _dgField('suppliers') }),
     onDoc: d => { const n = parseInt(d.fields?.nextSupplierId?.integerValue || '0'); if(n > nextSupplierId) nextSupplierId = n; },
     save: () => { saveToStorage('suppliers', suppliersData); saveToStorage('nextSupplierId', nextSupplierId); },
     push: () => pushSuppliersToCloud() };
@@ -36761,6 +37135,7 @@ async function pushProductsToCloud(){
       const peek = await authFirestoreFetch(`${PRODUCTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
       if(peek && peek.ok){
         const pdoc = await peek.json();
+        _dgMergeRemote('products', pdoc); // 🛡️ FM610TU320
         updateTime = pdoc.updateTime || null;
         remoteManualStr = pdoc.fields?.manualOrder?.stringValue ?? null;
         remoteLocked = (typeof pdoc.fields?.serialLocked?.booleanValue === 'boolean') ? pdoc.fields.serialLocked.booleanValue : null;
@@ -36768,7 +37143,7 @@ async function pushProductsToCloud(){
         if(pstr){
           const remote = JSON.parse(pstr);
           if(Array.isArray(remote)){
-            productsData = _reattachLocalImages(await _shrinkLockCheck(remote, mergeProductsThreeWay(productsSyncBase, productsData, remote), 'product_id', 'سبزیاں'), productsData); // 🔒 FM309WE#270
+            productsData = _dgFilter('products', _reattachLocalImages(await _shrinkLockCheck(_dgFilter('products', remote), mergeProductsThreeWay(productsSyncBase, productsData, remote), 'product_id', 'سبزیاں'), productsData)); // 🛡️ FM610TU320 // 🔒 FM309WE#270
             try{ repairDuplicateProductSerials(); }catch(e){}
             try{ recomputeReservedFromOrders(); }catch(e){}
             saveProductsLight();
@@ -36795,7 +37170,8 @@ async function pushProductsToCloud(){
             // 🔒 26 ستمبر: سبزیوں کی دستی ترتیب اور سیریل لاک صرف ایڈمن کا فون بدل سکتا ہے — منشی/ملازم کا فون
             // اپنی پرانی (مقامی) ترتیب کبھی کلاؤڈ پر نہیں بھیجے گا، کلاؤڈ والی ہی جوں کی توں واپس لکھے گا
             manualOrder: { stringValue: (AppState.currentRole !== 'admin' && remoteManualStr !== null) ? remoteManualStr : JSON.stringify(manualOrderForCloud) },
-            serialLocked: { booleanValue: (AppState.currentRole !== 'admin' && remoteLocked !== null) ? remoteLocked : !!PRODUCT_SERIAL_LOCKED }
+            serialLocked: { booleanValue: (AppState.currentRole !== 'admin' && remoteLocked !== null) ? remoteLocked : !!PRODUCT_SERIAL_LOCKED },
+            delGuard: _dgField('products') // 🛡️ FM610TU320
           }
         })
       });
@@ -36840,7 +37216,8 @@ async function fetchProductsFromCloud(silent){
     // کی ترتیب بھی الجھ جاتی تھی۔ اب دونوں فہرستیں ملا دی جاتی ہیں: کلاؤڈ کا ڈیٹا بنیاد ہے (چونکہ وہ سب فونز کی
     // مشترکہ تازہ ترین حالت ہے)، اور جو آئٹم صرف مقامی طور پر موجود ہیں (ابھی کلاؤڈ پر نہیں گئے) وہ آخر میں
     // شامل کر دیے جاتے ہیں — کسی کا ڈیٹا یا سیریل نمبر گم نہیں ہوگا ---------- -->
-    const mergedNow = _reattachLocalImages(mergeProductsThreeWay(productsSyncBase, productsData, cloudProducts), productsData);
+    _dgMergeRemote('products', doc); // 🛡️ FM610TU320
+    const mergedNow = _dgFilter('products', _reattachLocalImages(mergeProductsThreeWay(productsSyncBase, productsData, cloudProducts), productsData));
     const hadLocalChanges = !_syncEq(stripImagesForSync(mergedNow), stripImagesForSync(cloudProducts));
     productsData = mergedNow;
     _syncSetBase(cloudProducts);
