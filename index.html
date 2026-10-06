@@ -8928,7 +8928,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM610TU327'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM710WE328'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -31995,7 +31995,50 @@ function renderAdvanceOrdersScreen(){
 
 // ---------- ایڈمن کا منظر: "Advance Order" نہیں — یہاں ملازمین کے بھیجے ہوئے PENDING ORDERS ملازم کے نام سے گروپ ہو کر نظر آتے ہیں،
 // ہر کسٹمر پر ٹیپ کرتے ہی اصل بل کھلتا ہے جہاں ریٹ لگا کر فوراً مکمل کیا جا سکتا ہے ---------- 
+// ---------- 📝 FM610TU328 (صدام کی شکایت): منشی کے ڈرافٹ آرڈر سٹاک بک کر لیتے ہیں مگر ایڈمن کو نظر نہیں آتے تھے —
+// اب ایڈمن کی آرڈر لسٹ کے اوپر صاف پٹی: کتنے ڈرافٹ، کس ملازم کے، اور ایک بٹن سے سب "حتمی" لے لیں ----------
 function renderAdminPendingOrdersScreen(){
+  _renderAdminPendingOrdersScreenCore();
+  try{
+    if(adminOrderFilter === 'fulfilled') return;
+    const wrap = document.getElementById('advOrderListWrap'); if(!wrap) return;
+    const drafts = (advanceOrdersData || []).filter(o => o && o.isDraft === true && o.status !== 'fulfilled');
+    const old = document.getElementById('adminDraftBanner'); if(old) old.remove();
+    if(!drafts.length) return;
+    const by = {}; drafts.forEach(o => { const k = o.employeeName || '—'; by[k] = (by[k] || 0) + 1; });
+    const who = Object.keys(by).map(k => `${k}: ${by[k]}`).join(' • ');
+    const div = document.createElement('div');
+    div.id = 'adminDraftBanner';
+    div.dir = 'rtl';
+    div.style.cssText = "background:linear-gradient(155deg,#fffbeb,#fef3c7); border:2px solid #f59e0b; border-radius:14px; padding:10px 12px; margin:0 0 10px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;";
+    div.innerHTML = `<div style="font-size:18px; font-weight:700; color:#92400e; line-height:1.9;">📝 ${drafts.length} آرڈر ابھی ڈرافٹ میں ہیں — حتمی نہیں بھیجے گئے</div>
+      <div style="font-size:14px; color:#78350f; line-height:1.8;">${who}<br>یہ آرڈر سٹاک بک کیے بیٹھے ہیں، اس لیے آرڈر بکنگ میں سٹاک کم/صفر دکھتا ہے۔</div>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button type="button" onclick="adminViewDraftOrders()" style="flex:1; height:42px; border:none; border-radius:11px; background:#fff; color:#92400e; border:2px solid #f59e0b; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;">👁️ دیکھیں</button>
+        <button type="button" onclick="adminAcceptAllDrafts()" style="flex:1.4; height:42px; border:none; border-radius:11px; background:linear-gradient(135deg,#16a34a,#14532d); color:#fff; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;">✅ سب آرڈر لسٹ میں لے لیں</button>
+      </div>`;
+    wrap.insertBefore(div, wrap.firstChild);
+  }catch(e){}
+}
+async function adminViewDraftOrders(){
+  const drafts = (advanceOrdersData || []).filter(o => o && o.isDraft === true && o.status !== 'fulfilled');
+  const rows = drafts.slice(0, 25).map(o => ({ label: `${o.customerName || '—'} (${o.employeeName || '—'})`, value: String((o.items || []).reduce((a, i) => a + (Number(i.qty) || 0), 0)) + ' مال' }));
+  const ok = await uDialog({ title: '📝 ڈرافٹ آرڈر', message: drafts.length > 25 ? `پہلے 25 دکھائے گئے (کل ${drafts.length})` : '', rows, okText: '✅ سب لسٹ میں لے لیں', cancelText: 'بند کریں', tone: 'amber' });
+  if(ok) adminAcceptAllDrafts(true);
+}
+async function adminAcceptAllDrafts(skipConfirm){
+  if(AppState.currentRole !== 'admin') return;
+  const drafts = (advanceOrdersData || []).filter(o => o && o.isDraft === true && o.status !== 'fulfilled');
+  if(!drafts.length) return;
+  if(!skipConfirm && !(await uDialog({ title: '✅ ڈرافٹ آرڈر لے لیں؟', message: `${drafts.length} ڈرافٹ آرڈر آپ کی آرڈر لسٹ میں آ جائیں گے (جیسے ملازم نے حتمی بھیجے ہوں)۔`, okText: '✅ ہاں', cancelText: '✖ نہیں', tone: 'green' }))) return;
+  const now = new Date().toISOString();
+  drafts.forEach(o => { o.isDraft = false; o.finalSentAt = now; o.acceptedByAdmin = true; });
+  persistAllData();
+  try{ pushAdvanceOrdersToCloud(); }catch(e){}
+  try{ renderAdvanceOrdersScreen(); }catch(e){}
+  uAlert('✅ آ گئے', `${drafts.length} آرڈر اب آرڈر لسٹ میں ہیں۔`, 'green');
+}
+function _renderAdminPendingOrdersScreenCore(){
   const wrap = document.getElementById('advOrderListWrap');
   if(!wrap) return;
 
