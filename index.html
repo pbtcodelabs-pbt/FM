@@ -8931,7 +8931,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM810TH339'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM810TH340'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -39910,10 +39910,24 @@ function getYesterdayPayInfo(invoice){
     const c = customersData.find(x => x.customer_id === invoice.customer_id); if(!c) return null;
     const base = (invoice.invoice_id === 'DRAFT' || !invoice.created_at) ? todayDateKey() : invDay(invoice);
     const dt = new Date(base + 'T12:00:00'); dt.setDate(dt.getDate() - 1);
-    const D = localDateKey(dt);
-    const r = drCustomerDay(c, D);
+    let D = localDateKey(dt);
+    let r = drCustomerDay(c, D);
+    // 🔧 FM810TH340: اگر کل (بل کی تاریخ − 1) کوئی خریداری/وصولی نہیں تھی تو ڈبہ خالی صفر رہ جاتا تھا اور سرخ کم وصولی کبھی نہیں آتی تھی —
+    // اب اس کسٹمر کا پچھلا وہ دن لیا جاتا ہے جس دن اس کا مال یا وصولی ہوئی (بل کی تاریخ سے پہلے کا سب سے قریبی دن)
+    let isYesterday = true;
+    if(!r.hasToday){
+      const days = [];
+      invoicesData.forEach(inv => { if(inv.customer_id === c.customer_id && inv.status !== 'voided' && inv.invoice_id !== invoice.invoice_id) days.push(invDay(inv)); });
+      (c.walletHistory || []).forEach(h => { if(h && (h.type === 'cash_given' || h.type === 'receivable_collected')) days.push(h.date); });
+      recoveryListData.forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') days.push(recDay(e)); });
+      const prev = days.filter(d => d && d < base).sort().pop();
+      if(prev){
+        const r2 = drCustomerDay(c, prev);
+        if(r2.hasToday){ D = prev; r = r2; isYesterday = (prev === localDateKey(dt)); }
+      }
+    }
     const p = D.split('-');
-    return { D, label: p[2] + '-' + p[1] + '-' + p[0], opening: r.openingBalance, goods: r.todayGoods, total: r.totalBalance, paid: r.todayRecovery, final: r.finalBalance, dayShort: r.dayShort };
+    return { D, isYesterday, label: p[2] + '-' + p[1] + '-' + p[0], opening: r.openingBalance, goods: r.todayGoods, total: r.totalBalance, paid: r.todayRecovery, final: r.finalBalance, dayShort: r.dayShort };
   }catch(e){ return null; }
 }
 function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
@@ -39948,7 +39962,7 @@ function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   ctx.strokeRect(L + 0.5, top + 0.5, R - L, boxH);
   ctx.textAlign = 'center'; ctx.fillStyle = '#000';
   let fpx = 15; ctx.font = FP(`bold ${fpx}px`);
-  const t1 = 'کل کی ادائیگی کی تفصیل';
+  const t1 = (y.isYesterday === false) ? 'پچھلی ادائیگی کی تفصیل' : 'کل کی ادائیگی کی تفصیل';
   while(ctx.measureText(t1).width > (R - L) - 10 && fpx > 9){ fpx -= 1; ctx.font = FP(`bold ${fpx}px`); }
   ctx.fillText(t1, (L + R) / 2, top + Math.round(22 * fscale));
   ctx.font = `bold ${Math.round(14 * fscale)}px Arial, sans-serif`;
@@ -39956,7 +39970,7 @@ function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   const rTop = top + lay.yTitleH;
   ctx.strokeStyle = rc.border; ctx.beginPath(); ctx.moveTo(L, rTop); ctx.lineTo(R, rTop); ctx.stroke();
   _drawPayRows(ctx, FP, L, R, rTop, lay.sumRowH, [
-    ['سابقہ بقایا', y.opening], ['کل کی خریداری', y.goods], ['ٹوٹل', y.total], ['کل ادا کیا', y.paid], ['بقایا', y.final, true]
+    ['سابقہ بقایا', y.opening], [(y.isYesterday === false ? 'پچھلی خریداری' : 'کل کی خریداری'), y.goods], ['ٹوٹل', y.total], [(y.isYesterday === false ? 'پچھلا ادا کیا' : 'کل ادا کیا'), y.paid], ['بقایا', y.final, true]
   ], rc, bw, fscale);
   let bottom = top + boxH;
   if(y.dayShort > 0){
@@ -39964,7 +39978,7 @@ function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
     ctx.fillStyle = '#dc2626';
     ctx.fillRect(L + 0.5, rt, R - L, rh);
     ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
-    let px = 16; const txt = 'کل کے بل میں سے کم دیے:  ' + Math.round(y.dayShort).toLocaleString();
+    let px = 16; const txt = 'کم وصولی:  ' + Math.round(y.dayShort).toLocaleString();
     ctx.font = FP(`bold ${px}px`);
     while(ctx.measureText(txt).width > (R - L) - 10 && px > 9){ px -= 1; ctx.font = FP(`bold ${px}px`); }
     ctx.fillText(txt, (L + R) / 2, rt + rh / 2 + Math.round(6 * fscale));
