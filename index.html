@@ -963,6 +963,24 @@ function __appHostKind(h, p){
   .qtyBtns button{width:24px; height:24px; border:none; background:#e2e8f0; border-radius:6px; cursor:pointer; font-weight:700;}
   .removeBtn{color:var(--danger); cursor:pointer; font-size:13px; border:none; background:none;}
   .saleRecordBtn{color:var(--primary-dark); cursor:pointer; font-size:12px; border:none; background:none; white-space:nowrap; font-weight:600;}
+  /* ---------- 🔧 FM810TH344: کارٹ شیٹ — ڈیلیٹ بٹن قطار کے بالکل بائیں طرف نظر آئے (سلائیڈ کی ضرورت نہیں)،
+       عام فہرست سے ذرا ہٹ کر الگ لکیر کے ساتھ تاکہ غلطی سے نہ دبے؛ پوری شیٹ نوری نستعلیق میں ---------- */
+  #cartSheetModal .cartWrap table.cartTable{min-width:0 !important; table-layout:auto;}
+  #cartSheetModal table.cartTable th, #cartSheetModal table.cartTable td{padding-left:4px; padding-right:4px;}
+  #cartSheetModal .qtyBtns{gap:3px;}
+  #cartSheetModal .qtyBtns button{width:22px; height:22px;}
+  #cartSheetModal .rateEditInput{width:58px; padding:5px 2px;}
+  #cartSheetModal table.cartTable td.cartDelCell{padding-left:12px; padding-right:6px; border-right:1px dashed #f0b4b4; text-align:center; vertical-align:middle;}
+  #cartSheetModal .cartDelBtn{width:32px; height:32px; border-radius:9px; background:#fee2e2; color:#b91c1c; font-size:15px; padding:0; border:1px solid #fca5a5;}
+  #cartSheetModal, #cartSheetModal *{
+    font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif !important;
+  }
+  #cartSheetModal table.cartTable td, #cartSheetModal table.cartTable th{line-height:1.8;}
+  /* ---------- ◀ ▶ پوری سکرین/مرحلہ پیچھے-آگے کے بٹن (FM810TH345) ---------- */
+  .fmArrowBtn{min-width:34px; height:32px; padding:0 8px; border:1.5px solid #cbd5e1; border-radius:10px; background:#f1f5f9; color:#334155; font-size:14px; font-weight:900; cursor:pointer;}
+  .fmArrowBtn:active{background:#e2e8f0;}
+  .fmArrowWide{min-width:92px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;}
+
   .emptyCart{text-align:center; color:var(--muted); padding:18px 0; font-size:13px;}
 
   /* --- Right: Checkout Panel --- */
@@ -3466,6 +3484,10 @@ function __appHostKind(h, p){
         <div class="cartSheetHead">
           <strong>🛒 آپ کا کارٹ</strong>
           <span style="display:flex; align-items:center; gap:10px;">
+            <span dir="ltr" style="display:flex; gap:5px;">
+              <button type="button" class="fmArrowBtn" onclick="fmStepBack()" title="پیچھے — سبزیوں والے صفحے پر">◀</button>
+              <button type="button" class="fmArrowBtn" onclick="fmStepForward()" title="آگے — بل دیکھیں">▶</button>
+            </span>
             <button type="button" onclick="deleteBillingCartDraft()" style="background:#fee2e2; color:#991b1b; border:none; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">🗑️ کارٹ صاف کریں</button>
             <span class="closeBtn" onclick="closeCartSheet()">✖</span>
           </span>
@@ -3504,7 +3526,7 @@ function __appHostKind(h, p){
           <div class="cartWrap">
             <table class="cartTable">
               <thead>
-                <tr><th>#</th><th>سبزی</th><th>تعداد</th><th>قیمت</th><th>کل</th><th></th><th>پرانے ریٹ</th></tr>
+                <tr><th>#</th><th>سبزی</th><th>تعداد</th><th>قیمت</th><th>کل</th><th></th></tr>
               </thead>
               <tbody id="cartBody">
                 <!-- JS سے cart rows یہاں بنیں گی -->
@@ -5799,6 +5821,10 @@ function __appHostKind(h, p){
          ===================================================================== -->
     <div class="screen customer-only" id="screen-orderTaking" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="pageTitle" style="text-align:center; font-weight:900; font-size:18px; margin-bottom:8px; padding-bottom:5px;">🧾 آرڈر بکنگ</div>
+      <div dir="ltr" style="display:flex; justify-content:center; gap:12px; margin-bottom:8px;">
+        <button type="button" class="fmArrowBtn fmArrowWide" onclick="fmArrowBack()">◀ پیچھے</button>
+        <button type="button" class="fmArrowBtn fmArrowWide" onclick="fmArrowForward()">آگے ▶</button>
+      </div>
 
       <!-- STEP 1: پہلے کسٹمر منتخب کریں — ایریا ریکارڈ سے خودبخود آ جائے گا -->
       <div id="otStepCustomer">
@@ -8931,7 +8957,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM810TH343'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM810TH345'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12951,12 +12977,14 @@ function goTo(screenName, _isHistoryNav){
 
 // ---------- Back/Forward بٹن — بالکل براؤزر کی طرح، ایک وقت میں ایک قدم ----------
 function goBack(){
+  if(fmStepBack()) return; // 🔙 FM810TH345: پہلے اسی صفحے کا مرحلہ (کارٹ/آرڈر کے مراحل) پیچھے، پھر پوری سکرین
   if(navBackStack.length === 0) return;
   const prev = navBackStack.pop();
   navForwardStack.push(currentScreenName);
   goTo(prev, true);
 }
 function goForward(){
+  if(fmStepForward()) return;
   if(navForwardStack.length === 0) return;
   const next = navForwardStack.pop();
   navBackStack.push(currentScreenName);
@@ -12965,9 +12993,57 @@ function goForward(){
 function updateNavArrowsState(){
   const backBtn = document.getElementById('navBackBtn');
   const fwdBtn = document.getElementById('navForwardBtn');
-  if(backBtn) backBtn.disabled = navBackStack.length === 0;
-  if(fwdBtn) fwdBtn.disabled = navForwardStack.length === 0;
+  let sb = false, sf = false;
+  try{ sb = fmStepCanBack(); sf = fmStepCanForward(); }catch(e){}
+  if(backBtn) backBtn.disabled = navBackStack.length === 0 && !sb;
+  if(fwdBtn) fwdBtn.disabled = navForwardStack.length === 0 && !sf;
 }
+
+// ---------- 🔙 FM810TH345 (صدام کی ہدایت): پوری سکرین/مرحلہ پیچھے-آگے ----------
+// کارٹ (بل بنائیں) اور آرڈر بکنگ کے مراحل (کسٹمر ← سبزیاں ← ریویو) بھی اب ایک ایک قدم پیچھے/آگے جاتے ہیں؛
+// کسی صفحے کے اندر ایک ایک لائن/تبدیلی واپس نہیں ہوتی۔ آخری مرحلے پر پہنچ کر پھر پچھلی سکرین۔
+let fmCartForward = false;
+function fmVisible(id){ const el = document.getElementById(id); return !!el && el.style.display !== 'none' && el.offsetParent !== null; }
+function fmCartOpen(){ return !!document.getElementById('cartSheetModal')?.classList.contains('show'); }
+function fmOtBackAvailable(){
+  if(currentScreenName !== 'orderTaking') return false;
+  if(fmVisible('otStepProdCust') || fmVisible('otStepProdList')) return true;
+  if(AppState.currentRole === 'customer') return false; // کسٹمر کا STEP 1 ہوتا ہی نہیں — سیدھی پچھلی سکرین
+  return fmVisible('otStepReview') || fmVisible('otStepItems');
+}
+function fmOtForwardAvailable(){
+  return currentScreenName === 'orderTaking' && AppState.currentRole !== 'customer' && !!otCustomer &&
+         fmVisible('otStepCustomer') && !fmVisible('otStepProdList') && !fmVisible('otStepProdCust');
+}
+function fmStepCanBack(){ return fmCartOpen() || fmOtBackAvailable(); }
+function fmStepCanForward(){
+  return fmCartOpen() || (fmCartForward && currentScreenName === 'billing' && Billing.cart.length > 0) || fmOtForwardAvailable();
+}
+function fmStepBack(){
+  if(fmCartOpen()){ closeCartSheet(); fmCartForward = true; updateNavArrowsState(); return true; }
+  if(fmOtBackAvailable()){
+    if(fmVisible('otStepProdCust')) pdBackToProducts();
+    else if(fmVisible('otStepProdList')) pdBackToCustomers();
+    else if(fmVisible('otStepReview')) backToOtItems();
+    else backToOtCustomer();
+    setTimeout(updateNavArrowsState, 50);
+    return true;
+  }
+  return false;
+}
+function fmStepForward(){
+  if(fmCartOpen()){ openBillPreviewBeforeComplete(); return true; }
+  if(fmCartForward && currentScreenName === 'billing' && Billing.cart.length > 0){ fmCartForward = false; openCartSheet(); return true; }
+  if(fmOtForwardAvailable()){
+    document.getElementById('otStepCustomer').style.display = 'none';
+    document.getElementById('otStepItems').style.display = '';
+    setTimeout(updateNavArrowsState, 50);
+    return true;
+  }
+  return false;
+}
+function fmArrowBack(){ if(!fmStepBack()) goBack(); }
+function fmArrowForward(){ if(!fmStepForward()) goForward(); }
 
 // ---------- سیلزمین کو ان کے مسترد شدہ بلز کی وجہ دکھائیں (جب تک وہ خود بند نہ کریں) ----------
 function renderRejectionNotice(){
@@ -14824,7 +14900,7 @@ function renderCart(){
     body.innerHTML = Billing.cart.map((item, idx) => `
       <tr>
         <td style="text-align:center; color:var(--muted); font-weight:700;">${_cartSerialMap.get(item.variant_id) || (idx+1)}</td>
-        <td>${item.name}${item.loose_product_id ? '' : chalanChipHtml(item.variant_id, item.qty, item.chalanAlloc || null, `openCartChalanPicker(${idx})`)}${item.laborPerUnit > 0 ? `<div style="font-size:10px; color:#b45309; font-weight:700; margin-top:2px;">💪 مزدوری شامل: Rs. ${item.laborPerUnit}/یونٹ (کل Rs. ${(item.laborPerUnit*item.qty).toLocaleString()})</div>` : ''}</td>
+        <td>${item.name}${item.loose_product_id ? '' : chalanChipHtml(item.variant_id, item.qty, item.chalanAlloc || null, `openCartChalanPicker(${idx})`)}${item.laborPerUnit > 0 ? `<div style="font-size:10px; color:#b45309; font-weight:700; margin-top:2px;">💪 مزدوری شامل: Rs. ${item.laborPerUnit}/یونٹ (کل Rs. ${(item.laborPerUnit*item.qty).toLocaleString()})</div>` : ''}<div style="margin-top:3px;"><button class="saleRecordBtn" onclick="showItemSaleRecord(${item.variant_id})" title="اس گاہک کو یہ سبزی پہلے کس ریٹ پر بیچی">🔁 پرانے ریٹ</button></div></td>
         <td>
           <div class="qtyBtns">
             <button onclick="changeQty(${item.variant_id}, -1)">−</button>
@@ -14837,8 +14913,7 @@ function renderCart(){
                  onchange="updateCartRate(${item.variant_id}, this.value)">
         </td>
         <td>Rs. ${(item.qty * item.unitPrice).toFixed(0)}</td>
-        <td><button class="removeBtn" onclick="removeFromCart(${item.variant_id})">ڈیلیٹ کریں</button></td>
-        <td><button class="saleRecordBtn" onclick="showItemSaleRecord(${item.variant_id})" title="اس گاہک کو یہ سبزی پہلے کس ریٹ پر بیچی">🔁 پرانے ریٹ</button></td>
+        <td class="cartDelCell"><button class="removeBtn cartDelBtn" onclick="removeFromCart(${item.variant_id})" title="ڈیلیٹ کریں">🗑️</button></td>
       </tr>
     `).join('');
 
@@ -14999,13 +15074,22 @@ function renderFloatingCartBar(){
 }
 
 function openCartSheet(){
+  // ---------- 🔒 FM810TH344: کسٹمر کا نام چنے بغیر کارٹ/بل آگے نہیں کھلے گا (نظام بازار کا ہے) ----------
+  try{ renderCart(); }catch(e){} // پہلے رفریش، تاکہ محفوظ شدہ ڈرافٹ کا کسٹمر بحال ہو جائے
+  if(Billing.cart.length > 0 && !document.getElementById('customerSelect')?.value){
+    requireBillCustomer();
+    return;
+  }
   document.getElementById('cartSheetModal').classList.add('show');
+  fmCartForward = false;
+  try{ updateNavArrowsState(); }catch(e){}
   renderCart(); // ---------- بگ فکس: پہلے یہ نہیں بلایا جاتا تھا — تازہ پیج لوڈ کے بعد کارٹ خالی ہی دکھتا رہتا تھا حالانکہ Billing.cart میں آئٹمز موجود تھے ----------
   applyCartTextSettings();
   syncCartModeControls();
 }
 function closeCartSheet(){
   document.getElementById('cartSheetModal').classList.remove('show');
+  try{ updateNavArrowsState(); }catch(e){}
 }
 
 // ---------- Payment Method Selector ----------
@@ -15136,6 +15220,7 @@ async function openBillPreviewBeforeComplete(){
 
 function finalizeInvoice(){
   if(Billing.cart.length === 0) return;
+  if(!requireBillCustomer()) return; // 🔒 FM810TH344: سب سے پہلے کسٹمر کا نام لازمی
 
   // ---------- 🧾 صدام کی ہدایت (26 ستمبر): بل فائنل سے پہلے — (1) ہر سبزی کا چالان طے ہو (ایک ہو تو خودکار)
   // (2) ان چالانوں کا خرید ریٹ لگ چکا ہو۔ ریٹ باقی ہو تو اسی بل کے چالانوں کا پاپ اپ کھلے، سب ریٹ لگتے ہی
