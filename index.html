@@ -5812,6 +5812,7 @@ function __appHostKind(h, p){
           <button type="button" onclick="openMyDraftOrders()" style="flex:1; padding:7px 4px; background:linear-gradient(180deg,#c2790f,#8a530a); color:#fff; border:none; border-radius:9px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15); white-space:nowrap;">📝 ڈرافٹ</button>
           <button type="button" onclick="openMySentOrders()" style="flex:1; padding:7px 4px; background:linear-gradient(180deg,#0f766e,#0b4a45); color:#fff; border:none; border-radius:9px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15); white-space:nowrap;">✅ فائنل سینڈ آرڈر</button>
         </div>
+        <button type="button" onclick="pdOpenList()" style="width:100%; padding:9px 6px; margin-bottom:6px; background:linear-gradient(180deg,#0ea5e9,#0369a1); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:900; cursor:pointer; box-shadow:0 3px 0 #075985;">📦 مال کے حساب سے تقسیم — چالان آیا ہے؟ پہلے ایک سبزی سب میں بانٹیں</button>
         <div dir="ltr" style="display:flex; gap:5px; align-items:stretch; margin:0 0 6px;">
           <button type="button" onclick="openStockFeedModal()" style="flex:0 0 auto; padding:6px 7px; background:linear-gradient(180deg,#f59e0b,#b45309); color:#fff; border:none; border-radius:9px; font-size:11px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15); white-space:nowrap; line-height:1.3;">📥 چالان فیڈ</button>
           <input type="text" id="otCustSearch" dir="rtl" placeholder="🔍 کسٹمر کا نام یا نمبر" oninput="renderOtCustomerList(this.value)"
@@ -5823,6 +5824,36 @@ function __appHostKind(h, p){
           <button type="button" id="otAreaFilterToday" onclick="setOtAreaFilter('today')" style="flex:1; padding:7px 4px; background:#0369a1; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">🛒 آج کے خریدار</button>
         </div>
         <div id="otCustomerListWrap" style="max-height:65vh; overflow-y:auto; padding-bottom:20px;"></div>
+      </div>
+
+
+      <!-- 📦 FM810TH336: مال کے حساب سے تقسیم — سکرین ۱: سبزیوں کی فہرست -->
+      <div id="otStepProdList" style="display:none;">
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <button type="button" onclick="pdBackToCustomers()" style="flex:1; padding:8px 4px; background:#f1f5f9; color:#334155; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13px; font-weight:900; cursor:pointer;">◀ کسٹمر لسٹ</button>
+          <button type="button" onclick="openMyDraftOrders()" style="flex:1; padding:8px 4px; background:linear-gradient(180deg,#c2790f,#8a530a); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">📝 میرے ڈرافٹ آرڈرز</button>
+        </div>
+        <div style="text-align:center; font-weight:900; font-size:15px; color:#0369a1; margin-bottom:6px;">📦 جس سبزی کا مال آیا ہے اسے چنیں</div>
+        <input type="text" id="pdProdSearch" dir="rtl" placeholder="🔍 سبزی کا نام یا نمبر" oninput="renderPdProductList(this.value)" style="width:100%; padding:8px 6px; border:2px solid var(--primary); border-radius:9px; font-size:14px; font-weight:800; text-align:center; box-sizing:border-box; margin-bottom:6px;">
+        <button type="button" id="pdAllToggle" onclick="pdToggleAllProducts()" style="width:100%; padding:6px; margin-bottom:6px; background:#fff; color:#0369a1; border:1.5px solid #0369a1; border-radius:9px; font-size:12px; font-weight:800; cursor:pointer;">📋 سب سبزیاں دکھائیں</button>
+        <div id="pdProdListWrap" style="max-height:62vh; overflow-y:auto; padding-bottom:20px;"></div>
+      </div>
+
+      <!-- 📦 FM810TH336: مال کے حساب سے تقسیم — سکرین ۲: ایک سبزی، کسٹمروں میں تقسیم -->
+      <div id="otStepProdCust" style="display:none;">
+        <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+          <button type="button" onclick="pdBackToProducts()" style="flex:0 0 auto; padding:8px 12px; background:#f1f5f9; color:#334155; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13px; font-weight:900; cursor:pointer;">◀ سبزیاں</button>
+          <div id="pdVarHeader" style="flex:1; text-align:center; min-width:0;"></div>
+        </div>
+        <div id="pdChalanBar" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:6px;"></div>
+        <div id="pdSummary" style="margin-bottom:6px;"></div>
+        <div id="pdMsg" style="display:none; text-align:center; font-weight:900; font-size:13px; padding:6px; border-radius:9px; margin-bottom:6px;"></div>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <input type="text" id="pdCustSearch" dir="rtl" placeholder="🔍 کسٹمر کا نام یا نمبر" oninput="renderPdCustList()" style="flex:1; min-width:0; padding:7px 6px; border:2px solid var(--primary); border-radius:9px; font-size:13px; font-weight:800; text-align:center; box-sizing:border-box;">
+          <button type="button" id="pdOnlyGivenBtn" onclick="pdToggleOnlyGiven()" style="flex:0 0 auto; padding:6px 8px; background:#fff; color:#0369a1; border:1.5px solid #0369a1; border-radius:9px; font-size:11.5px; font-weight:800; cursor:pointer;">✅ صرف جنہیں لگ چکا</button>
+        </div>
+        <div id="pdGivenCount" style="text-align:center; font-size:12px; font-weight:800; color:#166534; margin-bottom:4px;"></div>
+        <div id="pdCustListWrap" style="max-height:52vh; overflow-y:auto; padding-bottom:20px;"></div>
       </div>
 
       <!-- STEP 2: آئٹمز منتخب کریں — ٹک لگائیں، تعداد لگائیں، صفحہ بدلیں -->
@@ -8895,7 +8926,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM810TH335'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM810TH336'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29046,6 +29077,7 @@ function renderOrderTakingScreen(){
   if(s1) s1.style.display = '';
   if(s2) s2.style.display = 'none';
   if(s3) s3.style.display = 'none';
+  ['otStepProdList','otStepProdCust'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; }); // 📦 FM810TH336
 
   // ---------- 🧪 FMtest02 Phase 3: کسٹمر خود لاگ ان ہو تو کسٹمر منتخب کرنے کا مرحلہ (STEP 1) بالکل چھوڑ دیں —
   // نام خودکار خود اسی لاگ ان شدہ کسٹمر کا لگے، تلاش کرنے کی ضرورت نہ ہو ---------- -->
@@ -29183,6 +29215,25 @@ function selectOtCustomer(customerId){
   // اگر ٹکرائی ہو تو یہاں بھی خودکار الگ کر دیں (ایک آئٹم کی تعداد دوسرے میں مرج ہونے سے بچانے کی
   // دوسری/آخری تہہ حفاظت) ----------
   try{ dedupeVariantIds(); }catch(e){}
+
+  // ---------- 📦 FM810TH336: اسی کسٹمر کا کھلا ڈرافٹ پہلے سے ہو (مثلاً مال کے حساب سے تقسیم میں بنا) تو نیا آرڈر نہیں —
+  // وہی کھلے، اس کی سبزیاں/مقدار/چالان بھرے ہوں، اور نئی سبزیاں اسی میں جڑیں ----------
+  try{
+    if(AppState.currentRole !== 'customer'){
+      const _od = pdFindOpenDraft(c.customer_id);
+      if(_od){
+        (_od.items || []).forEach(i => {
+          if(i.variant_id != null){
+            otQtyMap[i.variant_id] = i.qty;
+            otCheckedMap[i.variant_id] = true;
+            if(i.chalanAlloc) otChalanMap[i.variant_id] = JSON.parse(JSON.stringify(i.chalanAlloc));
+          }
+        });
+        otSavedOrderId = _od.id;
+        if(areaEl) areaEl.textContent = (otCustomer.area ? '🗺️ ' + otCustomer.area + ' • ' : '') + '📝 پہلے کا ڈرافٹ کھلا ہے — اسی میں جڑے گا';
+      }
+    }
+  }catch(e){}
 
   // ---------- 🔒 صدام کی ہدایت (FM13SEPSU): پہلے نام کے حساب سے (الف بائی ترتیب) سورٹ ہوتا تھا، جس سے سیریل
   // نمبر بے ترتیب نظر آتے تھے (31 کے بعد 60، پھر 5...) — اب سیریل نمبر کے حساب سے (1 سے آخر تک) سورٹ،
@@ -29904,6 +29955,383 @@ async function shareOtOrderSheet(){
     }
   }, 'image/png');
 }
+
+/* =====================================================================
+   📦 مال کے حساب سے تقسیم (FM810TH336) — منڈی کا اصل طریقہ: چالان آیا تو پہلے ایک سبزی سب کسٹمروں میں بانٹی،
+   پھر اگلا چالان۔ ہر کسٹمر کا صرف ایک کھلا ڈرافٹ آرڈر رہتا ہے؛ ہر سبزی اسی میں جڑتی جاتی ہے (الگ الگ
+   آرڈر/بل نہیں بنتے)۔ ہر لکھی مقدار اسی لمحے محفوظ، سٹاک/چالان کی بکنگ فوراً، آخر میں ہر کسٹمر کا
+   ایک ہی مکمل آرڈر → ایک ہی بل۔ چالان سے زیادہ مال لگ نہیں سکتا۔
+   ===================================================================== */
+let pdVariantId = null;      // چنی ہوئی سبزی
+let pdChalanNo = null;       // چنا ہوا چالان (null = اس سبزی کا کوئی چالان نہیں)
+let pdShowAll = false;       // false = صرف جن کا مال/بکنگ ہے
+let pdOnlyGiven = false;     // true = صرف وہ کسٹمر جنہیں یہ مال لگ چکا
+let pdQueue = Promise.resolve();
+let pdPushTimer = null;
+let pdLastFetch = 0;
+let pdMsgTimer = null;
+const PD_STEPS = ['otStepCustomer','otStepItems','otStepReview','otStepProdList','otStepProdCust'];
+
+function _pdEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _pdMyName(){ return (AppState.currentUser && AppState.currentUser.name) || 'Unknown'; }
+function pdShowStep(id){
+  PD_STEPS.forEach(s => { const el = document.getElementById(s); if(el) el.style.display = (s === id) ? '' : 'none'; });
+  try{ window.scrollTo(0, 0); }catch(e){}
+}
+// ---------- اسی ملازم کا اسی کسٹمر کا کھلا (ابھی نہ بھیجا گیا) ڈرافٹ ----------
+function pdFindOpenDraft(cid){
+  const me = _pdMyName();
+  let best = null;
+  (advanceOrdersData || []).forEach(o => {
+    if(!o || o.customer_id !== cid || o.status !== 'pending' || o.isDraft !== true || o.stockReleased) return;
+    if((o.employeeName || '') !== me) return;
+    if((advDeletedIds || []).includes(o.id)) return;
+    if(!best || new Date(o.createdAt) > new Date(best.createdAt)) best = o;
+  });
+  return best;
+}
+function pdDraftMap(){
+  const m = {};
+  (customersData || []).forEach(c => { const d = pdFindOpenDraft(c.customer_id); if(d) m[c.customer_id] = d; });
+  return m;
+}
+function pdItemOf(order, vid){ return order ? (order.items || []).find(i => i.variant_id === vid) : null; }
+// اس کسٹمر کے ڈرافٹ میں اس سبزی کی، موجودہ چنے چالان کی مقدار (چالان نہ ہو تو بغیر چالان والی مقدار)
+function pdCurQty(order, vid, chNo){
+  const it = pdItemOf(order, vid);
+  if(!it) return 0;
+  if(chNo != null) return _chRound(Number(it.chalanAlloc && it.chalanAlloc[chNo]) || 0);
+  return _chRound(Math.max(0, (Number(it.qty) || 0) - chalanAllocSum(it.chalanAlloc)));
+}
+
+// ---------- سکرین ۱: سبزیوں کی فہرست ----------
+function pdOpenList(){
+  if(AppState.currentRole === 'customer') return;
+  pdShowStep('otStepProdList');
+  const s = document.getElementById('pdProdSearch'); if(s) s.value = '';
+  renderPdProductList('');
+}
+function pdBackToCustomers(){
+  pdFlushPush();
+  pdShowStep('otStepCustomer');
+  const s = document.getElementById('otCustSearch');
+  renderOtCustomerList(s ? s.value : '');
+}
+function pdToggleAllProducts(){
+  pdShowAll = !pdShowAll;
+  const s = document.getElementById('pdProdSearch');
+  renderPdProductList(s ? s.value : '');
+}
+function renderPdProductList(query){
+  const wrap = document.getElementById('pdProdListWrap');
+  if(!wrap) return;
+  const q = (query || '').trim().toLowerCase();
+  const tg = document.getElementById('pdAllToggle');
+  if(tg) tg.textContent = pdShowAll ? '📋 صرف مال والی سبزیاں' : '📋 سب سبزیاں دکھائیں';
+  const list = getFlatVariants().sort((a, b) => {
+    const sa = a.serial_no, sb = b.serial_no;
+    if(sa == null && sb == null) return a.name.localeCompare(b.name, 'ur');
+    if(sa == null) return 1;
+    if(sb == null) return -1;
+    return sa - sb;
+  }).filter(f => {
+    if(!pdShowAll && !((Number(f.stock) || 0) > 0 || (Number(f.reserved) || 0) > 0)) return false;
+    if(!q) return true;
+    return f.name.toLowerCase().includes(q) || String(f.serial_no == null ? '' : f.serial_no).includes(q);
+  });
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">${pdShowAll ? 'کوئی سبزی نہیں ملی' : 'کسی سبزی کا مال نہیں — پہلے چالان فیڈ کریں، یا اوپر سے «سب سبزیاں دکھائیں» دبائیں'}</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(f => {
+    const stock = Number(f.stock) || 0, resv = Number(f.reserved) || 0;
+    const free = _chRound(stock - resv);
+    const col = free > 0 ? '#15803d' : (free < 0 ? '#b91c1c' : '#64748b');
+    return `<div dir="rtl" onclick="pdOpenVariant(${f.variant_id})" style="display:flex; align-items:center; gap:8px; padding:8px 10px; margin-bottom:6px; border-radius:12px; border:1.5px solid #cbd5e1; background:#fff; cursor:pointer; box-shadow:0 2px 0 #cbd5e1;">
+      <span style="flex:0 0 auto; min-width:28px; height:28px; border-radius:50%; background:#dc2626; color:#fff; font:900 12px Arial,sans-serif; display:flex; align-items:center; justify-content:center;">${f.serial_no == null ? '' : f.serial_no}</span>
+      <div style="flex:1 1 auto; min-width:0; font-weight:900; font-size:15px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${_pdEsc(f.name)}</div>
+      <div style="flex:0 0 auto; text-align:center; font-family:Arial,sans-serif;">
+        <div style="font-size:15px; font-weight:900; color:${col};">${free}</div>
+        <div style="font-size:9.5px; color:#64748b; font-weight:700;">باقی</div>
+      </div>
+      <div style="flex:0 0 auto; text-align:center; font-family:Arial,sans-serif; min-width:34px;">
+        <div style="font-size:13px; font-weight:800; color:#0369a1;">${resv}</div>
+        <div style="font-size:9.5px; color:#64748b; font-weight:700;">بک</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- سکرین ۲: ایک سبزی — کسٹمروں میں تقسیم ----------
+function pdChalanFree(v, c, rm){ return _chRound((Number(c.qty) || 0) - ((rm || {})[c.chalanNo] || 0)); }
+function pdDefaultChalan(v){
+  const rm = getChalanReservedMap(v.variant_id);
+  const live = (v.chalans || []).filter(c => (Number(c.qty) || 0) > 0).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  const withFree = live.find(c => pdChalanFree(v, c, rm) > 0);
+  const pick = withFree || live[0];
+  return pick ? pick.chalanNo : null;
+}
+function pdOpenVariant(vid){
+  const fp = findProductAndVariant(vid);
+  if(!fp.v) return;
+  ensureVariantChalans(fp.v);
+  pdVariantId = vid;
+  pdChalanNo = pdDefaultChalan(fp.v);
+  pdOnlyGiven = false;
+  pdShowStep('otStepProdCust');
+  const s = document.getElementById('pdCustSearch'); if(s) s.value = '';
+  renderPdVariantHeader();
+  renderPdCustList();
+}
+function pdBackToProducts(){
+  pdFlushPush();
+  pdVariantId = null;
+  pdShowStep('otStepProdList');
+  const s = document.getElementById('pdProdSearch');
+  renderPdProductList(s ? s.value : '');
+}
+function pdPickChalan(no){
+  pdChalanNo = no;
+  renderPdVariantHeader();
+  renderPdCustList();
+}
+function pdToggleOnlyGiven(){
+  pdOnlyGiven = !pdOnlyGiven;
+  renderPdCustList();
+}
+function pdMsg(text, kind){
+  const el = document.getElementById('pdMsg');
+  if(!el) return;
+  clearTimeout(pdMsgTimer);
+  el.textContent = text || '';
+  el.style.display = text ? '' : 'none';
+  el.style.background = kind === 'err' ? '#fee2e2' : '#dcfce7';
+  el.style.color = kind === 'err' ? '#b91c1c' : '#166534';
+  if(text) pdMsgTimer = setTimeout(() => { el.style.display = 'none'; }, kind === 'err' ? 4500 : 1800);
+}
+function renderPdVariantHeader(){
+  const fp = findProductAndVariant(pdVariantId);
+  const v = fp.v, p = fp.p;
+  const head = document.getElementById('pdVarHeader');
+  const bar = document.getElementById('pdChalanBar');
+  const sum = document.getElementById('pdSummary');
+  if(!v || !head) return;
+  const rm = getChalanReservedMap(pdVariantId);
+  head.innerHTML = `<span style="font-weight:900; font-size:19px; color:#0f172a;">${p && p.serial_no != null ? `<span style="display:inline-block; min-width:26px; height:26px; line-height:26px; border-radius:50%; background:#dc2626; color:#fff; font:900 12px/26px Arial,sans-serif; text-align:center; margin-left:6px;">${p.serial_no}</span>` : ''}${_pdEsc(p ? p.name : '')}${v.label ? ' — ' + _pdEsc(v.label) : ''}</span>`;
+  const chs = (v.chalans || []).filter(c => (Number(c.qty) || 0) > 0 || c.chalanNo === pdChalanNo).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  if(chs.length === 0){
+    bar.innerHTML = `<div style="font-size:12px; color:#92400e; background:#fef3c7; border-radius:8px; padding:6px 8px;">اس سبزی کا کوئی چالان نہیں — مقدار بغیر چالان کے لگے گی</div>`;
+  } else {
+    bar.innerHTML = chs.map(c => {
+      const free = pdChalanFree(v, c, rm);
+      const on = c.chalanNo === pdChalanNo;
+      const done = free <= 0;
+      return `<button type="button" onclick="pdPickChalan(${c.chalanNo})" style="flex:0 0 auto; min-width:92px; padding:6px 8px; border-radius:11px; border:2px solid ${on ? '#0369a1' : '#cbd5e1'}; background:${on ? '#e0f2fe' : (done ? '#f0fdf4' : '#fff')}; cursor:pointer; text-align:center; line-height:1.35;">
+        <div style="font-weight:900; font-size:13px; color:#0f172a;">🧾 چالان ${c.chalanNo}${done ? ' ✅' : ''}</div>
+        <div style="font-size:10.5px; color:#475569; font-weight:700;">${_pdEsc(chalanSourceLabel(c))}</div>
+        <div style="font-size:10px; color:#64748b; font-family:Arial,sans-serif;">${_pdEsc(chalanDateLabel(c.ts))}</div>
+        <div style="font-size:12px; font-weight:900; font-family:Arial,sans-serif; color:${free > 0 ? '#15803d' : '#64748b'};">باقی ${free}</div>
+      </button>`;
+    }).join('');
+  }
+  // خلاصہ — موجودہ چنے چالان کا (یا چالان نہ ہو تو پوری سبزی کا)
+  let total, booked, label;
+  const cc = pdChalanNo != null ? (v.chalans || []).find(c => c.chalanNo === pdChalanNo) : null;
+  if(cc){ total = Number(cc.qty) || 0; booked = rm[cc.chalanNo] || 0; label = `چالان ${cc.chalanNo}`; }
+  else { total = Number(v.stock) || 0; booked = Number(v.reserved) || 0; label = 'کل مال'; }
+  const free = _chRound(total - booked);
+  const box = (t, n, col) => `<div style="flex:1; text-align:center; padding:5px 2px;"><div style="font:900 20px Arial,sans-serif; color:${col};">${n}</div><div style="font-size:11px; color:#475569; font-weight:800;">${t}</div></div>`;
+  sum.innerHTML = `<div style="display:flex; border:2px solid #0369a1; border-radius:12px; background:#f0f9ff; overflow:hidden;">
+      ${box(label + ' میں مال', _chRound(total), '#0f172a')}
+      ${box('بانٹ دیا', _chRound(booked), '#0369a1')}
+      ${box(free < 0 ? 'کمی' : 'ابھی بچا', free, free > 0 ? '#15803d' : (free < 0 ? '#b91c1c' : '#64748b'))}
+    </div>` + ((free === 0 && total > 0) ? `<div style="margin-top:6px; padding:8px; border-radius:10px; background:#dcfce7; color:#166534; font-weight:900; text-align:center; font-size:14px;">✅ یہ مال پورا تقسیم ہو گیا — <span onclick="pdBackToProducts()" style="text-decoration:underline; cursor:pointer;">اگلی سبزی/چالان چنیں ◀</span></div>` : '');
+}
+function renderPdCustList(){
+  const wrap = document.getElementById('pdCustListWrap');
+  if(!wrap || pdVariantId == null) return;
+  const sEl = document.getElementById('pdCustSearch');
+  const q = ((sEl && sEl.value) || '').trim().toLowerCase();
+  const tg = document.getElementById('pdOnlyGivenBtn');
+  if(tg){ tg.textContent = pdOnlyGiven ? '👥 سب کسٹمر دکھائیں' : '✅ صرف جنہیں لگ چکا'; tg.style.background = pdOnlyGiven ? '#0369a1' : '#fff'; tg.style.color = pdOnlyGiven ? '#fff' : '#0369a1'; }
+  const drafts = pdDraftMap();
+  let givenCount = 0;
+  const list = (customersData || []).filter(c => {
+    const cur = pdCurQty(drafts[c.customer_id], pdVariantId, pdChalanNo);
+    if(cur > 0) givenCount++;
+    if(pdOnlyGiven && !(cur > 0)) return false;
+    if(!q) return true;
+    return (c.name || '').toLowerCase().includes(q) || (c.area || '').toLowerCase().includes(q) || (c.phone || '').includes(q) || String(c.serial_no == null ? '' : c.serial_no).includes(q);
+  }).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ur'));
+  const cnt = document.getElementById('pdGivenCount');
+  if(cnt) cnt.textContent = `✅ ${givenCount} کسٹمر کو لگ چکا`;
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">کوئی کسٹمر نہیں ملا</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(c => {
+    const d = drafts[c.customer_id];
+    const cur = pdCurQty(d, pdVariantId, pdChalanNo);
+    return `<div class="pdRow" data-cid="${c.customer_id}" dir="rtl" style="display:flex; align-items:center; gap:6px; padding:6px 8px; margin-bottom:5px; border-radius:12px; border:1.5px solid ${cur > 0 ? '#16a34a' : '#cbd5e1'}; background:${cur > 0 ? '#dcfce7' : '#fff'};">
+      ${c.serial_no ? `<span style="flex:0 0 auto; min-width:24px; height:24px; border-radius:50%; background:#dc2626; color:#fff; font:900 11px Arial,sans-serif; display:flex; align-items:center; justify-content:center;">${c.serial_no}</span>` : ''}
+      <div style="flex:1 1 auto; min-width:0;">
+        <div style="font-weight:900; font-size:14.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${_pdEsc(c.name)}</div>
+        <div class="pdTot" style="font-size:10.5px; color:#64748b; font-weight:700;">${pdTotText(d)}</div>
+      </div>
+      <input type="text" inputmode="decimal" class="pdQtyInput" data-cid="${c.customer_id}" data-vid="${pdVariantId}" data-ch="${pdChalanNo == null ? '' : pdChalanNo}" value="${cur > 0 ? cur : ''}" placeholder="0" onfocus="this.select()" onchange="pdOnQtyChange(this)" onkeydown="pdQtyKey(event,this)" style="flex:0 0 78px; width:78px; padding:7px 4px; border:2px solid #0369a1; border-radius:10px; font:900 17px Arial,sans-serif; text-align:center; box-sizing:border-box; background:#fff;">
+    </div>`;
+  }).join('');
+}
+// اس کسٹمر کے ڈرافٹ میں اس سبزی کی کل مقدار (سب چالان ملا کر) — صرف معلومات کے لیے
+function pdTotText(d){
+  const it = pdItemOf(d, pdVariantId);
+  const tot = it ? _chRound(Number(it.qty) || 0) : 0;
+  const n = d ? (d.items || []).length : 0;
+  if(!d) return '';
+  return (tot > 0 ? `اس سبزی کی کل: ${tot} • ` : '') + `ڈرافٹ میں ${n} سبزیاں`;
+}
+function pdRefreshRow(cid){
+  const row = document.querySelector(`#pdCustListWrap .pdRow[data-cid="${cid}"]`);
+  if(!row) return;
+  const d = pdFindOpenDraft(cid);
+  const cur = pdCurQty(d, pdVariantId, pdChalanNo);
+  row.style.borderColor = cur > 0 ? '#16a34a' : '#cbd5e1';
+  row.style.background = cur > 0 ? '#dcfce7' : '#fff';
+  const t = row.querySelector('.pdTot'); if(t) t.textContent = pdTotText(d);
+  const inp = row.querySelector('.pdQtyInput'); if(inp && document.activeElement !== inp) inp.value = cur > 0 ? cur : '';
+  const cnt = document.getElementById('pdGivenCount');
+  if(cnt){ const dm = pdDraftMap(); let n = 0; (customersData || []).forEach(c => { if(pdCurQty(dm[c.customer_id], pdVariantId, pdChalanNo) > 0) n++; }); cnt.textContent = `✅ ${n} کسٹمر کو لگ چکا`; }
+}
+function pdQtyKey(e, el){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  const all = Array.prototype.slice.call(document.querySelectorAll('#pdCustListWrap .pdQtyInput'));
+  const nx = all[all.indexOf(el) + 1];
+  if(nx) nx.focus(); else el.blur();
+}
+function pdParseQty(raw){
+  const map = '۰۱۲۳۴۵۶۷۸۹';
+  let s = String(raw == null ? '' : raw).trim().replace(/[۰-۹]/g, d => String(map.indexOf(d))).replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[٫,]/g, '.');
+  if(s === '') return 0;
+  if(!/^\d*\.?\d+$|^\d+\.$/.test(s)) return NaN;
+  return Number(s);
+}
+function pdOnQtyChange(el){
+  // 🛡️ سبزی اور چالان وہ جو اسی خانے کے بنتے وقت تھے (خانہ ہٹنے/اسکرین بدلنے پر بھی مقدار غلط سبزی میں نہیں جاتی)
+  const cid = Number(el.getAttribute('data-cid'));
+  const vid = Number(el.getAttribute('data-vid'));
+  const chAttr = el.getAttribute('data-ch');
+  const ch = (chAttr === '' || chAttr == null) ? null : Number(chAttr);
+  const q0 = pdParseQty(el.value);
+  const row = el.closest('.pdRow');
+  const same = () => vid === pdVariantId && ch === pdChalanNo; // کیا یہ خانہ ابھی سکرین پر اسی سبزی/چالان کا ہے
+  if(!isFinite(q0) || q0 < 0){
+    pdMsg('❌ درست مقدار لکھیں', 'err');
+    el.value = pdCurQty(pdFindOpenDraft(cid), vid, ch) || '';
+    return;
+  }
+  const q = _chRound(q0);
+  if(row) row.style.opacity = '.55';
+  pdQueue = pdQueue.then(() => pdApplyQty(cid, q, vid, ch)).then(res => {
+    if(row) row.style.opacity = '';
+    if(res && res.ok === false){ el.value = res.keep ? res.keep : ''; if(same()) pdMsg(res.msg || '❌ محفوظ نہیں ہوا', 'err'); }
+    else if(res && !res.same){ el.value = q > 0 ? q : ''; if(same()) pdMsg(q > 0 ? '✅ محفوظ' : '🗑️ ہٹا دیا', 'ok'); }
+    if(same()){ pdRefreshRow(cid); renderPdVariantHeader(); }
+  }).catch(err => {
+    if(row) row.style.opacity = '';
+    console.error('pdOnQtyChange', err);
+    if(same()){ pdMsg('❌ محفوظ کرنے میں خرابی — دوبارہ کوشش کریں', 'err'); pdRefreshRow(cid); }
+  });
+}
+// ---------- اصل کام: کسٹمر کے ایک ہی کھلے ڈرافٹ میں اس سبزی کی مقدار لگانا/بدلنا/ہٹانا ----------
+async function pdApplyQty(cid, q, vid, chNo){
+  const cust = (customersData || []).find(c => c.customer_id === cid);
+  if(!cust) return {ok: false, msg: '❌ کسٹمر نہیں ملا'};
+  const fp = findProductAndVariant(vid);
+  if(!fp.v) return {ok: false, msg: '❌ سبزی نہیں ملی'};
+  const v = fp.v, p = fp.p;
+  let order = pdFindOpenDraft(cid);
+  const cur = pdCurQty(order, vid, chNo);
+  if(Math.abs(q - cur) < 0.001) return {ok: true, same: true};
+  // چالان سے زیادہ مال نہیں لگ سکتا
+  if(chNo != null && q > cur){
+    ensureVariantChalans(v);
+    const c = (v.chalans || []).find(x => x.chalanNo === chNo);
+    const booked = (getChalanReservedMap(vid)[chNo]) || 0;
+    const avail = _chRound((c ? Number(c.qty) || 0 : 0) - booked + cur);
+    if(q > avail + 0.001) return {ok: false, keep: cur > 0 ? cur : '', msg: avail <= 0.001 ? `❌ چالان ${chNo} کا سارا مال بانٹا جا چکا` : `❌ چالان ${chNo} میں صرف ${avail} باقی ہے — اتنا ہی لگے گا`};
+  }
+  if(!order && q <= 0) return {ok: true, same: true};
+  if(!order){
+    // نیا آرڈر بننے سے پہلے کلاؤڈ سے تازہ آرڈر نمبر (دوسرے فون سے نمبر نہ ٹکرائے) — لگاتار ہر کسٹمر پر نہیں، ہر ۱۵ سیکنڈ بعد
+    if(Date.now() - pdLastFetch > 15000){
+      try{ await fetchAdvanceOrdersFromCloud(true); }catch(e){ /* آف لائن — مقامی نمبر سے آگے */ }
+      pdLastFetch = Date.now();
+    }
+    order = pdFindOpenDraft(cid); // کلاؤڈ ملاپ کے بعد دوبارہ دیکھیں
+  }
+  if(order) releaseOrderStock(order.items); // پرانی بکنگ واپس، نئی نیچے لگے گی
+  let item = order ? pdItemOf(order, vid) : null;
+  const baseQty = item ? (Number(item.qty) || 0) : 0;
+  const alloc = (item && item.chalanAlloc) ? JSON.parse(JSON.stringify(item.chalanAlloc)) : {};
+  const prevCur = pdCurQty(order, vid, chNo);
+  if(chNo != null){ if(q > 0) alloc[chNo] = q; else delete alloc[chNo]; }
+  const newQty = _chRound(baseQty - prevCur + q);
+  const allocObj = Object.keys(alloc).length ? alloc : null;
+  if(!order){
+    order = {
+      id: takeNewAdvOrderId(),
+      customerName: cust.name,
+      customerPhone: cust.phone || '',
+      customerArea: cust.area || '',
+      customer_id: cust.customer_id,
+      note: '',
+      items: [],
+      status: 'pending',
+      employeeName: _pdMyName(),
+      placedByCustomer: false,
+      extraCharges: [],
+      createdAt: new Date().toISOString(),
+      fulfilledAt: null,
+      isDraft: true,
+      finalSentAt: null
+    };
+    advanceOrdersData.unshift(order);
+  }
+  if(newQty <= 0.0001){
+    order.items = (order.items || []).filter(i => i.variant_id !== vid);
+  } else if(item){
+    item.qty = newQty;
+    item.chalanAlloc = allocObj;
+  } else {
+    order.items = order.items || [];
+    order.items.push({variant_id: vid, name: `${p.name} ${v.label}`.trim(), label: v.label || '', qty: newQty, unitPrice: 0, chalanAlloc: allocObj});
+  }
+  if((order.items || []).length === 0){
+    // ڈرافٹ میں کچھ نہ بچا — خالی آرڈر نہ رہے
+    advanceOrdersData = advanceOrdersData.filter(o => o.id !== order.id);
+    _advRememberDeleted(order.id);
+  } else {
+    reserveOrderStock(order.items);
+  }
+  persistAllData();
+  pdSchedulePush();
+  try{ svTick(true); }catch(e){}
+  return {ok: true};
+}
+// ---------- کلاؤڈ پر بھیجنا: ہر لکھائی پر نہیں، رکنے کے ۰.۶ سیکنڈ بعد ایک بار ----------
+function pdSchedulePush(){
+  try{ pauseCloudPolling(20000); }catch(e){}
+  clearTimeout(pdPushTimer);
+  pdPushTimer = setTimeout(pdDoPush, 600);
+}
+function pdDoPush(){
+  clearTimeout(pdPushTimer); pdPushTimer = null;
+  try{ pushProductsToCloud(); }catch(e){}
+  try{ pushAdvanceOrdersToCloud(); }catch(e){}
+}
+function pdFlushPush(){ if(pdPushTimer) pdDoPush(); }
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') pdFlushPush(); });
 
 // ---------- STEP 3: ریویو — اب اصل "Advance Order" بل کینوس کی شکل میں، صرف تعداد کے ساتھ (رقم/ریٹ ابھی نہیں) ----------
 async function openOtReview(){
