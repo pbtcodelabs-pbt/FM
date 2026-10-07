@@ -8931,7 +8931,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM810TH340'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM810TH341'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -30039,60 +30039,153 @@ function smDistCompute(){
       let sum = 0;
       const cells = custs.map(c => { const q = _chRound((given[vid] && given[vid][c.customer_id]) || 0); sum += q; return q; });
       const oth = _chRound(other[vid] || 0);
-      rows.push({serial: p.serial_no, name: `${p.name} ${v.label || ''}`.trim(), total, cells, oth, remaining: _chRound(total - sum - oth)});
+      // 🔧 8 اکتوبر: نام اور پیکنگ الگ الگ (پیکنگ نام کا حصہ نہیں)، سیریل وہی جو ایڈمن سٹاک لسٹ میں ہے (p.serial_no)
+      rows.push({serial: p.serial_no, name: String(p.name || '').trim(), pack: String(v.label || '').trim(), total, cells, oth, remaining: _chRound(total - sum - oth)});
     });
   });
   return {day, custs, rows, hasOther: rows.some(r => r.oth > 0)};
 }
+
+// ---------- 🎨 رپورٹ کی سیٹنگ: فونٹ / سائز / موٹائی / رنگ — فوراً اثر، فون میں محفوظ ----------
+const SM_DIST_FONTS = [
+  {id:'nast',   label:'نستعلیق',        family:"'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif", nast:true},
+  {id:'kash',   label:'نستعلیق کشیدہ',  family:"'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif", nast:true},
+  {id:'arial',  label:'Arial',          family:"Arial,sans-serif"},
+  {id:'tahoma', label:'Tahoma',         family:"'Open Sans',Tahoma,sans-serif"},
+  {id:'calibri',label:'Calibri',        family:"'Carlito',Calibri,sans-serif"}
+];
+const SM_DIST_DEFAULT = {
+  nameFont:'nast', nameSize:17, nameWeight:700, nameColor:'#0f172a',
+  packFont:'nast', packSize:13, packWeight:700, packColor:'#b45309',
+  cellFont:'arial', cellSize:15, cellWeight:900, cellColor:'#166534', cellBg:'#dcfce7',
+  headFont:'nast', headSize:13, headBg:'#0f766e', headColor:'#ffffff',
+  stockBg:'#1d4ed8', leftBg:'#b91c1c', circle:'#dc2626',
+  rowPad:6
+};
+let smDistStyle = null;
+function smDistLoadStyle(){
+  if(smDistStyle) return smDistStyle;
+  let saved = {};
+  try{ saved = JSON.parse(localStorage.getItem('smDistStyle') || '{}') || {}; }catch(e){}
+  smDistStyle = Object.assign({}, SM_DIST_DEFAULT, saved);
+  return smDistStyle;
+}
+function smDistSaveStyle(){ try{ localStorage.setItem('smDistStyle', JSON.stringify(smDistStyle)); }catch(e){} }
+function smDistFam(id){ const f = SM_DIST_FONTS.find(x => x.id === id) || SM_DIST_FONTS[0]; return f.family; }
+function smDistIsNast(id){ const f = SM_DIST_FONTS.find(x => x.id === id); return !!(f && f.nast); }
+
 function smDistTableHtml(d, forPrint){
   const esc = _pdEsc;
+  const S = smDistLoadStyle();
+  const k = forPrint ? 0.72 : 1;                       // پرنٹ میں A4 کے حساب سے چھوٹا
+  const px = (n) => Math.round(Number(n) * k * 10) / 10;
   const bd = 'border:1px solid #94a3b8;';
-  const stk = (r) => forPrint ? '' : `position:sticky; right:${r}px; z-index:2;`;
-  const thBase = `${bd} padding:5px 3px; background:#0f766e; color:#fff; font-size:11px; font-weight:900; text-align:center; vertical-align:middle;`;
-  let h = `<table dir="rtl" style="border-collapse:collapse; width:${forPrint ? '100%' : 'max-content; min-width:100%'}; font-family:Arial,sans-serif;"><thead><tr>`;
-  h += `<th style="${thBase}${stk(0)} min-width:30px;${forPrint ? '' : ' top:0;'}">#</th>`;
-  h += `<th style="${thBase}${stk(30)} min-width:92px;${forPrint ? '' : ' top:0;'}">سبزی</th>`;
-  h += `<th style="${thBase} background:#1d4ed8; min-width:52px;${forPrint ? '' : ' position:sticky; top:0;'}">ٹوٹل سٹاک</th>`;
-  d.custs.forEach(c => { h += `<th style="${thBase} min-width:54px; max-width:80px; word-break:break-word;${forPrint ? '' : ' position:sticky; top:0;'}">${esc(c.name)}</th>`; });
-  if(d.hasOther) h += `<th style="${thBase} background:#92400e; min-width:50px;${forPrint ? '' : ' position:sticky; top:0;'}">نقد / دیگر</th>`;
-  h += `<th style="${thBase} background:#b91c1c; min-width:64px;${forPrint ? '' : ' position:sticky; top:0;'}">بچا ہوا سٹاک</th></tr></thead><tbody>`;
+  const pad = px(S.rowPad);
+  const nameLH = smDistIsNast(S.nameFont) ? 2.0 : 1.35;
+  const packLH = smDistIsNast(S.packFont) ? 1.9 : 1.3;
+  const headLH = smDistIsNast(S.headFont) ? 1.9 : 1.35;
+  const stk = forPrint ? '' : 'position:sticky; right:0; z-index:2;';
+  const thBase = `${bd} padding:${px(6)}px ${px(4)}px; background:${S.headBg}; color:${S.headColor}; font-family:${smDistFam(S.headFont)}; font-size:${px(S.headSize)}px; line-height:${headLH}; font-weight:900; text-align:center; vertical-align:middle;`;
+  const stkTop = forPrint ? '' : ' position:sticky; top:0;';
+  const cellW = Math.max(50, Math.round(Number(S.cellSize) * 2.8));
+  const custW = Math.max(60, Math.round(Number(S.headSize) * 5.2));
+  let h = `<table dir="rtl" style="border-collapse:collapse; width:${forPrint ? '100%' : 'max-content; min-width:100%'};"><thead><tr>`;
+  h += `<th style="${thBase} ${forPrint ? '' : 'position:sticky; right:0; top:0; z-index:4;'} min-width:${px(150)}px;">سبزی</th>`;
+  h += `<th style="${thBase} background:${S.stockBg}; min-width:${px(cellW + 8)}px;${stkTop}">ٹوٹل سٹاک</th>`;
+  d.custs.forEach(c => { h += `<th style="${thBase} min-width:${px(custW)}px; word-break:break-word;${stkTop}">${esc(c.name)}</th>`; });
+  if(d.hasOther) h += `<th style="${thBase} background:#92400e; min-width:${px(cellW)}px;${stkTop}">نقد / دیگر</th>`;
+  h += `<th style="${thBase} background:${S.leftBg}; min-width:${px(cellW + 14)}px;${stkTop}">بچا ہوا سٹاک</th></tr></thead><tbody>`;
   const counts = d.custs.map(() => 0);
+  const cs = `font-family:${smDistFam(S.cellFont)}; font-size:${px(S.cellSize)}px; font-weight:${S.cellWeight};`;
+  const dash = '<span style="color:#94a3b8;">—</span>';
+  const circD = Math.round(Number(S.nameSize) * 1.75 * k);
   d.rows.forEach((r, ri) => {
     const bg = ri % 2 ? '#f8fafc' : '#fff';
     const done = r.total > 0.0001 && Math.abs(r.remaining) <= 0.0001;
-    h += `<tr style="background:${done ? '#ecfdf5' : bg};">`;
-    h += `<td style="${bd} padding:4px 2px; text-align:center; font-size:11px; font-weight:900; background:${done ? '#ecfdf5' : bg}; ${stk(0)}">${r.serial == null || r.serial === '' ? '' : esc(r.serial)}</td>`;
-    h += `<td style="${bd} padding:4px 5px; text-align:right; font-size:12px; font-weight:900; white-space:nowrap; background:${done ? '#ecfdf5' : bg}; ${stk(30)}">${esc(r.name)}</td>`;
-    h += `<td style="${bd} padding:4px 3px; text-align:center; font-size:13px; font-weight:900; color:#1d4ed8;">${r.total > 0.0001 ? r.total : '<span style="color:#94a3b8;">—</span>'}</td>`;
+    const rb = done ? '#ecfdf5' : bg;
+    h += `<tr style="background:${rb};">`;
+    // 🔴 سیریل (گول دائرہ) + نام، نیچے الگ لائن میں پیکنگ
+    const circ = (r.serial == null || r.serial === '') ? '' : `<span style="flex:0 0 auto; width:${circD}px; height:${circD}px; border-radius:50%; background:${S.circle}; color:#fff; font:900 ${Math.max(9, Math.round(circD * 0.46))}px Arial,sans-serif; display:flex; align-items:center; justify-content:center; margin-left:${px(8)}px; box-shadow:0 1px 3px rgba(0,0,0,.35);">${esc(r.serial)}</span>`;
+    const pack = r.pack ? `<div style="font-family:${smDistFam(S.packFont)}; font-size:${px(S.packSize)}px; font-weight:${S.packWeight}; color:${S.packColor}; line-height:${packLH}; white-space:nowrap;">${esc(r.pack)}</div>` : '';
+    h += `<td style="${bd} padding:${pad}px ${px(8)}px; background:${rb}; ${stk} text-align:right;"><div style="display:flex; align-items:center;">${circ}<div style="min-width:0;"><div style="font-family:${smDistFam(S.nameFont)}; font-size:${px(S.nameSize)}px; font-weight:${S.nameWeight}; color:${S.nameColor}; line-height:${nameLH}; white-space:nowrap;">${esc(r.name)}</div>${pack}</div></div></td>`;
+    h += `<td style="${bd} padding:${pad}px ${px(4)}px; text-align:center; ${cs} color:${S.stockBg};">${r.total > 0.0001 ? r.total : dash}</td>`;
     r.cells.forEach((q, ci) => {
-      if(q > 0.0001){ counts[ci]++; h += `<td style="${bd} padding:4px 3px; text-align:center; font-size:13px; font-weight:900; color:#166534; background:#dcfce7;">${q}</td>`; }
-      else h += `<td style="${bd} padding:4px 3px; text-align:center; font-size:13px; color:#94a3b8;">—</td>`;
+      if(q > 0.0001){ counts[ci]++; h += `<td style="${bd} padding:${pad}px ${px(4)}px; text-align:center; ${cs} color:${S.cellColor}; background:${S.cellBg};">${q}</td>`; }
+      else h += `<td style="${bd} padding:${pad}px ${px(4)}px; text-align:center; ${cs} color:#94a3b8; font-weight:400;">—</td>`;
     });
-    if(d.hasOther) h += `<td style="${bd} padding:4px 3px; text-align:center; font-size:13px; font-weight:900; color:#92400e;">${r.oth > 0.0001 ? r.oth : '<span style="color:#94a3b8;">—</span>'}</td>`;
-    if(done) h += `<td style="${bd} padding:3px 3px; text-align:center; font-size:11px; font-weight:900; color:#166534; line-height:1.35;">✅ تقسیم شدہ<br><span style="font-size:10px;">${r.total} میں سے ${r.total}</span></td>`;
-    else if(r.remaining < -0.0001) h += `<td style="${bd} padding:4px 3px; text-align:center; font-size:13px; font-weight:900; color:#b91c1c; background:#fee2e2;">${r.remaining}</td>`;
-    else h += `<td style="${bd} padding:4px 3px; text-align:center; font-size:13px; font-weight:900; color:${r.total > 0.0001 ? '#b91c1c' : '#94a3b8'};">${r.total > 0.0001 || r.remaining > 0.0001 ? r.remaining : '—'}</td>`;
+    if(d.hasOther) h += `<td style="${bd} padding:${pad}px ${px(4)}px; text-align:center; ${cs} color:#92400e;">${r.oth > 0.0001 ? r.oth : dash}</td>`;
+    if(done) h += `<td style="${bd} padding:${pad}px ${px(4)}px; text-align:center; font-family:${smDistFam(S.headFont)}; font-size:${px(Math.max(11, S.headSize))}px; font-weight:900; color:#166534; line-height:${headLH};">✅ تقسیم شدہ<br><span style="font-family:Arial,sans-serif; font-size:${px(11)}px;">${r.total} میں سے ${r.total}</span></td>`;
+    else if(r.remaining < -0.0001) h += `<td style="${bd} padding:${pad}px ${px(4)}px; text-align:center; ${cs} color:#b91c1c; background:#fee2e2;">${r.remaining}</td>`;
+    else h += `<td style="${bd} padding:${pad}px ${px(4)}px; text-align:center; ${cs} color:${r.total > 0.0001 ? S.leftBg : '#94a3b8'};">${r.total > 0.0001 || r.remaining > 0.0001 ? r.remaining : '—'}</td>`;
     h += `</tr>`;
   });
-  h += `<tr style="background:#e2e8f0;"><td colspan="3" style="${bd} padding:5px; text-align:center; font-size:12px; font-weight:900; ${forPrint ? '' : 'position:sticky; right:0;'}">کتنی سبزیاں لیں</td>`;
-  counts.forEach(n => { h += `<td style="${bd} padding:5px 3px; text-align:center; font-size:13px; font-weight:900;">${n > 0 ? n : '—'}</td>`; });
+  h += `<tr style="background:#e2e8f0;"><td colspan="2" style="${bd} padding:${pad}px; text-align:center; font-family:${smDistFam(S.headFont)}; font-size:${px(S.headSize)}px; line-height:${headLH}; font-weight:900; ${forPrint ? '' : 'position:sticky; right:0;'}">کتنی سبزیاں لیں</td>`;
+  counts.forEach(n => { h += `<td style="${bd} padding:${pad}px ${px(4)}px; text-align:center; ${cs}">${n > 0 ? n : '—'}</td>`; });
   if(d.hasOther) h += `<td style="${bd}"></td>`;
   h += `<td style="${bd}"></td></tr></tbody></table>`;
   return h;
 }
+
+// ---------- سیٹنگ پینل (اوپر کھلتا ہے، رپورٹ اس کے نیچے ہی نظر آتی رہتی ہے) ----------
+function _sdFonts(label, key){
+  const S = smDistLoadStyle();
+  return `<div style="margin:6px 0 2px; font-size:12px; font-weight:900; color:#334155;">${label}</div><div style="display:flex; flex-wrap:wrap; gap:5px;">${SM_DIST_FONTS.map(f => `<button type="button" onclick="smDistSet('${key}','${f.id}')" style="padding:5px 9px; border-radius:9px; border:1.5px solid ${S[key] === f.id ? '#0f766e' : '#cbd5e1'}; background:${S[key] === f.id ? '#0f766e' : '#fff'}; color:${S[key] === f.id ? '#fff' : '#0f172a'}; font-family:${f.family}; font-size:13px; font-weight:800; cursor:pointer;">${f.label}</button>`).join('')}</div>`;
+}
+function _sdRange(label, key, min, max, step){
+  const S = smDistLoadStyle();
+  return `<div style="margin:6px 0 0; font-size:12px; font-weight:900; color:#334155;">${label}: <span id="sdv_${key}">${S[key]}</span></div><input type="range" min="${min}" max="${max}" step="${step}" value="${S[key]}" oninput="smDistSet('${key}', this.value)" style="width:100%;">`;
+}
+function _sdColor(label, key){
+  const S = smDistLoadStyle();
+  return `<label style="display:inline-flex; align-items:center; gap:5px; margin:4px 10px 0 0; font-size:12px; font-weight:900; color:#334155;"><input type="color" value="${S[key]}" oninput="smDistSet('${key}', this.value)" style="width:34px; height:28px; padding:0; border:none; border-radius:6px;">${label}</label>`;
+}
+function _sdBox(title, inner){ return `<div style="background:#fff; border:1.5px solid #e2e8f0; border-radius:11px; padding:7px 9px; margin-bottom:7px;"><div style="font-size:13.5px; font-weight:900; color:#0f766e;">${title}</div>${inner}</div>`; }
+function renderDistPanel(){
+  const p = document.getElementById('smDistPanel'); if(!p) return;
+  p.innerHTML =
+    _sdBox('📝 سبزی کا نام', _sdFonts('فونٹ', 'nameFont') + _sdRange('سائز', 'nameSize', 10, 34, 1) + _sdRange('موٹائی', 'nameWeight', 400, 900, 100) + _sdColor('لکھائی کا رنگ', 'nameColor')) +
+    _sdBox('📦 پیکنگ (دوسری لائن)', _sdFonts('فونٹ', 'packFont') + _sdRange('سائز', 'packSize', 9, 28, 1) + _sdRange('موٹائی', 'packWeight', 400, 900, 100) + _sdColor('لکھائی کا رنگ', 'packColor')) +
+    _sdBox('🔢 مقداروں والے خانے', _sdFonts('فونٹ', 'cellFont') + _sdRange('سائز', 'cellSize', 10, 34, 1) + _sdRange('موٹائی', 'cellWeight', 400, 900, 100) + _sdColor('لکھائی کا رنگ', 'cellColor') + _sdColor('خانے کا رنگ', 'cellBg')) +
+    _sdBox('🏷️ اوپر کی پٹی (کسٹمر نام)', _sdFonts('فونٹ', 'headFont') + _sdRange('سائز', 'headSize', 9, 28, 1) + _sdColor('پٹی کا رنگ', 'headBg') + _sdColor('لکھائی کا رنگ', 'headColor') + _sdColor('ٹوٹل سٹاک پٹی', 'stockBg') + _sdColor('بچا ہوا پٹی', 'leftBg')) +
+    _sdBox('⬜ ڈبوں کی شکل', _sdRange('قطار کی اونچائی', 'rowPad', 2, 26, 1) + _sdColor('نمبر کے دائرے کا رنگ', 'circle')) +
+    `<button type="button" onclick="smDistResetStyle()" style="width:100%; padding:8px; border:none; border-radius:10px; background:#fee2e2; color:#b91c1c; font-weight:900; font-size:13px; cursor:pointer;">↺ سب پہلے جیسا کر دیں</button>`;
+}
+function smDistSet(key, val){
+  const S = smDistLoadStyle();
+  S[key] = (typeof SM_DIST_DEFAULT[key] === 'number') ? Number(val) : val;
+  smDistSaveStyle();
+  const lbl = document.getElementById('sdv_' + key); if(lbl) lbl.textContent = S[key];
+  if(key.endsWith('Font')) renderDistPanel();
+  renderDistReport();
+}
+function smDistResetStyle(){
+  smDistStyle = Object.assign({}, SM_DIST_DEFAULT);
+  smDistSaveStyle(); renderDistPanel(); renderDistReport();
+}
+function smDistTogglePanel(){
+  const p = document.getElementById('smDistPanel'); if(!p) return;
+  const open = p.style.display === 'none';
+  p.style.display = open ? 'block' : 'none';
+  if(open) renderDistPanel();
+}
+
 let smDistTimer = null;
 function ensureDistReportModal(){
   if(document.getElementById('smDistOverlay')) return;
   const el = document.createElement('div');
   el.id = 'smDistOverlay';
   el.style.cssText = 'display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:10060; background:#fff; flex-direction:column;';
-  el.innerHTML = `<div dir="rtl" style="display:flex; align-items:center; gap:6px; padding:8px; background:#0f766e; color:#fff;">
-      <button type="button" onclick="closeDistReport()" style="flex:0 0 auto; padding:7px 12px; border:none; border-radius:9px; background:#fff; color:#0f766e; font-weight:900; font-size:14px; cursor:pointer;">✖ بند</button>
-      <div style="flex:1; text-align:center; font-weight:900; font-size:15px; line-height:1.4;">📊 آج کی سبزی کس کس کسٹمر کو دی گئی</div>
-      <button type="button" onclick="printDistReport()" style="flex:0 0 auto; padding:7px 10px; border:none; border-radius:9px; background:#fff; color:#0f766e; font-weight:900; font-size:14px; cursor:pointer;">🖨️ پرنٹ</button>
+  el.innerHTML = `<div dir="rtl" style="display:flex; align-items:center; gap:6px; padding:8px; background:#0f766e; color:#fff; font-family:${smDistFam('nast')};">
+      <button type="button" onclick="closeDistReport()" style="flex:0 0 auto; padding:7px 12px; border:none; border-radius:9px; background:#fff; color:#0f766e; font-weight:900; font-size:14px; cursor:pointer; font-family:${smDistFam('nast')};">✖ بند</button>
+      <div style="flex:1; text-align:center; font-weight:900; font-size:15px; line-height:1.9;">📊 آج کی سبزی کس کس کسٹمر کو دی گئی</div>
+      <button type="button" onclick="printDistReport()" style="flex:0 0 auto; padding:7px 10px; border:none; border-radius:9px; background:#fff; color:#0f766e; font-weight:900; font-size:14px; cursor:pointer; font-family:${smDistFam('nast')};">🖨️ پرنٹ</button>
     </div>
-    <div id="smDistInfo" dir="rtl" style="padding:5px 8px; font-size:12px; font-weight:800; color:#334155; background:#f1f5f9; text-align:center;"></div>
-    <div id="smDistWrap" dir="rtl" style="flex:1 1 auto; overflow:auto; -webkit-overflow-scrolling:touch; padding:0;"></div>`;
+    <div dir="rtl" style="display:flex; align-items:center; gap:6px; padding:4px 8px; background:#f1f5f9;">
+      <div id="smDistInfo" style="flex:1; font-size:13px; font-weight:800; color:#334155; text-align:center; font-family:${smDistFam('nast')}; line-height:1.9;"></div>
+      <button type="button" onclick="smDistTogglePanel()" style="flex:0 0 auto; padding:6px 10px; border:none; border-radius:9px; background:#7c3aed; color:#fff; font-weight:900; font-size:13px; cursor:pointer; font-family:${smDistFam('nast')};">🎨 سیٹنگ</button>
+    </div>
+    <div id="smDistPanel" dir="rtl" style="display:none; flex:0 0 auto; max-height:46vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:8px; background:#f8fafc; border-bottom:3px solid #7c3aed; font-family:${smDistFam('nast')}; line-height:1.8;"></div>
+    <div id="smDistWrap" dir="rtl" style="flex:1 1 auto; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; padding:0;"></div>`;
   document.body.appendChild(el);
 }
 function renderDistReport(){
@@ -30101,7 +30194,7 @@ function renderDistReport(){
   const d = smDistCompute();
   const info = document.getElementById('smDistInfo');
   if(info) info.textContent = `📅 ${bizFmt(d.day)}  •  حاضر سبزیاں: ${d.rows.length}  •  کل کسٹمر: ${d.custs.length}`;
-  wrap.innerHTML = d.rows.length ? smDistTableHtml(d, false) : '<div style="padding:30px; text-align:center; font-weight:900; color:#64748b;">کوئی حاضر سبزی نہیں ہے</div>';
+  wrap.innerHTML = d.rows.length ? smDistTableHtml(d, false) : '<div style="padding:30px; text-align:center; font-weight:900; color:#64748b; font-family:' + smDistFam('nast') + '; line-height:2;">کوئی حاضر سبزی نہیں ہے</div>';
 }
 function openDistReport(){
   ensureDistReportModal();
@@ -30119,7 +30212,8 @@ function printDistReport(){
   const d = smDistCompute();
   const w = window.open('', '_blank');
   if(!w){ alert('پرنٹ والی ونڈو نہیں کھل سکی — براؤزر میں پاپ اپ کی اجازت دیں'); return; }
-  w.document.write(`<!DOCTYPE html><html lang="ur" dir="rtl"><head><meta charset="utf-8"><title>آج کی سبزی کس کس کسٹمر کو دی گئی</title><style>@page{size:A4 landscape;margin:8mm} body{font-family:Arial,sans-serif;margin:0} h2{text-align:center;margin:4px 0;font-size:16px} .sub{text-align:center;font-size:11px;margin-bottom:6px} th,td{font-size:10px !important}</style></head><body><h2>آج کی سبزی کس کس کسٹمر کو دی گئی</h2><div class="sub">${bizFmt(d.day)}</div>${smDistTableHtml(d, true)}<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
+  const nf = smDistFam('nast');
+  w.document.write(`<!DOCTYPE html><html lang="ur" dir="rtl"><head><meta charset="utf-8"><title>آج کی سبزی کس کس کسٹمر کو دی گئی</title><style>@page{size:A4 landscape;margin:8mm} body{font-family:${nf};margin:0} h2{text-align:center;margin:4px 0;font-size:18px;line-height:1.9} .sub{text-align:center;font-size:12px;margin-bottom:6px}</style></head><body><h2>آج کی سبزی کس کس کسٹمر کو دی گئی</h2><div class="sub">${bizFmt(d.day)}</div>${smDistTableHtml(d, true)}<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
   w.document.close();
 }
 
