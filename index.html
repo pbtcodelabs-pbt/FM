@@ -8931,7 +8931,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM810TH341'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM810TH343'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -14740,9 +14740,9 @@ function renderCartCustomerStatus(){
 
   if(customer){
     statusText.innerHTML = `👤 ${customer.name} <span style="font-weight:500; color:var(--muted); font-size:11.5px;">${customer.area ? '(' + customer.area + ')' : ''}</span>`;
-    endBtn.style.display = 'inline-block';
+    endBtn.style.display = 'none'; // 🔒 اب "نقد گاہک" پر واپس جانے کا راستہ نہیں
   } else {
-    statusText.innerHTML = '🚶 نقد گاہک <span style="font-weight:500; color:var(--muted); font-size:11.5px;">(بل پر نام نہیں)</span>';
+    statusText.innerHTML = '<span style="color:#b91c1c; font-weight:900;">⚠️ کسٹمر کا نام چنیں — بغیر نام بل نہیں بنے گا</span>';
     endBtn.style.display = 'none';
   }
 }
@@ -15084,8 +15084,20 @@ function generateBillNumbers(){
 
 // ---------- بل مکمل (Complete) کرنے سے پہلے کبھی بھی دیکھ سکیں کہ بل بالکل ویسا ہی بن رہا ہے جیسا چاہیے —
 // کوئی آئٹم ڈپلیکیٹ تو نہیں، کوئی ریٹ غلط تو نہیں۔ یہ اصل بل کا حصہ نہیں بنتا، صرف پریویو ہے ----------
+
+// ---------- 🔒 FM810TH343 (ہدایت): نقد/بغیر نام کسٹمر ختم — ہر بل کسی چنے ہوئے کسٹمر کے نام پر ہی بنے گا ----------
+function requireBillCustomer(){
+  const cid = document.getElementById('customerSelect')?.value;
+  const c = cid ? customersData.find(x => x.customer_id == cid) : null;
+  if(c) return c;
+  alert('⚠️ کسٹمر کا نام فیڈ کریں — بغیر نام کے بل آگے نہیں بن سکتا۔\nاوپر والی فہرست سے کسٹمر چنیں۔');
+  try{ openCustomerList(); }catch(e){}
+  try{ const t = document.getElementById('customerTriggerBox') || document.getElementById('customerSelectListWrap'); if(t && t.scrollIntoView) t.scrollIntoView({block:'center'}); }catch(e){}
+  return null;
+}
 async function openBillPreviewBeforeComplete(){
   if(Billing.cart.length === 0){ alert('بل خالی ہے — اوپر سے سبزی چنیں'); return; }
+  if(!requireBillCustomer()) return;
   const custId = document.getElementById('customerSelect').value;
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
@@ -15199,16 +15211,7 @@ function finalizeInvoice(){
   // اسی وجہ سے پوری رقم وصول ہو جانے کے باوجود بھی کسٹمر کا نام مانگا جاتا رہا (کیونکہ ٹوگل کسی وجہ سے درست
   // حالت میں نہیں تھا)۔ اب اصل بقایہ رقم دیکھ کر فیصلہ کریں — یہی حتمی سچائی ہے، ٹوگل کی پروا نہیں ---------- -->
   const willRemainPending = rawReceivedForCheck < grandTotal;
-  if(!customer && willRemainPending){
-    document.getElementById('qccName').value = '';
-    document.getElementById('qccPhone').value = '';
-    document.getElementById('quickCreditCustomerModal').classList.add('show');
-    return;
-  }
-  if(!customer && !willRemainPending){
-    // ---------- پیمنٹ مکمل ہو چکی ہے — کسٹمر کا نام لازمی نہیں، صرف ہلکی سی تصدیق کر کے بل پرنٹ ہونے دیں ----------
-    if(!confirm('کسٹمر کا نام درج نہیں کیا گیا — لیکن پیمنٹ مکمل ہو چکی ہے۔\nاسی طرح Walk-in Customer کے نام سے بل پرنٹ کر دیا جائے؟')) return;
-  }
+  if(!customer){ requireBillCustomer(); return; } // 🔒 بغیر نام بل کبھی نہیں
 
   // ---------- پیمنٹ خودکار طے ہوتی ہے — بلنگ کے دوران کوئی انتخاب نہیں کرنا پڑتا ----------
   // Counter Sale: فوری نقد، کوئی کسٹمر اکاؤنٹ متاثر نہیں ہوتا (جب تک پوری رقم ادا ہو)۔
@@ -28704,7 +28707,7 @@ function applyAdvOrderRateMode(mode){
 async function saveAdvanceOrder(){
   if(advOrderCart.length === 0){ alert('Please add at least one item.'); return; }
   const customerName = document.getElementById('advCustomerName').value.trim();
-  if(!customerName){ alert('Please enter the customer\'s name.'); return; }
+  if(!customerName){ alert('⚠️ کسٹمر کا نام فیڈ کریں — بغیر نام آرڈر نہیں بھیجا جا سکتا۔'); return; }
   const customerPhone = document.getElementById('advCustomerPhone').value.trim();
   const note = document.getElementById('advOrderNote').value.trim();
 
@@ -32720,6 +32723,7 @@ function fulfillAdvanceOrder(orderId){
   if(skippedCustom.length > 0){
     msg += `\n\n⚠️ ${skippedCustom.length} custom/rough item(s) were not in inventory and were skipped — add them manually: ${skippedCustom.map(i=>i.name).join(', ')}`;
   }
+  if(!matchedCustomer){ msg = '⚠️ اس آرڈر میں کسٹمر کا نام فہرست سے نہیں ملا — پہلے کسٹمر کا نام فیڈ کریں، اس کے بغیر بل آگے نہیں جائے گا۔\n\n' + msg; setTimeout(() => { try{ openCustomerList(); }catch(e){} }, 300); }
   alert(msg);
 }
 
@@ -40082,6 +40086,46 @@ function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   return bottom;
 }
 
+
+// ---------- 💌 FM810TH342 (صدام کی ہدایت): بل کے نیچے کسٹمر کے نام کے ساتھ درخواست کا پیغام (فوٹر) ----------
+function _wishLayout(ctx, F, boxW, invoice){
+  const nm = String(invoice.customer_name || '').trim();
+  if(!invoice.customer_id || !nm) return null;
+  const msg = 'ہماری درخواست ہے کہ اپنی ضرورت اور سیل کے مطابق آرڈر لکھوائیں، تاکہ آپ کو روزانہ تازہ سٹاک ملے اور پیمنٹ کرنا بھی آسان ہو۔';
+  ctx.font = F('bold 15px');
+  const maxW = boxW - 24, lines = []; let cur = '';
+  msg.split(' ').forEach(w => {
+    const t = cur ? cur + ' ' + w : w;
+    if(cur && ctx.measureText(t).width > maxW){ lines.push(cur); cur = w; } else cur = t;
+  });
+  if(cur) lines.push(cur);
+  const lh = Math.round(parseFloat(F('15px')) * 1.9);
+  const headH = Math.round(parseFloat(F('15px')) * 1.9) + Math.round(parseFloat(F('22px')) * 1.9) + 10;
+  return { nm, lines, lh, headH, h: headH + lines.length * lh + 14 };
+}
+function _drawWishBox(ctx, F, L, R, top, W, rc){
+  if(!W) return top;
+  const cx = (L + R) / 2;
+  ctx.strokeStyle = rc.border; ctx.lineWidth = 2;
+  ctx.strokeRect(L + 0.5, top + 0.5, R - L, W.h);
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+  ctx.strokeRect(L + 4.5, top + 4.5, R - L - 8, W.h - 8);
+  ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+  let y = top + 6 + Math.round(parseFloat(F('15px')) * 1.5);
+  ctx.font = F('bold 15px');
+  ctx.fillText('محترم بھائی', cx, y);
+  y += Math.round(parseFloat(F('22px')) * 1.55);
+  let sz = 22; ctx.font = F('bold ' + sz + 'px');
+  while(ctx.measureText(W.nm).width > (R - L) - 30 && sz > 11){ sz -= 1; ctx.font = F('bold ' + sz + 'px'); }
+  ctx.fillText(W.nm, cx, y);
+  y += 10;
+  ctx.beginPath(); ctx.moveTo(L + 24, y); ctx.lineTo(R - 24, y); ctx.stroke();
+  y += 4;
+  ctx.font = F('bold 15px');
+  W.lines.forEach(t => { y += W.lh; ctx.fillText(t, cx, y - Math.round(W.lh * 0.25)); });
+  return top + W.h;
+}
+
 async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchKey = null){
   const canvas0 = document.getElementById('invoiceCanvas');
   try{
@@ -40252,6 +40296,8 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   estimatedHeight += Math.max(summaryBlockH, accountBlockH) + 24; // ---------- اب دونوں ساتھ ساتھ ہیں، جمع نہیں کرنے، جو بھی اونچا ہو وہی حساب میں شمار ----------
   const totalReturnedAmt = invoice.items.reduce((s,i) => s + (i.returnAmount||0), 0);
   if(totalReturnedAmt > 0) estimatedHeight += 44; // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
+  const _wishW = _wishLayout(ctx, F, pxWidth - 16, invoice);
+  if(_wishW) estimatedHeight += _wishW.h + 16;
   estimatedHeight += 34; // Grand Total لائن
   if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += 16;
   if(AppState.settings.printShowBranding) estimatedHeight += 20;
@@ -40660,6 +40706,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     summaryBottom = _drawYesterdayBox(ctx, FP, colX[0], tableRight, _t, _payLay, rc, _bw, fscale);
   }
   y = Math.max(summaryBottom, accountBottom, paymentBoxTop) + 24;
+  { const _w = _wishLayout(ctx, F, pxWidth - 16, invoice); if(_w){ y = _drawWishBox(ctx, F, 8, pxWidth - 8, y, _w, rc) + 26; } }
 
   ctx.textAlign = 'center';
   ctx.font = F('13px');
