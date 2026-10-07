@@ -8928,7 +8928,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM710WE330'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM710WE331'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -19462,7 +19462,8 @@ function renderChSupplierPickList(query){
       <span style="display:inline-block; width:fit-content; max-width:70%; padding:3px 12px; border-radius:999px; background:linear-gradient(180deg,#e0f2fe,#bae6fd); color:#0c4a6e; font-size:15px; line-height:1.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
       ${balHtml}
     </div>`;
-  let html = '';
+  // ➕ FM710WE331 (صدام کی ہدایت): یہیں سے نیا بیوپاری — نام لازمی، موبائل اختیاری — اور فوراً اسی چالان پر لگ جائے
+  let html = `<div onclick="chOpenNewSupplierForm()" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 10px; margin-bottom:8px; border-radius:12px; cursor:pointer; background:#f0fdf4; border:2px dashed #16a34a; color:#15803d; font-size:17px; font-weight:700;">➕ نیا بیوپاری شامل کریں</div>`;
   if(!q || 'نقد'.includes(q)) html += row('cash', '💵 نقد خریداری', '', cur === 'cash');
   (suppliersData || []).slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
     if(q && !s.name.toLowerCase().includes(q)) return;
@@ -19474,6 +19475,58 @@ function renderChSupplierPickList(query){
   });
   wrap.innerHTML = html || `<div style="text-align:center; color:var(--muted); padding:14px 0;">کوئی بیوپاری نہیں ملا</div>`;
 }
+
+// ---------- ➕ FM710WE331: چالان کے بیوپاری چناؤ سے نیا بیوپاری (نام + اختیاری موبائل) ----------
+function chOpenNewSupplierForm(){
+  const urF = "'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif";
+  let ov = document.getElementById('chNewSupOverlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'chNewSupOverlay'; document.body.appendChild(ov); }
+  ov.style.cssText = 'position:fixed; inset:0; z-index:10080; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; padding:16px;';
+  const pre = (document.getElementById('chSupplierPickSearch')?.value || '').trim().replace(/"/g, '&quot;');
+  const inp = 'width:100%; box-sizing:border-box; height:48px; margin-top:6px; border:2px solid #cbd5e1; border-radius:12px; padding:0 12px; font-size:18px;';
+  ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:380px; background:#fff; border-radius:18px; overflow:hidden; font-family:${urF}; box-shadow:0 18px 50px rgba(0,0,0,.35);">
+    <div style="background:linear-gradient(135deg,#16a34a,#14532d); color:#fff; padding:10px 14px; font-size:21px; font-weight:700; text-align:center; line-height:1.9;">➕ نیا بیوپاری</div>
+    <div style="padding:10px 14px;">
+      <div style="font-size:16px; font-weight:700;">بیوپاری کا نام <span style="color:#dc2626;">*</span></div>
+      <input id="chNewSupName" type="text" value="${pre}" placeholder="مثلاً حاجی اکرم" autocomplete="off" style="${inp} font-family:${urF};">
+      <div style="font-size:16px; font-weight:700; margin-top:10px;">موبائل نمبر <span style="color:#64748b; font-size:13px;">(اختیاری)</span></div>
+      <input id="chNewSupPhone" type="tel" inputmode="tel" placeholder="03XXXXXXXXX" autocomplete="off" style="${inp} font-family:Arial,sans-serif; direction:ltr; text-align:center;">
+      <div id="chNewSupErr" style="display:none; color:#b91c1c; font-size:15px; margin-top:6px;"></div>
+    </div>
+    <div style="display:flex; gap:8px; padding:4px 14px 14px;">
+      <button type="button" onclick="document.getElementById('chNewSupOverlay').style.display='none'" style="flex:1; height:46px; border:none; border-radius:14px; background:#e2e8f0; color:#334155; font-family:${urF}; font-size:18px; font-weight:700;">✖ واپس</button>
+      <button type="button" onclick="chSaveNewSupplier()" style="flex:1.4; height:46px; border:none; border-radius:14px; background:linear-gradient(135deg,#16a34a,#14532d); color:#fff; font-family:${urF}; font-size:18px; font-weight:700;">✅ محفوظ کر کے لگائیں</button>
+    </div></div>`;
+  setTimeout(() => { const n = document.getElementById('chNewSupName'); if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 60);
+}
+function chSaveNewSupplier(){
+  const name = (document.getElementById('chNewSupName')?.value || '').trim().replace(/\s+/g, ' ');
+  const phone = (document.getElementById('chNewSupPhone')?.value || '').replace(/[^\d+]/g, '');
+  const err = document.getElementById('chNewSupErr');
+  const say = m => { if(err){ err.textContent = m; err.style.display = 'block'; } };
+  if(!name){ say('⚠️ بیوپاری کا نام لکھیں'); return; }
+  const dup = (suppliersData || []).find(x => String(x.name || '').trim().toLowerCase() === name.toLowerCase());
+  if(dup){
+    // پہلے سے موجود — نیا نہ بنائیں، وہی لگا دیں
+    document.getElementById('chNewSupOverlay').style.display = 'none';
+    pickChSupplier(dup.supplier_id);
+    try{ uAlert('ℹ️ پہلے سے موجود', `"${name}" پہلے سے لسٹ میں ہے — وہی اس چالان پر لگا دیا گیا۔`, 'amber'); }catch(e){}
+    return;
+  }
+  const serial = (suppliersData || []).reduce((m, x) => Math.max(m, Number(x.serial_no) || 0), 0) + 1;
+  nextSupplierId = Math.max(Number(nextSupplierId) || 1, (suppliersData || []).reduce((m, x) => Math.max(m, Number(x.supplier_id) || 0), 0) + 1); // نمبر کبھی نہ ٹکرائے
+  const sup = { supplier_id: nextSupplierId++, name, phone, address: '', area: '', keywords: '', photo: null,
+    openingBalance: 0, total_payable: 0, wallet_balance: 0, ledgerHistory: [], purchaseHistory: [],
+    createdAt: new Date().toISOString(), serial_no: serial };
+  suppliersData.push(sup);
+  try{ backfillMissingSupplierSerials(); }catch(e){}
+  persistAllData();
+  try{ pushSuppliersToCloud(); }catch(e){}
+  document.getElementById('chNewSupOverlay').style.display = 'none';
+  pickChSupplier(sup.supplier_id);
+  try{ renderChSupplierPickList(''); }catch(e){}
+}
+
 function pickChSupplier(val){
   const b = document.getElementById('chSrc_' + _chSupplierPickKey);
   if(b){ b.dataset.value = String(val); b.textContent = _chSrcLabel(String(val)) + ' ▾'; }
