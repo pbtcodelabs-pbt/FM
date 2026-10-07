@@ -8931,7 +8931,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM810TH338'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM810TH339'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -30144,6 +30144,7 @@ window.addEventListener('resize', pdFitLists);
 if(window.visualViewport){ window.visualViewport.addEventListener('resize', pdFitLists); window.visualViewport.addEventListener('scroll', pdFitLists); }
 document.addEventListener('focusin', () => { setTimeout(pdFitLists, 50); setTimeout(pdFitLists, 350); });
 setInterval(pdFitLists, 600);
+let pdOptMap = {}, pdOptRow = {}; // ⚡ فوری اپڈیٹ: ابھی محفوظ ہوتی مقدار کا عارضی فرق
 let pdVariantId = null;      // چنی ہوئی سبزی
 let pdChalanNo = null;       // چنا ہوا چالان (null = اس سبزی کا کوئی چالان نہیں)
 let pdShowAll = false;       // false = صرف جن کا مال/بکنگ ہے
@@ -30319,15 +30320,14 @@ function renderPdVariantHeader(){
   // خلاصہ — موجودہ چنے چالان کا (یا چالان نہ ہو تو پوری سبزی کا)
   let total, booked, label;
   const cc = pdChalanNo != null ? (v.chalans || []).find(c => c.chalanNo === pdChalanNo) : null;
-  if(cc){ total = Number(cc.qty) || 0; booked = rm[cc.chalanNo] || 0; label = `چالان ${cc.chalanNo}`; }
-  else { total = Number(v.stock) || 0; booked = Number(v.reserved) || 0; label = 'کل مال'; }
+  if(cc){ total = Number(cc.qty) || 0; booked = (rm[cc.chalanNo] || 0) + (pdOptMap[pdVariantId + ':' + cc.chalanNo] || 0); label = `چالان ${cc.chalanNo}`; }
+  else { total = Number(v.stock) || 0; booked = (Number(v.reserved) || 0) + (pdOptMap[pdVariantId + ':'] || 0); label = 'کل مال'; }
   const free = _chRound(total - booked);
-  const box = (t, n, col) => `<div style="flex:1; text-align:center; padding:5px 2px;"><div style="font:900 20px Arial,sans-serif; color:${col};">${n}</div><div style="font-size:11px; color:#475569; font-weight:800;">${t}</div></div>`;
-  sum.innerHTML = `<div style="display:flex; border:2px solid #0369a1; border-radius:12px; background:#f0f9ff; overflow:hidden;">
-      ${box(label + ' میں مال', _chRound(total), '#0f172a')}
-      ${box('بانٹ دیا', _chRound(booked), '#0369a1')}
-      ${box(free < 0 ? 'کمی' : 'ابھی بچا', free, free > 0 ? '#15803d' : (free < 0 ? '#b91c1c' : '#64748b'))}
-    </div>` + ((free === 0 && total > 0) ? `<div style="margin-top:6px; padding:8px; border-radius:10px; background:#dcfce7; color:#166534; font-weight:900; text-align:center; font-size:14px;">✅ یہ مال پورا تقسیم ہو گیا — <span onclick="pdBackToProducts()" style="text-decoration:underline; cursor:pointer;">اگلی سبزی/چالان چنیں ◀</span></div>` : '');
+  const box = (t, n, col, bg) => `<div style="flex:1; text-align:center; padding:3px 2px; border-radius:9px; background:${bg}; border:1.5px solid ${col};"><div style="font:900 17px/1.2 Arial,sans-serif; color:${col};">${n}</div><div style="font-size:10.5px; color:${col}; font-weight:900; line-height:1.3;">${t}</div></div>`;
+  sum.innerHTML = `<div dir="rtl" style="display:flex; gap:5px;">${box('آیا ہوا سٹاک', _chRound(total), '#15803d', '#dcfce7')}${box('تقسیم ہوا', _chRound(booked), '#1d4ed8', '#dbeafe')}${box(free < 0 ? 'کمی' : 'بچا ہوا سٹاک', free, '#b91c1c', '#fee2e2')}</div>`;
+  if(free === 0 && total > 0){ // ✅ پورا تقسیم — اگلی سبزی/چالان کا بٹن چالان کارڈ کے ساتھ، عنبر (پیلے) رنگ میں
+    bar.innerHTML += `<button type="button" onclick="pdBackToProducts()" style="flex:1 0 auto; min-width:120px; padding:6px 10px; border-radius:11px; border:2px solid #d97706; background:linear-gradient(180deg,#fde68a,#fbbf24); color:#78350f; font-weight:900; font-size:13px; line-height:1.4; cursor:pointer;">✅ پورا تقسیم ہو گیا<br>اگلی سبزی/چالان چنیں ◀</button>`;
+  }
 }
 function renderPdCustList(){
   const wrap = document.getElementById('pdCustListWrap');
@@ -30413,14 +30413,24 @@ function pdOnQtyChange(el){
     return;
   }
   const q = _chRound(q0);
+  const _rk = cid + ':' + vid + ':' + (ch == null ? '' : ch), _vk = vid + ':' + (ch == null ? '' : ch);
+  const _base = (pdOptRow[_rk] !== undefined) ? pdOptRow[_rk].q : pdCurQty(pdFindOpenDraft(cid), vid, ch);
+  const _d0 = _chRound(q - _base);
+  const _r = pdOptRow[_rk] || (pdOptRow[_rk] = {q: q, n: 0}); _r.q = q; _r.n++;
+  pdOptMap[_vk] = _chRound((pdOptMap[_vk] || 0) + _d0);
+  let _fin = false;
+  const _done = () => { if(_fin) return; _fin = true; pdOptMap[_vk] = _chRound((pdOptMap[_vk] || 0) - _d0); if(--_r.n <= 0) delete pdOptRow[_rk]; };
+  if(same()) renderPdVariantHeader(); // ⚡ اوپر کا خلاصہ فوراً بدلے
   if(row) row.style.opacity = '.55';
   pdQueue = pdQueue.then(() => pdApplyQty(cid, q, vid, ch)).then(res => {
+    _done();
     if(row) row.style.opacity = '';
     if(res && res.ok === false){ el.value = res.keep ? res.keep : ''; if(same()) pdMsg(res.msg || '❌ محفوظ نہیں ہوا', 'err'); }
     else if(res && !res.same){ el.value = q > 0 ? q : ''; if(same()) pdMsg(q > 0 ? '✅ محفوظ' : '🗑️ ہٹا دیا', 'ok'); }
     if(same()){ pdRefreshRow(cid); renderPdVariantHeader(); }
   }).catch(err => {
     if(row) row.style.opacity = '';
+    _done();
     console.error('pdOnQtyChange', err);
     if(same()){ pdMsg('❌ محفوظ کرنے میں خرابی — دوبارہ کوشش کریں', 'err'); pdRefreshRow(cid); }
   });
