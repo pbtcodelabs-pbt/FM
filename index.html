@@ -8895,7 +8895,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM810TH334'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM810TH335'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -19491,8 +19491,9 @@ function chOpenNewSupplierForm(){
 // ---------- 📇 فون بک سے ایک ٹچ پر بیوپاری: نام + نمبر دونوں اٹھائے، خانوں میں بھرے، اور فوراً محفوظ کر کے چالان پر لگا دے ----------
 async function chPickSupplierFromPhonebook(){
   const err = document.getElementById('chNewSupErr');
-  const say = m => { if(err){ err.textContent = m; err.style.display = 'block'; } };
-  if(!('contacts' in navigator && 'ContactsManager' in window)){
+  const say = (m, ok) => { if(err){ err.textContent = m; err.style.color = ok ? '#15803d' : '#b91c1c'; err.style.display = 'block'; } };
+  if(err) err.style.display = 'none';
+  if(!(navigator.contacts && typeof navigator.contacts.select === 'function')){
     say('⚠️ اس فون/براؤزر میں فون بک کھولنے کی سہولت نہیں — نام اور نمبر خود لکھ دیں');
     return;
   }
@@ -19500,11 +19501,14 @@ async function chPickSupplierFromPhonebook(){
   try{
     picked = await navigator.contacts.select(['name', 'tel'], {multiple: false});
   }catch(e){
-    return; // یوزر نے منسوخ کر دیا
+    if(e && e.name === 'AbortError') return; // یوزر نے خود منسوخ کیا
+    // ---------- پہلے یہاں خرابی چپ چاپ نگل لی جاتی تھی، اس لیے کچھ ہوتا نظر ہی نہیں آتا تھا — اب وجہ صاف دکھے گی ----------
+    say('⚠️ فون بک نہیں کھل سکی (' + ((e && e.name) || 'خرابی') + ') — نام اور نمبر خود لکھ دیں');
+    return;
   }
-  if(!picked || !picked.length) return;
+  if(!picked || !picked.length) return; // کوئی کانٹیکٹ نہیں چنا
   const c = picked[0] || {};
-  const nm = (c.name && c.name.length ? String(c.name[0] || '') : '').trim().replace(/\s+/g, ' ');
+  const nm = ((c.name && c.name.length ? String(c.name.find(x => String(x || '').trim()) || '') : '')).trim().replace(/\s+/g, ' ');
   let tel = '';
   if(c.tel && c.tel.length){
     // پہلا ایسا نمبر جس میں ہندسے ہوں؛ +92 / 0092 / 92 کو مقامی 03XXXXXXXXX شکل میں بدلیں
@@ -19518,7 +19522,9 @@ async function chPickSupplierFromPhonebook(){
   if(nEl && nm) nEl.value = nm;
   if(pEl) pEl.value = tel;
   if(!nm){ say('⚠️ اس کانٹیکٹ کا نام خالی ہے — نام لکھ کر محفوظ کریں'); if(nEl) nEl.focus(); return; }
-  chSaveNewSupplier(); // ایک ہی ٹچ — فوراً محفوظ + چالان پر لگ جائے
+  // ---------- نام اور نمبر پہلے خانوں میں صاف نظر آئیں، پھر ذرا سی دیر بعد خود محفوظ ہو کر چالان پر لگ جائے ----------
+  say('✅ ' + nm + (tel ? ' — ' + tel : '') + ' چن لیا گیا، لگایا جا رہا ہے…', true);
+  setTimeout(() => { if(document.getElementById('chNewSupOverlay')?.style.display !== 'none') chSaveNewSupplier(); }, 900);
 }
 function chSaveNewSupplier(){
   const name = (document.getElementById('chNewSupName')?.value || '').trim().replace(/\s+/g, ' ');
