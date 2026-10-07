@@ -8928,7 +8928,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM710WE331'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM710WE332'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -19487,6 +19487,7 @@ function chOpenNewSupplierForm(){
   ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:380px; background:#fff; border-radius:18px; overflow:hidden; font-family:${urF}; box-shadow:0 18px 50px rgba(0,0,0,.35);">
     <div style="background:linear-gradient(135deg,#16a34a,#14532d); color:#fff; padding:10px 14px; font-size:21px; font-weight:700; text-align:center; line-height:1.9;">➕ نیا بیوپاری</div>
     <div style="padding:10px 14px;">
+      <button type="button" onclick="chPickSupplierFromPhonebook()" style="width:100%; height:50px; margin-bottom:10px; border:2px solid #16a34a; border-radius:14px; background:#f0fdf4; color:#15803d; font-family:${urF}; font-size:19px; font-weight:700; cursor:pointer;">📇 فون بک سے چنیں (ایک ٹچ پر محفوظ)</button>
       <div style="font-size:16px; font-weight:700;">بیوپاری کا نام <span style="color:#dc2626;">*</span></div>
       <input id="chNewSupName" type="text" value="${pre}" placeholder="مثلاً حاجی اکرم" autocomplete="off" style="${inp} font-family:${urF};">
       <div style="font-size:16px; font-weight:700; margin-top:10px;">موبائل نمبر <span style="color:#64748b; font-size:13px;">(اختیاری)</span></div>
@@ -19498,6 +19499,38 @@ function chOpenNewSupplierForm(){
       <button type="button" onclick="chSaveNewSupplier()" style="flex:1.4; height:46px; border:none; border-radius:14px; background:linear-gradient(135deg,#16a34a,#14532d); color:#fff; font-family:${urF}; font-size:18px; font-weight:700;">✅ محفوظ کر کے لگائیں</button>
     </div></div>`;
   setTimeout(() => { const n = document.getElementById('chNewSupName'); if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 60);
+}
+// ---------- 📇 فون بک سے ایک ٹچ پر بیوپاری: نام + نمبر دونوں اٹھائے، خانوں میں بھرے، اور فوراً محفوظ کر کے چالان پر لگا دے ----------
+async function chPickSupplierFromPhonebook(){
+  const err = document.getElementById('chNewSupErr');
+  const say = m => { if(err){ err.textContent = m; err.style.display = 'block'; } };
+  if(!('contacts' in navigator && 'ContactsManager' in window)){
+    say('⚠️ اس فون/براؤزر میں فون بک کھولنے کی سہولت نہیں — نام اور نمبر خود لکھ دیں');
+    return;
+  }
+  let picked;
+  try{
+    picked = await navigator.contacts.select(['name', 'tel'], {multiple: false});
+  }catch(e){
+    return; // یوزر نے منسوخ کر دیا
+  }
+  if(!picked || !picked.length) return;
+  const c = picked[0] || {};
+  const nm = (c.name && c.name.length ? String(c.name[0] || '') : '').trim().replace(/\s+/g, ' ');
+  let tel = '';
+  if(c.tel && c.tel.length){
+    // پہلا ایسا نمبر جس میں ہندسے ہوں؛ +92 / 0092 / 92 کو مقامی 03XXXXXXXXX شکل میں بدلیں
+    let raw = String(c.tel.find(t => /\d/.test(String(t))) || c.tel[0] || '').replace(/[^0-9]/g, '');
+    if(raw.startsWith('0092')) raw = '0' + raw.slice(4);
+    else if(raw.startsWith('92') && raw.length >= 12) raw = '0' + raw.slice(2);
+    tel = raw;
+  }
+  const nEl = document.getElementById('chNewSupName');
+  const pEl = document.getElementById('chNewSupPhone');
+  if(nEl && nm) nEl.value = nm;
+  if(pEl) pEl.value = tel;
+  if(!nm){ say('⚠️ اس کانٹیکٹ کا نام خالی ہے — نام لکھ کر محفوظ کریں'); if(nEl) nEl.focus(); return; }
+  chSaveNewSupplier(); // ایک ہی ٹچ — فوراً محفوظ + چالان پر لگ جائے
 }
 function chSaveNewSupplier(){
   const name = (document.getElementById('chNewSupName')?.value || '').trim().replace(/\s+/g, ' ');
