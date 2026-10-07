@@ -3365,9 +3365,7 @@ function __appHostKind(h, p){
                پر نظر نہیں آنا چاہیے — یہ انتخاب صرف بل بننے کے بعد، بل والے صفحے پر (وہاں پہلے سے موجود
                🔴🟢 بٹنوں سے) ہونا چاہیے۔ فنکشن/ڈیفالٹ ریٹ ویسے ہی کام کرتا رہے گا، بس یہ ڈراپ ڈاؤن یہاں چھپا دیا ---------- -->
           <select id="modeAreaSelect" class="billModeSelect" onchange="setSaleMode(this.value)" style="display:none;">
-            <option value="retail">🔴 اسلام آباد ریٹ</option>
-            <option value="wholesale">🟢 راولپنڈی ریٹ</option>
-            <option value="suburbs">🌿 مضافات (راولپنڈی ریٹ)</option>
+            <option value="retail">قیمت فروخت</option>
           </select>
 
           <!-- ---------- ⚙️ Settings بٹن — یہاں سے ہٹا دیا گیا (اوپر Topbar میں موجود ⚙️ بٹن ہی وہی کام
@@ -3493,9 +3491,9 @@ function __appHostKind(h, p){
             <span class="switchTrack active" id="cartModeCounterSale" onclick="toggleCounterSale()">🚶</span>
             <span class="switchLabel">Walk-in</span>
           </label>
-          <div class="billModeToggle" style="flex:1 1 auto; min-width:0;">
-            <button id="cartModeRetail" class="active" onclick="setSaleMode('retail')">🔴 اسلام آباد</button>
-            <button id="cartModeWholesale" onclick="setSaleMode('wholesale')">🟢 راولپنڈی</button>
+          <div class="billModeToggle" style="display:none;">
+            <button id="cartModeRetail" class="active" onclick="setSaleMode('retail')">قیمت فروخت</button>
+            <button id="cartModeWholesale" style="display:none;" onclick="setSaleMode('retail')"></button>
           </div>
         </div>
 
@@ -3733,12 +3731,8 @@ function __appHostKind(h, p){
             <div style="font-size:8.5px; font-weight:800; color:#134e2c; margin-bottom:1px;">🧮 حتمی خرید</div>
             <div id="vcEditTotalPurchase" style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:13px; color:#134e2c; padding:3px 2px;">0</div>
           </div>
-          <div class="vcEditFieldBox" style="background:linear-gradient(155deg,#eafbf0,#d5f5e0); border:1px solid #86efac; border-radius:8px; padding:3px 3px; box-shadow:0 1.5px 0 #6fd696;">
-            <div style="font-size:8.5px; font-weight:800; color:#15803d; margin-bottom:1px;">🟢 راولپنڈی ریٹ</div>
-            <input id="vcEditWholesale" type="number" onfocus="clearTimeout(vcEditAdvanceTimer);" oninput="vcEditScheduleAdvance('wholesale')" onchange="vcEditCommit('wholesale', this.value)" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #6fd696; border-radius:5px; padding:3px 2px; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:13px; color:#15803d; background:#fff;">
-          </div>
           <div class="vcEditFieldBox" style="background:linear-gradient(155deg,#fdecec,#fad2d0); border:1px solid #fca5a5; border-radius:8px; padding:3px 3px; box-shadow:0 1.5px 0 #f28b87;">
-            <div style="font-size:8.5px; font-weight:800; color:#b91c1c; margin-bottom:1px;">🔴 اسلام آباد ریٹ</div>
+            <div style="font-size:8.5px; font-weight:800; color:#b91c1c; margin-bottom:1px;">🏷️ قیمت فروخت</div>
             <input id="vcEditRetail" type="number" onfocus="clearTimeout(vcEditAdvanceTimer);" oninput="vcEditScheduleAdvance('retail')" onchange="vcEditCommit('retail', this.value)" style="width:100%; box-sizing:border-box; text-align:center; border:1px solid #f28b87; border-radius:5px; padding:3px 2px; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:13px; color:#b91c1c; background:#fff;">
           </div>
           <div class="vcEditFieldBox" style="background:linear-gradient(155deg,#eef2ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:8px; padding:3px 3px; box-shadow:0 1.5px 0 #a5b4fc; grid-column:span 2;">
@@ -3771,23 +3765,6 @@ function __appHostKind(h, p){
         <div class="modalBtns" style="flex-direction:column; gap:8px;">
           <button onclick="addNewPackingOption()" style="background:#dcfce7 !important; color:var(--success) !important; width:100%;">➕ نئی پیکنگ شامل کریں</button>
           <button class="cancelBtn" onclick="closePackingPicker()" style="width:100%;">بند کریں</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ---------- 🏷️ صدام کی ہدایت (FM10SEPTH0844AM): کسٹمر کارڈ سے سیدھا اسلام آباد/راولپنڈی/مضافات منتخب
-         کرنے کا مختصر Modal — یہی ریٹ خودکار بلنگ میں لاگو ہوتا ہے (پہلے سے موجود rateArea نظام) ---------- -->
-    <div class="modalOverlay" id="rateAreaPickerModal" onclick="if(event.target===this) closeRateAreaPicker()">
-      <div class="modalBox" style="max-width:340px;">
-        <h3 style="margin-top:0; margin-bottom:10px;">🏷️ علاقہ منتخب کریں</h3>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <button onclick="selectRateArea('retail')" style="width:100%; padding:12px; background:#d1fae5; color:#065f46; border:1.5px solid #6ee7b7; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">🏷️ اسلام آباد</button>
-          <button onclick="selectRateArea('wholesale')" style="width:100%; padding:12px; background:#ede9fe; color:#5b21b6; border:1.5px solid #c4b5fd; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">📦 راولپنڈی</button>
-          <button onclick="selectRateArea('suburbs')" style="width:100%; padding:12px; background:#fef3c7; color:#92400e; border:1.5px solid #fde68a; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">🌿 مضافات</button>
-          <button onclick="selectRateArea('')" style="width:100%; padding:10px; background:#f1f5f9; color:var(--muted); border:1.5px solid #e2e8f0; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer;">❔ صاف کریں (کوئی علاقہ نہیں)</button>
-        </div>
-        <div class="modalBtns" style="margin-top:10px;">
-          <button class="cancelBtn" onclick="closeRateAreaPicker()" style="width:100%;">بند کریں</button>
         </div>
       </div>
     </div>
@@ -3834,13 +3811,10 @@ function __appHostKind(h, p){
             <input type="number" id="npSellLabor" placeholder="0">
           </div>
           <div class="npFieldWrap">
-            <label class="npFieldLabel" style="color:#b91c1c;">🔴 اسلام آباد ریٹ</label>
+            <label class="npFieldLabel" style="color:#b91c1c;">🏷️ قیمت فروخت</label>
             <input type="number" id="npRetail" placeholder="0">
           </div>
-          <div class="npFieldWrap">
-            <label class="npFieldLabel" style="color:#15803d;">🟢 راولپنڈی ریٹ</label>
-            <input type="number" id="npWholesale" placeholder="0">
-          </div>
+          <input type="hidden" id="npWholesale" value="">
           <div class="npFieldWrap npStockCompact">
             <label class="npFieldLabel">📦 Stock</label>
             <input type="number" id="npStock" placeholder="0">
@@ -4315,11 +4289,8 @@ function __appHostKind(h, p){
         </div>
         <!-- ---------- 🏷️ ریٹ ایریا — یہ کسٹمر اسلام آباد ریٹ پر ہے یا راولپنڈی ریٹ پر — بلنگ/ایڈوانس آرڈر میں
              اسی کسٹمر کو منتخب کرتے ہی خودکار وہی ریٹ لگ جائے گا، ہر بار دستی انتخاب کی ضرورت نہیں ---------- -->
-        <select id="npPartyRateArea" style="margin-top:2px;">
-          <option value="">🏷️ ریٹ علاقہ — منتخب کریں (اختیاری)</option>
-          <option value="retail">🔴 اسلام آباد ریٹ</option>
-          <option value="wholesale">🟢 راولپنڈی ریٹ</option>
-          <option value="suburbs">🌿 مضافات</option>
+        <select id="npPartyRateArea" style="display:none;">
+          <option value=""></option>
         </select>
         <!-- ---------- 💼 سابقہ بقایہ (Opening Balance) — اب کسٹمر اور سپلائر دونوں کے لیے (صدام کی ہدایت FM3SEPTH10)،
              پرانے کاغذی رجسٹر سے منتقل کیا گیا بیلنس۔ نئے پارٹی کے لیے فوراً Current Balance
@@ -5848,8 +5819,7 @@ function __appHostKind(h, p){
           <button type="button" onclick="openOtNewCustomer()" style="flex:0 0 auto; padding:6px 7px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; border-radius:9px; font-size:11px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15); white-space:nowrap; line-height:1.3;">➕ نیا کسٹمر</button>
         </div>
         <div style="display:flex; gap:6px; margin-bottom:6px;">
-          <button type="button" id="otAreaFilterRetail" onclick="setOtAreaFilter('retail')" style="flex:1; padding:7px 4px; background:#b91c1c; color:#fff; border:none; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">🏷️ اسلام آباد</button>
-          <button type="button" id="otAreaFilterWholesale" onclick="setOtAreaFilter('wholesale')" style="flex:1; padding:7px 4px; background:#15803d; color:#fff; border:none; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">📦 راولپنڈی</button>
+
           <button type="button" id="otAreaFilterToday" onclick="setOtAreaFilter('today')" style="flex:1; padding:7px 4px; background:#0369a1; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">🛒 آج کے خریدار</button>
         </div>
         <div id="otCustomerListWrap" style="max-height:65vh; overflow-y:auto; padding-bottom:20px;"></div>
@@ -6128,8 +6098,7 @@ function __appHostKind(h, p){
         <input type="text" id="rlCustSearch" placeholder="🔍 کسٹمر کا نام یا سیریل نمبر لکھیں" oninput="renderRecoveryListEmployeeView()"
                style="width:86%; max-width:340px; display:block; margin:0 auto 10px; padding:11px; border:2px solid var(--primary); border-radius:12px; font-size:14.5px; font-weight:800; text-align:center; box-sizing:border-box;">
         <div style="display:flex; gap:6px; margin-bottom:8px;">
-          <button type="button" id="rlAreaFilterRetail" onclick="setRlAreaFilter('retail')" style="flex:1; padding:10px 4px; background:#b91c1c; color:#fff; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer;">🏷️ اسلام آباد</button>
-          <button type="button" id="rlAreaFilterWholesale" onclick="setRlAreaFilter('wholesale')" style="flex:1; padding:10px 4px; background:#15803d; color:#fff; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer;">📦 راولپنڈی</button>
+
           <button type="button" id="rlAreaFilterToday" onclick="setRlAreaFilter('today')" style="flex:1; padding:10px 4px; background:#0369a1; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer;">🛒 آج کے خریدار</button>
         </div>
         <select id="rlSortSelect" onchange="renderRecoveryListEmployeeView()" style="width:100%; padding:9px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px; font-weight:700;">
@@ -6283,8 +6252,7 @@ function __appHostKind(h, p){
         <div id="advRateModeRow" style="display:none; justify-content:flex-end; margin-bottom:6px; position:relative;">
           <button type="button" onclick="toggleAdvRateMenu(event)" style="background:#eef2ff; color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; padding:6px 12px; font-size:11.5px; font-weight:800; cursor:pointer;">⚙️ Rate Lagayein ▾</button>
           <div id="advRateMenu" style="display:none; position:absolute; right:0; top:calc(100% + 4px); background:#fff; border:1px solid #dbe1ea; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.18); padding:5px; z-index:60; min-width:170px;">
-            <button type="button" onclick="applyAdvOrderRateMode('retail'); closeAdvRateMenu();" style="display:block; width:100%; text-align:left; background:none; border:none; padding:9px 10px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; color:#b91c1c;">🔴 اسلام آباد ریٹ</button>
-            <button type="button" onclick="applyAdvOrderRateMode('wholesale'); closeAdvRateMenu();" style="display:block; width:100%; text-align:left; background:none; border:none; padding:9px 10px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; color:#15803d;">🟢 راولپنڈی ریٹ</button>
+            <button type="button" onclick="applyAdvOrderRateMode('retail'); closeAdvRateMenu();" style="display:block; width:100%; text-align:right; background:none; border:none; padding:9px 10px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; color:#b91c1c;">🏷️ قیمت فروخت لگائیں</button>
           </div>
         </div>
         <div id="advEmployeeRateNote" class="admin-hide-only" style="background:#eef2ff; color:var(--primary-dark); padding:8px 10px; border-radius:8px; font-size:11.5px; margin-bottom:8px; font-weight:600;">
@@ -6440,8 +6408,7 @@ function __appHostKind(h, p){
 
         <!-- ---------- 🏷️ ریٹ لگانے کے بٹن — اب یہیں بل کے اوپر، ایک ٹیپ سے ریٹ لگتے ہی بل مکمل ہو جاتا ہے ---------- -->
         <div id="aopRateApplyRow" style="display:none; gap:8px; padding:10px 14px 0;">
-          <button onclick="applyRateInPreview('retail')" style="flex:1; background:#fef2f2; color:#b91c1c; border:1.5px solid #fca5a5; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">🔴 اسلام آباد ریٹ</button>
-          <button onclick="applyRateInPreview('wholesale')" style="flex:1; background:#f0fdf4; color:#15803d; border:1.5px solid #86efac; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">🟢 راولپنڈی ریٹ</button>
+          <button onclick="applyRateInPreview('retail')" style="flex:1; background:#fef2f2; color:#b91c1c; border:1.5px solid #fca5a5; border-radius:10px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer;">🏷️ قیمت فروخت لگائیں</button>
         </div>
 
         <!-- ---------- ➕ اضافی خرچے — فریٹ/شپنگ/لیبر وغیرہ — صرف ایڈمن کو نظر آئیں، بل مکمل ہونے کے بعد بھی لگائے جا سکتے ہیں ---------- -->
@@ -8928,7 +8895,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM710WE333'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM810TH334'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -13580,7 +13547,7 @@ function getFlatVariants(){
 // ---------- Billing State ----------
 const Billing = {
   cart: loadFromStorage('billingCartDraft', []),          // [{variant_id, name, qty, unitPrice}] — اب رفریش سے بچ جاتا ہے، صرف بل مکمل ہونے یا خود ڈیلیٹ کرنے پر خالی ہو
-  saleMode: loadFromStorage('billingSaleModeDraft', 'retail'), // 'retail' | 'wholesale'
+  saleMode: 'retail', // ایک ہی قیمت فروخت (retail) — دوسرا ریٹ ختم
   paymentMethod: loadFromStorage('billingPaymentMethodDraft', 'cash'), // 'cash' | 'wallet' | 'credit' | 'mixed'
   counterSale: loadFromStorage('billingCounterSaleDraft', true), // true = فوری نقد کاؤنٹر سیل (کوئی کسٹمر درکار نہیں) | false = کسٹمر اکاؤنٹ پر Pending
   // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): اگر موجودہ کارٹ کسی Pending Order (منشی کے آرڈر) سے لوڈ ہوا ہے تو اس کا id —
@@ -13919,7 +13886,7 @@ function renderVariantChooserList(productId){
   let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:40px !important; height:40px !important; min-width:40px !important; min-height:40px !important; font-size:16px !important; margin:0 6px 0 0; cursor:default;">${product.serial_no}</span>` : ''}${product.name}</div>`;
 
   html += flat.map(v => {
-    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    const price = v.retail;
     const isNegative = v.stock < 0;
     const outOfStock = v.stock <= 0; // ---------- صرف بصری وارننگ کے لیے، بل بنانے میں رکاوٹ نہیں ----------
     const isLow = !outOfStock && v.stock <= (v.lowStockAt ?? 0);
@@ -14010,7 +13977,7 @@ function renderBillingSearchSuggestions(query){
     if(v.label && baseName.endsWith(v.label)){
       baseName = baseName.slice(0, baseName.length - v.label.length).trim();
     }
-    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    const price = v.retail;
     return `
       <div class="bssRow" onclick="selectBillingSuggestion(${v.variant_id})">
         <span class="bssName">${baseName}</span>
@@ -14140,7 +14107,7 @@ function renderBillingProductGrid(){
     if(isSingleVariant){
       // ---------- صرف ایک ویریئنٹ ہو تو پہلے کی طرح براہ راست +/- سے کام چلے ----------
       const v = p.variants[0];
-      const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+      const price = v.retail;
       const isNegative = v.stock < 0;
       const outOfStock = v.stock <= 0;
       const isLow = !outOfStock && v.stock <= (v.lowStockAt ?? 0);
@@ -14213,7 +14180,7 @@ function renderBillingProductTable(grid){
     flat = flat.filter(v => v.name.toLowerCase().includes(activeBillingSearch) || v.barcode.includes(activeBillingSearch));
   }
   // ---------- 🔼 سیریل نمبر کے حساب سے Ascending ترتیب — سب سے چھوٹا سیریل نمبر سب سے اوپر ---------- -->
-  flat.sort((a,b) => (a.serial_no ?? Infinity) - (b.serial_no ?? Infinity));
+  flat.sort((a,b) => (billingSerialSortKey(a) - billingSerialSortKey(b)) || ((a.product_id ?? 0) - (b.product_id ?? 0)) || ((a.variant_id ?? 0) - (b.variant_id ?? 0)));
   // ---------- 🔗 صدام کی ہدایت (22 ستمبر): اگر ایڈمن نے سٹاک مینجمنٹ میں دستی (ڈریگ) ترتیب دی ہو تو یہاں بھی
   // بالکل وہی ترتیب لاگو ہو — سیریل نمبر کی ترتیب صرف اس وقت جب کوئی دستی ترتیب موجود نہ ہو ---------- -->
   flat = applyManualCardOrder(flat);
@@ -14319,7 +14286,7 @@ function setBillQtyTableManual(variantId, value, inputEl){
   } else if(existing){
     existing.qty = qty;
   } else {
-    const price = Billing.saleMode === 'retail' ? product.retail : product.wholesale;
+    const price = product.retail;
     Billing.cart.push({variant_id: variantId, name: product.name, label: product.label || '', qty, unitPrice: price, unit: product.unit || 'pcs', laborPerUnit: product.sellLabor || 0});
   }
   if(inputEl){
@@ -14360,7 +14327,7 @@ function addToCart(variantId){
     return;
   }
 
-  const price = Billing.saleMode === 'retail' ? product.retail : product.wholesale;
+  const price = product.retail;
   // ---------- 🔒🆕 صدام کی ہدایت (FM24SEPTH0837AM): اگر اس سیل موڈ کی قیمت ابھی تک خالی/صفر ہے (نیا آئٹم
   // جو بغیر قیمت فیڈ ہوا تھا) تو بل میں چپ چاپ 0 پر شامل کرنے کی بجائے یہیں چھوٹا سا پاپ اپ کھول کر صرف
   // وہی ایک قیمت مانگیں — بھرتے ہی خودکار محفوظ ہو کر بل میں شامل ہو جائے گا۔ نئے آئٹم پر پہلے سے کوئی
@@ -14399,7 +14366,7 @@ function openBillingQuickPriceModal(variantId){
   const modeEl = document.getElementById('bqpMode');
   const priceEl = document.getElementById('bqpPrice');
   if(nameEl) nameEl.textContent = product ? (product.name + (product.label ? ' — ' + product.label : '')) : '—';
-  if(modeEl) modeEl.textContent = Billing.saleMode === 'retail' ? '🔴 اسلام آباد ریٹ ابھی خالی ہے' : '🟢 راولپنڈی ریٹ ابھی خالی ہے';
+  if(modeEl) modeEl.textContent = 'قیمت فروخت ابھی خالی ہے';
   if(priceEl) priceEl.value = '';
   document.getElementById('billingQuickPriceModal').classList.add('show');
   setTimeout(() => priceEl?.focus(), 60);
@@ -14416,7 +14383,7 @@ function confirmBillingQuickPrice(){
   for(const p of productsData){
     const v = p.variants.find(x => x.variant_id === variantId);
     if(v){
-      if(Billing.saleMode === 'retail') v.retail = val; else v.wholesale = val;
+      v.retail = val; v.wholesale = val;
       break;
     }
   }
@@ -14450,7 +14417,7 @@ function openReverseCalc(productId){
 
   const sel = document.getElementById('reverseCalcVariantSelect');
   sel.innerHTML = weightVariants.map(v => {
-    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    const price = v.retail;
     return `<option value="${v.variant_id}">${v.label} — Rs. ${price}</option>`;
   }).join('');
   sel.value = ReverseCalc.variantId;
@@ -14487,7 +14454,7 @@ function updateReverseCalc(){
   const v = getFlatVariants().find(f => f.variant_id === ReverseCalc.variantId);
   if(!v) return;
   const grams = parseWeightGrams(v.label);
-  const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+  const price = v.retail;
   const pricePerGram = price / grams;
 
   document.getElementById('reverseCalcRateLine').textContent =
@@ -14514,7 +14481,7 @@ function addReverseCalcToCart(){
   const v = getFlatVariants().find(f => f.variant_id === ReverseCalc.variantId);
   if(!v) return;
   const grams = parseWeightGrams(v.label);
-  const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+  const price = v.retail;
   const pricePerGram = price / grams;
 
   // ---------- موڈ کے مطابق حتمی گرام معلوم کریں — By Amount میں روپے سے، By Weight میں براہ راست کسٹمر کے بتائے گرام سے ----------
@@ -14688,6 +14655,7 @@ function removeFromCart(variantId){
 
 // ---------- Retail / Wholesale Toggle (فوری تمام cart Priceیں تبدیل کرے) ----------
 function setSaleMode(mode){
+  mode = 'retail'; // ایک ہی قیمت فروخت
   Billing.saleMode = mode;
   // ---------- 🔄 صدام کی ہدایت (FM4SEPFR30): اوپر والا bilModeToggle اب ڈراپ ڈاؤن بن گیا ہے (modeAreaSelect) ---------- -->
   const areaSel = document.getElementById('modeAreaSelect');
@@ -14700,7 +14668,7 @@ function setSaleMode(mode){
   Billing.cart.forEach(item => {
     const product = getFlatVariants().find(p => p.variant_id === item.variant_id);
     if(product){
-      const baseRate = mode === 'retail' ? product.retail : product.wholesale;
+      const baseRate = product.retail;
       item.laborPerUnit = product.sellLabor || 0;
       item.unitPrice = baseRate; // ---------- 💪 صدام کی ہدایت (FM050926): نرخ خالص رہے گا، مزدوری الگ کالم/ٹوٹل میں ---------- -->
     }
@@ -14767,7 +14735,25 @@ function openCartChalanPicker(idx){
     renderCart();
   });
 }
+// ---------- 🔢 بلنگ میں سبزیاں ہمیشہ سیریل نمبر کی ترتیب میں (1، 2، 3، 4 ...) — منشی کا آرڈر کسی بھی ترتیب سے آئے،
+// کارٹ/بل میں اور نیچے کی فہرست میں سب سیریل نمبر وار نظر آئیں تاکہ بل بنانے اور ہر چیز چننے میں آسانی ہو ----------
+function billingSerialSortKey(v){
+  const s = v ? Number(v.serial_no) : NaN;
+  return (isNaN(s) || !(s > 0)) ? 1e9 : s;
+}
+function sortBillingCartBySerial(){
+  try{
+    const m = new Map();
+    getFlatVariants().forEach(v => m.set(v.variant_id, v));
+    const pos = new Map(Billing.cart.map((it, i) => [it, i]));
+    Billing.cart.sort((a, b) =>
+      (billingSerialSortKey(m.get(a.variant_id)) - billingSerialSortKey(m.get(b.variant_id)))
+      || ((a.variant_id ?? 0) - (b.variant_id ?? 0))
+      || (pos.get(a) - pos.get(b)));
+  }catch(e){}
+}
 function renderCart(){
+  sortBillingCartBySerial();
   try{ applyChalanPricingToItems(Billing.cart, Billing.saleMode); }catch(e){} // 🧾 ہر چالان کا اپنا فروخت ریٹ
   saveBillingCartDraft(); // ---------- ہر تبدیلی کے بعد خودکار محفوظ — رفریش سے کارٹ ضائع نہ ہو ----------
   renderHomeUnfinishedCartCard(); // ---------- حفاظتی: ہوم پیج کا کارڈ بھی ہمیشہ اسی وقت تازہ ہو، چاہے ہوم پیج کا اپنا رینڈر کہیں نہ چلا ہو ----------
@@ -14798,9 +14784,10 @@ function renderCart(){
     document.getElementById('cartItemCountSummary').textContent = '';
   } else {
     emptyMsg.style.display = 'none';
+    const _cartSerialMap = new Map(flat.map(v => [v.variant_id, v.serial_no]));
     body.innerHTML = Billing.cart.map((item, idx) => `
       <tr>
-        <td style="text-align:center; color:var(--muted); font-weight:700;">${idx+1}</td>
+        <td style="text-align:center; color:var(--muted); font-weight:700;">${_cartSerialMap.get(item.variant_id) || (idx+1)}</td>
         <td>${item.name}${item.loose_product_id ? '' : chalanChipHtml(item.variant_id, item.qty, item.chalanAlloc || null, `openCartChalanPicker(${idx})`)}${item.laborPerUnit > 0 ? `<div style="font-size:10px; color:#b45309; font-weight:700; margin-top:2px;">💪 مزدوری شامل: Rs. ${item.laborPerUnit}/یونٹ (کل Rs. ${(item.laborPerUnit*item.qty).toLocaleString()})</div>` : ''}</td>
         <td>
           <div class="qtyBtns">
@@ -15011,9 +14998,6 @@ function onCustomerChange(){
   }
   // ---------- 🏷️ کسٹمر کا اپنا محفوظ شدہ ریٹ ایریا (اسلام آباد/راولپنڈی) ہو تو خودکار وہی ریٹ لگا دیں —
   // ہر بار دستی طور پر ٹوگل کرنے کی ضرورت نہیں ----------
-  if(customer && customer.rateArea && (customer.rateArea === 'retail' || customer.rateArea === 'wholesale')){
-    setSaleMode(customer.rateArea);
-  }
   syncCartModeControls();
   renderAutoPaymentNote();
   renderCart();
@@ -15130,8 +15114,7 @@ function finalizeInvoice(){
     const REQUIRED_PRICE_FIELDS = [
       {field:'purchase',  label:'💰 خرید قیمت'},
       {field:'sellLabor', label:'💪 مزدوری فروخت'},
-      {field:'wholesale', label:'🟢 راولپنڈی ریٹ'},
-      {field:'retail',    label:'🔴 اسلام آباد ریٹ'},
+      {field:'retail',    label:'🏷️ قیمت فروخت'},
     ];
     for(const item of Billing.cart){
       // ---------- 🔒 صدام کی ہدایت (FM22SEPTU): اس مخصوص بل لائن کی اپنی فروخت قیمت بھی زیرو/خالی نہیں ہونی چاہیے —
@@ -15608,7 +15591,7 @@ function addReviewItem(variantId){
   if(!v) return;
   const existing = p.items.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else p.items.push({variant_id: variantId, name: v.name, qty:1, unitPrice: p.sale_mode === 'wholesale' ? v.wholesale : v.retail});
+  else p.items.push({variant_id: variantId, name: v.name, qty:1, unitPrice: v.retail});
   document.getElementById('reviewAddItemInput').value = '';
   document.getElementById('reviewSearchResults').classList.remove('show');
   renderPendingReview();
@@ -15815,7 +15798,7 @@ function saveQuickAddItem(){
     category: '',
     variants: [{
       variant_id: newVariantId, label:'Default', barcode:'NEW'+newVariantId,
-      purchase, retail: sale, wholesale: sale * 0.92, stock, lowStockAt:5, location:'', unit, expiryDate:'', image: qaPhotoDataUrl || null
+      purchase, retail: sale, wholesale: sale, stock, lowStockAt:5, location:'', unit, expiryDate:'', image: qaPhotoDataUrl || null
     }]
   });
   backfillMissingProductSerials(); // ---------- نئی سبزی کو فوراً اگلا خالی سیریل نمبر مل جائے ---------- -->
@@ -15943,6 +15926,25 @@ const LEGACY_DEMO_PRODUCT_NAMES = ['Bio Amla Shampoo', 'Bio Amla Shampoo+Conditi
     }
   }
 })();
+
+// ---------- 💲 ایک ہی قیمت فروخت: پہلے اسلام آباد (retail) اور راولپنڈی (wholesale) دو ریٹ تھے۔
+// اب صرف retail = "قیمت فروخت"۔ جس سبزی/چالان میں retail خالی مگر wholesale بھرا تھا اس کی قیمت retail میں آ جاتی ہے،
+// پھر wholesale = retail (تاکہ پرانا کوئی بھی حوالہ ٹوٹے نہیں) ----------
+function fmUnifyPrices(){
+  let changed = false;
+  try{
+    (productsData || []).forEach(p => (p.variants || []).forEach(v => {
+      if(!(Number(v.retail) > 0) && Number(v.wholesale) > 0){ v.retail = v.wholesale; changed = true; }
+      if(Number(v.wholesale || 0) !== Number(v.retail || 0)){ v.wholesale = Number(v.retail || 0); changed = true; }
+      (v.chalans || []).forEach(c => {
+        if(!(Number(c.retail) > 0) && Number(c.wholesale) > 0){ c.retail = c.wholesale; changed = true; }
+        if(c.retail != null && Number(c.wholesale || 0) !== Number(c.retail || 0)){ c.wholesale = Number(c.retail || 0); changed = true; }
+      });
+    }));
+  }catch(e){}
+  return changed;
+}
+if(fmUnifyPrices()){ try{ saveToStorage('products', productsData); }catch(e){} }
 
 // ---------- 🧾 صدام کی ہدایت (25 ستمبر، چالان سسٹم): موجودہ سٹاک والے ہر variant کو ایک بار "چالان نمبر 1"
 // میں تبدیل کریں (موجودہ v.purchase ریٹ کے ساتھ) — تاکہ نیا چالان سسٹم فوراً پرانے ڈیٹا پر بھی کام کرے۔
@@ -17290,10 +17292,9 @@ const SCAN_PRODUCT_COLUMNS = [
   {field:'name',      label:'Product Name',  type:'text',   placeholder:'Product name', cls:'scanCellName'},
   {field:'variant',   label:'Variant',       type:'text',   placeholder:'Default'},
   {field:'purchase',  label:'Purchase Price',type:'number', placeholder:'0', num:true},
-  {field:'retail',    label:'🏷️ Islamabad Price', type:'number', placeholder:'0', num:true},
+  {field:'retail',    label:'🏷️ Sale Price', type:'number', placeholder:'0', num:true},
   {field:'stock',     label:'Stock',         type:'number', placeholder:'0', num:true},
   {field:'barcode',   label:'Barcode',       type:'text',   placeholder:'Barcode'},
-  {field:'wholesale', label:'📦 Rawalpindi Price', type:'number', placeholder:'0', num:true},
   {field:'lowstock',  label:'Low Stock',     type:'number', placeholder:'5', num:true},
   {field:'expiry',    label:'Expiry',        type:'date',   placeholder:''},
   {field:'location',  label:'Location',      type:'text',   placeholder:'Location'},
@@ -17388,7 +17389,7 @@ function downloadScanAsCsv(){
   let headerRow, dataRows;
   if(scanImportContext === 'product'){
     headerRow = PRODUCT_CSV_HEADERS;
-    dataRows = scanReviewRows.map(r => [r.name, r.category, r.variant || 'Default', r.barcode, r.purchase, r.retail, r.wholesale, r.stock, r.lowstock, r.expiry, r.location]);
+    dataRows = scanReviewRows.map(r => [r.name, r.category, r.variant || 'Default', r.barcode, r.purchase, r.retail, r.retail, r.stock, r.lowstock, r.expiry, r.location]);
   } else {
     headerRow = ['Name','Phone','Address','Area'];
     dataRows = scanReviewRows.map(r => [r.name, r.phone, r.address, r.area]);
@@ -17407,7 +17408,7 @@ function finalizeScanImport(){
       'barcode': (r.barcode || '').trim(),
       'purchase price': String(r.purchase || '').trim(),
       'retail price': String(r.retail || '').trim(),
-      'wholesale price': String(r.wholesale || '').trim(),
+      'wholesale price': String(r.retail || '').trim(),
       'stock': String(r.stock || '0').trim(),
       'low stock alert': String(r.lowstock || '').trim(),
       'expiry date (yyyy-mm-dd)': (r.expiry || '').trim(),
@@ -17526,13 +17527,11 @@ function animateAndTogglePresence(cardId, productId){
 // راولپنڈی = سبز ڈبہ، اسلام آباد = سرخ ڈبہ۔ یہ فنکشن Products، Stock Adjustment، Billing وغیرہ ہر جگہ استعمال ہوتا ہے
 // تاکہ رنگ سکیم پوری ایپ میں ہمیشہ ایک جیسی رہے ---------- -->
 function buildRateBadgesHtml(v, showStock){
-  const rwp = (v?.wholesale ?? 0).toLocaleString();
   const isb = (v?.retail ?? 0).toLocaleString();
   const stock = v?.stock ?? 0;
   return `<span class="rateBadgeRow">` +
-    `<span class="rateBadgeCol"><span class="rbCaption">🟢 راولپنڈی</span><span class="rateBadge rateBadgeRwp" title="راولپنڈی ریٹ">Rs. ${rwp}</span></span>` +
-    `<span class="rateBadgeCol"><span class="rbCaption">🔴 اسلام آباد</span><span class="rateBadge rateBadgeIsb" title="اسلام آباد ریٹ">Rs. ${isb}</span></span>` +
-    (showStock !== false ? `<span class="rateBadgeCol rbStockCol"><span class="rbCaption">📦 سٹاک</span><span class="rateBadge rateBadgeStock" title="سٹاک">${stock}</span></span>` : '') +
+    `<span class="rateBadgeCol"><span class="rbCaption">🏷️ قیمت فروخت</span><span class="rateBadge rateBadgeIsb" title="قیمت فروخت">Rs. ${isb}</span></span>` +
+    (showStock !== false ? `<span class="rateBadgeCol"><span class="rbCaption">📦 سٹاک</span><span class="rateBadge rateBadgeStock" title="سٹاک">${stock}</span></span>` : '') +
     `</span>`;
 }
 
@@ -17829,7 +17828,6 @@ function buildInlineFieldsRow(productId, v){
   const isNegative = v.stock < 0;
   const totalPurchase = (v.purchase||0) + (v.labor||0);
   const finalIsb = Number(v.retail||0) + Number(v.sellLabor||0);
-  const finalRwp = Number(v.wholesale||0) + Number(v.sellLabor||0);
   // ---------- 🎨 صدام کی ہدایت (5 ستمبر): ہوم پیج کے 🎨 تھیم بٹن سے منتخب کردہ کارڈ رنگ یہاں بھی لاگو —
   // وہی سیٹنگ (productCardNameBg) جو پرانے فوٹو کارڈز پر اثر کرتی تھی، اب یہاں بھی، تاکہ ایک ہی جگہ سے
   // پورے ایپ کا تھیم بدلا جا سکے (Stock Adjustment + Products دونوں) ---------- -->
@@ -17858,15 +17856,9 @@ function buildInlineFieldsRow(productId, v){
       </div>
       <!-- ---------- 🔴 اسلام آباد ریٹ — سرخ، موٹی رقم + نیچے حتمی (مزدوری سمیت) ریٹ خودکار ---------- -->
       <div class="vcFieldWrap vcRateWrap" style="background:#fee2e2;">
-        <span class="vcFieldLabel" style="color:#b91c1c;">🔴 اسلام آباد</span>
+        <span class="vcFieldLabel" style="color:#b91c1c;">🏷️ قیمت فروخت</span>
         <input type="number" value="${v.retail || ''}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fff; border-color:#fca5a5; color:#b91c1c; font-weight:900;">
         <div class="vcFinalRateNote" style="font-size:9.5px; font-weight:800; color:#b91c1c; margin-top:2px; white-space:nowrap;">حتمی: <span class="vcEffIsb">${finalIsb.toLocaleString()}</span></div>
-      </div>
-      <!-- ---------- 🟢 راولپنڈی ریٹ — سبز، موٹی رقم + نیچے حتمی (مزدوری سمیت) ریٹ خودکار ---------- -->
-      <div class="vcFieldWrap vcRateWrap" style="background:#dcfce7;">
-        <span class="vcFieldLabel" style="color:#15803d;">🟢 راولپنڈی</span>
-        <input type="number" value="${v.wholesale || ''}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value); vcRecalcEffectiveRates(this)" oninput="vcRecalcEffectiveRates(this)" style="background:#fff; border-color:#86efac; color:#15803d; font-weight:900;">
-        <div class="vcFinalRateNote" style="font-size:9.5px; font-weight:800; color:#15803d; margin-top:2px; white-space:nowrap;">حتمی: <span class="vcEffRwp">${finalRwp.toLocaleString()}</span></div>
       </div>
       <div class="vcFieldWrap vcStockWrap" style="background:#e0e7ff;">
         <span class="vcFieldLabel">📦 سٹاک</span>
@@ -18752,8 +18744,8 @@ function chalanSalePrice(v, alloc, mode){
     if(aq <= 0) continue;
     const c = (v.chalans || []).find(x => String(x.chalanNo) === String(no));
     if(!c) return null;
-    let price = mode === 'retail' ? Number(c.retail) : Number(c.wholesale);
-    if(!(price > 0) && (isLegacyChalan(c) || !chalanNeedsAccounting(c))) price = mode === 'retail' ? Number(v.retail) : Number(v.wholesale);
+    let price = Number(c.retail);
+    if(!(price > 0) && (isLegacyChalan(c) || !chalanNeedsAccounting(c))) price = Number(v.retail);
     if(!(price > 0)) return null;
     const labor = (c.sellLabor != null && c.sellLabor !== '') ? Number(c.sellLabor) : (Number(v.sellLabor) || 0);
     q += aq; amt += aq * price; lab += aq * labor;
@@ -18844,8 +18836,7 @@ function renderChalanRateModal(){
         <div style="display:flex; gap:5px; margin-top:6px;">
           ${inp('chRate_' + key, rateVal, '💰 خرید', '#b45309')}
           ${inp('chLab_' + key, laborVal, '💪 مزدوری', '#7c3aed')}
-          ${inp('chIsb_' + key, retailVal, '🔴 اسلام آباد', '#dc2626')}
-          ${inp('chRwp_' + key, wholesaleVal, '🟢 راولپنڈی', '#16a34a')}
+          ${inp('chIsb_' + key, retailVal, '🏷️ قیمت فروخت', '#dc2626')}
         </div>
         <div style="display:flex; gap:6px; margin-top:6px;">
           <button type="button" id="chSrc_${key}" data-value="${srcSel}" onclick="openChSupplierPicker('${key}')" style="flex:1; min-width:0; height:40px; border:2px solid #0369a1; border-radius:10px; background:#fff; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:15px; color:#0c4a6e; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 8px;">${_chSrcLabel(srcSel)} ▾</button>
@@ -18888,11 +18879,10 @@ function saveChalanAccounting(variantId, chalanNo){
   if(!c) return;
   const key = `${variantId}_${chalanNo}`;
   const num = (id) => _chRound(parseFloat(String(document.getElementById(id)?.value || '').replace(',', '.')));
-  const rate = num('chRate_' + key), labor = num('chLab_' + key), isb = num('chIsb_' + key), rwp = num('chRwp_' + key);
+  const rate = num('chRate_' + key), labor = num('chLab_' + key), isb = num('chIsb_' + key), rwp = isb;
   const src = document.getElementById('chSrc_' + key)?.dataset.value || '';
   if(!(rate > 0)){ alert('⚠️ خرید قیمت لکھیں'); document.getElementById('chRate_' + key)?.focus(); return; }
-  if(!(isb > 0)){ alert('⚠️ اسلام آباد ریٹ لکھیں'); document.getElementById('chIsb_' + key)?.focus(); return; }
-  if(!(rwp > 0)){ alert('⚠️ راولپنڈی ریٹ لکھیں'); document.getElementById('chRwp_' + key)?.focus(); return; }
+  if(!(isb > 0)){ alert('⚠️ قیمت فروخت لکھیں'); document.getElementById('chIsb_' + key)?.focus(); return; }
   if(!src){ alert('⚠️ بیوپاری یا نقد چنیں'); document.getElementById('chSrc_' + key)?.focus(); return; }
   const qtyForBill = Number(c.origQty != null ? c.origQty : c.qty) || 0;
   const newSupplier = src === 'cash' ? null : suppliersData.find(s => String(s.supplier_id) === String(src));
@@ -19158,8 +19148,7 @@ function renderChalanSplit(){
         ${inp(i, 'labor', pt.labor, '💪 مزدوری', '#7c3aed', 1)}
       </div>
       <div style="display:flex; gap:5px; margin-top:6px;">
-        ${inp(i, 'isb', pt.isb, '🔴 اسلام آباد', '#dc2626', 1)}
-        ${inp(i, 'rwp', pt.rwp, '🟢 راولپنڈی', '#16a34a', 1)}
+        ${inp(i, 'isb', pt.isb, '🏷️ قیمت فروخت', '#dc2626', 1)}
       </div>
       <div style="margin-top:6px;">
         <button type="button" id="chSrc_split${i}" data-value="${pt.src}" onclick="openChSupplierPicker('split${i}')" style="width:100%; height:40px; border:2px solid #0369a1; border-radius:10px; background:#fff; font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:15px; color:#0c4a6e; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 8px;">${_chSrcLabel(pt.src)} ▾</button>
@@ -19224,13 +19213,12 @@ function saveChalanSplit(){
   const {p, v} = findProductAndVariant(st.variantId); if(!v) return;
   const c = (v.chalans || []).find(x => x.chalanNo === st.chalanNo);
   if(!c || c.accounted){ alert('یہ چالان اب پہلے جیسا نہیں رہا — دوبارہ کھولیں'); closeChalanSplit(); return; }
-  const parts = st.parts.map((pt, i) => ({ i, qty: _chRound(_chPn(pt.qty)), rate: _chPn(pt.rate), labor: _chPn(pt.labor), isb: _chPn(pt.isb), rwp: _chPn(pt.rwp), src: pt.src, pay: Math.max(0, Math.round(_chPn(pt.pay))) }));
+  const parts = st.parts.map((pt, i) => ({ i, qty: _chRound(_chPn(pt.qty)), rate: _chPn(pt.rate), labor: _chPn(pt.labor), isb: _chPn(pt.isb), rwp: _chPn(pt.isb), src: pt.src, pay: Math.max(0, Math.round(_chPn(pt.pay))) }));
   for(const pt of parts){
     const nm = 'حصہ ' + (pt.i + 1);
     if(!(pt.qty > 0)){ alert(`⚠️ ${nm}: مقدار لکھیں`); return; }
     if(!(pt.rate > 0)){ alert(`⚠️ ${nm}: خرید قیمت لکھیں`); return; }
-    if(!(pt.isb > 0)){ alert(`⚠️ ${nm}: اسلام آباد ریٹ لکھیں`); return; }
-    if(!(pt.rwp > 0)){ alert(`⚠️ ${nm}: راولپنڈی ریٹ لکھیں`); return; }
+    if(!(pt.isb > 0)){ alert(`⚠️ ${nm}: قیمت فروخت لکھیں`); return; }
     if(!pt.src){ alert(`⚠️ ${nm}: بیوپاری یا نقد چنیں`); return; }
     if(pt.src !== 'cash' && !suppliersData.find(s => String(s.supplier_id) === String(pt.src))){ alert(`⚠️ ${nm}: بیوپاری نہیں ملا`); return; }
     if(pt.src === 'cash') pt.pay = 0;
@@ -21675,11 +21663,8 @@ function vcRecalcEffectiveRates(inputEl){
   const inputs = row.querySelectorAll('input[type="number"]');
   const sellLabor = Number(inputs[1]?.value) || 0;
   const retail = Number(inputs[2]?.value) || 0;
-  const wholesale = Number(inputs[3]?.value) || 0;
   const isbEl = row.querySelector('.vcEffIsb');
-  const rwpEl = row.querySelector('.vcEffRwp');
   if(isbEl) isbEl.textContent = (retail + sellLabor).toLocaleString();
-  if(rwpEl) rwpEl.textContent = (wholesale + sellLabor).toLocaleString();
 }
 function updateVariantField(productId, variantId, field, value, inputEl){
   const product = productsData.find(p => p.product_id === productId);
@@ -21776,7 +21761,7 @@ let vcInlineSpeedMs = loadFromStorage('vcEditSpeedMs', 600);
 // ترتیب بھی اسی نئی بصری ترتیب سے ملا دی — سب سے پہلے سٹاک، پھر خرید، م.فروخت (حتمی خانہ خود کار/لاک
 // ہے، کرسر اس میں کبھی نہیں جاتا)، پھر راولپنڈی، آخر میں اسلام آباد پر رک جاتا ہے
 // 🔴 صدام کی ہدایت (22 ستمبر): "💪 م.خرید" (labor) خانہ مکمل حذف — نہ کرسر اب اس میں جاتا ہے، نہ یہ لازمی ہے ---------- -->
-const VC_INLINE_FIELD_ORDER = ['stock', 'purchase', 'sellLabor', 'wholesale', 'retail']; // ---------- 🔒 صدام کی ہدایت (22 ستمبر — اصلاح): ترتیب اب سٹاک → خرید → م.فروخت → راولپنڈی → سب سے آخر میں اسلام آباد ----------
+const VC_INLINE_FIELD_ORDER = ['stock', 'purchase', 'sellLabor', 'retail']; // ---------- 🔒 صدام کی ہدایت (22 ستمبر — اصلاح): ترتیب اب سٹاک → خرید → م.فروخت → راولپنڈی → سب سے آخر میں اسلام آباد ----------
 const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', sellLabor:'vcInlineSellLabor', wholesale:'vcInlineWholesale', retail:'vcInlineRetail', stock:'vcInlineStock'};
 // ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): 📦 سٹاک چھوڑا جا سکتا ہے (خالی/زیرو دونوں ٹھیک)، مگر باقی
 // یہ 4 خانے — 💰 خرید، 💪 م.فروخت، 🟢 راولپنڈی، 🔴 اسلام آباد — سب لکھے ہونے چاہئیں تبھی سبزی
@@ -21785,8 +21770,7 @@ const VC_INLINE_ID_MAP = {purchase:'vcInlinePurchase', sellLabor:'vcInlineSellLa
 const VC_INLINE_REQUIRED_FIELDS = [
   {field:'purchase', label:'💰 خرید قیمت'},
   {field:'sellLabor', label:'💪 مزدوری فروخت'},
-  {field:'wholesale', label:'🟢 راولپنڈی ریٹ'},
-  {field:'retail', label:'🔴 اسلام آباد ریٹ'}
+  {field:'retail', label:'🏷️ قیمت فروخت'}
 ];
 function vcInlineCheckRequiredFields(){
   if(vcInlineSelectedId === null) return {ok:true};
@@ -21850,8 +21834,7 @@ function buildVcInlinePanelHtml(){
         <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;" dir="rtl">
           ${plainBox('vcAddStock','📦 سٹاک','linear-gradient(155deg,#eef2ff,#e0e7ff)','#c7d2fe','#a5b4fc','#3730a3', 50)}
           ${plainBox('vcAddPurchase','💰 خرید','linear-gradient(155deg,#fef9e7,#fef3c7)','#fde68a','#f9d976','#92400e', 50)}
-          ${plainBox('vcAddWholesale','🟢 راولپنڈی','linear-gradient(155deg,#eafbf0,#d5f5e0)','#86efac','#6fd696','#15803d', 50)}
-          ${plainBox('vcAddRetail','🔴 اسلام آباد','linear-gradient(155deg,#fdecec,#fad2d0)','#fca5a5','#f28b87','#b91c1c', 50)}
+          ${plainBox('vcAddRetail','🏷️ قیمت فروخت','linear-gradient(155deg,#fdecec,#fad2d0)','#fca5a5','#f28b87','#b91c1c', 50)}
         </div>
         <div style="display:flex; gap:10px; margin-top:7px;">
           <button type="button" onclick="vcInlineSaveNew()" style="flex:1 1 auto; max-width:220px; padding:9px; background:linear-gradient(180deg,#34d95a,#16a34a); color:#fff; border:none; border-radius:9px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.2), 0 3px 6px rgba(0,0,0,.15);">💾 محفوظ کریں</button>
@@ -21890,8 +21873,7 @@ function buildVcInlinePanelHtml(){
             <div style="font-size:7.5px; font-weight:900; color:#134e2c; white-space:nowrap;">🧮 حتمی خرید</div>
             <div id="vcInlineTotalPurchase" style="font-family:${numFontStack}; font-weight:900; font-size:17px; color:#134e2c; text-align:center;">0</div>
           </div>
-          ${fieldBox('vcInlineWholesale', '🟢 راولپنڈی', 'linear-gradient(155deg,#eafbf0,#d5f5e0)', '#86efac', '#6fd696', '#15803d', 50)}
-          ${fieldBox('vcInlineRetail', '🔴 اسلام آباد', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c', 50)}
+          ${fieldBox('vcInlineRetail', '🏷️ قیمت فروخت', 'linear-gradient(155deg,#fdecec,#fad2d0)', '#fca5a5', '#f28b87', '#b91c1c', 50)}
         </div>
       </div>
     </div>`;
@@ -21976,7 +21958,7 @@ function vcInlineSaveNew(){
   const savedSerial = getNextProductSerial();
   productsData.push({
     product_id: newProductId, name, category:'', isDormant:false, serial_no: savedSerial,
-    variants:[{ variant_id:newVariantId, label:packing, barcode:'NEW'+newVariantId, purchase:num('vcAddPurchase'), labor:0, sellLabor:0, retail:num('vcAddRetail'), wholesale:num('vcAddWholesale'), stock:num('vcAddStock'), lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
+    variants:[{ variant_id:newVariantId, label:packing, barcode:'NEW'+newVariantId, purchase:num('vcAddPurchase'), labor:0, sellLabor:0, retail:num('vcAddRetail'), wholesale:num('vcAddRetail'), stock:num('vcAddStock'), lowStockAt:0, location:'', unit:'', expiryDate:'', image:null }]
   });
   saveToStorage('nextProductId', nextProductId);
   saveToStorage('nextVariantId', nextVariantId);
@@ -22050,8 +22032,7 @@ function vcInlinePopulate(){
   // تاکہ ہر خانے میں فوراً لکھنا شروع کیا جا سکے، پہلے 0 مٹانے کی ضرورت نہ پڑے ---------- -->
   document.getElementById('vcInlinePurchase').value = variant.purchase || '';
   document.getElementById('vcInlineSellLabor').value = variant.sellLabor || '';
-  document.getElementById('vcInlineWholesale').value = variant.wholesale || '';
-  document.getElementById('vcInlineRetail').value = variant.retail || '';
+    document.getElementById('vcInlineRetail').value = variant.retail || '';
   document.getElementById('vcInlineStock').value = variant.stock || '';
   document.getElementById('vcInlineTotalPurchase').textContent = ((variant.purchase||0) + (variant.labor||0)).toLocaleString();
   // ---------- 🆕 صدام کی ہدایت (17 ستمبر، صبح 6): سبزی بدلنے پر کرسر خودکار 📦 سٹاک کے خانے میں ---------- -->
@@ -22207,8 +22188,7 @@ function openNewProductModal(productId = null){
     document.getElementById('npLabor').value = v.labor || '';
     document.getElementById('npSellLabor').value = v.sellLabor || '';
     document.getElementById('npRetail').value = v.retail || '';
-    document.getElementById('npWholesale').value = v.wholesale || '';
-    document.getElementById('npStock').value = v.stock || '';
+        document.getElementById('npStock').value = v.stock || '';
     npProductPhotoDataUrl = v.image || null;
     renderProductPhotoPreview(npProductPhotoDataUrl);
   } else {
@@ -22328,7 +22308,7 @@ function saveNewProduct(){
   const labor = Number(document.getElementById('npLabor').value) || 0; // ---------- 💪 مزدوری — صدام کی ہدایت (FM3SEPTH10) ----------
   const sellLabor = Number(document.getElementById('npSellLabor').value) || 0; // ---------- 💪 مزدوری فروخت — صدام کی ہدایت (FM20SEPSU06) ----------
   const retail = Number(document.getElementById('npRetail').value) || 0;
-  const wholesale = Number(document.getElementById('npWholesale').value) || 0;
+  const wholesale = retail; // ایک ہی قیمت فروخت
   const stock = Number(document.getElementById('npStock').value) || 0; // ---------- اسٹاک خالی چھوڑا ہو تو بھی 0 کے ساتھ محفوظ ہو جائے ----------
 
   if(!name){
@@ -22344,8 +22324,7 @@ function saveNewProduct(){
     {val: purchase,  label: '💰 خرید قیمت'},
     {val: labor,     label: '💪 مزدوری خرید'},
     {val: sellLabor, label: '💪 مزدوری فروخت'},
-    {val: wholesale, label: '🟢 راولپنڈی ریٹ'},
-    {val: retail,    label: '🔴 اسلام آباد ریٹ'},
+    {val: retail,    label: '🏷️ قیمت فروخت'},
   ];
   const npMissing = NP_REQUIRED_FIELDS.filter(rf => !rf.val);
   if(npMissing.length > 0){
@@ -24177,13 +24156,11 @@ async function renderStockValueReportToCanvas(canvasEl){
       if(qty === 0) return; // ---------- جس چیز کا سٹاک صفر ہے اسے رپورٹ میں شامل کرنے کا کوئی فائدہ نہیں ----------
       const purchaseUnit = (v.purchase || 0) + (v.labor || 0);
       const totalPurchase = qty * purchaseUnit;
-      const totalRwp = qty * (v.wholesale || 0);
       const totalIsb = qty * (v.retail || 0);
       rows.push({
         serial: p.serial_no || 0,
         name: p.name + (v.label && v.label !== p.name ? ' — ' + v.label : ''),
         qty, purchaseUnit, totalPurchase,
-        wholesale: v.wholesale || 0, totalRwp, profitRwp: totalRwp - totalPurchase,
         retail: v.retail || 0, totalIsb, profitIsb: totalIsb - totalPurchase,
       });
     });
@@ -24192,10 +24169,9 @@ async function renderStockValueReportToCanvas(canvasEl){
 
   const grand = rows.reduce((acc, r) => {
     acc.qty += r.qty; acc.purchase += r.totalPurchase;
-    acc.rwp += r.totalRwp; acc.profitRwp += r.profitRwp;
     acc.isb += r.totalIsb; acc.profitIsb += r.profitIsb;
     return acc;
-  }, {qty:0, purchase:0, rwp:0, profitRwp:0, isb:0, profitIsb:0});
+  }, {qty:0, purchase:0, isb:0, profitIsb:0});
 
   const pxWidth = 900; // A4 پورٹریٹ کے تناسب سے چوڑا کینوس، پرنٹ پر صاف نظر آئے
   const margin = 30;
@@ -24204,17 +24180,14 @@ async function renderStockValueReportToCanvas(canvasEl){
 
   // ---------- کالمز (دائیں سے بائیں): نمبر | نام | تعداد | خرید فی یونٹ | ٹوٹل خرید | راولپنڈی ریٹ | ٹوٹل راولپنڈی | منافع راولپنڈی | اسلام آباد ریٹ | ٹوٹل اسلام آباد | منافع اسلام آباد ---------- -->
   const colDefs = [
-    {key:'no',    label:'نمبر',        w:0.045},
-    {key:'name',  label:'نام',         w:0.155},
-    {key:'qty',   label:'تعداد',       w:0.055},
-    {key:'pu',    label:'خرید/یونٹ',   w:0.075},
-    {key:'tp',    label:'ٹوٹل خرید',   w:0.085},
-    {key:'rwp',   label:'راولپنڈی ریٹ',w:0.075, grp:'g'},
-    {key:'trwp',  label:'ٹوٹل',        w:0.085, grp:'g'},
-    {key:'prwp',  label:'منافع',       w:0.085, grp:'g'},
-    {key:'isb',   label:'اسلام آباد ریٹ',w:0.075, grp:'r'},
-    {key:'tisb',  label:'ٹوٹل',        w:0.085, grp:'r'},
-    {key:'pisb',  label:'منافع',       w:0.085, grp:'r'},
+    {key:'no',    label:'نمبر',        w:0.06},
+    {key:'name',  label:'نام',         w:0.22},
+    {key:'qty',   label:'تعداد',       w:0.08},
+    {key:'pu',    label:'خرید/یونٹ',   w:0.11},
+    {key:'tp',    label:'ٹوٹل خرید',   w:0.13},
+    {key:'isb',   label:'قیمت فروخت',  w:0.12, grp:'r'},
+    {key:'tisb',  label:'ٹوٹل',        w:0.13, grp:'r'},
+    {key:'pisb',  label:'منافع',       w:0.15, grp:'r'},
   ];
   // ---------- 🔄 صدام کی ہدایت (FM4SEPFR30) اہم فکس: پہلے یہ کالم بائیں سے دائیں (LTR) ترتیب میں بنتے تھے —
   // یعنی "نمبر" سب سے بائیں کنارے پر آتا تھا، جو اردو کی فطری دائیں سے بائیں (RTL) ترتیب کے بالکل الٹ تھا۔
@@ -24289,9 +24262,6 @@ async function renderStockValueReportToCanvas(canvasEl){
         case 'qty': return String(r.qty);
         case 'pu': return r.purchaseUnit.toLocaleString();
         case 'tp': return r.totalPurchase.toLocaleString();
-        case 'rwp': return r.wholesale.toLocaleString();
-        case 'trwp': return r.totalRwp.toLocaleString();
-        case 'prwp': return r.profitRwp.toLocaleString();
         case 'isb': return r.retail.toLocaleString();
         case 'tisb': return r.totalIsb.toLocaleString();
         case 'pisb': return r.profitIsb.toLocaleString();
@@ -24308,9 +24278,8 @@ async function renderStockValueReportToCanvas(canvasEl){
         while(ctx.measureText(txt).width > c.width - 6 && txt.length > 3){ txt = txt.slice(0,-1); }
         ctx.fillText(txt, c.x + c.width - 4, baseline);
       } else {
-        if((c.key === 'prwp' || c.key === 'pisb')){
-          const val = c.key === 'prwp' ? r.profitRwp : r.profitIsb;
-          ctx.fillStyle = val < 0 ? '#b91c1c' : '#15803d';
+        if(c.key === 'pisb'){
+          ctx.fillStyle = r.profitIsb < 0 ? '#b91c1c' : '#15803d';
         }
         ctx.fillText(txt, c.x + c.width/2, baseline);
       }
@@ -24333,10 +24302,8 @@ async function renderStockValueReportToCanvas(canvasEl){
   };
   drawSummaryLine('📦 کل تعداد (سٹاک)', grand.qty.toLocaleString());
   drawSummaryLine('💰 ٹوٹل خرید قیمت', 'Rs. ' + grand.purchase.toLocaleString());
-  drawSummaryLine('🟢 راولپنڈی ریٹ پر ٹوٹل مالیت', 'Rs. ' + grand.rwp.toLocaleString(), '#15803d');
-  drawSummaryLine('🟢 راولپنڈی — کل ممکنہ منافع', 'Rs. ' + grand.profitRwp.toLocaleString(), grand.profitRwp < 0 ? '#b91c1c' : '#15803d');
-  drawSummaryLine('🔴 اسلام آباد ریٹ پر ٹوٹل مالیت', 'Rs. ' + grand.isb.toLocaleString(), '#b91c1c');
-  drawSummaryLine('🔴 اسلام آباد — کل ممکنہ منافع', 'Rs. ' + grand.profitIsb.toLocaleString(), grand.profitIsb < 0 ? '#b91c1c' : '#15803d');
+  drawSummaryLine('🏷️ قیمت فروخت پر ٹوٹل مالیت', 'Rs. ' + grand.isb.toLocaleString(), '#b91c1c');
+  drawSummaryLine('🏷️ کل ممکنہ منافع', 'Rs. ' + grand.profitIsb.toLocaleString(), grand.profitIsb < 0 ? '#b91c1c' : '#15803d');
   y += 10;
 
   ctx.textAlign = 'center';
@@ -25522,7 +25489,7 @@ function customerBoughtToday(customerId){
   return invoicesData.some(inv => inv.customer_id === customerId && invDay(inv) === todayStr);
 }
 
-const RATE_AREA_LABELS = { retail: '🏷️ اسلام آباد', wholesale: '📦 راولپنڈی', suburbs: '🌿 مضافات' };
+const RATE_AREA_LABELS = {};
 
 function renderCustFilterBar(){
   const bar = document.getElementById('custFilterBar');
@@ -25531,12 +25498,7 @@ function renderCustFilterBar(){
   const f = customerFilterState;
   const areaBtn = (val, label) => `<button onclick="setCustFilter('area','${val}')" style="flex:1; padding:8px 4px; border-radius:8px; border:1.5px solid ${f.area===val?'var(--primary)':'#dbe1ea'}; background:${f.area===val?'var(--primary)':'#fff'}; color:${f.area===val?'#fff':'var(--text)'}; font-size:11.5px; font-weight:800; cursor:pointer;">${label}</button>`;
   bar.innerHTML = `
-    <div style="display:flex; gap:6px;">
-      ${areaBtn('all','سب')}
-      ${areaBtn('retail','🏷️ اسلام آباد')}
-      ${areaBtn('wholesale','📦 راولپنڈی')}
-      ${areaBtn('suburbs','🌿 مضافات')}
-    </div>
+    
     <div style="display:flex; gap:6px; align-items:center;">
       <select onchange="setCustFilter('sort', this.value)" style="flex:1; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px;">
         <option value="name" ${f.sort==='name'?'selected':''}>🔤 نام کے مطابق</option>
@@ -25570,7 +25532,7 @@ function applyCustomerCategorization(list){
   // ---------- 🔓 FM299TU#260: حاضر/کھوہ کھاتے دوبارہ بحال — ایڈمن ٹیب سے چنتا ہے، ملازم کو صرف حاضر کسٹمر ----------
   const showDormantNow = (AppState.currentRole === 'admin') ? !!f.showDormant : false;
   let out = list.filter(c => !!c.isDormant === showDormantNow);
-  if(f.area !== 'all') out = out.filter(c => c.rateArea === f.area);
+  
   if(f.todayOnly) out = out.filter(c => customerBoughtToday(c.customer_id));
   if(f.sort === 'highest') out.sort((a,b) => (b.total_receivable||0) - (a.total_receivable||0));
   else if(f.sort === 'lowest') out.sort((a,b) => (a.total_receivable||0) - (b.total_receivable||0));
@@ -25802,7 +25764,7 @@ function renderPartyList(query = ''){
       const f2 = customerFilterState;
       let emptyMsg = f2.showDormant ? 'کھوہ کھاتے میں کوئی کسٹمر نہیں' : 'No customer found';
       let showAllBtn = '';
-      if(f2.area !== 'all'){
+      if(false){
         emptyMsg = `اس علاقے (${RATE_AREA_LABELS[f2.area] || ''}) میں کوئی کسٹمر ٹیگ نہیں — کسٹمرز غائب نہیں ہوئے، صرف علاقہ فلٹر آن ہے`;
         showAllBtn = `<button onclick="setCustFilter('area','all')" style="margin-top:12px; padding:9px 18px; border-radius:9px; border:none; background:var(--primary); color:#fff; font-size:12.5px; font-weight:800; cursor:pointer;">🔄 سب کسٹمر دکھائیں</button>`;
       } else if(f2.todayOnly){
@@ -25814,9 +25776,7 @@ function renderPartyList(query = ''){
     }
     const isAdmin = AppState.currentRole === 'admin';
     wrap.innerHTML = (isAdmin ? fmZeroBalBtnHtml('customers') : '') + filtered.map(c => { // 🧹 FM610TU323 عارضی زیرو بٹن
-      const areaBadgeHtml = c.rateArea
-        ? `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#fff; background:${c.rateArea==='retail'?'#b91c1c':'#15803d'}; border:none; border-radius:7px; padding:2px 5px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">${c.rateArea==='retail'?'اسلام آباد':'راولپنڈی'}</button>`
-        : `<button type="button" onclick="event.stopPropagation(); openRateAreaPicker(${c.customer_id})" style="flex:0 0 auto; font-size:9px; font-weight:800; color:#5b21b6; background:#ede9fe; border:1.5px solid #c4b5fd; border-radius:7px; padding:2px 5px; cursor:pointer;">❔</button>`;
+      const areaBadgeHtml = '';
       return buildCompactPartyRow({
         id: c.customer_id, name: c.name, phone: c.phone, serial: c.serial_no, keywords: c.keywords,
         areaBadgeHtml, balance: c.total_receivable || 0, wallet: c.wallet_balance || 0,
@@ -28367,7 +28327,7 @@ function renderAdvOrderProductGrid(){
 
     if(isSingleVariant){
       const v = p.variants[0];
-      const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+      const price = v.retail;
       const cartItem = advOrderCart.find(c => c.variant_id === v.variant_id);
       const qtyInCart = cartItem ? cartItem.qty : 0;
       priceLabel = advIsAdmin ? `Rs. ${price}` : '';
@@ -28410,7 +28370,7 @@ function addToAdvOrderCartGrid(variantId){
   if(!v) return;
   // ---------- ملازم کبھی ریٹ سیٹ نہیں کرتا — 0 پر رہے گا، ایڈمن ریویو کے وقت راولپنڈی/اسلام آباد بٹن سے لگائے گا ----------
   const advIsAdmin = document.body.classList.contains('role-admin');
-  const price = advIsAdmin ? (Billing.saleMode === 'retail' ? v.retail : v.wholesale) : 0;
+  const price = advIsAdmin ? (v.retail) : 0;
   const existing = advOrderCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
   else advOrderCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, unitPrice: price});
@@ -28452,7 +28412,7 @@ function renderAdvOrderVariantChooserList(productId){
   let html = `<div style="text-align:center; font-weight:900; font-size:19px; color:var(--primary-dark); padding:6px 0 12px; border-bottom:2px solid #eef2ff; margin-bottom:10px;">${product?.serial_no ? `<span class="serialBadgeBtn" style="${SERIAL_BADGE_INLINE_STYLE} width:40px !important; height:40px !important; min-width:40px !important; min-height:40px !important; font-size:16px !important; margin:0 6px 0 0; cursor:default;">${product.serial_no}</span>` : ''}${product?.name || ''}</div>`;
 
   html += flat.map(v => {
-    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    const price = v.retail;
     const cartItem = advOrderCart.find(c => c.variant_id === v.variant_id);
     const qty = cartItem ? cartItem.qty : 0;
     const label = v.label || v.name;
@@ -28694,7 +28654,7 @@ function applyAdvOrderRateMode(mode){
     if(item.variant_id == null) return; // ---------- کسٹم/رف آئٹم کا کوئی ویریئنٹ نہیں، ریٹ دستی ہی رہے گا ----------
     const v = flat.find(f => f.variant_id === item.variant_id);
     if(!v) return;
-    item.unitPrice = mode === 'wholesale' ? v.wholesale : v.retail;
+    item.unitPrice = v.retail;
   });
   renderAdvOrderCart();
 }
@@ -29128,8 +29088,6 @@ function renderOtCustomerList(query){
   const list = customersData.filter(c => {
     // ---------- 🔒 صدام کی ہدایت (FM16SEPWE0518AM2): حاضر/غیر حاضر نظام مکمل ہائیڈ — کھوہ کھاتے بھی اب آرڈر ٹیکنگ میں نظر آئیں گے ----------
     // if(c.isDormant) return false;
-    if(otAreaFilter === 'retail' && c.rateArea !== 'retail') return false;
-    if(otAreaFilter === 'wholesale' && c.rateArea !== 'wholesale') return false;
     if(otAreaFilter === 'today' && !customerBoughtToday(c.customer_id)) return false;
     if(!q) return true;
     return (c.name || '').toLowerCase().includes(q) ||
@@ -29149,11 +29107,7 @@ function renderOtCustomerList(query){
     // کسی بھی وجہ سے اگر پرانا/کوئی CSS نہ چلے تب بھی یہ رو بالکل ویسی ہی نظر آئے ---------- -->
     const digits = (c.phone || '').replace(/[^0-9]/g, '');
     const waNum = digits ? (digits.startsWith('92') ? digits : digits.startsWith('0') ? '92' + digits.slice(1) : digits) : '';
-    const areaBadge = c.rateArea === 'retail'
-      ? `<span style="flex:0 0 auto; font-size:9px; font-weight:800; padding:2px 5px; border-radius:7px; white-space:nowrap; text-align:center; color:#fff; background:#b91c1c; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">اسلام آباد</span>`
-      : (c.rateArea === 'wholesale'
-        ? `<span style="flex:0 0 auto; font-size:9px; font-weight:800; padding:2px 5px; border-radius:7px; white-space:nowrap; text-align:center; color:#fff; background:#15803d; box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);">راولپنڈی</span>`
-        : `<span style="flex:0 0 0;"></span>`);
+    const areaBadge = '';
     const bal = c.total_receivable || 0;
     // ---------- 💰 صدام کی ہدایت (FM13SEPSU): بقایہ کیپسول پہلے نمایاں نہیں تھا — اب بڑا، ابھرا ہوا،
     // سرخ رنگ (یہ رقم کسٹمر سے لینی ہے) ---------- -->
@@ -30544,9 +30498,7 @@ function renderRecoveryListEmployeeView(){
   if(rlQ){
     owing = owing.filter(c => (c.name || '').toLowerCase().includes(rlQ) || String(c.serial_no ?? '').includes(rlQ));
   }
-  if(rlAreaFilter === 'retail') owing = owing.filter(c => c.rateArea === 'retail');
-  else if(rlAreaFilter === 'wholesale') owing = owing.filter(c => c.rateArea === 'wholesale');
-  else if(rlAreaFilter === 'today') owing = owing.filter(c => customerBoughtToday(c.customer_id));
+  if(rlAreaFilter === 'today') owing = owing.filter(c => customerBoughtToday(c.customer_id));
   const sortMode = document.getElementById('rlSortSelect')?.value || 'default';
   owing.sort((a,b) => {
     const aDone = rlIsDone(a.customer_id) ? 1 : 0, bDone = rlIsDone(b.customer_id) ? 1 : 0;
@@ -30626,8 +30578,7 @@ function buildRlEmployeeCard(c, dr){
           ${isDone ? '✅' : ''}
         </div>
         <div style="display:flex; gap:4px; align-items:center;">
-          ${c.rateArea ? `<span style="flex:0 0 auto; font-size:${z(8)}px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:5px; padding:1px 4px; white-space:nowrap;">${RATE_AREA_LABELS[c.rateArea] || ''}</span>` : ''}
-          ${c.phone ? iconBtn('tel:' + c.phone, '#eef2ff', 'var(--primary-dark)', '📞') : ''}
+                    ${c.phone ? iconBtn('tel:' + c.phone, '#eef2ff', 'var(--primary-dark)', '📞') : ''}
           ${c.phone ? iconBtn('https://wa.me/' + waNum, '#dcfce7', '#15803d', '📱', 'target="_blank"') : ''}
         </div>
       </div>
@@ -32177,8 +32128,7 @@ function _renderAdminPendingOrdersScreenCore(){
   // ترتیب — بالکل ریکوری لسٹ سکرین جیسا نظام ---------- -->
   const pendingFilterBarHtml = `
     <div style="display:flex; gap:6px; margin-bottom:8px;">
-      <button type="button" onclick="setAdminPendingAreaFilter('retail')" style="flex:1; padding:9px 4px; background:#b91c1c; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer; opacity:${adminPendingAreaFilter==='retail'?'1':'.55'};">🏷️ اسلام آباد</button>
-      <button type="button" onclick="setAdminPendingAreaFilter('wholesale')" style="flex:1; padding:9px 4px; background:#15803d; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer; opacity:${adminPendingAreaFilter==='wholesale'?'1':'.55'};">📦 راولپنڈی</button>
+
       <button type="button" onclick="toggleAdminPendingToday()" style="flex:1; padding:9px 4px; background:#0369a1; color:#fff; border:none; border-radius:10px; font-size:11px; font-weight:800; cursor:pointer; opacity:${adminPendingTodayOnly?'1':'.55'};">🛒 آج کے خریدار</button>
     </div>
     <select onchange="setAdminPendingSort(this.value)" style="width:100%; padding:9px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px; font-weight:700;">
@@ -32243,9 +32193,7 @@ function _renderAdminPendingOrdersScreenCore(){
       const when = new Date(o.createdAt).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
       // ---------- 🏷️ کسٹمر کا محفوظ شدہ ریٹ ایریا — نام کے ساتھ ہی نظر آ جائے، ایڈمن کو ٹیپ کرنے سے پہلے ہی پتا چل جائے ----------
       const matchedCust = customersData.find(c => c.name.toLowerCase() === o.customerName.toLowerCase());
-      const areaBadge = matchedCust && matchedCust.rateArea
-        ? (matchedCust.rateArea === 'wholesale' ? `<span style="font-size:10.5px; font-weight:800; background:#ede9fe; color:#5b21b6; padding:2px 7px; border-radius:8px; margin-inline-start:5px;">📦 Rawalpindi</span>` : `<span style="font-size:10.5px; font-weight:800; background:#d1fae5; color:#065f46; padding:2px 7px; border-radius:8px; margin-inline-start:5px;">🏷️ Islamabad</span>`)
-        : '';
+      const areaBadge = '';
       return `
         <div class="billCard" style="cursor:default; padding:8px 12px; margin-bottom:5px; flex-wrap:wrap; align-items:flex-start;">
           <div onclick="fulfillAdvanceOrder(${o.id})" style="cursor:pointer; flex:1 1 100%;">
@@ -32282,9 +32230,9 @@ function applyRateToAdvanceOrder(orderId, mode){
     if(item.variant_id == null) return; // ---------- کسٹم/رف آئٹم کا کوئی ویریئنٹ نہیں، ریٹ دستی لگانا ہوگا (Edit سے) ----------
     const v = flat.find(f => f.variant_id === item.variant_id);
     if(!v) return;
-    item.unitPrice = mode === 'wholesale' ? v.wholesale : v.retail;
+    item.unitPrice = v.retail;
   });
-  try{ applyChalanPricingToItems(order.items, mode === 'wholesale' ? 'wholesale' : 'retail'); }catch(e){} // 🧾 چالان کا اپنا ریٹ
+  try{ applyChalanPricingToItems(order.items, 'retail'); }catch(e){} // 🧾 چالان کا اپنا ریٹ
   order.rateApplied = mode;
 }
 
@@ -34947,7 +34895,7 @@ function updateCustomerTriggerLabel(){
   // ---------- 🏷️ صدام کی ہدایت (FM10SEPTH0844AM): بل بناتے وقت بھی کسٹمر کے نام کے ساتھ اس کا علاقہ (اسلام
   // آباد/راولپنڈی/مضافات) کیپسول کی شکل میں نظر آئے — ریٹ والے بٹن سے الگ، صرف شناخت کے لیے ---------- -->
   if(!c){ textEl.textContent = '— گاہک منتخب کریں —'; return; }
-  const areaCapsule = `<span style="font-size:10px; font-weight:800; background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:2px 7px; margin-inline-start:5px;">${RATE_AREA_LABELS[c.rateArea] || '❔'}</span>`;
+  const areaCapsule = '';
   textEl.innerHTML = c.name + areaCapsule;
 }
 
@@ -37483,6 +37431,7 @@ async function pushProductsToCloud(){
           const remote = JSON.parse(pstr);
           if(Array.isArray(remote)){
             productsData = _dgFilter('products', _reattachLocalImages(await _shrinkLockCheck(_dgFilter('products', remote), mergeProductsThreeWay(productsSyncBase, productsData, remote), 'product_id', 'سبزیاں'), productsData)); // 🛡️ FM610TU320
+            try{ fmUnifyPrices(); }catch(e){}
             _syncSetBase(remote); // 🐞 FM710WE329: کلاؤڈ ملا لیا — اب بنیاد یہی، تاکہ دوبارہ کوشش پر دوسرے فون کی تبدیلی دوبارہ نہ جڑے (دستی ترمیم والے فالتو سٹاک کی جڑ) // 🔒 FM309WE#270
             try{ repairDuplicateProductSerials(); }catch(e){}
             try{ recomputeReservedFromOrders(); }catch(e){}
@@ -46192,7 +46141,7 @@ async function renderPurchaseChalanReportToCanvas(){
     // 🧾 FM310SA286 (صدام کی ہدایت): کیپشن اور ترتیب (دائیں سے بائیں): حاضر سٹاک، ریٹ، سیل ہوا، باقی سٹاک، منافع — ڈیٹا ہر کالم کے ساتھ ہی شفٹ
     {key:'inQty', label:'حاضر سٹاک', frac:0.125, num:true},
     {key:'rate', label:'خرید ریٹ', frac:0.12, num:true},
-    {key:'sellIsb', label:'فروخت ریٹ', frac:0.12, num:true},
+    {key:'sellIsb', label:'قیمت فروخت', frac:0.12, num:true},
     {key:'left', label:'باقی سٹاک', frac:0.125, num:true},
     {key:'profit', label:'منافع', frac:0.14, num:true},
   ]);
