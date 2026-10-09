@@ -3718,6 +3718,7 @@ function __appHostKind(h, p){
     <div class="modalOverlay" id="quickAddCustomerModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
         <h3>🧑‍🤝‍🧑 نیا گاہک</h3>
+        <button type="button" onclick="qcPickFromPhonebook()" style="width:100%; height:46px; margin-bottom:8px; border:2px solid #16a34a; border-radius:12px; background:#f0fdf4; color:#15803d; font-family:inherit; font-size:16px; font-weight:800; cursor:pointer;">📇 فون بک سے چنیں (ایک ٹچ پر محفوظ)</button>
         <input type="text" id="qcName" placeholder="نام">
         <input type="text" id="qcPhone" placeholder="موبائل نمبر (اختیاری)">
         <div class="modalBtns">
@@ -9026,7 +9027,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM910FR349'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM910FR350'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -14981,6 +14982,7 @@ function renderCart(){
     const custIdNow = document.getElementById('customerSelect')?.value;
     const custNow = custIdNow ? customersData.find(c => c.customer_id == custIdNow) : null;
     const _esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+    try{ let _gb = document.getElementById('cartRecGateBanner'); if(!_gb){ _gb = document.createElement('div'); _gb.id = 'cartRecGateBanner'; custBanner.insertAdjacentElement('afterend', _gb); } _gb.innerHTML = custNow ? fmCartRecBannerHtml(custNow.customer_id) : ''; }catch(e){} // 🧾 FM910FR350
     custBanner.innerHTML = custNow
       ? `<span class="bcCustLbl">گاہک کا نام</span><span class="bcCustName">${_esc(custNow.name)}</span>${custNow.phone ? `<span class="bcCustPhone">📞 ${_esc(custNow.phone)}</span>` : ''}`
       : '<span class="bcCustName">🚶 نقد گاہک</span>';
@@ -15344,9 +15346,102 @@ async function openBillPreviewBeforeComplete(){
   showImageSharePreview(canvas, 'Bill_Preview.png', '👁️ Bill Preview — Not Yet Saved', 'Bill preview');
 }
 
+
+// =====================================================================
+// 🧾 FM910FR350: بل بنانے سے پہلے گاہک کی پچھلی وصولی کا حساب —
+//  (1) اس گاہک کی کوئی کچی (غیر تصدیق شدہ) وصولی کھڑی ہے → بل نہیں بنے گا، پہلے کنفرم کریں (بٹن سیدھا وہیں لے جاتا ہے)
+//  (2) کل مال گیا مگر کل کی کوئی وصولی درج ہی نہیں → یاد دہانی؛ "وصولی نہیں ہوئی، بل بنائیں" سے آگے جا سکتے ہیں
+//  کنفرم کرنے کے بعد نیچے سبز پٹی "🧾 بل پر واپس جائیں" — ایک ٹچ میں واپس اسی بل پر
+// =====================================================================
+let fmBillReturnCid = null;
+const fmBillNoRecOk = new Set();
+function fmBillRecStatus(cid){
+  const out = { pending: [], pendSum: 0, goodsY: 0, recY: 0, Y: rlPrevBizDay() };
+  if(cid === null || cid === undefined || cid === '') return out;
+  const id = Number(cid);
+  const c = customersData.find(x => Number(x.customer_id) === id); if(!c) return out;
+  out.c = c;
+  out.pending = recoveryListData.filter(r => Number(r.customer_id) === id && r.status === 'pending');
+  out.pendSum = out.pending.reduce((a, r) => a + (Number(r.amount) || 0), 0);
+  invoicesData.forEach(inv => { if(Number(inv.customer_id) === id && inv.status !== 'voided' && invDay(inv) === out.Y) out.goodsY += _drGoodsOrig(inv); });
+  (c.walletHistory || []).forEach(h => { if(h && h.type === 'receivable_collected' && h.date === out.Y) out.recY += Number(h.amount) || 0; });
+  recoveryListData.forEach(r => { if(Number(r.customer_id) === id && recDay(r) === out.Y) out.recY += Number(r.amount) || 0; });
+  return out;
+}
+function fmBillRecoveryGate(cid, onProceed){
+  if(AppState.currentRole !== 'admin') return true;
+  const st = fmBillRecStatus(cid); if(!st.c) return true;
+  const f = n => Math.round(n).toLocaleString();
+  if(st.pending.length){
+    const rows = st.pending.map(r => `<div style="display:flex; justify-content:space-between; gap:8px; padding:7px 10px; background:#fff; border:1.5px solid #fcd34d; border-radius:10px; margin-top:6px;"><span>📅 ${bizFmt(recDay(r))} — ${escRlHtml(r.employeeName || '')}</span><b style="font-family:Arial,sans-serif;">Rs. ${f(r.amount)}</b></div>`).join('');
+    fmGateDialog('⏳ پہلے وصولی کنفرم کریں', `<b>${escRlHtml(st.c.name)}</b> کی <b>Rs. ${f(st.pendSum)}</b> وصولی ابھی کچی ہے (کھاتے میں درج نہیں)۔<br>پہلے اسے کنفرم کریں، پھر بل بنے گا — تاکہ بل پر سابقہ بقایا درست آئے۔${rows}`,
+      [{ txt: '📥 وصولی کنفرم کرنے چلیں', bg: '#15803d', sh: '#14532d', fn: () => fmGoConfirmRecovery(st.c.customer_id) }]);
+    return false;
+  }
+  const key = st.c.customer_id + '|' + st.Y;
+  if(st.goodsY > 0 && st.recY <= 0 && !fmBillNoRecOk.has(key)){
+    fmGateDialog('⚠️ کل کی وصولی درج نہیں', `<b>${escRlHtml(st.c.name)}</b> کو کل (${bizFmt(st.Y)}) <b>Rs. ${f(st.goodsY)}</b> کا مال گیا، مگر کل کی کوئی وصولی درج نہیں۔<br>اگر وصولی آئی ہے تو پہلے درج کریں۔`,
+      [{ txt: '📥 وصولی درج کرنے چلیں', bg: '#0f766e', sh: '#134e4a', fn: () => fmGoConfirmRecovery(st.c.customer_id) },
+       { txt: '✅ کل کوئی وصولی نہیں ہوئی — بل بنائیں', bg: '#b45309', sh: '#78350f', fn: () => { fmBillNoRecOk.add(key); if(onProceed) onProceed(); } }]);
+    return false;
+  }
+  return true;
+}
+function fmGateDialog(title, html, btns){
+  document.getElementById('fmGateDlg')?.remove();
+  const d = document.createElement('div'); d.id = 'fmGateDlg'; d.dir = 'rtl';
+  d.style.cssText = 'position:fixed; inset:0; z-index:2147483400; background:rgba(15,23,42,.65); display:flex; align-items:center; justify-content:center; padding:16px;';
+  d.innerHTML = `<div style="background:#fffbeb; border:3px solid #d97706; border-radius:18px; padding:16px; width:100%; max-width:380px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+      <div style="font-size:20px; font-weight:900; color:#78350f; text-align:center;">${title}</div>
+      <div style="font-size:15.5px; color:#422006; line-height:2; margin-top:8px;">${html}</div>
+      ${btns.map((b, i) => `<button type="button" data-i="${i}" style="width:100%; padding:13px 8px; margin-top:10px; border:none; border-radius:14px; background:${b.bg}; color:#fff; font-family:inherit; font-size:17px; font-weight:800; cursor:pointer; box-shadow:0 4px 0 ${b.sh};">${b.txt}</button>`).join('')}
+      <button type="button" data-i="x" style="width:100%; padding:10px; margin-top:12px; border:none; border-radius:12px; background:#e2e8f0; color:#334155; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;">✖ واپس بل پر</button>
+    </div>`;
+  d.addEventListener('click', ev => {
+    const b = ev.target.closest('button[data-i]');
+    if(!b && ev.target !== d) return;
+    d.remove();
+    const i = b ? b.getAttribute('data-i') : 'x';
+    if(i !== 'x' && btns[+i]) btns[+i].fn();
+  });
+  document.body.appendChild(d);
+}
+function fmGoConfirmRecovery(cid){
+  fmBillReturnCid = cid;
+  try{ closeCartSheet(); }catch(e){}
+  try{ closeSidebar(); }catch(e){}
+  try{ openCustomerProfile(cid); }catch(e){}
+  fmRefreshBillReturnBar();
+}
+function fmRefreshBillReturnBar(){
+  let b = document.getElementById('fmBillReturnBar');
+  if(fmBillReturnCid === null){ if(b) b.remove(); return; }
+  if(!b){ b = document.createElement('div'); b.id = 'fmBillReturnBar'; b.dir = 'rtl'; document.body.appendChild(b); }
+  const st = fmBillRecStatus(fmBillReturnCid);
+  const done = !st.pending.length;
+  b.style.cssText = `position:fixed; left:10px; right:10px; bottom:14px; z-index:2147483300; display:flex; gap:8px; align-items:center; padding:8px; border-radius:16px; background:${done ? '#14532d' : '#78350f'}; box-shadow:0 6px 20px rgba(0,0,0,.35);`;
+  b.innerHTML = `<button type="button" onclick="fmBackToBill()" style="flex:1; padding:12px 6px; border:none; border-radius:12px; background:${done ? 'linear-gradient(180deg,#22c55e,#15803d)' : '#f59e0b'}; color:#fff; font-family:inherit; font-size:17px; font-weight:800; cursor:pointer;">🧾 بل پر واپس جائیں${done ? ' ✅' : ' (وصولی ابھی کچی)'}</button>
+    <button type="button" onclick="fmBillReturnCid=null; fmRefreshBillReturnBar();" style="flex:0 0 auto; width:42px; height:42px; border:none; border-radius:12px; background:rgba(255,255,255,.18); color:#fff; font-size:16px; cursor:pointer;">✖</button>`;
+}
+function fmBackToBill(){
+  fmBillReturnCid = null; fmRefreshBillReturnBar();
+  try{ closeProfileModal(); }catch(e){}
+  try{ goTo('billing'); }catch(e){}
+  setTimeout(() => { try{ openCartSheet(); }catch(e){} }, 150);
+}
+function fmCartRecBannerHtml(cid){
+  if(AppState.currentRole !== 'admin') return '';
+  const st = fmBillRecStatus(cid); if(!st.c) return '';
+  const f = n => Math.round(n).toLocaleString();
+  if(st.pending.length) return `<div dir="rtl" style="margin:0 12px 6px; padding:8px 10px; border-radius:12px; background:#fef3c7; border:2px solid #d97706; color:#78350f; font-weight:800; font-size:13.5px; display:flex; align-items:center; gap:8px;"><span style="flex:1;">⏳ Rs. ${f(st.pendSum)} وصولی کچی ہے — بل سے پہلے کنفرم کریں</span><button type="button" onclick="fmGoConfirmRecovery(${st.c.customer_id})" style="flex:0 0 auto; padding:7px 10px; border:none; border-radius:10px; background:#15803d; color:#fff; font-family:inherit; font-weight:800; font-size:13px; cursor:pointer;">📥 کنفرم کریں</button></div>`;
+  if(st.goodsY > 0 && st.recY <= 0) return `<div dir="rtl" style="margin:0 12px 6px; padding:7px 10px; border-radius:12px; background:#fff7ed; border:1.5px dashed #ea580c; color:#9a3412; font-weight:800; font-size:13px;">⚠️ کل (${bizFmt(st.Y)}) Rs. ${f(st.goodsY)} کا مال گیا — کل کی وصولی درج نہیں</div>`;
+  if(st.goodsY > 0 || st.recY > 0) return `<div dir="rtl" style="margin:0 12px 6px; padding:6px 10px; border-radius:12px; background:#f0fdf4; border:1.5px solid #86efac; color:#14532d; font-weight:800; font-size:13px;">✅ کل کی وصولی کا حساب مکمل — Rs. ${f(st.recY)}</div>`;
+  return '';
+}
 function finalizeInvoice(){
   if(Billing.cart.length === 0) return;
   if(!requireBillCustomer()) return; // 🔒 FM810TH344: سب سے پہلے کسٹمر کا نام لازمی
+  if(!fmBillRecoveryGate(document.getElementById('customerSelect')?.value, () => finalizeInvoice())) return; // 🧾 FM910FR350: کل کی وصولی کا حساب پہلے
 
   // ---------- 🧾 صدام کی ہدایت (26 ستمبر): بل فائنل سے پہلے — (1) ہر سبزی کا چالان طے ہو (ایک ہو تو خودکار)
   // (2) ان چالانوں کا خرید ریٹ لگ چکا ہو۔ ریٹ باقی ہو تو اسی بل کے چالانوں کا پاپ اپ کھلے، سب ریٹ لگتے ہی
@@ -19744,7 +19839,7 @@ async function chPickSupplierFromPhonebook(){
   const say = (m, ok) => { if(err){ err.textContent = m; err.style.color = ok ? '#15803d' : '#b91c1c'; err.style.display = 'block'; } };
   if(err) err.style.display = 'none';
   if(!(navigator.contacts && typeof navigator.contacts.select === 'function')){
-    say('⚠️ اس فون/براؤزر میں فون بک کھولنے کی سہولت نہیں — نام اور نمبر خود لکھ دیں');
+    say(fmContactUnsupportedMsg());
     return;
   }
   let picked;
@@ -21412,7 +21507,69 @@ function formatPhoneForWhatsApp(phone){
 }
 
 // ---------- فون کی کتاب سے کسٹمر/سپلائر منتخب کریں — نام اور نمبر دونوں خودکار بھر جائیں ----------
+// ---------- 📇 FM910FR350: فون بک سے رابطہ — ایک ہی مضبوط مددگار (بیوپاری/گاہک/فوری گاہک سب یہی استعمال کرتے ہیں) ----------
+// نام + نمبر واپس دیتا ہے؛ نہ چل سکے تو صاف اردو وجہ بتاتا ہے (پہلے کہیں انگریزی پیغام، کہیں خاموشی تھی)
+function fmContactUnsupportedMsg(){
+  const ua = navigator.userAgent || '';
+  if(!/Android/i.test(ua)) return '⚠️ فون بک سے چننا صرف اینڈرائیڈ فون پر چلتا ہے — نام اور نمبر خود لکھ دیں';
+  if(/; wv\)/.test(ua)) return '⚠️ یہ ایپ (ویب ویو والی APK) فون بک کھولنے نہیں دیتی — ایپ کروم سے کھولیں (یا کروم والی نئی APK لگائیں)، یا نام اور نمبر خود لکھ دیں';
+  if(!window.isSecureContext) return '⚠️ فون بک صرف https والے لنک پر کھلتی ہے — نام اور نمبر خود لکھ دیں';
+  return '⚠️ اس فون کا کروم پرانا ہے، فون بک نہیں کھلتی — کروم اپڈیٹ کریں، یا نام اور نمبر خود لکھ دیں';
+}
+function fmNormPkPhone(t){
+  let raw = String(t || '').replace(/[^0-9]/g, '');
+  if(raw.startsWith('0092')) raw = '0' + raw.slice(4);
+  else if(raw.startsWith('92') && raw.length >= 12) raw = '0' + raw.slice(2);
+  else if(raw.length === 10 && raw.startsWith('3')) raw = '0' + raw;
+  return raw;
+}
+async function fmPickPhoneContact(){
+  if(!(navigator.contacts && typeof navigator.contacts.select === 'function')) return { err: fmContactUnsupportedMsg() };
+  let picked;
+  try{ picked = await navigator.contacts.select(['name', 'tel'], { multiple: false }); }
+  catch(e){
+    if(e && e.name === 'AbortError') return { cancel: true };
+    if(e && e.name === 'InvalidStateError') return { err: '⚠️ فون بک پہلے سے کھلی ہے — ایک بار واپس جا کر دوبارہ بٹن دبائیں' };
+    if(e && e.name === 'SecurityError') return { err: '⚠️ فون بک کی اجازت نہیں ملی — بٹن کو ایک بار صاف ٹچ کریں (لمبا نہ دبائیں)' };
+    return { err: '⚠️ فون بک نہیں کھل سکی (' + ((e && (e.name || e.message)) || 'خرابی') + ') — نام اور نمبر خود لکھ دیں' };
+  }
+  if(!picked || !picked.length) return { cancel: true };
+  const c = picked[0] || {};
+  const name = String((c.name || []).find(x => String(x || '').trim()) || '').trim().replace(/\s+/g, ' ');
+  const tel = fmNormPkPhone((c.tel || []).find(t => /\d/.test(String(t))) || '');
+  return { name, tel };
+}
+function fmPkToast(msg, ok){
+  let t = document.getElementById('fmPkToast');
+  if(!t){ t = document.createElement('div'); t.id = 'fmPkToast'; t.dir = 'rtl'; document.body.appendChild(t); }
+  t.style.cssText = `position:fixed; left:12px; right:12px; bottom:90px; z-index:2147483600; padding:12px 14px; border-radius:14px; font-weight:800; font-size:15px; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,.3); background:${ok ? '#15803d' : '#b91c1c'}; color:#fff;`;
+  t.textContent = msg;
+  clearTimeout(t._h); t._h = setTimeout(() => { t.style.display = 'none'; }, ok ? 2500 : 6000);
+}
+async function qcPickFromPhonebook(){
+  const r = await fmPickPhoneContact();
+  if(r.cancel) return;
+  if(r.err){ fmPkToast(r.err, false); return; }
+  const n = document.getElementById('qcName'), p = document.getElementById('qcPhone');
+  if(n && r.name) n.value = r.name;
+  if(p) p.value = r.tel || '';
+  if(!r.name){ fmPkToast('⚠️ اس رابطے کا نام خالی ہے — نام لکھ کر محفوظ کریں', false); n && n.focus(); return; }
+  fmPkToast('✅ ' + r.name + (r.tel ? ' — ' + r.tel : '') + ' محفوظ ہو رہا ہے…', true);
+  setTimeout(() => { try{ saveQuickAddCustomer(); }catch(e){} }, 900);
+}
 async function pickContactForNewParty(){
+  // 📇 FM910FR350: نیا مشترکہ مددگار — نام + نمبر خانوں میں، صاف اردو پیغام
+  const r = await fmPickPhoneContact();
+  if(r.cancel) return;
+  if(r.err){ fmPkToast(r.err, false); return; }
+  const nEl = document.getElementById('npPartyName'), pEl = document.getElementById('npPartyPhone');
+  if(nEl && r.name) nEl.value = r.name;
+  if(pEl) pEl.value = r.tel || '';
+  try{ filterPartyNameOptions(); filterPartyPhoneOptions(); }catch(e){}
+  fmPkToast(r.name ? ('✅ ' + r.name + (r.tel ? ' — ' + r.tel : '') + ' — اب "محفوظ کریں" دبائیں') : '⚠️ اس رابطے کا نام خالی ہے — نام لکھ دیں', !!r.name);
+  return;
+}
+async function _oldPickContactForNewParty(){
   if(!('contacts' in navigator && 'ContactsManager' in window)){
     alert('This phone/browser does not support access to contacts — please type the name and number manually.');
     return;
@@ -31638,9 +31795,36 @@ function buildRecoveryEntryFromSplit(c){
     confirmedAt: null
   };
 }
-function submitSingleRecovery(customerId){
+// ---------- 📅 FM910FR350: کوئی وصولی تاریخ کی تصدیق کے بغیر پکی نہیں — OK دبانے پر پہلے پوچھا جائے گا: کل یا آج؟ ----------
+function rlAskEntryDate(onPick){
+  document.getElementById('rlDateAsk')?.remove();
+  const Y = rlPrevBizDay(), T = bizDateKey();
+  const d = document.createElement('div'); d.id = 'rlDateAsk'; d.dir = 'rtl';
+  d.style.cssText = 'position:fixed; inset:0; z-index:2147483500; background:rgba(15,23,42,.65); display:flex; align-items:center; justify-content:center; padding:16px;';
+  const btn = (mode, txt, bg, sh) => `<button type="button" data-m="${mode}" style="width:100%; padding:14px 8px; margin-top:10px; border:${rlEntryDayMode === mode ? '3px solid #fde047' : '2px solid transparent'}; border-radius:14px; background:${bg}; color:#fff; font-family:inherit; font-size:19px; font-weight:800; cursor:pointer; box-shadow:0 4px 0 ${sh};">${txt}</button>`;
+  d.innerHTML = `<div style="background:#fff; border-radius:18px; padding:16px; width:100%; max-width:360px; text-align:center;">
+      <div style="font-size:19px; font-weight:900; color:#0f172a;">📅 یہ وصولی کس تاریخ کی ہے؟</div>
+      <div style="font-size:13px; color:#64748b; margin-top:4px;">تاریخ پکی کریں — بغیر تاریخ وصولی محفوظ نہیں ہوگی</div>
+      ${btn('yesterday', '⏪ کل — ' + bizFmt(Y), '#ea580c', '#9a3412')}
+      ${btn('today', '📍 آج — ' + bizFmt(T), '#15803d', '#14532d')}
+      <button type="button" data-m="" style="width:100%; padding:10px; margin-top:12px; border:none; border-radius:12px; background:#e2e8f0; color:#334155; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;">✖ واپس</button>
+    </div>`;
+  d.addEventListener('click', ev => {
+    const b = ev.target.closest('button[data-m]');
+    if(!b && ev.target !== d) return;
+    const m = b ? b.getAttribute('data-m') : '';
+    d.remove();
+    if(!m) return;
+    rlEntryDayMode = m;
+    onPick();
+    try{ renderRecoveryListEmployeeView(); }catch(e){}
+  });
+  document.body.appendChild(d);
+}
+function submitSingleRecovery(customerId, _dateOk){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
+  if(!_dateOk){ if(rlTypedTotal(customerId) <= 0){ alert('پہلے وصولی کی رقم لکھیں'); return; } rlAskEntryDate(() => submitSingleRecovery(customerId, true)); return; } // 📅 FM910FR350
   const entry = buildRecoveryEntryFromSplit(c);
   if(!entry){ alert('پہلے وصولی کی رقم لکھیں'); return; }
   recoveryListData.unshift(entry);
@@ -31671,9 +31855,10 @@ function saveRlNoteAfterOk(customerId){
 // ---------- پرانا فنکشن نام (کسی جگہ سے کال ہو تو نہ ٹوٹے) ----------
 function updateRlAmount(customerId, val){ updateRlSplit(customerId, 0, 'amount', val); }
 
-function submitRecoveryList(){
+function submitRecoveryList(_dateOk){
   const ids = Object.keys(rlSplitMap).map(Number).filter(id => rlTypedTotal(id) > 0 && !rlIsDone(id));
   if(ids.length === 0){ alert('کم از کم ایک کسٹمر کی وصولی کی رقم لکھیں'); return; }
+  if(_dateOk !== true){ rlAskEntryDate(() => submitRecoveryList(true)); return; } // 📅 FM910FR350
   ids.forEach(id => {
     const c = customersData.find(x => x.customer_id === id);
     if(!c) return;
@@ -32219,6 +32404,7 @@ function confirmRecoveryEntry(entryId){
   pushInvoicesToCloud();
   pushFinanceToCloud();
   pushRecoveryListToCloud(); // ---------- کلاؤڈ پر بھی "confirmed" حالت اپڈیٹ ہو جائے ----------
+  try{ if(fmBillReturnCid !== null) setTimeout(fmRefreshBillReturnBar, 50); }catch(e){} // 🧾 FM910FR350: بل پر واپسی والی پٹی تازہ
   renderRecoveryListAdminView();
 
   // ---------- 🎨 صدام کی ہدایت (FM3SEPTH10): واٹس ایپ کی بجائے "بھیجیں؟" پوچھنے سے پہلے، پوسٹر کا فونٹ/رنگ
