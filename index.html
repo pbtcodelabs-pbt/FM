@@ -9043,7 +9043,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM910FR351'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM910FR352'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -48970,6 +48970,58 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<!-- =====================================================================
+     🔄 FM910FR352: نئی اپڈیٹ کی پٹی — نیا ورژن اترنا شروع ہو تو اوپر بڑی سرخ پٹی: "نئی اپڈیٹ آ رہی ہے — کام فی الحال روک دیں"؛
+     اپڈیٹ مکمل ہو کر ایپ تازہ ہو تو اسی جگہ پٹی سبز: "پرانا ورژن ← نیا ورژن — اب کام شروع کر سکتے ہیں"
+     ===================================================================== -->
+<style>
+  #fmUpdBar{position:fixed; left:0; right:0; top:0; z-index:2147483000; display:flex; align-items:center; justify-content:center; gap:12px;
+    padding:calc(7px + env(safe-area-inset-top)) 10px 7px; gap:8px; direction:rtl; text-align:center; color:#fff;
+    font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; box-shadow:0 6px 20px rgba(0,0,0,.45);
+    animation:fmUpdIn .35s ease both; transition:background .5s ease;}
+  #fmUpdBar.red{background:linear-gradient(180deg,#7f1d1d,#c0392b);}
+  #fmUpdBar.green{background:linear-gradient(180deg,#14532d,#16a34a);}
+  #fmUpdBar .t1{display:block; font-size:21px; line-height:1.7; color:#ffe08a; font-weight:700;}
+  #fmUpdBar.green .t1{color:#ffffff;}
+  #fmUpdBar .t2{display:block; font-size:16px; line-height:1.75;}
+  #fmUpdBar .vv{display:inline-block; direction:ltr; font:900 13.5px Arial,Helvetica,sans-serif; background:rgba(0,0,0,.25); border-radius:8px; padding:1px 6px; margin:0 2px; white-space:nowrap;}
+  #fmUpdBar .spin{flex:none; width:34px; height:34px; border-radius:50%; border:4px solid rgba(255,240,200,.35); border-top-color:#ffe08a; animation:fmUpdSpin .9s linear infinite;}
+  #fmUpdBar .ok{flex:none; font-size:26px; line-height:1;}
+  #fmUpdBar .x{flex:none; width:32px; height:32px; border:none; border-radius:50%; background:rgba(255,255,255,.22); color:#fff; font-size:18px; cursor:pointer;}
+  @keyframes fmUpdSpin{to{transform:rotate(360deg)}}
+  @keyframes fmUpdIn{from{transform:translateY(-100%)}to{transform:none}}
+</style>
+<script>
+(function(){
+  const KEY = 'fmUpdSeenBuild';
+  function bar(){
+    let b = document.getElementById('fmUpdBar');
+    if(!b){ b = document.createElement('div'); b.id = 'fmUpdBar'; b.setAttribute('role', 'status'); document.body.appendChild(b); }
+    return b;
+  }
+  window.fmUpdShowComing = function(){
+    if(!document.body) return;
+    const b = bar(); if(b.classList.contains('red')) return;
+    b.className = 'red';
+    b.innerHTML = '<span class="spin" aria-hidden="true"></span><span><span class="t1">🔄 نئی اپڈیٹ آ رہی ہے</span><span class="t2">انتظار فرمائیں — کام فی الحال روک دیں</span></span>';
+  };
+  function showDone(oldV, newV){
+    const b = bar();
+    b.className = 'green';
+    b.innerHTML = `<span class="ok">✅</span><span><span class="t1">ایپ اپڈیٹ ہو گئی — اب کام شروع کریں</span><span class="t2">پرانا <span class="vv">${oldV}</span> ← نیا <span class="vv">${newV}</span></span></span><button type="button" class="x" aria-label="بند">✖</button>`;
+    b.querySelector('.x').onclick = () => b.remove();
+    setTimeout(() => { try{ b.remove(); }catch(e){} }, 15000);
+  }
+  function check(){
+    const cur = (typeof APP_BUILD_VERSION !== 'undefined') ? APP_BUILD_VERSION : '';
+    if(!cur) return;
+    let old = '';
+    try{ old = localStorage.getItem(KEY) || ''; localStorage.setItem(KEY, cur); }catch(e){}
+    if(old && old !== cur) showDone(old, cur);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', check); else check();
+})();
+</script>
 <!-- ========================================================================
      🔄 PWA رجسٹریشن: آف لائن سپورٹ + اپڈیٹ کا نظام
      ====================================================================== -->
@@ -48993,6 +49045,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // ---------- جب بھی نیا ورژن ملے ----------
       reg.addEventListener('updatefound', () => {
         newWorker = reg.installing;
+        if(navigator.serviceWorker.controller){ try{ fmUpdShowComing(); }catch(e){} } // 🔄 FM910FR352: سرخ پٹی
         newWorker.addEventListener('statechange', () => {
           if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
             // نیا ورژن تیار ہے اور پرانا ورژن پہلے سے چل رہا ہے — یعنی یہ ایک اپڈیٹ ہے
@@ -49022,6 +49075,7 @@ document.addEventListener('DOMContentLoaded', () => {
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if(refreshing) return;
     refreshing = true;
+    try{ fmUpdShowComing(); }catch(e){} // 🔄 FM910FR352: سرخ پٹی (ری لوڈ تک)
     const tryReload = () => {
       if(isUserBusyTypingAnywhere()){
         setTimeout(tryReload, 1500);
@@ -49104,7 +49158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     padding:calc(env(safe-area-inset-top,0px) + 6px) 12px 7px; text-align:center; color:#fff; font-weight:700; font-size:15px; line-height:1.9;
     font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; direction:rtl;
     background-size:40px 40px; animation:presenceMove .8s linear infinite; box-shadow:0 2px 8px rgba(0,0,0,.3);}
-  #presenceBar.show{display:block;}
+  #presenceBar.show{display:none !important;}
   #presenceBar.p-admin{background-image:repeating-linear-gradient(45deg,#b45309 0 20px,#f59e0b 20px 40px);}
   #presenceBar.p-staff{background-image:repeating-linear-gradient(45deg,#0f766e 0 20px,#14b8a6 20px 40px);}
   @keyframes presenceMove{from{background-position:0 0;} to{background-position:40px 0;}}
@@ -49113,6 +49167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div id="presenceBar"></div>
 <script>
 (function(){
+  if(true) return; // 🚫 FM910FR352: "ایڈمن/ملازم کام کر رہا ہے" والی ترچھی پٹی بند — فائدہ نہیں تھا (کوڈ محفوظ ہے)
   const SID = 'x' + Math.random().toString(36).slice(2, 10);          // ہر کھلے ٹیب/ایپ کی اپنی شناخت
   const FIELD = 'd_' + SID;
   const ACTIVE_WINDOW = 15000;   // آخری کام کے بعد اتنی دیر تک "کام کر رہا ہے"
