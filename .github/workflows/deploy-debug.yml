@@ -16,7 +16,18 @@ jobs:
           echo "$SA" > /tmp/sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json
           set +e
-          npx --yes firebase-tools@latest deploy --only hosting --project fm-saddam-mandi --non-interactive > /tmp/out.txt 2>&1
+          gcloud auth activate-service-account --key-file=/tmp/sa.json > /tmp/out.txt 2>&1
+          TOKEN=$(gcloud auth print-access-token)
+          echo "== live channel: keep only last 5 releases" >> /tmp/out.txt
+          curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            "https://firebasehosting.googleapis.com/v1beta1/sites/fm-saddam-mandi/channels/live?updateMask=retainedReleaseCount" \
+            -d '{"retainedReleaseCount": 5}' >> /tmp/out.txt 2>&1
+          echo "== channels" >> /tmp/out.txt
+          curl -s -H "Authorization: Bearer $TOKEN" "https://firebasehosting.googleapis.com/v1beta1/sites/fm-saddam-mandi/channels" | grep -E '"name"|retained|expireTime' >> /tmp/out.txt
+          echo "== versions count" >> /tmp/out.txt
+          curl -s -H "Authorization: Bearer $TOKEN" "https://firebasehosting.googleapis.com/v1beta1/sites/fm-saddam-mandi/versions?pageSize=100" | grep -c '"status"' >> /tmp/out.txt
+          sleep 60
+          npx --yes firebase-tools@latest deploy --only hosting --project fm-saddam-mandi --non-interactive >> /tmp/out.txt 2>&1
           echo "EXIT=$?" >> /tmp/out.txt
           grep -v -i "private_key" /tmp/out.txt | tail -80 > /tmp/deploy-log.txt
           rm -f /tmp/sa.json
