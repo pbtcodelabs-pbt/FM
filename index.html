@@ -9043,7 +9043,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM910FR352'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM910FR353'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15302,12 +15302,26 @@ function generateBillNumbers(){
   const daily_bill_no = String(dailyCount);
   const monthly_bill_no = String(monthlyCount);
 
+  // 🔢 FM910FR353: ہر بل کا اپنا مسلسل نمبر — 0001 سے شروع، کبھی دوبارہ صفر سے نہیں
+  const bill_seq = (invoicesData || []).reduce((m, inv) => Math.max(m, Number(inv.bill_seq) || 0), (invoicesData || []).length) + 1;
   return {
     daily_bill_no,
     monthly_bill_no,
+    bill_seq,
     invoice_no: `Bill#${daily_bill_no}/${monthly_bill_no}`
   };
 }
+// پرانے بلوں (جن پر نمبر نہیں لگا تھا) کا نمبر تاریخ کی ترتیب سے نکالیں
+function fmBillSeqOf(inv){
+  if(!inv) return 0;
+  if(Number(inv.bill_seq) > 0) return Number(inv.bill_seq);
+  const ts = v => new Date(v || 0).getTime() || 0;
+  const list = (invoicesData || []).slice().sort((a, b) => ts(a.created_at) - ts(b.created_at));
+  const i = list.findIndex(x => x.invoice_id === inv.invoice_id);
+  return i >= 0 ? i + 1 : list.length + 1;
+}
+function fmBillSeqStr(inv){ return String(fmBillSeqOf(inv)).padStart(4, '0'); }
+const FM_URDU_DAYS = ['اتوار', 'سوموار', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'];
 
 // ---------- بل مکمل (Complete) کرنے سے پہلے کبھی بھی دیکھ سکیں کہ بل بالکل ویسا ہی بن رہا ہے جیسا چاہیے —
 // کوئی آئٹم ڈپلیکیٹ تو نہیں، کوئی ریٹ غلط تو نہیں۔ یہ اصل بل کا حصہ نہیں بنتا، صرف پریویو ہے ----------
@@ -40444,7 +40458,7 @@ function getBillSummaryRows(invoice){
 
 // ---------- 🧾 FM610TU323 (صدام کی ہدایت): بل کے نیچے ادائیگی کے ڈبوں کا ناپ — 🔠 فونٹ سائز اور ↕ قطار دونوں کنٹرول سے بڑا/چھوٹا ----------
 function _billPayLayout(invoice, fscale, rowScale){
-  const sumRowH = Math.max(Math.round(22 * rowScale), Math.round(30 * fscale));
+  const sumRowH = Math.round(30 * fscale * rowScale); // ↕ FM910FR353: قطار کنٹرول کا پورا اثر
   const titleH = Math.max(Math.round(26 * rowScale), Math.round(32 * fscale));
   const n = getBillSummaryRows(invoice).rows.length + 1;
   const boxH = titleH + n * sumRowH + 2;
@@ -40482,7 +40496,11 @@ function getYesterdayPayInfo(invoice){
   }catch(e){ return null; }
 }
 function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
-  const W = R - L, labelW = Math.round(W * 0.56), valueX = R - labelW;
+  // 🧾 FM910FR353: اردو کا خانہ سب سے لمبے اردو لفظ جتنا (ہمیشہ دائیں)، باقی جگہ رقم کو — اوپر 🔠 کنٹرول سے لکھائی بڑی ہو تو خانے بھی ساتھ
+  const W = R - L;
+  let _maxL = 0;
+  rows.forEach(([lb, , fin]) => { ctx.font = FP(`${bw}${fin ? 18 : 15}px`); _maxL = Math.max(_maxL, ctx.measureText(String(lb)).width); });
+  const labelW = Math.round(Math.min(W * 0.68, Math.max(W * 0.40, _maxL + 16 * fscale))), valueX = R - labelW;
   let rowTop = top;
   rows.forEach(([label, val, isFinal], idx) => {
     if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(L + 0.5, rowTop + 0.5, W - 1, rowH); }
@@ -40728,7 +40746,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
 
   // ---------- کل اونچائی پہلے سے حساب لگائیں — canvas.width/height صرف ایک بار سیٹ ہوں ----------
   // (پہلے یہ درمیان میں بار بار بدلتے تھے جو کچھ Android WebView ورژنز میں پینٹنگ خراب کر دیتا ہے)
-  let estimatedHeight = 30 + 26 + 22 + 22 + tableH + 26;
+  let estimatedHeight = 30 + 26 + 22 + 22 + tableH + 26 + Math.round(78 * fscale); // 📅 FM910FR353: بڑی تاریخ + بل نمبر کا ڈبہ
   if(AppState.settings.businessAddress) estimatedHeight += 16;
   if(AppState.settings.businessPhone) estimatedHeight += 16;
   let summaryBlockH = 0, accountBlockH = 0;
@@ -40803,8 +40821,35 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   const dd = String(billDateObj.getDate()).padStart(2, '0');
   const mm = String(billDateObj.getMonth() + 1).padStart(2, '0');
   const yy = String(billDateObj.getFullYear()).slice(-2);
-  const billLine = `Bill#${invoice.daily_bill_no || '—'}/${invoice.monthly_bill_no || '—'} ${dd}/${mm}/${yy} ${getDayAbbrev(invoice.created_at)}`;
-  ctx.fillText(billLine, pxWidth/2, y); y += 22;
+  // 📅 FM910FR353: تاریخ بڑی، موٹی، پاکستانی انداز (09-10-2026) + اردو دن؛ نیچے باریک بارڈر میں 4 ہندسوں کا بل نمبر
+  {
+    const _bd = (invoice.invoice_id === 'DRAFT' || !invoice.created_at) ? bizDateKey() : invDay(invoice);
+    const _p = String(_bd || '').split('-');
+    const _dObj = _p.length === 3 ? new Date(+_p[0], +_p[1] - 1, +_p[2]) : billDateObj;
+    const _dateTxt = _p.length === 3 ? `${_p[2]}-${_p[1]}-${_p[0]}` : `${dd}-${mm}-${billDateObj.getFullYear()}`;
+    const _day = FM_URDU_DAYS[_dObj.getDay()] || '';
+    const _dPx = Math.round(24 * fscale), _uPx = Math.round(22 * fscale), _gap = Math.round(12 * fscale);
+    ctx.font = `bold ${_dPx}px Arial, Helvetica, sans-serif`;
+    const _dW = ctx.measureText(_dateTxt).width;
+    ctx.font = F('bold 22px');
+    const _uW = ctx.measureText(_day).width;
+    const _tot = _dW + _gap + _uW, _x0 = pxWidth/2 - _tot/2;
+    y += Math.round(18 * fscale);
+    ctx.textAlign = 'left'; ctx.fillStyle = '#000';
+    ctx.font = `bold ${_dPx}px Arial, Helvetica, sans-serif`;
+    ctx.fillText(_dateTxt, _x0, y);
+    ctx.font = F('bold 22px');
+    ctx.fillText(_day, _x0 + _dW + _gap, y);
+    ctx.textAlign = 'center';
+    y += Math.round(14 * fscale);
+    const _bn = 'بل نمبر:  ' + fmBillSeqStr(invoice);
+    ctx.font = F('bold 15px');
+    const _bw2 = ctx.measureText(_bn).width + Math.round(26 * fscale), _bh = Math.round(28 * fscale);
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.strokeRect(Math.round(pxWidth/2 - _bw2/2) + 0.5, y + 0.5, Math.round(_bw2), _bh);
+    ctx.fillText(_bn, pxWidth/2, y + _bh/2 + Math.round(5 * fscale));
+    y += _bh + Math.round(22 * fscale);
+  }
 
   ctx.font = F('16px');
   ctx.fillText('کسٹمر: ' + invoice.customer_name, pxWidth/2, y); y += 28;
