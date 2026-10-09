@@ -5937,6 +5937,12 @@ function __appHostKind(h, p){
         </div>
         <div style="display:flex; gap:6px; margin-bottom:6px;">
 
+          <select id="otCustSortSel" onchange="setOtCustSort(this.value)" style="flex:1.3; padding:7px 4px; border:1.5px solid #0369a1; border-radius:10px; font-size:12px; font-weight:800; background:#fff; color:#0f172a;">
+            <option value="serial">🔢 سیریل نمبر (1،2،3...)</option>
+            <option value="name">🔤 نام کے مطابق</option>
+            <option value="highest">📈 زیادہ بقایا پہلے</option>
+            <option value="lowest">📉 کم بقایا پہلے</option>
+          </select>
           <button type="button" id="otAreaFilterToday" onclick="setOtAreaFilter('today')" style="flex:1; padding:7px 4px; background:#0369a1; color:#fff; border:none; border-radius:10px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.15);">🛒 آج کے خریدار</button>
         </div>
         <div id="otCustomerListWrap" style="max-height:65vh; overflow-y:auto; padding-bottom:20px;"></div>
@@ -9043,7 +9049,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM910FR353'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM910FR354'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29506,6 +29512,8 @@ function otBackButtonClick(){
 // ---------- STEP 1: کسٹمر لسٹ (سرچ کے ساتھ) — ٹیپ کرتے ہی کسٹمر + ایریا سیٹ ہو جاتا ہے ----------
 // ---------- 🔒 صدام کی ہدایت (FM12SEPSA0724PM): آرڈر ٹیکنگ کی کسٹمر لسٹ کے لیے ایریا/آج کے خریدار فلٹر ---------- -->
 let otAreaFilter = null; // null | 'retail' | 'wholesale' | 'today'
+let otCustSort = loadFromStorage('otCustSort', 'serial'); // 🔢 منشی کی گاہک لسٹ کی ترتیب — اسی فون پر یاد رہے
+function setOtCustSort(v){ otCustSort = v || 'serial'; saveToStorage('otCustSort', otCustSort); renderOtCustomerList(document.getElementById('otCustSearch') ? document.getElementById('otCustSearch').value : ''); }
 function setOtAreaFilter(mode){
   otAreaFilter = (otAreaFilter === mode) ? null : mode;
   const map = {retail:'otAreaFilterRetail', wholesale:'otAreaFilterWholesale', today:'otAreaFilterToday'};
@@ -29537,7 +29545,14 @@ function renderOtCustomerList(query){
            (c.area || '').toLowerCase().includes(q) ||
            (c.phone || '').includes(q) ||
            String(c.serial_no ?? '').includes(q);
-  }).sort((a, b) => a.name.localeCompare(b.name, 'ur'));
+  }).sort((a, b) => { // 🔢 منشی کی گاہک لسٹ — ترتیب خود چنیں (ڈیفالٹ سیریل نمبر)
+    const m = otCustSort;
+    if(m === 'serial'){ const sa = Number(a.serial_no) > 0 ? Number(a.serial_no) : 1e9, sb = Number(b.serial_no) > 0 ? Number(b.serial_no) : 1e9; return (sa - sb) || a.name.localeCompare(b.name, 'ur'); }
+    if(m === 'highest') return (Number(b.total_receivable) || 0) - (Number(a.total_receivable) || 0);
+    if(m === 'lowest') return (Number(a.total_receivable) || 0) - (Number(b.total_receivable) || 0);
+    return a.name.localeCompare(b.name, 'ur');
+  });
+  try{ const _ss = document.getElementById('otCustSortSel'); if(_ss && _ss.value !== otCustSort) _ss.value = otCustSort; }catch(e){}
 
   if(list.length === 0){
     wrap.innerHTML = `<div class="placeholder" style="padding:20px 0; text-align:center;">کوئی کسٹمر نہیں ملا</div>`;
@@ -32096,6 +32111,7 @@ function drCustomerDay(c, D){
   invoicesData.forEach(inv => { if(inv.customer_id === c.customer_id) add(gDay, invDay(inv), _drGoodsOrig(inv)); });
   hist.forEach(h => { if(h.type === 'cash_given') add(gDay, h.date, h.amount); else if(h.type === 'receivable_collected') add(rDay, h.date, h.amount); });
   recoveryListData.forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') add(pDay, recDay(e), e.amount); });
+  const zDay = {}; hist.forEach(h => { if(h && h.type === 'zero_reset') add(zDay, h.date, h.amount); }); // 🧹 FM910FR354: زیرو کی رقم
   const sumW = (o, pred) => Object.keys(o).filter(pred).reduce((s, k) => s + o[k], 0);
   const todayGoods = gDay[D] || 0;
   const goodsAfter = sumW(gDay, d => d > D);
@@ -32103,7 +32119,7 @@ function drCustomerDay(c, D){
   const recAfter = sumW(rDay, d => d > D);
   const pendingRecovery = pDay[D] || 0;
   const todayRecovery = confirmedRecovery + pendingRecovery;
-  const endBal = (c.total_receivable || 0) + recAfter - goodsAfter; // ---------- اس تاریخ کے اختتام پر بقایہ (کھاتے کے مطابق) ----------
+  const endBal = (c.total_receivable || 0) + recAfter + sumW(zDay, d => d > D) - goodsAfter; // ---------- اس تاریخ کے اختتام پر بقایہ (کھاتے کے مطابق) ----------
   const openingBalance = endBal + confirmedRecovery - todayGoods;
   const totalBalance = openingBalance + todayGoods;
   const finalBalance = totalBalance - todayRecovery;
@@ -32143,9 +32159,19 @@ async function fmZeroAllBalances(kind){
   if(!(await uDialog({ title: '⚠️ پہلی تنبیہ', message: `آپ <b>تمام ${who} کا پورا بقایا اور ایڈوانس زیرو</b> کرنے لگے ہیں۔ ${who} کے نام، فون اور پرانے بل اپنی جگہ رہیں گے۔`, rows, okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'amber' }))) return;
   if(!(await uDialog({ title: '⛔ دوسری تنبیہ', message: `زیرو کرنے کے بعد یہ رقمیں <b>واپس نہیں آئیں گی</b> اور ہر فون پر زیرو ہو جائیں گی۔ <b>کیا پکا؟</b>`, okText: '🧹 ہاں، زیرو کریں', cancelText: '✖ نہیں', tone: 'red' }))) return;
   if(!(await _askAdminPinForSerialMaster(`تمام ${who} کا بقایا زیرو کرنے کے لیے`))) return;
-  try{ saveToStorage('zeroBalBackup_' + kind, { at: new Date().toISOString(), list: arr.map(x => ({ id: x[isC ? 'customer_id' : 'supplier_id'], name: x.name, bal: x[balF], wal: x.wallet_balance })) }); }catch(e){}
+  // 🧹 FM910FR354: اصل خرابی — زیرو "فرق" کی شکل میں کلاؤڈ سے ملتا تھا؛ اگر اس فون کی آخری معلوم کلاؤڈ حالت پرانی ہوتی
+  // تو بیچ کی رقم بچ جاتی اور بعد میں بل پر "سابقہ" بن کر آ جاتی۔ اب پہلے کلاؤڈ کی تازہ ترین حالت، پھر زیرو، پھر تصدیق
+  try{ if(isC){ await fetchCustomersFromCloud(true); await fetchInvoicesFromCloud(true); } else { await fetchSuppliersFromCloud(true); } }catch(e){}
+  const _arr2 = isC ? customersData : suppliersData;
+  const _zAt = new Date().toISOString(), _zDay = bizDateKey();
+  try{ saveToStorage('zeroBalBackup_' + kind, { at: _zAt, day: _zDay, list: _arr2.map(x => ({ id: x[isC ? 'customer_id' : 'supplier_id'], name: x.name, bal: x[balF], wal: x.wallet_balance })) }); }catch(e){}
   try{ pauseCloudPolling(20000); }catch(e){}
-  arr.forEach(x => { x[balF] = 0; x.wallet_balance = 0; });
+  _arr2.forEach(x => {
+    const ob = Number(x[balF]) || 0, ow = Number(x.wallet_balance) || 0;
+    if(isC && (ob || ow)){ x.walletHistory = x.walletHistory || []; x.walletHistory.unshift({ type: 'zero_reset', amount: ob, wal: ow, date: _zDay, at: _zAt, note: '🧹 تمام بقایا زیرو (عارضی بٹن)' }); }
+    if(isC) x.zeroResetAt = _zAt;
+    x[balF] = 0; x.wallet_balance = 0;
+  });
   if(isC){
     // گاہکوں کے پرانے بلوں کا باقی بھی صفر — تاکہ آگے کی وصولی پرانے بلوں میں نہ جائے
     (invoicesData || []).forEach(inv => { if(inv && inv.customer_id && (Number(inv.amount_due) || 0) !== 0) inv.amount_due = 0; });
@@ -32160,10 +32186,45 @@ async function fmZeroAllBalances(kind){
   }
   persistAllData();
   try{ if(isC){ await pushCustomersToCloud(); await pushInvoicesToCloud(); } else { await pushSuppliersToCloud(); } }catch(e){}
+  // ✅ FM910FR354: تصدیق — کلاؤڈ سے دوبارہ پڑھ کر دیکھیں؛ کہیں رقم بچ گئی ہو تو دوبارہ صفر کر کے بھیجیں
+  let _left = 0;
+  for(let _t = 0; _t < 2; _t++){
+    try{ if(isC) await fetchCustomersFromCloud(true); else await fetchSuppliersFromCloud(true); }catch(e){}
+    const _now = isC ? customersData : suppliersData;
+    const _bad = _now.filter(x => (Number(x[balF]) || 0) !== 0 || (Number(x.wallet_balance) || 0) !== 0);
+    _left = _bad.length;
+    if(!_left) break;
+    _bad.forEach(x => { x[balF] = 0; x.wallet_balance = 0; });
+    persistAllData();
+    try{ if(isC) await pushCustomersToCloud(); else await pushSuppliersToCloud(); }catch(e){}
+  }
   try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
   try{ renderHomeMoneySummary(); }catch(e){}
-  uAlert('✅ زیرو ہو گیا', `تمام ${who} کا بقایا اور ایڈوانس زیرو کر دیا گیا۔`, 'green');
+  uAlert('✅ زیرو ہو گیا', `تمام ${who} کا بقایا اور ایڈوانس زیرو کر دیا گیا اور کلاؤڈ پر بھی پکا ہو گیا۔` + (_left ? `\n⚠️ ${_left} کا زیرو کلاؤڈ پر تصدیق نہیں ہو سکا (نیٹ؟) — نیٹ آنے پر بٹن دوبارہ دبائیں` : ''), _left ? 'amber' : 'green');
 }
+
+// 🧹 FM910FR354: جن گاہکوں کا بقایا پرانے بٹن سے زیرو ہوا تھا (نشان کے بغیر) — اسی فون کے محفوظ بیک اپ سے ایک بار نشان لگا دیں،
+// تاکہ بل کا "کل کی ادائیگی" ڈبہ اور روزانہ حساب زیرو سے پہلے کا پرانا کھاتہ نہ اٹھائیں
+setTimeout(() => {
+  try{
+    if(AppState.currentRole !== 'admin') return;
+    const bk = loadFromStorage('zeroBalBackup_customers', null);
+    if(!bk || !bk.at || bk.zrDone) return;
+    const day = bk.day || localDateKey(new Date(bk.at));
+    let n = 0;
+    (bk.list || []).forEach(o => {
+      if(!(Number(o.bal) || Number(o.wal))) return;
+      const c = customersData.find(x => x.customer_id === o.id); if(!c) return;
+      c.walletHistory = c.walletHistory || [];
+      if(c.walletHistory.some(h => h && h.type === 'zero_reset' && h.at === bk.at)) return;
+      c.walletHistory.unshift({ type: 'zero_reset', amount: Number(o.bal) || 0, wal: Number(o.wal) || 0, date: day, at: bk.at, note: '🧹 تمام بقایا زیرو (عارضی بٹن)' });
+      if(!c.zeroResetAt) c.zeroResetAt = bk.at;
+      n++;
+    });
+    bk.zrDone = true; saveToStorage('zeroBalBackup_customers', bk);
+    if(n){ persistAllData(); try{ pushCustomersToCloud(); }catch(e){} }
+  }catch(e){}
+}, 9000);
 setInterval(() => {
   try{ const w = document.getElementById('tmpZeroStockWrap'); if(w) w.style.display = (AppState.currentRole === 'admin') ? 'block' : 'none'; }catch(e){}
 }, 1500);
@@ -40474,6 +40535,7 @@ function getYesterdayPayInfo(invoice){
     if(!invoice || !invoice.customer_id) return null;
     const c = customersData.find(x => x.customer_id === invoice.customer_id); if(!c) return null;
     const base = (invoice.invoice_id === 'DRAFT' || !invoice.created_at) ? todayDateKey() : invDay(invoice);
+    const _zLast = (c.walletHistory || []).filter(h => h && h.type === 'zero_reset' && h.date && h.date <= base).map(h => h.date).sort().pop() || ''; // 🧹 FM910FR354
     const dt = new Date(base + 'T12:00:00'); dt.setDate(dt.getDate() - 1);
     let D = localDateKey(dt);
     let r = drCustomerDay(c, D);
@@ -40485,12 +40547,13 @@ function getYesterdayPayInfo(invoice){
       invoicesData.forEach(inv => { if(inv.customer_id === c.customer_id && inv.status !== 'voided' && inv.invoice_id !== invoice.invoice_id) days.push(invDay(inv)); });
       (c.walletHistory || []).forEach(h => { if(h && (h.type === 'cash_given' || h.type === 'receivable_collected')) days.push(h.date); });
       recoveryListData.forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') days.push(recDay(e)); });
-      const prev = days.filter(d => d && d < base).sort().pop();
+      const prev = days.filter(d => d && d < base && (!_zLast || d >= _zLast)).sort().pop();
       if(prev){
         const r2 = drCustomerDay(c, prev);
         if(r2.hasToday){ D = prev; r = r2; isYesterday = (prev === localDateKey(dt)); }
       }
     }
+    if(_zLast && D < _zLast) return null; // 🧹 زیرو سے پہلے کا کھاتہ نہیں
     const p = D.split('-');
     return { D, isYesterday, label: p[2] + '-' + p[1] + '-' + p[0], opening: r.openingBalance, goods: r.todayGoods, total: r.totalBalance, paid: r.todayRecovery, final: r.finalBalance, dayShort: r.dayShort };
   }catch(e){ return null; }
