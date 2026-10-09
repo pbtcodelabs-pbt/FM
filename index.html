@@ -1054,6 +1054,22 @@ function __appHostKind(h, p){
   #cartSheetModal .bcQty button:active{transform:translateY(2px); box-shadow:0 1px 0 #1e3a8a;}
   #cartSheetModal .bcQty span{font-size:16px; line-height:1; display:flex; align-items:center; justify-content:center; height:100%;}
   #cartSheetModal .bcExtras{display:none !important;}
+  /* ---------- 🧾 FM910FR351: کارٹ — ڈیلیٹ کا خانہ ختم (آئٹم ہٹانا ہو تو ➖ سے صفر، دو وارننگ کے بعد)؛ سبزی کا نام پورا،
+       ڈبے کے درمیان، کبھی نہ کٹے (لمبا ہو تو دو لائنوں میں)؛ چھوٹی سکرین (360px) پر بھی سب خانے برابر ---------- */
+  #cartSheetModal .cartSheetBody{padding:8px 6px 14px;}
+  #cartSheetModal .bcList{padding:5px 3px 2px;}
+  #cartSheetModal .bcRow, #cartSheetModal .bcRow.alt{padding:6px 4px;}
+  #cartSheetModal .bcHead, #cartSheetModal .bcMain{grid-template-columns:28px minmax(60px,1fr) 40px 50px 80px 52px; gap:3px;}
+  #cartSheetModal .bcMain{align-items:center;}
+  #cartSheetModal .bcMain .bcName{height:auto !important; min-height:38px; white-space:normal !important; overflow:visible; display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:3px 4px; line-height:1.35; word-break:normal; overflow-wrap:anywhere; font-size:min(var(--cart-font-size, 14px), 15px);}
+  #cartSheetModal .bcMain .bcPack{white-space:normal !important; padding:2px; font-size:11px; line-height:1.3; text-align:center; justify-content:center; overflow:hidden;}
+  #cartSheetModal .bcQty{padding:0 3px;}
+  #cartSheetModal .bcQty button{width:26px; height:30px; font-size:19px;}
+  #cartSheetModal .bcQty span{font-size:15px; min-width:18px;}
+  #cartSheetModal .bcPrice{font-size:13.5px;}
+  #cartSheetModal .bcTotal{font-size:12.5px; padding:0 2px;}
+
   #cartSheetModal .bcMain .bcName, #cartSheetModal .bcMain .bcPack{font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu','PDMSMultan',serif !important; white-space:nowrap;}
 
   .emptyCart{text-align:center; color:var(--muted); padding:18px 0; font-size:13px;}
@@ -3599,7 +3615,7 @@ function __appHostKind(h, p){
 
         <div class="cartSheetBody">
           <div class="cartWrap">
-            <div class="bcHead"><span>🗑️</span><span>#</span><span>نام</span><span>پیکنگ</span><span>قیمت</span><span>تعداد</span><span>کل رقم</span></div>
+            <div class="bcHead"><span>#</span><span>نام</span><span>پیکنگ</span><span>قیمت</span><span>تعداد</span><span>کل رقم</span></div>
             <div id="cartBody" class="bcList"><!-- JS سے ہر آئٹم کی الگ لائن یہاں بنے گی --></div>
             <div class="emptyCart" id="emptyCartMsg">بل خالی ہے — اوپر سے سبزی چنیں</div>
             <div id="cartItemCountSummary" style="text-align:right; font-size:11.5px; font-weight:700; color:var(--muted); padding:6px 4px 0;"></div>
@@ -9027,7 +9043,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM910FR350'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM910FR351'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15023,7 +15039,6 @@ function renderCart(){
       return `
       <div class="bcRow${idx % 2 ? ' alt' : ''}">
         <div class="bcMain">
-          <button type="button" class="bcDel" onclick="confirmRemoveFromCart(${item.variant_id})" title="یہ آئٹم بل سے نکالیں">🗑️</button>
           <span class="bcSerial">${_serial}</span>
           <div class="bcName" onclick="showItemSaleRecord(${item.variant_id})" title="ٹیپ کریں: اس گاہک کو یہ سبزی پہلے کس ریٹ پر بیچی">${_baseName}</div>
           <div class="bcPack${_chip ? (_chipNeedsPick ? ' bcPick' : ' bcTap') : ''}" ${_chip ? `onclick="openCartChalanPicker(${idx})" title="چالان"` : ''}>${_chipNeedsPick ? '🧾 چالان' : _pack}</div>
