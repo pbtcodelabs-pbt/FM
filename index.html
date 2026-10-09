@@ -9026,7 +9026,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM910FR348'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM910FR349'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -31388,8 +31388,29 @@ let rlAmountMap = {};
 let rlMethodMap = {};
 
 // ---------- اس کسٹمر کی آج کی (اسی تاریخ کی) وصولی انٹریاں — کچی یا پکی دونوں ----------
+// ---------- 📅 FM910FR349: وصولی کس دن کی ہے؟ — رات 12 بجے کے بعد آنے والی کل کی وصولی "کل" میں درج ہو سکے،
+// تاکہ آج کے بل سے نہ کٹے بلکہ کل کے حساب (بل کے "کل کی ادائیگی" والے ڈبے) میں آئے ----------
+let rlEntryDayMode = 'today';
+function rlPrevBizDay(){ const dt = new Date(bizDateKey() + 'T12:00:00'); dt.setDate(dt.getDate() - 1); return localDateKey(dt); }
+function rlEntryDate(){ return rlEntryDayMode === 'yesterday' ? rlPrevBizDay() : bizDateKey(); }
+function setRlEntryDay(mode){
+  if(mode === rlEntryDayMode) return;
+  if(mode === 'yesterday' && !confirm(`📅 کل (${bizFmt(rlPrevBizDay())}) کی وصولی\n\nاب جو وصولی لکھیں گے وہ ${bizFmt(rlPrevBizDay())} میں جائے گی — آج کے بل سے نہیں کٹے گی، کل کے حساب میں آئے گی۔\n\nٹھیک ہے؟`)) return;
+  rlEntryDayMode = mode;
+  rlSplitMap = {}; rlNoteMap = {}; rlReopenIds = [];
+  renderRecoveryListEmployeeView();
+}
+function rlEntryDayBarHtml(){
+  const y = rlEntryDayMode === 'yesterday';
+  const b = (m, txt, on, bg) => `<button type="button" onclick="setRlEntryDay('${m}')" style="flex:1; padding:9px 4px; border:${on ? '3px solid #fde047' : '2px solid transparent'}; border-radius:11px; background:${on ? bg : '#e2e8f0'}; color:${on ? '#fff' : '#334155'}; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; box-shadow:${on ? '0 3px 0 rgba(0,0,0,.3)' : 'none'};">${txt}</button>`;
+  return `<div dir="rtl" style="grid-column:1/-1; background:${y ? '#fff7ed' : '#f0fdf4'}; border:2px solid ${y ? '#ea580c' : '#86efac'}; border-radius:12px; padding:7px 8px; margin-bottom:4px;">
+      <div style="font-weight:800; font-size:13.5px; color:${y ? '#9a3412' : '#14532d'}; text-align:center; margin-bottom:5px;">📅 یہ وصولی کس دن کی ہے؟</div>
+      <div style="display:flex; gap:8px;">${b('yesterday', '⏪ کل ' + bizFmt(rlPrevBizDay()), y, '#ea580c')}${b('today', '📍 آج ' + bizFmt(bizDateKey()), !y, '#15803d')}</div>
+      ${y ? `<div style="text-align:center; color:#9a3412; font-weight:800; font-size:12.5px; margin-top:5px;">⚠️ اب ہر وصولی ${bizFmt(rlPrevBizDay())} (کل) میں درج ہو رہی ہے</div>` : ''}
+    </div>`;
+}
 function rlTodayEntriesFor(customerId){
-  const t = todayDateKey();
+  const t = rlEntryDate();
   return recoveryListData.filter(r => r.customer_id === customerId && recDay(r) === t);
 }
 // ---------- اس کسٹمر کی تمام کچی (ایڈمن نے ابھی کھاتے میں درج نہیں کیں) وصولیاں — باقی بقایا انہی کو منہا کر کے دکھایا جاتا ہے ----------
@@ -31454,22 +31475,23 @@ function renderRecoveryListEmployeeView(){
       <button type="button" onclick="runCloudHealthCheck()" style="margin-top:10px; border:none; border-radius:999px; background:#0f766e; color:#fff; font-size:15px; padding:8px 18px; cursor:pointer; font-family:inherit;">🩺 کلاؤڈ چیک</button></div>`;
     return;
   }
-  const drAll = computeDailyRecoveryRows();
+  const drAll = computeDailyRecoveryRows(rlEntryDate());
   // ---------- 📊 FM299TU#261: ملازم کو بھی اوپر آج کی اپنی کل وصولی ----------
-  const _myToday = recoveryListData.filter(e => e.employeeName === (AppState.currentUser?.name) && recDay(e) === todayDateKey());
+  const _myToday = recoveryListData.filter(e => e.employeeName === (AppState.currentUser?.name) && recDay(e) === rlEntryDate());
   const _myTotal = _myToday.reduce((a, e) => a + (Number(e.amount) || 0), 0);
   const _sumHtml = `<div dir="rtl" style="grid-column:1/-1; background:linear-gradient(135deg,#15803d,#065f46); color:#fff; border-radius:12px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
       <span style="font-weight:800;">📥 آج کی میری کل وصولی (${_myToday.length} گاہک) <button type="button" onclick="runCloudHealthCheck()" style="margin-right:6px; border:none; border-radius:999px; background:rgba(255,255,255,.2); color:#fff; font-size:11px; padding:2px 8px; cursor:pointer; font-family:inherit;">🩺 کلاؤڈ چیک</button></span>
       <span style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:18px; direction:ltr;">Rs. ${_myTotal.toLocaleString()}</span></div>`;
-  list.innerHTML = _sumHtml + owing.map(c => buildRlEmployeeCard(c, drAll.find(r => r.c.customer_id === c.customer_id) || {})).join('');
+  list.innerHTML = rlEntryDayBarHtml() + (rlEntryDayMode === 'yesterday' ? _sumHtml.replace('آج کی میری کل وصولی', 'کل کی میری کل وصولی') : _sumHtml) + owing.map(c => { const h = buildRlEmployeeCard(c, drAll.find(r => r.c.customer_id === c.customer_id) || {}); return rlEntryDayMode === 'yesterday' ? h.split('آج وصول').join('کل وصول').split('آج مال').join('کل مال') : h; }).join('');
 }
 // ---------- صرف ایک کارڈ دوبارہ بنائیں (باقی فہرست اور لکھی ہوئی رقمیں ویسی ہی رہیں) ----------
 function rerenderRlCard(customerId){
   const el = document.getElementById('rlCard-' + customerId);
   const c = customersData.find(x => x.customer_id === customerId);
   if(!el || !c){ renderRecoveryListEmployeeView(); return; }
-  const dr = computeDailyRecoveryRows().find(r => r.c.customer_id === customerId) || {};
-  el.outerHTML = buildRlEmployeeCard(c, dr);
+  const dr = computeDailyRecoveryRows(rlEntryDate()).find(r => r.c.customer_id === customerId) || {};
+  const h = buildRlEmployeeCard(c, dr);
+  el.outerHTML = rlEntryDayMode === 'yesterday' ? h.split('آج وصول').join('کل وصول').split('آج مال').join('کل مال') : h;
 }
 
 function buildRlEmployeeCard(c, dr){
@@ -31610,7 +31632,8 @@ function buildRecoveryEntryFromSplit(c){
     noteUpdatedAt: Date.now(),
     employeeName: AppState.currentUser?.name || 'Unknown',
     status: 'pending', // ---------- ایڈمن Confirm کرنے تک اصل کھاتے میں کوئی تبدیلی نہیں ----------
-    bizDate: bizDateKey(),
+    bizDate: rlEntryDate(),
+    ...(rlEntryDayMode === 'yesterday' ? { backdated: true } : {}), // 📅 FM910FR349: کل کی وصولی (تاریخ بدلنے کے بعد درج ہوئی)
     createdAt: new Date().toISOString(),
     confirmedAt: null
   };
@@ -32183,6 +32206,7 @@ function confirmRecoveryEntry(entryId){
     recordPaymentEntry({
       direction: 'in', party_type: 'customer', party_id: c.customer_id, party_name: c.name,
       amount: entry.amount, balance_before: c.total_receivable + (entry.amount - excess), balance_after: c.total_receivable,
+      biz_date: entry.bizDate || bizDateKey(), ...(entry.backdated ? { backdated: true } : {}), // 📅 FM910FR349
       method: recoverySplitLabel(entry) || 'Cash',
       note: `ریکوری لسٹ — ${entry.employeeName}${entry.note ? ' — 📝 ' + entry.note : ''}${excess > 0 ? ' — 💳 Rs. ' + excess.toLocaleString() + ' والٹ میں' : ''}`
     });
@@ -40150,19 +40174,32 @@ function getBillSummaryRows(invoice){
       const prevTs = prevBills.reduce((m, x) => Math.max(m, _ts2(x.created_at)), 0);
       const fromTs = Math.max(prevTs, dayStart.getTime());
       recBefore = (paymentsData || []).filter(pm => pm && pm.party_type === 'customer' && pm.party_id === invoice.customer_id && pm.direction === 'in'
+          && !(pm.backdated && pm.biz_date && pm.biz_date < invDay(invoice)) // 📅 کل کی وصولی آج کے بل کی "ابھی وصول" میں نہیں
           && _ts2(pm.created_at) > fromTs && _ts2(pm.created_at) <= billTs2)
         .reduce((a, pm) => a + (Number(pm.amount) || 0), 0);
     }
   }catch(e){ recBefore = 0; }
 
   let finalLabel, finalValue;
+  // ---------- 📅 FM910FR349: "کل" کی تاریخ میں درج وصولی جو اس بل کے بقایہ میں ابھی شامل نہیں تھی (کچی تھی، یا بل کے بعد
+  // تصدیق ہوئی) — وہ "ابھی وصول" میں نہیں بلکہ سابقہ بقایہ کو کم کرتی ہے؛ کل کے ڈبے میں "کل ادا کیا" میں نظر آتی ہے ----------
+  const _effTs = (r) => r.backdated ? new Date(recDay(r) + 'T23:59:59').getTime() : (new Date(r.createdAt || r.confirmedAt || 0).getTime() || 0);
+  let backAdj = 0;
+  try{
+    if(invoice.customer_id){
+      const _bts = invoice.created_at && invoice.invoice_id !== 'DRAFT' ? (new Date(invoice.created_at).getTime() || Date.now()) : Date.now();
+      backAdj = recoveryListData.filter(r => r.customer_id === invoice.customer_id && r.backdated && _effTs(r) < _bts
+          && (r.status === 'pending' || (r.status === 'confirmed' && (new Date(r.confirmedAt || 0).getTime() || 0) > _bts)))
+        .reduce((a, r) => a + (Number(r.amount) || 0), 0);
+    }
+  }catch(e){ backAdj = 0; }
   if(hasOldCredit || recBefore > 0){
-    const prevGross = (Number(invoice.previous_balance) || 0) + recBefore;
+    const prevGross = Math.max(0, (Number(invoice.previous_balance) || 0) - backAdj) + recBefore;
     rows.push(['سابقہ بقایہ', prevGross]);
     if(!shownThisBillAlready) rows.push(['یہ بل', invoice.grand_total]);
     rows.push(['تازہ ٹوٹل', prevGross + invoice.grand_total]);
     finalLabel = 'حتمی بقایہ رقم';
-    finalValue = invoice.new_balance || 0;
+    finalValue = Math.max(0, (invoice.new_balance || 0) - backAdj);
   } else {
     if(!shownThisBillAlready) rows.push(['یہ بل', invoice.grand_total]);
     finalLabel = 'حتمی بل';
@@ -40185,14 +40222,14 @@ function getBillSummaryRows(invoice){
       if(laterBills.length === 0){
         // ---------- یہی اس کسٹمر کا آخری بل ہے: کچی وصولی + تصدیق شدہ وصولی (بقایہ کے فرق یا ریکوری لسٹ کی انٹری، جو بڑی ہو) ----------
         const cu = customersData.find(c => c.customer_id === invoice.customer_id);
-        const pend = recEntries.filter(r => r.status === 'pending').reduce((a, r) => a + (Number(r.amount) || 0), 0);
+        const pend = recEntries.filter(r => r.status === 'pending' && !(r.backdated && _effTs(r) < billTs)).reduce((a, r) => a + (Number(r.amount) || 0), 0);
         const confirmedLater = cu ? Math.max(0, (Number(invoice.new_balance) || 0) - (Number(cu.total_receivable) || 0)) : 0;
-        const confirmedFromList = recEntries.filter(r => r.status === 'confirmed' && _ts(r.createdAt || r.confirmedAt) >= billTs).reduce((a, r) => a + (Number(r.amount) || 0), 0);
-        laterRecovery = pend + Math.max(confirmedLater, confirmedFromList);
+        const confirmedFromList = recEntries.filter(r => r.status === 'confirmed' && _effTs(r) >= billTs).reduce((a, r) => a + (Number(r.amount) || 0), 0);
+        laterRecovery = pend + Math.max(Math.max(0, confirmedLater - backAdj), confirmedFromList);
       } else {
         // ---------- اس کے بعد اور بل بن چکے ہیں: صرف وہ وصولیاں جو اس بل کے وقت سے اگلے بل کے وقت تک کی ہیں ----------
         const nextTs = _ts(laterBills[0].created_at);
-        laterRecovery = recEntries.filter(r => { const t = _ts(r.createdAt || r.confirmedAt); return t >= billTs && t < nextTs; })
+        laterRecovery = recEntries.filter(r => { const t = _effTs(r); return t >= billTs && t < nextTs; })
           .reduce((a, r) => a + (Number(r.amount) || 0), 0);
       }
     }

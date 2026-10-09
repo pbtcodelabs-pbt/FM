@@ -1,4 +1,4 @@
-# 🔍 فائربیس ڈیپلائے کی اصل غلطی پڑھنے کے لیے — نتیجہ "deploy-log" برانچ میں deploy-log.txt میں لکھا جاتا ہے
+# 🔍 فائربیس ڈیپلائے: پرانے ورژن صاف کر کے دوبارہ ڈیپلائے — نتیجہ "deploy-log" برانچ میں deploy-log.txt میں
 name: deploy-debug
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy with full log
+      - name: Clean old versions + deploy
         env:
           SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FM_SADDAM_MANDI }}
         run: |
@@ -18,18 +18,34 @@ jobs:
           set +e
           gcloud auth activate-service-account --key-file=/tmp/sa.json > /tmp/out.txt 2>&1
           TOKEN=$(gcloud auth print-access-token)
-          echo "== live channel: keep only last 5 releases" >> /tmp/out.txt
-          curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-            "https://firebasehosting.googleapis.com/v1beta1/sites/fm-saddam-mandi/channels/live?updateMask=retainedReleaseCount" \
-            -d '{"retainedReleaseCount": 5}' >> /tmp/out.txt 2>&1
+          API=https://firebasehosting.googleapis.com/v1beta1/sites/fm-saddam-mandi
+          echo "== set live channel retainedReleaseCount=5" >> /tmp/out.txt
+          curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" "$API/channels/live?updateMask=retainedReleaseCount" -d '{"retainedReleaseCount": 5}' | jq -c '{name,retainedReleaseCount}' >> /tmp/out.txt 2>&1
           echo "== channels" >> /tmp/out.txt
-          curl -s -H "Authorization: Bearer $TOKEN" "https://firebasehosting.googleapis.com/v1beta1/sites/fm-saddam-mandi/channels" | grep -E '"name"|retained|expireTime' >> /tmp/out.txt
-          echo "== versions count" >> /tmp/out.txt
-          curl -s -H "Authorization: Bearer $TOKEN" "https://firebasehosting.googleapis.com/v1beta1/sites/fm-saddam-mandi/versions?pageSize=100" | grep -c '"status"' >> /tmp/out.txt
-          sleep 60
-          npx --yes firebase-tools@latest deploy --only hosting --project fm-saddam-mandi --non-interactive >> /tmp/out.txt 2>&1
-          echo "EXIT=$?" >> /tmp/out.txt
-          grep -v -i "private_key" /tmp/out.txt | tail -80 > /tmp/deploy-log.txt
+          curl -s -H "Authorization: Bearer $TOKEN" "$API/channels" | jq -c '.channels[]? | {name, retainedReleaseCount, expireTime}' >> /tmp/out.txt
+          # تمام ورژن (صفحہ بہ صفحہ)
+          : > /tmp/vers.jsonl; PT=""
+          for i in $(seq 1 30); do
+            R=$(curl -s -H "Authorization: Bearer $TOKEN" "$API/versions?pageSize=100&pageToken=$PT")
+            echo "$R" | jq -c '.versions[]? | {name, status, createTime, bytes: (.versionBytes // "0")}' >> /tmp/vers.jsonl
+            PT=$(echo "$R" | jq -r '.nextPageToken // empty'); [ -z "$PT" ] && break
+          done
+          echo "== versions total: $(wc -l < /tmp/vers.jsonl)" >> /tmp/out.txt
+          jq -s 'group_by(.status) | map({status: .[0].status, n: length, MB: ((map(.bytes|tonumber)|add)/1048576|floor)})' /tmp/vers.jsonl >> /tmp/out.txt
+          # آخری 3 FINALIZED چھوڑ کر باقی سب ختم
+          jq -s -r '[.[] | select(.status=="FINALIZED")] | sort_by(.createTime) | reverse | .[3:] | .[].name' /tmp/vers.jsonl > /tmp/del.txt
+          echo "== deleting $(wc -l < /tmp/del.txt) old versions" >> /tmp/out.txt
+          OK=0; BAD=0
+          while read -r V; do
+            C=$(curl -s -o /tmp/d.txt -w '%{http_code}' -X DELETE -H "Authorization: Bearer $TOKEN" "https://firebasehosting.googleapis.com/v1beta1/$V")
+            if [ "$C" = "200" ]; then OK=$((OK+1)); else BAD=$((BAD+1)); [ $BAD -le 3 ] && { echo "del $V -> $C"; head -c 300 /tmp/d.txt; echo; } >> /tmp/out.txt; fi
+          done < /tmp/del.txt
+          echo "== deleted ok=$OK failed=$BAD" >> /tmp/out.txt
+          sleep 20
+          echo "== deploy" >> /tmp/out.txt
+          npx --yes firebase-tools@latest deploy --only hosting --project fm-saddam-mandi --non-interactive 2>&1 | grep -v "npm warn" >> /tmp/out.txt
+          echo "EXIT=${PIPESTATUS[0]}" >> /tmp/out.txt
+          grep -v -i "private_key" /tmp/out.txt | tail -120 > /tmp/deploy-log.txt
           rm -f /tmp/sa.json
           git config user.name zip-bot; git config user.email zip-bot@users.noreply.github.com
           git checkout --orphan deploy-log
