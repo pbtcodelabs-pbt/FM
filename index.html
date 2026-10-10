@@ -3272,7 +3272,9 @@ function __appHostKind(h, p){
          ایک ہی DOM اسکرین (screen-parties) شیئر کرتے ہیں، صرف ٹیب بدلتا ہے ---------- -->
     <div class="navItem admin-only" data-screen="customers" data-navkey="customers" data-navlabel="Customers" onclick="goTo('customers')" style="background:#D97706; color:#fff;">🧑‍🤝‍🧑 کسٹمرز<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="suppliers" data-navkey="suppliers" data-navlabel="Suppliers" onclick="goTo('suppliers')" style="background:#0284C7; color:#fff;">🚚 سپلائرز<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="mydiary" data-navkey="mydiary" data-navlabel="My Diary" onclick="goTo('mydiary')" style="background:#DB2777; color:#fff;">📔 میری ڈائری<span class="navDragHandle">⠿</span></div>
+    <!-- 📊 FM1010SA355 (صدام کی ہدایت): میری ڈائری مینیو سے چھپا دی گئی (کوڈ/ڈیٹا محفوظ) — اس کی جگہ "کاروبار کی سمری" -->
+    <div class="navItem admin-only" data-screen="bizsummary" data-navkey="bizsummary" data-navlabel="Business Summary" onclick="goTo('bizsummary')" style="background:#0F766E; color:#fff;">📊 کاروبار کی سمری<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="mydiary" data-navkey="mydiary" data-navlabel="My Diary" onclick="goTo('mydiary')" style="display:none; background:#DB2777; color:#fff;">📔 میری ڈائری<span class="navDragHandle">⠿</span></div>
     <div class="navItem" data-screen="advanceorders" data-navkey="advanceorders" data-navlabel="Advance Orders" onclick="goTo('advanceorders')" style="background:#059669; color:#fff;">📝 ایڈوانس آرڈرز<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="billsettings" data-navkey="billsettings" data-navlabel="Bill & Print Settings" onclick="goTo('billsettings')" style="background:#7C3AED; color:#fff;">🖨️ بل اور پرنٹ سیٹنگز<span class="navDragHandle">⠿</span></div>
     <div class="navItem" data-screen="billhistory" data-navkey="billhistory" data-navlabel="Bill History" onclick="goTo('billhistory')" style="background:#EA580C; color:#fff;">🧾 بل ہسٹری<span class="navDragHandle">⠿</span></div>
@@ -4122,6 +4124,7 @@ function __appHostKind(h, p){
             <div class="categoryDropdownItem"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); openDailyStockProfitReport();">📊 روزانہ سٹاک/منافع رپورٹ (منڈی سیل ریکارڈ — ایڈمن)</span></div>
             <!-- ---------- 📋 FM510MO316 (صدام کی ہدایت): روزانہ ریکوری لسٹ بھی یہیں — ہوم/مینیو والا "رپورٹس" ڈبہ ختم ---------- -->
             <div class="categoryDropdownItem admin-only"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); goTo('dailyRecovery');">📋 روزانہ ریکوری لسٹ</span></div>
+            <div class="categoryDropdownItem admin-only"><span class="cdiName" onclick="closeStockAdjReportsDropdown(); goTo('bizsummary');">📊 کاروبار کی مکمل سمری (پرنٹ)</span></div>
             <div class="stockAdjReportsSortBlock">
               <div class="stockAdjReportsSortLabel">ترتیب دیں:</div>
               <select id="stockAdjSortFilter" onchange="handleStockAdjSortSelect(this); closeStockAdjReportsDropdown();" onclick="event.stopPropagation();">
@@ -5467,6 +5470,86 @@ function __appHostKind(h, p){
     <!-- =====================================================================
          📔 MY DIARY — بلنگ سے الگ ذاتی کھاتہ: صرف نام اور بقایہ (کوئی کوڈ/پراڈکٹ نہیں)
          ===================================================================== -->
+    <!-- ===================== 📊 FM1010SA355 — صدام کی ہدایت (10 اکتوبر): کاروبار کی مکمل سمری (My Diary کی جگہ) ===================== -->
+    <style>
+      #screen-bizsummary{direction:rtl; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;}
+      #screen-bizsummary .bsTop{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;}
+      #screen-bizsummary .bsTitle{font-size:19px; white-space:nowrap; font-weight:700; color:var(--primary-dark); line-height:1.8;}
+      #screen-bizsummary .bsDate{font-size:12px; color:var(--muted); text-align:left;}
+      #screen-bizsummary .bsBar{display:flex; gap:8px; margin-bottom:10px; align-items:center;}
+      #screen-bizsummary .bsBar select, #screen-bizsummary .bsBar input{flex:1; padding:9px 10px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-family:inherit; background:#fff; min-width:0;}
+      #screen-bizsummary .bsPrintBtn{flex:0 0 auto; background:#0f766e; color:#fff; border:none; border-radius:10px; padding:9px 14px; font-weight:800; font-size:14px; cursor:pointer; font-family:inherit;}
+      #screen-bizsummary .bsHero{border-radius:16px; padding:12px 14px; margin-bottom:12px; color:#fff; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,.18);}
+      #screen-bizsummary .bsHero.bsUp{background:linear-gradient(160deg,#059669,#065f46);}
+      #screen-bizsummary .bsHero.bsDown{background:linear-gradient(160deg,#e11d48,#881337);}
+      #screen-bizsummary .bsHeroLbl{font-size:15px; line-height:1.8;}
+      #screen-bizsummary .bsHeroVal{font-family:Arial,sans-serif; font-size:28px; font-weight:900; direction:ltr; margin:2px 0;}
+      #screen-bizsummary .bsHeroSub{font-size:12.5px; opacity:.92; line-height:1.8;}
+      #screen-bizsummary .bsCard{background:var(--card,#fff); border-radius:14px; padding:10px 12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(15,23,42,.08);}
+      #screen-bizsummary .bsHead{display:flex; justify-content:space-between; align-items:center; font-size:17px; font-weight:700; color:var(--primary-dark); border-bottom:2px solid #e2e8f0; padding-bottom:4px; margin-bottom:4px; line-height:1.9;}
+      #screen-bizsummary .bsSub{font-size:14px; color:#475569; margin:2px 0; line-height:1.8;}
+      #screen-bizsummary .bsRow{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:3px 0; border-bottom:1px dashed #e5e7eb; font-size:15px; line-height:1.9;}
+      #screen-bizsummary .bsRow .bsV{font-family:Arial,sans-serif; font-weight:800; direction:ltr; white-space:nowrap; font-size:14.5px;}
+      #screen-bizsummary .bsRow.bsIn .bsV{color:#15803d;}
+      #screen-bizsummary .bsRow.bsOut .bsV{color:#dc2626;}
+      #screen-bizsummary .bsRow.bsSmall{font-size:13.5px; color:#475569;}
+      #screen-bizsummary .bsRow.bsSmall .bsV{font-size:13px; font-weight:700;}
+      #screen-bizsummary .bsTotal .bsRow{border-bottom:none; border-top:2px solid #94a3b8; margin-top:3px; font-weight:700; font-size:16px;}
+      #screen-bizsummary .bsTotal .bsRow .bsV{font-size:16px; font-weight:900;}
+      #screen-bizsummary .bsWarn{font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; color:#b45309; font-weight:700; font-size:13px;}
+      #screen-bizsummary .bsMiniBtn{background:#eef2ff; color:var(--primary-dark); border:none; border-radius:8px; padding:4px 10px; font-size:13px; font-family:inherit; cursor:pointer;}
+      #screen-bizsummary .bsWorth{margin-top:10px; border-radius:12px; padding:8px 10px; text-align:center;}
+      #screen-bizsummary .bsWorth.bsUp{background:#ecfdf5; border:1.5px solid #6ee7b7;}
+      #screen-bizsummary .bsWorth.bsDown{background:#fff1f2; border:1.5px solid #fda4af;}
+      #screen-bizsummary .bsWorthLbl{font-size:14px; color:#334155; line-height:1.8;}
+      #screen-bizsummary .bsWorthVal{font-family:Arial,sans-serif; font-size:24px; font-weight:900; direction:ltr; color:#0f172a;}
+      #screen-bizsummary .bsWorthSub{font-size:12.5px; color:#475569; line-height:1.8;}
+      #screen-bizsummary .bsDet summary{cursor:pointer; font-size:16px; font-weight:700; color:var(--primary-dark); list-style:none; line-height:1.9;}
+      #screen-bizsummary .bsDet[open] summary{margin-bottom:6px; border-bottom:2px solid #e2e8f0;}
+      #screen-bizsummary .bsEmpty{font-size:13.5px; color:var(--muted); text-align:center; padding:6px;}
+      #screen-bizsummary .bsLinkBtn{width:100%; margin-top:8px; background:#f1f5f9; border:none; border-radius:10px; padding:8px; font-family:inherit; font-size:14px; color:var(--primary-dark); cursor:pointer;}
+      #screen-bizsummary .bsNote{font-size:12px; color:var(--muted); line-height:1.9; padding:0 4px 14px;}
+    </style>
+    <div class="screen admin-only" id="screen-bizsummary">
+      <div class="bsTop">
+        <div class="bsTitle">📊 کاروبار کی مکمل سمری</div>
+        <div class="bsDate" id="bsDate">—</div>
+      </div>
+      <div class="bsBar">
+        <select id="bsPreset" onchange="onBizSummaryPresetChange()">
+          <option value="today">آج</option>
+          <option value="yesterday">گزشتہ کل</option>
+          <option value="thisweek">یہ ہفتہ</option>
+          <option value="thismonth" selected>یہ مہینہ</option>
+          <option value="prevmonth">گزشتہ مہینہ</option>
+          <option value="thisyear">یہ سال</option>
+          <option value="all">شروع سے اب تک</option>
+          <option value="custom">اپنی تاریخ</option>
+        </select>
+        <button type="button" class="bsPrintBtn" onclick="openBizSummaryReport()">🖨️ پرنٹ / شیئر</button>
+      </div>
+      <div class="bsBar" id="bsCustomBar" style="display:none;">
+        <input type="date" id="bsFromDate" onchange="renderBizSummary()">
+        <input type="date" id="bsToDate" onchange="renderBizSummary()">
+      </div>
+      <div id="bsBody"></div>
+    </div>
+
+    <!-- 💵 روزانہ اوپننگ کیش — بل بنانے سے پہلے روز ایک بار -->
+    <div class="modalOverlay" id="openingCashDailyModal" style="z-index:1200;">
+      <div class="modalBox" dir="rtl" style="max-width:360px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; text-align:center;">
+        <div style="font-size:34px;">🌅</div>
+        <div style="font-size:21px; font-weight:700; color:var(--primary-dark); line-height:1.9;">آج کا اوپننگ کیش</div>
+        <div id="openingCashDailyDate" style="font-size:13px; color:var(--muted); line-height:1.8;"></div>
+        <div id="openingCashDailySub" style="font-size:14.5px; color:#334155; line-height:1.9; margin:6px 0 10px;"></div>
+        <input type="number" inputmode="numeric" id="openingCashDailyInput" placeholder="رقم (Rs.)" onfocus="this.select()" onkeydown="if(event.key==='Enter') saveOpeningCashDaily(false)" style="width:100%; padding:12px; border:2px solid #0f766e; border-radius:12px; font-size:22px; font-weight:900; text-align:center; font-family:Arial,sans-serif; direction:ltr;">
+        <div class="modalActions" style="margin-top:12px;">
+          <button class="cancelBtn" onclick="saveOpeningCashDaily(true)">آج کیش نہیں تھا (0)</button>
+          <button class="saveBtn" onclick="saveOpeningCashDaily(false)">✅ محفوظ کریں</button>
+        </div>
+      </div>
+    </div>
+
     <div class="screen admin-only" id="screen-mydiary">
       <div class="pageTitle">📔 میری ڈائری</div>
       <!-- ---------- 🧹 صدام کی ہدایت: یہاں بھی وہی ٹیب بار — Customers/Suppliers/Diary کے درمیان فوری سوئچ ---------- -->
@@ -9049,7 +9132,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM910FR354'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1010SA355'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9746,7 +9829,7 @@ const HOME_SHORTCUT_OPTIONS = [
   {key:'products',      icon:'📦', label:'مال کی فہرست',       screen:'products'},
   {key:'payments',      icon:'💳', label:'پیمنٹس',       screen:'payments'},
   {key:'myaccount',     icon:'🏦', label:'میرا اکاؤنٹ',     screen:'myaccount'},
-  {key:'mydiary',       icon:'📔', label:'میری ڈائری',       screen:'mydiary'},
+  {key:'bizsummary',    icon:'📊', label:'کاروبار کی سمری', screen:'bizsummary'}, // 📊 FM1010SA355 (میری ڈائری کی جگہ)
   {key:'users',         icon:'🔑', label:'ملازمین',          screen:'users'},
   {key:'settings',      icon:'⚙️', label:'سیٹنگ',       screen:'settings'},
   {key:'billsettings',  icon:'🖨️', label:'بل و پرنٹ سیٹنگ', screen:'billsettings'},
@@ -9882,7 +9965,10 @@ function renderHomeIconGrid(){
   // ---------- ↩️ صدام کی ہدایت (FM7SEPMO4): واپسی کی زیرِ التوا درخواستوں پر بھی وہی سرخ بلبلا بیج ---------- -->
   const pendingReturnCount = (typeof returnRequestsData !== 'undefined') ? returnRequestsData.filter(r => r.status !== 'completed').length : 0;
   const currentUser = usersData.find(x => x.name === AppState.currentUser?.name && x.role === AppState.currentRole);
-  const assignedKeys = (currentUser && Array.isArray(currentUser.screens)) ? currentUser.screens : [];
+  let assignedKeys = (currentUser && Array.isArray(currentUser.screens)) ? currentUser.screens : [];
+  // 📊 FM1010SA355: میری ڈائری کی جگہ "کاروبار کی سمری" — ایڈمن کے ہوم پر ہمیشہ موجود
+  assignedKeys = assignedKeys.map(k => k === 'mydiary' ? 'bizsummary' : k).filter((k, i, a) => a.indexOf(k) === i);
+  if(AppState.currentRole === 'admin' && !assignedKeys.includes('bizsummary')) assignedKeys = assignedKeys.concat('bizsummary');
   const myTiles = assignedKeys.map(key => {
     // ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): "پراڈکٹس" کا ہوم آئیکن مکمل چھپا دیا (سٹاک مینجمنٹ اب وہی کام
     // کرتی ہے) — کوڈ/فنکشن/ASSIGNABLE_SCREENS اندراج بالکل محفوظ ہے، صرف یہاں سے فلٹر کیا گیا ---------- -->
@@ -12820,6 +12906,7 @@ let navForwardStack = [];
 
 function goTo(screenName, _isHistoryNav){
   // ---------- 🗄️ سیف الماری: بغیر ایڈمن PIN کے کسی راستے (مینیو، بیک بٹن، سرچ، ہوم شارٹ کٹ) سے نہیں کھلے گی ----------
+  if(screenName === 'dashboard' || screenName === 'mydiary') screenName = 'bizsummary'; // 📊 FM1010SA355: پرانا ڈیش بورڈ/ڈائری → نئی سمری
   if(screenName === 'safevault' && !window.__svUnlocked){ svAskAndOpen(); return; }
   if(screenName !== 'safevault' && window.__svUnlocked){ window.__svUnlocked = false; }
   try{ if(screenName === 'payments' || screenName === 'mydiary'){ const _d = EXTRA_SYNC_DEFS.find(d => d.key === (screenName === 'payments' ? 'payments' : 'diary')); if(_d) setTimeout(() => extraSyncOne(_d), 300); } }catch(e){}
@@ -12894,6 +12981,17 @@ function goTo(screenName, _isHistoryNav){
   stopApprovalRequestsPolling(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 8) ----------
   stopMunshiLogPolling(); // ---------- ☁️ صدام کی ہدایت (19 ستمبر، شام): منشی سٹاک لاگ ---------- -->
 
+  // 📊 FM1010SA355: کاروبار کی سمری — فوراً دکھائیں، پھر کلاؤڈ سے تازہ ڈیٹا آتے ہی دوبارہ
+  if(screenName === 'bizsummary'){
+    try{ renderBizSummary(); }catch(e){ console.error(e); }
+    Promise.allSettled([
+      fetchFinanceFromCloud(true),
+      (typeof fetchCustomersFromCloud === 'function' ? fetchCustomersFromCloud(true) : null),
+      (typeof fetchSuppliersFromCloud === 'function' ? fetchSuppliersFromCloud(true) : null)
+    ]).then(() => { if(currentScreenName === 'bizsummary') try{ renderBizSummary(); }catch(e){} });
+  }
+  // 🌅 FM1010SA355: بل بنانے سے پہلے آج کا اوپننگ کیش (روز ایک بار)
+  if(screenName === 'billing') setTimeout(maybeAskOpeningCash, 350);
   if(screenName === 'dashboard') {
     renderDashboard();
     // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): Dashboard پر Cash in Hand کارڈ دکھتا ہے —
@@ -22886,6 +22984,393 @@ async function _oldDeleteProduct(productId){
 }
 
 /* =====================================================================
+   📊 FM1010SA355 — صدام کی ہدایت (10 اکتوبر): "کاروبار کی مکمل سمری" — نیا، صاف، سادہ ماڈیول
+   (پرانا گنجلک ڈیش بورڈ + My Diary کی جگہ)۔ اس میں کوئی ڈائری شامل نہیں۔
+   حصے: ① آج کا کیش (اوپننگ کیش سے شروع) ② اس وقت کاروبار کی حالت (اثاثے − واجبات)
+        ③ منتخب مدت کا منافع/نقصان (فروخت، مال پر منافع، اخراجات) ④ کس کا دینا / کس سے لینا
+   + 💵 روزانہ اوپننگ کیش: بل بنانے سے پہلے روز ایک بار پوچھا جاتا ہے (صفر بھی چلتا ہے)،
+     تاریخ وار محفوظ، کلاؤڈ (shopData/finance) میں بھی جاتا ہے، اور رپورٹوں/پرنٹ میں آتا ہے
+   ===================================================================== */
+function bsGetOpeningMap(){
+  const m = AppState.settings.dailyOpeningCash;
+  return (m && typeof m === 'object') ? m : {};
+}
+// ---------- کسی تاریخ کا اوپننگ کیش — درج نہ ہو تو null ----------
+function getOpeningCashFor(dateStr){
+  const e = bsGetOpeningMap()[dateStr];
+  if(e == null) return null;
+  const n = Number(typeof e === 'object' ? e.amt : e);
+  return isNaN(n) ? null : n;
+}
+function getTodayOpeningCash(){
+  const v = getOpeningCashFor(toLocalDateStr(new Date()));
+  return v == null ? (AppState.settings.openingCashBalance || 0) : v; // پرانی رپورٹیں: درج نہ ہو تو پرانی سیٹنگ
+}
+function setOpeningCashFor(dateStr, amount){
+  const m = Object.assign({}, bsGetOpeningMap());
+  m[dateStr] = {amt: Math.max(0, Math.round(Number(amount) || 0)), at: Date.now(), by: (AppState.currentUser && AppState.currentUser.name) || ''};
+  // صرف آخری 120 دن رکھیں — پرانا ریکارڈ خود ختم، تاکہ ڈیٹا ہلکا رہے
+  const keys = Object.keys(m).sort();
+  while(keys.length > 120) delete m[keys.shift()];
+  AppState.settings.dailyOpeningCash = m;
+  try{ persistAllData(); }catch(e){}
+  try{ pushFinanceToCloud(); }catch(e){}
+}
+// ---------- کلاؤڈ سے آئے ہوئے اوپننگ کیش کو مقامی کے ساتھ ملائیں — ہر تاریخ پر جو نیا ہو وہی رہے ----------
+function mergeOpeningCashFromCloud(jsonStr){
+  try{
+    const cloud = JSON.parse(jsonStr || '{}');
+    if(!cloud || typeof cloud !== 'object') return;
+    const m = Object.assign({}, bsGetOpeningMap());
+    Object.keys(cloud).forEach(k => {
+      const c = cloud[k], l = m[k];
+      if(!l || ((c && c.at) || 0) > ((l && l.at) || 0)) m[k] = c;
+    });
+    AppState.settings.dailyOpeningCash = m;
+    try{ saveToStorage('settings', AppState.settings); }catch(e){}
+  }catch(e){}
+}
+
+// ---------- 💵 روزانہ اوپننگ کیش پوچھنے والا پاپ اپ ----------
+let _bsOpeningAfter = null;
+function openOpeningCashModal(afterFn, forceEdit){
+  const today = toLocalDateStr(new Date());
+  const cur = getOpeningCashFor(today);
+  _bsOpeningAfter = typeof afterFn === 'function' ? afterFn : null;
+  const inp = document.getElementById('openingCashDailyInput');
+  if(inp) inp.value = (cur != null && cur > 0) ? cur : '';
+  const dt = document.getElementById('openingCashDailyDate');
+  if(dt) dt.textContent = new Date().toLocaleDateString('ur-PK', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  const sub = document.getElementById('openingCashDailySub');
+  if(sub) sub.textContent = forceEdit ? 'آج کا اوپننگ کیش درست کریں' : 'بل بنانے سے پہلے: آج صبح گلے/دکان میں کتنا نقد کیش تھا؟';
+  document.getElementById('openingCashDailyModal').classList.add('show');
+  setTimeout(() => { try{ inp && inp.focus(); }catch(e){} }, 250);
+}
+function saveOpeningCashDaily(zero){
+  const inp = document.getElementById('openingCashDailyInput');
+  let val = zero ? 0 : parseFloat((inp && inp.value) || '');
+  if(!zero && (isNaN(val) || val < 0)){
+    if(!confirm('رقم خالی ہے — کیا آج اوپننگ کیش صفر (0) لکھ دیں؟')) return;
+    val = 0;
+  }
+  setOpeningCashFor(toLocalDateStr(new Date()), val);
+  document.getElementById('openingCashDailyModal').classList.remove('show');
+  const fn = _bsOpeningAfter; _bsOpeningAfter = null;
+  if(fn) try{ fn(); }catch(e){}
+  if(currentScreenName === 'bizsummary') renderBizSummary();
+}
+// ---------- بل والی سکرین کھلتے ہی: آج کا اوپننگ کیش درج نہیں تو پہلے پوچھیں (صرف ایڈمن، دن میں ایک بار) ----------
+function maybeAskOpeningCash(){
+  try{
+    if(AppState.currentRole !== 'admin') return;
+    if(getOpeningCashFor(toLocalDateStr(new Date())) != null) return;
+    const m = document.getElementById('openingCashDailyModal');
+    if(m && m.classList.contains('show')) return;
+    openOpeningCashModal(null, false);
+  }catch(e){}
+}
+
+// ---------- مدت (فلٹر) — اخراجات والی سکرین جیسے ہی اختیارات ----------
+function bsComputeRange(preset){
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let from = null, to = null;
+  if(preset === 'today'){ from = today; to = today; }
+  else if(preset === 'yesterday'){ const y = new Date(today); y.setDate(y.getDate()-1); from = y; to = y; }
+  else if(preset === 'thisweek'){ const s = new Date(today); s.setDate(s.getDate() - s.getDay()); from = s; to = today; }
+  else if(preset === 'thismonth'){ from = new Date(today.getFullYear(), today.getMonth(), 1); to = today; }
+  else if(preset === 'prevmonth'){ from = new Date(today.getFullYear(), today.getMonth()-1, 1); to = new Date(today.getFullYear(), today.getMonth(), 0); }
+  else if(preset === 'thisyear'){ from = new Date(today.getFullYear(), 0, 1); to = today; }
+  else if(preset === 'custom'){
+    const f = document.getElementById('bsFromDate')?.value, t = document.getElementById('bsToDate')?.value;
+    from = f ? new Date(f + 'T00:00:00') : null; to = t ? new Date(t + 'T00:00:00') : null;
+  }
+  return {fromStr: from ? toLocalDateStr(from) : null, toStr: to ? toLocalDateStr(to) : null};
+}
+const BS_PRESET_LABELS = {today:'آج', yesterday:'گزشتہ کل', thisweek:'یہ ہفتہ', thismonth:'یہ مہینہ', prevmonth:'گزشتہ مہینہ', thisyear:'یہ سال', all:'شروع سے اب تک', custom:'اپنی تاریخ'};
+function bsInRange(d, r){ return !!d && (!r.fromStr || d >= r.fromStr) && (!r.toStr || d <= r.toStr); }
+function bsInvDay(inv){
+  if(inv && inv.biz_date) return inv.biz_date;
+  try{ return inv && inv.created_at ? toLocalDateStr(new Date(inv.created_at)) : ''; }catch(e){ return ''; }
+}
+function bsIsCashMethod(m){ return !m || /cash|نقد/i.test(String(m)); }
+// ---------- بل میں سے فوری نقد کتنا آیا (نقد بل = پورا؛ ادھار بل = جو ساتھ ہی وصول ہوا) ----------
+function bsBillCash(inv){
+  const cr = Number(inv.cash_received_now) || 0;
+  if(cr > 0) return cr;
+  const paid = (inv.paid_now != null) ? Number(inv.paid_now) || 0 : ((Number(inv.amount_due) || 0) > 0 ? 0 : Number(inv.grand_total) || 0);
+  return Math.max(0, paid - (Number(inv.wallet_applied) || 0));
+}
+
+// ---------- 🧮 پورا حساب ایک جگہ — سکرین اور پرنٹ دونوں یہی استعمال کرتے ہیں ----------
+function computeBizSummary(preset){
+  const r = bsComputeRange(preset);
+  const todayStr = toLocalDateStr(new Date());
+  const invs = (invoicesData || []).filter(inv => inv && inv.status !== 'voided' && inv.status !== 'rejected');
+  const pays = (paymentsData || []);
+  const exps = (typeof expenseData !== 'undefined' ? expenseData : []);
+
+  // --- ① آج کا کیش ---
+  const openingEntered = getOpeningCashFor(todayStr);
+  const opening = openingEntered == null ? 0 : openingEntered;
+  const tInv = invs.filter(i => bsInvDay(i) === todayStr);
+  const tBillCash = tInv.reduce((s, i) => s + bsBillCash(i), 0);
+  const tPays = pays.filter(p => p.date === todayStr && bsIsCashMethod(p.method));
+  const tRecovery = tPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const tOtherIn = tPays.filter(p => p.direction === 'in' && p.party_type !== 'customer').reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const tSupOut = tPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const tOtherOut = tPays.filter(p => p.direction === 'out' && p.party_type !== 'supplier').reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const tExp = exps.filter(e => e.date === todayStr).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const cashNow = opening + tBillCash + tRecovery + tOtherIn - tSupOut - tOtherOut - tExp;
+
+  // --- ② اس وقت کی حالت ---
+  let stockValue = 0;
+  (productsData || []).forEach(p => (p.variants || []).forEach(v => { try{ stockValue += Math.max(0, variantStockValue(v) || 0); }catch(e){} }));
+  const custs = (customersData || []).map(c => ({name: c.name, amt: Math.max(0, Number(c.total_receivable) || 0)})).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt);
+  const sups = (suppliersData || []).map(s => ({name: s.name, amt: Math.max(0, Number(s.total_payable) || 0)})).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt);
+  const receivable = custs.reduce((s, x) => s + x.amt, 0);
+  const payable = sups.reduce((s, x) => s + x.amt, 0);
+  const cashAsset = Math.max(0, cashNow);
+  const assets = stockValue + receivable + cashAsset;
+  const netWorth = assets - payable;
+
+  // --- ③ منتخب مدت ---
+  const vMap = {};
+  (productsData || []).forEach(p => (p.variants || []).forEach(v => { vMap[v.variant_id] = v; }));
+  const pInv = invs.filter(i => bsInRange(bsInvDay(i), r) || (!r.fromStr && !r.toStr));
+  let sales = 0, salesCash = 0, goodsProfit = 0;
+  pInv.forEach(inv => {
+    sales += Number(inv.grand_total) || 0;
+    salesCash += Math.min(Number(inv.grand_total) || 0, bsBillCash(inv));
+    (inv.items || []).forEach(it => {
+      const v = vMap[it.variant_id];
+      const base = v ? ((Number(v.purchase) || 0) + (Number(v.labor) || 0)) : null;
+      let cost = base;
+      if(v && it.chalanAlloc){ try{ cost = (getChalanAllocUnitCost(v, it.chalanAlloc, Number(v.purchase) || 0) || 0) + (Number(v.labor) || 0); }catch(e){} }
+      if(cost == null) return; // مال اب فہرست میں نہیں — لاگت معلوم نہیں
+      goodsProfit += (Number(it.qty) || 0) * ((Number(it.unitPrice) || 0) - cost);
+    });
+  });
+  const pExpList = exps.filter(e => bsInRange(e.date, r) || (!r.fromStr && !r.toStr));
+  const expTotal = pExpList.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const expByName = {};
+  pExpList.forEach(e => { const k = (e.name || 'دیگر').trim(); expByName[k] = (expByName[k] || 0) + (Number(e.amount) || 0); });
+  const expTop = Object.keys(expByName).map(k => ({name: k, amt: expByName[k]})).sort((a, b) => b.amt - a.amt);
+  const pPays = pays.filter(p => bsInRange(p.date, r) || (!r.fromStr && !r.toStr));
+  const recovered = pPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const paidSup = pPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const netProfit = goodsProfit - expTotal;
+
+  return {
+    preset, range: r, todayStr,
+    opening, openingEntered, tBillCash, tRecovery, tOtherIn, tSupOut, tOtherOut, tExp, cashNow,
+    stockValue: Math.round(stockValue), receivable, payable, cashAsset, assets: Math.round(assets), netWorth: Math.round(netWorth), custs, sups,
+    billCount: pInv.length, sales, salesCash, salesCredit: Math.max(0, sales - salesCash),
+    goodsProfit: Math.round(goodsProfit), expTotal, expTop, expCount: pExpList.length, recovered, paidSup, netProfit: Math.round(goodsProfit - expTotal)
+  };
+}
+
+function bsMoney(n){ return (n < 0 ? '- ' : '') + 'Rs. ' + Math.abs(Math.round(Number(n) || 0)).toLocaleString('en-US'); }
+function bsEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function bsRangeLabel(S){
+  const lbl = BS_PRESET_LABELS[S.preset] || '';
+  const f = d => { try{ return new Date(d + 'T00:00:00').toLocaleDateString('ur-PK', {day:'numeric', month:'long'}); }catch(e){ return d; } };
+  if(!S.range.fromStr && !S.range.toStr) return lbl;
+  if(S.range.fromStr === S.range.toStr) return `${lbl} (${f(S.range.fromStr)})`;
+  return `${lbl} (${S.range.fromStr ? f(S.range.fromStr) : '…'} تا ${S.range.toStr ? f(S.range.toStr) : '…'})`;
+}
+
+function onBizSummaryPresetChange(){
+  const v = document.getElementById('bsPreset').value;
+  saveToStorage('bsPreset', v);
+  document.getElementById('bsCustomBar').style.display = v === 'custom' ? 'flex' : 'none';
+  renderBizSummary();
+}
+
+function renderBizSummary(){
+  const wrap = document.getElementById('bsBody');
+  if(!wrap) return;
+  const sel = document.getElementById('bsPreset');
+  if(sel && !sel.dataset.init){ sel.value = loadFromStorage('bsPreset', 'thismonth') || 'thismonth'; sel.dataset.init = '1'; }
+  const preset = sel ? sel.value : 'thismonth';
+  const cb = document.getElementById('bsCustomBar'); if(cb) cb.style.display = preset === 'custom' ? 'flex' : 'none';
+  const dEl = document.getElementById('bsDate');
+  if(dEl) dEl.textContent = new Date().toLocaleDateString('ur-PK', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  const S = computeBizSummary(preset);
+  const row = (label, val, cls) => `<div class="bsRow ${cls || ''}"><span class="bsL">${label}</span><span class="bsV">${val}</span></div>`;
+  const listHtml = (arr, emptyMsg) => arr.length
+    ? arr.map((x, i) => `<div class="bsRow bsSmall"><span class="bsL">${i + 1}. ${bsEsc(x.name)}</span><span class="bsV">${bsMoney(x.amt)}</span></div>`).join('')
+    : `<div class="bsEmpty">${emptyMsg}</div>`;
+  const profit = S.netProfit >= 0;
+  const worthPos = S.netWorth >= 0;
+
+  wrap.innerHTML = `
+    <!-- ⭐ سب سے اوپر: ایک نظر میں نتیجہ -->
+    <div class="bsHero ${profit ? 'bsUp' : 'bsDown'}">
+      <div class="bsHeroLbl">${bsEsc(bsRangeLabel(S))} — کاروبار ${profit ? 'منافع' : 'نقصان'} میں</div>
+      <div class="bsHeroVal">${bsMoney(Math.abs(S.netProfit))} ${profit ? '📈' : '📉'}</div>
+      <div class="bsHeroSub">مال پر منافع ${bsMoney(S.goodsProfit)} − اخراجات ${bsMoney(S.expTotal)}</div>
+    </div>
+
+    <!-- ① آج کا کیش -->
+    <div class="bsCard">
+      <div class="bsHead"><span>💵 آج کا کیش (گلہ)</span>
+        <button type="button" class="bsMiniBtn" onclick="openOpeningCashModal(null, true)">✏️ اوپننگ کیش</button></div>
+      ${row('🌅 اوپننگ کیش (صبح)', S.openingEntered == null ? '<span class="bsWarn">درج نہیں — ✏️ دبائیں</span>' : bsMoney(S.opening))}
+      ${row('➕ آج کے بلوں سے نقد', bsMoney(S.tBillCash), 'bsIn')}
+      ${row('➕ گاہکوں سے وصولی (نقد)', bsMoney(S.tRecovery), 'bsIn')}
+      ${S.tOtherIn ? row('➕ دیگر نقد آمد', bsMoney(S.tOtherIn), 'bsIn') : ''}
+      ${row('➖ بیوپاریوں کو ادائیگی (نقد)', bsMoney(S.tSupOut), 'bsOut')}
+      ${S.tOtherOut ? row('➖ دیگر نقد ادائیگی', bsMoney(S.tOtherOut), 'bsOut') : ''}
+      ${row('➖ آج کے اخراجات', bsMoney(S.tExp), 'bsOut')}
+      <div class="bsTotal">${row('= اس وقت گلے میں کیش', bsMoney(S.cashNow))}</div>
+    </div>
+
+    <!-- ② اس وقت کاروبار کی حالت -->
+    <div class="bsCard">
+      <div class="bsHead"><span>🏦 اس وقت کاروبار کی حالت</span></div>
+      <div class="bsSub">🟢 ہمارا مال اور پیسہ (اثاثے)</div>
+      ${row('📦 حاضر سٹاک کی مالیت (خرید پر)', bsMoney(S.stockValue), 'bsIn')}
+      ${row('🤝 گاہکوں کی طرف ادھار', bsMoney(S.receivable), 'bsIn')}
+      ${row('💵 گلے میں کیش', bsMoney(S.cashAsset), 'bsIn')}
+      <div class="bsTotal">${row('کل اثاثے', bsMoney(S.assets))}</div>
+      <div class="bsSub" style="margin-top:8px;">🔴 ہم نے دینا ہے (واجبات)</div>
+      ${row('🚚 بیوپاریوں کا قرض', bsMoney(S.payable), 'bsOut')}
+      <div class="bsWorth ${worthPos ? 'bsUp' : 'bsDown'}">
+        <div class="bsWorthLbl">صافی مالیت = اثاثے − قرض</div>
+        <div class="bsWorthVal">${bsMoney(S.netWorth)}</div>
+        <div class="bsWorthSub">${worthPos ? 'سب قرض اتار کر بھی کاروبار اتنی رقم پر جمع میں ہے ✅' : 'قرض، اثاثوں سے زیادہ ہے ⚠️'}</div>
+      </div>
+    </div>
+
+    <!-- ③ منتخب مدت کی کارکردگی -->
+    <div class="bsCard">
+      <div class="bsHead"><span>📅 ${bsEsc(bsRangeLabel(S))} کی کارکردگی</span></div>
+      ${row('🧾 کل فروخت (' + S.billCount + ' بل)', bsMoney(S.sales))}
+      ${row('   • نقد', bsMoney(S.salesCash), 'bsSmall')}
+      ${row('   • ادھار', bsMoney(S.salesCredit), 'bsSmall')}
+      ${row('💰 مال پر منافع', bsMoney(S.goodsProfit), S.goodsProfit >= 0 ? 'bsIn' : 'bsOut')}
+      ${row('💸 کل اخراجات (' + S.expCount + ')', bsMoney(S.expTotal), 'bsOut')}
+      <div class="bsTotal">${row(profit ? '= خالص منافع' : '= خالص نقصان', bsMoney(Math.abs(S.netProfit)), profit ? 'bsIn' : 'bsOut')}</div>
+      ${row('📥 گاہکوں سے وصولی', bsMoney(S.recovered), 'bsSmall')}
+      ${row('📤 بیوپاریوں کو ادائیگی', bsMoney(S.paidSup), 'bsSmall')}
+    </div>
+
+    <!-- ④ تفصیل — ٹیپ کر کے کھولیں -->
+    <details class="bsCard bsDet"><summary>💸 اخراجات کی تفصیل (${S.expTop.length})</summary>${listHtml(S.expTop, 'اس مدت میں کوئی خرچہ درج نہیں')}
+      <button type="button" class="bsLinkBtn" onclick="goTo('expenditure')">➕ خرچہ درج کریں / سب دیکھیں</button></details>
+    <details class="bsCard bsDet"><summary>🚚 کس بیوپاری کا کتنا دینا ہے (${S.sups.length})</summary>${listHtml(S.sups, 'کسی بیوپاری کا قرض نہیں ✅')}</details>
+    <details class="bsCard bsDet"><summary>🤝 کس گاہک سے کتنا لینا ہے (${S.custs.length})</summary>${listHtml(S.custs, 'کسی گاہک کی طرف ادھار نہیں ✅')}</details>
+
+    <div class="bsNote">نوٹ: "مال پر منافع" ہر بل کی فروخت قیمت − خرید/مزدوری سے نکلتا ہے۔ سٹاک کی مالیت خرید قیمت پر ہے۔ کیش کا حساب صرف نقد لین دین سے (بینک/والٹ شامل نہیں)۔</div>
+  `;
+}
+
+// ---------- 🖨️ پرنٹ / واٹس ایپ — رپورٹ پریویو (وہی پرنٹ/شیئر بٹن جو باقی رپورٹوں میں ہیں) ----------
+function openBizSummaryReport(){
+  currentReportType = 'bizsummary';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = '📊 کاروبار کی مکمل سمری';
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+
+async function renderBizSummaryToCanvas(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  const preset = document.getElementById('bsPreset')?.value || loadFromStorage('bsPreset', 'thismonth') || 'thismonth';
+  const S = computeBizSummary(preset);
+  const useA4 = AppState.settings.reportPrintStyle === 'a4';
+  const W = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+  const k = (useA4 ? 1.5 : (W >= 576 ? 1.25 : 1)) * ((AppState.settings.reportFontScale || 100) / 100);
+  const urdu = `'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif`;
+  const num = `Arial,'Helvetica Neue',sans-serif`;
+  try{ await document.fonts.load(`700 20px ${urdu}`); await document.fonts.ready; }catch(e){}
+  const pad = useA4 ? 40 : 10;
+  const fsT = Math.round(26 * k), fsH = Math.round(20 * k), fsR = Math.round(17 * k), fsN = Math.round(17 * k);
+  const lh = Math.round(fsR * 2.15);
+
+  // ---------- پہلے لائنوں کی فہرست بنائیں، پھر اونچائی ناپ کر ڈرا کریں ----------
+  const L = [];
+  const head = t => L.push({t:'head', text:t});
+  const rowL = (l, v, opt) => L.push(Object.assign({t:'row', l, v}, opt || {}));
+  const line = () => L.push({t:'line'});
+  const gap = () => L.push({t:'gap'});
+  L.push({t:'title', text: AppState.settings.businessName || 'صدام فروٹ منڈی'});
+  L.push({t:'center', text:'📊 کاروبار کی مکمل سمری'});
+  L.push({t:'center', text: new Date().toLocaleDateString('ur-PK', {weekday:'long', day:'numeric', month:'long', year:'numeric'}), small:true});
+  line();
+  head('آج کا کیش (گلہ)');
+  rowL('اوپننگ کیش (صبح)', S.openingEntered == null ? 'درج نہیں' : bsMoney(S.opening));
+  rowL('+ آج کے بلوں سے نقد', bsMoney(S.tBillCash));
+  rowL('+ گاہکوں سے وصولی', bsMoney(S.tRecovery));
+  if(S.tOtherIn) rowL('+ دیگر نقد آمد', bsMoney(S.tOtherIn));
+  rowL('− بیوپاریوں کو ادائیگی', bsMoney(S.tSupOut));
+  if(S.tOtherOut) rowL('− دیگر نقد ادائیگی', bsMoney(S.tOtherOut));
+  rowL('− آج کے اخراجات', bsMoney(S.tExp));
+  rowL('= گلے میں کیش', bsMoney(S.cashNow), {bold:true, box:true});
+  gap();
+  head('اس وقت کاروبار کی حالت');
+  rowL('حاضر سٹاک کی مالیت', bsMoney(S.stockValue));
+  rowL('گاہکوں کی طرف ادھار', bsMoney(S.receivable));
+  rowL('گلے میں کیش', bsMoney(S.cashAsset));
+  rowL('کل اثاثے', bsMoney(S.assets), {bold:true});
+  rowL('بیوپاریوں کا قرض', bsMoney(S.payable));
+  rowL('صافی مالیت (اثاثے − قرض)', bsMoney(S.netWorth), {bold:true, box:true});
+  gap();
+  head(bsRangeLabel(S));
+  rowL(`کل فروخت (${S.billCount} بل)`, bsMoney(S.sales));
+  rowL('   نقد', bsMoney(S.salesCash));
+  rowL('   ادھار', bsMoney(S.salesCredit));
+  rowL('مال پر منافع', bsMoney(S.goodsProfit));
+  rowL('کل اخراجات', bsMoney(S.expTotal));
+  rowL(S.netProfit >= 0 ? 'خالص منافع' : 'خالص نقصان', bsMoney(Math.abs(S.netProfit)), {bold:true, box:true});
+  rowL('گاہکوں سے وصولی', bsMoney(S.recovered));
+  rowL('بیوپاریوں کو ادائیگی', bsMoney(S.paidSup));
+  if(S.expTop.length){ gap(); head('اخراجات کی تفصیل'); S.expTop.slice(0, 15).forEach(x => rowL(x.name, bsMoney(x.amt), {small:true})); }
+  if(S.sups.length){ gap(); head('بیوپاریوں کا دینا'); S.sups.forEach(x => rowL(x.name, bsMoney(x.amt), {small:true})); }
+  line();
+  L.push({t:'center', text:'— شکریہ —', small:true});
+
+  const hOf = it => it.t === 'title' ? fsT * 2 : it.t === 'center' ? (it.small ? fsR * 1.9 : fsH * 2) : it.t === 'head' ? fsH * 2.2 : it.t === 'line' ? 14 : it.t === 'gap' ? 10 : (it.box ? lh + 8 : (it.small ? lh * 0.9 : lh));
+  const H = Math.round(pad + L.reduce((s, it) => s + hOf(it), 0) + pad);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#111111'; ctx.textBaseline = 'middle';
+  const fit = (text, maxW, px, fam, wt) => { let p = px; ctx.font = `${wt || ''} ${p}px ${fam}`; while(ctx.measureText(text).width > maxW && p > 9){ p--; ctx.font = `${wt || ''} ${p}px ${fam}`; } return p; };
+  let y = pad;
+  L.forEach(it => {
+    const h = hOf(it), mid = y + h / 2;
+    if(it.t === 'title' || it.t === 'center'){
+      const px = it.t === 'title' ? fsT : (it.small ? fsR : fsH);
+      fit(it.text, W - pad * 2, px, urdu, '700');
+      ctx.textAlign = 'center'; ctx.direction = 'rtl'; ctx.fillText(it.text, W / 2, mid);
+    } else if(it.t === 'head'){
+      ctx.fillStyle = '#111111'; ctx.fillRect(pad, y + 4, W - pad * 2, h - 8);
+      ctx.fillStyle = '#ffffff'; fit(it.text, W - pad * 2 - 12, fsH, urdu, '700');
+      ctx.textAlign = 'center'; ctx.direction = 'rtl'; ctx.fillText(it.text, W / 2, mid);
+      ctx.fillStyle = '#111111';
+    } else if(it.t === 'line'){
+      ctx.fillRect(pad, mid - 1, W - pad * 2, 2);
+    } else if(it.t === 'row'){
+      if(it.box){ ctx.lineWidth = 2; ctx.strokeStyle = '#111'; ctx.strokeRect(pad + 1, y + 3, W - pad * 2 - 2, h - 6); }
+      else { ctx.fillStyle = '#d4d4d4'; ctx.fillRect(pad, y + h - 1, W - pad * 2, 1); ctx.fillStyle = '#111111'; }
+      const wt = it.bold ? '900' : '700';
+      const numPx = fit(it.v, W * 0.42, it.small ? Math.round(fsN * 0.9) : fsN, num, wt);
+      ctx.textAlign = 'left'; ctx.direction = 'ltr'; ctx.font = `${wt} ${numPx}px ${num}`; ctx.fillText(it.v, pad + 8, mid);
+      const vW = ctx.measureText(it.v).width;
+      fit(it.l, W - pad * 2 - vW - 30, it.small ? Math.round(fsR * 0.9) : fsR, urdu, wt);
+      ctx.textAlign = 'right'; ctx.direction = 'rtl'; ctx.fillText(it.l, W - pad - 8, mid);
+    }
+    y += h;
+  });
+}
+
+/* =====================================================================
    Dashboard لاجک — 3-Line Financial Summary + Low Stock + Expiry Alerts
    (Schema سے مطابقت: v_stock_value, v_receivables_payables views + stock_batches table)
    ===================================================================== */
@@ -23357,7 +23842,7 @@ function saveDiaryNewEntry(){
   const amountRaw = parseFloat(document.getElementById('diaryNewAmount').value);
   const note = document.getElementById('diaryNewNote').value.trim();
   if(!name){ alert('Please enter the person\'s name.'); return; }
-  if(!amountRaw || amountRaw <= 0){ alert('Please enter a valid amount.'); return; }
+  if(!amountRaw || amountRaw <= 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
 
   const signedAmount = diaryNewTypeSelected === 'owe' ? -Math.abs(amountRaw) : Math.abs(amountRaw);
 
@@ -23436,7 +23921,7 @@ function saveDiaryHistoryEdit(){
   if(!entry || activeDiaryHistoryIdx === null || !entry.history[activeDiaryHistoryIdx]) return;
   const amountRaw = parseFloat(document.getElementById('diaryHistEditAmount').value);
   const noteVal = document.getElementById('diaryHistEditNote').value.trim();
-  if(!amountRaw || amountRaw <= 0){ alert('Please enter a valid amount.'); return; }
+  if(!amountRaw || amountRaw <= 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
 
   const h = entry.history[activeDiaryHistoryIdx];
   const newAmount = diaryHistEditTypeSelected === 'owe' ? -Math.abs(amountRaw) : Math.abs(amountRaw);
@@ -23507,7 +23992,7 @@ function saveDiaryEditEntry(){
   const name = document.getElementById('diaryEditName').value.trim();
   const amountRaw = parseFloat(document.getElementById('diaryEditAmount').value);
   if(!name){ alert('Please enter the person\'s name.'); return; }
-  if(isNaN(amountRaw) || amountRaw < 0){ alert('Please enter a valid amount.'); return; }
+  if(isNaN(amountRaw) || amountRaw < 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
 
   const newBalance = diaryEditTypeSelected === 'owe' ? -Math.abs(amountRaw) : Math.abs(amountRaw);
   if(newBalance !== entry.balance){
@@ -23530,7 +24015,7 @@ function diaryAdjustBalance(direction){
   if(!entry) return;
   const amt = parseFloat(document.getElementById('diaryAdjustAmount').value);
   const noteVal = document.getElementById('diaryAdjustNote').value.trim();
-  if(!amt || amt <= 0){ alert('Please enter a valid amount.'); return; }
+  if(!amt || amt <= 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
   const signedAmount = direction * Math.abs(amt);
   entry.balance += signedAmount;
   entry.history.push({amount: signedAmount, note: noteVal, kind: direction === -1 ? 'owed' : 'receivable', date: getDiaryDateISO('diaryAdjustDate')});
@@ -23549,7 +24034,7 @@ function diarySettlePartial(){
   if(!entry) return;
   const amt = parseFloat(document.getElementById('diaryAdjustAmount').value);
   const noteVal = document.getElementById('diaryAdjustNote').value.trim();
-  if(!amt || amt <= 0){ alert('Please enter a valid amount.'); return; }
+  if(!amt || amt <= 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
   if(entry.balance === 0){ alert('This account is already settled.'); return; }
   // ---------- ادائیگی کس طرف کی جا رہی ہے (Payable کم ہو رہا ہے یا Receivable) وہ ابھی، بیلنس بدلنے سے پہلے، محفوظ کر لیں —
   // تاکہ پوسٹر میں یہ ادائیگی صحیح کالم میں "(Paid)" کے طور پر نظر آئے، الٹے کالم میں نہ چلی جائے ----------
@@ -24065,8 +24550,8 @@ function saveNewExpense(){
   const amountRaw = parseFloat(document.getElementById('expNewAmount').value);
   const date = document.getElementById('expNewDate').value || toLocalDateStr(new Date());
   const note = document.getElementById('expNewNote').value.trim();
-  if(!name){ alert('Please enter the item / expense name.'); return; }
-  if(!amountRaw || amountRaw <= 0){ alert('Please enter a valid amount.'); return; }
+  if(!name){ alert('براہ کرم خرچے کا نام لکھیں۔'); return; }
+  if(!amountRaw || amountRaw <= 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
 
   expenseData.push({
     id: nextExpenseId++,
@@ -24097,9 +24582,9 @@ function saveExpenseEdit(){
   const name = document.getElementById('expEditName').value.trim();
   const amountRaw = parseFloat(document.getElementById('expEditAmount').value);
   const date = document.getElementById('expEditDate').value;
-  if(!name){ alert('Please enter the item / expense name.'); return; }
-  if(!amountRaw || amountRaw <= 0){ alert('Please enter a valid amount.'); return; }
-  if(!date){ alert('Please pick a date.'); return; }
+  if(!name){ alert('براہ کرم خرچے کا نام لکھیں۔'); return; }
+  if(!amountRaw || amountRaw <= 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
+  if(!date){ alert('براہ کرم تاریخ منتخب کریں۔'); return; }
 
   entry.name = name;
   entry.amount = Math.abs(amountRaw);
@@ -24115,7 +24600,7 @@ function saveExpenseEdit(){
 function deleteExpenseEntry(){
   const entry = expenseData.find(e => e.id === activeExpenseEntryId);
   if(!entry) return;
-  if(!confirm('Delete this expense entry ("' + entry.name + '")?')) return;
+  if(!confirm('یہ خرچہ ("' + entry.name + '") ڈیلیٹ کر دیں؟')) return;
   expenseData = expenseData.filter(e => e.id !== activeExpenseEntryId);
   saveToStorage('expenses', expenseData);
   pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): ڈیلیٹ ہونا فوراً کلاؤڈ میں ----------
@@ -35126,7 +35611,7 @@ function confirmSupplierReturn(itemIndex){
   const amount = parseFloat(document.getElementById(`supRetAmt_${itemIndex}`).value) || 0;
 
   if(qty <= 0 || qty > item.qty){ alert('Please enter a valid quantity (max ' + item.qty + ').'); return; }
-  if(amount < 0){ alert('Please enter a valid amount.'); return; }
+  if(amount < 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
 
   // ---------- اسٹاک سے Item منہا کریں (سامان سپلائر کو واپس جا رہا ہے) ----------
   productsData.forEach(p => {
@@ -35447,7 +35932,7 @@ function setTxnType(type){
 function saveWalletTxn(){
   const amount = parseFloat(document.getElementById('txnAmount').value) || 0;
   if(amount <= 0){
-    alert('Please enter a valid amount.');
+    alert('براہ کرم درست رقم لکھیں۔');
     return;
   }
 
@@ -35487,7 +35972,7 @@ function setOpeningBalanceType(type){
 }
 function saveOpeningBalanceAdjustment(){
   const amount = parseFloat(document.getElementById('obAmount').value) || 0;
-  if(amount <= 0){ alert('Please enter a valid amount.'); return; }
+  if(amount <= 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
   const note = document.getElementById('obNote').value.trim();
   const c = customersData.find(x => x.customer_id === activeOpeningBalanceCustomerId);
   if(!c) return;
@@ -36385,7 +36870,7 @@ function saveRecordPaymentModal(){
   }
   const amount = parseFloat(document.getElementById('rpAmount').value) || 0;
   if(amount <= 0){
-    alert('Please enter a valid amount.');
+    alert('براہ کرم درست رقم لکھیں۔');
     return;
   }
   const method = document.getElementById('rpMethod').value;
@@ -36925,7 +37410,8 @@ const ASSIGNABLE_SCREENS = [
   // پہلے یہ ایک مشترکہ اندراج تھا (نیچے دیکھیں پرانا کمنٹ)، اب ہر ایک الگ سے Assign کی جا سکتی ہے ----------
   {key:'customers', label:'🧑‍🤝‍🧑 گاہک'},
   {key:'suppliers', label:'🚚 بیوپاری'},
-  {key:'mydiary', label:'📔 میری ڈائری'},
+  {key:'bizsummary', label:'📊 کاروبار کی سمری'}, // 📊 FM1010SA355: میری ڈائری کی جگہ
+  // {key:'mydiary', label:'📔 میری ڈائری'}, // 🙈 FM1010SA355: صدام کی ہدایت — چھپا دی (کوڈ محفوظ)
   {key:'expenditure', label:'💸 اخراجات'},
   {key:'myaccount', label:'🏦 میرا اکاؤنٹ'},
   {key:'billsettings', label:'🖨️ بل و پرنٹ سیٹنگ'},
@@ -39401,6 +39887,7 @@ async function pushFinanceToCloud(){
           cashInHand: { doubleValue: financeDummy.cashInHand },
           expensesJson: { stringValue: JSON.stringify(expenseData) },
           nextExpenseId: { integerValue: String(nextExpenseId) },
+          openingCashJson: { stringValue: JSON.stringify(AppState.settings.dailyOpeningCash || {}) }, // 🌅 FM1010SA355
           updatedAt: { integerValue: String(Date.now()) }
         }
       })
@@ -39436,6 +39923,7 @@ async function fetchFinanceFromCloud(silent){
       const cloudExpenses = JSON.parse(jsonStr);
       if(Array.isArray(cloudExpenses)) expenseData = cloudExpenses;
     }
+    if(doc.fields?.openingCashJson?.stringValue) mergeOpeningCashFromCloud(doc.fields.openingCashJson.stringValue); // 🌅 FM1010SA355
     const cloudNextId = parseInt(doc.fields?.nextExpenseId?.integerValue || '0');
     if(cloudNextId > nextExpenseId) nextExpenseId = cloudNextId;
     saveToStorage('expenses', expenseData);
@@ -45886,6 +46374,7 @@ async function renderReportToCanvas(){
   if(mlfWrap) mlfWrap.style.display = (currentReportType === 'munshistocklog' || currentReportType === 'purchasechalan' || currentReportType === 'supplierslip') ? 'block' : 'none';
   if(currentReportType === 'purchasechalan'){ await renderPurchaseChalanReportToCanvas(); return; } // 🧾 خرید اور چالان رپورٹ
   if(currentReportType === 'supplierslip'){ await renderSupplierSlipToCanvas(); return; } // 🧾 بیوپاری چٹ
+  if(currentReportType === 'bizsummary'){ await renderBizSummaryToCanvas(); return; } // 📊 FM1010SA355
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'stockprofit'){ await renderDailyStockProfitReportToCanvas(); return; } // ---------- صدام کی ہدایت (FM16SEPWE9): روزانہ سٹاک/منافع رپورٹ — اپنا الگ لے آؤٹ ---------- -->
@@ -46276,7 +46765,7 @@ async function renderTodaySaleReportToCanvas(){
   const todayExpenses = (typeof expenseData !== 'undefined' ? expenseData : []).filter(e => e.date === todayStr).reduce((s,e) => s + (e.amount||0), 0);
 
   // ---------- اوپننگ کیش (Settings سے) ----------
-  const openingCash = AppState.settings.openingCashBalance || 0;
+  const openingCash = getTodayOpeningCash(); // 🌅 FM1010SA355: آج کا درج شدہ اوپننگ کیش
 
   // ---------- ڈائری کا موجودہ بیلنس (Dashboard جیسا ہی حساب — balance مثبت = I Got/Liability، منفی = I Gave/Asset) ----------
   let diaryPayable = 0, diaryReceivable = 0;
@@ -46374,12 +46863,13 @@ async function renderTodaySaleReportToCanvas(){
     ['Opening Cash', openingCash],
     ['Total Sales', totalSales],
     ['Payments Received (Customers)', customerPaymentsReceived],
-    ['Diary Receivable', diaryReceivable],
+    // 🙈 FM1010SA355: ڈائری رپورٹ سے ختم (صدام کی ہدایت)
+    ['', null],
   ];
   const cashOutItems = [
     [`Today's Expenses`, todayExpenses],
     ['Payments Made (Suppliers)', supplierPaymentsMade],
-    ['Diary Payable', diaryPayable],
+    ['', null],
     ['', null],
   ];
   const cashInTotal = cashInItems.reduce((s,[,v]) => s + v, 0);
@@ -48335,7 +48825,7 @@ function buildTodaySalePdf(orientation){
   const customerPaymentsReceived = todayPayments.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s,p) => s + (p.amount||0), 0);
   const supplierPaymentsMade = todayPayments.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s,p) => s + (p.amount||0), 0);
   const todayExpenses = (typeof expenseData !== 'undefined' ? expenseData : []).filter(e => e.date === todayStr).reduce((s,e) => s + (e.amount||0), 0);
-  const openingCash = AppState.settings.openingCashBalance || 0;
+  const openingCash = getTodayOpeningCash(); // 🌅 FM1010SA355
   const cashIn = openingCash + totalSales + customerPaymentsReceived;
   const cashOut = supplierPaymentsMade + todayExpenses;
   const netCash = cashIn - cashOut;
@@ -48651,7 +49141,7 @@ async function shareReportPdf(){
   if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
   await renderReportToCanvas();
   const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog' || currentReportType === 'purchasechalan' || currentReportType === 'supplierslip') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog' || currentReportType === 'purchasechalan' || currentReportType === 'supplierslip' || currentReportType === 'bizsummary') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -48681,7 +49171,7 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog' || currentReportType === 'purchasechalan' || currentReportType === 'supplierslip') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : (currentReportType === 'stockprofit' || currentReportType === 'mandisale' || currentReportType === 'munshistocklog' || currentReportType === 'purchasechalan' || currentReportType === 'supplierslip' || currentReportType === 'bizsummary') ? buildDailyStockProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
     window.open(pdf.output('bloburl'), '_blank');
     return;
   }
