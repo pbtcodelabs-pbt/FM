@@ -2,7 +2,7 @@
 // یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
 // صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
 // ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'FM1010SA358';
+const CACHE_VERSION = 'FM1110SU359';
 const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
 // ---------- 🔒🆕 صدام کی ہدایت (FM21SEPMO03): آف لائن نہ چلنے کی اصل جڑ یہاں ملی — پہلے تمام فائلیں
@@ -25,9 +25,6 @@ const OPTIONAL_URLS = [
   './fonts/JameelNooriNastaleeq-Regular.ttf',
   './fonts/JameelNooriNastaleeq-Kasheeda.ttf',
   // ---------- 🆕 صدام کی ہدایت (FM8SEPTU4): 3 نئے فونٹ — fonts/ فولڈر میں ---------- -->
-  './fonts/PTSimpleBoldRuled.ttf',
-  './fonts/ThuluthAlsmt.ttf',
-  './fonts/JameelKhushkhati.ttf',
   // ---------- 🗑️ صدام کی ہدایت (FM13SEPSU): 4 فونٹ (Gandhara Suls, Akram Unicode, AlQalam Khawar, AlFars Aban)
   // فہرست سے ہٹا دیے گئے، اس لیے یہ precache انٹریز بھی ہٹا دی گئیں ---------- -->
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'

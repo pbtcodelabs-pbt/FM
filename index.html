@@ -9155,7 +9155,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM1010SA358'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1110SU359'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -31358,7 +31358,7 @@ function renderPdVariantHeader(){
     bar.innerHTML += `<button type="button" onclick="pdBackToProducts()" style="flex:1 0 auto; min-width:120px; padding:6px 10px; border-radius:11px; border:2px solid #d97706; background:linear-gradient(180deg,#fde68a,#fbbf24); color:#78350f; font-weight:900; font-size:13px; line-height:1.4; cursor:pointer;">✅ پورا تقسیم ہو گیا<br>اگلی سبزی/چالان چنیں ◀</button>`;
   }
 }
-let pdSortDesc = !!loadFromStorage('pdSortDesc', false); // 🔢 FM1010SA358: منشی کی چالان تقسیم لسٹ — سیریل نمبر کی ترتیب (فون پر یاد)
+let pdSortDesc = !!loadFromStorage('pdSortDesc', false); // 🔢 FM1110SU359: منشی کی چالان تقسیم لسٹ — سیریل نمبر کی ترتیب (فون پر یاد)
 function pdToggleSort(){ pdSortDesc = !pdSortDesc; saveToStorage('pdSortDesc', pdSortDesc); renderPdCustList(); }
 function renderPdCustList(){
   const wrap = document.getElementById('pdCustListWrap');
@@ -31375,7 +31375,7 @@ function renderPdCustList(){
     if(pdOnlyGiven && !(cur > 0)) return false;
     if(!q) return true;
     return (c.name || '').toLowerCase().includes(q) || (c.area || '').toLowerCase().includes(q) || (c.phone || '').includes(q) || String(c.serial_no == null ? '' : c.serial_no).includes(q);
-  }).sort((a, b) => { // 🔢 FM1010SA358: سیریل نمبر کی ترتیب — چھوٹا اوپر (1→9) یا بڑا اوپر (9→1)
+  }).sort((a, b) => { // 🔢 FM1110SU359: سیریل نمبر کی ترتیب — چھوٹا اوپر (1→9) یا بڑا اوپر (9→1)
     const sa = Number(a.serial_no) > 0 ? Number(a.serial_no) : null, sb = Number(b.serial_no) > 0 ? Number(b.serial_no) : null;
     if(sa === null && sb === null) return (a.name || '').localeCompare(b.name || '', 'ur');
     if(sa === null) return 1; if(sb === null) return -1; // بغیر سیریل والے ہمیشہ نیچے
@@ -32224,6 +32224,47 @@ function rerenderRlCard(customerId){
   el.outerHTML = rlEntryDayMode === 'yesterday' ? h.split('آج وصول').join('کل وصول').split('آج مال').join('کل مال') : h;
 }
 
+
+// ---------- 🛒 FM1110SU359 (صدام کی ہدایت): ریکوری والے کے لیے "کل کی خریداری" ڈبہ — صرف دیکھنے کے لیے، کسی حساب/کیلکولیشن میں شامل نہیں ----------
+// ہر گاہک: کل کا مال، اس دن درج وصولی، اور کم وصولی؛ ڈراپ ڈاؤن سے اسی مہینے کی پچھلی تمام تاریخیں۔ حساب وہی (drCustomerDay جیسا) — صرف پڑھا جاتا ہے۔
+let rlHistSel = {};
+function rlHistRows(c){
+  const entryD = rlEntryDate();
+  const gDay = {}, rDay = {};
+  const add = (o, d, v) => { if(!d) return; o[d] = (o[d] || 0) + (Number(v) || 0); };
+  invoicesData.forEach(inv => { if(inv.customer_id === c.customer_id) add(gDay, invDay(inv), _drGoodsOrig(inv)); });
+  (c.walletHistory || []).forEach(h => { if(!h) return; if(h.type === 'cash_given') add(gDay, h.date, h.amount); else if(h.type === 'receivable_collected') add(rDay, h.date, h.amount); });
+  recoveryListData.forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') add(rDay, recDay(e), e.amount); });
+  const dt = new Date(entryD + 'T12:00:00'); dt.setDate(dt.getDate() - 1);
+  const prev = localDateKey(dt);
+  const ym = entryD.slice(0, 7);
+  let zr = ''; try{ if(c.zeroResetAt) zr = localDateKey(new Date(c.zeroResetAt)); }catch(e){}
+  const dates = new Set([prev]);
+  Object.keys(gDay).concat(Object.keys(rDay)).forEach(d => { if(d < entryD && d.slice(0, 7) === ym) dates.add(d); });
+  const rows = Array.from(dates).sort().reverse().map(d => {
+    const old = !!zr && d < zr; // زیرو کرنے سے پہلے کا پرانا کھاتہ نہ دکھائیں
+    const g = old ? 0 : Math.round(gDay[d] || 0), r = old ? 0 : Math.round(rDay[d] || 0);
+    return { d, g, r, s: g > 0 ? Math.max(0, g - r) : 0 };
+  });
+  return { prev, rows };
+}
+function rlHistBodyHtml(c, sel, z, numF){
+  const H = rlHistRows(c);
+  const row = H.rows.find(x => x.d === sel) || H.rows[0];
+  const isKal = (row.d === rlPrevBizDay() && rlEntryDayMode === 'today');
+  const lbl = (isKal ? '🛒 کل کی خریداری' : '🛒 ' + bizFmt(row.d) + ' کی خریداری');
+  const cell = (t, v, bg, fg, bd) => `<div style="flex:1; background:${bg}; border:1px solid ${bd}; border-radius:7px; padding:2px 4px; text-align:center;"><div style="font-size:${z(9.5)}px; font-weight:700; color:${fg};">${t}</div><div style="${numF} font-size:${z(14)}px; color:${fg}; direction:ltr;">Rs. ${v.toLocaleString()}</div></div>`;
+  return { lbl, vals: cell('خریداری', row.g, '#fff7ed', '#c2410c', '#fdba74') + cell('وصولی', row.r, '#f0fdf4', '#15803d', '#86efac') + cell('کم وصولی', row.s, row.s > 0 ? '#fef2f2' : '#f8fafc', row.s > 0 ? '#b91c1c' : '#64748b', row.s > 0 ? '#fca5a5' : '#e2e8f0'), rows: H.rows, sel: row.d };
+}
+function rlHistPick(cid, val){
+  rlHistSel[cid] = val;
+  const c = customersData.find(x => x.customer_id === cid); if(!c) return;
+  const z = (n) => (n * rlZoomPct / 100).toFixed(1);
+  const b = rlHistBodyHtml(c, val, z, `font-family:'Arial Black',Arial,sans-serif; font-weight:900;`);
+  const l = document.getElementById('rlHistLbl-' + cid), v = document.getElementById('rlHistVals-' + cid);
+  if(l) l.textContent = b.lbl; if(v) v.innerHTML = b.vals;
+}
+
 function buildRlEmployeeCard(c, dr){
   const z = (n) => (n * rlZoomPct / 100).toFixed(1);
   const cid = c.customer_id;
@@ -32246,6 +32287,18 @@ function buildRlEmployeeCard(c, dr){
   const iconBtn = (href, bg, col, ic, extra) => `<a href="${href}" ${extra||''} style="flex:0 0 auto; width:${z(24)}px; height:${z(24)}px; display:flex; align-items:center; justify-content:center; background:${bg}; color:${col}; border-radius:50%; font-size:${z(11)}px; text-decoration:none;">${ic}</a>`;
 
   // ---------- رقم کی قطاریں (ہر قطار: رقم + طریقہ) — "➕ دوسرا طریقہ" سے مزید قطار ----------
+  // ---------- 🛒 FM1110SU359: کل کی خریداری + ڈیٹ ڈراپ ڈاؤن (صرف دیکھنے کے لیے) ----------
+  const _hb = rlHistBodyHtml(c, rlHistSel[cid], z, numF);
+  const histBoxHtml = `
+      <div dir="rtl" style="background:#fffbeb; border:1.5px solid #fcd34d; border-radius:9px; padding:4px 6px; margin-bottom:5px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-bottom:3px;">
+          <span id="rlHistLbl-${cid}" style="font-size:${z(11.5)}px; font-weight:800; color:#92400e;">${_hb.lbl}</span>
+          <select onchange="rlHistPick(${cid}, this.value)" style="flex:0 0 auto; max-width:${z(120)}px; padding:3px 2px; border:1px solid #fcd34d; border-radius:6px; background:#fff; font-size:${z(10)}px; font-family:inherit;">
+            ${_hb.rows.map((x, i) => `<option value="${x.d}" ${x.d === _hb.sel ? 'selected' : ''}>${(x.d === rlPrevBizDay() && rlEntryDayMode === 'today') ? 'کل — ' : ''}${bizFmt(x.d)}</option>`).join('')}
+          </select>
+        </div>
+        <div id="rlHistVals-${cid}" style="display:flex; gap:3px;">${_hb.vals}</div>
+      </div>`;
   const splitRowsHtml = isDone ? '' : rows.map((m, i) => `
       <div style="display:flex; gap:3px; align-items:center; margin-bottom:4px;">
         <input type="number" min="0" inputmode="numeric" placeholder="${i === 0 ? 'رقم' : 'مزید رقم'}" value="${m.amount ? m.amount : ''}" oninput="updateRlSplit(${cid}, ${i}, 'amount', this.value)"
@@ -32285,6 +32338,7 @@ function buildRlEmployeeCard(c, dr){
           <div id="rlTodayRec-${cid}" style="${numF} font-size:${z(17)}px; color:#15803d; direction:ltr;">Rs. ${(todaySent + typed).toLocaleString()}</div>
         </div>
       </div>
+      ${histBoxHtml}
       ${doneSummaryHtml}
       ${splitRowsHtml}
       ${isDone ? `
@@ -41312,8 +41366,9 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   });
   // ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): سبزی کے نام کے ساتھ اس کا پکا سیریل نمبر ایک گول رنگین بیج میں —
   // نام اشیاء کالم کی چوڑائی میں اس بیج کے لیے بھی جگہ ریزرو کرنی ہے ---------- -->
-  const serialBadgeD = Math.max(14, Math.min(24, Math.round(20 * fscale)));
-  const serialBadgeGap = Math.round(5 * fscale);
+  // 🔵 FM1110SU359 (صدام کی ہدایت): کسٹمر بل پر سبزی کا گول پکا سیریل نمبر نہیں — صرف لسٹ کا نمبر شمار؛ اس کے لیے رکھی گئی جگہ بھی صفر
+  const serialBadgeD = 0;
+  const serialBadgeGap = 0;
   // ---------- نام اشیاء کا کالم کبھی بھی بہت تنگ نہ ہو (کم از کم 100px جتنا) — نام ایک دوسرے پر نہ چڑھیں ---------- -->
   const itemWTight = Math.max(Math.round(100*fscale), Math.round(ctx.measureText(maxItemStr).width) + itemPad + serialBadgeD + serialBadgeGap);
   // ---------- بچ جانے والی خالی جگہ — نام اور پیکنگ کے علاوہ باقی 5 خانوں (نمبر/تعداد/قیمت/مزدوری/ٹوٹل) پر برابر تقسیم ---------- -->
@@ -41602,7 +41657,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     // ---------- 🔵 صدام کی ہدایت (FM21SEPMO01): یہ فائنل بل ہے جو براہِ راست کسٹمر کو جاتا ہے — کسٹمر کو سبزی کا
     // اندرونی سیریل نمبر دکھانے کی ضرورت نہیں، صرف نام/پیکنگ۔ بیج صرف اندرونی رپورٹس (ایڈوانس آرڈر، منشی سٹاک لاگ)
     // میں رہے گا — یہاں سے صرف چھپایا ہے، فنکشن/ڈیٹا جوں کا توں محفوظ ہے، دوبارہ چاہیں تو true کر دیں ---------- -->
-    const SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL = true; // 🔴 FM910FR348: سبزی کا اصل سیریل نمبر سرخ گول دائرے میں دوبارہ بل پر
+    const SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL = false; // 🔵 FM1110SU359: کسٹمر بل پر گول سیریل نمبر بند — // 🔴 FM910FR348: سبزی کا اصل سیریل نمبر سرخ گول دائرے میں دوبارہ بل پر
     const _rowSerialNo = getSerialNoForVariantId(item.variant_id);
     if(SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL && _rowSerialNo !== null && _rowSerialNo !== undefined){
       drawSerialBadge(ctx, headerItemNameX - serialBadgeD/2, hLineY + rowH/2, serialBadgeD/2, _rowSerialNo);
