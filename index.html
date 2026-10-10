@@ -3274,7 +3274,7 @@ function __appHostKind(h, p){
     <div class="navItem admin-only" data-screen="suppliers" data-navkey="suppliers" data-navlabel="Suppliers" onclick="goTo('suppliers')" style="background:#0284C7; color:#fff;">🚚 سپلائرز<span class="navDragHandle">⠿</span></div>
     <!-- 📊 FM1010SA355 (صدام کی ہدایت): میری ڈائری مینیو سے چھپا دی گئی (کوڈ/ڈیٹا محفوظ) — اس کی جگہ "کاروبار کی سمری" -->
     <div class="navItem admin-only" data-screen="bizsummary" data-navkey="bizsummary" data-navlabel="Business Summary" onclick="goTo('bizsummary')" style="background:#0F766E; color:#fff;">📊 کاروبار کی سمری<span class="navDragHandle">⠿</span></div>
-    <div class="navItem admin-only" data-screen="mydiary" data-navkey="mydiary" data-navlabel="My Diary" onclick="goTo('mydiary')" style="display:none; background:#DB2777; color:#fff;">📔 میری ڈائری<span class="navDragHandle">⠿</span></div>
+    <div class="navItem admin-only" data-screen="mydiary" data-navkey="mydiary" data-navlabel="My Diary" onclick="goTo('mydiary')" style="background:#DB2777; color:#fff;">📔 میری ڈائری<span class="navDragHandle">⠿</span></div>
     <div class="navItem" data-screen="advanceorders" data-navkey="advanceorders" data-navlabel="Advance Orders" onclick="goTo('advanceorders')" style="background:#059669; color:#fff;">📝 ایڈوانس آرڈرز<span class="navDragHandle">⠿</span></div>
     <div class="navItem admin-only" data-screen="billsettings" data-navkey="billsettings" data-navlabel="Bill & Print Settings" onclick="goTo('billsettings')" style="background:#7C3AED; color:#fff;">🖨️ بل اور پرنٹ سیٹنگز<span class="navDragHandle">⠿</span></div>
     <div class="navItem" data-screen="billhistory" data-navkey="billhistory" data-navlabel="Bill History" onclick="goTo('billhistory')" style="background:#EA580C; color:#fff;">🧾 بل ہسٹری<span class="navDragHandle">⠿</span></div>
@@ -6818,6 +6818,13 @@ function __appHostKind(h, p){
 
       <div class="settingsWrap">
 
+        <!-- --- 🔥 FM1110SU361: ماسٹر ری سیٹ — سیٹنگ کھولتے ہی سب سے اوپر (صرف ایڈمن) --- -->
+        <div class="settingsCard" id="settingsCardMasterReset" style="border:2px solid #fecaca; background:#fff7f7;">
+          <h3 style="color:#b91c1c;">🔥 ماسٹر ری سیٹ</h3>
+          <div class="settingsHint">تمام لین دین کا ڈیٹا زیرو۔ کسٹمر، سامان اور بیوپاری کی لسٹیں باقی رہیں گی۔</div>
+          <button type="button" class="testPrintBtn" style="margin-top:8px; background:#b91c1c; color:#fff; width:100%;" onclick="fmMasterResetAll()">🔥 ماسٹر ری سیٹ</button>
+        </div>
+
         <!-- --- 🏷️ Build Version — ہر نئی فائل کے ساتھ یہ نمبر بدلتا ہے، سپورٹ کے وقت پتا چلتا ہے کہ کسٹمر کون سا ورژن چلا رہا ہے --- -->
         <div class="settingsCard" style="background:#f4f1ea;">
           <h3 style="font-size:12.5px; color:var(--muted); font-weight:700;">🏷️ ایپ ورژن</h3>
@@ -6973,7 +6980,7 @@ function __appHostKind(h, p){
         </div>
 
         <!-- --- ⚠️ Danger Zone — صرف Admin، PIN درکار، دونوں عمل ناقابلِ واپسی --- -->
-        <div class="settingsCard" style="border:2px solid #fecaca; background:#fff7f7;">
+        <div class="settingsCard" id="settingsCardOldDangerZone" style="display:none !important; border:2px solid #fecaca; background:#fff7f7;">
           <h3 style="color:#b91c1c;">⚠️ خطرناک حصہ</h3>
           <div class="settingsHint">یہ کام واپس نہیں ہو سکتے۔ پہلے بیک اپ لے لیں۔</div>
 
@@ -7083,10 +7090,10 @@ function __appHostKind(h, p){
       </div>
 
       <!-- --- 📔 My Diary شارٹ کٹ — اس کلائنٹ کے لیے چھپا دیا گیا (کوڈ محفوظ ہے) --- -->
-      <div class="settingsCard" style="display:none;">
+      <div class="settingsCard">
         <h3>📔 My Diary</h3>
         <div class="settingsHint">Personal "I Got / I Gave" ledger — separate from customer/supplier accounts.</div>
-        <button class="testPrintBtn" style="margin-top:10px; display:none;" onclick="goTo('mydiary')">📔 Open My Diary</button>
+        <button class="testPrintBtn" style="margin-top:10px;" onclick="goTo('mydiary')">📔 Open My Diary</button>
       </div>
     </div>
 
@@ -7143,7 +7150,7 @@ function __appHostKind(h, p){
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📋 روزانہ ریکوری لسٹ — Daily Recovery List</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">سابقہ بقایہ، آج کا مال، آج کی ریکوری اور تازہ بقایہ — سب ایک ہی فہرست میں، سورٹ/فلٹر کے ساتھ</div>
       </button>
-      <button onclick="openDiarySummaryReport()" style="display:none; text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+      <button onclick="openDiarySummaryReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📔 My Diary Summary</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Everyone in My Diary, who owes whom, and the net total</div>
       </button>
@@ -9155,7 +9162,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM1110SU359'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1110SU361'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9852,6 +9859,7 @@ const HOME_SHORTCUT_OPTIONS = [
   {key:'products',      icon:'📦', label:'مال کی فہرست',       screen:'products'},
   {key:'payments',      icon:'💳', label:'پیمنٹس',       screen:'payments'},
   {key:'myaccount',     icon:'🏦', label:'میرا اکاؤنٹ',     screen:'myaccount'},
+  {key:'mydiary',       icon:'📔', label:'میری ڈائری', screen:'mydiary'}, // 📔 FM1110SU361: واپس
   {key:'bizsummary',    icon:'📊', label:'کاروبار کی سمری', screen:'bizsummary'}, // 📊 FM1010SA355 (میری ڈائری کی جگہ)
   {key:'users',         icon:'🔑', label:'ملازمین',          screen:'users'},
   {key:'settings',      icon:'⚙️', label:'سیٹنگ',       screen:'settings'},
@@ -10001,7 +10009,8 @@ function renderHomeIconGrid(){
   const currentUser = usersData.find(x => x.name === AppState.currentUser?.name && x.role === AppState.currentRole);
   let assignedKeys = (currentUser && Array.isArray(currentUser.screens)) ? currentUser.screens : [];
   // 📊 FM1010SA355: میری ڈائری کی جگہ "کاروبار کی سمری" — ایڈمن کے ہوم پر ہمیشہ موجود
-  assignedKeys = assignedKeys.map(k => k === 'mydiary' ? 'bizsummary' : k).filter((k, i, a) => a.indexOf(k) === i);
+  assignedKeys = assignedKeys.filter((k, i, a) => a.indexOf(k) === i);
+  if(AppState.currentRole === 'admin' && !assignedKeys.includes('mydiary')) assignedKeys = assignedKeys.concat('mydiary'); // 📔 FM1110SU361: ڈائری واپس
   if(AppState.currentRole === 'admin' && !assignedKeys.includes('bizsummary')) assignedKeys = assignedKeys.concat('bizsummary');
   const myTiles = assignedKeys.map(key => {
     // ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): "پراڈکٹس" کا ہوم آئیکن مکمل چھپا دیا (سٹاک مینجمنٹ اب وہی کام
@@ -12940,7 +12949,7 @@ let navForwardStack = [];
 
 function goTo(screenName, _isHistoryNav){
   // ---------- 🗄️ سیف الماری: بغیر ایڈمن PIN کے کسی راستے (مینیو، بیک بٹن، سرچ، ہوم شارٹ کٹ) سے نہیں کھلے گی ----------
-  if(screenName === 'dashboard' || screenName === 'mydiary') screenName = 'bizsummary'; // 📊 FM1010SA355: پرانا ڈیش بورڈ/ڈائری → نئی سمری
+  if(screenName === 'dashboard') screenName = 'bizsummary'; // 📔 FM1110SU361: ڈائری واپس کھول دی // 📊 FM1010SA355: پرانا ڈیش بورڈ/ڈائری → نئی سمری
   if(screenName === 'safevault' && !window.__svUnlocked){ svAskAndOpen(); return; }
   if(screenName !== 'safevault' && window.__svUnlocked){ window.__svUnlocked = false; }
   try{ if(screenName === 'payments' || screenName === 'mydiary'){ const _d = EXTRA_SYNC_DEFS.find(d => d.key === (screenName === 'payments' ? 'payments' : 'diary')); if(_d) setTimeout(() => extraSyncOne(_d), 300); } }catch(e){}
@@ -31358,7 +31367,7 @@ function renderPdVariantHeader(){
     bar.innerHTML += `<button type="button" onclick="pdBackToProducts()" style="flex:1 0 auto; min-width:120px; padding:6px 10px; border-radius:11px; border:2px solid #d97706; background:linear-gradient(180deg,#fde68a,#fbbf24); color:#78350f; font-weight:900; font-size:13px; line-height:1.4; cursor:pointer;">✅ پورا تقسیم ہو گیا<br>اگلی سبزی/چالان چنیں ◀</button>`;
   }
 }
-let pdSortDesc = !!loadFromStorage('pdSortDesc', false); // 🔢 FM1110SU359: منشی کی چالان تقسیم لسٹ — سیریل نمبر کی ترتیب (فون پر یاد)
+let pdSortDesc = !!loadFromStorage('pdSortDesc', false); // 🔢 FM1110SU361: منشی کی چالان تقسیم لسٹ — سیریل نمبر کی ترتیب (فون پر یاد)
 function pdToggleSort(){ pdSortDesc = !pdSortDesc; saveToStorage('pdSortDesc', pdSortDesc); renderPdCustList(); }
 function renderPdCustList(){
   const wrap = document.getElementById('pdCustListWrap');
@@ -31375,7 +31384,7 @@ function renderPdCustList(){
     if(pdOnlyGiven && !(cur > 0)) return false;
     if(!q) return true;
     return (c.name || '').toLowerCase().includes(q) || (c.area || '').toLowerCase().includes(q) || (c.phone || '').includes(q) || String(c.serial_no == null ? '' : c.serial_no).includes(q);
-  }).sort((a, b) => { // 🔢 FM1110SU359: سیریل نمبر کی ترتیب — چھوٹا اوپر (1→9) یا بڑا اوپر (9→1)
+  }).sort((a, b) => { // 🔢 FM1110SU361: سیریل نمبر کی ترتیب — چھوٹا اوپر (1→9) یا بڑا اوپر (9→1)
     const sa = Number(a.serial_no) > 0 ? Number(a.serial_no) : null, sb = Number(b.serial_no) > 0 ? Number(b.serial_no) : null;
     if(sa === null && sb === null) return (a.name || '').localeCompare(b.name || '', 'ur');
     if(sa === null) return 1; if(sb === null) return -1; // بغیر سیریل والے ہمیشہ نیچے
@@ -32225,7 +32234,7 @@ function rerenderRlCard(customerId){
 }
 
 
-// ---------- 🛒 FM1110SU359 (صدام کی ہدایت): ریکوری والے کے لیے "کل کی خریداری" ڈبہ — صرف دیکھنے کے لیے، کسی حساب/کیلکولیشن میں شامل نہیں ----------
+// ---------- 🛒 FM1110SU361 (صدام کی ہدایت): ریکوری والے کے لیے "کل کی خریداری" ڈبہ — صرف دیکھنے کے لیے، کسی حساب/کیلکولیشن میں شامل نہیں ----------
 // ہر گاہک: کل کا مال، اس دن درج وصولی، اور کم وصولی؛ ڈراپ ڈاؤن سے اسی مہینے کی پچھلی تمام تاریخیں۔ حساب وہی (drCustomerDay جیسا) — صرف پڑھا جاتا ہے۔
 let rlHistSel = {};
 function rlHistRows(c){
@@ -32287,7 +32296,7 @@ function buildRlEmployeeCard(c, dr){
   const iconBtn = (href, bg, col, ic, extra) => `<a href="${href}" ${extra||''} style="flex:0 0 auto; width:${z(24)}px; height:${z(24)}px; display:flex; align-items:center; justify-content:center; background:${bg}; color:${col}; border-radius:50%; font-size:${z(11)}px; text-decoration:none;">${ic}</a>`;
 
   // ---------- رقم کی قطاریں (ہر قطار: رقم + طریقہ) — "➕ دوسرا طریقہ" سے مزید قطار ----------
-  // ---------- 🛒 FM1110SU359: کل کی خریداری + ڈیٹ ڈراپ ڈاؤن (صرف دیکھنے کے لیے) ----------
+  // ---------- 🛒 FM1110SU361: کل کی خریداری + ڈیٹ ڈراپ ڈاؤن (صرف دیکھنے کے لیے) ----------
   const _hb = rlHistBodyHtml(c, rlHistSel[cid], z, numF);
   const histBoxHtml = `
       <div dir="rtl" style="background:#fffbeb; border:1.5px solid #fcd34d; border-radius:9px; padding:4px 6px; margin-bottom:5px;">
@@ -32811,6 +32820,163 @@ setTimeout(() => {
 setInterval(() => {
   try{ const w = document.getElementById('tmpZeroStockWrap'); if(w) w.style.display = (AppState.currentRole === 'admin') ? 'block' : 'none'; }catch(e){}
 }, 1500);
+
+
+/* =====================================================================
+   🔥 FM1110SU361 (صدام کی ہدایت): ماسٹر ری سیٹ — سیٹنگ میں سب سے اوپر، صرف ایڈمن۔
+   تمام لین دین زیرو: بل، بقایا/ایڈوانس، وصولی، سٹاک، آرڈرز، اخراجات، ادائیگیاں، نقد خریداری، کیش۔
+   کسٹمر / سامان / بیوپاری کی لسٹیں (نام، فون، پیکنگ، ریٹ، سیریل) باقی رہتی ہیں۔
+   ترتیب: وارننگ → ایڈمن PIN → خودکار بیک اپ فائل → کلاؤڈ کی تازہ حالت → صفر → کلاؤڈ پر بھیجنا → تصدیق
+   (پرانے عارضی زیرو بٹنوں والا ہی محفوظ طریقہ: "پہلے کلاؤڈ، پھر زیرو، پھر تصدیق")
+   ===================================================================== */
+function _fmMrBusy(msg){
+  let el = document.getElementById('fmMrBusyOverlay');
+  if(!msg){ if(el) el.remove(); return; }
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'fmMrBusyOverlay';
+    el.style.cssText = 'position:fixed; inset:0; z-index:99995; background:rgba(15,23,42,.8); display:flex; align-items:center; justify-content:center; padding:20px;';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = '<div dir="rtl" style="background:#fff; border-radius:18px; padding:22px 18px; max-width:340px; width:100%; text-align:center; font-family:\'JameelNooriNastaleeqKasheeda\',\'JameelNooriNastaleeq\',\'Noto Nastaliq Urdu\',serif;"><div style="font-size:22px; font-weight:700; color:#b91c1c; line-height:2;">🔥 ماسٹر ری سیٹ جاری ہے</div><div style="font-size:18px; line-height:2; color:#0f172a;">' + msg + '</div><div style="font-size:15px; color:#64748b; margin-top:6px;">براہ کرم ایپ بند نہ کریں</div></div>';
+}
+async function _fmMrExtraSync(key){
+  const def = (typeof EXTRA_SYNC_DEFS !== 'undefined') ? EXTRA_SYNC_DEFS.find(d => d.key === key) : null;
+  if(!def) return;
+  for(let i = 0; i < 20 && _xBusy[def.key]; i++) await new Promise(r => setTimeout(r, 300));
+  await extraSyncOne(def);
+}
+async function fmMasterResetAll(){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'ماسٹر ری سیٹ صرف ایڈمن کر سکتا ہے۔'); return; }
+  if(window.__fmMrRunning) return;
+  const f = n => 'Rs. ' + Math.round(Number(n) || 0).toLocaleString('en-US');
+  const sumRec = customersData.reduce((a, c) => a + (Number(c.total_receivable) || 0) + (Number(c.wallet_balance) || 0), 0);
+  const sumPay = suppliersData.reduce((a, s) => a + (Number(s.total_payable) || 0) + (Number(s.wallet_balance) || 0), 0);
+  let stockCnt = 0; (productsData || []).forEach(p => (p.variants || []).forEach(v => { if((Number(v.stock) || 0) !== 0) stockCnt++; }));
+  const rows = [
+    { label: 'محفوظ بل', value: String((invoicesData || []).length), big: true },
+    { label: 'گاہکوں کا بقایا/ایڈوانس', value: f(sumRec), bg: '#fee2e2', fg: '#7f1d1d' },
+    { label: 'بیوپاریوں کا بقایا/ایڈوانس', value: f(sumPay), bg: '#fee2e2', fg: '#7f1d1d' },
+    { label: 'سٹاک والی اشیاء', value: String(stockCnt), bg: '#fee2e2', fg: '#7f1d1d' }
+  ];
+  const ok1 = await uDialog({
+    title: '⚠️ ماسٹر ری سیٹ — وارننگ',
+    message: 'ایپ کا <b>تمام لین دین کا ڈیٹا زیرو</b> ہو جائے گا: بل، ادھار/نقد، <b>وصولی (ریکوری)</b>، سٹاک، آرڈرز، اخراجات، ادائیگیاں اور کیش۔<br><br>✅ <b>ڈیلیٹ نہیں ہوں گی:</b> کسٹمر کی لسٹ، سامان کی لسٹ اور بیوپاری کی لسٹ۔ مگر ان کے اندر کا سارا لین دین (ریکوری، ادھار، نقد، سٹاک) ختم ہو کر <b>زیرو</b> ہو جائے گا۔<br><br>⛔ یہ کام <b>واپس نہیں ہو سکتا</b> اور سب فونز پر زیرو ہو جائے گا۔',
+    rows, okText: '✅ ٹھیک ہے، آگے', cancelText: '✖ منسوخ', tone: 'red'
+  });
+  if(!ok1) return;
+  if(!(await _askAdminPinForSerialMaster('ماسٹر ری سیٹ کے لیے'))) return;
+
+  window.__fmMrRunning = true;
+  const step = async (msg, fn) => { _fmMrBusy(msg); try{ return await fn(); }catch(e){ console.warn('masterReset step:', msg, e); } };
+  try{
+    const _at = new Date().toISOString();
+    // 1) حفاظتی بیک اپ: فائل ڈاؤن لوڈ + فون میں ہلکی کاپی
+    await step('بیک اپ فائل محفوظ ہو رہی ہے…', async () => {
+      try{
+        const blob = new Blob([JSON.stringify(buildBackupObject())], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'BEFORE-RESET-' + generateBackupFileName();
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      }catch(e){}
+      try{
+        saveToStorage('masterResetBackup', {
+          at: _at,
+          customers: customersData.map(c => ({ id: c.customer_id, name: c.name, bal: c.total_receivable, wal: c.wallet_balance, ob: c.openingBalance })),
+          suppliers: suppliersData.map(s => ({ id: s.supplier_id, name: s.name, bal: s.total_payable, wal: s.wallet_balance, ob: s.openingBalance })),
+          stock: (productsData || []).reduce((arr, p) => arr.concat((p.variants || []).map(v => ({ v: v.variant_id, s: v.stock, pr: v.purchase }))), []),
+          invoices: (invoicesData || []).length, cash: financeDummy.cashInHand
+        });
+      }catch(e){}
+    });
+
+    // 2) تمام فونز کی تازہ ترین حالت کلاؤڈ سے (ورنہ پرانی رقم "فرق" بن کر واپس آ جاتی ہے)
+    await step('کلاؤڈ کی تازہ حالت لے رہا ہوں…', async () => {
+      const jobs = [fetchCustomersFromCloud, fetchSuppliersFromCloud, fetchInvoicesFromCloud, fetchProductsFromCloud, fetchAdvanceOrdersFromCloud,
+        fetchRecoveryListFromCloud, fetchMunshiStockLogFromCloud, fetchFinanceFromCloud, fetchPendingBillsFromCloud, fetchReturnRequestsFromCloud];
+      for(const j of jobs){ try{ await j(true); }catch(e){} }
+      try{ await _fmMrExtraSync('payments'); await _fmMrExtraSync('cashPurchases'); }catch(e){}
+    });
+    try{ pauseCloudPolling(60000); }catch(e){}
+    const oldInvIds = new Set((invoicesData || []).map(x => x && x.invoice_id));
+
+    // 3) صفر کرنا
+    _fmMrBusy('ڈیٹا زیرو ہو رہا ہے…');
+    const _day = bizDateKey();
+    customersData.forEach(c => { c.total_receivable = 0; c.wallet_balance = 0; c.walletHistory = []; c.openingBalance = 0; c.zeroResetAt = _at; });
+    suppliersData.forEach(s => { s.total_payable = 0; s.wallet_balance = 0; s.openingBalance = 0; s.purchaseHistory = []; s.ledgerHistory = []; });
+    (productsData || []).forEach(p => (p.variants || []).forEach(v => { v.stock = 0; v.chalans = []; v.reserved = 0; v.purchase = 0; v.salesCount = 0; if(v.batches) v.batches = []; }));
+    invoicesData = [];
+    pendingBillsData = [];
+    try{ (advanceOrdersData || []).forEach(o => _advRememberDeleted(o.id)); }catch(e){}
+    advanceOrdersData = [];
+    try{
+      (recoveryListData || []).forEach(r => { if(!recoveryDeletedIds.includes(r.id)) recoveryDeletedIds.push(r.id); });
+      saveToStorage('recoveryDeletedIds', recoveryDeletedIds);
+    }catch(e){}
+    recoveryListData = [];
+    dailyRecoveryNotes = {}; try{ saveToStorage('dailyRecoveryNotes', dailyRecoveryNotes); }catch(e){}
+    try{ saveToStorage('munshiLogClearedMaxId', Math.max(0, ...munshiStockLogData.map(x => Number(x.id) || 0), (Number(nextMunshiLogId) || 1) - 1)); saveToStorage('munshiLogClearedAt', Date.now()); }catch(e){}
+    munshiStockLogData = [];
+    returnRequestsData = [];
+    paymentsData = [];
+    cashPurchasesData = [];
+    expenseData = [];
+    financeDummy.cashInHand = 0;
+    AppState.settings.openingCashBalance = 0;
+    AppState.settings.dailyOpeningCash = {};
+    dailyStockSnapshot = { date: '', opening: {}, added: {} }; try{ saveToStorage('dailyStockSnapshot', dailyStockSnapshot); }catch(e){}
+    try{ recomputeReservedFromOrders(); }catch(e){}
+    AppState.settings.productsPendingSync = true;
+    persistAllData();
+
+    // 4) کلاؤڈ پر بھیجنا
+    await step('کلاؤڈ پر زیرو بھیج رہا ہوں…', async () => {
+      const pushes = [pushInvoicesToCloud, pushPendingBillsToCloud, pushAdvanceOrdersToCloud, pushRecoveryListToCloud, pushMunshiStockLogToCloud,
+        pushReturnRequestsToCloud, pushFinanceToCloud, pushCustomersToCloud, pushSuppliersToCloud, pushProductsToCloud];
+      for(const p of pushes){ try{ await p(); }catch(e){} }
+      try{ await _fmMrExtraSync('payments'); await _fmMrExtraSync('cashPurchases'); }catch(e){}
+    });
+
+    // 5) تصدیق: کلاؤڈ سے دوبارہ پڑھ کر دیکھیں، کچھ بچا ہو تو دوبارہ زیرو
+    let left = 0;
+    await step('تصدیق ہو رہی ہے…', async () => {
+      for(let t = 0; t < 2; t++){
+        try{ await fetchCustomersFromCloud(true); await fetchSuppliersFromCloud(true); await fetchProductsFromCloud(true); await fetchInvoicesFromCloud(true); }catch(e){}
+        const badC = customersData.filter(c => (Number(c.total_receivable) || 0) !== 0 || (Number(c.wallet_balance) || 0) !== 0);
+        const badS = suppliersData.filter(s => (Number(s.total_payable) || 0) !== 0 || (Number(s.wallet_balance) || 0) !== 0);
+        const badV = []; (productsData || []).forEach(p => (p.variants || []).forEach(v => { if((Number(v.stock) || 0) !== 0) badV.push(v); }));
+        const oldInv = (invoicesData || []).filter(x => x && oldInvIds.has(x.invoice_id));
+        left = badC.length + badS.length + badV.length + oldInv.length;
+        if(!left) break;
+        badC.forEach(c => { c.total_receivable = 0; c.wallet_balance = 0; });
+        badS.forEach(s => { s.total_payable = 0; s.wallet_balance = 0; });
+        badV.forEach(v => { v.stock = 0; });
+        if(oldInv.length) invoicesData = invoicesData.filter(x => !(x && oldInvIds.has(x.invoice_id)));
+        persistAllData();
+        try{ await pushCustomersToCloud(); await pushSuppliersToCloud(); await pushProductsToCloud(); await pushInvoicesToCloud(); }catch(e){}
+      }
+    });
+    _fmMrBusy(null);
+
+    // 6) سکرینیں تازہ
+    try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+    try{ renderHomeMoneySummary(); }catch(e){}
+    try{ if(document.getElementById('productListWrap')) renderProductList(''); }catch(e){}
+    try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+    try{ goTo('home'); }catch(e){}
+    await uAlert('✅ ماسٹر ری سیٹ مکمل', 'تمام لین دین زیرو ہو گیا۔ کسٹمر، سامان اور بیوپاری کی لسٹیں محفوظ ہیں۔ بیک اپ فائل ڈاؤن لوڈ میں موجود ہے۔' + (left ? '\n⚠️ کچھ چیزوں کی کلاؤڈ پر تصدیق نہیں ہو سکی (نیٹ؟) — نیٹ آنے پر ایپ دوبارہ کھولیں۔' : ''), 'green');
+  }catch(e){
+    console.warn('masterReset failed', e);
+    _fmMrBusy(null);
+    try{ await uAlert('❌ مسئلہ آیا', 'ری سیٹ مکمل نہیں ہو سکا۔ بیک اپ فائل ڈاؤن لوڈ میں موجود ہے۔ دوبارہ کوشش کریں۔', 'red'); }catch(_){}
+  }finally{
+    window.__fmMrRunning = false;
+    _fmMrBusy(null);
+  }
+}
 
 function saveDailyRecoveryNote(customerId, value){
   const key = todayDateKey() + '_' + customerId;
@@ -37509,7 +37675,7 @@ const ASSIGNABLE_SCREENS = [
   {key:'customers', label:'🧑‍🤝‍🧑 گاہک'},
   {key:'suppliers', label:'🚚 بیوپاری'},
   {key:'bizsummary', label:'📊 کاروبار کی سمری'}, // 📊 FM1010SA355: میری ڈائری کی جگہ
-  // {key:'mydiary', label:'📔 میری ڈائری'}, // 🙈 FM1010SA355: صدام کی ہدایت — چھپا دی (کوڈ محفوظ)
+  {key:'mydiary', label:'📔 میری ڈائری'}, // 📔 FM1110SU361: واپس
   {key:'expenditure', label:'💸 اخراجات'},
   {key:'myaccount', label:'🏦 میرا اکاؤنٹ'},
   {key:'billsettings', label:'🖨️ بل و پرنٹ سیٹنگ'},
@@ -41366,7 +41532,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   });
   // ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): سبزی کے نام کے ساتھ اس کا پکا سیریل نمبر ایک گول رنگین بیج میں —
   // نام اشیاء کالم کی چوڑائی میں اس بیج کے لیے بھی جگہ ریزرو کرنی ہے ---------- -->
-  // 🔵 FM1110SU359 (صدام کی ہدایت): کسٹمر بل پر سبزی کا گول پکا سیریل نمبر نہیں — صرف لسٹ کا نمبر شمار؛ اس کے لیے رکھی گئی جگہ بھی صفر
+  // 🔵 FM1110SU361 (صدام کی ہدایت): کسٹمر بل پر سبزی کا گول پکا سیریل نمبر نہیں — صرف لسٹ کا نمبر شمار؛ اس کے لیے رکھی گئی جگہ بھی صفر
   const serialBadgeD = 0;
   const serialBadgeGap = 0;
   // ---------- نام اشیاء کا کالم کبھی بھی بہت تنگ نہ ہو (کم از کم 100px جتنا) — نام ایک دوسرے پر نہ چڑھیں ---------- -->
@@ -41657,7 +41823,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     // ---------- 🔵 صدام کی ہدایت (FM21SEPMO01): یہ فائنل بل ہے جو براہِ راست کسٹمر کو جاتا ہے — کسٹمر کو سبزی کا
     // اندرونی سیریل نمبر دکھانے کی ضرورت نہیں، صرف نام/پیکنگ۔ بیج صرف اندرونی رپورٹس (ایڈوانس آرڈر، منشی سٹاک لاگ)
     // میں رہے گا — یہاں سے صرف چھپایا ہے، فنکشن/ڈیٹا جوں کا توں محفوظ ہے، دوبارہ چاہیں تو true کر دیں ---------- -->
-    const SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL = false; // 🔵 FM1110SU359: کسٹمر بل پر گول سیریل نمبر بند — // 🔴 FM910FR348: سبزی کا اصل سیریل نمبر سرخ گول دائرے میں دوبارہ بل پر
+    const SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL = false; // 🔵 FM1110SU361: کسٹمر بل پر گول سیریل نمبر بند — // 🔴 FM910FR348: سبزی کا اصل سیریل نمبر سرخ گول دائرے میں دوبارہ بل پر
     const _rowSerialNo = getSerialNoForVariantId(item.variant_id);
     if(SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL && _rowSerialNo !== null && _rowSerialNo !== undefined){
       drawSerialBadge(ctx, headerItemNameX - serialBadgeD/2, hLineY + rowH/2, serialBadgeD/2, _rowSerialNo);
@@ -46246,7 +46412,6 @@ function openTodaySaleReport(){
 
 // ---------- 📔 My Diary Summary — سب لوگوں کا مکمل ریکارڈ ایک ہی رپورٹ میں، کیٹگری کی ضرورت نہیں ----------
 function openDiarySummaryReport(){
-  return openBizSummaryReport(); // 🙈 FM1010SA357: ڈائری ختم — پرانا راستہ بھی نئی سمری پر
   currentReportType = 'diarysummary';
   currentReportCategories = [];
   document.getElementById('reportPreviewTitle').textContent = "📔 My Diary Summary";
