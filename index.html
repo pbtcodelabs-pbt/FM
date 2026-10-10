@@ -6078,6 +6078,7 @@ function __appHostKind(h, p){
         <div id="pdMsg" style="display:none; text-align:center; font-weight:900; font-size:13px; padding:6px; border-radius:9px; margin-bottom:6px;"></div>
         <div style="display:flex; gap:6px; margin-bottom:6px;">
           <input type="text" id="pdCustSearch" dir="rtl" placeholder="🔍 کسٹمر کا نام یا نمبر" oninput="renderPdCustList()" style="flex:1; min-width:0; padding:7px 6px; border:2px solid var(--primary); border-radius:9px; font-size:13px; font-weight:800; text-align:center; box-sizing:border-box;">
+          <button type="button" id="pdSortBtn" onclick="pdToggleSort()" style="flex:0 0 auto; padding:6px 8px; background:#7c2d12; color:#fff; border:none; border-radius:9px; font-size:12px; font-weight:900; cursor:pointer; white-space:nowrap;">🔢 1→9</button>
           <button type="button" id="pdOnlyGivenBtn" onclick="pdToggleOnlyGiven()" style="flex:0 0 auto; padding:6px 8px; background:#fff; color:#0369a1; border:1.5px solid #0369a1; border-radius:9px; font-size:11.5px; font-weight:800; cursor:pointer;">✅ صرف جنہیں لگ چکا</button>
         </div>
         <div id="pdGivenCount" style="text-align:center; font-size:12px; font-weight:800; color:#166534; margin-bottom:4px;"></div>
@@ -9154,7 +9155,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM1010SA357'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1010SA358'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -31357,6 +31358,8 @@ function renderPdVariantHeader(){
     bar.innerHTML += `<button type="button" onclick="pdBackToProducts()" style="flex:1 0 auto; min-width:120px; padding:6px 10px; border-radius:11px; border:2px solid #d97706; background:linear-gradient(180deg,#fde68a,#fbbf24); color:#78350f; font-weight:900; font-size:13px; line-height:1.4; cursor:pointer;">✅ پورا تقسیم ہو گیا<br>اگلی سبزی/چالان چنیں ◀</button>`;
   }
 }
+let pdSortDesc = !!loadFromStorage('pdSortDesc', false); // 🔢 FM1010SA358: منشی کی چالان تقسیم لسٹ — سیریل نمبر کی ترتیب (فون پر یاد)
+function pdToggleSort(){ pdSortDesc = !pdSortDesc; saveToStorage('pdSortDesc', pdSortDesc); renderPdCustList(); }
 function renderPdCustList(){
   const wrap = document.getElementById('pdCustListWrap');
   if(!wrap || pdVariantId == null) return;
@@ -31372,7 +31375,14 @@ function renderPdCustList(){
     if(pdOnlyGiven && !(cur > 0)) return false;
     if(!q) return true;
     return (c.name || '').toLowerCase().includes(q) || (c.area || '').toLowerCase().includes(q) || (c.phone || '').includes(q) || String(c.serial_no == null ? '' : c.serial_no).includes(q);
-  }).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ur'));
+  }).sort((a, b) => { // 🔢 FM1010SA358: سیریل نمبر کی ترتیب — چھوٹا اوپر (1→9) یا بڑا اوپر (9→1)
+    const sa = Number(a.serial_no) > 0 ? Number(a.serial_no) : null, sb = Number(b.serial_no) > 0 ? Number(b.serial_no) : null;
+    if(sa === null && sb === null) return (a.name || '').localeCompare(b.name || '', 'ur');
+    if(sa === null) return 1; if(sb === null) return -1; // بغیر سیریل والے ہمیشہ نیچے
+    return pdSortDesc ? (sb - sa) : (sa - sb);
+  });
+  const sbtn = document.getElementById('pdSortBtn');
+  if(sbtn) sbtn.textContent = pdSortDesc ? '🔢 9→1' : '🔢 1→9';
   const cnt = document.getElementById('pdGivenCount');
   if(cnt) cnt.textContent = `✅ ${givenCount} کسٹمر کو لگ چکا`;
   if(list.length === 0){
