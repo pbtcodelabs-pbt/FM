@@ -4026,13 +4026,13 @@ function __appHostKind(h, p){
           <div class="finRow"><span>📦 سٹاک کی مالیت</span><span id="hlStock">—</span></div>
           <div class="finRow"><span>💵 ہاتھ میں کیش</span><span id="hlCash">—</span></div>
           <div class="finRow"><span>🤝 گاہکوں پر بقایا</span><span id="hlReceivable">—</span></div>
-          <div class="finRow"><span>📔 ڈائری — میں نے ادھار دیا</span><span id="hlDiaryReceivable">—</span></div>
+          <div class="finRow" style="display:none;"><span>📔 ڈائری — میں نے ادھار دیا</span><span id="hlDiaryReceivable">—</span></div>
           <div class="finSplitTotal" id="finGreenTotal">کل: Rs. 0</div>
         </div>
         <div class="finSplitCol finRed">
           <div class="finSplitHead">🔴 دینا</div>
           <div class="finRow"><span>📤 بیوپاریوں کا دینا</span><span id="hlPayable">—</span></div>
-          <div class="finRow"><span>📔 ڈائری — میں نے قرض لیا</span><span id="hlDiaryPayable">—</span></div>
+          <div class="finRow" style="display:none;"><span>📔 ڈائری — میں نے قرض لیا</span><span id="hlDiaryPayable">—</span></div>
           <div class="finSplitTotal" id="finRedTotal">کل: Rs. 0</div>
         </div>
       </div>
@@ -5579,11 +5579,11 @@ function __appHostKind(h, p){
 
       <div class="diaryTotalsBar">
         <div class="diaryTotalCard diaryTotalGreen">
-          <div class="diaryTotalLabel">🟢 میں نے قرض لیا</div>
+          <div class="diaryTotalLabel">🟢 میں نے لیے<br><span style="font-size:.82em; font-weight:700; opacity:.95;">I Got</span></div>
           <div class="diaryTotalValue" id="diaryTotalPayable">Rs. 0</div>
         </div>
         <div class="diaryTotalCard diaryTotalRed">
-          <div class="diaryTotalLabel">🔴 میں نے ادھار دیا</div>
+          <div class="diaryTotalLabel">🔴 میں نے دیے<br><span style="font-size:.82em; font-weight:700; opacity:.95;">I Gave</span></div>
           <div class="diaryTotalValue" id="diaryTotalReceivable">Rs. 0</div>
         </div>
       </div>
@@ -5673,8 +5673,8 @@ function __appHostKind(h, p){
         <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date (change for a back-dated entry)</label>
         <input type="date" id="diaryNewDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 میں نے ادھار دیا</button>
-          <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 میں نے قرض لیا</button>
+          <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 میں نے دیے — I Gave</button>
+          <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 میں نے لیے — I Got</button>
         </div>
         <input type="text" id="diaryNewNote" placeholder="Note (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions">
@@ -5698,11 +5698,11 @@ function __appHostKind(h, p){
         <input type="date" id="diaryAdjustDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <input type="text" id="diaryAdjustNote" placeholder="What's this for? (optional, e.g. milk, rent)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions" style="margin-bottom:8px;">
-          <button class="saveBtn" style="background:var(--danger);" onclick="diaryAdjustBalance(-1)">🔴 میں نے ادھار دیا</button>
-          <button class="saveBtn" style="background:var(--success);" onclick="diaryAdjustBalance(1)">🟢 میں نے قرض لیا</button>
+          <button class="saveBtn" style="background:var(--danger);" onclick="diaryAdjustBalance(-1)">🔴 میں نے دیے — I Gave</button>
+          <button class="saveBtn" style="background:var(--success);" onclick="diaryAdjustBalance(1)">🟢 میں نے لیے — I Got</button>
         </div>
         <div class="modalActions" style="margin-bottom:8px;">
-          <button class="saveBtn" style="background:#0284c7;" onclick="diarySettlePartial()">✅ Payment/Collection Made (Reduce Balance)</button>
+          <button class="saveBtn" id="diarySettleBtn" style="background:#0284c7;" onclick="diarySettlePartial()">✅ میں نے وصول کیے — I Received / میں نے ادا کیے — I Paid</button>
         </div>
 
         <div id="diaryHistoryList" style="max-height:140px; overflow-y:auto; font-size:12px; color:#64748b; border-top:1px solid #eef1f5; margin-top:6px; padding-top:6px;"></div>
@@ -5726,8 +5726,8 @@ function __appHostKind(h, p){
         <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date</label>
         <input type="date" id="diaryHistEditDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryHistEditType-owe" class="active" onclick="setDiaryHistEditType('owe')" style="flex:1;">🔴 میں نے ادھار دیا</button>
-          <button type="button" id="diaryHistEditType-get" onclick="setDiaryHistEditType('get')" style="flex:1;">🟢 میں نے قرض لیا</button>
+          <button type="button" id="diaryHistEditType-owe" class="active" onclick="setDiaryHistEditType('owe')" style="flex:1;">🔴 میں نے دیے — I Gave</button>
+          <button type="button" id="diaryHistEditType-get" onclick="setDiaryHistEditType('get')" style="flex:1;">🟢 میں نے لیے — I Got</button>
         </div>
         <input type="text" id="diaryHistEditNote" placeholder="What's this for? (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions">
@@ -5744,8 +5744,8 @@ function __appHostKind(h, p){
         <input type="text" id="diaryEditName" placeholder="Person's name" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
         <input type="number" id="diaryEditAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryEditType-owe" class="active" onclick="setDiaryEditType('owe')" style="flex:1;">🔴 میں نے ادھار دیا</button>
-          <button type="button" id="diaryEditType-get" onclick="setDiaryEditType('get')" style="flex:1;">🟢 میں نے قرض لیا</button>
+          <button type="button" id="diaryEditType-owe" class="active" onclick="setDiaryEditType('owe')" style="flex:1;">🔴 میں نے دیے — I Gave</button>
+          <button type="button" id="diaryEditType-get" onclick="setDiaryEditType('get')" style="flex:1;">🟢 میں نے لیے — I Got</button>
         </div>
         <div class="modalActions">
           <button class="cancelBtn" onclick="document.getElementById('diaryEditModal').classList.remove('show')">Cancel</button>
@@ -6818,7 +6818,7 @@ function __appHostKind(h, p){
 
       <div class="settingsWrap">
 
-        <!-- --- 🔥 FM1110SU361: ماسٹر ری سیٹ — سیٹنگ کھولتے ہی سب سے اوپر (صرف ایڈمن) --- -->
+        <!-- --- 🔥 FM1110SU363: ماسٹر ری سیٹ — سیٹنگ کھولتے ہی سب سے اوپر (صرف ایڈمن) --- -->
         <div class="settingsCard" id="settingsCardMasterReset" style="border:2px solid #fecaca; background:#fff7f7;">
           <h3 style="color:#b91c1c;">🔥 ماسٹر ری سیٹ</h3>
           <div class="settingsHint">تمام لین دین کا ڈیٹا زیرو۔ کسٹمر، سامان اور بیوپاری کی لسٹیں باقی رہیں گی۔</div>
@@ -9162,7 +9162,7 @@ function getDeveloperContact(){
 // 🆕 FM410SU295: چالان وار جدول کے کالم کے نام — "ریٹ" کی جگہ "خرید ریٹ" اور "قیمتیں فروخت" کی جگہ "فروخت ریٹ"
 // 🆕 FM410SU294: چالان وار "باقی سٹاک" خانہ — صفر سے زیادہ ہو تو سرخ بیک گراؤنڈ
 // 🆕 FM410SU293: خرید اور چالان رپورٹ — "سیل ہوا" کالم کی جگہ "قیمتیں فروخت" (اسلام آباد ریٹ)، اور چالان وار خانے میں سبزی کے نیچے بیوپاری کا نام موٹا اور صاف
-const APP_BUILD_VERSION = 'FM1110SU361'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1110SU363'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9859,7 +9859,7 @@ const HOME_SHORTCUT_OPTIONS = [
   {key:'products',      icon:'📦', label:'مال کی فہرست',       screen:'products'},
   {key:'payments',      icon:'💳', label:'پیمنٹس',       screen:'payments'},
   {key:'myaccount',     icon:'🏦', label:'میرا اکاؤنٹ',     screen:'myaccount'},
-  {key:'mydiary',       icon:'📔', label:'میری ڈائری', screen:'mydiary'}, // 📔 FM1110SU361: واپس
+  {key:'mydiary',       icon:'📔', label:'میری ڈائری', screen:'mydiary'}, // 📔 FM1110SU363: واپس
   {key:'bizsummary',    icon:'📊', label:'کاروبار کی سمری', screen:'bizsummary'}, // 📊 FM1010SA355 (میری ڈائری کی جگہ)
   {key:'users',         icon:'🔑', label:'ملازمین',          screen:'users'},
   {key:'settings',      icon:'⚙️', label:'سیٹنگ',       screen:'settings'},
@@ -10010,7 +10010,7 @@ function renderHomeIconGrid(){
   let assignedKeys = (currentUser && Array.isArray(currentUser.screens)) ? currentUser.screens : [];
   // 📊 FM1010SA355: میری ڈائری کی جگہ "کاروبار کی سمری" — ایڈمن کے ہوم پر ہمیشہ موجود
   assignedKeys = assignedKeys.filter((k, i, a) => a.indexOf(k) === i);
-  if(AppState.currentRole === 'admin' && !assignedKeys.includes('mydiary')) assignedKeys = assignedKeys.concat('mydiary'); // 📔 FM1110SU361: ڈائری واپس
+  if(AppState.currentRole === 'admin' && !assignedKeys.includes('mydiary')) assignedKeys = assignedKeys.concat('mydiary'); // 📔 FM1110SU363: ڈائری واپس
   if(AppState.currentRole === 'admin' && !assignedKeys.includes('bizsummary')) assignedKeys = assignedKeys.concat('bizsummary');
   const myTiles = assignedKeys.map(key => {
     // ---------- 🔒 صدام کی ہدایت (FM15SEPTU3): "پراڈکٹس" کا ہوم آئیکن مکمل چھپا دیا (سٹاک مینجمنٹ اب وہی کام
@@ -12949,7 +12949,7 @@ let navForwardStack = [];
 
 function goTo(screenName, _isHistoryNav){
   // ---------- 🗄️ سیف الماری: بغیر ایڈمن PIN کے کسی راستے (مینیو، بیک بٹن، سرچ، ہوم شارٹ کٹ) سے نہیں کھلے گی ----------
-  if(screenName === 'dashboard') screenName = 'bizsummary'; // 📔 FM1110SU361: ڈائری واپس کھول دی // 📊 FM1010SA355: پرانا ڈیش بورڈ/ڈائری → نئی سمری
+  if(screenName === 'dashboard') screenName = 'bizsummary'; // 📔 FM1110SU363: ڈائری واپس کھول دی // 📊 FM1010SA355: پرانا ڈیش بورڈ/ڈائری → نئی سمری
   if(screenName === 'safevault' && !window.__svUnlocked){ svAskAndOpen(); return; }
   if(screenName !== 'safevault' && window.__svUnlocked){ window.__svUnlocked = false; }
   try{ if(screenName === 'payments' || screenName === 'mydiary'){ const _d = EXTRA_SYNC_DEFS.find(d => d.key === (screenName === 'payments' ? 'payments' : 'diary')); if(_d) setTimeout(() => extraSyncOne(_d), 300); } }catch(e){}
@@ -23508,8 +23508,8 @@ function renderHealthBand(){
   document.getElementById('hlDiaryPayable').textContent = 'Rs. ' + diaryPayable.toLocaleString();
 
   // ---------- سبز کالم (آنے والے پیسے) اور سرخ کالم (جانے والے پیسے) کے اپنے اپنے ٹوٹل ----------
-  const greenTotal = stockValue + financeDummy.cashInHand + totalReceivable + diaryReceivable;
-  const redTotal = totalPayable + diaryPayable;
+  const greenTotal = stockValue + financeDummy.cashInHand + totalReceivable; // 📔 FM1110SU363: ڈائری ذاتی ہے، سمری سے باہر
+  const redTotal = totalPayable;
   document.getElementById('finGreenTotal').textContent = 'کل: Rs. ' + greenTotal.toLocaleString();
   document.getElementById('finRedTotal').textContent = 'کل: Rs. ' + redTotal.toLocaleString();
 
@@ -23523,7 +23523,7 @@ function renderHealthBand(){
   document.getElementById('nphValue').textContent =
     `Rs. ${Math.abs(netPosition).toLocaleString()} ${netPosition >= 0 ? '📈 منافع' : '📉 نقصان'}`;
   document.getElementById('nphBreakdown').textContent =
-    `لینا: Rs. ${totalAssets.toLocaleString()} (سٹاک + کیش + گاہکوں پر بقایا + ڈائری)  −  دینا: Rs. ${totalLiabilities.toLocaleString()} (بیوپاریوں کا + ڈائری)`;
+    `لینا: Rs. ${totalAssets.toLocaleString()} (سٹاک + کیش + گاہکوں پر بقایا)  −  دینا: Rs. ${totalLiabilities.toLocaleString()} (بیوپاریوں کا)`;
 }
 
 // --- ZONE 1: KPI Cards (بنیادی نمبرز + الرٹس کی گنتی، سب ایک نظر میں) ---
@@ -23843,7 +23843,7 @@ function renderMyDiaryList(){
     // (پہلے یہاں یہ الٹا لکھا ہوا تھا، اسی وجہ سے سبز بٹن سے کی گئی انٹری سرخ میں نظر آ رہی تھی) ----------
     const isGot = e.balance > 0;
     const cls = isGot ? 'get' : (e.balance < 0 ? 'owe' : '');
-    const label = isGot ? 'میں نے قرض لیا' : (e.balance < 0 ? 'میں نے ادھار دیا' : 'حساب برابر');
+    const label = isGot ? 'میں نے لیے — I Got' : (e.balance < 0 ? 'میں نے دیے — I Gave' : 'حساب برابر');
     return `
       <div class="diaryRow" onclick="openDiaryDetailModal(${e.id})">
         <div>
@@ -24000,14 +24000,18 @@ function deleteDiaryHistoryLine(historyIdx){
 
 function renderDiaryDetailBalance(entry){
   const el = document.getElementById('diaryDetailBalance');
+  try{ // 📔 FM1110SU363: بقایا کی سمت کے مطابق بٹن کا نام — سرخ (میں نے دیے) پر واپسی = وصول، سبز (میں نے لیے) پر واپسی = ادا
+    const sb = document.getElementById('diarySettleBtn');
+    if(sb) sb.textContent = entry.balance < 0 ? '✅ میں نے وصول کیے — I Received' : (entry.balance > 0 ? '✅ میں نے ادا کیے — I Paid' : '✅ میں نے وصول کیے — I Received / میں نے ادا کیے — I Paid');
+  }catch(e){}
   if(entry.balance === 0){
     el.textContent = 'Rs. 0 — حساب برابر ✅';
     el.style.color = '#64748b';
   } else if(entry.balance > 0){
-    el.textContent = '🟢 میں نے قرض لیا: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🟢 میں نے لیے (I Got): ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--success)';
   } else {
-    el.textContent = '🔴 میں نے ادھار دیا: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🔴 میں نے دیے (I Gave): ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--danger)';
   }
 }
@@ -24127,12 +24131,12 @@ async function renderDiaryTransactionPoster(entry, historyIdx, note){
   // ---------- رنگ ہمیشہ رقم کی سمت سے: منفی = 🔴 میں نے ادھار دیا، مثبت = 🟢 میں نے قرض لیا ----------
   const txnAmount = txn ? Math.abs(txn.amount) : 0;
   const isGive = txn ? txn.amount < 0 : false;
-  let txnLabel = isGive ? 'میں نے ادھار دیا' : 'میں نے قرض لیا';
-  if(txn && txn.kind === 'payment_owed') txnLabel = 'ادھار کی واپسی (وصول)';
-  else if(txn && txn.kind === 'payment_receivable') txnLabel = 'قرض کی واپسی (ادا)';
-  const txnColor = isGive ? '#dc2626' : '#16a34a';
+  let txnLabel = isGive ? 'میں نے دیے — I Gave' : 'میں نے لیے — I Got';
+  if(txn && txn.kind === 'payment_owed') txnLabel = 'میں نے وصول کیے — I Received';
+  else if(txn && txn.kind === 'payment_receivable') txnLabel = 'میں نے ادا کیے — I Paid';
+  const txnColor = '#2563eb'; // 🔵 FM1110SU363: درمیان کا ڈبہ (یہ ٹرانزیکشن) ہمیشہ نیلا
   const balColor = v => v > 0 ? '#16a34a' : (v < 0 ? '#dc2626' : '#64748b');
-  const balCaption = v => v > 0 ? 'کل بقایا (میں نے قرض لیا)' : (v < 0 ? 'کل بقایا (میں نے ادھار دیا)' : 'کل بقایا (حساب برابر)');
+  const balCaption = v => v > 0 ? 'کل بقایا (میں نے لیے — I Got)' : (v < 0 ? 'کل بقایا (میں نے دیے — I Gave)' : 'کل بقایا (حساب برابر)');
   const netColor = balColor(newBalance);
   try{ await Promise.all([document.fonts.load('20px JameelNooriNastaleeq'), document.fonts.load('20px JameelNooriNastaleeqKasheeda')]); }catch(e){}
   const UF = "'JameelNooriNastaleeq','JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
@@ -24207,7 +24211,7 @@ async function renderDiaryTransactionPoster(entry, historyIdx, note){
   }
 
   const rightBoxes = [
-    {label:'سابقہ بقایا' + (prevBalance>0 ? ' (قرض)' : prevBalance<0 ? ' (ادھار)' : ''), value: prevBalance, color:'#cbd5e1', text:'#334155'},
+    {label:'سابقہ بقایا' + (prevBalance>0 ? ' (میں نے لیے)' : prevBalance<0 ? ' (میں نے دیے)' : ''), value: prevBalance, color: balColor(prevBalance)}, // 🟢/🔴 FM1110SU363: پرانے بقایا کی سمت کے مطابق رنگ
     {label: txnLabel, value: txnAmount, color: txnColor},
     {label: balCaption(newBalance), value: newBalance, color: netColor},
   ];
@@ -24352,7 +24356,7 @@ async function renderDiaryFullLedgerPoster(entry, note){
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
   ctx.font = `600 15px ${UF}`;
-  ctx.fillText(entry.balance > 0 ? 'کل بقایا (میں نے قرض لیا)' : (entry.balance < 0 ? 'کل بقایا (میں نے ادھار دیا)' : 'کل بقایا (حساب برابر)'), W/2, y + 26);
+  ctx.fillText(entry.balance > 0 ? 'کل بقایا (میں نے لیے — I Got)' : (entry.balance < 0 ? 'کل بقایا (میں نے دیے — I Gave)' : 'کل بقایا (حساب برابر)'), W/2, y + 26);
   ctx.font = `800 24px Poppins, sans-serif`;
   ctx.fillText('Rs ' + fmtDiaryAmount(Math.abs(entry.balance)), W/2, y + 54);
   y += netBoxH + 18;
@@ -31367,7 +31371,7 @@ function renderPdVariantHeader(){
     bar.innerHTML += `<button type="button" onclick="pdBackToProducts()" style="flex:1 0 auto; min-width:120px; padding:6px 10px; border-radius:11px; border:2px solid #d97706; background:linear-gradient(180deg,#fde68a,#fbbf24); color:#78350f; font-weight:900; font-size:13px; line-height:1.4; cursor:pointer;">✅ پورا تقسیم ہو گیا<br>اگلی سبزی/چالان چنیں ◀</button>`;
   }
 }
-let pdSortDesc = !!loadFromStorage('pdSortDesc', false); // 🔢 FM1110SU361: منشی کی چالان تقسیم لسٹ — سیریل نمبر کی ترتیب (فون پر یاد)
+let pdSortDesc = !!loadFromStorage('pdSortDesc', false); // 🔢 FM1110SU363: منشی کی چالان تقسیم لسٹ — سیریل نمبر کی ترتیب (فون پر یاد)
 function pdToggleSort(){ pdSortDesc = !pdSortDesc; saveToStorage('pdSortDesc', pdSortDesc); renderPdCustList(); }
 function renderPdCustList(){
   const wrap = document.getElementById('pdCustListWrap');
@@ -31384,7 +31388,7 @@ function renderPdCustList(){
     if(pdOnlyGiven && !(cur > 0)) return false;
     if(!q) return true;
     return (c.name || '').toLowerCase().includes(q) || (c.area || '').toLowerCase().includes(q) || (c.phone || '').includes(q) || String(c.serial_no == null ? '' : c.serial_no).includes(q);
-  }).sort((a, b) => { // 🔢 FM1110SU361: سیریل نمبر کی ترتیب — چھوٹا اوپر (1→9) یا بڑا اوپر (9→1)
+  }).sort((a, b) => { // 🔢 FM1110SU363: سیریل نمبر کی ترتیب — چھوٹا اوپر (1→9) یا بڑا اوپر (9→1)
     const sa = Number(a.serial_no) > 0 ? Number(a.serial_no) : null, sb = Number(b.serial_no) > 0 ? Number(b.serial_no) : null;
     if(sa === null && sb === null) return (a.name || '').localeCompare(b.name || '', 'ur');
     if(sa === null) return 1; if(sb === null) return -1; // بغیر سیریل والے ہمیشہ نیچے
@@ -32234,7 +32238,7 @@ function rerenderRlCard(customerId){
 }
 
 
-// ---------- 🛒 FM1110SU361 (صدام کی ہدایت): ریکوری والے کے لیے "کل کی خریداری" ڈبہ — صرف دیکھنے کے لیے، کسی حساب/کیلکولیشن میں شامل نہیں ----------
+// ---------- 🛒 FM1110SU363 (صدام کی ہدایت): ریکوری والے کے لیے "کل کی خریداری" ڈبہ — صرف دیکھنے کے لیے، کسی حساب/کیلکولیشن میں شامل نہیں ----------
 // ہر گاہک: کل کا مال، اس دن درج وصولی، اور کم وصولی؛ ڈراپ ڈاؤن سے اسی مہینے کی پچھلی تمام تاریخیں۔ حساب وہی (drCustomerDay جیسا) — صرف پڑھا جاتا ہے۔
 let rlHistSel = {};
 function rlHistRows(c){
@@ -32296,7 +32300,7 @@ function buildRlEmployeeCard(c, dr){
   const iconBtn = (href, bg, col, ic, extra) => `<a href="${href}" ${extra||''} style="flex:0 0 auto; width:${z(24)}px; height:${z(24)}px; display:flex; align-items:center; justify-content:center; background:${bg}; color:${col}; border-radius:50%; font-size:${z(11)}px; text-decoration:none;">${ic}</a>`;
 
   // ---------- رقم کی قطاریں (ہر قطار: رقم + طریقہ) — "➕ دوسرا طریقہ" سے مزید قطار ----------
-  // ---------- 🛒 FM1110SU361: کل کی خریداری + ڈیٹ ڈراپ ڈاؤن (صرف دیکھنے کے لیے) ----------
+  // ---------- 🛒 FM1110SU363: کل کی خریداری + ڈیٹ ڈراپ ڈاؤن (صرف دیکھنے کے لیے) ----------
   const _hb = rlHistBodyHtml(c, rlHistSel[cid], z, numF);
   const histBoxHtml = `
       <div dir="rtl" style="background:#fffbeb; border:1.5px solid #fcd34d; border-radius:9px; padding:4px 6px; margin-bottom:5px;">
@@ -32823,7 +32827,7 @@ setInterval(() => {
 
 
 /* =====================================================================
-   🔥 FM1110SU361 (صدام کی ہدایت): ماسٹر ری سیٹ — سیٹنگ میں سب سے اوپر، صرف ایڈمن۔
+   🔥 FM1110SU363 (صدام کی ہدایت): ماسٹر ری سیٹ — سیٹنگ میں سب سے اوپر، صرف ایڈمن۔
    تمام لین دین زیرو: بل، بقایا/ایڈوانس، وصولی، سٹاک، آرڈرز، اخراجات، ادائیگیاں، نقد خریداری، کیش۔
    کسٹمر / سامان / بیوپاری کی لسٹیں (نام، فون، پیکنگ، ریٹ، سیریل) باقی رہتی ہیں۔
    ترتیب: وارننگ → ایڈمن PIN → خودکار بیک اپ فائل → کلاؤڈ کی تازہ حالت → صفر → کلاؤڈ پر بھیجنا → تصدیق
@@ -37675,7 +37679,7 @@ const ASSIGNABLE_SCREENS = [
   {key:'customers', label:'🧑‍🤝‍🧑 گاہک'},
   {key:'suppliers', label:'🚚 بیوپاری'},
   {key:'bizsummary', label:'📊 کاروبار کی سمری'}, // 📊 FM1010SA355: میری ڈائری کی جگہ
-  {key:'mydiary', label:'📔 میری ڈائری'}, // 📔 FM1110SU361: واپس
+  {key:'mydiary', label:'📔 میری ڈائری'}, // 📔 FM1110SU363: واپس
   {key:'expenditure', label:'💸 اخراجات'},
   {key:'myaccount', label:'🏦 میرا اکاؤنٹ'},
   {key:'billsettings', label:'🖨️ بل و پرنٹ سیٹنگ'},
@@ -41532,7 +41536,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   });
   // ---------- 🔵 صدام کی ہدایت (FM20SEPSU03): سبزی کے نام کے ساتھ اس کا پکا سیریل نمبر ایک گول رنگین بیج میں —
   // نام اشیاء کالم کی چوڑائی میں اس بیج کے لیے بھی جگہ ریزرو کرنی ہے ---------- -->
-  // 🔵 FM1110SU361 (صدام کی ہدایت): کسٹمر بل پر سبزی کا گول پکا سیریل نمبر نہیں — صرف لسٹ کا نمبر شمار؛ اس کے لیے رکھی گئی جگہ بھی صفر
+  // 🔵 FM1110SU363 (صدام کی ہدایت): کسٹمر بل پر سبزی کا گول پکا سیریل نمبر نہیں — صرف لسٹ کا نمبر شمار؛ اس کے لیے رکھی گئی جگہ بھی صفر
   const serialBadgeD = 0;
   const serialBadgeGap = 0;
   // ---------- نام اشیاء کا کالم کبھی بھی بہت تنگ نہ ہو (کم از کم 100px جتنا) — نام ایک دوسرے پر نہ چڑھیں ---------- -->
@@ -41823,7 +41827,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     // ---------- 🔵 صدام کی ہدایت (FM21SEPMO01): یہ فائنل بل ہے جو براہِ راست کسٹمر کو جاتا ہے — کسٹمر کو سبزی کا
     // اندرونی سیریل نمبر دکھانے کی ضرورت نہیں، صرف نام/پیکنگ۔ بیج صرف اندرونی رپورٹس (ایڈوانس آرڈر، منشی سٹاک لاگ)
     // میں رہے گا — یہاں سے صرف چھپایا ہے، فنکشن/ڈیٹا جوں کا توں محفوظ ہے، دوبارہ چاہیں تو true کر دیں ---------- -->
-    const SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL = false; // 🔵 FM1110SU361: کسٹمر بل پر گول سیریل نمبر بند — // 🔴 FM910FR348: سبزی کا اصل سیریل نمبر سرخ گول دائرے میں دوبارہ بل پر
+    const SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL = false; // 🔵 FM1110SU363: کسٹمر بل پر گول سیریل نمبر بند — // 🔴 FM910FR348: سبزی کا اصل سیریل نمبر سرخ گول دائرے میں دوبارہ بل پر
     const _rowSerialNo = getSerialNoForVariantId(item.variant_id);
     if(SHOW_SERIAL_BADGE_ON_CUSTOMER_BILL && _rowSerialNo !== null && _rowSerialNo !== undefined){
       drawSerialBadge(ctx, headerItemNameX - serialBadgeD/2, hLineY + rowH/2, serialBadgeD/2, _rowSerialNo);
