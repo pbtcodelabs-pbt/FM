@@ -3485,7 +3485,7 @@ function __appHostKind(h, p){
         <div id="homeMoneyPanel">
           <!-- ⭐ FM1210MO370 (صدام کی ہدایت): سات ڈبے — اوپر 3 (قرض+اخراجات، ادھار، سٹاک کی مالیت)، نیچے 4 (کیش آیا، کیش گیا، کیفیت، آج کا منافع) -->
           <div id="homeMoneyRow">
-            <div class="hmCap hmK1" id="hmPayCap" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاری قرض + اخراجات</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
+            <div class="hmCap hmK1" id="hmPayCap" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاریوں کا قرض</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
             <div class="hmCap hmK2" id="hmRecCap" onclick="goTo('customers')"><div class="hmLbl">گاہکوں کی طرف ادھار</div><div class="hmPill"><div class="hmVal" id="hmRecVal">0</div></div></div>
             <div class="hmCap hmK3" id="hmStkCap" onclick="goTo('bizsummary')"><div class="hmLbl">سٹاک کی مالیت</div><div class="hmPill"><div class="hmVal" id="hmStkVal">0</div></div></div>
           </div>
@@ -9314,7 +9314,8 @@ function getDeveloperContact(){
 // 🆕 FM1110SU368: ہوم سمری — پانچ چھوٹے رنگین ڈبے (بیوپاری قرض + اخراجات، گاہکوں کی طرف ادھار، سٹاک کی قیمت، حاضر کیش، کاروبار منافع/نقصان میں کتنا)
 // 🆕 FM1110SU369: ہوم سمری ڈبوں کے رنگ صاف، گہرے اور چمکدار — دھندلی چمک/سایہ ختم
 // 🆕 FM1210MO370: ہوم سمری سات ڈبے — سٹاک کی مالیت، ٹوٹل کیش آیا، ٹوٹل کیش گیا، کاروبار کی کیفیت (منافع/نقصان)، صرف آج کا منافع
-const APP_BUILD_VERSION = 'FM1210MO370'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1210MO371: ڈبہ ① میں صرف بیوپاریوں کا قرض، سارا جانے والا کیش (بیوپاری ادائیگی + اخراجات) صرف ڈبہ ⑤ میں
+const APP_BUILD_VERSION = 'FM1210MO371'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10080,12 +10081,12 @@ function renderHomeMoneySummary(){
   applyHomeMoneyHidden();
   if(loadFromStorage('homeMoneyHidden', false)) return;
   // ⭐ FM1210MO370 (صدام کی ہدایت): سات ڈبوں کا حساب — سب آج کی تاریخ کا، "کاروبار کی مکمل سمری" والے ہی اعداد سے:
-  //  ① بیوپاری قرض + اخراجات = بیوپاریوں کا کل بقایا + ⑤ (آج گلے سے نکلا ہر روپیہ)
+  //  ① بیوپاریوں کا قرض       = صرف بیوپاریوں کا کل بقایا (FM1210MO371: اخراجات اب صرف ⑤ میں)
   //  ② گاہکوں کی طرف ادھار   = تمام گاہکوں کا کل بقایا
   //  ③ سٹاک کی مالیت         = حاضر سٹاک × خرید ریٹ
   //  ④ ٹوٹل کیش آیا          = اوپننگ کیش + دیگر آمدن + آج کے بلوں سے نقد + گاہکوں سے نقد وصولی + دیگر نقد آمد
   //  ⑤ ٹوٹل کیش گیا          = بیوپاریوں کو نقد ادائیگی + دیگر نقد ادائیگی + آج کے اخراجات
-  //  ⑥ کاروبار کی کیفیت       = ② + ③ + ④ − ①   (یعنی ادھار + سٹاک + گلے کا کیش − بیوپاری قرض) — جمع ہو تو منافع، مائنس ہو تو نقصان
+  //  ⑥ کاروبار کی کیفیت       = ② + ③ + ④ − ⑤ − ①   (یعنی ادھار + سٹاک + گلے کا کیش − بیوپاری قرض) — جمع ہو تو منافع، مائنس ہو تو نقصان
   //  ⑦ صرف آج کا منافع        = آج کے بلوں پر مال کا منافع (فروخت ریٹ − خرید ریٹ − مزدوری) − آج کے اخراجات
   let S = null;
   try{ S = computeBizSummary('today'); }catch(e){}
@@ -10095,13 +10096,12 @@ function renderHomeMoneySummary(){
   const stock = S ? N(S.stockValue) : 0;
   const cashIn = S ? N(S.opening) + N(S.otherManual) + N(S.tBillCash) + N(S.tRecovery) + N(S.tOtherIn) : 0;
   const cashOut = S ? N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) : 0;
-  const pay = supPay + cashOut;
-  const net = rec + stock + cashIn - pay;
+  const net = rec + stock + cashIn - cashOut - supPay;
   const todayProfit = S ? N(S.goodsProfit) - N(S.expTotal) : 0;
   const f = n => Math.abs(Math.round(n)).toLocaleString('en-US');
   const setVal = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
   const setPL = (capId, up) => { const c = document.getElementById(capId); if(c){ c.classList.toggle('loss', !up); c.classList.toggle('profit', up); } };
-  setVal('hmPayVal', f(pay));
+  setVal('hmPayVal', f(supPay));
   setVal('hmRecVal', f(rec));
   setVal('hmStkVal', f(stock));
   setVal('hmCashVal', f(cashIn));
@@ -10113,10 +10113,10 @@ function renderHomeMoneySummary(){
   setVal('hmTodayLbl', tUp ? 'صرف آج کا منافع' : 'صرف آج کا نقصان');
   setVal('hmTodayVal', (tUp ? '+ ' : '- ') + f(todayProfit));
   const t = (id, txt) => { const el = document.getElementById(id); if(el) el.title = txt; };
-  t('hmPayCap', `بیوپاریوں کا قرض ${f(supPay)} + آج کیش گیا ${f(cashOut)}`);
+  t('hmPayCap', `تمام بیوپاریوں کا کل بقایا ${f(supPay)}`);
   t('hmCashCap', S ? `اوپننگ ${f(S.opening)} + دیگر آمدن ${f(N(S.otherManual) + N(S.tOtherIn))} + نقد سیل ${f(S.tBillCash)} + وصولی ${f(S.tRecovery)}` : '');
   t('hmOutCap', S ? `بیوپاریوں کو ${f(S.tSupOut)} + دیگر ادائیگی ${f(S.tOtherOut)} + اخراجات ${f(S.tExp)}` : '');
-  t('hmNetCap', `ادھار ${f(rec)} + سٹاک ${f(stock)} + کیش آیا ${f(cashIn)} − (قرض + کیش گیا) ${f(pay)}`);
+  t('hmNetCap', `ادھار ${f(rec)} + سٹاک ${f(stock)} + کیش آیا ${f(cashIn)} − کیش گیا ${f(cashOut)} − بیوپاری قرض ${f(supPay)}`);
   t('hmTodayCap', S ? `مال پر منافع ${f(S.goodsProfit)} − اخراجات ${f(S.expTotal)}` : '');
   document.querySelectorAll('#homeMoneyRow .hmVal, #homeMoneyRow2 .hmVal').forEach(el => {
     let size = 17; el.style.fontSize = size + 'px';
