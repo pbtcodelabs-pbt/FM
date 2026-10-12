@@ -3475,6 +3475,18 @@ function __appHostKind(h, p){
         #homeMoneyRow .hmCap.hmK6,#homeMoneyRow2 .hmCap.hmK6{--hmB:#be185d; --hmEdge:#831843; --hmNum:#be185d;}
         #homeMoneyRow2 .hmCap.hmK7.profit{--hmB:#0f766e; --hmEdge:#134e4a; --hmNum:#0f766e;}
         #homeMoneyRow2 .hmCap.hmK7.loss{--hmB:#b91c1c; --hmEdge:#7f1d1d; --hmNum:#b91c1c;}
+        /* 💵 FM1210MO372: ہاتھ میں کیش + مکمل سمری — ایک لائن میں دو ڈبے */
+        #homeMoneyBottom{display:grid; grid-template-columns:3fr 2fr; gap:7px; margin-top:7px; align-items:stretch;}
+        #homeMoneyBottom .hmCap{position:relative; border-radius:14px; padding:3px 6px 5px; text-align:center; min-width:0; cursor:pointer;
+          background:var(--hmB); border:1.5px solid rgba(255,255,255,.55); box-shadow:0 3px 0 var(--hmEdge); transition:transform .12s, box-shadow .12s;}
+        #homeMoneyBottom .hmCap:active{transform:translateY(3px); box-shadow:0 0 0 var(--hmEdge);}
+        #homeMoneyBottom .hmLbl{font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:13.5px; font-weight:700; line-height:1.55; white-space:nowrap; overflow:hidden; color:#fff;}
+        #homeMoneyBottom .hmPill{background:#fff; border-radius:9px; padding:1px 3px;}
+        #homeMoneyBottom .hmVal{font-family:UrduAll,Arial,'Helvetica Neue',sans-serif; font-weight:900; font-size:18px; line-height:1.3; direction:ltr; white-space:nowrap; overflow:hidden; color:var(--hmNum);}
+        #homeMoneyBottom .hmHand{--hmB:#ca8a04; --hmEdge:#854d0e; --hmNum:#a16207;}
+        #homeMoneyBottom .hmHand.loss{--hmB:#dc2626; --hmEdge:#7f1d1d; --hmNum:#b91c1c;}
+        #homeMoneyBottom #homeMoneyMore{margin-top:0; height:100%; border-radius:14px; background:#334e9b; border:1.5px solid rgba(255,255,255,.4); box-shadow:0 3px 0 #0f1d4a; font-size:15px; font-weight:700;}
+        #homeMoneyBottom #homeMoneyMore:active{transform:translateY(3px); box-shadow:none;}
         #homeMoneyToggle{position:absolute; left:-6px; top:-11px; width:30px; height:24px; border:none; background:none; padding:0; cursor:pointer; line-height:0; z-index:2; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45));}
         #homeMoneyToggle svg{width:30px; height:24px; display:block;}
         #homeMoneyWrap.hmHidden{margin:0 2px 4px; height:24px;}
@@ -3495,7 +3507,11 @@ function __appHostKind(h, p){
             <div class="hmCap hmK5 profit" id="hmNetCap" onclick="goTo('bizsummary')"><div class="hmLbl" id="hmNetLbl">کاروبار کی کیفیت (منافع)</div><div class="hmPill"><div class="hmVal" id="hmNetVal">0</div></div></div>
             <div class="hmCap hmK7 profit" id="hmTodayCap" onclick="goTo('bizsummary')"><div class="hmLbl" id="hmTodayLbl">صرف آج کا منافع</div><div class="hmPill"><div class="hmVal" id="hmTodayVal">0</div></div></div>
           </div>
-          <button type="button" id="homeMoneyMore" onclick="goTo('bizsummary')">📊 مکمل سمری دیکھیں ›</button>
+          <!-- 💵 FM1210MO372: نیچے کی پٹی دو حصوں میں — دائیں "اس وقت ہاتھ میں کیش" (رقم کے ساتھ)، بائیں "مکمل سمری" -->
+          <div id="homeMoneyBottom">
+            <div class="hmCap hmHand" id="hmHandCap" onclick="goTo('bizsummary')"><div class="hmLbl" id="hmHandLbl">💵 اس وقت ہاتھ میں کیش</div><div class="hmPill"><div class="hmVal" id="hmHandVal">0</div></div></div>
+            <button type="button" id="homeMoneyMore" onclick="goTo('bizsummary')">📊 مکمل سمری ›</button>
+          </div>
         </div>
         <button type="button" id="homeMoneyToggle" onclick="toggleHomeMoneyRow()" aria-label="eye"></button>
       </div>
@@ -9315,7 +9331,8 @@ function getDeveloperContact(){
 // 🆕 FM1110SU369: ہوم سمری ڈبوں کے رنگ صاف، گہرے اور چمکدار — دھندلی چمک/سایہ ختم
 // 🆕 FM1210MO370: ہوم سمری سات ڈبے — سٹاک کی مالیت، ٹوٹل کیش آیا، ٹوٹل کیش گیا، کاروبار کی کیفیت (منافع/نقصان)، صرف آج کا منافع
 // 🆕 FM1210MO371: ڈبہ ① میں صرف بیوپاریوں کا قرض، سارا جانے والا کیش (بیوپاری ادائیگی + اخراجات) صرف ڈبہ ⑤ میں
-const APP_BUILD_VERSION = 'FM1210MO371'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1210MO372: مکمل سمری کی پٹی دو حصوں میں — "اس وقت ہاتھ میں کیش" (کیش آیا − کیش گیا) رقم کے ساتھ + مکمل سمری بٹن
+const APP_BUILD_VERSION = 'FM1210MO372'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10098,8 +10115,13 @@ function renderHomeMoneySummary(){
   const cashOut = S ? N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) : 0;
   const net = rec + stock + cashIn - cashOut - supPay;
   const todayProfit = S ? N(S.goodsProfit) - N(S.expTotal) : 0;
+  // 💵 FM1210MO372: اس وقت ہاتھ میں کیش = ④ ٹوٹل کیش آیا − ⑤ ٹوٹل کیش گیا
+  //    (اوپننگ کیش + دیگر آمدن + آج کے بلوں سے نقد + گاہکوں سے نقد وصولی + دیگر نقد آمد − بیوپاریوں کو ادائیگی − دیگر ادائیگی − آج کے اخراجات)
+  //    یہی رقم "کاروبار کی مکمل سمری" میں "اس وقت گلے میں کیش" ہے — دونوں جگہ ایک ہی عدد
+  const hand = cashIn - cashOut;
   const f = n => Math.abs(Math.round(n)).toLocaleString('en-US');
   const setVal = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
+  const t0 = (id, txt) => { const el = document.getElementById(id); if(el) el.title = txt; };
   const setPL = (capId, up) => { const c = document.getElementById(capId); if(c){ c.classList.toggle('loss', !up); c.classList.toggle('profit', up); } };
   setVal('hmPayVal', f(supPay));
   setVal('hmRecVal', f(rec));
@@ -10109,6 +10131,9 @@ function renderHomeMoneySummary(){
   const up = net >= 0; setPL('hmNetCap', up);
   setVal('hmNetLbl', up ? 'کاروبار کی کیفیت (منافع)' : 'کاروبار کی کیفیت (نقصان)');
   setVal('hmNetVal', (up ? '+ ' : '- ') + f(net));
+  const hUp = hand >= 0; const hc = document.getElementById('hmHandCap'); if(hc) hc.classList.toggle('loss', !hUp);
+  setVal('hmHandVal', (hUp ? '' : '- ') + f(hand));
+  t0('hmHandCap', `کیش آیا ${f(cashIn)} − کیش گیا ${f(cashOut)} = ${hUp ? '' : '- '}${f(hand)}` + (hUp ? '' : ' — جتنا آیا اس سے زیادہ گیا، اوپننگ کیش چیک کریں'));
   const tUp = todayProfit >= 0; setPL('hmTodayCap', tUp);
   setVal('hmTodayLbl', tUp ? 'صرف آج کا منافع' : 'صرف آج کا نقصان');
   setVal('hmTodayVal', (tUp ? '+ ' : '- ') + f(todayProfit));
@@ -10118,7 +10143,7 @@ function renderHomeMoneySummary(){
   t('hmOutCap', S ? `بیوپاریوں کو ${f(S.tSupOut)} + دیگر ادائیگی ${f(S.tOtherOut)} + اخراجات ${f(S.tExp)}` : '');
   t('hmNetCap', `ادھار ${f(rec)} + سٹاک ${f(stock)} + کیش آیا ${f(cashIn)} − کیش گیا ${f(cashOut)} − بیوپاری قرض ${f(supPay)}`);
   t('hmTodayCap', S ? `مال پر منافع ${f(S.goodsProfit)} − اخراجات ${f(S.expTotal)}` : '');
-  document.querySelectorAll('#homeMoneyRow .hmVal, #homeMoneyRow2 .hmVal').forEach(el => {
+  document.querySelectorAll('#homeMoneyRow .hmVal, #homeMoneyRow2 .hmVal, #homeMoneyBottom .hmVal').forEach(el => {
     let size = 17; el.style.fontSize = size + 'px';
     while(el.scrollWidth > el.clientWidth && size > 9){ size -= 1; el.style.fontSize = size + 'px'; }
   });
