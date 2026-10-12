@@ -1077,6 +1077,13 @@ function __appHostKind(h, p){
   #cartSheetModal .bcPrice{font-size:13.5px;}
   #cartSheetModal .bcTotal{font-size:12.5px; padding:0 2px;}
 
+  /* ---------- 💪 FM1210MO373 (صدام کی ہدایت): گول سیریل نمبر ختم — نام دائیں کونے پر، پیکنگ کے بعد "مزدوری" کا کالم (قیمت کے ساتھ دائیں جانب)
+       پیچھے (آرڈر/چالان) سے جو مزدوری لگ کر آئی وہی نظر آئے، اور یہیں بدلی جا سکے ---------- */
+  #cartSheetModal .bcHead, #cartSheetModal .bcMain{grid-template-columns:minmax(60px,1fr) 40px 44px 50px 80px 52px; gap:3px;}
+  #cartSheetModal .bcLaborIn{width:100%; height:38px; box-sizing:border-box; border:2px solid #a855f7; border-radius:10px; background:#faf5ff; text-align:center;
+    font-family:UrduAll,Arial,Helvetica,sans-serif !important; font-weight:900; font-size:13.5px; color:#6b21a8; padding:0 2px; -moz-appearance:textfield;}
+  #cartSheetModal .bcLaborIn::-webkit-outer-spin-button, #cartSheetModal .bcLaborIn::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  #cartSheetModal .bcLaborIn.bcLaborEdited{border-color:#dc2626; background:#fff1f2; color:#b91c1c;}
   #cartSheetModal .bcMain .bcName, #cartSheetModal .bcMain .bcPack{font-family:UrduAll,'JameelNooriNastaleeq','Noto Nastaliq Urdu','PDMSMultan',serif !important; white-space:nowrap;}
 
   .emptyCart{text-align:center; color:var(--muted); padding:18px 0; font-size:13px;}
@@ -3746,7 +3753,7 @@ function __appHostKind(h, p){
 
         <div class="cartSheetBody">
           <div class="cartWrap">
-            <div class="bcHead"><span>#</span><span>نام</span><span>پیکنگ</span><span>قیمت</span><span>تعداد</span><span>کل رقم</span></div>
+            <div class="bcHead"><span>نام</span><span>پیکنگ</span><span>مزدوری</span><span>قیمت</span><span>تعداد</span><span>کل رقم</span></div>
             <div id="cartBody" class="bcList"><!-- JS سے ہر آئٹم کی الگ لائن یہاں بنے گی --></div>
             <div class="emptyCart" id="emptyCartMsg">بل خالی ہے — اوپر سے سبزی چنیں</div>
             <div id="cartItemCountSummary" style="text-align:right; font-size:11.5px; font-weight:700; color:var(--muted); padding:6px 4px 0;"></div>
@@ -9332,7 +9339,8 @@ function getDeveloperContact(){
 // 🆕 FM1210MO370: ہوم سمری سات ڈبے — سٹاک کی مالیت، ٹوٹل کیش آیا، ٹوٹل کیش گیا، کاروبار کی کیفیت (منافع/نقصان)، صرف آج کا منافع
 // 🆕 FM1210MO371: ڈبہ ① میں صرف بیوپاریوں کا قرض، سارا جانے والا کیش (بیوپاری ادائیگی + اخراجات) صرف ڈبہ ⑤ میں
 // 🆕 FM1210MO372: مکمل سمری کی پٹی دو حصوں میں — "اس وقت ہاتھ میں کیش" (کیش آیا − کیش گیا) رقم کے ساتھ + مکمل سمری بٹن
-const APP_BUILD_VERSION = 'FM1210MO372'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1210MO373: بل کا کارٹ — گول سیریل نمبر ختم، نام دائیں کونے پر، قیمت کے ساتھ "مزدوری" کا کالم (پیچھے سے لگی مزدوری نظر آئے اور یہیں درست ہو سکے)
+const APP_BUILD_VERSION = 'FM1210MO373'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15246,7 +15254,7 @@ function setSaleMode(mode){
     const product = getFlatVariants().find(p => p.variant_id === item.variant_id);
     if(product){
       const baseRate = product.retail;
-      item.laborPerUnit = product.sellLabor || 0;
+      if(!item.laborManual) item.laborPerUnit = product.sellLabor || 0; // 💪 FM1210MO373: ہاتھ سے درست کی گئی مزدوری برقرار
       item.unitPrice = baseRate; // ---------- 💪 صدام کی ہدایت (FM050926): نرخ خالص رہے گا، مزدوری الگ کالم/ٹوٹل میں ---------- -->
     }
   });
@@ -15382,9 +15390,10 @@ function renderCart(){
       return `
       <div class="bcRow${idx % 2 ? ' alt' : ''}">
         <div class="bcMain">
-          <span class="bcSerial">${_serial}</span>
           <div class="bcName" onclick="showItemSaleRecord(${item.variant_id})" title="ٹیپ کریں: اس گاہک کو یہ سبزی پہلے کس ریٹ پر بیچی">${_baseName}</div>
           <div class="bcPack${_chip ? (_chipNeedsPick ? ' bcPick' : ' bcTap') : ''}" ${_chip ? `onclick="openCartChalanPicker(${idx})" title="چالان"` : ''}>${_chipNeedsPick ? '🧾 چالان' : _pack}</div>
+          <input type="number" inputmode="decimal" class="bcLaborIn${item.laborManual ? ' bcLaborEdited' : ''}" value="${Number(item.laborPerUnit) || 0}" min="0" onfocus="this.select()"
+                 title="فی یونٹ مزدوری — غلط لگی ہو تو یہیں درست کریں" onchange="updateCartLabor(${item.variant_id}, this.value)">
           <input type="number" inputmode="decimal" class="bcPrice${_price > 0 ? '' : ' bcZero'}" value="${_price > 0 ? _price : ''}" placeholder="قیمت" min="0" onfocus="this.select()"
                  onchange="updateCartRate(${item.variant_id}, this.value)">
           <div class="bcQty">
@@ -15533,6 +15542,19 @@ function renderCart(){
 }
 
 // ---------- کارٹ میں ریٹ تبدیل کریں — قیمت ہمیشہ فکس نہیں ہوتی، کبھی کم/زیادہ بیچنی پڑتی ہے ----------
+// ---------- 💪 FM1210MO373 (صدام کی ہدایت): کارٹ میں ہی مزدوری درست کریں — پیچھے سے غلط مزدوری (مثلاً 7 کی جگہ 450) لگ کر آئی ہو
+// تو یہاں فی یونٹ مزدوری بدلیں؛ اس کے بعد چالان والا ریٹ یا موڈ تبدیلی اسے دوبارہ پرانا نہیں کرے گی ---------- -->
+function updateCartLabor(variantId, newLabor){
+  const item = Billing.cart.find(c => c.variant_id === variantId);
+  if(!item) return;
+  const raw = String(newLabor == null ? '' : newLabor).trim();
+  const labor = raw === '' ? 0 : parseFloat(raw);
+  if(isNaN(labor) || labor < 0){ renderCart(); return; }
+  item.laborPerUnit = labor;
+  item.laborManual = true;
+  renderCart();
+}
+
 function updateCartRate(variantId, newRate){
   const item = Billing.cart.find(c => c.variant_id === variantId);
   if(!item) return;
@@ -19474,7 +19496,7 @@ function applyChalanPricingToItems(items, mode){
     if(!it || it.priceManual || !it.chalanAlloc || it.loose_product_id) return;
     const v = findVariantByVariantId(it.variant_id);
     const r = chalanSalePrice(v, it.chalanAlloc, mode);
-    if(r){ it.unitPrice = r.price; it.laborPerUnit = r.labor; }
+    if(r){ it.unitPrice = r.price; if(!it.laborManual) it.laborPerUnit = r.labor; } // 💪 FM1210MO373: ہاتھ سے درست کی گئی مزدوری برقرار
   });
 }
 
