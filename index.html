@@ -2951,7 +2951,11 @@ function __appHostKind(h, p){
     <div id="loginPinWrap">
       <!-- ---------- 👑 ایڈمن کی قطار ---------- -->
       <div class="loginRoleRow">
-        <div class="loginRoleTitle">👑 ایڈمن</div>
+        <div class="loginRoleTitle" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+          <span>👑 ایڈمن</span>
+          <!-- 👆 FM1310TU374: صرف فنگر پرنٹ کا نشان، کوئی عبارت نہیں — دبانے پر فون کا فنگر پرنٹ پاپ اپ۔ آن ہونے پر JS اسے دکھاتا ہے -->
+          <span id="bioFpIcon" onclick="bioLogin()" title="فنگر پرنٹ سے لاگ اِن" style="display:none; font-size:22px; cursor:pointer; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));">👆</span>
+        </div>
         <div class="loginRoleInputBar">
           <button type="button"
             onmousedown="showPinWhilePressed('pinInput')" onmouseup="hidePinAfterRelease('pinInput')" onmouseleave="hidePinAfterRelease('pinInput')"
@@ -9341,7 +9345,8 @@ function getDeveloperContact(){
 // 🆕 FM1210MO372: مکمل سمری کی پٹی دو حصوں میں — "اس وقت ہاتھ میں کیش" (کیش آیا − کیش گیا) رقم کے ساتھ + مکمل سمری بٹن
 // 🆕 FM1210MO373: بل کا کارٹ — گول سیریل نمبر ختم، نام دائیں کونے پر، قیمت کے ساتھ "مزدوری" کا کالم (پیچھے سے لگی مزدوری نظر آئے اور یہیں درست ہو سکے)
 // 🆕 FM1310TU374: 👆 فنگر پرنٹ لاگ اِن — درمیان والا بڑا "فنگر پرنٹ سے لاگ اِن" بلاک مکمل ختم؛ اب لاگ اِن اسکرین کھلتے ہی فون کا اپنا فنگر پرنٹ پاپ اپ خودبخود کھلتا ہے (باقی ایپس کی طرح)، منسوخ/ناکام ہونے پر صرف چھوٹا "👆 دوبارہ ٹچ کریں" لنک
-const APP_BUILD_VERSION = 'FM1310TU374'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1310TU375: 👆 فنگر پرنٹ — اب کوئی عبارت/لنک نہیں؛ صرف "👑 ایڈمن" عنوان کے برابر ایک چھوٹا فنگر پرنٹ کا نشان (دبانے پر پھر پاپ اپ)، باقی سب ویسے ہی خودکار؛ پاپ اپ کا اوپر والا نام بھی مختصر (rp.name = "ایڈمن")
+const APP_BUILD_VERSION = 'FM1310TU375'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21597,7 +21602,7 @@ async function enableBioLogin(){
   try{
     const cred = await navigator.credentials.create({ publicKey: {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
-      rp: { name: 'Fruit Mandi POS' },
+      rp: { name: 'ایڈمن' },
       user: { id: new TextEncoder().encode('fm-admin-' + me.user_id), name: me.name, displayName: me.name },
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
       authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
@@ -21635,38 +21640,27 @@ async function bioLogin(){
   _bioBusy = false;
 }
 
-// ---------- 👆 صدام کی ہدایت (13 اکتوبر): پہلے درمیان میں ایک بڑا "فنگر پرنٹ سے لاگ اِن" والا بلاک/بٹن تھا،
-//   جس پر پہلے ٹچ کرنا پڑتا تھا تب فون کا فنگر پرنٹ پاپ اپ کھلتا تھا۔ وہ بڑا بلاک مکمل ختم کر دیا گیا۔
-//   اب لاگ اِن اسکرین کھلتے ہی، اگر اس فون پر فنگر پرنٹ آن ہے، خودبخود فون کا اپنا فنگر پرنٹ پاپ اپ کھل جاتا ہے
-//   (بالکل باقی ایپس کی طرح)۔ اگر بندہ منسوخ کر دے یا ناکام ہو، تو صرف ایک چھوٹا سا "👆 دوبارہ ٹچ کریں"
-//   والا لنک نظر آتا ہے تاکہ وہ پھنسے نہیں — اور پن سے لاگ اِن ہمیشہ ساتھ چلتا رہتا ہے۔ ----------
+// ---------- 👆 صدام کی ہدایت (13 اکتوبر): کوئی بڑا بلاک نہیں، کوئی عبارت/لنک نہیں۔
+//   "👑 ایڈمن" عنوان کے برابر صرف ایک فنگر پرنٹ کا نشان (👆) — بس وہی نظر آتا ہے جب اس فون پر فنگر پرنٹ آن ہو۔
+//   لاگ اِن اسکرین کھلتے ہی خودبخود فون کا اپنا فنگر پرنٹ پاپ اپ کھل جاتا ہے (باقی ایپس کی طرح)۔
+//   منسوخ/ناکام ہو تو بندہ وہی 👆 نشان دبا کر دوبارہ کر لے — پن سے لاگ اِن ہمیشہ ساتھ۔ ----------
 let _bioAutoTried = false;
 function _resetBioAutoFlag(){ _bioAutoTried = false; }
+// صرف 👆 آئیکن دکھانا/چھپانا — فنگر پرنٹ آن ہو تو دکھے، ورنہ غائب
+function _showBioIcon(on){
+  const ic = document.getElementById('bioFpIcon');
+  if(ic) ic.style.display = on ? 'inline-block' : 'none';
+}
 async function autoBioPrompt(){
   // لاگ اِن اسکرین کھلتے ہی خودکار فنگر پرنٹ — صرف ایک بار فی اسکرین، تاکہ بار بار پاپ اپ نہ آئے
   const on = !!(getBioCred() && _bioAdminUser());
-  renderBioRetryLink(on);           // پرانا بڑا بٹن چھپا رہے گا؛ ضرورت پر صرف چھوٹا لنک بنے گا
+  _showBioIcon(on);
   if(!on) return;
-  if(!(await isBioSupported())) return;
+  if(!(await isBioSupported())){ _showBioIcon(false); return; }
   if(_bioAutoTried) return;
   _bioAutoTried = true;
   // تھوڑا وقفہ تاکہ لاگ اِن اسکرین مکمل نظر آ جائے، پھر خودبخود فون کا پاپ اپ
   setTimeout(() => { try{ bioLogin(); }catch(e){} }, 350);
-}
-// چھوٹا سا دوبارہ-کوشش لنک (بڑا بلاک نہیں) — صرف تب کام کا جب خودکار کوشش منسوخ/ناکام ہو
-function renderBioRetryLink(on){
-  const adminRow = document.querySelectorAll('#loginPinWrap > .loginRoleRow')[0];
-  if(!adminRow) return;
-  let b = document.getElementById('bioLoginBox');
-  if(!on){ if(b) b.style.display = 'none'; return; }
-  if(!b){
-    b = document.createElement('div'); b.id = 'bioLoginBox';
-    b.style.cssText = 'text-align:center; margin:4px 0 2px;';
-    b.innerHTML = `<a href="javascript:void(0)" onclick="bioLogin()" style="display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:700; color:#bbf7d0; text-decoration:underline; cursor:pointer; font-family:inherit;"><span style="font-size:16px;">👆</span> فنگر پرنٹ سے لاگ اِن</a><div id="bioLoginMsg" style="font-size:12px; color:#fecaca; margin-top:3px; min-height:14px;"></div>`;
-    const bar = adminRow.querySelector('.loginRoleInputBar');
-    if(bar) adminRow.insertBefore(b, bar); else adminRow.appendChild(b);
-  }
-  b.style.display = '';
 }
 // پرانے نام سے کہیں کال ہو تو خودکار پرامپٹ ہی چلے (کوئی پرانی کال ٹوٹے نہیں)
 function renderBioLoginButton(){ try{ autoBioPrompt(); }catch(e){} }
