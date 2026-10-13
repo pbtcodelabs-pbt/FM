@@ -9350,7 +9350,8 @@ function getDeveloperContact(){
 // 🆕 FM1310TU377: روزانہ ریکوری لسٹ — وصولی ڈال کر OK کرنے پر گاہک کا پورا ڈبہ اب گہرا سبز (پہلے بہت ہلکا تھا)؛ سفید نام + سایہ، صاف پتہ چلے کہ وصولی مکمل/سیف ہو چکی
 // 🆕 FM1310TU378: 👆 فنگر پرنٹ کا بار بار مانگنا بالکل ختم — مسئلہ یہ تھا کہ setupLoginScreen سے autoBioPrompt سیشن نشانی چیک کیے بغیر ہر ریفریش پر پاپ اپ کھول دیتا تھا؛ اب autoBioPrompt خود نشانی/لاگ اِن چیک کرتا ہے، ایک بار دینے کے بعد اسی سیشن میں دوبارہ خودکار پاپ اپ نہیں
 // 🆕 FM1310TU379: کسٹمر بل کا بایاں 'ادائیگی کی تفصیل' ڈبہ اب آسان ترتیب میں — آج کا بل → سابقہ رقم → ٹوٹل رقم → وصولی رقم → قابلِ ادا رقم (دایاں 'کل کی تفصیل' ڈبہ نہیں بدلا)
-const APP_BUILD_VERSION = 'FM1310TU379'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1310TU380: 🔧 فوری فکس — آرڈر ٹیکنگ سے بنے بل کو فائنل کرتے وقت جھوٹی 'سٹاک ختم' روک ختم۔ اب اُس بل کے اپنے سورس آرڈر کی بکنگ reserved سے واپس گنی جاتی ہے، تو اپنی ہی بکنگ اپنا بل نہیں روکتی (باقی آرڈرز کی بکنگ محفوظ)
+const APP_BUILD_VERSION = 'FM1310TU380'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15943,10 +15944,23 @@ function finalizeInvoice(){
   // شمار نہیں ہوگا، صرف باقی/دوسرے پینڈنگ آرڈرز کا بک شدہ سٹاک شمار ہوگا ---------- -->
   if(stockGuardOn()){
     const flatVariants = getFlatVariants();
+    // ---------- 🔧 FM1310TU (صدام کی ہدایت — فوری فکس): آرڈر ٹیکنگ سے بنے بل کو فائنل کرتے وقت "سٹاک ختم" کی
+    //   جھوٹی روک آتی تھی۔ وجہ: یہ بل جس آرڈر سے بنا، اُس آرڈر کی اپنی بکنگ ابھی v.reserved میں باقی رہ جاتی تھی
+    //   (stockReleased صحیح وقت پر نہ چلا ہو، یا کلاؤڈ سے پرانی reserved واپس آ گئی ہو)، تو اپنی ہی بکنگ اپنے خلاف
+    //   کٹ کر دستیاب صفر دکھاتی تھی۔ حل: اس بل کے اپنے سورس آرڈر کی مقدار reserved سے واپس گنیں (بالکل smAvailForVariant
+    //   کی طرح) — یوں اپنی بکنگ اپنا بل نہیں روکتی، اور باقی آرڈرز کی بکنگ بدستور محفوظ رہتی ہے۔ ----------
+    const _srcOrder = (Billing.sourceAdvanceOrderId != null)
+      ? (advanceOrdersData || []).find(o => o.id === Billing.sourceAdvanceOrderId && o.status !== 'fulfilled' && !o.stockReleased)
+      : null;
+    const _myReservedFor = (vid) => {
+      if(!_srcOrder) return 0;
+      return (_srcOrder.items || []).reduce((s, i) => s + ((i && i.variant_id === vid) ? (Number(i.qty) || 0) : 0), 0);
+    };
     for(const item of Billing.cart){
       const v = flatVariants.find(f => f.variant_id === item.variant_id);
-      const availableFinalizeBl = v ? Math.max(0, (v.stock||0) - (v.reserved||0)) : 0;
-      if(v && item.qty > availableFinalizeBl){
+      const _othersReserved = v ? Math.max(0, (Number(v.reserved) || 0) - _myReservedFor(item.variant_id)) : 0;
+      const availableFinalizeBl = v ? Math.max(0, (v.stock||0) - _othersReserved) : 0;
+      if(v && item.qty > availableFinalizeBl + 0.0001){
         alert('"' + item.name + '" — ' + smStockMsg(availableFinalizeBl));
         return;
       }
