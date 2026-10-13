@@ -9351,7 +9351,8 @@ function getDeveloperContact(){
 // 🆕 FM1310TU378: 👆 فنگر پرنٹ کا بار بار مانگنا بالکل ختم — مسئلہ یہ تھا کہ setupLoginScreen سے autoBioPrompt سیشن نشانی چیک کیے بغیر ہر ریفریش پر پاپ اپ کھول دیتا تھا؛ اب autoBioPrompt خود نشانی/لاگ اِن چیک کرتا ہے، ایک بار دینے کے بعد اسی سیشن میں دوبارہ خودکار پاپ اپ نہیں
 // 🆕 FM1310TU379: کسٹمر بل کا بایاں 'ادائیگی کی تفصیل' ڈبہ اب آسان ترتیب میں — آج کا بل → سابقہ رقم → ٹوٹل رقم → وصولی رقم → قابلِ ادا رقم (دایاں 'کل کی تفصیل' ڈبہ نہیں بدلا)
 // 🆕 FM1310TU380: 🔧 فوری فکس — آرڈر ٹیکنگ سے بنے بل کو فائنل کرتے وقت جھوٹی 'سٹاک ختم' روک ختم۔ اب اُس بل کے اپنے سورس آرڈر کی بکنگ reserved سے واپس گنی جاتی ہے، تو اپنی ہی بکنگ اپنا بل نہیں روکتی (باقی آرڈرز کی بکنگ محفوظ)
-const APP_BUILD_VERSION = 'FM1310TU380'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1310TU381: 🔧 فوری فکس — آرڈر ٹیکنگ سے بنے بل کو فائنل کرتے وقت جھوٹی 'کسٹمر کا نام چنیں' روک ختم۔ اب select خالی ہو مگر بل سورس آرڈر سے بنا ہو تو اُسی آرڈر کے کسٹمر سے نام خودکار بحال
+const APP_BUILD_VERSION = 'FM1310TU381'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15908,7 +15909,7 @@ function finalizeInvoice(){
   }
 
   const custId = document.getElementById('customerSelect').value;
-  const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
+  let customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
   const subtotal = Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0);
   const laborTotal = Billing.cart.reduce((sum,i) => sum + (i.qty*(i.laborPerUnit||0)), 0);
@@ -15928,6 +15929,29 @@ function finalizeInvoice(){
   // اسی وجہ سے پوری رقم وصول ہو جانے کے باوجود بھی کسٹمر کا نام مانگا جاتا رہا (کیونکہ ٹوگل کسی وجہ سے درست
   // حالت میں نہیں تھا)۔ اب اصل بقایہ رقم دیکھ کر فیصلہ کریں — یہی حتمی سچائی ہے، ٹوگل کی پروا نہیں ---------- -->
   const willRemainPending = rawReceivedForCheck < grandTotal;
+  // ---------- 🔧 FM1310TU (صدام کی ہدایت — فوری فکس): آرڈر ٹیکنگ سے بنا بل فائنل کرتے وقت کبھی "کسٹمر کا نام چنیں"
+  //   آ جاتا تھا — حالانکہ نام آرڈر کے ساتھ آتا ہے۔ وجہ: فلٹر/کھوہ کھاتہ یا id نہ ملنے پر customerSelect خالی رہ جاتا۔
+  //   اب select خالی ہو مگر بل کسی سورس آرڈر سے بنا ہو، تو اُسی آرڈر کے customer_id/نام سے کسٹمر خودکار بحال کر لیں۔ ----------
+  if(!customer && Billing.sourceAdvanceOrderId != null){
+    try{
+      const _o = (advanceOrdersData || []).find(o => o.id === Billing.sourceAdvanceOrderId);
+      if(_o){
+        const _nn = s => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        customer = (_o.customer_id != null ? customersData.find(c => String(c.customer_id) === String(_o.customer_id)) : null)
+          || customersData.find(c => _nn(c.name) === _nn(_o.customerName));
+        if(customer){
+          const _sel = document.getElementById('customerSelect');
+          if(_sel){
+            if(!Array.from(_sel.options).some(op => String(op.value) === String(customer.customer_id))){
+              const _op = document.createElement('option'); _op.value = customer.customer_id; _op.textContent = customer.name; _sel.appendChild(_op);
+            }
+            _sel.value = customer.customer_id;
+          }
+          Billing.counterSale = false;
+        }
+      }
+    }catch(e){}
+  }
   if(!customer){ requireBillCustomer(); return; } // 🔒 بغیر نام بل کبھی نہیں
 
   // ---------- پیمنٹ خودکار طے ہوتی ہے — بلنگ کے دوران کوئی انتخاب نہیں کرنا پڑتا ----------
