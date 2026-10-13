@@ -9349,7 +9349,8 @@ function getDeveloperContact(){
 // 🆕 FM1310TU376: 👆 فنگر پرنٹ — ایک بار دینے کے بعد اسی سیشن میں دوبارہ نہ مانگے؛ صفحہ ریفریش/اوپر کھینچنے پر دوبارہ نہیں پوچھتا۔ صرف ٹیب/ایپ مکمل بند کر کے دوبارہ کھولنے پر فنگر پرنٹ (sessionStorage نشانی)؛ لاگ آؤٹ پر نشانی صاف
 // 🆕 FM1310TU377: روزانہ ریکوری لسٹ — وصولی ڈال کر OK کرنے پر گاہک کا پورا ڈبہ اب گہرا سبز (پہلے بہت ہلکا تھا)؛ سفید نام + سایہ، صاف پتہ چلے کہ وصولی مکمل/سیف ہو چکی
 // 🆕 FM1310TU378: 👆 فنگر پرنٹ کا بار بار مانگنا بالکل ختم — مسئلہ یہ تھا کہ setupLoginScreen سے autoBioPrompt سیشن نشانی چیک کیے بغیر ہر ریفریش پر پاپ اپ کھول دیتا تھا؛ اب autoBioPrompt خود نشانی/لاگ اِن چیک کرتا ہے، ایک بار دینے کے بعد اسی سیشن میں دوبارہ خودکار پاپ اپ نہیں
-const APP_BUILD_VERSION = 'FM1310TU378'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1310TU379: کسٹمر بل کا بایاں 'ادائیگی کی تفصیل' ڈبہ اب آسان ترتیب میں — آج کا بل → سابقہ رقم → ٹوٹل رقم → وصولی رقم → قابلِ ادا رقم (دایاں 'کل کی تفصیل' ڈبہ نہیں بدلا)
+const APP_BUILD_VERSION = 'FM1310TU379'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -41578,17 +41579,10 @@ function getBillSummaryRows(invoice){
 
   // ---------- 💪 صدام کی ہدایت (6 ستمبر - دوسری تصحیح): پہلے "ذیلی ٹوٹل" اور نیچے "یہ بل" دونوں ایک ہی
   // رقم کو دو دفعہ دکھا رہے تھے (کھلارا) — اب صرف ایک ہی لائن "یہ بل" کے نام سے دکھے گی، دہرائی نہیں ---------- -->
+  // ---------- 🧾 FM1310TU: صدام کی ہدایت — بایاں "ادائیگی کی تفصیل" ڈبہ اب ایک آسان، ہمیشہ ایک جیسی ترتیب میں:
+  //   (1) آج کا بل  (2) سابقہ رقم  (3) ٹوٹل رقم  (4) وصولی رقم  (5) قابلِ ادا رقم
+  //   — نیچے جہاں rows بنتے ہیں، وہیں اسی ترتیب میں ترتیب دیے گئے ہیں۔ (دایاں "کل کی تفصیل" ڈبہ بالکل نہیں بدلا) ----------
   const rows = [];
-  let shownThisBillAlready = false;
-  if(hasDiscount || hasLabor){
-    rows.push(['یہ بل', mergedSubtotal]);
-    if(hasDiscount) rows.push(['اضافی چارجز' + (invoice.discount_type ? ' (' + invoice.discount_type + ')' : ''), invoice.discount]);
-    rows.push(['ٹوٹل', invoice.grand_total]);
-    shownThisBillAlready = true;
-  }
-  if(invoice.tax_amount && invoice.tax_amount > 0){
-    rows.push([`ٹیکس (${invoice.tax_percent}%)`, invoice.tax_amount]);
-  }
 
   // ---------- 💰 FM510MO314 (صدام کی ہدایت): بل بننے سے پہلے اسی دن (پچھلے بل کے بعد) جو وصولی ہوئی، وہ بھی اسی بل میں
   // "ابھی وصول" میں آئے — پہلے یہ وصولی بقایہ سے تو کٹ جاتی تھی مگر بل پر صفر لکھا آتا تھا (صدام کے ڈیٹا میں 36 میں سے 31
@@ -41610,7 +41604,6 @@ function getBillSummaryRows(invoice){
     }
   }catch(e){ recBefore = 0; }
 
-  let finalLabel, finalValue;
   // ---------- 📅 FM910FR349: "کل" کی تاریخ میں درج وصولی جو اس بل کے بقایہ میں ابھی شامل نہیں تھی (کچی تھی، یا بل کے بعد
   // تصدیق ہوئی) — وہ "ابھی وصول" میں نہیں بلکہ سابقہ بقایہ کو کم کرتی ہے؛ کل کے ڈبے میں "کل ادا کیا" میں نظر آتی ہے ----------
   const _effTs = (r) => r.backdated ? new Date(recDay(r) + 'T23:59:59').getTime() : (new Date(r.createdAt || r.confirmedAt || 0).getTime() || 0);
@@ -41623,49 +41616,44 @@ function getBillSummaryRows(invoice){
         .reduce((a, r) => a + (Number(r.amount) || 0), 0);
     }
   }catch(e){ backAdj = 0; }
-  if(hasOldCredit || recBefore > 0){
-    const prevGross = Math.max(0, (Number(invoice.previous_balance) || 0) - backAdj) + recBefore;
-    rows.push(['سابقہ بقایہ', prevGross]);
-    if(!shownThisBillAlready) rows.push(['یہ بل', invoice.grand_total]);
-    rows.push(['تازہ ٹوٹل', prevGross + invoice.grand_total]);
-    finalLabel = 'حتمی بقایہ رقم';
-    finalValue = Math.max(0, (invoice.new_balance || 0) - backAdj);
-  } else {
-    if(!shownThisBillAlready) rows.push(['یہ بل', invoice.grand_total]);
-    finalLabel = 'حتمی بل';
-    finalValue = Math.max(0, invoice.grand_total - walletApplied - cashNow);
-  }
+  // ---------- پہلے سارا حساب نکالیں (سابقہ، آج کا بل، وصولی) — پھر نیچے صدام کی ترتیب میں rows بنائیں ----------
+  const prevGross = (hasOldCredit || recBefore > 0) ? (Math.max(0, (Number(invoice.previous_balance) || 0) - backAdj) + recBefore) : 0;
+  const thisBill = invoice.grand_total;        // آج کا بل (مزدوری/اضافی چارجز/ٹیکس اس میں پہلے سے شامل)
 
-  if(walletApplied > 0) rows.push(['Wallet سے ادا', walletApplied]);
   // ---------- FM110TH272: بل بننے کے بعد ریپ کی لائی ہوئی وصولی (کچی یا بعد میں تصدیق شدہ) — صرف اس کسٹمر کے آخری بل پر ----------
   let laterRecovery = 0;
   try{
     if(invoice.customer_id && invoice.invoice_id !== 'DRAFT' && hasOldCredit){
-      // 🔧 FM410SU297 (صدام کی ہدایت): جو وصولی کسی بل کے بعد، اگلا بل بننے سے پہلے آئی وہ اسی بل کی ہے — اگلا بل بننے کے بعد بھی
-      // دوبارہ پرنٹ/شیئر پر وہی رہے گی، کبھی صفر نہیں ہوگی۔ اگلے بل کی اپنی صورتحال اس کے اپنے وقت سے شروع ہوتی ہے۔
-      // (پچھلے ورژن میں صرف "آخری بل" کو وصولی ملتی تھی، اس لیے نیا بل بنتے ہی پرانے بل پر صفر آ جاتا تھا)
       const _ts = (v) => new Date(v || 0).getTime() || 0;
       const mine = invoicesData.filter(x => x.customer_id === invoice.customer_id && x.status !== 'voided');
       const billTs = _ts(invoice.created_at);
       const laterBills = mine.filter(x => x.invoice_id !== invoice.invoice_id && _ts(x.created_at) > billTs).sort((a, b) => _ts(a.created_at) - _ts(b.created_at));
       const recEntries = recoveryListData.filter(r => r.customer_id === invoice.customer_id && (r.status === 'pending' || r.status === 'confirmed'));
       if(laterBills.length === 0){
-        // ---------- یہی اس کسٹمر کا آخری بل ہے: کچی وصولی + تصدیق شدہ وصولی (بقایہ کے فرق یا ریکوری لسٹ کی انٹری، جو بڑی ہو) ----------
         const cu = customersData.find(c => c.customer_id === invoice.customer_id);
         const pend = recEntries.filter(r => r.status === 'pending' && !(r.backdated && _effTs(r) < billTs)).reduce((a, r) => a + (Number(r.amount) || 0), 0);
         const confirmedLater = cu ? Math.max(0, (Number(invoice.new_balance) || 0) - (Number(cu.total_receivable) || 0)) : 0;
         const confirmedFromList = recEntries.filter(r => r.status === 'confirmed' && _effTs(r) >= billTs).reduce((a, r) => a + (Number(r.amount) || 0), 0);
         laterRecovery = pend + Math.max(Math.max(0, confirmedLater - backAdj), confirmedFromList);
       } else {
-        // ---------- اس کے بعد اور بل بن چکے ہیں: صرف وہ وصولیاں جو اس بل کے وقت سے اگلے بل کے وقت تک کی ہیں ----------
         const nextTs = _ts(laterBills[0].created_at);
         laterRecovery = recEntries.filter(r => { const t = _effTs(r); return t >= billTs && t < nextTs; })
           .reduce((a, r) => a + (Number(r.amount) || 0), 0);
       }
     }
   }catch(e){}
-  rows.push(['ابھی وصول', cashNow + recBefore + laterRecovery]); // 💰 FM510MO314: بل سے پہلے والی آج کی وصولی بھی
-  if(laterRecovery > 0) finalValue = Math.max(0, finalValue - laterRecovery);
+
+  const totalAmount = prevGross + thisBill;                        // ٹوٹل رقم = آج کا بل + سابقہ رقم
+  const recoveredAmount = cashNow + recBefore + laterRecovery + walletApplied; // وصولی رقم (نقد + Wallet + بعد کی وصولی)
+  const payableAmount = Math.max(0, totalAmount - recoveredAmount); // قابلِ ادا رقم = ٹوٹل − وصولی
+
+  // ---------- 🧾 صدام کی ترتیب (اوپر سے نیچے): آج کا بل → سابقہ رقم → ٹوٹل رقم → وصولی رقم → قابلِ ادا رقم ----------
+  rows.push(['آج کا بل', thisBill]);
+  rows.push(['سابقہ رقم', prevGross]);
+  rows.push(['ٹوٹل رقم', totalAmount]);
+  rows.push(['وصولی رقم', recoveredAmount]);
+  const finalLabel = 'قابلِ ادا رقم';
+  const finalValue = payableAmount;
 
   return {rows, finalLabel, finalValue};
 }
