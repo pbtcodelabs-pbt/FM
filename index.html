@@ -9346,7 +9346,8 @@ function getDeveloperContact(){
 // 🆕 FM1210MO373: بل کا کارٹ — گول سیریل نمبر ختم، نام دائیں کونے پر، قیمت کے ساتھ "مزدوری" کا کالم (پیچھے سے لگی مزدوری نظر آئے اور یہیں درست ہو سکے)
 // 🆕 FM1310TU374: 👆 فنگر پرنٹ لاگ اِن — درمیان والا بڑا "فنگر پرنٹ سے لاگ اِن" بلاک مکمل ختم؛ اب لاگ اِن اسکرین کھلتے ہی فون کا اپنا فنگر پرنٹ پاپ اپ خودبخود کھلتا ہے (باقی ایپس کی طرح)، منسوخ/ناکام ہونے پر صرف چھوٹا "👆 دوبارہ ٹچ کریں" لنک
 // 🆕 FM1310TU375: 👆 فنگر پرنٹ — اب کوئی عبارت/لنک نہیں؛ صرف "👑 ایڈمن" عنوان کے برابر ایک چھوٹا فنگر پرنٹ کا نشان (دبانے پر پھر پاپ اپ)، باقی سب ویسے ہی خودکار؛ پاپ اپ کا اوپر والا نام بھی مختصر (rp.name = "ایڈمن")
-const APP_BUILD_VERSION = 'FM1310TU375'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1310TU376: 👆 فنگر پرنٹ — ایک بار دینے کے بعد اسی سیشن میں دوبارہ نہ مانگے؛ صفحہ ریفریش/اوپر کھینچنے پر دوبارہ نہیں پوچھتا۔ صرف ٹیب/ایپ مکمل بند کر کے دوبارہ کھولنے پر فنگر پرنٹ (sessionStorage نشانی)؛ لاگ آؤٹ پر نشانی صاف
+const APP_BUILD_VERSION = 'FM1310TU376'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -12668,7 +12669,12 @@ function tryAutoLogin(){
   let user = usersData.find(u => u.user_id === remembered.user_id && (!remembered.role || u.role === remembered.role) && (!remembered.name || u.name === remembered.name));
   if(!user && remembered.role && remembered.name) user = usersData.find(u => u.role === remembered.role && u.name === remembered.name); // id بدل گئی ہو تو نام/عہدہ سے
   try{ _migratePhoneOwner(); if(user && !isPhoneOwnerUser(user)){ saveToStorage('rememberedSession', null); return false; } }catch(e){}
-  try{ if(user && user.role === 'admin' && getBioCred() && _bioAdminUser()){ setTimeout(() => { try{ _resetBioAutoFlag(); autoBioPrompt(); }catch(e){} }, 300); return false; } }catch(e){}
+  // ---------- 👆 FM1310TU376: فنگر پرنٹ صرف اُسی وقت دوبارہ مانگے جب ٹیب/ایپ مکمل بند کر کے دوبارہ کھلے —
+  //   ایک بار فنگر پرنٹ دے کر اندر آ گئے، تو اسی سیشن میں (صفحہ ریفریش/اوپر سے نیچے کھینچنے پر) دوبارہ نہ مانگے۔
+  //   sessionStorage کی نشانی ٹیب بند ہونے پر خودبخود مٹ جاتی ہے، مگر صرف ریفریش پر برقرار رہتی ہے —
+  //   یوں سیکیورٹی بھی قائم (کوئی اور ایڈمن کے فون سے نئے سرے سے نہ کھولے) اور بار بار تنگ بھی نہیں کرتا۔ ----------
+  let _bioSessionOk = false; try{ _bioSessionOk = sessionStorage.getItem('fm_bioSessionOk') === '1'; }catch(e){}
+  try{ if(user && user.role === 'admin' && getBioCred() && _bioAdminUser() && !_bioSessionOk){ setTimeout(() => { try{ _resetBioAutoFlag(); autoBioPrompt(); }catch(e){} }, 300); return false; } }catch(e){}
   if(!user || !user.is_active){
     saveToStorage('rememberedSession', null); // یوزر ڈیلیٹ/غیرفعال ہو چکا ہو تو یاد رکھا ہوا سیشن بھی صاف کر دیں
     return false;
@@ -13113,6 +13119,7 @@ function logout(){
     document.body.classList.remove('role-admin','role-salesman','role-customer');
     document.getElementById('pinInput').value = '';
     saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
+    try{ sessionStorage.removeItem('fm_bioSessionOk'); }catch(e){} // 👆 لاگ آؤٹ پر فنگر پرنٹ کی سیشن نشانی بھی صاف — اگلی بار فنگر پرنٹ دوبارہ مانگے گا
     document.getElementById('app').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
     // ---------- 🧪 FMtest01: کسٹمر لاگ ان کی حالت بھی صاف کر دیں تاکہ اگلی بار خالی سکرین ملے ----------
@@ -21633,7 +21640,7 @@ async function bioLogin(){
       allowCredentials: [{ type: 'public-key', id: _bioUnB64(c.id), transports: ['internal'] }],
       userVerification: 'required', timeout: 60000
     }});
-    if(a){ window.__bioVerified = true; _bioBusy = false; finishLogin(admin, true); return; }
+    if(a){ window.__bioVerified = true; try{ sessionStorage.setItem('fm_bioSessionOk','1'); }catch(e){} _bioBusy = false; finishLogin(admin, true); return; }
   }catch(e){
     const m = document.getElementById('bioLoginMsg'); if(m){ m.textContent = '❌ ٹچ نہیں ہوا — دوبارہ 👆 دبائیں یا پن لکھیں'; }
   }
