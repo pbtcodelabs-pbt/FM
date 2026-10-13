@@ -9354,7 +9354,7 @@ function getDeveloperContact(){
 // 🆕 FM1310TU381: 🔧 فوری فکس — آرڈر ٹیکنگ سے بنے بل کو فائنل کرتے وقت جھوٹی 'کسٹمر کا نام چنیں' روک ختم۔ اب select خالی ہو مگر بل سورس آرڈر سے بنا ہو تو اُسی آرڈر کے کسٹمر سے نام خودکار بحال
 // 🆕 FM1310TU382: 🔧 Advance Order پوسٹر کا نیچے ٹوٹل — پہلے دائیں کنارے سے کٹ کر Rs./ہندسے غائب ہو جاتے تھے؛ اب پوری چوڑائی میں مرکز، فارمیٹ RS=رقم= ، اور لمبی رقم پر فونٹ خودکار فٹ (کوئی ہندسہ نہ کٹے)
 // 🆕 FM1310TU383: 🎨 ایڈمن پینڈنگ آرڈرز — ہر کسٹمر کا الگ رنگ ابھرا ہوا کمپیکٹ کارڈ (کم چوڑائی، ایک لائن، زیادہ بل)؛ اور 'نیا آرڈر پہلے' فلٹر فکس — ترتیب چننے پر گروپ بندی ٹوٹ کر پوری فہرست اسی ترتیب میں (نیا واقعی سب سے اوپر)
-const APP_BUILD_VERSION = 'FM1310TU383'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1310TU384'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -34604,7 +34604,7 @@ function _renderAdminPendingOrdersScreenCore(){
     const itemCount = o.items.reduce((a,i)=>a+i.qty, 0);
     const when = new Date(o.createdAt).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
     const hue = _apHue(o.customerName);
-    const bg = `hsl(${hue},70%,96%)`, bd = `hsl(${hue},55%,62%)`, nameCol = `hsl(${hue},65%,30%)`;
+    const bg = `hsl(${hue},75%,86%)`, bd = `hsl(${hue},60%,45%)`, nameCol = `hsl(${hue},70%,25%)`;
     const statusTag = hasRate
       ? `<span style="flex:0 0 auto; background:#dcfce7; color:#15803d; font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:6px;">✅ تیار</span>`
       : `<span style="flex:0 0 auto; background:#fef3c7; color:#b45309; font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:6px;">⏳ ریٹ</span>`;
@@ -34614,13 +34614,13 @@ function _renderAdminPendingOrdersScreenCore(){
           <span style="flex:1 1 auto; min-width:0; font-weight:900; font-size:13px; color:${nameCol}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🧑 ${o.customerName}</span>
           ${statusTag}
         </div>
-        <div onclick="fulfillAdvanceOrder(${o.id})" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:2px; font-size:10.5px; color:#475569; font-weight:700;">
+        <div onclick="fulfillAdvanceOrder(${o.id})" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:2px; font-size:10.5px; color:#1e293b; font-weight:800;">
           <span style="white-space:nowrap;">${when} • ${itemCount} آئٹم</span>
-          ${hasRate ? `<span style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; color:#15803d; white-space:nowrap;">Rs. ${advOrderTotal(o).toLocaleString()}</span>` : ''}
+          ${hasRate ? `<span style="font-family:'Arial Black',Arial,sans-serif; font-weight:900; color:#14532d; white-space:nowrap;">Rs. ${advOrderTotal(o).toLocaleString()}</span>` : ''}
         </div>
         <div style="display:flex; gap:5px; margin-top:4px;" onclick="event.stopPropagation();">
-          <button onclick="openAdvOrderPreview(${o.id})" style="flex:1; padding:4px 6px; font-size:10.5px; font-weight:800; border:none; border-radius:7px; background:#e0e7ff; color:#3730a3; cursor:pointer; font-family:inherit;">👁️ پریویو</button>
-          <button onclick="deleteAdvanceOrder(${o.id})" style="flex:1; padding:4px 6px; font-size:10.5px; font-weight:800; border:none; border-radius:7px; background:#fee2e2; color:#b91c1c; cursor:pointer; font-family:inherit;">🗑️ ڈیلیٹ</button>
+          <button onclick="openAdvOrderPreview(${o.id})" style="flex:1; padding:5px 6px; font-size:10.5px; font-weight:800; border:none; border-radius:7px; background:#fff; color:#3730a3; cursor:pointer; font-family:inherit; box-shadow:0 1px 2px rgba(0,0,0,.15);">👁️ پریویو</button>
+          <button onclick="deleteAdvanceOrder(${o.id})" style="flex:1; padding:5px 6px; font-size:10.5px; font-weight:800; border:none; border-radius:7px; background:#fff; color:#b91c1c; cursor:pointer; font-family:inherit; box-shadow:0 1px 2px rgba(0,0,0,.15);">🗑️ ڈیلیٹ</button>
         </div>
       </div>`;
   };
