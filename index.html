@@ -9340,7 +9340,8 @@ function getDeveloperContact(){
 // 🆕 FM1210MO371: ڈبہ ① میں صرف بیوپاریوں کا قرض، سارا جانے والا کیش (بیوپاری ادائیگی + اخراجات) صرف ڈبہ ⑤ میں
 // 🆕 FM1210MO372: مکمل سمری کی پٹی دو حصوں میں — "اس وقت ہاتھ میں کیش" (کیش آیا − کیش گیا) رقم کے ساتھ + مکمل سمری بٹن
 // 🆕 FM1210MO373: بل کا کارٹ — گول سیریل نمبر ختم، نام دائیں کونے پر، قیمت کے ساتھ "مزدوری" کا کالم (پیچھے سے لگی مزدوری نظر آئے اور یہیں درست ہو سکے)
-const APP_BUILD_VERSION = 'FM1210MO373'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1310TU374: 👆 فنگر پرنٹ لاگ اِن — درمیان والا بڑا "فنگر پرنٹ سے لاگ اِن" بلاک مکمل ختم؛ اب لاگ اِن اسکرین کھلتے ہی فون کا اپنا فنگر پرنٹ پاپ اپ خودبخود کھلتا ہے (باقی ایپس کی طرح)، منسوخ/ناکام ہونے پر صرف چھوٹا "👆 دوبارہ ٹچ کریں" لنک
+const APP_BUILD_VERSION = 'FM1310TU374'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10515,7 +10516,7 @@ async function setupLoginScreen(){
     // ---------- 🚀 سبسکرپشن/ٹرائل فعال ہو (یا PIN ابھی تک ڈیفالٹ ہو) تو خوش آمدید سکرین پر رکنے کی بجائے
     // خودکار سیدھا ایپ میں داخل کر دیں — ایک اضافی "Enter App" ٹیپ کی ضرورت نہ رہے ----------
     try{ applyLoginDeviceLock(); }catch(e){}
-    try{ renderBioLoginButton(); }catch(e){}
+    try{ _resetBioAutoFlag(); autoBioPrompt(); }catch(e){}
     if(skipPin){
       quickEnterApp();
       return;
@@ -12662,7 +12663,7 @@ function tryAutoLogin(){
   let user = usersData.find(u => u.user_id === remembered.user_id && (!remembered.role || u.role === remembered.role) && (!remembered.name || u.name === remembered.name));
   if(!user && remembered.role && remembered.name) user = usersData.find(u => u.role === remembered.role && u.name === remembered.name); // id بدل گئی ہو تو نام/عہدہ سے
   try{ _migratePhoneOwner(); if(user && !isPhoneOwnerUser(user)){ saveToStorage('rememberedSession', null); return false; } }catch(e){}
-  try{ if(user && user.role === 'admin' && getBioCred() && _bioAdminUser()){ setTimeout(() => { try{ renderBioLoginButton(); }catch(e){} }, 300); return false; } }catch(e){}
+  try{ if(user && user.role === 'admin' && getBioCred() && _bioAdminUser()){ setTimeout(() => { try{ _resetBioAutoFlag(); autoBioPrompt(); }catch(e){} }, 300); return false; } }catch(e){}
   if(!user || !user.is_active){
     saveToStorage('rememberedSession', null); // یوزر ڈیلیٹ/غیرفعال ہو چکا ہو تو یاد رکھا ہوا سیشن بھی صاف کر دیں
     return false;
@@ -21627,27 +21628,48 @@ async function bioLogin(){
       allowCredentials: [{ type: 'public-key', id: _bioUnB64(c.id), transports: ['internal'] }],
       userVerification: 'required', timeout: 60000
     }});
-    if(a){ window.__bioVerified = true; finishLogin(admin, true); }
+    if(a){ window.__bioVerified = true; _bioBusy = false; finishLogin(admin, true); return; }
   }catch(e){
-    const m = document.getElementById('bioLoginMsg'); if(m){ m.textContent = '❌ ٹچ نہیں ہوا — دوبارہ دبائیں یا پن لکھیں'; }
+    const m = document.getElementById('bioLoginMsg'); if(m){ m.textContent = '❌ ٹچ نہیں ہوا — دوبارہ 👆 دبائیں یا پن لکھیں'; }
   }
   _bioBusy = false;
 }
-function renderBioLoginButton(){
+
+// ---------- 👆 صدام کی ہدایت (13 اکتوبر): پہلے درمیان میں ایک بڑا "فنگر پرنٹ سے لاگ اِن" والا بلاک/بٹن تھا،
+//   جس پر پہلے ٹچ کرنا پڑتا تھا تب فون کا فنگر پرنٹ پاپ اپ کھلتا تھا۔ وہ بڑا بلاک مکمل ختم کر دیا گیا۔
+//   اب لاگ اِن اسکرین کھلتے ہی، اگر اس فون پر فنگر پرنٹ آن ہے، خودبخود فون کا اپنا فنگر پرنٹ پاپ اپ کھل جاتا ہے
+//   (بالکل باقی ایپس کی طرح)۔ اگر بندہ منسوخ کر دے یا ناکام ہو، تو صرف ایک چھوٹا سا "👆 دوبارہ ٹچ کریں"
+//   والا لنک نظر آتا ہے تاکہ وہ پھنسے نہیں — اور پن سے لاگ اِن ہمیشہ ساتھ چلتا رہتا ہے۔ ----------
+let _bioAutoTried = false;
+function _resetBioAutoFlag(){ _bioAutoTried = false; }
+async function autoBioPrompt(){
+  // لاگ اِن اسکرین کھلتے ہی خودکار فنگر پرنٹ — صرف ایک بار فی اسکرین، تاکہ بار بار پاپ اپ نہ آئے
+  const on = !!(getBioCred() && _bioAdminUser());
+  renderBioRetryLink(on);           // پرانا بڑا بٹن چھپا رہے گا؛ ضرورت پر صرف چھوٹا لنک بنے گا
+  if(!on) return;
+  if(!(await isBioSupported())) return;
+  if(_bioAutoTried) return;
+  _bioAutoTried = true;
+  // تھوڑا وقفہ تاکہ لاگ اِن اسکرین مکمل نظر آ جائے، پھر خودبخود فون کا پاپ اپ
+  setTimeout(() => { try{ bioLogin(); }catch(e){} }, 350);
+}
+// چھوٹا سا دوبارہ-کوشش لنک (بڑا بلاک نہیں) — صرف تب کام کا جب خودکار کوشش منسوخ/ناکام ہو
+function renderBioRetryLink(on){
   const adminRow = document.querySelectorAll('#loginPinWrap > .loginRoleRow')[0];
   if(!adminRow) return;
   let b = document.getElementById('bioLoginBox');
-  const on = !!(getBioCred() && _bioAdminUser());
   if(!on){ if(b) b.style.display = 'none'; return; }
   if(!b){
     b = document.createElement('div'); b.id = 'bioLoginBox';
-    b.style.cssText = 'text-align:center; margin:8px 0 4px;';
-    b.innerHTML = `<button type="button" onclick="bioLogin()" style="width:auto; display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border:none; border-radius:14px; background:linear-gradient(160deg,#22c55e,#15803d); color:#fff; font-size:17px; font-weight:800; box-shadow:0 4px 0 #14532d; cursor:pointer; font-family:inherit;"><span style="font-size:24px;">👆</span> فنگر پرنٹ سے لاگ اِن</button><div id="bioLoginMsg" style="font-size:12px; color:#fecaca; margin-top:4px; min-height:14px;"></div>`;
+    b.style.cssText = 'text-align:center; margin:4px 0 2px;';
+    b.innerHTML = `<a href="javascript:void(0)" onclick="bioLogin()" style="display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:700; color:#bbf7d0; text-decoration:underline; cursor:pointer; font-family:inherit;"><span style="font-size:16px;">👆</span> فنگر پرنٹ سے لاگ اِن</a><div id="bioLoginMsg" style="font-size:12px; color:#fecaca; margin-top:3px; min-height:14px;"></div>`;
     const bar = adminRow.querySelector('.loginRoleInputBar');
     if(bar) adminRow.insertBefore(b, bar); else adminRow.appendChild(b);
   }
   b.style.display = '';
 }
+// پرانے نام سے کہیں کال ہو تو خودکار پرامپٹ ہی چلے (کوئی پرانی کال ٹوٹے نہیں)
+function renderBioLoginButton(){ try{ autoBioPrompt(); }catch(e){} }
 function renderBioSettingsCard(){
   const box = document.getElementById('bioSettingsBody'); if(!box) return;
   const c = getBioCred();
