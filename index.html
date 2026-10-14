@@ -9364,7 +9364,8 @@ function getDeveloperContact(){
 // 🆕 FM1410WE385: ہوم پیج — آئیکن سائز والا سلائیڈر ختم؛ اب 1، 2، 3، 4، 5 فی لائن چننے کے بٹن، سائز خودکار فٹ
 // 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
 // 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
-const APP_BUILD_VERSION = 'FM1410WE387'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
+const APP_BUILD_VERSION = 'FM1410WE388'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -32808,7 +32809,11 @@ function rlHistRows(c){
     const g = old ? 0 : Math.round(gDay[d] || 0), r = old ? 0 : Math.round(rDay[d] || 0);
     return { d, g, r, s: g > 0 ? Math.max(0, g - r) : 0 };
   });
-  return { prev, rows };
+  // 🛒 FM1410WE388: آج (اندراج والے دن) کی خریداری بھی — پہلے صرف پچھلے دن نظر آتے تھے
+  const tOld = !!zr && entryD < zr;
+  const tg = tOld ? 0 : Math.round(gDay[entryD] || 0), tr = tOld ? 0 : Math.round(rDay[entryD] || 0);
+  const today = { d: entryD, g: tg, r: tr, s: tg > 0 ? Math.max(0, tg - tr) : 0 };
+  return { prev, rows, today };
 }
 function rlHistBodyHtml(c, sel, z, numF){
   const H = rlHistRows(c);
@@ -32816,7 +32821,10 @@ function rlHistBodyHtml(c, sel, z, numF){
   const isKal = (row.d === rlPrevBizDay() && rlEntryDayMode === 'today');
   const lbl = (isKal ? '🛒 کل کی خریداری' : '🛒 ' + bizFmt(row.d) + ' کی خریداری');
   const cell = (t, v, bg, fg, bd) => `<div style="flex:1; background:${bg}; border:1px solid ${bd}; border-radius:7px; padding:2px 4px; text-align:center;"><div style="font-size:${z(9.5)}px; font-weight:700; color:${fg};">${t}</div><div style="${numF} font-size:${z(14)}px; color:${fg}; direction:ltr;">Rs. ${v.toLocaleString()}</div></div>`;
-  return { lbl, vals: cell('خریداری', row.g, '#fff7ed', '#c2410c', '#fdba74') + cell('وصولی', row.r, '#f0fdf4', '#15803d', '#86efac') + cell('کم وصولی', row.s, row.s > 0 ? '#fef2f2' : '#f8fafc', row.s > 0 ? '#b91c1c' : '#64748b', row.s > 0 ? '#fca5a5' : '#e2e8f0'), rows: H.rows, sel: row.d };
+  const T = H.today, isAaj = rlEntryDayMode === 'today';
+  const todayLbl = '🛒 ' + (isAaj ? 'آج' : bizFmt(T.d)) + ' کی خریداری (' + bizFmt(T.d) + ')';
+  const todayVals = cell('خریداری', T.g, '#fff7ed', '#c2410c', '#fdba74') + cell('وصولی', T.r, '#f0fdf4', '#15803d', '#86efac') + cell('کم وصولی', T.s, T.s > 0 ? '#fef2f2' : '#f8fafc', T.s > 0 ? '#b91c1c' : '#64748b', T.s > 0 ? '#fca5a5' : '#e2e8f0');
+  return { todayLbl, todayVals, lbl, vals: cell('خریداری', row.g, '#fff7ed', '#c2410c', '#fdba74') + cell('وصولی', row.r, '#f0fdf4', '#15803d', '#86efac') + cell('کم وصولی', row.s, row.s > 0 ? '#fef2f2' : '#f8fafc', row.s > 0 ? '#b91c1c' : '#64748b', row.s > 0 ? '#fca5a5' : '#e2e8f0'), rows: H.rows, sel: row.d };
 }
 function rlHistPick(cid, val){
   rlHistSel[cid] = val;
@@ -32852,6 +32860,10 @@ function buildRlEmployeeCard(c, dr){
   // ---------- 🛒 FM1110SU367: کل کی خریداری + ڈیٹ ڈراپ ڈاؤن (صرف دیکھنے کے لیے) ----------
   const _hb = rlHistBodyHtml(c, rlHistSel[cid], z, numF);
   const histBoxHtml = `
+      <div dir="rtl" style="background:#ecfdf5; border:1.5px solid #6ee7b7; border-radius:9px; padding:4px 6px; margin-bottom:5px;">
+        <div style="font-size:${z(11.5)}px; font-weight:800; color:#065f46; margin-bottom:3px;">${_hb.todayLbl}</div>
+        <div style="display:flex; gap:3px;">${_hb.todayVals}</div>
+      </div>
       <div dir="rtl" style="background:#fffbeb; border:1.5px solid #fcd34d; border-radius:9px; padding:4px 6px; margin-bottom:5px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-bottom:3px;">
           <span id="rlHistLbl-${cid}" style="font-size:${z(11.5)}px; font-weight:800; color:#92400e;">${_hb.lbl}</span>
