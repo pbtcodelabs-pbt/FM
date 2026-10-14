@@ -9365,7 +9365,8 @@ function getDeveloperContact(){
 // 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
 // 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
 // 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
-const APP_BUILD_VERSION = 'FM1410WE388'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1410WE389: ریکوری کارڈ کی ترتیب — کل کی خریداری اوپر، آج کی خریداری نیچے (وصولی کے خانے کے سامنے)
+const APP_BUILD_VERSION = 'FM1410WE389'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -32860,10 +32861,6 @@ function buildRlEmployeeCard(c, dr){
   // ---------- 🛒 FM1110SU367: کل کی خریداری + ڈیٹ ڈراپ ڈاؤن (صرف دیکھنے کے لیے) ----------
   const _hb = rlHistBodyHtml(c, rlHistSel[cid], z, numF);
   const histBoxHtml = `
-      <div dir="rtl" style="background:#ecfdf5; border:1.5px solid #6ee7b7; border-radius:9px; padding:4px 6px; margin-bottom:5px;">
-        <div style="font-size:${z(11.5)}px; font-weight:800; color:#065f46; margin-bottom:3px;">${_hb.todayLbl}</div>
-        <div style="display:flex; gap:3px;">${_hb.todayVals}</div>
-      </div>
       <div dir="rtl" style="background:#fffbeb; border:1.5px solid #fcd34d; border-radius:9px; padding:4px 6px; margin-bottom:5px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-bottom:3px;">
           <span id="rlHistLbl-${cid}" style="font-size:${z(11.5)}px; font-weight:800; color:#92400e;">${_hb.lbl}</span>
@@ -32872,6 +32869,11 @@ function buildRlEmployeeCard(c, dr){
           </select>
         </div>
         <div id="rlHistVals-${cid}" style="display:flex; gap:3px;">${_hb.vals}</div>
+      </div>
+      <!-- 🛒 FM1410WE389: ترتیب — اوپر کل کی خریداری، نیچے (رقم والے خانے کے بالکل سامنے) آج کی خریداری -->
+      <div dir="rtl" style="background:#ecfdf5; border:1.5px solid #6ee7b7; border-radius:9px; padding:4px 6px; margin-bottom:5px;">
+        <div style="font-size:${z(11.5)}px; font-weight:800; color:#065f46; margin-bottom:3px;">${_hb.todayLbl}</div>
+        <div style="display:flex; gap:3px;">${_hb.todayVals}</div>
       </div>`;
   const splitRowsHtml = isDone ? '' : rows.map((m, i) => `
       <div style="display:flex; gap:3px; align-items:center; margin-bottom:4px;">
