@@ -450,6 +450,8 @@ function __appHostKind(h, p){
   /* ---------- 🍇 صدام کی ہدایت پر: ہوم پیج پر لمبی عمودی لائن کی بجائے اب صرف 3 باریک آئٹم ایک ہی
        قطار میں (Pending Orders / Customers / Suppliers) — باقی مین ایریا خالی رہتا ہے ---------- */
   /* ✅ FM110TH273 (صدام کی ہدایت): 26 ستمبر والی پابندی ختم — ملازم/منشی آرڈر بکنگ سے خود بھی سبزیاں حاضر/غیر حاضر کر سکے */
+  .homeColsBtn{width:38px; height:38px; border-radius:50%; border:2px solid #0f766e; background:#fff; color:#0f766e; font:900 17px/1 Arial,sans-serif; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,.12); padding:0;}
+  .homeColsBtn.active{background:#0f766e; color:#fff; box-shadow:0 3px 8px rgba(15,118,110,.45);}
   .homeIconGrid{display:grid; grid-template-columns:repeat(var(--homeCols,3), 1fr); gap:6px 4px; margin-top:2px;}
   /* 🎨 26 ستمبر: سفید ڈبے/بارڈر/سایہ ختم — صرف رنگین آئیکن اور اس کے نیچے نستعلیق نام، کم جگہ میں زیادہ آئیکن */
   .homeIconGrid .homeIconTile{background:transparent !important; box-shadow:none !important; border:none !important; padding:6px 2px 2px !important; gap:3px !important; border-radius:14px !important; justify-content:flex-start !important;}
@@ -3588,11 +3590,16 @@ function __appHostKind(h, p){
 
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — Admin کے لیے اب انہی کی منتخب کردہ Shortcut اسکرینیں،
            Salesman کے لیے اسے Assign کی گئی اسکرینیں ---------- -->
-      <!-- 🔍 26 ستمبر: ٹائلز کا سائز — سلائیڈر سے ایک لائن میں 3، 4، 5 یا 6 آئیکن -->
-      <div id="homeSizeBar" dir="rtl" style="display:flex; align-items:center; gap:8px; margin:4px 2px 8px; padding:5px 10px; border-radius:20px; background:rgba(15,118,110,.07);">
-        <span style="font-size:15px;">🔍</span>
-        <input type="range" id="homeColsSlider" min="3" max="6" step="1" value="3" oninput="setHomeGridCols(this.value)" style="flex:1; direction:ltr; accent-color:#0f766e;">
-        <span id="homeColsLabel" style="font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:14px; min-width:62px; text-align:center; color:#0f766e;">3 فی لائن</span>
+      <!-- 🔢 FM1410WE385: سلائیڈر ختم — اب ایک لائن میں 1، 2، 3، 4 یا 5 آئیکن چننے کے بٹن (سائز خود فٹ) -->
+      <div id="homeSizeBar" dir="rtl" style="display:flex; align-items:center; justify-content:center; gap:8px; margin:4px 2px 8px; padding:6px 10px; border-radius:20px; background:rgba(15,118,110,.07);">
+        <span style="font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-size:14px; color:#0f766e;">فی لائن</span>
+        <div id="homeColsBtns" dir="ltr" style="display:flex; gap:8px;">
+          <button type="button" class="homeColsBtn" data-cols="1" onclick="setHomeGridCols(1)">1</button>
+          <button type="button" class="homeColsBtn" data-cols="2" onclick="setHomeGridCols(2)">2</button>
+          <button type="button" class="homeColsBtn" data-cols="3" onclick="setHomeGridCols(3)">3</button>
+          <button type="button" class="homeColsBtn" data-cols="4" onclick="setHomeGridCols(4)">4</button>
+          <button type="button" class="homeColsBtn" data-cols="5" onclick="setHomeGridCols(5)">5</button>
+        </div>
       </div>
       <div class="homeIconGrid" id="homeIconGrid"></div>
     </div>
@@ -9354,7 +9361,8 @@ function getDeveloperContact(){
 // 🆕 FM1310TU381: 🔧 فوری فکس — آرڈر ٹیکنگ سے بنے بل کو فائنل کرتے وقت جھوٹی 'کسٹمر کا نام چنیں' روک ختم۔ اب select خالی ہو مگر بل سورس آرڈر سے بنا ہو تو اُسی آرڈر کے کسٹمر سے نام خودکار بحال
 // 🆕 FM1310TU382: 🔧 Advance Order پوسٹر کا نیچے ٹوٹل — پہلے دائیں کنارے سے کٹ کر Rs./ہندسے غائب ہو جاتے تھے؛ اب پوری چوڑائی میں مرکز، فارمیٹ RS=رقم= ، اور لمبی رقم پر فونٹ خودکار فٹ (کوئی ہندسہ نہ کٹے)
 // 🆕 FM1310TU383: 🎨 ایڈمن پینڈنگ آرڈرز — ہر کسٹمر کا الگ رنگ ابھرا ہوا کمپیکٹ کارڈ (کم چوڑائی، ایک لائن، زیادہ بل)؛ اور 'نیا آرڈر پہلے' فلٹر فکس — ترتیب چننے پر گروپ بندی ٹوٹ کر پوری فہرست اسی ترتیب میں (نیا واقعی سب سے اوپر)
-const APP_BUILD_VERSION = 'FM1310TU384'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1410WE385: ہوم پیج — آئیکن سائز والا سلائیڈر ختم؛ اب 1، 2، 3، 4، 5 فی لائن چننے کے بٹن، سائز خودکار فٹ
+const APP_BUILD_VERSION = 'FM1410WE385'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9988,8 +9996,9 @@ const HOME_TILES_SALESMAN = [
 // ---------- ہوم پیج پر ادھورے بل کا کارڈ — جب تک بل مکمل یا خود ڈیلیٹ نہ کریں، ہمیشہ نظر آتا رہے ----------
 // ---------- 🔍 ہوم ٹائلز کا سائز — اسی فون پر یاد رہتا ہے ---------- -->
 function setHomeGridCols(n){
-  n = Math.max(3, Math.min(6, parseInt(n, 10) || 3));
-  const sizes = {3:[64,34,16], 4:[54,28,14], 5:[46,24,12.5], 6:[40,21,11]}[n];
+  // 🔢 FM1410WE385: 1 سے 5 آئیکن فی لائن (بٹن) — جتنے کم آئیکن، اتنا بڑا سائز
+  n = Math.max(1, Math.min(5, parseInt(n, 10) || 3));
+  const sizes = {1:[120,66,24], 2:[88,48,19], 3:[64,34,16], 4:[54,28,14], 5:[46,24,12.5]}[n];
   const grid = document.getElementById('homeIconGrid');
   if(grid){
     grid.style.setProperty('--homeCols', n);
@@ -9997,8 +10006,7 @@ function setHomeGridCols(n){
     grid.style.setProperty('--homeIconEmoji', sizes[1] + 'px');
     grid.style.setProperty('--homeLabelSize', sizes[2] + 'px');
   }
-  const sl = document.getElementById('homeColsSlider'); if(sl && String(sl.value) !== String(n)) sl.value = n;
-  const lb = document.getElementById('homeColsLabel'); if(lb) lb.textContent = n + ' فی لائن';
+  document.querySelectorAll('#homeColsBtns .homeColsBtn').forEach(b => b.classList.toggle('active', String(b.dataset.cols) === String(n)));
   try{ localStorage.setItem('homeGridCols', String(n)); }catch(e){}
 }
 function applySavedHomeGridCols(){
