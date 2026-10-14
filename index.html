@@ -9362,7 +9362,8 @@ function getDeveloperContact(){
 // 🆕 FM1310TU382: 🔧 Advance Order پوسٹر کا نیچے ٹوٹل — پہلے دائیں کنارے سے کٹ کر Rs./ہندسے غائب ہو جاتے تھے؛ اب پوری چوڑائی میں مرکز، فارمیٹ RS=رقم= ، اور لمبی رقم پر فونٹ خودکار فٹ (کوئی ہندسہ نہ کٹے)
 // 🆕 FM1310TU383: 🎨 ایڈمن پینڈنگ آرڈرز — ہر کسٹمر کا الگ رنگ ابھرا ہوا کمپیکٹ کارڈ (کم چوڑائی، ایک لائن، زیادہ بل)؛ اور 'نیا آرڈر پہلے' فلٹر فکس — ترتیب چننے پر گروپ بندی ٹوٹ کر پوری فہرست اسی ترتیب میں (نیا واقعی سب سے اوپر)
 // 🆕 FM1410WE385: ہوم پیج — آئیکن سائز والا سلائیڈر ختم؛ اب 1، 2، 3، 4، 5 فی لائن چننے کے بٹن، سائز خودکار فٹ
-const APP_BUILD_VERSION = 'FM1410WE385'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
+const APP_BUILD_VERSION = 'FM1410WE386'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -14854,7 +14855,7 @@ function setBillQtyTableManual(variantId, value, inputEl){
   // خلاف چیک ہو — منشی کے بھیجے پینڈنگ بلوں میں بک شدہ مقدار کو یہاں دوبارہ فروخت نہ ہونے دیں ---------- -->
   const availableQtyBl = Math.max(0, (product.stock||0) - (product.reserved||0));
   if(qty > 0 && stockGuardOn() && qty > availableQtyBl){
-    alert(smStockMsg(availableQtyBl));
+    billStockOutPrompt(variantId, availableQtyBl, () => setBillQtyTableManual(variantId, value));
     qty = availableQtyBl;
   }
   const existing = Billing.cart.find(c => c.variant_id === variantId);
@@ -14900,7 +14901,7 @@ function addToCart(variantId){
   // ---------- 🔗 صدام کی ہدایت (22 ستمبر): خام product.stock نہیں، "دستیاب" (stock - reserved) کے خلاف چیک کریں ---------- -->
   const availableAddBl = Math.max(0, (product.stock||0) - (product.reserved||0));
   if(stockGuardOn() && (qtyAlreadyInCart + 1) > availableAddBl){
-    alert(smStockMsg(availableAddBl));
+    billStockOutPrompt(variantId, availableAddBl, () => addToCart(variantId));
     return;
   }
 
@@ -15075,7 +15076,7 @@ function addReverseCalcToCart(){
   // ---------- 🔗 صدام کی ہدایت (22 ستمبر): خام v.stock نہیں، "دستیاب" (stock - reserved) کے خلاف چیک کریں ---------- -->
   const availableGramsBl = Math.max(0, (v.stock||0) - (v.reserved||0));
   if(stockGuardOn() && resultGrams > availableGramsBl){
-    alert(smStockMsg(availableGramsBl));
+    billStockOutPrompt(v.variant_id, availableGramsBl, null);
     return;
   }
 
@@ -15214,7 +15215,7 @@ function changeQty(variantId, delta){
     // ---------- 🔗 صدام کی ہدایت (22 ستمبر): خام product.stock نہیں، "دستیاب" (stock - reserved) کے خلاف چیک کریں ---------- -->
     const availableChgBl = product ? Math.max(0, (product.stock||0) - (product.reserved||0)) : 0;
     if(product && (item.qty + delta) > availableChgBl){
-      alert(smStockMsg(availableChgBl));
+      billStockOutPrompt(variantId, availableChgBl, () => changeQty(variantId, delta));
       return;
     }
   }
@@ -15995,7 +15996,7 @@ function finalizeInvoice(){
       const _othersReserved = v ? Math.max(0, (Number(v.reserved) || 0) - _myReservedFor(item.variant_id)) : 0;
       const availableFinalizeBl = v ? Math.max(0, (v.stock||0) - _othersReserved) : 0;
       if(v && item.qty > availableFinalizeBl + 0.0001){
-        alert('"' + item.name + '" — ' + smStockMsg(availableFinalizeBl));
+        billStockOutPrompt(item.variant_id, availableFinalizeBl, null, item.name);
         return;
       }
     }
@@ -30248,6 +30249,7 @@ function openOtAddStockModal(){
 }
 function closeOtAddStockModal(){
   document.getElementById('otAddStockModal').classList.remove('show');
+  if(billStockReturnCtx){ billStockReturnCtx = null; billStockRefreshBilling(); } // ↩️ بلنگ پر واپس
 }
 function otAddStockOpenNewPackingPicker(){
   packingPickerCtx = { isNewDraft:true, targetInputId:'otAddStockNewPacking' };
@@ -30414,6 +30416,7 @@ function otAddStockCommit(productId, variantId){
   if(curEl) curEl.textContent = Math.max(0, (Number(v.stock)||0) - (Number(v.reserved)||0));
   otSyncFlatCacheStock(variantId);
   updateOtStockCell(variantId); // ---------- نیچے آرڈر ٹیکنگ کی اصل فہرست (سٹاک کالم) میں فوری اپڈیٹ ---------- -->
+  billStockAfterAdd(variantId); // ↩️ FM1410WE386: بلنگ سے آئے تھے تو خودکار واپس بل پر
 }
 function otAddStockCreateNewVeg(){
   const name = (document.getElementById('otAddStockNewName')?.value || '').trim();
@@ -31378,6 +31381,64 @@ function smAvailForVariant(vid, mineQty){
   if(!fp.v) return 0;
   const others = Math.max(0, (Number(fp.v.reserved) || 0) - (Number(mineQty) || 0));
   return _chRound(Math.max(0, (Number(fp.v.stock) || 0) - others));
+}
+// ---------- ↩️ FM1410WE386 (صدام کی ہدایت): بل بناتے وقت سٹاک ختم ہو تو صرف وارننگ نہیں — وہیں "➕ سٹاک ایڈ کریں" بٹن۔
+// دبانے پر سٹاک ایڈ والا پاپ اپ اسی چیز کی تلاش کے ساتھ کھلتا ہے؛ ✅ دبا کر سٹاک جمع ہوتے ہی خودکار واپس بل پر
+// اور جو چیز ڈالنی تھی وہ خود بل میں چلی جاتی ہے (وقت ضائع نہ ہو) ----------
+let billStockReturnCtx = null;
+function billStockOutPrompt(variantId, avail, retry, itemName){
+  const fp = findProductAndVariant(Number(variantId));
+  const nm = itemName || (fp.p ? fp.p.name + (fp.v && fp.v.label ? ' (' + fp.v.label + ')' : '') : '');
+  let ov = document.getElementById('billStockOutModal');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'billStockOutModal'; ov.className = 'modalOverlay'; ov.style.zIndex = '1200';
+    ov.onclick = (e) => { if(e.target === ov) closeBillStockOutPrompt(); };
+    document.body.appendChild(ov);
+  }
+  ov._ctx = {variantId: Number(variantId), retry: retry || null};
+  ov.innerHTML = `<div class="modalBox" dir="rtl" style="max-width:380px; text-align:center; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+      <div style="font-size:40px; line-height:1.2;">📦</div>
+      ${nm ? `<div style="font-weight:900; font-size:17px; color:#134e2c; margin:4px 0;">${nm}</div>` : ''}
+      <div style="font-weight:800; font-size:15px; color:#b91c1c; margin:6px 0 14px; line-height:2;">${smStockMsg(avail)}</div>
+      <button type="button" onclick="billStockGoAdd()" style="width:100%; padding:13px; border:none; border-radius:12px; background:linear-gradient(180deg,#16a34a,#15803d); color:#fff; font-size:16px; font-weight:900; cursor:pointer; box-shadow:0 3px 8px rgba(21,128,61,.35);">➕ سٹاک ایڈ کریں</button>
+      <button type="button" onclick="closeBillStockOutPrompt()" style="width:100%; margin-top:8px; padding:11px; border:none; border-radius:12px; background:#f1f5f9; color:#334155; font-size:14px; font-weight:800; cursor:pointer;">↩️ بل پر واپس</button>
+    </div>`;
+  ov.classList.add('show');
+}
+function closeBillStockOutPrompt(){
+  const ov = document.getElementById('billStockOutModal'); if(ov) ov.classList.remove('show');
+}
+function billStockGoAdd(){
+  const ov = document.getElementById('billStockOutModal');
+  const ctx = ov && ov._ctx ? ov._ctx : null;
+  closeBillStockOutPrompt();
+  if(!ctx) return;
+  const m = document.getElementById('otAddStockModal');
+  if(!m){ alert('⚠️ سٹاک ایڈ والا صفحہ نہیں ملا'); return; }
+  if(m.parentNode !== document.body) document.body.appendChild(m); // آرڈر ٹیکنگ کی سکرین کے اندر سے نکال کر ہر جگہ دستیاب
+  billStockReturnCtx = ctx;
+  openOtAddStockModal();
+  const fp = findProductAndVariant(ctx.variantId);
+  if(fp.p){
+    try{ otAddStockPresenceMode = fp.p.isDormant ? 'absent' : 'present'; }catch(e){}
+    const si = document.getElementById('otAddStockSearchInput'); if(si) si.value = fp.p.name;
+    renderOtAddStockList(fp.p.name);
+  }
+  setTimeout(() => { const q = document.getElementById('otAddStockQty-' + ctx.variantId); if(q){ q.scrollIntoView({block:'center'}); q.focus(); } }, 150);
+}
+function billStockRefreshBilling(){
+  try{ if(typeof renderCart === 'function') renderCart(); }catch(e){}
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+}
+function billStockAfterAdd(variantId){
+  const ctx = billStockReturnCtx;
+  if(!ctx || ctx.variantId !== Number(variantId)) return;
+  billStockReturnCtx = null;
+  document.getElementById('otAddStockModal')?.classList.remove('show');
+  billStockRefreshBilling();
+  if(ctx.retry){ try{ ctx.retry(); }catch(e){} }
+  try{ if(typeof fmPkToast === 'function') fmPkToast('✅ سٹاک شامل — بل پر واپس', true); }catch(e){}
 }
 function smStockMsg(avail){
   return avail <= 0.0001
