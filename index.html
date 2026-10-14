@@ -9363,7 +9363,8 @@ function getDeveloperContact(){
 // 🆕 FM1310TU383: 🎨 ایڈمن پینڈنگ آرڈرز — ہر کسٹمر کا الگ رنگ ابھرا ہوا کمپیکٹ کارڈ (کم چوڑائی، ایک لائن، زیادہ بل)؛ اور 'نیا آرڈر پہلے' فلٹر فکس — ترتیب چننے پر گروپ بندی ٹوٹ کر پوری فہرست اسی ترتیب میں (نیا واقعی سب سے اوپر)
 // 🆕 FM1410WE385: ہوم پیج — آئیکن سائز والا سلائیڈر ختم؛ اب 1، 2، 3، 4، 5 فی لائن چننے کے بٹن، سائز خودکار فٹ
 // 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
-const APP_BUILD_VERSION = 'FM1410WE386'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
+const APP_BUILD_VERSION = 'FM1410WE387'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10140,11 +10141,17 @@ function renderHomeMoneySummary(){
   try{ S = computeBizSummary('today'); }catch(e){}
   const N = v => Math.round(Number(v) || 0);
   const supPay = N((suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_payable) || 0), 0));
-  const rec = N((customersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_receivable) || 0), 0));
+  // 🔧 FM1410WE387 (پیارے بھائی کی ہدایت): ادھار = کھاتوں کا کل بقایا − وہ وصولی جو ریکوری والا لے چکا مگر ابھی منظور نہیں ہوئی
+  //   (بالکل روزانہ ریکوری لسٹ کے "تازہ مکمل بقایہ" کی طرح)۔ "آج" = دکان کی کاروباری تاریخ، کیلنڈر نہیں
+  const recLedger = N((customersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_receivable) || 0), 0));
+  const pendRec = S ? N(S.pendingRec) : 0;
+  const rec = Math.max(0, recLedger - pendRec);
   const stock = S ? N(S.stockValue) : 0;
   const cashIn = S ? N(S.opening) + N(S.otherManual) + N(S.tBillCash) + N(S.tRecovery) + N(S.tOtherIn) : 0;
   const cashOut = S ? N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) : 0;
-  const net = rec + stock + cashIn - cashOut - supPay;
+  // ⑥ کیفیت: ادھار + ریکوری والوں کے پاس وصول شدہ رقم + سٹاک + گلے کا کیش + بیوپاریوں کے پاس ہمارا ایڈوانس − بیوپاری قرض − گاہکوں کا ایڈوانس
+  const supAdv = S ? N(S.supWallet) : 0, custAdv = S ? N(S.custWallet) : 0;
+  const net = rec + pendRec + stock + cashIn - cashOut + supAdv - supPay - custAdv;
   const todayProfit = S ? N(S.goodsProfit) - N(S.expTotal) : 0;
   // 💵 FM1210MO372: اس وقت ہاتھ میں کیش = ④ ٹوٹل کیش آیا − ⑤ ٹوٹل کیش گیا
   //    (اوپننگ کیش + دیگر آمدن + آج کے بلوں سے نقد + گاہکوں سے نقد وصولی + دیگر نقد آمد − بیوپاریوں کو ادائیگی − دیگر ادائیگی − آج کے اخراجات)
@@ -10172,7 +10179,9 @@ function renderHomeMoneySummary(){
   t('hmPayCap', `تمام بیوپاریوں کا کل بقایا ${f(supPay)}`);
   t('hmCashCap', S ? `اوپننگ ${f(S.opening)} + دیگر آمدن ${f(N(S.otherManual) + N(S.tOtherIn))} + نقد سیل ${f(S.tBillCash)} + وصولی ${f(S.tRecovery)}` : '');
   t('hmOutCap', S ? `بیوپاریوں کو ${f(S.tSupOut)} + دیگر ادائیگی ${f(S.tOtherOut)} + اخراجات ${f(S.tExp)}` : '');
-  t('hmNetCap', `ادھار ${f(rec)} + سٹاک ${f(stock)} + کیش آیا ${f(cashIn)} − کیش گیا ${f(cashOut)} − بیوپاری قرض ${f(supPay)}`);
+  t('hmNetCap', `ادھار ${f(rec)} + زیرِ منظوری وصولی ${f(pendRec)} + سٹاک ${f(stock)} + کیش آیا ${f(cashIn)} − کیش گیا ${f(cashOut)} + بیوپاریوں کے پاس ایڈوانس ${f(supAdv)} − بیوپاری قرض ${f(supPay)} − گاہکوں کا ایڈوانس ${f(custAdv)}`);
+  t('hmRecCap', `کھاتوں کا کل بقایا ${f(recLedger)} − زیرِ منظوری وصولی ${f(pendRec)} = ${f(rec)}`);
+  t('hmStkCap', 'حاضر سٹاک × چالان کا خرید ریٹ (پرانا مال پہلے بکا)');
   t('hmTodayCap', S ? `مال پر منافع ${f(S.goodsProfit)} − اخراجات ${f(S.expTotal)}` : '');
   document.querySelectorAll('#homeMoneyRow .hmVal, #homeMoneyRow2 .hmVal, #homeMoneyBottom .hmVal').forEach(el => {
     let size = 17; el.style.fontSize = size + 'px';
@@ -19493,10 +19502,23 @@ function logMunshiPurchaseEntry(v, qty, chalan, sourceLabel){
 }
 // ---------- سٹاک کی مالیت — ہر چالان اپنے ریٹ سے (ریٹ باقی ہو تو تازہ ترین خرید ریٹ) ---------- -->
 function variantStockValue(v){
+  // 📦 FM1410WE387: مالیت ہمیشہ اصل حاضر سٹاک (v.stock) کے مطابق — پہلے صرف چالانوں کا مجموعہ لیا جاتا تھا؛ چالان اور سٹاک
+  // میں فرق ہو (دستی ترمیم، دوسرے فون کی تبدیلی، مائنس سٹاک) تو مالیت غلط آتی تھی۔ اب پرانے چالان پہلے بکتے ہیں (FIFO):
+  // جتنا سٹاک ہے اتنا ہی نئے چالانوں سے گنا جاتا ہے؛ چالان کم ہوں تو باقی خرید ریٹ پر۔ ریٹ باقی ہو تو تازہ خرید ریٹ
   if(!v) return 0;
+  let left = Math.max(0, Number(v.stock) || 0);
+  if(!(left > 0)) return 0;
   const chs = (v.chalans || []).filter(c => (Number(c.qty) || 0) > 0);
-  if(!chs.length) return (Number(v.purchase) || 0) * (Number(v.stock) || 0);
-  return chs.reduce((s, c) => s + (Number(c.qty) || 0) * (c.ratePending ? (Number(v.purchase) || 0) : (Number(c.rate) || 0)), 0);
+  const lastRate = (() => { for(let k = chs.length - 1; k >= 0; k--){ if(!chs[k].ratePending && Number(chs[k].rate) > 0) return Number(chs[k].rate); } return 0; })();
+  const fallback = Number(v.purchase) || lastRate || 0;
+  let val = 0;
+  for(let k = chs.length - 1; k >= 0 && left > 0; k--){
+    const q = Math.min(left, Number(chs[k].qty) || 0);
+    const rate = chs[k].ratePending ? fallback : (Number(chs[k].rate) || fallback);
+    val += q * rate; left -= q;
+  }
+  if(left > 0) val += left * fallback;
+  return val;
 }
 
 
@@ -23336,6 +23358,21 @@ function bsGetOpeningMap(){
   return (m && typeof m === 'object') ? m : {};
 }
 // ---------- کسی تاریخ کا اوپننگ کیش — درج نہ ہو تو null ----------
+// 📅 FM1410WE387 (پیارے بھائی کی ہدایت): سمری کا "آج" = دکان کی کاروباری تاریخ (bizDateKey) — بل، وصولی، ادائیگی اسی تاریخ پر بنتے ہیں۔
+// پہلے یہاں کیلنڈر تاریخ تھی؛ جب تک ایڈمن "ڈیٹ اینڈ" نہ کرے کاروباری تاریخ پچھلی رہتی ہے، اس لیے نیچے والے ڈبے زیرو آتے تھے
+function bsToday(){ try{ if(typeof bizDateKey === 'function') return bizDateKey(); }catch(e){} return toLocalDateStr(new Date()); }
+// ادائیگی کس کاروباری دن کی ہے: biz_date (اگر لکھا ہو) ورنہ بننے کا مقامی وقت — p.date UTC میں ہوتی ہے (صبح 5 بجے سے پہلے پچھلا دن)
+function bsPayDay(p){
+  if(!p) return '';
+  if(p.biz_date) return p.biz_date;
+  try{ if(p.created_at) return toLocalDateStr(new Date(p.created_at)); }catch(e){}
+  return p.date || '';
+}
+// ادائیگی میں نقد حصہ کتنا: ریکوری کی ملی جلی ادائیگی (نقد + ایزی پیسہ/بینک) میں صرف نقد گنیں
+function bsPayCash(p){
+  if(p && p.cash_amount != null) return Number(p.cash_amount) || 0;
+  return bsIsCashMethod(p && p.method) ? (Number(p && p.amount) || 0) : 0;
+}
 function getOpeningCashFor(dateStr){
   const e = bsGetOpeningMap()[dateStr];
   if(e == null) return null;
@@ -23343,7 +23380,7 @@ function getOpeningCashFor(dateStr){
   return isNaN(n) ? null : n;
 }
 function getTodayOpeningCash(){
-  const v = getOpeningCashFor(toLocalDateStr(new Date()));
+  const v = getOpeningCashFor(bsToday());
   return v == null ? (AppState.settings.openingCashBalance || 0) : v; // پرانی رپورٹیں: درج نہ ہو تو پرانی سیٹنگ
 }
 function getOpeningDetailFor(dateStr){
@@ -23400,7 +23437,7 @@ function mergeOpeningCashFromCloud(jsonStr){
 // ---------- 💵 روزانہ اوپننگ کیش پوچھنے والا پاپ اپ ----------
 let _bsOpeningAfter = null;
 function openOpeningCashModal(afterFn, forceEdit){
-  const today = toLocalDateStr(new Date());
+  const today = bsToday();
   const cur = getOpeningCashFor(today);
   _bsOpeningAfter = typeof afterFn === 'function' ? afterFn : null;
   const inp = document.getElementById('openingCashDailyInput');
@@ -23419,7 +23456,7 @@ function saveOpeningCashDaily(zero){
     if(!confirm('رقم خالی ہے — کیا آج اوپننگ کیش صفر (0) لکھ دیں؟')) return;
     val = 0;
   }
-  setOpeningCashFor(toLocalDateStr(new Date()), val);
+  setOpeningCashFor(bsToday(), val);
   document.getElementById('openingCashDailyModal').classList.remove('show');
   const fn = _bsOpeningAfter; _bsOpeningAfter = null;
   if(fn) try{ fn(); }catch(e){}
@@ -23452,7 +23489,7 @@ function bsfRecalc(){
   if(c2) c2.classList.toggle('neg', net < 0);
 }
 function openSummaryForm(){
-  const today = toLocalDateStr(new Date());
+  const today = bsToday();
   const d = getOpeningDetailFor(today);
   const set = (id, v) => { const el = document.getElementById(id); if(el) el.value = v; };
   set('bsfCash', d.parts.cash > 0 ? d.parts.cash : ''); set('bsfWallet', d.parts.wallet > 0 ? d.parts.wallet : ''); set('bsfBank', d.parts.bank > 0 ? d.parts.bank : '');
@@ -23470,7 +23507,7 @@ function closeSummaryForm(){
 function saveSummaryForm(){
   const parts = {cash: bsfNum('bsfCash'), wallet: bsfNum('bsfWallet'), bank: bsfNum('bsfBank')};
   const total = parts.cash + parts.wallet + parts.bank;
-  setOpeningCashFor(toLocalDateStr(new Date()), total, {
+  setOpeningCashFor(bsToday(), total, {
     parts: parts,
     note: ((document.getElementById('bsfNote') || {}).value || '').trim(),
     other: {amt: bsfNum('bsfOther'), note: ((document.getElementById('bsfOtherNote') || {}).value || '').trim()}
@@ -23484,7 +23521,7 @@ function saveSummaryForm(){
 function maybeAskOpeningCash(){
   try{
     if(AppState.currentRole !== 'admin') return;
-    if(getOpeningCashFor(toLocalDateStr(new Date())) != null) return;
+    if(getOpeningCashFor(bsToday()) != null) return;
     const m = document.getElementById('openingCashDailyModal');
     if(m && m.classList.contains('show')) return;
     openOpeningCashModal(null, false);
@@ -23493,7 +23530,7 @@ function maybeAskOpeningCash(){
 
 // ---------- مدت (فلٹر) — اخراجات والی سکرین جیسے ہی اختیارات ----------
 function bsComputeRange(preset){
-  const now = new Date();
+  const now = (() => { try{ const d = new Date(bsToday() + 'T12:00:00'); return isNaN(d) ? new Date() : d; }catch(e){ return new Date(); } })(); // 📅 کاروباری تاریخ
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   let from = null, to = null;
   if(preset === 'today'){ from = today; to = today; }
@@ -23526,7 +23563,7 @@ function bsBillCash(inv){
 // ---------- 🧮 پورا حساب ایک جگہ — سکرین اور پرنٹ دونوں یہی استعمال کرتے ہیں ----------
 function computeBizSummary(preset){
   const r = bsComputeRange(preset);
-  const todayStr = toLocalDateStr(new Date());
+  const todayStr = bsToday(); // 📅 کاروباری تاریخ
   const invs = (invoicesData || []).filter(inv => inv && inv.status !== 'voided' && inv.status !== 'rejected');
   const pays = (paymentsData || []);
   const exps = (typeof expenseData !== 'undefined' ? expenseData : []);
@@ -23538,11 +23575,11 @@ function computeBizSummary(preset){
   const otherManual = _od.otherAmt; // ➕ فارم والی دیگر آمدن (ہاتھ سے، اختیاری)
   const tInv = invs.filter(i => bsInvDay(i) === todayStr);
   const tBillCash = tInv.reduce((s, i) => s + bsBillCash(i), 0);
-  const tPays = pays.filter(p => p.date === todayStr && bsIsCashMethod(p.method));
-  const tRecovery = tPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  const tOtherIn = tPays.filter(p => p.direction === 'in' && p.party_type !== 'customer').reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  const tSupOut = tPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  const tOtherOut = tPays.filter(p => p.direction === 'out' && p.party_type !== 'supplier').reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const tPays = pays.filter(p => bsPayDay(p) === todayStr && bsPayCash(p) > 0);
+  const tRecovery = tPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + bsPayCash(p), 0);
+  const tOtherIn = tPays.filter(p => p.direction === 'in' && p.party_type !== 'customer').reduce((s, p) => s + bsPayCash(p), 0);
+  const tSupOut = tPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
+  const tOtherOut = tPays.filter(p => p.direction === 'out' && p.party_type !== 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
   const tExp = exps.filter(e => e.date === todayStr).reduce((s, e) => s + (Number(e.amount) || 0), 0);
   const cashNow = opening + otherManual + tBillCash + tRecovery + tOtherIn - tSupOut - tOtherOut - tExp;
 
@@ -23552,10 +23589,14 @@ function computeBizSummary(preset){
   const custs = (customersData || []).map(c => ({name: c.name, amt: Math.max(0, Number(c.total_receivable) || 0)})).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt);
   const sups = (suppliersData || []).map(s => ({name: s.name, amt: Math.max(0, Number(s.total_payable) || 0)})).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt);
   const receivable = custs.reduce((s, x) => s + x.amt, 0);
+  // ⏳ ریکوری والے نے وصول کر لی مگر ایڈمن نے ابھی کھاتے میں منظور نہیں کی (روزانہ ریکوری لسٹ والی "زیرِ التوا")
+  const pendingRec = (typeof recoveryListData !== 'undefined' ? recoveryListData : []).filter(e => e && e.status === 'pending').reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const custWallet = (customersData || []).reduce((s, c) => s + Math.max(0, Number(c && c.wallet_balance) || 0), 0); // گاہکوں کا ایڈوانس (ہم نے دینا)
+  const supWallet = (suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.wallet_balance) || 0), 0); // بیوپاریوں کے پاس ہمارا ایڈوانس
   const payable = sups.reduce((s, x) => s + x.amt, 0);
   const cashAsset = Math.max(0, cashNow);
   const assets = stockValue + receivable + cashAsset;
-  const netWorth = assets - payable;
+  const netWorth = assets + supWallet - payable - custWallet; // 🔧 ایڈوانس بھی حساب میں (بیوپاری کے پاس ہمارا = جمع، گاہک کا ہمارے پاس = منفی)
 
   // --- ③ منتخب مدت ---
   const vMap = {};
@@ -23579,14 +23620,14 @@ function computeBizSummary(preset){
   const expByName = {};
   pExpList.forEach(e => { const k = (e.name || 'دیگر').trim(); expByName[k] = (expByName[k] || 0) + (Number(e.amount) || 0); });
   const expTop = Object.keys(expByName).map(k => ({name: k, amt: expByName[k]})).sort((a, b) => b.amt - a.amt);
-  const pPays = pays.filter(p => bsInRange(p.date, r) || (!r.fromStr && !r.toStr));
+  const pPays = pays.filter(p => bsInRange(bsPayDay(p), r) || (!r.fromStr && !r.toStr));
   const recovered = pPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + (Number(p.amount) || 0), 0);
   const paidSup = pPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + (Number(p.amount) || 0), 0);
   const netProfit = goodsProfit - expTotal;
 
   return {
     preset, range: r, todayStr,
-    opening, openingEntered, openingParts: _od.parts, openingNote: _od.note, otherManual, otherManualNote: _od.otherNote, tBillCash, tRecovery, tOtherIn, tSupOut, tOtherOut, tExp, cashNow,
+    pendingRec, custWallet, supWallet, opening, openingEntered, openingParts: _od.parts, openingNote: _od.note, otherManual, otherManualNote: _od.otherNote, tBillCash, tRecovery, tOtherIn, tSupOut, tOtherOut, tExp, cashNow,
     stockValue: Math.round(stockValue), receivable, payable, cashAsset, assets: Math.round(assets), netWorth: Math.round(netWorth), custs, sups,
     billCount: pInv.length, sales, salesCash, salesCredit: Math.max(0, sales - salesCash),
     goodsProfit: Math.round(goodsProfit), expTotal, expTop, expCount: pExpList.length, recovered, paidSup, netProfit: Math.round(goodsProfit - expTotal)
@@ -25015,13 +25056,13 @@ function expRefreshDetailSuggestions(){
 }
 function expUpdateModalTotal(){
   const el = document.getElementById('expModalTotal'); if(!el) return;
-  const d = document.getElementById('expNewDate')?.value || toLocalDateStr(new Date());
+  const d = document.getElementById('expNewDate')?.value || bsToday();
   const t = (expenseData || []).filter(e => e.date === d).reduce((a, e) => a + (Number(e.amount) || 0), 0);
-  el.textContent = (d === toLocalDateStr(new Date()) ? 'آج کا کل خرچ: ' : d.split('-').reverse().join('/') + ' کا کل خرچ: ') + fmtExpAmount(t);
+  el.textContent = (d === bsToday() ? 'آج کا کل خرچ: ' : d.split('-').reverse().join('/') + ' کا کل خرچ: ') + fmtExpAmount(t);
 }
 function openExpenseAddModal(){
   document.getElementById('expNewAmount').value = '';
-  document.getElementById('expNewDate').value = toLocalDateStr(new Date()); // آج کی تاریخ خود بخود
+  document.getElementById('expNewDate').value = bsToday(); // آج کی تاریخ خود بخود
   document.getElementById('expNewNote').value = '';
   document.getElementById('expNewCatInput').value = '';
   document.getElementById('expSavedMsg').textContent = '';
@@ -25035,7 +25076,7 @@ function saveNewExpense(){
   const sel = document.getElementById('expNewCat');
   let cat = sel.value === '__new__' ? document.getElementById('expNewCatInput').value.trim() : sel.value;
   const amountRaw = parseFloat(document.getElementById('expNewAmount').value);
-  const date = document.getElementById('expNewDate').value || toLocalDateStr(new Date());
+  const date = document.getElementById('expNewDate').value || bsToday();
   const note = document.getElementById('expNewNote').value.trim();
   if(!cat){ alert('براہ کرم کیٹیگری چنیں یا نئی بنائیں۔'); return; }
   if(!amountRaw || amountRaw <= 0){ alert('براہ کرم درست رقم لکھیں۔'); return; }
@@ -33744,6 +33785,7 @@ function confirmRecoveryEntry(entryId){
       amount: entry.amount, balance_before: c.total_receivable + (entry.amount - excess), balance_after: c.total_receivable,
       biz_date: entry.bizDate || bizDateKey(), ...(entry.backdated ? { backdated: true } : {}), // 📅 FM910FR349
       method: recoverySplitLabel(entry) || 'Cash',
+      cash_amount: _cashPart, // 💵 FM1410WE387: سمری میں صرف نقد حصہ کیش میں گنا جائے (ایزی پیسہ/بینک نہیں)
       note: `ریکوری لسٹ — ${entry.employeeName}${entry.note ? ' — 📝 ' + entry.note : ''}${excess > 0 ? ' — 💳 Rs. ' + excess.toLocaleString() + ' والٹ میں' : ''}`
     });
   }catch(e){}
