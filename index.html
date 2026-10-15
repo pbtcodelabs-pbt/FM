@@ -9366,7 +9366,8 @@ function getDeveloperContact(){
 // 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
 // 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
 // 🆕 FM1410WE389: ریکوری کارڈ کی ترتیب — کل کی خریداری اوپر، آج کی خریداری نیچے (وصولی کے خانے کے سامنے)
-const APP_BUILD_VERSION = 'FM1410WE389'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1510TH390: (1) بیوپاری کے پرچیز آرڈر — رنگین لمبا کیپسول، اوپر تاریخ، اس دن کی ادائیگی/بقایا کے کیپسول (2) آرڈر بکنگ میں چالان کا سٹاک بچا ہو تو دو وارننگ + PIN، باقی سٹاک کی ایڈمن کو فوراً اطلاع (ہوم پر پٹی + پاپ اپ)
+const APP_BUILD_VERSION = 'FM1510TH390'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10218,7 +10219,8 @@ function toggleHomeMoneyRow(){
 }
 
 function renderHomeIconGrid(){
-  try{ renderHomeMoneySummary(); }catch(e){} // 💰 FM510MO310
+  try{ renderHomeMoneySummary(); }catch(e){}
+  try{ renderChLeftoverBanner(); }catch(e){} // 📦 FM1510TH390: بچا ہوا سٹاک // 💰 FM510MO310
   renderHomeUnfinishedCartCard();
   const grid = document.getElementById('homeIconGrid');
   if(!grid) return;
@@ -27917,16 +27919,27 @@ function renderSupplierPoSection(supplierId){
              <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ حذف کریں</button>`
           : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ دیکھیں</button>
              <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ واپسی</button>`;
+        // 🎨 FM1510TH390 (صدام صاحب کی ہدایت): ہر پرچیز آرڈر ایک لمبا رنگین کیپسول — اوپر بیچ میں رنگدار تاریخ، نیچے اس دن کی
+        // ادائیگی/چھوٹ/بقایا کے کیپسول (وہی حساب جو چٹ میں کھلتا ہے: poDayStatement)، پھر پرانی لائن اور بٹن
+        const _pal = [['#ecfdf5','#10b981','#065f46'],['#eff6ff','#3b82f6','#1e3a8a'],['#fff7ed','#f97316','#9a3412'],['#faf5ff','#a855f7','#6b21a8'],['#fdf2f8','#ec4899','#9d174d']][idx % 5];
+        let _st = null; try{ if(!isPending) _st = poDayStatement(s, po.date); }catch(e){}
+        const _f = n => 'Rs. ' + Math.round(Number(n) || 0).toLocaleString('en-US');
+        const _cap = (t, v, bg, fg) => `<div style="flex:1 1 0; min-width:0; background:${bg}; color:${fg}; border-radius:999px; padding:3px 6px; text-align:center; box-shadow:inset 0 -2px 0 rgba(0,0,0,.08), 0 2px 5px rgba(0,0,0,.08);"><div style="font-size:11px; font-weight:800; line-height:1.6;">${t}</div><div dir="ltr" style="font:900 14px/1.3 Arial,sans-serif; white-space:nowrap;">${v}</div></div>`;
+        const _caps = _st ? (_cap('💵 اس دن کی ادائیگی', _f(_st.dayPaid), '#dcfce7', '#166534')
+            + (_st.dayDisc > 0 ? _cap('🏷️ چھوٹ', _f(_st.dayDisc), '#fef9c3', '#854d0e') : '')
+            + _cap('📒 اس دن کے بعد بقایا', _f(_st.closing), '#fee2e2', '#991b1b')) : '';
         return `
-        <div class="billRow ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; gap:6px; cursor:default;">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div class="billRow ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; gap:6px; cursor:default; background:linear-gradient(180deg, ${_pal[0]}, #ffffff); border:2px solid ${_pal[1]}; border-radius:26px; padding:8px 10px 10px; box-shadow:0 4px 12px rgba(0,0,0,.08);">
+          <div style="text-align:center;"><span dir="ltr" style="display:inline-block; background:linear-gradient(135deg, ${_pal[1]}, ${_pal[2]}); color:#fff; font:900 15px/1 Arial,sans-serif; padding:7px 18px; border-radius:999px; box-shadow:0 3px 8px rgba(0,0,0,.18);">📅 ${po.date}</span></div>
+          ${_caps ? `<div dir="rtl" style="display:flex; gap:5px;">${_caps}</div>` : ''}
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fff; border-radius:16px; padding:4px 8px; border:1px solid ${_pal[1]}55;">
             <div class="brInfo">
-              <div class="brDate">📅 ${po.date} · ${po.items.length} items · ${statusTxt}</div>
+              <div class="brDate">${po.items.length} items · ${statusTxt}</div>
               <div class="brDesc">${itemsDesc}</div>
             </div>
             <div class="brAmount">Rs. ${po.total.toLocaleString()}</div>
           </div>
-          <div style="display:flex; gap:6px;">${actionBtn}</div>
+          <div style="display:flex; gap:6px; justify-content:center;">${actionBtn}</div>
         </div>`;
       }).join('');
 
@@ -31780,6 +31793,110 @@ function pdCurQty(order, vid, chNo){
   return _chRound(Math.max(0, (Number(it.qty) || 0) - chalanAllocSum(it.chalanAlloc)));
 }
 
+// ---------- 📦 FM1510TH390 (صدام صاحب کی ہدایت): چالان میں سٹاک بچا ہو اور منشی اگلی سبزی/چالان پر جانا چاہے →
+// پہلی وارننگ → دوسری وارننگ → منشی کا اپنا PIN (یا ایڈمن PIN)۔ پھر وہ مال اسی چالان میں "باقی سٹاک" رہتا ہے (سٹاک نہیں بدلتا)
+// اور ایڈمن کو فوراً اطلاع (کلاؤڈ: shopData/chalanLeftovers) — ہوم پر پاپ اپ + رپورٹ۔ صفر بچا ہو تو کوئی وارننگ نہیں ----------
+const CH_LEFTOVER_DOC_PATH = 'shopData/chalanLeftovers';
+let chLeftoverData = loadFromStorage('chLeftovers', []) || [];
+function pdCurrentFree(){
+  const fp = findProductAndVariant(pdVariantId); const v = fp.v; if(!v) return null;
+  const rm = getChalanReservedMap(pdVariantId);
+  const cc = pdChalanNo != null ? (v.chalans || []).find(c => c.chalanNo === pdChalanNo) : null;
+  let total, booked;
+  if(cc){ total = Number(cc.qty) || 0; booked = (rm[cc.chalanNo] || 0) + (pdOptMap[pdVariantId + ':' + cc.chalanNo] || 0); }
+  else { total = Number(v.stock) || 0; booked = (Number(v.reserved) || 0) + (pdOptMap[pdVariantId + ':'] || 0); }
+  return { p: fp.p, v, cc, total: _chRound(total), free: _chRound(total - booked) };
+}
+async function pdCheckOwnPin(pin){
+  const clean = String(pin || '').trim(); if(!clean) return false;
+  const h = await hashPin(clean);
+  const me = (AppState.currentUser && AppState.currentUser.name) || '';
+  return (usersData || []).some(u => u && u.pin === h && u.is_active !== false && ((u.name === me && u.role === AppState.currentRole) || u.role === 'admin'));
+}
+async function pdLeaveGuard(){
+  try{
+    if(pdVariantId == null) return true;
+    const F = pdCurrentFree(); if(!F || !(F.free > 0)) return true;
+    const nm = (F.p ? F.p.name : '') + (F.v.label ? ' — ' + F.v.label : '');
+    const where = F.cc ? 'چالان ' + F.cc.chalanNo : 'اس سبزی';
+    const day = bizDateKey();
+    // اسی چالان کی اتنی ہی مقدار پہلے سے منظور ہو چکی ہو تو دوبارہ نہ پوچھیں
+    if(chLeftoverData.some(e => e && e.vid === pdVariantId && e.chalanNo === (F.cc ? F.cc.chalanNo : null) && Math.abs((Number(e.qty) || 0) - F.free) < 0.001 && e.day === day)) return true;
+    const rows = [{ label: '🥬 ' + nm, value: '' }, { label: '📦 ' + where + ' میں بچا ہوا', value: String(F.free), bg: '#fee2e2', fg: '#7f1d1d' }];
+    if(!(await uDialog({ title: '⚠️ سٹاک ابھی بچا ہوا ہے', message: `${where} میں ابھی <b>${F.free}</b> بچا ہوا ہے۔ کیا آپ واقعی اسے چھوڑ کر آگے جانا چاہتے ہیں؟`, rows, okText: 'ہاں، آگے', cancelText: '✖ نہیں، تقسیم کروں', tone: 'amber' }))) return false;
+    if(!(await uDialog({ title: '⛔ دوسری وارننگ', message: `دیکھیں، <b>${F.free}</b> ${_pdEsc(nm)} ابھی تک بچا ہوا ہے۔ کیا آپ یہ سٹاک <b>باقی سٹاک</b> کے طور پر بچانا چاہتے ہیں؟ ایڈمن کو فوراً اطلاع جائے گی۔`, okText: '✅ ہاں، بچا لیں', cancelText: '✖ نہیں', tone: 'red' }))) return false;
+    const pin = await uDialog({ title: '🔐 اپنا PIN لگائیں', message: 'بچا ہوا سٹاک چھوڑنے کے لیے اپنا PIN کوڈ درج کریں:', input: 'password', okText: '✅ تصدیق', cancelText: '✖ منسوخ', tone: 'amber' });
+    if(pin === null || pin === false) return false;
+    if(!(await pdCheckOwnPin(pin))){ await uAlert('❌ غلط PIN', 'PIN درست نہیں — آپ اسی چالان پر ہیں، کچھ نہیں بدلا۔', 'red'); return false; }
+    const entry = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), ts: Date.now(), day, vid: pdVariantId,
+      name: F.p ? F.p.name : '', label: F.v.label || '', serial: F.p ? (F.p.serial_no ?? null) : null,
+      chalanNo: F.cc ? F.cc.chalanNo : null, total: F.total, qty: F.free, by: (AppState.currentUser && AppState.currentUser.name) || '' };
+    chLeftoverData.push(entry); saveToStorage('chLeftovers', chLeftoverData);
+    pushChLeftoversToCloud();
+    try{ fmPkToast('📦 ' + F.free + ' ' + (F.p ? F.p.name : '') + ' باقی سٹاک میں — ایڈمن کو اطلاع بھیج دی', true); }catch(e){}
+    return true;
+  }catch(e){ return true; }
+}
+async function fetchChLeftoversFromCloud(){
+  try{
+    const res = await authFirestoreFetch(`${CH_LEFTOVER_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(!res || !res.ok) return false;
+    const doc = await res.json();
+    const list = JSON.parse(doc.fields?.json?.stringValue || '[]');
+    const ids = new Set(chLeftoverData.map(e => e.id)); let added = false;
+    (Array.isArray(list) ? list : []).forEach(e => { if(e && e.id && !ids.has(e.id)){ chLeftoverData.push(e); added = true; } });
+    if(added){ chLeftoverData.sort((a, b) => (a.ts || 0) - (b.ts || 0)); saveToStorage('chLeftovers', chLeftoverData); }
+    return added;
+  }catch(e){ return false; }
+}
+async function pushChLeftoversToCloud(){
+  await fetchChLeftoversFromCloud();
+  const cut = Date.now() - 45 * 86400000; // صرف پچھلے 45 دن رکھیں
+  chLeftoverData = chLeftoverData.filter(e => (e.ts || 0) >= cut); saveToStorage('chLeftovers', chLeftoverData);
+  try{
+    await authFirestoreFetch(`${CH_LEFTOVER_DOC_PATH}?key=${FIREBASE_API_KEY}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { json: { stringValue: JSON.stringify(chLeftoverData) }, updatedAt: { integerValue: String(Date.now()) } } }) });
+  }catch(e){}
+}
+// ---------- ایڈمن: ہوم پر پٹی + نئی اطلاع پر پاپ اپ رپورٹ ----------
+function chLeftoverToday(){ const d = bizDateKey(); return chLeftoverData.filter(e => e && e.day === d); }
+function chLeftoverRows(list, seen){
+  return list.slice().reverse().map(e => ({ label: (seen && !seen.includes(e.id) ? '🆕 ' : '') + (e.serial != null ? e.serial + '. ' : '') + _pdEsc(e.name) + (e.label ? ' (' + _pdEsc(e.label) + ')' : '')
+      + `<br><span style="font-size:13px; color:#64748b;">${e.chalanNo != null ? 'چالان ' + e.chalanNo + ' · ' : ''}${_pdEsc(e.by || '')} · ${new Date(e.ts).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'})}</span>`,
+    value: String(e.qty), bg: '#fff7ed', fg: '#9a3412' }));
+}
+async function openChLeftoverReport(){
+  const list = chLeftoverToday();
+  const seen = loadFromStorage('chLeftoverSeen', []) || [];
+  await uDialog({ title: '📦 آج کا بچا ہوا (باقی) سٹاک', message: list.length ? `منشی نے یہ مال چالان میں باقی چھوڑا (${bizFmt(bizDateKey())}):` : 'آج ابھی تک کوئی سٹاک باقی نہیں چھوڑا گیا ✅', rows: chLeftoverRows(list, seen), okText: '✅ دیکھ لیا', cancelText: null, tone: 'amber' });
+  saveToStorage('chLeftoverSeen', Array.from(new Set(seen.concat(chLeftoverData.map(e => e.id)))).slice(-500));
+  renderChLeftoverBanner();
+}
+function renderChLeftoverBanner(){
+  const grid = document.getElementById('homeIconGrid'); if(!grid) return;
+  let b = document.getElementById('chLeftoverBanner');
+  const list = AppState.currentRole === 'admin' ? chLeftoverToday() : [];
+  if(!list.length){ if(b) b.remove(); return; }
+  if(!b){ b = document.createElement('div'); b.id = 'chLeftoverBanner'; b.onclick = openChLeftoverReport; grid.parentNode.insertBefore(b, grid); }
+  const seen = loadFromStorage('chLeftoverSeen', []) || [];
+  const nNew = list.filter(e => !seen.includes(e.id)).length;
+  b.dir = 'rtl';
+  b.style.cssText = 'margin:0 2px 10px; padding:9px 12px; border-radius:16px; cursor:pointer; display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#fef3c7,#fdba74); border:2px solid #ea580c; color:#7c2d12; font-weight:800; font-size:15px; box-shadow:0 3px 8px rgba(234,88,12,.25);';
+  b.innerHTML = `<span style="font-size:22px;">📦</span><span style="flex:1;">آج کا بچا ہوا سٹاک: ${list.map(e => _pdEsc(e.name) + ' ' + e.qty).join('، ')}</span>${nNew ? `<span style="background:#dc2626; color:#fff; border-radius:999px; padding:2px 9px; font:900 13px Arial;">${nNew} نیا</span>` : ''}`;
+}
+async function chLeftoverAdminTick(){
+  if(AppState.currentRole !== 'admin' || document.hidden) return;
+  await fetchChLeftoversFromCloud();
+  renderChLeftoverBanner();
+  const seen = loadFromStorage('chLeftoverSeen', []) || [];
+  const fresh = chLeftoverToday().filter(e => !seen.includes(e.id));
+  const onHome = typeof currentScreenName !== 'undefined' && currentScreenName === 'home';
+  const busy = document.getElementById('uDialogOverlay') && document.getElementById('uDialogOverlay').style.display === 'flex';
+  if(fresh.length && onHome && !busy) openChLeftoverReport();
+}
+setTimeout(() => { try{ chLeftoverAdminTick(); }catch(e){} }, 6000);
+setInterval(() => { try{ chLeftoverAdminTick(); }catch(e){} }, 15000);
+
 // ---------- سکرین ۱: سبزیوں کی فہرست ----------
 function pdOpenList(){
   if(AppState.currentRole === 'customer') return;
@@ -31859,14 +31976,16 @@ function pdOpenVariant(vid){
   renderPdVariantHeader();
   renderPdCustList();
 }
-function pdBackToProducts(){
+async function pdBackToProducts(){
+  if(!(await pdLeaveGuard())) return; // 📦 بچا ہوا سٹاک ہو تو دو وارننگ + PIN
   pdFlushPush();
   pdVariantId = null;
   pdShowStep('otStepProdList');
   const s = document.getElementById('pdProdSearch');
   renderPdProductList(s ? s.value : '');
 }
-function pdPickChalan(no){
+async function pdPickChalan(no){
+  if(no !== pdChalanNo && !(await pdLeaveGuard())) return; // 📦 دوسرے چالان پر جانے سے پہلے بھی
   pdChalanNo = no;
   renderPdVariantHeader();
   renderPdCustList();
