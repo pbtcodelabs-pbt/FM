@@ -9371,7 +9371,8 @@ function getDeveloperContact(){
 // 🆕 FM1610FR392: وصولی کی تقسیم الگ رقم والی لائنوں کی بجائے 'کل ادا کیا' کی اسی لائن کے نیچے چھوٹی ضمنی تحریر میں؛ ٹوٹل بڑا موٹا (الجھن ختم)
 // 🆕 FM1610FR393: بل — لال ڈبے کے اوپر جملہ 'کل 15 اکتوبر جمعرات تک ٹوٹل کم وصولی'، ڈبے میں صرف رقم
 // 🆕 FM1710SA394: ہوم سمری — کسی ایک خالی/خراب ریکارڈ (null گاہک/بیوپاری/خرچہ/سبزی/بل آئٹم یا نمبر والا خرچہ نام) سے پورا حساب رک کر کیش آیا/گیا/سٹاک/منافع صفر ہو جاتے تھے؛ اب ایسا ریکارڈ چھوڑ کر باقی حساب فوراً
-const APP_BUILD_VERSION = 'FM1710SA394'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1710SA395: ہوم 'گاہکوں کی طرف ادھار' اب بالکل گاہکوں کی فہرست کے جوڑ کے برابر (زیرِ منظوری وصولی منہا نہیں)
+const APP_BUILD_VERSION = 'FM1710SA395'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10150,15 +10151,17 @@ function renderHomeMoneySummary(){
   const supPay = N((suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_payable) || 0), 0));
   // 🔧 FM1410WE387 (پیارے بھائی کی ہدایت): ادھار = کھاتوں کا کل بقایا − وہ وصولی جو ریکوری والا لے چکا مگر ابھی منظور نہیں ہوئی
   //   (بالکل روزانہ ریکوری لسٹ کے "تازہ مکمل بقایہ" کی طرح)۔ "آج" = دکان کی کاروباری تاریخ، کیلنڈر نہیں
-  const recLedger = N((customersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_receivable) || 0), 0));
+  const recLedger = N((customersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_receivable) || 0), 0)); // null گاہک محفوظ طریقے سے چھوڑ
   const pendRec = S ? N(S.pendingRec) : 0;
-  const rec = Math.max(0, recLedger - pendRec);
+  // 🔧 FM1710SA395: ادھار = بالکل گاہکوں کی فہرست کا جوڑ (ہر گاہک کا کھاتے والا بقایا) — پہلے ہر دن کی ساری زیرِ منظوری وصولیاں
+  //   (پرانی بھولی ہوئی بھی) منہا ہو کر عدد فہرست سے مختلف آتا تھا۔ زیرِ منظوری وصولی اب صرف تفصیل میں دکھتی ہے
+  const rec = recLedger;
   const stock = S ? N(S.stockValue) : 0;
   const cashIn = S ? N(S.opening) + N(S.otherManual) + N(S.tBillCash) + N(S.tRecovery) + N(S.tOtherIn) : 0;
   const cashOut = S ? N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) : 0;
   // ⑥ کیفیت: ادھار + ریکوری والوں کے پاس وصول شدہ رقم + سٹاک + گلے کا کیش + بیوپاریوں کے پاس ہمارا ایڈوانس − بیوپاری قرض − گاہکوں کا ایڈوانس
   const supAdv = S ? N(S.supWallet) : 0, custAdv = S ? N(S.custWallet) : 0;
-  const net = rec + pendRec + stock + cashIn - cashOut + supAdv - supPay - custAdv;
+  const net = rec + stock + cashIn - cashOut + supAdv - supPay - custAdv;
   const todayProfit = S ? N(S.goodsProfit) - N(S.expTotal) : 0;
   // 💵 FM1210MO372: اس وقت ہاتھ میں کیش = ④ ٹوٹل کیش آیا − ⑤ ٹوٹل کیش گیا
   //    (اوپننگ کیش + دیگر آمدن + آج کے بلوں سے نقد + گاہکوں سے نقد وصولی + دیگر نقد آمد − بیوپاریوں کو ادائیگی − دیگر ادائیگی − آج کے اخراجات)
@@ -10186,8 +10189,8 @@ function renderHomeMoneySummary(){
   t('hmPayCap', `تمام بیوپاریوں کا کل بقایا ${f(supPay)}`);
   t('hmCashCap', S ? `اوپننگ ${f(S.opening)} + دیگر آمدن ${f(N(S.otherManual) + N(S.tOtherIn))} + نقد سیل ${f(S.tBillCash)} + وصولی ${f(S.tRecovery)}` : '');
   t('hmOutCap', S ? `بیوپاریوں کو ${f(S.tSupOut)} + دیگر ادائیگی ${f(S.tOtherOut)} + اخراجات ${f(S.tExp)}` : '');
-  t('hmNetCap', `ادھار ${f(rec)} + زیرِ منظوری وصولی ${f(pendRec)} + سٹاک ${f(stock)} + کیش آیا ${f(cashIn)} − کیش گیا ${f(cashOut)} + بیوپاریوں کے پاس ایڈوانس ${f(supAdv)} − بیوپاری قرض ${f(supPay)} − گاہکوں کا ایڈوانس ${f(custAdv)}`);
-  t('hmRecCap', `کھاتوں کا کل بقایا ${f(recLedger)} − زیرِ منظوری وصولی ${f(pendRec)} = ${f(rec)}`);
+  t('hmNetCap', `ادھار ${f(rec)} + سٹاک ${f(stock)} + کیش آیا ${f(cashIn)} − کیش گیا ${f(cashOut)} + بیوپاریوں کے پاس ایڈوانس ${f(supAdv)} − بیوپاری قرض ${f(supPay)} − گاہکوں کا ایڈوانس ${f(custAdv)}`);
+  t('hmRecCap', `تمام گاہکوں کا کل بقایا ${f(rec)}` + (pendRec ? ` (اس میں ${f(pendRec)} کی وصولی ابھی منظوری کی منتظر)` : ''));
   t('hmStkCap', 'حاضر سٹاک × چالان کا خرید ریٹ (پرانا مال پہلے بکا)');
   t('hmTodayCap', S ? `مال پر منافع ${f(S.goodsProfit)} − اخراجات ${f(S.expTotal)}` : '');
   document.querySelectorAll('#homeMoneyRow .hmVal, #homeMoneyRow2 .hmVal, #homeMoneyBottom .hmVal').forEach(el => {
