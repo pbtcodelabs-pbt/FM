@@ -9372,7 +9372,8 @@ function getDeveloperContact(){
 // 🆕 FM1610FR393: بل — لال ڈبے کے اوپر جملہ 'کل 15 اکتوبر جمعرات تک ٹوٹل کم وصولی'، ڈبے میں صرف رقم
 // 🆕 FM1710SA394: ہوم سمری — کسی ایک خالی/خراب ریکارڈ (null گاہک/بیوپاری/خرچہ/سبزی/بل آئٹم یا نمبر والا خرچہ نام) سے پورا حساب رک کر کیش آیا/گیا/سٹاک/منافع صفر ہو جاتے تھے؛ اب ایسا ریکارڈ چھوڑ کر باقی حساب فوراً
 // 🆕 FM1710SA395: ہوم 'گاہکوں کی طرف ادھار' اب بالکل گاہکوں کی فہرست کے جوڑ کے برابر (زیرِ منظوری وصولی منہا نہیں)
-const APP_BUILD_VERSION = 'FM1710SA395'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1710SA396: ہوم 'کیش گیا' میں اب آج کی نقد خریداری (مال) بھی — بیوپاریوں کو ادائیگی + اخراجات + نقد خریداری؛ ہاتھ میں کیش اور مکمل سمری بھی اسی حساب سے
+const APP_BUILD_VERSION = 'FM1710SA396'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10158,7 +10159,7 @@ function renderHomeMoneySummary(){
   const rec = recLedger;
   const stock = S ? N(S.stockValue) : 0;
   const cashIn = S ? N(S.opening) + N(S.otherManual) + N(S.tBillCash) + N(S.tRecovery) + N(S.tOtherIn) : 0;
-  const cashOut = S ? N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) : 0;
+  const cashOut = S ? N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) + N(S.tCashBuy) : 0; // 🥬 FM1710SA396: نقد خریداری بھی
   // ⑥ کیفیت: ادھار + ریکوری والوں کے پاس وصول شدہ رقم + سٹاک + گلے کا کیش + بیوپاریوں کے پاس ہمارا ایڈوانس − بیوپاری قرض − گاہکوں کا ایڈوانس
   const supAdv = S ? N(S.supWallet) : 0, custAdv = S ? N(S.custWallet) : 0;
   const net = rec + stock + cashIn - cashOut + supAdv - supPay - custAdv;
@@ -10188,7 +10189,7 @@ function renderHomeMoneySummary(){
   const t = (id, txt) => { const el = document.getElementById(id); if(el) el.title = txt; };
   t('hmPayCap', `تمام بیوپاریوں کا کل بقایا ${f(supPay)}`);
   t('hmCashCap', S ? `اوپننگ ${f(S.opening)} + دیگر آمدن ${f(N(S.otherManual) + N(S.tOtherIn))} + نقد سیل ${f(S.tBillCash)} + وصولی ${f(S.tRecovery)}` : '');
-  t('hmOutCap', S ? `بیوپاریوں کو ${f(S.tSupOut)} + دیگر ادائیگی ${f(S.tOtherOut)} + اخراجات ${f(S.tExp)}` : '');
+  t('hmOutCap', S ? `بیوپاریوں کو ${f(S.tSupOut)} + دیگر ادائیگی ${f(S.tOtherOut)} + اخراجات ${f(S.tExp)} + نقد خریداری ${f(S.tCashBuy)}` : '');
   t('hmNetCap', `ادھار ${f(rec)} + سٹاک ${f(stock)} + کیش آیا ${f(cashIn)} − کیش گیا ${f(cashOut)} + بیوپاریوں کے پاس ایڈوانس ${f(supAdv)} − بیوپاری قرض ${f(supPay)} − گاہکوں کا ایڈوانس ${f(custAdv)}`);
   t('hmRecCap', `تمام گاہکوں کا کل بقایا ${f(rec)}` + (pendRec ? ` (اس میں ${f(pendRec)} کی وصولی ابھی منظوری کی منتظر)` : ''));
   t('hmStkCap', 'حاضر سٹاک × چالان کا خرید ریٹ (پرانا مال پہلے بکا)');
@@ -23491,7 +23492,7 @@ function bsfRecalc(){
   const S = _bsfS; if(!S) return;
   const open = bsfNum('bsfCash') + bsfNum('bsfWallet') + bsfNum('bsfBank');
   const other = bsfNum('bsfOther');
-  const cash = open + other + S.tBillCash + S.tRecovery + S.tOtherIn - S.tSupOut - S.tOtherOut - S.tExp;
+  const cash = open + other + S.tBillCash + S.tRecovery + S.tOtherIn - S.tSupOut - S.tOtherOut - S.tExp - (S.tCashBuy || 0);
   const net = S.stockValue + S.receivable + Math.max(0, cash) - S.payable;
   bsfSetTxt('bsfOpenTotal', bsfFmt(open));
   bsfSetTxt('bsfLiveCash', bsfFmt(cash)); bsfSetTxt('bsfLiveNet', bsfFmt(net));
@@ -23596,7 +23597,32 @@ function computeBizSummary(preset){
   const tSupOut = tPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
   const tOtherOut = tPays.filter(p => p.direction === 'out' && p.party_type !== 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
   const tExp = exps.filter(e => e.date === todayStr).reduce((s, e) => s + (Number(e.amount) || 0), 0);
-  const cashNow = opening + otherManual + tBillCash + tRecovery + tOtherIn - tSupOut - tOtherOut - tExp;
+  // 🥬 FM1710SA396: آج کی نقد خریداری (سبزی/پھل بغیر بیوپاری کے نقد خریدا) بھی کیش گیا میں — ایڈمن کی "نقد خریداری" + منشی کے نقد چالان جن کا ریٹ لگ چکا
+  let tCashBuy = 0;
+  try{
+    const cps = (typeof cashPurchasesData !== 'undefined' ? (cashPurchasesData || []) : []).filter(_ok);
+    const lineAmt = it => _ok(it) ? (Number(it.qty) || 0) * (Number(it.cost) || 0) : 0;
+    const directIds = new Set();
+    cps.forEach(cp => {
+      if(cp.isDaily) return;
+      let d = ''; try{ d = toLocalDateStr(new Date(Number(cp.id) || cp.date)); }catch(e){ d = cp.date || ''; }
+      if(d !== todayStr) return;
+      directIds.add(cp.id);
+      tCashBuy += (cp.items || []).reduce((a, it) => a + lineAmt(it), 0);
+    });
+    const vById = {}; _prods.forEach(p => _vars(p).forEach(v => { vById[v.variant_id] = v; }));
+    cps.forEach(cp => {
+      if(!cp.isDaily || cp.date !== todayStr) return;
+      (cp.items || []).forEach(it => {
+        if(!_ok(it)) return;
+        const v = vById[it.variant_id]; const ch = v ? (v.chalans || []).find(c => c && c.chalanNo === it.chalanNo) : null;
+        if(ch && ch.poRef != null && directIds.has(ch.poRef)) return; // پہلے ہی ایڈمن کی نقد خریداری میں گنا جا چکا — ڈبل نہیں
+        tCashBuy += lineAmt(it);
+      });
+    });
+    tCashBuy = Math.round(tCashBuy);
+  }catch(e){ tCashBuy = 0; }
+  const cashNow = opening + otherManual + tBillCash + tRecovery + tOtherIn - tSupOut - tOtherOut - tExp - tCashBuy;
 
   // --- ② اس وقت کی حالت ---
   let stockValue = 0;
@@ -23643,7 +23669,7 @@ function computeBizSummary(preset){
 
   return {
     preset, range: r, todayStr,
-    pendingRec, custWallet, supWallet, opening, openingEntered, openingParts: _od.parts, openingNote: _od.note, otherManual, otherManualNote: _od.otherNote, tBillCash, tRecovery, tOtherIn, tSupOut, tOtherOut, tExp, cashNow,
+    pendingRec, custWallet, supWallet, opening, openingEntered, openingParts: _od.parts, openingNote: _od.note, otherManual, otherManualNote: _od.otherNote, tBillCash, tRecovery, tOtherIn, tSupOut, tOtherOut, tExp, tCashBuy, cashNow,
     stockValue: Math.round(stockValue), receivable, payable, cashAsset, assets: Math.round(assets), netWorth: Math.round(netWorth), custs, sups,
     billCount: pInv.length, sales, salesCash, salesCredit: Math.max(0, sales - salesCash),
     goodsProfit: Math.round(goodsProfit), expTotal, expTop, expCount: pExpList.length, recovered, paidSup, netProfit: Math.round(goodsProfit - expTotal)
@@ -23708,6 +23734,7 @@ function renderBizSummary(){
       ${row('➖ بیوپاریوں کو ادائیگی (نقد)', bsMoney(S.tSupOut), 'bsOut')}
       ${S.tOtherOut ? row('➖ دیگر نقد ادائیگی', bsMoney(S.tOtherOut), 'bsOut') : ''}
       ${row('➖ آج کے اخراجات', bsMoney(S.tExp), 'bsOut')}
+      ${S.tCashBuy ? row('➖ نقد خریداری (مال)', bsMoney(S.tCashBuy), 'bsOut') : ''}
       <div class="bsTotal">${row('= اس وقت گلے میں کیش', bsMoney(S.cashNow))}</div>
     </div>
 
