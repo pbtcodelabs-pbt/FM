@@ -9367,7 +9367,8 @@ function getDeveloperContact(){
 // 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
 // 🆕 FM1410WE389: ریکوری کارڈ کی ترتیب — کل کی خریداری اوپر، آج کی خریداری نیچے (وصولی کے خانے کے سامنے)
 // 🆕 FM1510TH390: (1) بیوپاری کے پرچیز آرڈر — رنگین لمبا کیپسول، اوپر تاریخ، اس دن کی ادائیگی/بقایا کے کیپسول (2) آرڈر بکنگ میں چالان کا سٹاک بچا ہو تو دو وارننگ + PIN، باقی سٹاک کی ایڈمن کو فوراً اطلاع (ہوم پر پٹی + پاپ اپ)
-const APP_BUILD_VERSION = 'FM1510TH390'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1610FR391: بل کا 'کل کی ادائیگی' ڈبہ — ادا کی گئی رقم کی تقسیم (نقد/جاز کیش/ایزی پیسہ/بینک، صرف جن میں رقم آئی)؛ نیچے بڑا سرخ (پرنٹ میں سیاہ) ڈبہ: آج تک کی کل کم وصولی
+const APP_BUILD_VERSION = 'FM1610FR391'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -41967,8 +41968,8 @@ function _billPayLayout(invoice, fscale, rowScale){
   const boxH = titleH + n * sumRowH + 2;
   const y = getYesterdayPayInfo(invoice);
   const yTitleH = Math.round(54 * fscale);
-  const redH = (y && y.dayShort > 0) ? Math.round(40 * fscale) + 8 : 0;
-  const yH = y ? (yTitleH + 5 * sumRowH + 2 + redH) : 0;
+  const redH = (y && y.lifeShort > 0) ? Math.round(58 * fscale) + 8 : 0; // 🔴 FM1610FR391: آج تک کی کل کم وصولی — بڑا ڈبہ
+  const yH = y ? (yTitleH + _yBoxRows(y).length * sumRowH + 2 + redH) : 0;
   return { sumRowH, titleH, boxH, yTitleH, redH, yH, y };
 }
 // ---------- 📅 بل کی تاریخ سے ایک دن پہلے (کل) کی ادائیگی — بالکل روزانہ ریکوری رپورٹ والا حساب، صرف دیکھنے کے لیے ----------
@@ -41997,7 +41998,23 @@ function getYesterdayPayInfo(invoice){
     }
     if(_zLast && D < _zLast) return null; // 🧹 زیرو سے پہلے کا کھاتہ نہیں
     const p = D.split('-');
-    return { D, isYesterday, label: p[2] + '-' + p[1] + '-' + p[0], opening: r.openingBalance, goods: r.todayGoods, total: r.totalBalance, paid: r.todayRecovery, final: r.finalBalance, dayShort: r.dayShort };
+    // 💵 FM1610FR391: اس دن کی وصولی کس کس طریقے سے آئی (نقد / جاز کیش / ایزی پیسہ / بینک) — صرف وہی طریقے جن میں رقم آئی
+    const split = {};
+    const _mk = v => { const t = String(v || '').toLowerCase(); if(RECOVERY_METHODS[t]) return t; if(/jazz|جاز/.test(t)) return 'jazzcash'; if(/easy|ایزی/.test(t)) return 'easypaisa'; if(/bank|بینک/.test(t)) return 'bank'; if(/wallet|والٹ/.test(t)) return 'wallet'; return 'cash'; };
+    const _addSp = (list, cap) => { let left = cap == null ? Infinity : Number(cap) || 0; list.forEach(m => { const a = Math.min(left, Number(m.amount) || 0); if(a > 0){ const k = _mk(m.method); split[k] = (split[k] || 0) + a; left -= a; } }); };
+    (c.walletHistory || []).forEach(h => { if(h && h.type === 'receivable_collected' && h.date === D) _addSp(Array.isArray(h.methods) && h.methods.length ? h.methods : [{ method: h.via, amount: h.amount }], h.amount); });
+    (recoveryListData || []).forEach(e => { if(e && e.customer_id === c.customer_id && e.status === 'pending' && recDay(e) === D) _addSp(getRecoverySplit(e)); });
+    const _spSum = Object.keys(split).reduce((a, k) => a + split[k], 0);
+    if(r.todayRecovery - _spSum > 1) split.other = r.todayRecovery - _spSum;
+    // 🔴 آج تک کی کل کم وصولی (ریکوری لسٹ والا "کل کم وصولی" کالم) — ہر دن: اس دن کا مال − اس دن کی وصولی، اس دن (D) تک؛ زیرو کے بعد سے
+    let lifeShort = 0;
+    { const gD = {}, rD = {}; const ad = (o, d, v) => { if(d) o[d] = (o[d] || 0) + (Number(v) || 0); };
+      invoicesData.forEach(inv => { if(inv.customer_id === c.customer_id) ad(gD, invDay(inv), _drGoodsOrig(inv)); });
+      (c.walletHistory || []).forEach(h => { if(!h) return; if(h.type === 'cash_given') ad(gD, h.date, h.amount); else if(h.type === 'receivable_collected') ad(rD, h.date, h.amount); });
+      (recoveryListData || []).forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') ad(rD, recDay(e), e.amount); });
+      Object.keys(gD).forEach(d => { if(d <= D && (!_zLast || d >= _zLast) && gD[d] > 0) lifeShort += Math.max(0, gD[d] - (rD[d] || 0)); });
+      lifeShort = Math.round(lifeShort); }
+    return { D, isYesterday, label: p[2] + '-' + p[1] + '-' + p[0], opening: r.openingBalance, goods: r.todayGoods, total: r.totalBalance, paid: r.todayRecovery, final: r.finalBalance, dayShort: r.dayShort, split, lifeShort };
   }catch(e){ return null; }
 }
 function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
@@ -42029,9 +42046,20 @@ function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
   });
   return rowTop;
 }
+// 🧾 FM1610FR391: "کل ادا کیا" کے نیچے اس کی تقسیم (صرف وہ طریقے جن میں رقم آئی)
+const _Y_SPLIT_LBL = { cash: 'نقد', jazzcash: 'جاز کیش', easypaisa: 'ایزی پیسہ', bank: 'بینک', wallet: 'والٹ (ایڈوانس)', other: 'دیگر' };
+function _yBoxRows(y){
+  const kal = y.isYesterday !== false;
+  const rows = [['سابقہ بقایا', y.opening], [kal ? 'کل کی خریداری' : 'پچھلی خریداری', y.goods], ['ٹوٹل', y.total], [kal ? 'کل ادا کیا' : 'پچھلا ادا کیا', y.paid]];
+  const sp = y.split || {};
+  ['cash', 'jazzcash', 'easypaisa', 'bank', 'wallet', 'other'].forEach(k => { if((sp[k] || 0) > 0) rows.push(['• ' + _Y_SPLIT_LBL[k], sp[k]]); });
+  rows.push(['بقایا', y.final, true]);
+  return rows;
+}
 function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   const y = lay.y; if(!y) return top;
-  const boxH = lay.yTitleH + 5 * lay.sumRowH + 2;
+  const _rows = _yBoxRows(y);
+  const boxH = lay.yTitleH + _rows.length * lay.sumRowH + 2;
   ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
   ctx.strokeRect(L + 0.5, top + 0.5, R - L, boxH);
   ctx.textAlign = 'center'; ctx.fillStyle = '#000';
@@ -42043,19 +42071,22 @@ function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   ctx.fillText(y.label, (L + R) / 2, top + Math.round(44 * fscale));
   const rTop = top + lay.yTitleH;
   ctx.strokeStyle = rc.border; ctx.beginPath(); ctx.moveTo(L, rTop); ctx.lineTo(R, rTop); ctx.stroke();
-  _drawPayRows(ctx, FP, L, R, rTop, lay.sumRowH, [
-    ['سابقہ بقایا', y.opening], [(y.isYesterday === false ? 'پچھلی خریداری' : 'کل کی خریداری'), y.goods], ['ٹوٹل', y.total], [(y.isYesterday === false ? 'پچھلا ادا کیا' : 'کل ادا کیا'), y.paid], ['بقایا', y.final, true]
-  ], rc, bw, fscale);
+  _drawPayRows(ctx, FP, L, R, rTop, lay.sumRowH, _rows, rc, bw, fscale);
   let bottom = top + boxH;
-  if(y.dayShort > 0){
-    const rh = Math.round(40 * fscale), rt = bottom + 8;
-    ctx.fillStyle = '#dc2626';
+  // 🔴 FM1610FR391: آج تک کی کل کم وصولی — صرف دیکھنے کے لیے (کسی جمع/تفریق میں نہیں)؛ سکرین/شیئر پر سرخ، پرنٹ میں خودکار سیاہ ڈبہ + سفید لکھائی
+  if(y.lifeShort > 0){
+    const rh = Math.round(58 * fscale), rt = bottom + 8;
+    ctx.fillStyle = '#b91c1c';
     ctx.fillRect(L + 0.5, rt, R - L, rh);
     ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
-    let px = 16; const txt = 'کم وصولی:  ' + Math.round(y.dayShort).toLocaleString();
+    let px = 14; const t1 = 'کل کم وصولی (' + y.label + ' تک)';
     ctx.font = FP(`bold ${px}px`);
-    while(ctx.measureText(txt).width > (R - L) - 10 && px > 9){ px -= 1; ctx.font = FP(`bold ${px}px`); }
-    ctx.fillText(txt, (L + R) / 2, rt + rh / 2 + Math.round(6 * fscale));
+    while(ctx.measureText(t1).width > (R - L) - 10 && px > 9){ px -= 1; ctx.font = FP(`bold ${px}px`); }
+    ctx.fillText(t1, (L + R) / 2, rt + Math.round(20 * fscale));
+    let vx = 24; const t2 = Math.round(y.lifeShort).toLocaleString();
+    ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`;
+    while(ctx.measureText(t2).width > (R - L) - 10 && vx > 10){ vx -= 1; ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`; }
+    ctx.fillText(t2, (L + R) / 2, rt + rh - Math.round(9 * fscale));
     bottom = rt + rh;
   }
   ctx.fillStyle = '#000';
