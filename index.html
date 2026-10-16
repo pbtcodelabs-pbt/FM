@@ -9368,7 +9368,8 @@ function getDeveloperContact(){
 // 🆕 FM1410WE389: ریکوری کارڈ کی ترتیب — کل کی خریداری اوپر، آج کی خریداری نیچے (وصولی کے خانے کے سامنے)
 // 🆕 FM1510TH390: (1) بیوپاری کے پرچیز آرڈر — رنگین لمبا کیپسول، اوپر تاریخ، اس دن کی ادائیگی/بقایا کے کیپسول (2) آرڈر بکنگ میں چالان کا سٹاک بچا ہو تو دو وارننگ + PIN، باقی سٹاک کی ایڈمن کو فوراً اطلاع (ہوم پر پٹی + پاپ اپ)
 // 🆕 FM1610FR391: بل کا 'کل کی ادائیگی' ڈبہ — ادا کی گئی رقم کی تقسیم (نقد/جاز کیش/ایزی پیسہ/بینک، صرف جن میں رقم آئی)؛ نیچے بڑا سرخ (پرنٹ میں سیاہ) ڈبہ: آج تک کی کل کم وصولی
-const APP_BUILD_VERSION = 'FM1610FR391'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1610FR392: وصولی کی تقسیم الگ رقم والی لائنوں کی بجائے 'کل ادا کیا' کی اسی لائن کے نیچے چھوٹی ضمنی تحریر میں؛ ٹوٹل بڑا موٹا (الجھن ختم)
+const APP_BUILD_VERSION = 'FM1610FR392'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -41969,7 +41970,7 @@ function _billPayLayout(invoice, fscale, rowScale){
   const y = getYesterdayPayInfo(invoice);
   const yTitleH = Math.round(54 * fscale);
   const redH = (y && y.lifeShort > 0) ? Math.round(58 * fscale) + 8 : 0; // 🔴 FM1610FR391: آج تک کی کل کم وصولی — بڑا ڈبہ
-  const yH = y ? (yTitleH + _yBoxRows(y).length * sumRowH + 2 + redH) : 0;
+  const yH = y ? (yTitleH + _payRowsH(_yBoxRows(y), sumRowH) + 2 + redH) : 0;
   return { sumRowH, titleH, boxH, yTitleH, redH, yH, y };
 }
 // ---------- 📅 بل کی تاریخ سے ایک دن پہلے (کل) کی ادائیگی — بالکل روزانہ ریکوری رپورٹ والا حساب، صرف دیکھنے کے لیے ----------
@@ -42024,15 +42025,16 @@ function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
   rows.forEach(([lb, , fin]) => { ctx.font = FP(`${bw}${fin ? 18 : 15}px`); _maxL = Math.max(_maxL, ctx.measureText(String(lb)).width); });
   const labelW = Math.round(Math.min(W * 0.68, Math.max(W * 0.40, _maxL + 16 * fscale))), valueX = R - labelW;
   let rowTop = top;
-  rows.forEach(([label, val, isFinal], idx) => {
-    if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(L + 0.5, rowTop + 0.5, W - 1, rowH); }
+  rows.forEach(([label, val, isFinal, sub], idx) => {
+    const subH = sub ? Math.round(rowH * 0.8) : 0; // 🧾 ضمنی (چھوٹی) تحریر کی جگہ — اسی لائن کے نیچے
+    if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(L + 0.5, rowTop + 0.5, W - 1, rowH + subH); }
     if(isFinal){ ctx.fillStyle = '#e2e8f0'; ctx.fillRect(L + 0.5, rowTop + 0.5, W - 1, rowH); }
     let fpx = isFinal ? 18 : 15;
     ctx.font = FP(`${bw}${fpx}px`);
     while(ctx.measureText(label).width > labelW - 10 && fpx > 9){ fpx -= 1; ctx.font = FP(`${bw}${fpx}px`); }
     ctx.fillStyle = '#000'; ctx.textAlign = 'right';
     ctx.fillText(label, R - 6, rowTop + rowH / 2 + Math.round(5 * fscale));
-    let vpx = isFinal ? 18 : 16;
+    let vpx = (isFinal || sub) ? 19 : 16;
     const vs = Math.round(val).toLocaleString();
     ctx.font = FP(`bold ${vpx}px`);
     while(ctx.measureText(vs).width > (W - labelW) - 10 && vpx > 9){ vpx -= 1; ctx.font = FP(`bold ${vpx}px`); }
@@ -42040,7 +42042,14 @@ function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
     ctx.fillText(vs, L + 6, rowTop + rowH / 2 + Math.round(5 * fscale));
     ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(valueX, rowTop); ctx.lineTo(valueX, rowTop + rowH); ctx.stroke();
-    rowTop += rowH;
+    if(sub){
+      ctx.fillStyle = '#334155'; ctx.textAlign = 'center';
+      let spx = 12; ctx.font = FP(`${bw}${spx}px`);
+      while(ctx.measureText(sub).width > W - 8 && spx > 7){ spx -= 1; ctx.font = FP(`${bw}${spx}px`); }
+      ctx.fillText(sub, (L + R) / 2, rowTop + rowH + subH / 2 + Math.round(4 * fscale));
+      ctx.fillStyle = '#000';
+    }
+    rowTop += rowH + subH;
     ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(L, rowTop); ctx.lineTo(R, rowTop); ctx.stroke();
   });
@@ -42050,16 +42059,17 @@ function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
 const _Y_SPLIT_LBL = { cash: 'نقد', jazzcash: 'جاز کیش', easypaisa: 'ایزی پیسہ', bank: 'بینک', wallet: 'والٹ (ایڈوانس)', other: 'دیگر' };
 function _yBoxRows(y){
   const kal = y.isYesterday !== false;
-  const rows = [['سابقہ بقایا', y.opening], [kal ? 'کل کی خریداری' : 'پچھلی خریداری', y.goods], ['ٹوٹل', y.total], [kal ? 'کل ادا کیا' : 'پچھلا ادا کیا', y.paid]];
+  // 🧾 FM1610FR392: تقسیم الگ رقم والی لائنیں نہیں — "کل ادا کیا" کی اسی ایک لائن میں نیچے چھوٹی ضمنی تحریر، اور ٹوٹل بڑا موٹا
   const sp = y.split || {};
-  ['cash', 'jazzcash', 'easypaisa', 'bank', 'wallet', 'other'].forEach(k => { if((sp[k] || 0) > 0) rows.push(['• ' + _Y_SPLIT_LBL[k], sp[k]]); });
-  rows.push(['بقایا', y.final, true]);
-  return rows;
+  const parts = ['cash', 'jazzcash', 'easypaisa', 'bank', 'wallet', 'other'].filter(k => (sp[k] || 0) > 0).map(k => _Y_SPLIT_LBL[k] + ' ' + Math.round(sp[k]).toLocaleString());
+  const sub = parts.length ? '(' + parts.join('  ·  ') + ')' : '';
+  return [['سابقہ بقایا', y.opening], [kal ? 'کل کی خریداری' : 'پچھلی خریداری', y.goods], ['ٹوٹل', y.total], [kal ? 'کل ادا کیا' : 'پچھلا ادا کیا', y.paid, false, sub], ['بقایا', y.final, true]];
 }
+function _payRowsH(rows, rowH){ return rows.reduce((a, r) => a + (r[3] ? rowH + Math.round(rowH * 0.8) : rowH), 0); }
 function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   const y = lay.y; if(!y) return top;
   const _rows = _yBoxRows(y);
-  const boxH = lay.yTitleH + _rows.length * lay.sumRowH + 2;
+  const boxH = lay.yTitleH + _payRowsH(_rows, lay.sumRowH) + 2;
   ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
   ctx.strokeRect(L + 0.5, top + 0.5, R - L, boxH);
   ctx.textAlign = 'center'; ctx.fillStyle = '#000';
