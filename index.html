@@ -9369,7 +9369,8 @@ function getDeveloperContact(){
 // 🆕 FM1510TH390: (1) بیوپاری کے پرچیز آرڈر — رنگین لمبا کیپسول، اوپر تاریخ، اس دن کی ادائیگی/بقایا کے کیپسول (2) آرڈر بکنگ میں چالان کا سٹاک بچا ہو تو دو وارننگ + PIN، باقی سٹاک کی ایڈمن کو فوراً اطلاع (ہوم پر پٹی + پاپ اپ)
 // 🆕 FM1610FR391: بل کا 'کل کی ادائیگی' ڈبہ — ادا کی گئی رقم کی تقسیم (نقد/جاز کیش/ایزی پیسہ/بینک، صرف جن میں رقم آئی)؛ نیچے بڑا سرخ (پرنٹ میں سیاہ) ڈبہ: آج تک کی کل کم وصولی
 // 🆕 FM1610FR392: وصولی کی تقسیم الگ رقم والی لائنوں کی بجائے 'کل ادا کیا' کی اسی لائن کے نیچے چھوٹی ضمنی تحریر میں؛ ٹوٹل بڑا موٹا (الجھن ختم)
-const APP_BUILD_VERSION = 'FM1610FR392'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1610FR393: بل — لال ڈبے کے اوپر جملہ 'کل 15 اکتوبر جمعرات تک ٹوٹل کم وصولی'، ڈبے میں صرف رقم
+const APP_BUILD_VERSION = 'FM1610FR393'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -41969,7 +41970,7 @@ function _billPayLayout(invoice, fscale, rowScale){
   const boxH = titleH + n * sumRowH + 2;
   const y = getYesterdayPayInfo(invoice);
   const yTitleH = Math.round(54 * fscale);
-  const redH = (y && y.lifeShort > 0) ? Math.round(58 * fscale) + 8 : 0; // 🔴 FM1610FR391: آج تک کی کل کم وصولی — بڑا ڈبہ
+  const redH = (y && y.lifeShort > 0) ? Math.round(30 * fscale) + Math.round(46 * fscale) + 8 : 0; // 🔴 FM1610FR393: اوپر جملہ + نیچے لال ڈبہ // 🔴 FM1610FR391: آج تک کی کل کم وصولی — بڑا ڈبہ
   const yH = y ? (yTitleH + _payRowsH(_yBoxRows(y), sumRowH) + 2 + redH) : 0;
   return { sumRowH, titleH, boxH, yTitleH, redH, yH, y };
 }
@@ -42085,18 +42086,24 @@ function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   let bottom = top + boxH;
   // 🔴 FM1610FR391: آج تک کی کل کم وصولی — صرف دیکھنے کے لیے (کسی جمع/تفریق میں نہیں)؛ سکرین/شیئر پر سرخ، پرنٹ میں خودکار سیاہ ڈبہ + سفید لکھائی
   if(y.lifeShort > 0){
-    const rh = Math.round(58 * fscale), rt = bottom + 8;
+    // 🔴 FM1610FR393: اوپر سیاہ جملہ "کل 15 اکتوبر جمعرات تک ٹوٹل کم وصولی"، نیچے لال ڈبے میں صرف رقم (پرنٹ میں سیاہ ڈبہ)
+    const _UM = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];
+    const _UD = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
+    const _d = new Date(y.D + 'T12:00:00');
+    const t1 = (y.isYesterday !== false ? 'کل ' : '') + _d.getDate() + ' ' + _UM[_d.getMonth()] + ' ' + _UD[_d.getDay()] + ' تک ٹوٹل کم وصولی';
+    const lh = Math.round(30 * fscale), rt0 = bottom + 8;
+    ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+    let px = 16; ctx.font = FP(`bold ${px}px`);
+    while(ctx.measureText(t1).width > (R - L) - 6 && px > 9){ px -= 1; ctx.font = FP(`bold ${px}px`); }
+    ctx.fillText(t1, (L + R) / 2, rt0 + lh - Math.round(8 * fscale));
+    const rh = Math.round(46 * fscale), rt = rt0 + lh;
     ctx.fillStyle = '#b91c1c';
     ctx.fillRect(L + 0.5, rt, R - L, rh);
-    ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
-    let px = 14; const t1 = 'کل کم وصولی (' + y.label + ' تک)';
-    ctx.font = FP(`bold ${px}px`);
-    while(ctx.measureText(t1).width > (R - L) - 10 && px > 9){ px -= 1; ctx.font = FP(`bold ${px}px`); }
-    ctx.fillText(t1, (L + R) / 2, rt + Math.round(20 * fscale));
-    let vx = 24; const t2 = Math.round(y.lifeShort).toLocaleString();
+    ctx.fillStyle = '#ffffff';
+    let vx = 26; const t2 = Math.round(y.lifeShort).toLocaleString();
     ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`;
     while(ctx.measureText(t2).width > (R - L) - 10 && vx > 10){ vx -= 1; ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`; }
-    ctx.fillText(t2, (L + R) / 2, rt + rh - Math.round(9 * fscale));
+    ctx.fillText(t2, (L + R) / 2, rt + rh / 2 + Math.round(9 * fscale));
     bottom = rt + rh;
   }
   ctx.fillStyle = '#000';
