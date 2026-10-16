@@ -9370,7 +9370,8 @@ function getDeveloperContact(){
 // 🆕 FM1610FR391: بل کا 'کل کی ادائیگی' ڈبہ — ادا کی گئی رقم کی تقسیم (نقد/جاز کیش/ایزی پیسہ/بینک، صرف جن میں رقم آئی)؛ نیچے بڑا سرخ (پرنٹ میں سیاہ) ڈبہ: آج تک کی کل کم وصولی
 // 🆕 FM1610FR392: وصولی کی تقسیم الگ رقم والی لائنوں کی بجائے 'کل ادا کیا' کی اسی لائن کے نیچے چھوٹی ضمنی تحریر میں؛ ٹوٹل بڑا موٹا (الجھن ختم)
 // 🆕 FM1610FR393: بل — لال ڈبے کے اوپر جملہ 'کل 15 اکتوبر جمعرات تک ٹوٹل کم وصولی'، ڈبے میں صرف رقم
-const APP_BUILD_VERSION = 'FM1610FR393'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1710SA394: ہوم سمری — کسی ایک خالی/خراب ریکارڈ (null گاہک/بیوپاری/خرچہ/سبزی/بل آئٹم یا نمبر والا خرچہ نام) سے پورا حساب رک کر کیش آیا/گیا/سٹاک/منافع صفر ہو جاتے تھے؛ اب ایسا ریکارڈ چھوڑ کر باقی حساب فوراً
+const APP_BUILD_VERSION = 'FM1710SA394'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10144,7 +10145,7 @@ function renderHomeMoneySummary(){
   //  ⑥ کاروبار کی کیفیت       = ② + ③ + ④ − ⑤ − ①   (یعنی ادھار + سٹاک + گلے کا کیش − بیوپاری قرض) — جمع ہو تو منافع، مائنس ہو تو نقصان
   //  ⑦ صرف آج کا منافع        = آج کے بلوں پر مال کا منافع (فروخت ریٹ − خرید ریٹ − مزدوری) − آج کے اخراجات
   let S = null;
-  try{ S = computeBizSummary('today'); }catch(e){}
+  try{ S = computeBizSummary('today'); }catch(e){ try{ console.error('computeBizSummary', e); }catch(_){} }
   const N = v => Math.round(Number(v) || 0);
   const supPay = N((suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_payable) || 0), 0));
   // 🔧 FM1410WE387 (پیارے بھائی کی ہدایت): ادھار = کھاتوں کا کل بقایا − وہ وصولی جو ریکوری والا لے چکا مگر ابھی منظور نہیں ہوئی
@@ -23570,10 +23571,14 @@ function bsBillCash(inv){
 // ---------- 🧮 پورا حساب ایک جگہ — سکرین اور پرنٹ دونوں یہی استعمال کرتے ہیں ----------
 function computeBizSummary(preset){
   const r = bsComputeRange(preset);
+  // 🛡️ FM1710SA394: ایک بھی خالی/خراب ریکارڈ (null گاہک، بیوپاری، خرچہ، سبزی، بل کا آئٹم) پورا حساب روک کر سب ڈبے صفر کر دیتا تھا — اب ایسے ریکارڈ خود چھوڑ دیے جاتے ہیں
+  const _ok = x => !!x && typeof x === 'object';
+  const _prods = (productsData || []).filter(_ok);
+  const _vars = p => (p.variants || []).filter(_ok);
   const todayStr = bsToday(); // 📅 کاروباری تاریخ
-  const invs = (invoicesData || []).filter(inv => inv && inv.status !== 'voided' && inv.status !== 'rejected');
-  const pays = (paymentsData || []);
-  const exps = (typeof expenseData !== 'undefined' ? expenseData : []);
+  const invs = (invoicesData || []).filter(inv => _ok(inv) && inv.status !== 'voided' && inv.status !== 'rejected');
+  const pays = (paymentsData || []).filter(_ok);
+  const exps = (typeof expenseData !== 'undefined' ? (expenseData || []) : []).filter(_ok);
 
   // --- ① آج کا کیش ---
   const openingEntered = getOpeningCashFor(todayStr);
@@ -23592,9 +23597,9 @@ function computeBizSummary(preset){
 
   // --- ② اس وقت کی حالت ---
   let stockValue = 0;
-  (productsData || []).forEach(p => (p.variants || []).forEach(v => { try{ stockValue += Math.max(0, variantStockValue(v) || 0); }catch(e){} }));
-  const custs = (customersData || []).map(c => ({name: c.name, amt: Math.max(0, Number(c.total_receivable) || 0)})).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt);
-  const sups = (suppliersData || []).map(s => ({name: s.name, amt: Math.max(0, Number(s.total_payable) || 0)})).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt);
+  _prods.forEach(p => _vars(p).forEach(v => { try{ stockValue += Math.max(0, variantStockValue(v) || 0); }catch(e){} }));
+  const custs = (customersData || []).filter(_ok).map(c => ({name: c.name, amt: Math.max(0, Number(c.total_receivable) || 0)})).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt);
+  const sups = (suppliersData || []).filter(_ok).map(s => ({name: s.name, amt: Math.max(0, Number(s.total_payable) || 0)})).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt);
   const receivable = custs.reduce((s, x) => s + x.amt, 0);
   // ⏳ ریکوری والے نے وصول کر لی مگر ایڈمن نے ابھی کھاتے میں منظور نہیں کی (روزانہ ریکوری لسٹ والی "زیرِ التوا")
   const pendingRec = (typeof recoveryListData !== 'undefined' ? recoveryListData : []).filter(e => e && e.status === 'pending').reduce((s, e) => s + (Number(e.amount) || 0), 0);
@@ -23607,13 +23612,14 @@ function computeBizSummary(preset){
 
   // --- ③ منتخب مدت ---
   const vMap = {};
-  (productsData || []).forEach(p => (p.variants || []).forEach(v => { vMap[v.variant_id] = v; }));
+  _prods.forEach(p => _vars(p).forEach(v => { vMap[v.variant_id] = v; }));
   const pInv = invs.filter(i => bsInRange(bsInvDay(i), r) || (!r.fromStr && !r.toStr));
   let sales = 0, salesCash = 0, goodsProfit = 0;
   pInv.forEach(inv => {
     sales += Number(inv.grand_total) || 0;
     salesCash += Math.min(Number(inv.grand_total) || 0, bsBillCash(inv));
     (inv.items || []).forEach(it => {
+      if(!_ok(it)) return;
       const v = vMap[it.variant_id];
       const base = v ? ((Number(v.purchase) || 0) + (Number(v.labor) || 0)) : null;
       let cost = base;
@@ -23625,7 +23631,7 @@ function computeBizSummary(preset){
   const pExpList = exps.filter(e => bsInRange(e.date, r) || (!r.fromStr && !r.toStr));
   const expTotal = pExpList.reduce((s, e) => s + (Number(e.amount) || 0), 0);
   const expByName = {};
-  pExpList.forEach(e => { const k = (e.name || 'دیگر').trim(); expByName[k] = (expByName[k] || 0) + (Number(e.amount) || 0); });
+  pExpList.forEach(e => { const k = String(e.name || 'دیگر').trim() || 'دیگر'; expByName[k] = (expByName[k] || 0) + (Number(e.amount) || 0); });
   const expTop = Object.keys(expByName).map(k => ({name: k, amt: expByName[k]})).sort((a, b) => b.amt - a.amt);
   const pPays = pays.filter(p => bsInRange(bsPayDay(p), r) || (!r.fromStr && !r.toStr));
   const recovered = pPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + (Number(p.amount) || 0), 0);
