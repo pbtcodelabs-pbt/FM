@@ -9373,7 +9373,8 @@ function getDeveloperContact(){
 // 🆕 FM1710SA394: ہوم سمری — کسی ایک خالی/خراب ریکارڈ (null گاہک/بیوپاری/خرچہ/سبزی/بل آئٹم یا نمبر والا خرچہ نام) سے پورا حساب رک کر کیش آیا/گیا/سٹاک/منافع صفر ہو جاتے تھے؛ اب ایسا ریکارڈ چھوڑ کر باقی حساب فوراً
 // 🆕 FM1710SA395: ہوم 'گاہکوں کی طرف ادھار' اب بالکل گاہکوں کی فہرست کے جوڑ کے برابر (زیرِ منظوری وصولی منہا نہیں)
 // 🆕 FM1710SA396: ہوم 'کیش گیا' میں اب آج کی نقد خریداری (مال) بھی — بیوپاریوں کو ادائیگی + اخراجات + نقد خریداری؛ ہاتھ میں کیش اور مکمل سمری بھی اسی حساب سے
-const APP_BUILD_VERSION = 'FM1710SA396'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM1710SA397: کل کم وصولی کا حساب درست — صرف وصولی والے دن بھی منہا، بل کے ساتھ پرانے بقایا میں دی رقم بھی وصولی؛ بل کا لال ڈبہ اور ریکوری لسٹ کا کالم ایک ہی حساب
+const APP_BUILD_VERSION = 'FM1710SA397'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -33421,6 +33422,34 @@ function _drGoodsOrig(inv){
   const paid = (inv.paid_now !== undefined && inv.paid_now !== null) ? (Number(inv.paid_now) || 0) : (g - (Number(inv.amount_due) || 0));
   return Math.max(0, Math.round((g - paid) * 100) / 100);
 }
+// ---------- 🔴 FM1710SA397: گاہک کی "کل کم وصولی" (D تک) — ایک ہی حساب، بل کا لال ڈبہ اور ریکوری لسٹ کا کالم دونوں یہی استعمال کرتے ہیں
+// ہر دن (پرانے سے نئے): کم وصولی = پچھلی کم وصولی + اس دن کا ادھار مال − اس دن کی ساری وصولی (صفر سے کم نہیں)
+//   • جس دن صرف وصولی ہوئی (مال نہیں لیا) وہ بھی پرانی کم وصولی میں سے منہا — پہلے یہ دن چھوٹ جاتے تھے
+//   • بل بناتے وقت پرانے بقایا میں دی گئی نقد رقم بھی وصولی — پہلے گنی نہیں جاتی تھی
+//   • آخری "تمام بقایا زیرو" کے بعد سے؛ والٹ سے خودکار کٹوتی دوبارہ نہیں گنی جاتی (بل کا ادھار پہلے ہی اتنا کم ہے)
+function custShortThrough(c, D){
+  if(!c) return 0;
+  const hist = c.walletHistory || [];
+  const zLast = hist.filter(h => h && h.type === 'zero_reset' && h.date && h.date <= D).map(h => h.date).sort().pop() || '';
+  const gD = {}, rD = {}; const ad = (o, d, v) => { if(d) o[d] = (o[d] || 0) + (Number(v) || 0); };
+  (invoicesData || []).forEach(inv => {
+    if(!inv || inv.customer_id !== c.customer_id || inv.status === 'voided') return;
+    const d = invDay(inv);
+    ad(gD, d, _drGoodsOrig(inv));
+    const billCash = Math.max(0, (Number(inv.paid_now) || 0) - (Number(inv.wallet_applied) || 0));
+    ad(rD, d, Math.max(0, (Number(inv.cash_received_now) || 0) - billCash)); // بل کے ساتھ پرانے بقایا میں دی رقم
+  });
+  hist.forEach(h => {
+    if(!h) return;
+    if(h.type === 'cash_given') ad(gD, h.date, h.amount);
+    else if(h.type === 'receivable_collected' && !(h.via === 'wallet' && /^Auto-applied/.test(String(h.note || '')))) ad(rD, h.date, h.amount);
+  });
+  (recoveryListData || []).forEach(e => { if(e && e.customer_id === c.customer_id && e.status === 'pending') ad(rD, recDay(e), e.amount); });
+  const days = Array.from(new Set(Object.keys(gD).concat(Object.keys(rD)))).filter(d => d && d <= D && (!zLast || d >= zLast)).sort();
+  let short = 0;
+  days.forEach(d => { short = Math.max(0, short + (gD[d] || 0) - (rD[d] || 0)); });
+  return Math.round(short);
+}
 function drCustomerDay(c, D){
   const hist = c.walletHistory || [];
   const gDay = {}, rDay = {}, pDay = {};
@@ -33442,9 +33471,7 @@ function drCustomerDay(c, D){
   const finalBalance = totalBalance - todayRecovery;
   const dayShort = todayGoods > 0 ? Math.max(0, todayGoods - todayRecovery) : 0;
   // ⚠️ آج تک کی کل کم وصولی — ہر دن: اس دن کا مال − اس دن کی وصولی (صرف دیکھنے کے لیے، کسی حساب میں شامل نہیں)
-  let lifeShort = 0;
-  Object.keys(gDay).forEach(d => { if(d <= D && gDay[d] > 0) lifeShort += Math.max(0, gDay[d] - (rDay[d] || 0) - (pDay[d] || 0)); });
-  lifeShort = Math.round(lifeShort);
+  const lifeShort = custShortThrough(c, D); // 🔴 FM1710SA397: وہی حساب جو بل کا لال ڈبہ
   const hasToday = todayGoods > 0 || todayRecovery > 0;
   return { c, openingBalance, todayGoods, totalBalance, todayRecovery, confirmedRecovery, pendingRecovery, finalBalance, shortfall: lifeShort, dayShort, hasToday };
 }
@@ -42044,14 +42071,7 @@ function getYesterdayPayInfo(invoice){
     (recoveryListData || []).forEach(e => { if(e && e.customer_id === c.customer_id && e.status === 'pending' && recDay(e) === D) _addSp(getRecoverySplit(e)); });
     const _spSum = Object.keys(split).reduce((a, k) => a + split[k], 0);
     if(r.todayRecovery - _spSum > 1) split.other = r.todayRecovery - _spSum;
-    // 🔴 آج تک کی کل کم وصولی (ریکوری لسٹ والا "کل کم وصولی" کالم) — ہر دن: اس دن کا مال − اس دن کی وصولی، اس دن (D) تک؛ زیرو کے بعد سے
-    let lifeShort = 0;
-    { const gD = {}, rD = {}; const ad = (o, d, v) => { if(d) o[d] = (o[d] || 0) + (Number(v) || 0); };
-      invoicesData.forEach(inv => { if(inv.customer_id === c.customer_id) ad(gD, invDay(inv), _drGoodsOrig(inv)); });
-      (c.walletHistory || []).forEach(h => { if(!h) return; if(h.type === 'cash_given') ad(gD, h.date, h.amount); else if(h.type === 'receivable_collected') ad(rD, h.date, h.amount); });
-      (recoveryListData || []).forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') ad(rD, recDay(e), e.amount); });
-      Object.keys(gD).forEach(d => { if(d <= D && (!_zLast || d >= _zLast) && gD[d] > 0) lifeShort += Math.max(0, gD[d] - (rD[d] || 0)); });
-      lifeShort = Math.round(lifeShort); }
+    const lifeShort = custShortThrough(c, D); // 🔴 FM1710SA397: ریکوری لسٹ والا وہی حساب
     return { D, isYesterday, label: p[2] + '-' + p[1] + '-' + p[0], opening: r.openingBalance, goods: r.todayGoods, total: r.totalBalance, paid: r.todayRecovery, final: r.finalBalance, dayShort: r.dayShort, split, lifeShort };
   }catch(e){ return null; }
 }
