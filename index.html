@@ -9377,12 +9377,13 @@ function getDeveloperContact(){
 // 🆕 FM1710SA396: ہوم 'کیش گیا' میں اب آج کی نقد خریداری (مال) بھی — بیوپاریوں کو ادائیگی + اخراجات + نقد خریداری؛ ہاتھ میں کیش اور مکمل سمری بھی اسی حساب سے
 // 🆕 FM1710SA397: کل کم وصولی کا حساب درست — صرف وصولی والے دن بھی منہا، بل کے ساتھ پرانے بقایا میں دی رقم بھی وصولی؛ بل کا لال ڈبہ اور ریکوری لسٹ کا کالم ایک ہی حساب
 // 🆕 FM1710SA398: (1) ادائیگی/وصولی کا نوٹ گاہک کے بل اور بیوپاری کی چٹ پر بھی، اور گاہک کی ٹرانزیکشن ہسٹری میں محفوظ/نظر (2) 'سبزی کس کس کو دی گئی' اور 'چالانوں کا حساب' کے ساتھ 'سابقہ ریکارڈ' — تاریخ چنیں، اسی دن کی رپورٹ، پرنٹ/شیئر
+// 🆕 FM1710SA404: 📣 ہر پرنٹ/شیئر (بل، چٹ، پرچی، رپورٹ، PDF، بلوٹوتھ) کے نیچے برانڈنگ: بہترین موبائل سافٹ وئیر ہم سے بنوائیں۔۔۔ 03206793793
 // 🆕 FM1710SA403: 🏷️ آج کے پرچون ریٹ — آج تقسیم ہوئی سبزیوں کے 1/ڈیڑھ/ڈھائی/5 کلو اور نگ کے ریٹ خود لکھیں، تصویر واٹس ایپ/پرنٹ
 // 🆕 FM1710SA402: ہوم کے ہر ڈبے پر دبانے سے صرف اسی ڈبے کا حساب (پوری سمری نہیں)
 // 🆕 FM1710SA401: اردو فونٹ ہلکی WOFF2 شکل میں (24 MB → 10.3 MB)، نئے ورژن پر فونٹ دوبارہ ڈاؤن لوڈ نہیں
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1710SA403'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1710SA404'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -19872,7 +19873,7 @@ function printChalanDayReport(){
   const w = window.open('', '_blank');
   if(!w){ alert('پرنٹ والی ونڈو نہیں کھل سکی — براؤزر میں پاپ اپ کی اجازت دیں'); return; }
   const t = bizFmt(D) + ' کے چالانوں کا حساب';
-  w.document.write(`<!DOCTYPE html><html lang="ur" dir="rtl"><head><meta charset="utf-8"><title>${t}</title><style>@page{size:A4 landscape;margin:8mm} body{margin:0;font-family:UrduAll,'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif} h2{text-align:center;margin:4px 0;font-size:18px;line-height:1.9} .sub{text-align:center;font-size:12px;margin-bottom:6px}</style></head><body><h2>${t}</h2><div class="sub">${(AppState.settings.businessName || '')}</div>${chalanDayTableHtml(D)}<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
+  w.document.write(`<!DOCTYPE html><html lang="ur" dir="rtl"><head><meta charset="utf-8"><title>${t}</title><style>@page{size:A4 landscape;margin:8mm} body{margin:0;font-family:UrduAll,'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif} h2{text-align:center;margin:4px 0;font-size:18px;line-height:1.9} .sub{text-align:center;font-size:12px;margin-bottom:6px}</style></head><body><h2>${t}</h2><div class="sub">${(AppState.settings.businessName || '')}</div>${chalanDayTableHtml(D)}${brandHtmlFooter()}<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
   w.document.close();
 }
 
@@ -25086,14 +25087,14 @@ async function regenerateDiaryPoster(){
     ? await renderDiaryFullLedgerPoster(entry, note.trim())
     : await renderDiaryTransactionPoster(entry, diaryPosterHistIdx, note.trim());
   diaryPosterCanvas = canvas;
-  document.getElementById('diaryPosterPreviewImg').src = canvas.toDataURL('image/png');
+  document.getElementById('diaryPosterPreviewImg').src = brandCv(canvas).toDataURL('image/png');
 }
 function downloadDiaryPoster(){
   if(!diaryPosterCanvas) return;
   const entry = diaryData.find(e => e.id === activeDiaryEntryId);
   const fileName = `${diaryPosterMode === 'full' ? 'Statement' : 'Receipt'}_${(entry?.name || 'Diary').replace(/\s+/g,'_')}.png`;
   const a = document.createElement('a');
-  a.href = diaryPosterCanvas.toDataURL('image/png');
+  a.href = brandCv(diaryPosterCanvas).toDataURL('image/png');
   a.download = fileName;
   document.body.appendChild(a);
   a.click();
@@ -25103,7 +25104,7 @@ async function shareDiaryPosterFromModal(){
   if(!diaryPosterCanvas) return;
   const entry = diaryData.find(e => e.id === activeDiaryEntryId);
   const fileName = `${diaryPosterMode === 'full' ? 'Statement' : 'Receipt'}_${(entry?.name || 'Diary').replace(/\s+/g,'_')}.png`;
-  diaryPosterCanvas.toBlob(async (blob) => {
+  brandCv(diaryPosterCanvas).toBlob(async (blob) => {
     if(!blob){ alert('There was a problem preparing the image.'); return; }
     const file = new File([blob], fileName, {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -25111,7 +25112,7 @@ async function shareDiaryPosterFromModal(){
       catch(err){ /* یوزر نے شیئر منسوخ کر دی */ }
     } else {
       const win = window.open();
-      if(win) win.document.write(`<img src="${diaryPosterCanvas.toDataURL('image/png')}" style="width:100%;">`);
+      if(win) win.document.write(`<img src="${brandCv(diaryPosterCanvas).toDataURL('image/png')}" style="width:100%;">`);
       else alert("Sharing isn't supported. Please take a screenshot and send it.");
     }
   }, 'image/png');
@@ -26033,7 +26034,7 @@ function buildStockReportPdf(){
   let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
   if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
   const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM;
-  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  pdf.addImage(brandCvFit(canvas).toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
   return pdf;
 }
 async function printStockValueReport(){
@@ -26046,7 +26047,7 @@ async function printStockValueReport(){
     applyPrintPageSize(210);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -26343,7 +26344,7 @@ function buildVegListPdf(){
     let drawW = availW, drawH = fullDrawH;
     if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
     const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM;
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+    pdf.addImage(brandCvFit(canvas).toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
     return pdf;
   }
 
@@ -26363,7 +26364,7 @@ function buildVegListPdf(){
     if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
     const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM;
     if(!first) pdf.addPage();
-    pdf.addImage(tempCanvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+    pdf.addImage(brandCvFit(tempCanvas).toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
     sy += sh; first = false;
   }
   return pdf;
@@ -26380,7 +26381,7 @@ async function printVegListReport(mode){
     applyPrintPageSize(AppState.settings.paperWidth || 80);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${tempCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(tempCanvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -26390,7 +26391,7 @@ async function printVegListReport(mode){
     applyPrintPageSize(210);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -26503,7 +26504,7 @@ function buildPartyListPdf(canvas){
   const availW = pageW - marginMM*2, availH = pageH - marginMM*2;
   let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
   if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
-  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', marginMM + (availW-drawW)/2, marginMM, drawW, drawH);
+  pdf.addImage(brandCvFit(canvas).toDataURL('image/png'), 'PNG', marginMM + (availW-drawW)/2, marginMM, drawW, drawH);
   return pdf;
 }
 // ---------- 💾 صدام کی ہدایت (FM6SEPSU13): براہ راست PDF فون میں محفوظ کریں ---------- -->
@@ -26552,7 +26553,7 @@ async function printCustListReport(mode){
     applyPrintPageSize(AppState.settings.paperWidth || 80);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${tempCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(tempCanvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -26562,7 +26563,7 @@ async function printCustListReport(mode){
     applyPrintPageSize(210);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -26601,7 +26602,7 @@ async function printSupListReport(mode){
     applyPrintPageSize(AppState.settings.paperWidth || 80);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${tempCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(tempCanvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -26611,7 +26612,7 @@ async function printSupListReport(mode){
     applyPrintPageSize(210);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -26828,7 +26829,7 @@ async function printCustomerLedgerReport(mode){
     applyPrintPageSize(AppState.settings.paperWidth || 80);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${tempCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(tempCanvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -26838,7 +26839,7 @@ async function printCustomerLedgerReport(mode){
     applyPrintPageSize(210);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -27021,7 +27022,7 @@ function buildLaborReportPdf(){
   let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
   if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
   const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM;
-  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  pdf.addImage(brandCvFit(canvas).toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
   return pdf;
 }
 async function printLaborReport(){
@@ -27032,7 +27033,7 @@ async function printLaborReport(){
     applyPrintPageSize(210);
     const area = document.getElementById('printReceiptArea');
     enterPrintMode();
-    area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+    area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
     area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
     return;
   }
@@ -28786,7 +28787,7 @@ async function openSupplierReceipt(paymentId){
   const btn = (bg, js, t) => `<button type="button" onclick="${js}" style="flex:1; height:48px; border:none; border-radius:14px; background:${bg}; color:#fff; font-family:UrduAll,${urF}; font-size:18px; font-weight:700; cursor:pointer;">${t}</button>`;
   ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:420px; max-height:94vh; display:flex; flex-direction:column; background:#fff; border-radius:20px; overflow:hidden; font-family:UrduAll,${urF};">
     <div style="background:linear-gradient(135deg,#16a34a,#14532d); color:#fff; text-align:center; font-size:22px; font-weight:700; padding:10px; line-height:1.9;">✅ محفوظ ہو گیا — رسید تیار ہے</div>
-    <div style="flex:1; overflow:auto; background:#f1f5f9; padding:10px;"><img src="${_supRcptCanvas.toDataURL('image/png')}" style="width:100%; display:block; background:#fff; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.15);"></div>
+    <div style="flex:1; overflow:auto; background:#f1f5f9; padding:10px;"><img src="${brandCv(_supRcptCanvas).toDataURL('image/png')}" style="width:100%; display:block; background:#fff; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.15);"></div>
     <div style="display:flex; gap:8px; padding:10px 12px 6px;">
       ${btn('linear-gradient(135deg,#334155,#0f172a)', 'printSupplierReceipt()', '🖨️ پرنٹ')}
       ${btn('linear-gradient(135deg,#25D366,#128C7E)', 'shareSupplierReceipt()', '💬 واٹس ایپ / شیئر')}
@@ -28801,14 +28802,14 @@ function printSupplierReceipt(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
-  area.innerHTML = `<img src="${_supRcptCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${brandCv(_supRcptCanvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 function shareSupplierReceipt(){
   if(!_supRcptCanvas) return;
   const p = paymentsData.find(x => x.payment_id === _supRcptPaymentId) || {};
   const name = (p.party_name || 'supplier').replace(/\s+/g, '_');
-  _supRcptCanvas.toBlob(async blob => {
+  brandCv(_supRcptCanvas).toBlob(async blob => {
     if(!blob) return;
     const file = new File([blob], `Raseed_${name}_${p.payment_id || ''}.png`, {type: 'image/png'});
     const text = `${AppState.settings.businessName || ''} — ${p.direction === 'in' ? 'وصولی' : 'ادائیگی'} کی رسید: ${p.party_name || ''} — Rs. ${(Number(p.amount)||0).toLocaleString()}`;
@@ -31626,7 +31627,7 @@ async function printOtOrderSheet(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
-  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 async function shareOtOrderSheet(){
@@ -31634,7 +31635,7 @@ async function shareOtOrderSheet(){
   if(order.items.length === 0){ alert('ابھی تک کوئی آرڈر بک نہیں ہوا۔'); return; }
   const canvas = document.getElementById('otOrderSheetCanvas');
   await renderAdvOrderToCanvas(order, canvas);
-  canvas.toBlob(async (blob) => {
+  brandCv(canvas).toBlob(async (blob) => {
     if(!blob){ alert('تصویر بنانے میں مسئلہ ہوا۔'); return; }
     const file = new File([blob], `Order-Sheet-${new Date().toISOString().slice(0,10)}.png`, {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -31796,6 +31797,81 @@ function smDistCompute(dayArg){
 // کے لیے فون کرتے رہتے ہیں۔ یہاں آج تقسیم ہوئی سبزیوں/پھلوں کی فہرست آتی ہے، ہم خود 1 کلو / ڈیڑھ کلو / ڈھائی کلو / 5 کلو / نگ کے
 // پرچون ریٹ لکھتے ہیں، پھر خوبصورت تصویر واٹس ایپ پر شیئر یا پرنٹ۔ ریٹ تاریخ وار فون میں محفوظ؛ نئے دن پچھلے ریٹ پہلے سے بھرے آتے ہیں
 // =====================================================================
+// 📣 FM1710SA404 (پیارے بھائی کی ہدایت): ہر پرنٹ / شیئر ہونے والی چیز (گاہک کا بل، بیوپاری کی چٹ، پرچی، رپورٹ، PDF، بلوٹوتھ پرنٹ)
+// کے نیچے ہماری برانڈنگ۔ اصل کینوس نہیں بدلتا — باہر جاتے وقت نیچے ایک پٹی جڑ کر نیا کینوس بنتا ہے (دوبارہ نہیں جڑتی)
+// =====================================================================
+const BRAND_AD_TEXT = 'بہترین موبائل سافٹ وئیر ہم سے بنوائیں۔۔۔ 03206793793';
+const BRAND_AD_L1 = 'بہترین موبائل سافٹ وئیر ہم سے بنوائیں', BRAND_AD_L2 = '03206793793';
+const BRAND_AD_FONT = "UrduAll, Arial, 'JameelNooriNastaleeq', sans-serif";
+try{ document.fonts && document.fonts.load('30px UrduAll', 'بہترین موبائل سافٹ وئیر'); }catch(e){}
+function brandFooterStrip(w){
+  const pad = Math.max(6, Math.round(w * 0.02));
+  const c = document.createElement('canvas');
+  const t = c.getContext('2d');
+  let fs = Math.round(w * 0.042), two = false;
+  t.font = `bold ${fs}px ${BRAND_AD_FONT}`;
+  while(t.measureText(BRAND_AD_TEXT).width > w - 2 * pad && fs > 10){ fs--; t.font = `bold ${fs}px ${BRAND_AD_FONT}`; }
+  if(fs < Math.max(18, w * 0.034)){ // تنگ کاغذ (تھرمل): دو سطریں — اوپر جملہ، نیچے نمبر
+    two = true; fs = Math.round(w * 0.05); t.font = `bold ${fs}px ${BRAND_AD_FONT}`;
+    while(t.measureText(BRAND_AD_L1).width > w - 2 * pad && fs > 10){ fs--; t.font = `bold ${fs}px ${BRAND_AD_FONT}`; }
+  }
+  const lh = Math.round(fs * 1.75);
+  c.width = w; c.height = (two ? 2 * lh : lh) + pad;
+  const x = c.getContext('2d');
+  x.fillStyle = '#ffffff'; x.fillRect(0, 0, c.width, c.height);
+  x.strokeStyle = '#000000'; x.lineWidth = Math.max(1, Math.round(w / 400));
+  x.setLineDash([Math.max(3, Math.round(w / 90)), Math.max(2, Math.round(w / 150))]);
+  x.beginPath(); x.moveTo(pad, Math.round(pad / 2)); x.lineTo(w - pad, Math.round(pad / 2)); x.stroke(); x.setLineDash([]);
+  x.fillStyle = '#000000'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.direction = 'rtl';
+  x.font = `bold ${fs}px ${BRAND_AD_FONT}`;
+  if(two){ x.fillText(BRAND_AD_L1, w / 2, pad + lh / 2); x.font = `bold ${fs}px Arial, sans-serif`; x.fillText(BRAND_AD_L2, w / 2, pad + lh + lh / 2); }
+  else x.fillText(BRAND_AD_TEXT, w / 2, pad + lh / 2);
+  return c;
+}
+function brandCv(cv){
+  try{
+    if(!cv || !cv.width || !cv.height || cv.__branded) return cv;
+    const s = brandFooterStrip(cv.width);
+    const o = document.createElement('canvas');
+    o.width = cv.width; o.height = cv.height + s.height;
+    const x = o.getContext('2d');
+    x.fillStyle = '#ffffff'; x.fillRect(0, 0, o.width, o.height);
+    x.drawImage(cv, 0, 0); x.drawImage(s, 0, cv.height);
+    o.__branded = true;
+    return o;
+  }catch(e){ return cv; }
+}
+// PDF میں تصویر کا ناپ پہلے سے طے ہوتا ہے — اسی ناپ میں: اصل کو تھوڑا چھوٹا (تناسب وہی، کھنچاؤ نہیں) اور نیچے پٹی
+function brandCvFit(cv){
+  try{
+    if(!cv || !cv.width || !cv.height || cv.__branded) return cv;
+    const s = brandFooterStrip(cv.width);
+    const o = document.createElement('canvas');
+    o.width = cv.width; o.height = cv.height;
+    const x = o.getContext('2d');
+    x.fillStyle = '#ffffff'; x.fillRect(0, 0, o.width, o.height);
+    const h = cv.height - s.height, k = h / cv.height, w = cv.width * k;
+    x.drawImage(cv, (cv.width - w) / 2, 0, w, h); x.drawImage(s, 0, h);
+    o.__branded = true;
+    return o;
+  }catch(e){ return cv; }
+}
+function brandHtmlFooter(){
+  return `<div style="margin-top:10px;padding-top:6px;border-top:1px dashed #000;text-align:center;font-weight:bold;font-size:14px;color:#000;font-family:UrduAll,Arial,sans-serif;line-height:2;">${BRAND_AD_TEXT}</div>`;
+}
+// متنی PDF (jsPDF) کے ہر صفحے کے نیچے یہی پٹی تصویر کی صورت میں
+function brandPdf(pdf){
+  try{
+    const n = pdf.internal.getNumberOfPages();
+    const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight();
+    const s = brandFooterStrip(1400); const url = s.toDataURL('image/png');
+    const dw = pw - 20, dh = dw * s.height / s.width;
+    for(let i = 1; i <= n; i++){ pdf.setPage(i); pdf.addImage(url, 'PNG', 10, ph - dh - 2, dw, dh); }
+  }catch(e){}
+  return pdf;
+}
+
+// =====================================================================
 const RR_COLS = [
   {k:'k1',  label:'1 کلو'},
   {k:'k15', label:'ڈیڑھ کلو'},
@@ -31938,7 +32014,7 @@ async function rrCanvas(){
 }
 async function rrShare(){
   const cv = await rrCanvas(); if(!cv) return;
-  cv.toBlob(async (blob) => {
+  brandCv(cv).toBlob(async (blob) => {
     const file = new File([blob], 'aaj-ke-parchoon-rate.png', {type:'image/png'});
     const biz = (AppState.settings.businessName || '').trim();
     try{
@@ -31952,7 +32028,7 @@ async function rrPrint(){
   const cv = await rrCanvas(); if(!cv) return;
   const w = window.open('', '_blank');
   if(!w){ alert('پرنٹ والی ونڈو نہیں کھل سکی — براؤزر میں پاپ اپ کی اجازت دیں'); return; }
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>آج کے پرچون ریٹ</title><style>@page{size:A4 portrait;margin:8mm} body{margin:0;text-align:center} img{width:100%;max-width:190mm}</style></head><body><img src="${cv.toDataURL('image/png')}"><script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>آج کے پرچون ریٹ</title><style>@page{size:A4 portrait;margin:8mm} body{margin:0;text-align:center} img{width:100%;max-width:190mm}</style></head><body><img src="${brandCv(cv).toDataURL('image/png')}"><script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
   w.document.close();
 }
 
@@ -32147,7 +32223,7 @@ function printDistReport(){
   const w = window.open('', '_blank');
   if(!w){ alert('پرنٹ والی ونڈو نہیں کھل سکی — براؤزر میں پاپ اپ کی اجازت دیں'); return; }
   const nf = smDistFam('nast');
-  w.document.write(`<!DOCTYPE html><html lang="ur" dir="rtl"><head><meta charset="utf-8"><title>${_t}</title><style>@page{size:A4 landscape;margin:8mm} body{font-family:UrduAll,${nf};margin:0} h2{text-align:center;margin:4px 0;font-size:18px;line-height:1.9} .sub{text-align:center;font-size:12px;margin-bottom:6px}</style></head><body><h2>${_t}</h2><div class="sub">${bizFmt(d.day)}</div>${smDistTableHtml(d, true)}<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
+  w.document.write(`<!DOCTYPE html><html lang="ur" dir="rtl"><head><meta charset="utf-8"><title>${_t}</title><style>@page{size:A4 landscape;margin:8mm} body{font-family:UrduAll,${nf};margin:0} h2{text-align:center;margin:4px 0;font-size:18px;line-height:1.9} .sub{text-align:center;font-size:12px;margin-bottom:6px}</style></head><body><h2>${_t}</h2><div class="sub">${bizFmt(d.day)}</div>${smDistTableHtml(d, true)}${brandHtmlFooter()}<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
   w.document.close();
 }
 
@@ -32855,7 +32931,7 @@ async function printOtReviewOrder(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
-  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 
@@ -32876,7 +32952,7 @@ async function shareOtReviewOrder(orderIdOverride){
     }
   }
   await renderAdvOrderToCanvas(order, canvas);
-  canvas.toBlob(async (blob) => {
+  brandCv(canvas).toBlob(async (blob) => {
     if(!blob){ alert('تصویر بنانے میں مسئلہ ہوا۔'); return; }
     const file = new File([blob], `Order-${order.id}.png`, {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -34296,7 +34372,7 @@ async function shareDailyRecoveryImage(){
     ctx.fillStyle = '#6B7280'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('صدام فروٹ منڈی — ' + bizFmt(drEffDate()), w/2, h-sumH-18);
 
-    canvas.toBlob(async (blob) => {
+    brandCv(canvas).toBlob(async (blob) => {
       const file = new File([blob], 'daily-recovery-list.png', {type:'image/png'});
       if(navigator.canShare && navigator.canShare({files:[file]})){
         await navigator.share({files:[file], title:'روزانہ ریکوری لسٹ', text:'صدام فروٹ منڈی — روزانہ ریکوری لسٹ'});
@@ -34409,7 +34485,7 @@ function openReportImagePreview(canvases, opts){
   const list = Array.isArray(canvases) ? canvases : [canvases];
   document.getElementById('reportImagePreviewTitle').textContent = opts.title || '📊 رپورٹ تیار';
   const imgsWrap = document.getElementById('reportImagePreviewImages');
-  imgsWrap.innerHTML = list.map(c => `<img src="${c.toDataURL('image/png')}" style="width:100%; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.15); display:block;">`).join('');
+  imgsWrap.innerHTML = list.map(c => `<img src="${brandCv(c).toDataURL('image/png')}" style="width:100%; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.15); display:block;">`).join('');
 
   _reportPreviewState = { blob: opts.blob, fileName: opts.fileName || 'report.png', mime: opts.mime || 'image/png', title: opts.title || '' };
   // ---------- 🔵 صدام کی ہدایت (FM3SEPTH32): بلوٹوتھ پرنٹ بھی اب پہلے یہیں پریویو میں نظر آئے گا،
@@ -34647,7 +34723,7 @@ async function generateTodayOrderMatrixReport(){
     let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
     if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
     const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM + (availH-drawH)/2;
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+    pdf.addImage(brandCvFit(canvas).toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
   });
 
   const blob = pdf.output('blob');
@@ -34774,7 +34850,7 @@ async function generateTodayRecoveryReport(){
   ctx.fillStyle = '#fff'; ctx.font = 'bold 30px sans-serif';
   ctx.fillText('Rs. ' + grandTotal.toLocaleString(), W/2, y+55);
 
-  canvas.toBlob((blob) => {
+  brandCv(canvas).toBlob((blob) => {
     openReportImagePreview(canvas, {
       title: isAdmin ? '📊 آج کی ریکوری رپورٹ' : '📊 میری آج کی وصولی رپورٹ',
       blob, fileName: 'today-recovery-report.png', mime: 'image/png'
@@ -35604,7 +35680,7 @@ function buildAdvOrderPdf(){
   pdf.setFillColor(fr, fg, fb); pdf.rect(0, 0, pageW, pageH, 'F');
   pdf.setFillColor(255,255,255); pdf.setDrawColor(br,bgc,bb); pdf.setLineWidth(1.1);
   pdf.roundedRect(offsetX-5, offsetY-5, drawW+10, drawH+10, 7, 7, 'FD');
-  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  pdf.addImage(brandCvFit(canvas).toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
   return pdf;
 }
 
@@ -35969,7 +36045,7 @@ async function printAdvOrderPreview(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
-  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 
@@ -35985,7 +36061,7 @@ function shareAdvOrderUniversal(){
   const order = advanceOrdersData.find(o => o.id === currentPreviewAdvOrderId);
   if(!order) return;
   const canvas = document.getElementById('advOrderCanvas');
-  canvas.toBlob(async (blob) => {
+  brandCv(canvas).toBlob(async (blob) => {
     if(!blob){ alert('There was a problem creating the bill image.'); return; }
     const file = new File([blob], `AdvanceOrder-${order.id}.png`, {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -35997,7 +36073,7 @@ function shareAdvOrderUniversal(){
         });
       } catch(err){ /* یوزر نے شیئر منسوخ کیا */ }
     } else {
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = brandCv(canvas).toDataURL('image/png');
       const win = window.open();
       if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
       else alert("Sharing isn't supported. Please take a screenshot and send it.");
@@ -36315,7 +36391,7 @@ function buildPoPdf(){
   pdf.setFillColor(fr, fg, fb); pdf.rect(0, 0, pageW, pageH, 'F');
   pdf.setFillColor(255,255,255); pdf.setDrawColor(br,bgc,bb); pdf.setLineWidth(1.1);
   pdf.roundedRect(offsetX-5, offsetY-5, drawW+10, drawH+10, 7, 7, 'FD');
-  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  pdf.addImage(brandCvFit(canvas).toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
   return pdf;
 }
 async function sharePoPdf(){
@@ -36351,7 +36427,7 @@ async function printPoPreview(){
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
   const printCanvas = canvasToGrayscale(canvas); // ---------- کاغذ پر ہمیشہ سیاہ/سفید — سکرین/شیئر کا رنگین ورژن الگ ----------
-  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${brandCv(printCanvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 function sharePoWhatsapp(){
@@ -36364,7 +36440,7 @@ function sharePoUniversal(){
   if(!ref) return;
   const {s, po} = ref;
   const canvas = document.getElementById('poCanvas');
-  canvas.toBlob(async (blob) => {
+  brandCv(canvas).toBlob(async (blob) => {
     if(!blob){ alert('There was a problem creating the image.'); return; }
     const file = new File([blob], `PurchaseOrder.png`, {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -36376,7 +36452,7 @@ function sharePoUniversal(){
         });
       } catch(err){ /* یوزر نے شیئر منسوخ کیا */ }
     } else {
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = brandCv(canvas).toDataURL('image/png');
       const win = window.open();
       if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
       else alert("Sharing isn't supported. Please take a screenshot and send it.");
@@ -37996,7 +38072,7 @@ async function printLoanReceiptThermal(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
-  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${brandCv(canvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 async function shareLoanScreenshot(){
@@ -43979,7 +44055,7 @@ async function shareInvoicePdf(){
   pdf.setFillColor(fr, fg, fb); pdf.rect(0, 0, pageW, pageH, 'F');
   pdf.setFillColor(255,255,255); pdf.setDrawColor(br,bgc,bb); pdf.setLineWidth(1.1);
   pdf.roundedRect(offsetX-5, offsetY-5, drawW+10, drawH+10, 7, 7, 'FD');
-  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  pdf.addImage(brandCvFit(canvas).toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Invoice.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -44032,7 +44108,7 @@ async function printCurrentInvoice(){
     pdf.setLineWidth(1.1);
     pdf.roundedRect(offsetX - cardPad, offsetY - cardPad, drawW + cardPad * 2, drawH + cardPad * 2, 7, 7, 'FD');
 
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+    pdf.addImage(brandCvFit(canvas).toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
     const blobUrl = pdf.output('bloburl');
     window.open(blobUrl, '_blank');
     return;
@@ -44042,7 +44118,7 @@ async function printCurrentInvoice(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
-  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${brandCv(printCanvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 window.addEventListener('afterprint', () => {
@@ -44117,6 +44193,7 @@ async function printViaWebBluetooth(canvasOrId){
 // خودکار طور پر صحیح پرنٹر چوڑائی پر (تناسب برقرار رکھتے ہوئے) پہلے سکیل کر لیتے ہیں، چاہے ماخذ کینوس کسی
 // بھی سائز کا ہو ---------- -->
 function canvasToEscPosRaster(canvas, paperWidthMM){
+  canvas = brandCv(canvas); // 📣 FM1710SA404: بلوٹوتھ پرنٹ کے نیچے بھی برانڈنگ
   const widthDots = paperWidthMM === 80 ? 576 : 384;
   let srcCanvas = canvas;
   if(canvas.width !== widthDots){
@@ -44351,7 +44428,7 @@ function shareInvoiceUniversal(){
   if(!inv) return;
 
   const canvas = document.getElementById('invoiceCanvas');
-  canvas.toBlob(async (blob) => {
+  brandCv(canvas).toBlob(async (blob) => {
     if(!blob){
       alert('There was a problem creating the bill image.');
       return;
@@ -44371,7 +44448,7 @@ function shareInvoiceUniversal(){
       }
     } else {
       // Fallback: اگر شیئر سپورٹ نہ ہو تو تصویر نئے ٹیب میں کھولیں تاکہ یوزر خود Save/Share کر سکے
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = brandCv(canvas).toDataURL('image/png');
       const win = window.open();
       if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
       else alert("Sharing isn't supported. Please take a screenshot and send it.");
@@ -44478,7 +44555,7 @@ function refreshRecoveryPosterPreview(){
       const canvas = await renderRecoveryReceiptCanvas(rpCurrentCustomer, rpCurrentEntry, false);
       if(myToken !== rpPreviewToken) return; // ---------- اس دوران کوئی نئی سیٹنگ آ گئی تو پرانا نتیجہ نظر انداز ----------
       const img = document.getElementById('rpPreviewImg');
-      if(img) img.src = canvas.toDataURL('image/png');
+      if(img) img.src = brandCv(canvas).toDataURL('image/png');
     }catch(e){
       console.error('refreshRecoveryPosterPreview failed', e);
     }finally{
@@ -44495,7 +44572,7 @@ function generateAndShareRecoveryPoster(){
   (async () => {
     try{
       const canvas = await renderRecoveryReceiptCanvas(c, entry, false);
-      canvas.toBlob(async (blob) => {
+      brandCv(canvas).toBlob(async (blob) => {
         const fileName = `receipt-${c.name}.png`;
         const file = new File([blob], fileName, {type:'image/png'});
         try{
@@ -44544,7 +44621,7 @@ function generateAndPrintRecoveryPoster(){
       const canvas = await renderRecoveryReceiptCanvas(c, entry, true);
       const printCanvas = canvasToGrayscale(canvas);
       const mm = AppState.settings.paperWidth || 80;
-      const dataUrl = printCanvas.toDataURL('image/png');
+      const dataUrl = brandCv(printCanvas).toDataURL('image/png');
       const accentColor = canvas._accentColor || '#0d9488';
       const pageHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>رسید — ${c.name}</title>
       <style>
@@ -47146,7 +47223,7 @@ function showImageSharePreview(canvas, filename, title, text){
   pendingShareTitle = title;
   pendingShareText = text;
   document.getElementById('imageSharePreviewTitle').textContent = title || 'Preview';
-  document.getElementById('imageSharePreviewImg').src = canvas.toDataURL('image/png');
+  document.getElementById('imageSharePreviewImg').src = brandCv(canvas).toDataURL('image/png');
   document.getElementById('imageSharePreviewModal').classList.add('show');
 }
 function closeImageSharePreview(){
@@ -47155,7 +47232,7 @@ function closeImageSharePreview(){
 }
 async function confirmImageShare(){
   if(!pendingShareCanvas) return;
-  pendingShareCanvas.toBlob(async (blob) => {
+  brandCv(pendingShareCanvas).toBlob(async (blob) => {
     if(!blob){ alert('There was a problem preparing the image.'); return; }
     const file = new File([blob], pendingShareFilename, {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -47189,7 +47266,7 @@ function openImageReviewModal(canvas, title){
   imageReviewZoomLevel = 100;
   document.getElementById('imageReviewTitle').textContent = title || '🔍 ریویو';
   const img = document.getElementById('imageReviewImg');
-  img.src = canvas.toDataURL('image/png');
+  img.src = brandCv(canvas).toDataURL('image/png');
   img.style.width = canvas.width + 'px';
   img.style.transform = 'scale(1)';
   document.getElementById('imageReviewZoomSlider').value = 100;
@@ -50087,6 +50164,7 @@ function buildMultiColumnReportPdf(orientation){
   });
   finalizeColumnBox();
 
+  brandPdf(pdf); // 📣 FM1710SA404
   return pdf;
 }
 
@@ -50427,6 +50505,7 @@ function buildTodaySalePdf(orientation){
   });
   finalizeColumnBox();
 
+  brandPdf(pdf); // 📣 FM1710SA404
   return pdf;
 }
 
@@ -50572,6 +50651,7 @@ function buildDiarySummaryPdf(orientation){
   pdf.setTextColor(100,116,139);
   pdf.text('If any queries or discrepancy in this record, please contact us.', pageW/2, pageH - marginMM/2, {align:'center'});
 
+  brandPdf(pdf); // 📣 FM1710SA404
   return pdf;
 }
 
@@ -50603,7 +50683,7 @@ function buildDailyStockProfitPdf(orientation){
     sctx.fillStyle = '#ffffff';
     sctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
     sctx.drawImage(canvas, 0, offsetY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
-    const imgData = sliceCanvas.toDataURL('image/png');
+    const imgData = brandCvFit(sliceCanvas).toDataURL('image/png');
     const imgHmm = sliceH / pxPerMm;
     if(!first) pdf.addPage('a4', orientation);
     pdf.addImage(imgData, 'PNG', marginMM, marginMM, usableWmm, imgHmm);
@@ -50656,7 +50736,7 @@ async function printCurrentReport(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
-  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${brandCv(printCanvas).toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 
@@ -50665,14 +50745,14 @@ async function shareReportImage(){
   await renderReportToCanvas(); // ---------- یہاں بھی وہی حفاظتی وجہ — کبھی پرانا/ادھورا کینوس شیئر نہ ہو ----------
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
-  canvas.toBlob(async (blob) => {
+  brandCv(canvas).toBlob(async (blob) => {
     if(!blob){ alert('There was a problem creating the report image.'); return; }
     const file = new File([blob], 'Report.png', {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
       try{ await navigator.share({files:[file], title:'Report'}); }
       catch(err){ /* یوزر نے شیئر منسوخ کر دی */ }
     } else {
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = brandCv(canvas).toDataURL('image/png');
       const win = window.open();
       if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
       else alert("Sharing isn't supported. Please take a screenshot and send it.");
