@@ -3515,14 +3515,14 @@ function __appHostKind(h, p){
             <div class="hmCap hmK3" id="hmStkCap" onclick="goTo('bizsummary')"><div class="hmLbl">سٹاک کی مالیت</div><div class="hmPill"><div class="hmVal" id="hmStkVal">0</div></div></div>
           </div>
           <div id="homeMoneyRow2">
-            <div class="hmCap hmK4" id="hmCashCap" onclick="goTo('bizsummary')"><div class="hmLbl">ٹوٹل کیش آیا</div><div class="hmPill"><div class="hmVal" id="hmCashVal">0</div></div></div>
-            <div class="hmCap hmK6" id="hmOutCap" onclick="goTo('bizsummary')"><div class="hmLbl">ٹوٹل کیش گیا</div><div class="hmPill"><div class="hmVal" id="hmOutVal">0</div></div></div>
+            <div class="hmCap hmK4" id="hmCashCap" onclick="hmExplainCash('in')"><div class="hmLbl">ٹوٹل کیش آیا</div><div class="hmPill"><div class="hmVal" id="hmCashVal">0</div></div></div>
+            <div class="hmCap hmK6" id="hmOutCap" onclick="hmExplainCash('out')"><div class="hmLbl">ٹوٹل کیش گیا</div><div class="hmPill"><div class="hmVal" id="hmOutVal">0</div></div></div>
             <div class="hmCap hmK5 profit" id="hmNetCap" onclick="goTo('bizsummary')"><div class="hmLbl" id="hmNetLbl">کاروبار کی کیفیت (منافع)</div><div class="hmPill"><div class="hmVal" id="hmNetVal">0</div></div></div>
             <div class="hmCap hmK7 profit" id="hmTodayCap" onclick="goTo('bizsummary')"><div class="hmLbl" id="hmTodayLbl">صرف آج کا منافع</div><div class="hmPill"><div class="hmVal" id="hmTodayVal">0</div></div></div>
           </div>
           <!-- 💵 FM1210MO372: نیچے کی پٹی دو حصوں میں — دائیں "اس وقت ہاتھ میں کیش" (رقم کے ساتھ)، بائیں "مکمل سمری" -->
           <div id="homeMoneyBottom">
-            <div class="hmCap hmHand" id="hmHandCap" onclick="goTo('bizsummary')"><div class="hmLbl" id="hmHandLbl">💵 اس وقت ہاتھ میں کیش</div><div class="hmPill"><div class="hmVal" id="hmHandVal">0</div></div></div>
+            <div class="hmCap hmHand" id="hmHandCap" onclick="hmExplainCash('hand')"><div class="hmLbl" id="hmHandLbl">💵 اس وقت ہاتھ میں کیش</div><div class="hmPill"><div class="hmVal" id="hmHandVal">0</div></div></div>
             <button type="button" id="homeMoneyMore" onclick="goTo('bizsummary')">📊 مکمل سمری ›</button>
           </div>
         </div>
@@ -9377,8 +9377,9 @@ function getDeveloperContact(){
 // 🆕 FM1710SA396: ہوم 'کیش گیا' میں اب آج کی نقد خریداری (مال) بھی — بیوپاریوں کو ادائیگی + اخراجات + نقد خریداری؛ ہاتھ میں کیش اور مکمل سمری بھی اسی حساب سے
 // 🆕 FM1710SA397: کل کم وصولی کا حساب درست — صرف وصولی والے دن بھی منہا، بل کے ساتھ پرانے بقایا میں دی رقم بھی وصولی؛ بل کا لال ڈبہ اور ریکوری لسٹ کا کالم ایک ہی حساب
 // 🆕 FM1710SA398: (1) ادائیگی/وصولی کا نوٹ گاہک کے بل اور بیوپاری کی چٹ پر بھی، اور گاہک کی ٹرانزیکشن ہسٹری میں محفوظ/نظر (2) 'سبزی کس کس کو دی گئی' اور 'چالانوں کا حساب' کے ساتھ 'سابقہ ریکارڈ' — تاریخ چنیں، اسی دن کی رپورٹ، پرنٹ/شیئر
+// 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1710SA399'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1710SA400'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10138,6 +10139,62 @@ function toggleHomeEditMode(){
   renderHomeIconGrid();
 }
 // ---------- 💰 FM510MO310: ہوم کے تین کیپسول کا حساب — بیوپاریوں کا کل بقایا، گاہکوں کا کل بقایا، اور فرق ---------- -->
+// 🔍 FM1710SA400 (پیارے بھائی کی ہدایت): "کیش آیا / کیش گیا / ہاتھ میں کیش" دبانے پر پوری تفصیل — کون سی رقم کہاں سے آئی، ایک ایک اندراج کے ساتھ
+function hmExplainCash(kind){
+  let S = null;
+  try{ S = computeBizSummary('today'); }catch(e){}
+  if(!S){ goTo('bizsummary'); return; }
+  const N = v => Math.round(Number(v) || 0);
+  const f = n => (n < 0 ? '- ' : '') + Math.abs(N(n)).toLocaleString('en-US');
+  const E = s => bsEsc(s);
+  const line = (lbl, amt, items, color) => `<div style="border:1px solid #e3e8ef;border-radius:12px;padding:8px 10px;margin:6px 0;background:#fff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;color:${amt ? color : '#94a3b8'};">
+        <span>${lbl}</span><span dir="ltr" style="font-family:system-ui,sans-serif;">${f(amt)}</span></div>
+      ${(items || []).length ? `<div style="margin-top:4px;font-size:13px;color:#475569;">${items.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-top:1px dashed #eef2f7;"><span>• ${x[0]}</span><span dir="ltr" style="font-family:system-ui,sans-serif;">${f(x[1])}</span></div>`).join('')}</div>` : ''}
+    </div>`;
+  const pays = S.tPaysList || [];
+  const payItems = arr => arr.map(p => [E(p.party_name || '—') + (p.note ? ` <small style="color:#94a3b8;">(${E(String(p.note).slice(0, 40))})</small>` : ''), bsPayCash(p)]);
+  const pRec = pays.filter(p => p.direction === 'in' && p.party_type === 'customer');
+  const pOthIn = pays.filter(p => p.direction === 'in' && p.party_type !== 'customer');
+  const pSup = pays.filter(p => p.direction === 'out' && p.party_type === 'supplier');
+  const pOthOut = pays.filter(p => p.direction === 'out' && p.party_type !== 'supplier');
+  const billItems = (S.tInvList || []).filter(i => bsBillCash(i) > 0).map(i => [E(i.customer_name || 'نقد گاہک') + ' <small style="color:#94a3b8;">' + E(i.invoice_no || '') + '</small>', bsBillCash(i)]);
+  const expItems = (S.tExpList || []).map(e => [E(e.name || 'خرچہ'), Number(e.amount) || 0]);
+  const cashIn = N(S.opening) + N(S.otherManual) + N(S.tBillCash) + N(S.tRecovery) + N(S.tOtherIn);
+  const cashOut = N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) + N(S.tCashBuy);
+  const G = '#047857', R = '#b91c1c';
+  const inHtml = line('🌅 صبح کا اوپننگ کیش' + (S.openingEntered == null ? ' <small style="color:#b45309;">(درج نہیں)</small>' : ''), S.opening, [], G)
+    + (S.otherManual ? line('➕ دیگر آمدن (ہاتھ سے)', S.otherManual, S.otherManualNote ? [[E(S.otherManualNote), S.otherManual]] : [], G) : '')
+    + line('🧾 آج کے بلوں سے نقد', S.tBillCash, billItems, G)
+    + line('🤝 گاہکوں سے نقد وصولی', S.tRecovery, payItems(pRec), G)
+    + (S.tOtherIn ? line('➕ دیگر نقد آمد', S.tOtherIn, payItems(pOthIn), G) : '');
+  const outHtml = line('🚚 بیوپاریوں کو نقد ادائیگی', S.tSupOut, payItems(pSup), R)
+    + (S.tOtherOut ? line('➖ دیگر نقد ادائیگی', S.tOtherOut, payItems(pOthOut), R) : '')
+    + line('💸 آج کے اخراجات', S.tExp, expItems, R)
+    + line('🥬 نقد خریداری (مال)', S.tCashBuy, [], R);
+  const box = (t, v, c) => `<div style="background:${c};color:#fff;border-radius:12px;padding:8px 12px;margin:8px 0;display:flex;justify-content:space-between;font-weight:900;font-size:17px;"><span>${t}</span><span dir="ltr" style="font-family:system-ui,sans-serif;">${f(v)}</span></div>`;
+  let title, body;
+  if(kind === 'in'){ title = '💵 ٹوٹل کیش آیا — تفصیل'; body = inHtml + box('= ٹوٹل کیش آیا', cashIn, G); }
+  else if(kind === 'out'){ title = '💸 ٹوٹل کیش گیا — تفصیل'; body = outHtml + box('= ٹوٹل کیش گیا', cashOut, R); }
+  else { title = '💵 اس وقت ہاتھ میں کیش — تفصیل'; body = inHtml + box('= ٹوٹل کیش آیا', cashIn, G) + outHtml + box('= ٹوٹل کیش گیا', cashOut, R) + box('= ہاتھ میں کیش (آیا − گیا)', cashIn - cashOut, cashIn - cashOut < 0 ? R : '#1d4ed8'); }
+  let dLbl = S.todayStr; try{ dLbl = new Date(S.todayStr + 'T12:00:00').toLocaleDateString('ur-PK', {weekday:'long', day:'numeric', month:'long'}); }catch(e){}
+  const pend = N(S.pendingRec);
+  const old = document.getElementById('hmExplainOv'); if(old) old.remove();
+  const ov = document.createElement('div');
+  ov.id = 'hmExplainOv';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:12px;';
+  ov.innerHTML = `<div dir="rtl" style="background:#f8fafc;border-radius:18px;max-width:460px;width:100%;max-height:88vh;overflow:auto;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.35);">
+      <div style="font-weight:900;font-size:18px;color:#0f766e;text-align:center;">${title}</div>
+      <div style="text-align:center;font-size:13px;color:#475569;margin:4px 0 8px;">📅 کاروباری تاریخ: <b>${E(dLbl)}</b> — صرف اسی دن کا نقد حساب (ادھار بل اور ایزی پیسہ/بینک اس میں نہیں)</div>
+      ${body}
+      ${pend > 0 && kind !== 'out' ? `<div style="background:#fff7ed;border:1px solid #fdba74;color:#9a3412;border-radius:12px;padding:8px 10px;font-size:13px;margin-top:6px;">⏳ ریکوری والوں نے <b dir="ltr">${f(pend)}</b> وصول کیے ہیں مگر ابھی منظور نہیں ہوئے — منظوری کے بعد "کیش آیا" میں آئیں گے</div>` : ''}
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button type="button" onclick="document.getElementById('hmExplainOv').remove();goTo('bizsummary');" style="flex:1;padding:10px;border:0;border-radius:12px;background:#1e3a8a;color:#fff;font-weight:800;">📊 مکمل سمری</button>
+        <button type="button" onclick="document.getElementById('hmExplainOv').remove();" style="flex:1;padding:10px;border:0;border-radius:12px;background:#e2e8f0;color:#0f172a;font-weight:800;">بند کریں</button>
+      </div></div>`;
+  ov.addEventListener('click', e => { if(e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
+}
 function renderHomeMoneySummary(){
   const row = document.getElementById('homeMoneyRow');
   if(!row) return;
@@ -23726,7 +23783,7 @@ function computeBizSummary(preset){
   const netProfit = goodsProfit - expTotal;
 
   return {
-    preset, range: r, todayStr,
+    preset, range: r, todayStr, tInvList: tInv, tPaysList: tPays, tExpList: exps.filter(e => e.date === todayStr),
     pendingRec, custWallet, supWallet, opening, openingEntered, openingParts: _od.parts, openingNote: _od.note, otherManual, otherManualNote: _od.otherNote, tBillCash, tRecovery, tOtherIn, tSupOut, tOtherOut, tExp, tCashBuy, cashNow,
     stockValue: Math.round(stockValue), receivable, payable, cashAsset, assets: Math.round(assets), netWorth: Math.round(netWorth), custs, sups,
     billCount: pInv.length, sales, salesCash, salesCredit: Math.max(0, sales - salesCash),
