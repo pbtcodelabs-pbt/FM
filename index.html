@@ -3510,15 +3510,15 @@ function __appHostKind(h, p){
         <div id="homeMoneyPanel">
           <!-- ⭐ FM1210MO370 (صدام کی ہدایت): سات ڈبے — اوپر 3 (قرض+اخراجات، ادھار، سٹاک کی مالیت)، نیچے 4 (کیش آیا، کیش گیا، کیفیت، آج کا منافع) -->
           <div id="homeMoneyRow">
-            <div class="hmCap hmK1" id="hmPayCap" onclick="goTo('suppliers')"><div class="hmLbl">بیوپاریوں کا قرض</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
-            <div class="hmCap hmK2" id="hmRecCap" onclick="goTo('customers')"><div class="hmLbl">گاہکوں کی طرف ادھار</div><div class="hmPill"><div class="hmVal" id="hmRecVal">0</div></div></div>
-            <div class="hmCap hmK3" id="hmStkCap" onclick="goTo('bizsummary')"><div class="hmLbl">سٹاک کی مالیت</div><div class="hmPill"><div class="hmVal" id="hmStkVal">0</div></div></div>
+            <div class="hmCap hmK1" id="hmPayCap" onclick="hmExplain('pay')"><div class="hmLbl">بیوپاریوں کا قرض</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
+            <div class="hmCap hmK2" id="hmRecCap" onclick="hmExplain('rec')"><div class="hmLbl">گاہکوں کی طرف ادھار</div><div class="hmPill"><div class="hmVal" id="hmRecVal">0</div></div></div>
+            <div class="hmCap hmK3" id="hmStkCap" onclick="hmExplain('stk')"><div class="hmLbl">سٹاک کی مالیت</div><div class="hmPill"><div class="hmVal" id="hmStkVal">0</div></div></div>
           </div>
           <div id="homeMoneyRow2">
             <div class="hmCap hmK4" id="hmCashCap" onclick="hmExplainCash('in')"><div class="hmLbl">ٹوٹل کیش آیا</div><div class="hmPill"><div class="hmVal" id="hmCashVal">0</div></div></div>
             <div class="hmCap hmK6" id="hmOutCap" onclick="hmExplainCash('out')"><div class="hmLbl">ٹوٹل کیش گیا</div><div class="hmPill"><div class="hmVal" id="hmOutVal">0</div></div></div>
-            <div class="hmCap hmK5 profit" id="hmNetCap" onclick="goTo('bizsummary')"><div class="hmLbl" id="hmNetLbl">کاروبار کی کیفیت (منافع)</div><div class="hmPill"><div class="hmVal" id="hmNetVal">0</div></div></div>
-            <div class="hmCap hmK7 profit" id="hmTodayCap" onclick="goTo('bizsummary')"><div class="hmLbl" id="hmTodayLbl">صرف آج کا منافع</div><div class="hmPill"><div class="hmVal" id="hmTodayVal">0</div></div></div>
+            <div class="hmCap hmK5 profit" id="hmNetCap" onclick="hmExplain('net')"><div class="hmLbl" id="hmNetLbl">کاروبار کی کیفیت (منافع)</div><div class="hmPill"><div class="hmVal" id="hmNetVal">0</div></div></div>
+            <div class="hmCap hmK7 profit" id="hmTodayCap" onclick="hmExplain('today')"><div class="hmLbl" id="hmTodayLbl">صرف آج کا منافع</div><div class="hmPill"><div class="hmVal" id="hmTodayVal">0</div></div></div>
           </div>
           <!-- 💵 FM1210MO372: نیچے کی پٹی دو حصوں میں — دائیں "اس وقت ہاتھ میں کیش" (رقم کے ساتھ)، بائیں "مکمل سمری" -->
           <div id="homeMoneyBottom">
@@ -9377,10 +9377,11 @@ function getDeveloperContact(){
 // 🆕 FM1710SA396: ہوم 'کیش گیا' میں اب آج کی نقد خریداری (مال) بھی — بیوپاریوں کو ادائیگی + اخراجات + نقد خریداری؛ ہاتھ میں کیش اور مکمل سمری بھی اسی حساب سے
 // 🆕 FM1710SA397: کل کم وصولی کا حساب درست — صرف وصولی والے دن بھی منہا، بل کے ساتھ پرانے بقایا میں دی رقم بھی وصولی؛ بل کا لال ڈبہ اور ریکوری لسٹ کا کالم ایک ہی حساب
 // 🆕 FM1710SA398: (1) ادائیگی/وصولی کا نوٹ گاہک کے بل اور بیوپاری کی چٹ پر بھی، اور گاہک کی ٹرانزیکشن ہسٹری میں محفوظ/نظر (2) 'سبزی کس کس کو دی گئی' اور 'چالانوں کا حساب' کے ساتھ 'سابقہ ریکارڈ' — تاریخ چنیں، اسی دن کی رپورٹ، پرنٹ/شیئر
+// 🆕 FM1710SA402: ہوم کے ہر ڈبے پر دبانے سے صرف اسی ڈبے کا حساب (پوری سمری نہیں)
 // 🆕 FM1710SA401: اردو فونٹ ہلکی WOFF2 شکل میں (24 MB → 10.3 MB)، نئے ورژن پر فونٹ دوبارہ ڈاؤن لوڈ نہیں
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1710SA401'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1710SA402'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10140,19 +10141,38 @@ function toggleHomeEditMode(){
   renderHomeIconGrid();
 }
 // ---------- 💰 FM510MO310: ہوم کے تین کیپسول کا حساب — بیوپاریوں کا کل بقایا، گاہکوں کا کل بقایا، اور فرق ---------- -->
-// 🔍 FM1710SA400 (پیارے بھائی کی ہدایت): "کیش آیا / کیش گیا / ہاتھ میں کیش" دبانے پر پوری تفصیل — کون سی رقم کہاں سے آئی، ایک ایک اندراج کے ساتھ
-function hmExplainCash(kind){
+// 🔍 FM1710SA402 (پیارے بھائی کی ہدایت): ہوم کے ہر ڈبے پر دبانے سے صرف اسی ڈبے کا حساب — کون سی رقمیں جڑ کر یہ عدد بنا
+// (پوری سمری نہیں)۔ ہر ڈبے کا عدد بالکل وہی جو ہوم پر لکھا ہے
+function hmExplainCash(kind){ hmExplain(kind); }
+function hmExplain(kind){
   let S = null;
   try{ S = computeBizSummary('today'); }catch(e){}
   if(!S){ goTo('bizsummary'); return; }
   const N = v => Math.round(Number(v) || 0);
   const f = n => (n < 0 ? '- ' : '') + Math.abs(N(n)).toLocaleString('en-US');
   const E = s => bsEsc(s);
+  const G = '#047857', R = '#b91c1c', B = '#1d4ed8';
+  const num = v => `<span dir="ltr" style="font-family:system-ui,sans-serif;white-space:nowrap;">${f(v)}</span>`;
   const line = (lbl, amt, items, color) => `<div style="border:1px solid #e3e8ef;border-radius:12px;padding:8px 10px;margin:6px 0;background:#fff;">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;color:${amt ? color : '#94a3b8'};">
-        <span>${lbl}</span><span dir="ltr" style="font-family:system-ui,sans-serif;">${f(amt)}</span></div>
-      ${(items || []).length ? `<div style="margin-top:4px;font-size:13px;color:#475569;">${items.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-top:1px dashed #eef2f7;"><span>• ${x[0]}</span><span dir="ltr" style="font-family:system-ui,sans-serif;">${f(x[1])}</span></div>`).join('')}</div>` : ''}
+        <span>${lbl}</span>${num(amt)}</div>
+      ${(items || []).length ? `<div style="margin-top:4px;font-size:13px;color:#475569;">${items.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-top:1px dashed #eef2f7;"><span>• ${x[0]}</span>${num(x[1])}</div>`).join('')}</div>` : ''}
     </div>`;
+  const rows = (items, color) => `<div style="border:1px solid #e3e8ef;border-radius:12px;padding:4px 10px;margin:6px 0;background:#fff;font-size:14px;">${items.length ? items.map((x, i) => `<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;${i ? 'border-top:1px dashed #eef2f7;' : ''}"><span>${i + 1}. ${x[0]}</span><b style="color:${color};">${num(x[1])}</b></div>`).join('') : '<div style="text-align:center;color:#94a3b8;padding:8px;">کوئی اندراج نہیں</div>'}</div>`;
+  const box = (t, v, c) => `<div style="background:${c};color:#fff;border-radius:12px;padding:8px 12px;margin:8px 0;display:flex;justify-content:space-between;font-weight:900;font-size:17px;"><span>${t}</span>${num(v)}</div>`;
+  const note = (t, warn) => `<div style="background:${warn ? '#fff7ed' : '#f1f5f9'};border:1px solid ${warn ? '#fdba74' : '#e2e8f0'};color:${warn ? '#9a3412' : '#475569'};border-radius:12px;padding:8px 10px;font-size:13px;margin-top:6px;">${t}</div>`;
+  let dLbl = S.todayStr; try{ dLbl = new Date(S.todayStr + 'T12:00:00').toLocaleDateString('ur-PK', {weekday:'long', day:'numeric', month:'long'}); }catch(e){}
+  const dayNote = `📅 کاروباری تاریخ: <b>${E(dLbl)}</b>`;
+
+  // --- ہوم والے ہی عدد ---
+  const supPay = N((suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_payable) || 0), 0));
+  const rec = N((customersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_receivable) || 0), 0));
+  const stock = N(S.stockValue);
+  const cashIn = N(S.opening) + N(S.otherManual) + N(S.tBillCash) + N(S.tRecovery) + N(S.tOtherIn);
+  const cashOut = N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) + N(S.tCashBuy);
+  const supAdv = N(S.supWallet), custAdv = N(S.custWallet);
+  const pend = N(S.pendingRec);
+
   const pays = S.tPaysList || [];
   const payItems = arr => arr.map(p => [E(p.party_name || '—') + (p.note ? ` <small style="color:#94a3b8;">(${E(String(p.note).slice(0, 40))})</small>` : ''), bsPayCash(p)]);
   const pRec = pays.filter(p => p.direction === 'in' && p.party_type === 'customer');
@@ -10161,36 +10181,90 @@ function hmExplainCash(kind){
   const pOthOut = pays.filter(p => p.direction === 'out' && p.party_type !== 'supplier');
   const billItems = (S.tInvList || []).filter(i => bsBillCash(i) > 0).map(i => [E(i.customer_name || 'نقد گاہک') + ' <small style="color:#94a3b8;">' + E(i.invoice_no || '') + '</small>', bsBillCash(i)]);
   const expItems = (S.tExpList || []).map(e => [E(e.name || 'خرچہ'), Number(e.amount) || 0]);
-  const cashIn = N(S.opening) + N(S.otherManual) + N(S.tBillCash) + N(S.tRecovery) + N(S.tOtherIn);
-  const cashOut = N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) + N(S.tCashBuy);
-  const G = '#047857', R = '#b91c1c';
-  const inHtml = line('🌅 صبح کا اوپننگ کیش' + (S.openingEntered == null ? ' <small style="color:#b45309;">(درج نہیں)</small>' : ''), S.opening, [], G)
-    + (S.otherManual ? line('➕ دیگر آمدن (ہاتھ سے)', S.otherManual, S.otherManualNote ? [[E(S.otherManualNote), S.otherManual]] : [], G) : '')
-    + line('🧾 آج کے بلوں سے نقد', S.tBillCash, billItems, G)
-    + line('🤝 گاہکوں سے نقد وصولی', S.tRecovery, payItems(pRec), G)
-    + (S.tOtherIn ? line('➕ دیگر نقد آمد', S.tOtherIn, payItems(pOthIn), G) : '');
-  const outHtml = line('🚚 بیوپاریوں کو نقد ادائیگی', S.tSupOut, payItems(pSup), R)
-    + (S.tOtherOut ? line('➖ دیگر نقد ادائیگی', S.tOtherOut, payItems(pOthOut), R) : '')
-    + line('💸 آج کے اخراجات', S.tExp, expItems, R)
+  const inHtml = (detail) => line('🌅 صبح کا اوپننگ کیش' + (S.openingEntered == null ? ' <small style="color:#b45309;">(درج نہیں)</small>' : ''), S.opening, [], G)
+    + (S.otherManual ? line('➕ دیگر آمدن (ہاتھ سے)', S.otherManual, detail && S.otherManualNote ? [[E(S.otherManualNote), S.otherManual]] : [], G) : '')
+    + line('🧾 آج کے بلوں سے نقد', S.tBillCash, detail ? billItems : [], G)
+    + line('🤝 گاہکوں سے نقد وصولی', S.tRecovery, detail ? payItems(pRec) : [], G)
+    + (S.tOtherIn ? line('➕ دیگر نقد آمد', S.tOtherIn, detail ? payItems(pOthIn) : [], G) : '');
+  const outHtml = (detail) => line('🚚 بیوپاریوں کو نقد ادائیگی', S.tSupOut, detail ? payItems(pSup) : [], R)
+    + (S.tOtherOut ? line('➖ دیگر نقد ادائیگی', S.tOtherOut, detail ? payItems(pOthOut) : [], R) : '')
+    + line('💸 آج کے اخراجات', S.tExp, detail ? expItems : [], R)
     + line('🥬 نقد خریداری (مال)', S.tCashBuy, [], R);
-  const box = (t, v, c) => `<div style="background:${c};color:#fff;border-radius:12px;padding:8px 12px;margin:8px 0;display:flex;justify-content:space-between;font-weight:900;font-size:17px;"><span>${t}</span><span dir="ltr" style="font-family:system-ui,sans-serif;">${f(v)}</span></div>`;
-  let title, body;
-  if(kind === 'in'){ title = '💵 ٹوٹل کیش آیا — تفصیل'; body = inHtml + box('= ٹوٹل کیش آیا', cashIn, G); }
-  else if(kind === 'out'){ title = '💸 ٹوٹل کیش گیا — تفصیل'; body = outHtml + box('= ٹوٹل کیش گیا', cashOut, R); }
-  else { title = '💵 اس وقت ہاتھ میں کیش — تفصیل'; body = inHtml + box('= ٹوٹل کیش آیا', cashIn, G) + outHtml + box('= ٹوٹل کیش گیا', cashOut, R) + box('= ہاتھ میں کیش (آیا − گیا)', cashIn - cashOut, cashIn - cashOut < 0 ? R : '#1d4ed8'); }
-  let dLbl = S.todayStr; try{ dLbl = new Date(S.todayStr + 'T12:00:00').toLocaleDateString('ur-PK', {weekday:'long', day:'numeric', month:'long'}); }catch(e){}
-  const pend = N(S.pendingRec);
+
+  let title = '', sub = '', body = '', more = 'bizsummary';
+  if(kind === 'in'){
+    title = '💵 ٹوٹل کیش آیا'; sub = dayNote + ' — صرف نقد (ادھار، ایزی پیسہ، بینک نہیں)';
+    body = inHtml(true) + box('= ٹوٹل کیش آیا', cashIn, G)
+      + (pend > 0 ? note(`⏳ ریکوری والوں نے <b dir="ltr">${f(pend)}</b> وصول کیے ہیں مگر ابھی منظور نہیں ہوئے۔ منظوری کے بعد یہاں آئیں گے`, true) : '');
+  } else if(kind === 'out'){
+    title = '💸 ٹوٹل کیش گیا'; sub = dayNote + ' — صرف نقد';
+    body = outHtml(true) + box('= ٹوٹل کیش گیا', cashOut, R);
+  } else if(kind === 'hand'){
+    title = '💵 اس وقت ہاتھ میں کیش'; sub = dayNote;
+    body = line('➕ ٹوٹل کیش آیا', cashIn, [], G) + line('➖ ٹوٹل کیش گیا', cashOut, [], R)
+      + box('= ہاتھ میں کیش', cashIn - cashOut, cashIn - cashOut < 0 ? R : B)
+      + note('تفصیل کے لیے "ٹوٹل کیش آیا" یا "ٹوٹل کیش گیا" والا ڈبہ دبائیں')
+      + (cashIn - cashOut < 0 ? note('⚠️ جتنا آیا اس سے زیادہ گیا۔ صبح کا اوپننگ کیش درج کیا ہے یا نہیں، چیک کریں', true) : '');
+  } else if(kind === 'pay'){
+    title = '🚚 بیوپاریوں کا قرض'; sub = 'ہر بیوپاری کا ہمارے ذمے بقایا'; more = 'suppliers';
+    body = rows((S.sups || []).map(x => [E(x.name), x.amt]), R) + box('= کل قرض', supPay, R);
+  } else if(kind === 'rec'){
+    title = '🤝 گاہکوں کی طرف ادھار'; sub = 'ہر گاہک کا کھاتے والا بقایا'; more = 'customers';
+    body = rows((S.custs || []).map(x => [E(x.name), x.amt]), B) + box('= کل ادھار', rec, B)
+      + (pend > 0 ? note(`⏳ اس میں سے <b dir="ltr">${f(pend)}</b> ریکوری والے وصول کر چکے ہیں، منظوری باقی ہے`, true) : '');
+  } else if(kind === 'stk'){
+    title = '📦 سٹاک کی مالیت'; sub = 'حاضر سٹاک × خرید ریٹ (پرانا مال پہلے بکتا ہے)';
+    const it = [];
+    (productsData || []).filter(p => p && typeof p === 'object').forEach(p => (p.variants || []).filter(v => v && typeof v === 'object').forEach(v => {
+      let val = 0; try{ val = Math.max(0, variantStockValue(v) || 0); }catch(e){}
+      const q = Math.max(0, Number(v.stock) || 0);
+      if(!(q > 0)) return;
+      const nm = E(p.name || '') + (v.label ? ' — ' + E(v.label) : '');
+      it.push({nm, q, val, rate: q ? val / q : 0});
+    }));
+    it.sort((a, b) => b.val - a.val);
+    body = rows(it.map(x => [`${x.nm} <small style="color:#64748b;" dir="ltr">(${x.q.toLocaleString('en-US')} × ${N(x.rate).toLocaleString('en-US')})</small>`, x.val]), '#b45309')
+      + box('= کل سٹاک کی مالیت', stock, '#b45309')
+      + (it.some(x => !x.rate) ? note('⚠️ جن پر 0 ریٹ ہے ان کا خرید ریٹ ابھی نہیں لگا، اس لیے ان کی مالیت صفر گنی گئی', true) : '');
+  } else if(kind === 'net'){
+    const net = rec + stock + cashIn - cashOut + supAdv - supPay - custAdv;
+    title = '📊 کاروبار کی کیفیت'; sub = 'ہمارا مال اور پیسہ − ہمارے ذمے قرض';
+    body = line('➕ گاہکوں کی طرف ادھار', rec, [], G) + line('➕ سٹاک کی مالیت', stock, [], G)
+      + line('➕ ہاتھ میں کیش (آیا − گیا)', cashIn - cashOut, [], cashIn - cashOut < 0 ? R : G)
+      + (supAdv ? line('➕ بیوپاریوں کے پاس ہمارا ایڈوانس', supAdv, [], G) : '')
+      + line('➖ بیوپاریوں کا قرض', supPay, [], R)
+      + (custAdv ? line('➖ گاہکوں کا ایڈوانس (ہم نے دینا)', custAdv, [], R) : '')
+      + box(net >= 0 ? '= منافع' : '= نقصان', net, net >= 0 ? G : R);
+  } else if(kind === 'today'){
+    title = '📈 صرف آج کا منافع'; sub = dayNote + ' — ہر بل پر: فروخت ریٹ − خرید ریٹ − مزدوری';
+    const vMap = {}; (productsData || []).filter(p => p && typeof p === 'object').forEach(p => (p.variants || []).filter(v => v && typeof v === 'object').forEach(v => { vMap[v.variant_id] = v; }));
+    const bills = (S.tInvList || []).map(inv => {
+      let pr = 0;
+      (inv.items || []).forEach(x => {
+        if(!x || typeof x !== 'object') return;
+        const v = vMap[x.variant_id]; if(!v) return;
+        let cost = (Number(v.purchase) || 0) + (Number(v.labor) || 0);
+        if(x.chalanAlloc){ try{ cost = (getChalanAllocUnitCost(v, x.chalanAlloc, Number(v.purchase) || 0) || 0) + (Number(v.labor) || 0); }catch(e){} }
+        pr += (Number(x.qty) || 0) * ((Number(x.unitPrice) || 0) - cost);
+      });
+      return [E(inv.customer_name || 'نقد گاہک') + ' <small style="color:#94a3b8;">' + E(inv.invoice_no || '') + ' — بل ' + f(Number(inv.grand_total) || 0) + '</small>', pr];
+    });
+    const tp = N(S.goodsProfit) - N(S.expTotal);
+    body = line('🧾 آج کے بلوں پر مال کا منافع', S.goodsProfit, bills, G)
+      + line('➖ آج کے اخراجات', S.expTotal, expItems, R)
+      + box(tp >= 0 ? '= آج کا منافع' : '= آج کا نقصان', tp, tp >= 0 ? G : R)
+      + (!bills.length ? note('آج (اس کاروباری تاریخ پر) ابھی کوئی بل نہیں بنا') : '');
+  }
   const old = document.getElementById('hmExplainOv'); if(old) old.remove();
   const ov = document.createElement('div');
   ov.id = 'hmExplainOv';
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:12px;';
   ov.innerHTML = `<div dir="rtl" style="background:#f8fafc;border-radius:18px;max-width:460px;width:100%;max-height:88vh;overflow:auto;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.35);">
-      <div style="font-weight:900;font-size:18px;color:#0f766e;text-align:center;">${title}</div>
-      <div style="text-align:center;font-size:13px;color:#475569;margin:4px 0 8px;">📅 کاروباری تاریخ: <b>${E(dLbl)}</b> — صرف اسی دن کا نقد حساب (ادھار بل اور ایزی پیسہ/بینک اس میں نہیں)</div>
+      <div style="font-weight:900;font-size:19px;color:#0f766e;text-align:center;">${title}</div>
+      <div style="text-align:center;font-size:13px;color:#475569;margin:4px 0 8px;">${sub}</div>
       ${body}
-      ${pend > 0 && kind !== 'out' ? `<div style="background:#fff7ed;border:1px solid #fdba74;color:#9a3412;border-radius:12px;padding:8px 10px;font-size:13px;margin-top:6px;">⏳ ریکوری والوں نے <b dir="ltr">${f(pend)}</b> وصول کیے ہیں مگر ابھی منظور نہیں ہوئے — منظوری کے بعد "کیش آیا" میں آئیں گے</div>` : ''}
       <div style="display:flex;gap:8px;margin-top:10px;">
-        <button type="button" onclick="document.getElementById('hmExplainOv').remove();goTo('bizsummary');" style="flex:1;padding:10px;border:0;border-radius:12px;background:#1e3a8a;color:#fff;font-weight:800;">📊 مکمل سمری</button>
+        <button type="button" onclick="document.getElementById('hmExplainOv').remove();goTo('${more}');" style="flex:1;padding:10px;border:0;border-radius:12px;background:#1e3a8a;color:#fff;font-weight:800;">${more === 'bizsummary' ? '📊 مکمل سمری' : more === 'suppliers' ? '🚚 بیوپاری کھولیں' : '👥 گاہک کھولیں'}</button>
         <button type="button" onclick="document.getElementById('hmExplainOv').remove();" style="flex:1;padding:10px;border:0;border-radius:12px;background:#e2e8f0;color:#0f172a;font-weight:800;">بند کریں</button>
       </div></div>`;
   ov.addEventListener('click', e => { if(e.target === ov) ov.remove(); });
