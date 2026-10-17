@@ -2,7 +2,7 @@
 // یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
 // صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
 // ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'FM1710SA400';
+const CACHE_VERSION = 'FM1710SA401';
 const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
 
 // ---------- 🔒🆕 صدام کی ہدایت (FM21SEPMO03): آف لائن نہ چلنے کی اصل جڑ یہاں ملی — پہلے تمام فائلیں
@@ -17,13 +17,17 @@ const CRITICAL_URLS = [
   './index.html',
   './manifest.json'
 ];
+// 🪶 FM1710SA401: اردو فونٹ اب ہلکی WOFF2 شکل میں (24 MB → 10.3 MB، لکھائی بالکل وہی)۔ فونٹ کبھی نہیں بدلتے، اس لیے نئے ورژن پر
+// دوبارہ سرور سے نہیں اترتے — پچھلے ورژن کی محفوظ کاپی ہی نئے ورژن میں منتقل ہو جاتی ہے (پہلے ہر ریلیز پر ہر فون 24 MB دوبارہ لیتا تھا)
+const FONT_URLS = [
+  './fonts/JameelNooriNastaleeq-Regular.woff2',
+  './fonts/JameelNooriNastaleeq-Kasheeda.woff2'
+];
 const OPTIONAL_URLS = [
   './icons/favicon-32.png',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './fonts/JameelNooriNastaleeq-Regular.ttf',
-  './fonts/JameelNooriNastaleeq-Kasheeda.ttf',
   // ---------- 🆕 صدام کی ہدایت (FM8SEPTU4): 3 نئے فونٹ — fonts/ فولڈر میں ---------- -->
   // ---------- 🗑️ صدام کی ہدایت (FM13SEPSU): 4 فونٹ (Gandhara Suls, Akram Unicode, AlQalam Khawar, AlFars Aban)
   // فہرست سے ہٹا دیے گئے، اس لیے یہ precache انٹریز بھی ہٹا دی گئیں ---------- -->
@@ -77,6 +81,13 @@ self.addEventListener('install', (event) => {
       // ---------- CRITICAL: addAll() — ایک بھی ناکام ہو تو پوری install ناکام، پرانا SW/کیش فعال رہے ---------- -->
       await cache.addAll(CRITICAL_URLS.map((url) => new Request(url, { cache: 'reload' })));
       // ---------- OPTIONAL: ہر فائل الگ سے، ناکامی صرف وارننگ (اپڈیٹ نہ رکے) ---------- -->
+      await Promise.all(FONT_URLS.map(async (url) => {
+        try{
+          const old = await caches.match(url); // پرانے ورژن کی کیش میں موجود ہو تو وہی — سرور سے دوبارہ نہیں
+          if(old && old.ok){ await cache.put(url, old); return; }
+          await cache.add(url);
+        }catch(err){ console.warn('Font precache failed (optional)', url, err); }
+      }));
       await Promise.all(
         OPTIONAL_URLS.map((url) =>
           cache.add(url).catch((err) => {
