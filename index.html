@@ -2884,6 +2884,37 @@ function __appHostKind(h, p){
   #bsFormModal .bsfLock b{ font-family:UrduAll,Arial,sans-serif; font-weight:800; direction:ltr; white-space:nowrap; font-size:13px; color:#334155; }
   #bsFormModal .bsfLock.in b{ color:#15803d; }
   #bsFormModal .bsfLock.out b{ color:#dc2626; }
+
+  /* ---------- 💻 FM1810SU408: لیپ ٹاپ/کمپیوٹر پر اردو انداز — مینو کی پٹی دائیں طرف، صفحوں کے عنوان دائیں سے
+       (صرف بڑی اسکرین؛ موبائل کا ڈیزائن بالکل ویسا ہی رہتا ہے) ---------- */
+  @media (min-width: 861px){
+    #app{ direction:rtl; }
+    #app > *{ direction:ltr; }
+    /* مینو اور پورا کام والا حصہ اردو انداز میں — دائیں سے بائیں */
+    #sidebar, #mainArea, #globalUiZoomBar{ direction:rtl; }
+    #sidebar .navItem:hover, #sidebar .navItem.active{ border-right:none; border-left:4px solid #fff; }
+    #mainArea .pageTitle{ direction:rtl; text-align:right; }
+    #globalLogoutBtn{ inset-inline-end:auto; inset-inline-start:10px; }
+    /* پوری ایپ لیپ ٹاپ کی اسکرین کے حساب سے تھوڑی بڑی — موبائل کے لیے بنی چیزیں یہاں باریک نہ لگیں */
+    #mainArea{ zoom:1.12; }
+    /* اوپر والی سرچ پٹی (پراڈکٹس/گاہک/سٹاک) کبھی مینو کی جگہ نہ لے — ہر حصے کی جگہ پکی */
+    #app{ grid-template-rows:auto minmax(0,1fr); }
+    #sidebar{ grid-column:1; grid-row:1 / span 2; overflow-y:auto; }
+    #globalUiZoomBar{ grid-column:2; grid-row:1; padding-left:64px !important; }
+    #mainArea{ grid-column:2; grid-row:2; min-height:0; }
+    /* بل بنائیں کا جدول: موٹی قطاریں، بڑی لکھائی، بڑے + − بٹن */
+    .billDeskTbl th{ font-size:15px !important; padding:10px 4px !important; }
+    .billDeskTbl td{ padding:9px 6px !important; font-size:16px !important; }
+    .billDeskTbl td:nth-child(2){ font-size:18px !important; padding-inline-end:14px !important; }
+    .billDeskTbl td:nth-child(3){ font-size:16px !important; }
+    .billDeskTbl td:first-child span{ width:34px !important; height:34px !important; min-width:34px !important; min-height:34px !important; font-size:14px !important; }
+    .billDeskTbl td input{ width:64px !important; height:36px !important; font-size:16px !important; }
+    .billDeskTbl td button{ width:36px !important; height:36px !important; font-size:20px !important; border-radius:10px !important; }
+  }
+  /* بڑی اسکرین (فل ایچ ڈی مانیٹر) پر مزید بڑا */
+  @media (min-width: 1600px){
+    #mainArea{ zoom:1.3; }
+  }
 </style>
   <!-- ---------- یہ الگ style ٹیگ خاص طور پر پرنٹ کے وقت اصل کاغذ کی چوڑائی (58mm/80mm) بتانے کے لیے ہے —
        بغیر اس کے، پرنٹ سسٹم صفحے کا سائز A4/Letter سمجھ کر رسید کو چھوٹا کر کے سکیڑ دیتا تھا،
@@ -9468,6 +9499,7 @@ function getDeveloperContact(){
 // 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
 // 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
 // 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
+// 🆕 FM1810SU408: لیپ ٹاپ/کمپیوٹر (861px+) پر اردو انداز — مینو دائیں، کام والا حصہ RTL، سائز (zoom) اسکرین کے حساب سے، بل جدول کی قطاریں موٹی؛ پراڈکٹس پر سرچ پٹی مینو کی جگہ نہیں لیتی
 // 🆕 FM1810SU407: (1) بل کی "سابقہ رقم" میں کل کی کاروباری تاریخ والی وصولی (رات 12 کے بعد درج) دوبارہ نہیں جڑتی (2) نیا برانڈنگ اشتہار — صدام حسین مغل ☎ 03425556364
 // 🆕 FM1810SU405: ہوم سمری میں مدت (آج / گزشتہ کل / یہ ہفتہ / یہ مہینہ) — ادھار کاروبار میں کل کا منافع اور کیش بھی دکھے
 // 🆕 FM1410WE389: ریکوری کارڈ کی ترتیب — کل کی خریداری اوپر، آج کی خریداری نیچے (وصولی کے خانے کے سامنے)
@@ -9486,8 +9518,8 @@ function getDeveloperContact(){
 // 🆕 FM1710SA401: اردو فونٹ ہلکی WOFF2 شکل میں (24 MB → 10.3 MB)، نئے ورژن پر فونٹ دوبارہ ڈاؤن لوڈ نہیں
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1810SU407'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بل کی سابقہ رقم درست (کل کی وصولی دوبارہ نہیں) + نیچے نیا اشتہار'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1810SU408'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'لیپ ٹاپ پر اردو انداز: مینو دائیں طرف، سب کچھ دائیں سے، سائز اسکرین کے حساب سے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15063,18 +15095,25 @@ function renderBillingProductTable(grid){
   const measUrduFontBl = "700 13.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measPackFontBl = "700 11.5px 'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif";
   const measNumFontBl = "900 12.5px Arial,Helvetica,sans-serif";
-  const serialWBl = autoColWidth('#', flat.map(v => v.serial_no ?? '?'), measNumFontBl, {min:32, max:48, pad:14});
-  const nameWBl = autoColWidth('نام', flat.map(v => (productsData.find(p => p.product_id === v.product_id)?.name) || v.name), measUrduFontBl, {min:70, max:190, pad:24});
-  const packWBl = autoColWidth('پیکنگ', flat.map(v => v.label || ''), measPackFontBl, {min:40, max:90, pad:14});
+  let serialWBl = autoColWidth('#', flat.map(v => v.serial_no ?? '?'), measNumFontBl, {min:32, max:48, pad:14});
+  let nameWBl = autoColWidth('نام', flat.map(v => (productsData.find(p => p.product_id === v.product_id)?.name) || v.name), measUrduFontBl, {min:70, max:190, pad:24});
+  let packWBl = autoColWidth('پیکنگ', flat.map(v => v.label || ''), measPackFontBl, {min:40, max:90, pad:14});
   // ---------- 🔗 صدام کی ہدایت (22 ستمبر): منشی جیسے ہی آرڈر صدام حسین کو بھیجے (پینڈنگ بنے) اسی وقت اس کا سٹاک
   // v.reserved میں بک ہو جاتا ہے (reserveOrderStock) — یہاں بلنگ ٹیبل میں اب خام v.stock کی بجائے "دستیاب"
   // (v.stock - v.reserved) دکھایا جائے گا، بالکل اسی طرح جیسے آرڈر ٹیکنگ سکرین پر otAvailableStock() کرتا ہے ---------- -->
-  const stockWBl = autoColWidth('سٹاک', flat.map(v => Math.max(0, (v.stock||0) - (v.reserved||0))), measNumFontBl, {min:36, max:64, pad:14});
+  let stockWBl = autoColWidth('سٹاک', flat.map(v => Math.max(0, (v.stock||0) - (v.reserved||0))), measNumFontBl, {min:36, max:64, pad:14});
   let qtyWBl = Math.max(96, autoColWidth('مقدار', flat.map(v => { const ci = Billing.cart.find(c => c.variant_id === v.variant_id); return ci ? ci.qty : ''; }), measNumFontBl, {min:30, max:60, pad:10}) + 66);
   // ---------- خالی بچی سکرین کی چوڑائی "مقدار" کالم کو دے دیں (بالکل آرڈر ٹیکنگ جدول جیسا) ---------- -->
   const blAvailW = (grid.clientWidth || grid.offsetWidth || 0) - 4;
+  // ---------- 💻 FM1810SU408: لیپ ٹاپ پر بچی جگہ صرف "مقدار" کو نہیں (وہ بہت لمبا ہو جاتا تھا) — سب کالموں میں بانٹیں ---------- -->
+  const blDesk = window.innerWidth > 860;
+  if(blDesk){ serialWBl = Math.max(serialWBl, 54); qtyWBl = Math.max(qtyWBl, 190); }
   const blPreliminaryTotal = serialWBl + nameWBl + packWBl + stockWBl + qtyWBl;
-  if(blAvailW > blPreliminaryTotal){ qtyWBl += (blAvailW - blPreliminaryTotal); }
+  if(blAvailW > blPreliminaryTotal){
+    const blExtra = blAvailW - blPreliminaryTotal;
+    if(blDesk){ nameWBl += Math.round(blExtra*.40); packWBl += Math.round(blExtra*.15); stockWBl += Math.round(blExtra*.15); qtyWBl += blExtra - Math.round(blExtra*.40) - 2*Math.round(blExtra*.15); }
+    else { qtyWBl += blExtra; }
+  }
   const colWidths = [serialWBl, nameWBl, packWBl, stockWBl, qtyWBl];
   const rightOffsets = [0, colWidths[0]];
 
@@ -15115,7 +15154,7 @@ function renderBillingProductTable(grid){
   grid.style.display = 'block';
   grid.innerHTML = `
     <div style="width:100%;max-height:74vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1.5px solid #cbd5e1;box-shadow:0 3px 10px rgba(0,0,0,.1);">
-      <table dir="rtl" style="border-collapse:separate;border-spacing:0;width:${totalTableWBl}px;table-layout:fixed;font-size:12.5px;">
+      <table dir="rtl" class="billDeskTbl" style="border-collapse:separate;border-spacing:0;width:${totalTableWBl}px;table-layout:fixed;font-size:12.5px;">
         ${colgroupHtml}
         <thead>${theadHtml}</thead>
         <tbody>${rows}</tbody>
