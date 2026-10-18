@@ -9499,6 +9499,7 @@ function getDeveloperContact(){
 // 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
 // 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
 // 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
+// 🆕 FM1810SU410: وصولی/بل کی رقم بقایا میں سے دو بار کٹنے کی جڑ ختم — ایک فون پر بھیجنا/لینا ایک وقت میں ایک (قطار)، بھیجی حالت یاد، فون=کلاؤڈ ہو تو فرق دوبارہ نہیں (256 bota king: 121,000 دو بار کٹا تھا)
 // 🆕 FM1810SU409: بل کی "وصولی رقم" میں صرف بل کے کاروباری دن کی بعد والی وصولی (پہلے اگلے دنوں کی بھی جڑتی تھی: 35k+50k=85k)؛ زائد رقم جو والٹ میں گئی دو بار نہیں؛ ریکوری لسٹ میں بل کے ساتھ پرانے بقایا کی نقد وصولی اور والٹ کٹوتی کا اصول لال ڈبے جیسا؛ ریکوری لسٹ میں آج / گزشتہ کل / کیلنڈر تاریخ فلٹر
 // 🆕 FM1810SU408: لیپ ٹاپ/کمپیوٹر (861px+) پر اردو انداز — مینو دائیں، کام والا حصہ RTL، سائز (zoom) اسکرین کے حساب سے، بل جدول کی قطاریں موٹی؛ پراڈکٹس پر سرچ پٹی مینو کی جگہ نہیں لیتی
 // 🆕 FM1810SU407: (1) بل کی "سابقہ رقم" میں کل کی کاروباری تاریخ والی وصولی (رات 12 کے بعد درج) دوبارہ نہیں جڑتی (2) نیا برانڈنگ اشتہار — صدام حسین مغل ☎ 03425556364
@@ -9519,8 +9520,8 @@ function getDeveloperContact(){
 // 🆕 FM1710SA401: اردو فونٹ ہلکی WOFF2 شکل میں (24 MB → 10.3 MB)، نئے ورژن پر فونٹ دوبارہ ڈاؤن لوڈ نہیں
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1810SU409'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بل کی وصولی صرف اسی دن کی (اگلے دن کی نہیں)؛ ریکوری لسٹ کا حساب درست + آج / گزشتہ کل / تاریخ فلٹر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1810SU410'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'وصولی اب بقایا میں سے صرف ایک بار کٹے گی (فونز کے ملاپ کی خرابی درست)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -40341,6 +40342,7 @@ function _mergeRecordsThreeWay(base, local, remote, idField, counters, hists, se
   const isAdmin = (typeof AppState !== 'undefined' && AppState.currentRole === 'admin');
   return _mergeList(base, local, remote, idField, (b, l, r) => {
     if(!b) b = r;
+    if(l && r && _syncEq(l, r)) return _syncClone(r); // 🔒 FM1810SU410: فون اور کلاؤڈ پہلے سے برابر — پرانی بنیاد سے فرق دوبارہ نہ لگے
     const m = {};
     new Set([...Object.keys(r), ...Object.keys(l)]).forEach(f => {
       if(counters.includes(f)){
@@ -40734,7 +40736,34 @@ function bindHomeTileDrag(grid){
   grid.addEventListener('click', e => { if(suppressClick){ e.stopPropagation(); e.preventDefault(); } }, true);
 }
 
-async function _pushMerged(cfg){
+// ---------- 🔒 FM1810SU410 (پیارے بھائی — 256 bota king کی 121,000 وصولی بقایا میں سے دو بار کٹی): اصل خرابی —
+// ایک ہی فون پر "بھیجنا" اور ہر 12 سیکنڈ والا "لینا" ایک ساتھ چل جاتے تھے؛ لینا اسی لمحے کلاؤڈ پڑھتا جب ہماری کٹوتی
+// کلاؤڈ میں پہنچ چکی ہوتی مگر بنیاد ابھی پرانی ہوتی — یوں وہی کٹوتی دوبارہ لگ جاتی۔ اب (1) ایک وقت میں ایک ہی کام (قطار)،
+// (2) جو ہم نے بھیجا وہ یاد — کلاؤڈ میں وہی ریکارڈ ملے تو بنیاد وہی، (3) فون اور کلاؤڈ ایک جیسے ہوں تو کوئی فرق نہیں لگتا ----------
+const _syncQ = {};
+function _syncLocked(key, fn){
+  const prev = _syncQ[key] || Promise.resolve();
+  const run = prev.catch(() => {}).then(fn);
+  _syncQ[key] = run.catch(() => {});
+  return run;
+}
+function _sentKey(cfg){ return 'syncSent_' + cfg.path; }
+function _baseWithSent(cfg, remote){
+  const base = cfg.getBase();
+  let sent = null; try{ sent = loadFromStorage(_sentKey(cfg), null); }catch(e){}
+  if(!Array.isArray(base) || !Array.isArray(sent) || !Array.isArray(remote)) return base;
+  const sm = new Map(sent.map(x => [String(x && x[cfg.id]), x]));
+  const rm = new Map(remote.map(x => [String(x && x[cfg.id]), x]));
+  const out = base.map(b => {
+    const k = String(b && b[cfg.id]); const sx = sm.get(k), rx = rm.get(k);
+    return (sx && rx && _syncEq(sx, rx)) ? sx : b; // ہماری بھیجی حالت کلاؤڈ میں پہنچ چکی — فرق دوبارہ نہ لگے
+  });
+  sent.forEach(sx => { const k = String(sx && sx[cfg.id]); if(!base.some(b => String(b && b[cfg.id]) === k) && rm.has(k) && _syncEq(sx, rm.get(k))) out.push(sx); });
+  return out;
+}
+function _pushMerged(cfg){ return _syncLocked(cfg.path, () => _pushMergedRaw(cfg)); }
+function _fetchMerged(cfg){ return _syncLocked(cfg.path, () => _fetchMergedRaw(cfg)); }
+async function _pushMergedRaw(cfg){
   let ok = false;
   for(let attempt = 0; attempt < 3 && !ok; attempt++){
     let updateTime = null;
@@ -40747,7 +40776,7 @@ async function _pushMerged(cfg){
       if(str){
         const remote = JSON.parse(str);
         if(Array.isArray(remote)){
-          let merged = _mergeRecordsThreeWay(cfg.getBase(), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
+          let merged = _mergeRecordsThreeWay(_baseWithSent(cfg, remote), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
           if(cfg.label) merged = await _shrinkLockCheck((cfg.dg ? _dgFilter(cfg.dg, remote) : remote).filter(x => !(cfg.id === 'customer_id' && isLegacyDemoCustomer(x))), merged, cfg.id, cfg.label); // 🔒 FM309WE#270
           if(cfg.dg) merged = _dgFilter(cfg.dg, merged); // 🛡️ FM610TU320: حذف شدہ کبھی واپس نہیں
           cfg.set(merged);
@@ -40760,6 +40789,7 @@ async function _pushMerged(cfg){
     }
     const pre = updateTime ? `&currentDocument.updateTime=${encodeURIComponent(updateTime)}` : '';
     const sentJson = JSON.stringify(cfg.get()); // 🐞 FM510MO317: بھیجی جانے والی اسی لمحے کی کاپی
+    try{ saveToStorage(_sentKey(cfg), JSON.parse(sentJson)); }catch(e){} // 🔒 FM1810SU410: جواب گم بھی ہو جائے تو یاد رہے کیا بھیجا
     const fields = Object.assign({ json: { stringValue: sentJson }, updatedAt: { integerValue: String(Date.now()) } }, cfg.extra ? cfg.extra() : {});
     const res = await authFirestoreFetch(`${cfg.path}?key=${FIREBASE_API_KEY}${pre}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields })
@@ -40775,7 +40805,7 @@ async function _pushMerged(cfg){
   return ok;
 }
 // ---------- مشترکہ لینا: کلاؤڈ پڑھو → ملاؤ (کبھی اندھا دھند اوور رائٹ نہیں) → اسی فون کی تبدیلی ہو تو بھیجو ----------
-async function _fetchMerged(cfg){
+async function _fetchMergedRaw(cfg){
   const res = await authFirestoreFetch(`${cfg.path}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
   if(res.status === 404) return false;
   if(!res.ok) return false;
@@ -40785,7 +40815,7 @@ async function _fetchMerged(cfg){
   const remote = JSON.parse(str);
   if(!Array.isArray(remote)) return false;
   if(cfg.dg) _dgMergeRemote(cfg.dg, doc); // 🛡️ FM610TU320
-  let merged = _mergeRecordsThreeWay(cfg.getBase(), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
+  let merged = _mergeRecordsThreeWay(_baseWithSent(cfg, remote), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
   if(cfg.dg) merged = _dgFilter(cfg.dg, merged);
   const hadLocal = !_syncEq(merged, remote);
   cfg.set(merged);
