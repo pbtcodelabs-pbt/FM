@@ -9499,6 +9499,7 @@ function getDeveloperContact(){
 // 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
 // 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
 // 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
+// 🆕 FM1810SU409: بل کی "وصولی رقم" میں صرف بل کے کاروباری دن کی بعد والی وصولی (پہلے اگلے دنوں کی بھی جڑتی تھی: 35k+50k=85k)؛ زائد رقم جو والٹ میں گئی دو بار نہیں؛ ریکوری لسٹ میں بل کے ساتھ پرانے بقایا کی نقد وصولی اور والٹ کٹوتی کا اصول لال ڈبے جیسا؛ ریکوری لسٹ میں آج / گزشتہ کل / کیلنڈر تاریخ فلٹر
 // 🆕 FM1810SU408: لیپ ٹاپ/کمپیوٹر (861px+) پر اردو انداز — مینو دائیں، کام والا حصہ RTL، سائز (zoom) اسکرین کے حساب سے، بل جدول کی قطاریں موٹی؛ پراڈکٹس پر سرچ پٹی مینو کی جگہ نہیں لیتی
 // 🆕 FM1810SU407: (1) بل کی "سابقہ رقم" میں کل کی کاروباری تاریخ والی وصولی (رات 12 کے بعد درج) دوبارہ نہیں جڑتی (2) نیا برانڈنگ اشتہار — صدام حسین مغل ☎ 03425556364
 // 🆕 FM1810SU405: ہوم سمری میں مدت (آج / گزشتہ کل / یہ ہفتہ / یہ مہینہ) — ادھار کاروبار میں کل کا منافع اور کیش بھی دکھے
@@ -9518,8 +9519,8 @@ function getDeveloperContact(){
 // 🆕 FM1710SA401: اردو فونٹ ہلکی WOFF2 شکل میں (24 MB → 10.3 MB)، نئے ورژن پر فونٹ دوبارہ ڈاؤن لوڈ نہیں
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1810SU408'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'لیپ ٹاپ پر اردو انداز: مینو دائیں طرف، سب کچھ دائیں سے، سائز اسکرین کے حساب سے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1810SU409'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بل کی وصولی صرف اسی دن کی (اگلے دن کی نہیں)؛ ریکوری لسٹ کا حساب درست + آج / گزشتہ کل / تاریخ فلٹر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -34045,11 +34046,23 @@ function renderBizDayBar(){
   const el = document.getElementById('drDayBar'); if(!el) return;
   const cur = todayDateKey(), eff = drEffDate();
   const closed = Object.keys(bizDayState.closed || {}).sort().reverse();
-  const opts = [cur].concat(closed.filter(x => x !== cur)).map(x => `<option value="${x}" ${x === eff ? 'selected' : ''}>${bizFmt(x)}${x === cur ? (bizOverride ? ' 🔓' : ' • جاری') : ' 🔒'}</option>`).join('');
+  const optList = [cur].concat(closed.filter(x => x !== cur)); if(!optList.includes(eff)) optList.push(eff); // کیلنڈر سے چنی تاریخ بھی فہرست میں
+  const opts = optList.map(x => `<option value="${x}" ${x === eff ? 'selected' : ''}>${bizFmt(x)}${x === cur ? (bizOverride ? ' 🔓' : ' • جاری') : ' 🔒'}</option>`).join('');
   const bs = 'padding:5px 7px;border:none;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;color:#fff;';
   const isPast = eff !== cur;
   el.style.paddingRight = '0'; el.style.marginRight = '-3px';
-  el.innerHTML = `<select onchange="setDrViewDate(this.value)" class="drGreenSel ${isPast ? 'drPast' : ''}" style="padding:6px 4px;border-radius:8px;font-size:12px;min-width:100px;height:34px;flex:0 0 auto;">${opts}</select>
+  // ---------- 📅 FM1810SU409 (پیارے بھائی): تاریخ کا فلٹر — آج / گزشتہ کل / کیلنڈر سے کوئی بھی ایک تاریخ (ہر تاریخ کی الگ رپورٹ، جمع نہیں) ----------
+  const yDt = new Date(cur + 'T12:00:00'); yDt.setDate(yDt.getDate() - 1); const yest = localDateKey(yDt);
+  const chip = (on) => `padding:0 12px;height:34px;border-radius:17px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;flex:0 0 auto;border:2px solid ${on ? '#15803d' : '#cbd5e1'};background:${on ? '#15803d' : '#fff'};color:${on ? '#fff' : '#334155'};font-family:inherit;`;
+  const filt = `<div style="flex:1 0 100%;display:flex;gap:6px;align-items:center;margin-bottom:5px;">
+      <button type="button" onclick="setDrViewDate('${cur}')" style="${chip(eff === cur)}">آج</button>
+      <button type="button" onclick="setDrViewDate('${yest}')" style="${chip(eff === yest)}">گزشتہ کل</button>
+      <label style="${chip(eff !== cur && eff !== yest)}display:inline-flex;align-items:center;gap:4px;position:relative;">📅 ${eff !== cur && eff !== yest ? bizFmt(eff) : 'تاریخ'}
+        <input type="date" value="${eff}" max="${cur}" onchange="if(this.value) setDrViewDate(this.value)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"></label>
+      <span style="font-size:12px;font-weight:800;color:${isPast ? '#b45309' : '#15803d'};white-space:nowrap;">${bizFmt(eff)}</span>
+    </div>`;
+  el.style.flexWrap = 'wrap';
+  el.innerHTML = filt + `<select onchange="setDrViewDate(this.value)" class="drGreenSel ${isPast ? 'drPast' : ''}" style="padding:6px 4px;border-radius:8px;font-size:12px;min-width:100px;height:34px;flex:0 0 auto;">${opts}</select>
     ${bizIsAdmin() ? `<button type="button" onclick="endBizDay()" style="${bs}background:#b91c1c;flex:0 0 auto;height:34px;">🔒 ڈیٹ اینڈ</button><button type="button" onclick="openBizUnlockDialog()" style="${bs}background:#b45309;flex:0 0 auto;height:34px;">🔓 پچھلی ڈیٹ</button>` : ''}
     <button type="button" onclick="printDailyRecoveryReport()" style="${bs}background:var(--primary-dark);flex:0 0 auto;height:34px;">🖨️ PDF</button>
     <button type="button" onclick="shareDailyRecoveryImage()" style="${bs}background:#25D366;flex:0 0 auto;height:34px;">📤</button>
@@ -34096,8 +34109,21 @@ function drCustomerDay(c, D){
   const hist = c.walletHistory || [];
   const gDay = {}, rDay = {}, pDay = {};
   const add = (o, d, v) => { if(!d) return; o[d] = (o[d] || 0) + (Number(v) || 0); };
-  invoicesData.forEach(inv => { if(inv.customer_id === c.customer_id) add(gDay, invDay(inv), _drGoodsOrig(inv)); });
-  hist.forEach(h => { if(h.type === 'cash_given') add(gDay, h.date, h.amount); else if(h.type === 'receivable_collected') add(rDay, h.date, h.amount); });
+  // 🔧 FM1810SU409: وصولی کے اصول بالکل custShortThrough (لال ڈبہ) والے — (1) بل بناتے وقت پرانے بقایا میں دی نقد بھی اسی دن کی وصولی،
+  // (2) والٹ سے بل میں خودکار کٹوتی وصولی نہیں (بل کا ادھار پہلے ہی اتنا کم ہے) — پہلے یہ دونوں غلط تھے، پچھلے دنوں کا سابقہ/آخری غلط آتا تھا
+  invoicesData.forEach(inv => {
+    if(!inv || inv.customer_id !== c.customer_id) return;
+    const d = invDay(inv);
+    add(gDay, d, _drGoodsOrig(inv));
+    if(inv.status === 'voided') return;
+    const billCash = Math.max(0, (Number(inv.paid_now) || 0) - (Number(inv.wallet_applied) || 0));
+    add(rDay, d, Math.max(0, (Number(inv.cash_received_now) || 0) - billCash));
+  });
+  hist.forEach(h => {
+    if(!h) return;
+    if(h.type === 'cash_given') add(gDay, h.date, h.amount);
+    else if(h.type === 'receivable_collected' && !(h.via === 'wallet' && /^Auto-applied/.test(String(h.note || '')))) add(rDay, h.date, h.amount);
+  });
   recoveryListData.forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') add(pDay, recDay(e), e.amount); });
   const zDay = {}; hist.forEach(h => { if(h && h.type === 'zero_reset') add(zDay, h.date, h.amount); }); // 🧹 FM910FR354: زیرو کی رقم
   const sumW = (o, pred) => Object.keys(o).filter(pred).reduce((s, k) => s + o[k], 0);
@@ -42583,6 +42609,13 @@ let currentPreviewInvoiceId = null;
 
 // ---------- بل کی مکمل ادائیگی تفصیل (Total Bill/Discount/Subtotal, Old Credit/This Bill/Total, Wallet, Paid Now, Final Due) —
 //            دونوں پرنٹ سٹائلز (تھرمل اور A4) میں یکساں استعمال ہوتا ہے تاکہ ترتیب/حساب ہمیشہ ایک جیسا رہے ----------
+// 🔧 FM1810SU409: وصولی کا وہ حصہ جو بقایا میں سے کٹا (زائد رقم جو والٹ/ایڈوانس میں گئی وہ نہیں — وہ آگے بل میں "والٹ" بن کر آتی ہے، دو بار نہ گنی جائے)
+function _pmToDue(pm){
+  const a = Number(pm && pm.amount) || 0;
+  const bb = Number(pm && pm.balance_before), ba = Number(pm && pm.balance_after);
+  if(pm && pm.balance_before != null && pm.balance_after != null && isFinite(bb) && isFinite(ba) && bb >= ba) return Math.min(a, bb - ba);
+  return a;
+}
 function getBillSummaryRows(invoice){
   const rawSubtotal = (invoice.items || []).reduce((s, i) => s + i.qty * i.unitPrice, 0);
   // ---------- 💪 صدام کی ہدایت (6 ستمبر): مزدوری اب سمری میں الگ رو نہیں دکھائی جاتی — یہ ہر آئٹم کی
@@ -42624,7 +42657,7 @@ function getBillSummaryRows(invoice){
       recBefore = (paymentsData || []).filter(pm => pm && pm.party_type === 'customer' && pm.party_id === invoice.customer_id && pm.direction === 'in'
           && (pm.biz_date ? pm.biz_date === _bDay : _ts2(pm.created_at) > calDayStart.getTime()) // 📅 صرف اسی کاروباری دن کی وصولی — کل کی وصولی آج کے بل میں نہیں
           && _ts2(pm.created_at) > fromTs && _ts2(pm.created_at) <= billTs2)
-        .reduce((a, pm) => a + (Number(pm.amount) || 0), 0);
+        .reduce((a, pm) => a + _pmToDue(pm), 0);
     }
   }catch(e){ recBefore = 0; }
 
@@ -42645,24 +42678,24 @@ function getBillSummaryRows(invoice){
   const thisBill = invoice.grand_total;        // آج کا بل (مزدوری/اضافی چارجز/ٹیکس اس میں پہلے سے شامل)
 
   // ---------- FM110TH272: بل بننے کے بعد ریپ کی لائی ہوئی وصولی (کچی یا بعد میں تصدیق شدہ) — صرف اس کسٹمر کے آخری بل پر ----------
+  // ---------- 🔧 FM1810SU409 (پیارے بھائی): بل کے بعد کی وصولی — صرف اسی بل کے کاروباری دن کی (پہلے اگلے دنوں کی ساری وصولی بھی
+  // پرانے بل کی "وصولی رقم" میں جڑ جاتی تھی: کل کی ریکوری 35,000 + آج کاؤنٹر پر 50,000 = کل کے بل پر 85,000)۔
+  // اسی دن کے دو بل ہوں تو بیچ کی وصولی اگلے بل کی "سابقہ" والی وصولی (recBefore) میں جاتی ہے؛ یہاں صرف دن کا آخری بل لیتا ہے ----------
   let laterRecovery = 0;
   try{
-    if(invoice.customer_id && invoice.invoice_id !== 'DRAFT' && hasOldCredit){
+    if(invoice.customer_id && invoice.invoice_id !== 'DRAFT'){
       const _ts = (v) => new Date(v || 0).getTime() || 0;
-      const mine = invoicesData.filter(x => x.customer_id === invoice.customer_id && x.status !== 'voided');
       const billTs = _ts(invoice.created_at);
-      const laterBills = mine.filter(x => x.invoice_id !== invoice.invoice_id && _ts(x.created_at) > billTs).sort((a, b) => _ts(a.created_at) - _ts(b.created_at));
-      const recEntries = recoveryListData.filter(r => r.customer_id === invoice.customer_id && (r.status === 'pending' || r.status === 'confirmed'));
-      if(laterBills.length === 0){
-        const cu = customersData.find(c => c.customer_id === invoice.customer_id);
-        const pend = recEntries.filter(r => r.status === 'pending' && !(r.backdated && _effTs(r) < billTs)).reduce((a, r) => a + (Number(r.amount) || 0), 0);
-        const confirmedLater = cu ? Math.max(0, (Number(invoice.new_balance) || 0) - (Number(cu.total_receivable) || 0)) : 0;
-        const confirmedFromList = recEntries.filter(r => r.status === 'confirmed' && _effTs(r) >= billTs).reduce((a, r) => a + (Number(r.amount) || 0), 0);
-        laterRecovery = pend + Math.max(Math.max(0, confirmedLater - backAdj), confirmedFromList);
-      } else {
-        const nextTs = _ts(laterBills[0].created_at);
-        laterRecovery = recEntries.filter(r => { const t = _effTs(r); return t >= billTs && t < nextTs; })
+      const _day = invDay(invoice);
+      const laterSameDay = invoicesData.some(x => x.customer_id === invoice.customer_id && x.status !== 'voided' && x.invoice_id !== invoice.invoice_id
+          && invDay(x) === _day && _ts(x.created_at) > billTs);
+      if(!laterSameDay){
+        const paidLater = (paymentsData || []).filter(pm => pm && pm.party_type === 'customer' && pm.party_id === invoice.customer_id && pm.direction === 'in'
+            && bsPayDay(pm) === _day && _ts(pm.created_at) > billTs)
+          .reduce((a, pm) => a + _pmToDue(pm), 0);
+        const pend = (recoveryListData || []).filter(r => r && r.customer_id === invoice.customer_id && r.status === 'pending' && recDay(r) === _day)
           .reduce((a, r) => a + (Number(r.amount) || 0), 0);
+        laterRecovery = paidLater + pend;
       }
     }
   }catch(e){}
