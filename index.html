@@ -9499,6 +9499,7 @@ function getDeveloperContact(){
 // 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
 // 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
 // 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
+// 🆕 FM1810SU412: بقایا درستی — ڈراپ ڈاؤن کی جگہ صاف فہرست (نام دائیں، رقم رنگین کیپسول میں، تلاش)؛ نام اور رقم اب گڈمڈ نہیں
 // 🆕 FM1810SU411: ایڈمن کے لیے "🛠️ بقایا درستی" — گاہک کا بقایا صحیح رقم پر، اس تاریخ سے بلوں کا سابقہ بھی، کھاتے میں وجہ کے ساتھ اندراج، ایڈمن PIN
 // 🆕 FM1810SU410: وصولی/بل کی رقم بقایا میں سے دو بار کٹنے کی جڑ ختم — ایک فون پر بھیجنا/لینا ایک وقت میں ایک (قطار)، بھیجی حالت یاد، فون=کلاؤڈ ہو تو فرق دوبارہ نہیں (256 bota king: 121,000 دو بار کٹا تھا)
 // 🆕 FM1810SU409: بل کی "وصولی رقم" میں صرف بل کے کاروباری دن کی بعد والی وصولی (پہلے اگلے دنوں کی بھی جڑتی تھی: 35k+50k=85k)؛ زائد رقم جو والٹ میں گئی دو بار نہیں؛ ریکوری لسٹ میں بل کے ساتھ پرانے بقایا کی نقد وصولی اور والٹ کٹوتی کا اصول لال ڈبے جیسا؛ ریکوری لسٹ میں آج / گزشتہ کل / کیلنڈر تاریخ فلٹر
@@ -9521,8 +9522,8 @@ function getDeveloperContact(){
 // 🆕 FM1710SA401: اردو فونٹ ہلکی WOFF2 شکل میں (24 MB → 10.3 MB)، نئے ورژن پر فونٹ دوبارہ ڈاؤن لوڈ نہیں
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1810SU411'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ایڈمن کے لیے نیا بٹن: بقایا درستی (گاہک کی فہرست میں)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1810SU412'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بقایا درستی: گاہک کی صاف فہرست — نام الگ، رقم رنگین کیپسول میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -34166,13 +34167,20 @@ async function fmBalanceFix(presetId){
   try{ await fetchCustomersFromCloud(true); await fetchInvoicesFromCloud(true); }catch(e){} // پہلے تازہ ترین کھاتہ
   const list = (customersData || []).filter(c => c && !c.deleted).slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
   if(!list.length){ await uAlert('کوئی گاہک نہیں', 'پہلے گاہک بنائیں۔'); return; }
-  window.__bfCid = presetId != null ? presetId : list[0].customer_id;
-  const opts = list.map(c => `<option value="${c.customer_id}" ${c.customer_id === window.__bfCid ? 'selected' : ''}>${escRlHtml(c.name)} — ${f(c.total_receivable || 0)}</option>`).join('');
-  const okC = await uDialog({ title: '🛠️ بقایا درستی', message: `کس گاہک کا بقایا درست کرنا ہے؟<select onchange="window.__bfCid=Number(this.value)" style="width:100%; height:46px; margin-top:8px; border:2px solid #cbd5e1; border-radius:12px; font-size:16px; font-family:inherit;">${opts}</select>`, okText: 'آگے ←', cancelText: '✖ واپس' });
+  // 🎨 FM1810SU412 (پیارے بھائی): ڈراپ ڈاؤن میں نام اور رقم آپس میں گڈمڈ ہو جاتے تھے ("bota king — Rs. 664,740 256") —
+  // اب صاف فہرست: دائیں نام، بائیں رنگین کیپسول میں رقم؛ تلاش کا خانہ بھی
+  window.__bfCid = presetId != null ? presetId : null;
+  const rowsHtml = list.map(c => { const on = c.customer_id === window.__bfCid; return `<div class="bfItem" data-cid="${c.customer_id}" data-nm="${escRlHtml(String(c.name).toLowerCase())}" onclick="window.__bfCid=${c.customer_id};document.querySelectorAll('#bfList .bfItem').forEach(e=>{const s=e===this;e.style.borderColor=s?'#16a34a':'#e2e8f0';e.style.background=s?'#f0fdf4':'#fff';})" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;margin-top:6px;border:2px solid ${on ? '#16a34a' : '#e2e8f0'};border-radius:12px;background:${on ? '#f0fdf4' : '#fff'};cursor:pointer;">
+      <bdi dir="auto" style="flex:1;min-width:0;text-align:right;font-size:17px;font-weight:700;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escRlHtml(c.name)}</bdi>
+      <span dir="ltr" style="flex:0 0 auto;padding:3px 12px;border-radius:999px;background:${(Number(c.total_receivable) || 0) > 0 ? 'linear-gradient(135deg,#fee2e2,#fecaca)' : 'linear-gradient(135deg,#dcfce7,#bbf7d0)'};color:${(Number(c.total_receivable) || 0) > 0 ? '#991b1b' : '#166534'};font-family:UrduAll,Arial,sans-serif;font-size:15px;font-weight:900;white-space:nowrap;box-shadow:inset 0 -2px 0 rgba(0,0,0,.08);">${f(c.total_receivable || 0)}</span></div>`; }).join('');
+  const okC = await uDialog({ title: '🛠️ بقایا درستی', message: `کس گاہک کا بقایا درست کرنا ہے؟
+    <input type="text" placeholder="🔍 نام سے تلاش" oninput="const q=this.value.trim().toLowerCase();document.querySelectorAll('#bfList .bfItem').forEach(e=>{e.style.display=!q||e.dataset.nm.includes(q)?'flex':'none'})" style="width:100%;box-sizing:border-box;height:42px;margin-top:6px;border:2px solid #cbd5e1;border-radius:12px;padding:0 10px;font-size:16px;font-family:inherit;">
+    <div id="bfList" style="max-height:46vh;overflow-y:auto;margin-top:2px;padding:2px;">${rowsHtml}</div>`, okText: 'آگے ←', cancelText: '✖ واپس' });
   if(!okC) return;
+  if(window.__bfCid == null){ await uAlert('گاہک چنیں', 'فہرست میں سے گاہک کے نام پر ٹیپ کریں، پھر "آگے" دبائیں۔'); return fmBalanceFix(); }
   const c = customersData.find(x => x.customer_id === window.__bfCid); if(!c) return;
   const cur = Number(c.total_receivable) || 0;
-  const v = await uDialog({ title: '🛠️ ' + escRlHtml(c.name), message: `ابھی ایپ میں بقایا: <b>${f(cur)}</b><br>صحیح بقایا کتنا ہونا چاہیے؟`, input: 'number', okText: 'آگے ←', cancelText: '✖ واپس' });
+  const v = await uDialog({ title: '🛠️ <bdi dir="auto">' + escRlHtml(c.name) + '</bdi>', message: `ابھی ایپ میں بقایا: <b dir="ltr" style="display:inline-block;padding:1px 10px;border-radius:999px;background:#fee2e2;color:#991b1b;">${f(cur)}</b><br>صحیح بقایا کتنا ہونا چاہیے؟`, input: 'number', okText: 'آگے ←', cancelText: '✖ واپس' });
   if(v === null || v === false || String(v).trim() === '') return;
   const target = Math.round(Number(v) * 100) / 100;
   if(!isFinite(target) || target < 0){ await uAlert('غلط رقم', 'صحیح رقم لکھیں (صفر یا اس سے زیادہ)۔'); return; }
@@ -34187,7 +34195,7 @@ async function fmBalanceFix(presetId){
   const rows = [{ label: 'ابھی بقایا', value: f(cur) }, { label: 'صحیح بقایا', value: f(target), big: true },
     { label: delta > 0 ? '➕ بقایا بڑھے گا' : '➖ بقایا کم ہو گا', value: f(Math.abs(delta)), bg: '#fef9c3', fg: '#854d0e' },
     { label: `بل جن کا سابقہ درست ہو گا (${bizFmt(fromDay)} سے)`, value: bills.length ? bills.map(b => b.invoice_no).join('، ') : 'کوئی نہیں' }];
-  if(!(await uDialog({ title: '⚠️ تصدیق — ' + escRlHtml(c.name), rows, okText: '✅ درست کریں', cancelText: '✖ واپس', tone: 'amber' }))) return;
+  if(!(await uDialog({ title: '⚠️ تصدیق — <bdi dir="auto">' + escRlHtml(c.name) + '</bdi>', rows, okText: '✅ درست کریں', cancelText: '✖ واپس', tone: 'amber' }))) return;
   if(!(await _askAdminPinForSerialMaster(`${c.name} کا بقایا ${f(cur)} سے ${f(target)} کرنے کے لیے`))) return;
   try{ pauseCloudPolling(15000); }catch(e){}
   c.total_receivable = target;
@@ -34202,7 +34210,7 @@ async function fmBalanceFix(presetId){
   try{ ok = (await pushCustomersToCloud()) !== false; if(bills.length) await pushInvoicesToCloud(); }catch(e){ ok = false; }
   try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
   try{ renderHomeMoneySummary(); }catch(e){}
-  uAlert('✅ درست ہو گیا', `${escRlHtml(c.name)} کا بقایا اب <b>${f(target)}</b> ہے۔` + (bills.length ? `<br>${bills.length} بل کا سابقہ بھی درست۔` : '') + (ok ? '' : '<br>⚠️ انٹرنیٹ آنے پر کلاؤڈ میں چلا جائے گا۔'), 'green');
+  uAlert('✅ درست ہو گیا', `<bdi dir="auto">${escRlHtml(c.name)}</bdi> کا بقایا اب <b>${f(target)}</b> ہے۔` + (bills.length ? `<br>${bills.length} بل کا سابقہ بھی درست۔` : '') + (ok ? '' : '<br>⚠️ انٹرنیٹ آنے پر کلاؤڈ میں چلا جائے گا۔'), 'green');
 }
 function fmZeroBalBtnHtml(kind){
   const isC = kind === 'customers';
