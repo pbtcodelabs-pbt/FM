@@ -9522,8 +9522,9 @@ function getDeveloperContact(){
 // 🆕 FM1710SA401: اردو فونٹ ہلکی WOFF2 شکل میں (24 MB → 10.3 MB)، نئے ورژن پر فونٹ دوبارہ ڈاؤن لوڈ نہیں
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1810SU412'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بقایا درستی: گاہک کی صاف فہرست — نام الگ، رقم رنگین کیپسول میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM1910MO413: ریکوری والوں کی سارا دن کی نقد وصولی (منظوری کی منتظر بھی) "کیش آیا" میں؛ دوسرے فون کی منظور شدہ وصولیاں ہوم پر خود آتی ہیں
+const APP_BUILD_VERSION = 'FM1910MO413'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ریکوری والوں کی سارا دن کی وصولی اب "ٹوٹل کیش آیا" میں نظر آتی ہے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10320,6 +10321,7 @@ function hmExplain(kind){
   const pays = S.tPaysList || [];
   const payItems = arr => arr.map(p => [E(p.party_name || '—') + (p.note ? ` <small style="color:#94a3b8;">(${E(String(p.note).slice(0, 40))})</small>` : ''), bsPayCash(p)]);
   const pRec = pays.filter(p => p.direction === 'in' && p.party_type === 'customer');
+  const rlItems = (S.tRlPend || []).map(e => { const c = (customersData || []).find(x => x && x.customer_id === e.customer_id); const cash = getRecoverySplit(e).filter(m => !m.method || m.method === 'cash').reduce((a, m) => a + (Number(m.amount) || 0), 0); return [E((c && c.name) || e.customerName || '—') + ' <small style="color:#b45309;">(⏳ منظوری باقی' + (e.employeeName ? ' — ' + E(e.employeeName) : '') + ')</small>', cash]; }).filter(x => x[1] > 0);
   const pOthIn = pays.filter(p => p.direction === 'in' && p.party_type !== 'customer');
   const pSup = pays.filter(p => p.direction === 'out' && p.party_type === 'supplier');
   const pOthOut = pays.filter(p => p.direction === 'out' && p.party_type !== 'supplier');
@@ -10328,7 +10330,7 @@ function hmExplain(kind){
   const inHtml = (detail) => line('🌅 صبح کا اوپننگ کیش' + (S.openingEntered == null ? ' <small style="color:#b45309;">(درج نہیں)</small>' : ''), S.opening, [], G)
     + (S.otherManual ? line('➕ دیگر آمدن (ہاتھ سے)', S.otherManual, detail && S.otherManualNote ? [[E(S.otherManualNote), S.otherManual]] : [], G) : '')
     + line('🧾 آج کے بلوں سے نقد', S.tBillCash, detail ? billItems : [], G)
-    + line('🤝 گاہکوں سے نقد وصولی', S.tRecovery, detail ? payItems(pRec) : [], G)
+    + line('🤝 گاہکوں سے نقد وصولی', S.tRecovery, detail ? payItems(pRec).concat(rlItems) : [], G)
     + (S.tOtherIn ? line('➕ دیگر نقد آمد', S.tOtherIn, detail ? payItems(pOthIn) : [], G) : '');
   const outHtml = (detail) => line('🚚 بیوپاریوں کو نقد ادائیگی', S.tSupOut, detail ? payItems(pSup) : [], R)
     + (S.tOtherOut ? line('➖ دیگر نقد ادائیگی', S.tOtherOut, detail ? payItems(pOthOut) : [], R) : '')
@@ -10339,7 +10341,7 @@ function hmExplain(kind){
   if(kind === 'in'){
     title = '💵 ٹوٹل کیش آیا'; sub = dayNote + ' — صرف نقد (ادھار، ایزی پیسہ، بینک نہیں)';
     body = inHtml(true) + box('= ٹوٹل کیش آیا', cashIn, G)
-      + (pend > 0 ? note(`⏳ ریکوری والوں نے <b dir="ltr">${f(pend)}</b> وصول کیے ہیں مگر ابھی منظور نہیں ہوئے۔ منظوری کے بعد یہاں آئیں گے`, true) : '');
+      + (N(S.tRlPendCash) > 0 ? note(`⏳ اس میں <b dir="ltr">${f(S.tRlPendCash)}</b> وہ نقد وصولی بھی شامل ہے جو ریکوری والوں نے لے لی مگر ابھی "وصولی کھاتے اپڈیٹ" میں منظور نہیں ہوئی`, true) : '');
   } else if(kind === 'out'){
     title = '💸 ٹوٹل کیش گیا'; sub = dayNote + ' — صرف نقد';
     body = outHtml(true) + box('= ٹوٹل کیش گیا', cashOut, R);
@@ -10371,11 +10373,13 @@ function hmExplain(kind){
       + box('= کل سٹاک کی مالیت', stock, '#b45309')
       + (it.some(x => !x.rate) ? note('⚠️ جن پر 0 ریٹ ہے ان کا خرید ریٹ ابھی نہیں لگا، اس لیے ان کی مالیت صفر گنی گئی', true) : '');
   } else if(kind === 'net'){
-    const net = rec + stock + cashIn - cashOut + supAdv - supPay - custAdv;
+    const rlp = N(S.tRlPendCash);
+    const net = rec + stock + cashIn - cashOut - rlp + supAdv - supPay - custAdv;
     title = '📊 کاروبار کی کیفیت'; sub = 'ہمارا مال اور پیسہ − ہمارے ذمے قرض';
     body = line('➕ گاہکوں کی طرف ادھار', rec, [], G) + line('➕ سٹاک کی مالیت', stock, [], G)
       + line('➕ ہاتھ میں کیش (آیا − گیا)', cashIn - cashOut, [], cashIn - cashOut < 0 ? R : G)
       + (supAdv ? line('➕ بیوپاریوں کے پاس ہمارا ایڈوانس', supAdv, [], G) : '')
+      + (rlp ? line('➖ منظوری کی منتظر وصولی (ادھار میں بھی گنی ہے)', rlp, [], R) : '')
       + line('➖ بیوپاریوں کا قرض', supPay, [], R)
       + (custAdv ? line('➖ گاہکوں کا ایڈوانس (ہم نے دینا)', custAdv, [], R) : '')
       + box(net >= 0 ? '= منافع' : '= نقصان', net, net >= 0 ? G : R);
@@ -10420,11 +10424,21 @@ const HOME_PERIOD_LBL = {today:'آج', yesterday:'گزشتہ کل', thisweek:'ی
 const HOME_PERIOD_OF = {today:'آج', yesterday:'گزشتہ کل', thisweek:'اس ہفتے', thismonth:'اس مہینے'}; // "…کا منافع" کے لیے
 function homePeriod(){ const v = loadFromStorage('homePeriod', 'today'); return HOME_PERIOD_LBL[v] ? v : 'today'; }
 function setHomePeriod(v){ saveToStorage('homePeriod', HOME_PERIOD_LBL[v] ? v : 'today'); renderHomeMoneySummary(); }
+// 🤝 ہوم سمری کھلے تو دوسرے فون (یا لیپ ٹاپ) پر منظور ہوئی وصولیاں / ادائیگیاں بھی لے آئیں — ہر 2 منٹ میں زیادہ سے زیادہ ایک بار (کم ریڈ)
+let _hmPaySyncAt = 0;
+function hmMaybeSyncPayments(){
+  try{
+    if(Date.now() - _hmPaySyncAt < 120000 || typeof EXTRA_SYNC_DEFS === 'undefined') return;
+    _hmPaySyncAt = Date.now();
+    EXTRA_SYNC_DEFS.filter(d => d.key === 'payments' || d.key === 'cashPurchases').forEach(d => extraSyncOne(d));
+  }catch(e){}
+}
 function renderHomeMoneySummary(){
   const row = document.getElementById('homeMoneyRow');
   if(!row) return;
   applyHomeMoneyHidden();
   if(loadFromStorage('homeMoneyHidden', false)) return;
+  setTimeout(hmMaybeSyncPayments, 1500);
   // ⭐ FM1210MO370 (صدام کی ہدایت): سات ڈبوں کا حساب — سب آج کی تاریخ کا، "کاروبار کی مکمل سمری" والے ہی اعداد سے:
   //  ① بیوپاریوں کا قرض       = صرف بیوپاریوں کا کل بقایا (FM1210MO371: اخراجات اب صرف ⑤ میں)
   //  ② گاہکوں کی طرف ادھار   = تمام گاہکوں کا کل بقایا
@@ -10455,7 +10469,7 @@ function renderHomeMoneySummary(){
   const supAdv = S ? N(S.supWallet) : 0, custAdv = S ? N(S.custWallet) : 0;
   const cashIn0 = S0 ? N(S0.opening) + N(S0.otherManual) + N(S0.tBillCash) + N(S0.tRecovery) + N(S0.tOtherIn) : 0;
   const cashOut0 = S0 ? N(S0.tSupOut) + N(S0.tOtherOut) + N(S0.tExp) + N(S0.tCashBuy) : 0;
-  const net = rec + stock + cashIn0 - cashOut0 + supAdv - supPay - custAdv;
+  const net = rec + stock + cashIn0 - cashOut0 - (S0 ? N(S0.tRlPendCash) : 0) + supAdv - supPay - custAdv; // منظوری کی منتظر وصولی ادھار میں بھی ہے — ڈبل نہیں
   const todayProfit = S ? N(S.goodsProfit) - N(S.expTotal) : 0;
   // 💵 FM1210MO372: اس وقت ہاتھ میں کیش = ④ ٹوٹل کیش آیا − ⑤ ٹوٹل کیش گیا
   //    (اوپننگ کیش + دیگر آمدن + آج کے بلوں سے نقد + گاہکوں سے نقد وصولی + دیگر نقد آمد − بیوپاریوں کو ادائیگی − دیگر ادائیگی − آج کے اخراجات)
@@ -21636,6 +21650,7 @@ async function extraSyncOne(def, forcePush){
   try{
     if(typeof currentScreenName !== 'undefined'){
       if(def.key === 'payments' && currentScreenName === 'payments' && typeof renderPaymentsScreen === 'function') renderPaymentsScreen();
+      if((def.key === 'payments' || def.key === 'cashPurchases') && currentScreenName === 'home' && typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary(); // 🤝 دوسرے فون کی ادائیگیاں ہوم سمری میں
       if(def.key === 'diary' && currentScreenName === 'mydiary' && typeof renderMyDiaryList === 'function') renderMyDiaryList();
     }
   }catch(e){}
@@ -23951,7 +23966,12 @@ function computeBizSummary(preset, cashByRange){
   const tInv = invs.filter(i => inCash(bsInvDay(i)));
   const tBillCash = tInv.reduce((s, i) => s + bsBillCash(i), 0);
   const tPays = pays.filter(p => inCash(bsPayDay(p)) && bsPayCash(p) > 0);
-  const tRecovery = tPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + bsPayCash(p), 0);
+  // 🤝 FM1910MO413 (صدام بھائی): ریکوری والوں کی سارا دن کی وصولی بھی "کیش آیا" میں — جو ابھی منظوری کی منتظر ہے وہ بھی (پیسہ آ چکا)۔
+  //   منظور ہونے پر یہی وصولی ادائیگی بن جاتی ہے (اوپر tPays میں)، اس لیے یہاں صرف منظوری کی منتظر — ڈبل نہیں
+  const tRlPend = (typeof recoveryListData !== 'undefined' ? (recoveryListData || []) : []).filter(e => e && e.status === 'pending' && inCash(recDay(e)));
+  const _rlCash = e => getRecoverySplit(e).filter(m => !m.method || m.method === 'cash').reduce((a, m) => a + (Number(m.amount) || 0), 0);
+  const tRlPendCash = tRlPend.reduce((a, e) => a + _rlCash(e), 0);
+  const tRecovery = tPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + bsPayCash(p), 0) + tRlPendCash;
   const tOtherIn = tPays.filter(p => p.direction === 'in' && p.party_type !== 'customer').reduce((s, p) => s + bsPayCash(p), 0);
   const tSupOut = tPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
   const tOtherOut = tPays.filter(p => p.direction === 'out' && p.party_type !== 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
@@ -24027,7 +24047,7 @@ function computeBizSummary(preset, cashByRange){
   const netProfit = goodsProfit - expTotal;
 
   return {
-    preset, range: r, todayStr, tInvList: tInv, tPaysList: tPays, tExpList: exps.filter(e => inCash(e.date)),
+    preset, range: r, todayStr, tRlPend, tRlPendCash, tInvList: tInv, tPaysList: tPays, tExpList: exps.filter(e => inCash(e.date)),
     pendingRec, custWallet, supWallet, opening, openingEntered, openingParts: _od.parts, openingNote: _od.note, otherManual, otherManualNote: _od.otherNote, tBillCash, tRecovery, tOtherIn, tSupOut, tOtherOut, tExp, tCashBuy, cashNow,
     stockValue: Math.round(stockValue), receivable, payable, cashAsset, assets: Math.round(assets), netWorth: Math.round(netWorth), custs, sups,
     billCount: pInv.length, sales, salesCash, salesCredit: Math.max(0, sales - salesCash),
