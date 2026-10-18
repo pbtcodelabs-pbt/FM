@@ -9523,8 +9523,9 @@ function getDeveloperContact(){
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
 // 🆕 FM1910MO413: ریکوری والوں کی سارا دن کی نقد وصولی (منظوری کی منتظر بھی) "کیش آیا" میں؛ دوسرے فون کی منظور شدہ وصولیاں ہوم پر خود آتی ہیں
-const APP_BUILD_VERSION = 'FM1910MO413'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ریکوری والوں کی سارا دن کی وصولی اب "ٹوٹل کیش آیا" میں نظر آتی ہے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM1910MO414: "ٹوٹل کیش آیا" میں نقد + جاز کیش + ایزی پیسہ + بینک — دبانے پر ہر طریقے کی الگ رقم اور ٹوٹل؛ ہاتھ میں کیش صرف نقد
+const APP_BUILD_VERSION = 'FM1910MO414'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ٹوٹل کیش آیا میں اب جاز کیش، ایزی پیسہ اور بینک بھی — ڈبہ دبائیں، ہر ایک الگ نظر آئے گا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10313,7 +10314,7 @@ function hmExplain(kind){
   const supPay = N((suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_payable) || 0), 0));
   const rec = N((customersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_receivable) || 0), 0));
   const stock = N(S.stockValue);
-  const cashIn = N(S.opening) + N(S.otherManual) + N(S.tBillCash) + N(S.tRecovery) + N(S.tOtherIn);
+  const cashIn = N(S.cashInAll), cashInCash = N((S.inByM || {}).cash);
   const cashOut = N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) + N(S.tCashBuy);
   const supAdv = N(S.supWallet), custAdv = N(S.custWallet);
   const pend = N(S.pendingRec);
@@ -10339,18 +10340,32 @@ function hmExplain(kind){
 
   let title = '', sub = '', body = '', more = 'bizsummary';
   if(kind === 'in'){
-    title = '💵 ٹوٹل کیش آیا'; sub = dayNote + ' — صرف نقد (ادھار، ایزی پیسہ، بینک نہیں)';
-    body = inHtml(true) + box('= ٹوٹل کیش آیا', cashIn, G)
-      + (N(S.tRlPendCash) > 0 ? note(`⏳ اس میں <b dir="ltr">${f(S.tRlPendCash)}</b> وہ نقد وصولی بھی شامل ہے جو ریکوری والوں نے لے لی مگر ابھی "وصولی کھاتے اپڈیٹ" میں منظور نہیں ہوئی`, true) : '');
+    title = '💵 ٹوٹل کیش آیا'; sub = dayNote + ' — نقد + جاز کیش + ایزی پیسہ + بینک (ادھار نہیں)';
+    const by = S.inByM || {};
+    const mRows = ['cash', 'jazzcash', 'easypaisa', 'bank', 'mobile', 'other'].filter(k => N(by[k]) > 0 || k === 'cash').map(k => line(BS_MKEY_LBL[k], N(by[k]), [], G)).join('');
+    const mTag = x => { const ks = Object.keys(x.by).filter(k => N(x.by[k]) > 0); return ks.length === 1 && ks[0] === 'cash' ? '' : ' <small style="color:#64748b;">(' + ks.map(k => BS_MKEY_LBL[k].replace(/^\S+\s/, '') + (ks.length > 1 ? ' ' + f(x.by[k]) : '')).join(' + ') + ')</small>'; };
+    const nm = x => {
+      if(x.src === 'open') return '🌅 صبح کا اوپننگ کیش';
+      if(x.src === 'manual') return '➕ دیگر آمدن' + (x.ref ? ' — ' + E(x.ref) : '');
+      if(x.src === 'bill') return '🧾 ' + E(x.ref.customer_name || 'نقد گاہک') + ' <small style="color:#94a3b8;">' + E(x.ref.invoice_no || '') + '</small>';
+      if(x.src === 'rlp'){ const c = (customersData || []).find(q => q && q.customer_id === x.ref.customer_id); return '🤝 ' + E((c && c.name) || x.ref.customerName || '—') + ' <small style="color:#b45309;">(⏳ منظوری باقی' + (x.ref.employeeName ? ' — ' + E(x.ref.employeeName) : '') + ')</small>'; }
+      return (x.src === 'rec' ? '🤝 ' : '➕ ') + E(x.ref.party_name || '—');
+    };
+    const items = (S.inItems || []).map(x => [nm(x) + mTag(x), x.amt]);
+    body = mRows + box('= ٹوٹل کیش آیا', cashIn, G)
+      + `<div style="font-weight:800;color:#334155;margin:10px 2px 2px;">📋 کس کس سے آیا</div>` + rows(items, G)
+      + (N(S.tRlPendAll) > 0 ? note(`⏳ اس میں <b dir="ltr">${f(S.tRlPendAll)}</b> وہ وصولی بھی شامل ہے جو ریکوری والوں نے لے لی مگر ابھی "وصولی کھاتے اپڈیٹ" میں منظور نہیں ہوئی`, true) : '');
   } else if(kind === 'out'){
     title = '💸 ٹوٹل کیش گیا'; sub = dayNote + ' — صرف نقد';
     body = outHtml(true) + box('= ٹوٹل کیش گیا', cashOut, R);
   } else if(kind === 'hand'){
     title = hp === 'today' ? '💵 اس وقت ہاتھ میں کیش' : '💵 ' + HOME_PERIOD_OF[hp] + ' میں بچا کیش'; sub = dayNote;
-    body = line('➕ ٹوٹل کیش آیا', cashIn, [], G) + line('➖ ٹوٹل کیش گیا', cashOut, [], R)
-      + box('= ہاتھ میں کیش', cashIn - cashOut, cashIn - cashOut < 0 ? R : B)
+    const dig = cashIn - cashInCash;
+    body = line('➕ نقد آیا', cashInCash, [], G) + line('➖ ٹوٹل کیش گیا', cashOut, [], R)
+      + box('= ہاتھ (گلے) میں نقد', cashInCash - cashOut, cashInCash - cashOut < 0 ? R : B)
+      + (dig > 0 ? note(`📱 اس کے علاوہ جاز کیش / ایزی پیسہ / بینک میں <b dir="ltr">${f(dig)}</b> آئے — یہ گلے میں نہیں، اس لیے یہاں شامل نہیں`) : '')
       + note('تفصیل کے لیے "ٹوٹل کیش آیا" یا "ٹوٹل کیش گیا" والا ڈبہ دبائیں')
-      + (cashIn - cashOut < 0 ? note('⚠️ جتنا آیا اس سے زیادہ گیا۔ صبح کا اوپننگ کیش درج کیا ہے یا نہیں، چیک کریں', true) : '');
+      + (cashInCash - cashOut < 0 ? note('⚠️ جتنا نقد آیا اس سے زیادہ گیا۔ صبح کا اوپننگ کیش درج کیا ہے یا نہیں، چیک کریں', true) : '');
   } else if(kind === 'pay'){
     title = '🚚 بیوپاریوں کا قرض'; sub = 'ہر بیوپاری کا ہمارے ذمے بقایا'; more = 'suppliers';
     body = rows((S.sups || []).map(x => [E(x.name), x.amt]), R) + box('= کل قرض', supPay, R);
@@ -10373,11 +10388,11 @@ function hmExplain(kind){
       + box('= کل سٹاک کی مالیت', stock, '#b45309')
       + (it.some(x => !x.rate) ? note('⚠️ جن پر 0 ریٹ ہے ان کا خرید ریٹ ابھی نہیں لگا، اس لیے ان کی مالیت صفر گنی گئی', true) : '');
   } else if(kind === 'net'){
-    const rlp = N(S.tRlPendCash);
+    const rlp = N(S.tRlPendAll);
     const net = rec + stock + cashIn - cashOut - rlp + supAdv - supPay - custAdv;
     title = '📊 کاروبار کی کیفیت'; sub = 'ہمارا مال اور پیسہ − ہمارے ذمے قرض';
     body = line('➕ گاہکوں کی طرف ادھار', rec, [], G) + line('➕ سٹاک کی مالیت', stock, [], G)
-      + line('➕ ہاتھ میں کیش (آیا − گیا)', cashIn - cashOut, [], cashIn - cashOut < 0 ? R : G)
+      + line('➕ کیش آیا − گیا (نقد + جاز/ایزی/بینک)', cashIn - cashOut, [], cashIn - cashOut < 0 ? R : G)
       + (supAdv ? line('➕ بیوپاریوں کے پاس ہمارا ایڈوانس', supAdv, [], G) : '')
       + (rlp ? line('➖ منظوری کی منتظر وصولی (ادھار میں بھی گنی ہے)', rlp, [], R) : '')
       + line('➖ بیوپاریوں کا قرض', supPay, [], R)
@@ -10463,18 +10478,19 @@ function renderHomeMoneySummary(){
   //   (پرانی بھولی ہوئی بھی) منہا ہو کر عدد فہرست سے مختلف آتا تھا۔ زیرِ منظوری وصولی اب صرف تفصیل میں دکھتی ہے
   const rec = recLedger;
   const stock = S ? N(S.stockValue) : 0;
-  const cashIn = S ? N(S.opening) + N(S.otherManual) + N(S.tBillCash) + N(S.tRecovery) + N(S.tOtherIn) : 0;
+  const cashIn = S ? N(S.cashInAll) : 0; // 💳 ہر طریقے سے آئی رقم
+  const cashInCash = S ? N((S.inByM || {}).cash) : 0; // صرف نقد — گلے کا حساب
   const cashOut = S ? N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) + N(S.tCashBuy) : 0; // 🥬 FM1710SA396: نقد خریداری بھی
   // ⑥ کیفیت: ادھار + ریکوری والوں کے پاس وصول شدہ رقم + سٹاک + گلے کا کیش + بیوپاریوں کے پاس ہمارا ایڈوانس − بیوپاری قرض − گاہکوں کا ایڈوانس
   const supAdv = S ? N(S.supWallet) : 0, custAdv = S ? N(S.custWallet) : 0;
-  const cashIn0 = S0 ? N(S0.opening) + N(S0.otherManual) + N(S0.tBillCash) + N(S0.tRecovery) + N(S0.tOtherIn) : 0;
+  const cashIn0 = S0 ? N(S0.cashInAll) : 0;
   const cashOut0 = S0 ? N(S0.tSupOut) + N(S0.tOtherOut) + N(S0.tExp) + N(S0.tCashBuy) : 0;
-  const net = rec + stock + cashIn0 - cashOut0 - (S0 ? N(S0.tRlPendCash) : 0) + supAdv - supPay - custAdv; // منظوری کی منتظر وصولی ادھار میں بھی ہے — ڈبل نہیں
+  const net = rec + stock + cashIn0 - cashOut0 - (S0 ? N(S0.tRlPendAll) : 0) + supAdv - supPay - custAdv; // منظوری کی منتظر وصولی ادھار میں بھی ہے — ڈبل نہیں
   const todayProfit = S ? N(S.goodsProfit) - N(S.expTotal) : 0;
   // 💵 FM1210MO372: اس وقت ہاتھ میں کیش = ④ ٹوٹل کیش آیا − ⑤ ٹوٹل کیش گیا
   //    (اوپننگ کیش + دیگر آمدن + آج کے بلوں سے نقد + گاہکوں سے نقد وصولی + دیگر نقد آمد − بیوپاریوں کو ادائیگی − دیگر ادائیگی − آج کے اخراجات)
   //    یہی رقم "کاروبار کی مکمل سمری" میں "اس وقت گلے میں کیش" ہے — دونوں جگہ ایک ہی عدد
-  const hand = cashIn - cashOut;
+  const hand = cashInCash - cashOut; // ہاتھ (گلے) میں صرف نقد — جاز کیش/ایزی پیسہ/بینک گلے میں نہیں
   const f = n => Math.abs(Math.round(n)).toLocaleString('en-US');
   const setVal = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
   const t0 = (id, txt) => { const el = document.getElementById(id); if(el) el.title = txt; };
@@ -23755,6 +23771,28 @@ function bsPayCash(p){
   if(p && p.cash_amount != null) return Number(p.cash_amount) || 0;
   return bsIsCashMethod(p && p.method) ? (Number(p && p.amount) || 0) : 0;
 }
+// 💳 FM1910MO414 (صدام بھائی): آئی ہوئی رقم کس طریقے سے — نقد / جاز کیش / ایزی پیسہ / بینک (والٹ نیا پیسہ نہیں، اس لیے الگ)
+const BS_MKEY_LBL = {cash:'💵 نقد', jazzcash:'📱 جاز کیش', easypaisa:'📲 ایزی پیسہ', bank:'🏦 بینک', mobile:'📱 موبائل اکاؤنٹ (اوپننگ)', other:'➕ دیگر طریقہ'};
+function bsMethodKey(m){
+  const t = String(m || '').toLowerCase();
+  if(/wallet|والٹ/.test(t)) return 'wallet';
+  if(/jazz|جاز/.test(t)) return 'jazzcash';
+  if(/easy|ایزی/.test(t)) return 'easypaisa';
+  if(/bank|بینک|account|اکاؤنٹ/.test(t)) return 'bank';
+  return 'cash';
+}
+function bsPaySplit(p){
+  const out = {}, amt = Number(p && p.amount) || 0;
+  if(!(amt > 0)) return out;
+  const lbl = String((p && p.method) || '');
+  const mk = bsMethodKey(lbl);
+  if(mk === 'wallet') return out;
+  const re = /(نقد|جاز کیش|ایزی پیسہ|بینک)\s*([\d,]+)/g; let m, found = 0;
+  while((m = re.exec(lbl))){ const v = Number(m[2].replace(/,/g, '')) || 0; if(v > 0){ const k = bsMethodKey(m[1]); out[k] = (out[k] || 0) + v; found += v; } }
+  if(found > 0){ if(amt - found > 0.5) out.other = (out.other || 0) + (amt - found); return out; }
+  if(p.cash_amount != null){ const c = Math.min(amt, Number(p.cash_amount) || 0); if(c > 0) out.cash = c; if(amt - c > 0.5){ const k = mk === 'cash' ? 'other' : mk; out[k] = (out[k] || 0) + (amt - c); } return out; }
+  out[mk] = amt; return out;
+}
 function getOpeningCashFor(dateStr){
   const e = bsGetOpeningMap()[dateStr];
   if(e == null) return null;
@@ -24002,6 +24040,18 @@ function computeBizSummary(preset, cashByRange){
     tCashBuy = Math.round(tCashBuy);
   }catch(e){ tCashBuy = 0; }
   const cashNow = opening + otherManual + tBillCash + tRecovery + tOtherIn - tSupOut - tOtherOut - tExp - tCashBuy;
+  // 💳 کیش آیا — ہر طریقے کی رقم (نقد + جاز کیش + ایزی پیسہ + بینک)، ہر اندراج کے ساتھ
+  const inItems = [];
+  const _addIn = (src, ref, by) => { const amt = Object.keys(by).reduce((a, k) => a + (Number(by[k]) || 0), 0); if(amt > 0) inItems.push({src, ref, amt, by}); };
+  { const op = _od.parts || {}; const oc = Number(op.cash) || 0, ow = Number(op.wallet) || 0, ob = Number(op.bank) || 0;
+    const rest = Math.max(0, (Number(opening) || 0) - oc - ow - ob); _addIn('open', null, {cash: oc + rest, mobile: ow, bank: ob}); }
+  if(otherManual) _addIn('manual', _od.otherNote || '', {cash: Number(otherManual) || 0});
+  tInv.forEach(i => { const a = bsBillCash(i); if(a > 0){ let k = bsMethodKey(i.payment_method); if(k === 'wallet') k = 'cash'; _addIn('bill', i, {[k]: a}); } });
+  pays.filter(p => p.direction === 'in' && inCash(bsPayDay(p))).forEach(p => _addIn(p.party_type === 'customer' ? 'rec' : 'oth', p, bsPaySplit(p)));
+  tRlPend.forEach(e => { const by = {}; getRecoverySplit(e).forEach(m => { let k = bsMethodKey(m.method); if(k === 'wallet') return; by[k] = (by[k] || 0) + (Number(m.amount) || 0); }); _addIn('rlp', e, by); });
+  const inByM = {}; inItems.forEach(x => Object.keys(x.by).forEach(k => { inByM[k] = (inByM[k] || 0) + (Number(x.by[k]) || 0); }));
+  const cashInAll = inItems.reduce((a, x) => a + x.amt, 0);
+  const tRlPendAll = inItems.filter(x => x.src === 'rlp').reduce((a, x) => a + x.amt, 0);
 
   // --- ② اس وقت کی حالت ---
   let stockValue = 0;
@@ -24047,7 +24097,7 @@ function computeBizSummary(preset, cashByRange){
   const netProfit = goodsProfit - expTotal;
 
   return {
-    preset, range: r, todayStr, tRlPend, tRlPendCash, tInvList: tInv, tPaysList: tPays, tExpList: exps.filter(e => inCash(e.date)),
+    preset, range: r, todayStr, tRlPend, tRlPendCash, inItems, inByM, cashInAll, tRlPendAll, tInvList: tInv, tPaysList: tPays, tExpList: exps.filter(e => inCash(e.date)),
     pendingRec, custWallet, supWallet, opening, openingEntered, openingParts: _od.parts, openingNote: _od.note, otherManual, otherManualNote: _od.otherNote, tBillCash, tRecovery, tOtherIn, tSupOut, tOtherOut, tExp, tCashBuy, cashNow,
     stockValue: Math.round(stockValue), receivable, payable, cashAsset, assets: Math.round(assets), netWorth: Math.round(netWorth), custs, sups,
     billCount: pInv.length, sales, salesCash, salesCredit: Math.max(0, sales - salesCash),
