@@ -9499,6 +9499,7 @@ function getDeveloperContact(){
 // 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
 // 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
 // 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
+// 🆕 FM1810SU411: ایڈمن کے لیے "🛠️ بقایا درستی" — گاہک کا بقایا صحیح رقم پر، اس تاریخ سے بلوں کا سابقہ بھی، کھاتے میں وجہ کے ساتھ اندراج، ایڈمن PIN
 // 🆕 FM1810SU410: وصولی/بل کی رقم بقایا میں سے دو بار کٹنے کی جڑ ختم — ایک فون پر بھیجنا/لینا ایک وقت میں ایک (قطار)، بھیجی حالت یاد، فون=کلاؤڈ ہو تو فرق دوبارہ نہیں (256 bota king: 121,000 دو بار کٹا تھا)
 // 🆕 FM1810SU409: بل کی "وصولی رقم" میں صرف بل کے کاروباری دن کی بعد والی وصولی (پہلے اگلے دنوں کی بھی جڑتی تھی: 35k+50k=85k)؛ زائد رقم جو والٹ میں گئی دو بار نہیں؛ ریکوری لسٹ میں بل کے ساتھ پرانے بقایا کی نقد وصولی اور والٹ کٹوتی کا اصول لال ڈبے جیسا؛ ریکوری لسٹ میں آج / گزشتہ کل / کیلنڈر تاریخ فلٹر
 // 🆕 FM1810SU408: لیپ ٹاپ/کمپیوٹر (861px+) پر اردو انداز — مینو دائیں، کام والا حصہ RTL، سائز (zoom) اسکرین کے حساب سے، بل جدول کی قطاریں موٹی؛ پراڈکٹس پر سرچ پٹی مینو کی جگہ نہیں لیتی
@@ -9520,8 +9521,8 @@ function getDeveloperContact(){
 // 🆕 FM1710SA401: اردو فونٹ ہلکی WOFF2 شکل میں (24 MB → 10.3 MB)، نئے ورژن پر فونٹ دوبارہ ڈاؤن لوڈ نہیں
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1810SU410'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'وصولی اب بقایا میں سے صرف ایک بار کٹے گی (فونز کے ملاپ کی خرابی درست)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1810SU411'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ایڈمن کے لیے نیا بٹن: بقایا درستی (گاہک کی فہرست میں)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -27646,7 +27647,7 @@ function renderPartyList(query = ''){
       return;
     }
     const isAdmin = AppState.currentRole === 'admin';
-    wrap.innerHTML = (isAdmin ? fmZeroBalBtnHtml('customers') : '') + filtered.map(c => { // 🧹 FM610TU323 عارضی زیرو بٹن
+    wrap.innerHTML = (isAdmin ? fmZeroBalBtnHtml('customers') + fmBalFixBtnHtml() : '') + filtered.map(c => { // 🧹 FM610TU323 عارضی زیرو بٹن
       const areaBadgeHtml = '';
       return buildCompactPartyRow({
         id: c.customer_id, name: c.name, phone: c.phone, serial: c.serial_no, keywords: c.keywords,
@@ -28029,6 +28030,7 @@ function renderCustomerTransactionsSection(customerId){
         if(h.type === 'deposit'){ label = '💳 والٹ میں جمع (ایڈوانس)'; isGot = true; }
         else if(h.type === 'redeem'){ label = '💳 والٹ سے نکالا'; isGot = false; }
         else if(h.type === 'cash_given'){ label = '💸 نقد ادھار دیا (کھاتے میں چڑھا)'; isGot = false; }
+        else if(h.type === 'balance_fix'){ label = '🛠️ بقایا درستی (ایڈمن)'; isGot = (Number(h.delta) || 0) < 0; } // 🛠️ FM1810SU411
         else { label = `📥 وصولی (${h.via === 'wallet' ? 'والٹ سے' : 'نقد'})`; isGot = true; }
         { const _n = h.type === 'receivable_collected' ? _payUserNote(h.note) : h.note; if(_n) label += ` <span style="font-size:.85em; color:var(--muted);">— 📝 ${_n}</span>`; } // 📝 FM1710SA398: وصولی کا نوٹ بھی
         return `<div class="ledgerRow"><div class="lrTop">
@@ -34152,6 +34154,56 @@ function computeDailyRecoveryRows(dateStr){
 
 // ---------- 🧹 FM610TU323 (صدام کی ہدایت): عارضی تربیتی بٹن — تمام گاہکوں / بیوپاریوں کا بقایا زیرو
 // پہلی تنبیہ → دوسری تنبیہ → ایڈمن PIN۔ پرانی رقمیں حفاظت کے لیے فون میں محفوظ (zeroBalBackup_*) ----------
+// ---------- 🛠️ FM1810SU411 (پیارے بھائی): ایڈمن کے لیے "بقایا درستی" — کسی گاہک کا بقایا صحیح رقم پر لائیں
+// (مثلاً فونز کے ملاپ کی پرانی خرابی سے دو بار کٹی وصولی)۔ ساتھ اس تاریخ سے بنے اس گاہک کے بلوں کا "سابقہ/نیا بقایا" بھی
+// اتنا ہی درست ہوتا ہے، تاکہ بل پر بھی صحیح سابقہ آئے۔ کھاتے میں "بقایا درستی" کا اندراج (وجہ کے ساتھ) — ایڈمن PIN ضروری ----------
+function fmBalFixBtnHtml(){
+  return `<button type="button" onclick="fmBalanceFix()" style="width:100%; margin:0 0 10px; height:44px; border:2px dashed #2563eb; border-radius:12px; background:#eff6ff; color:#1d4ed8; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:17px; font-weight:700; cursor:pointer;">🛠️ بقایا درستی (ایڈمن)</button>`;
+}
+async function fmBalanceFix(presetId){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'یہ کام صرف ایڈمن کر سکتا ہے۔'); return; }
+  const f = n => 'Rs. ' + Math.round(n).toLocaleString('en-US');
+  try{ await fetchCustomersFromCloud(true); await fetchInvoicesFromCloud(true); }catch(e){} // پہلے تازہ ترین کھاتہ
+  const list = (customersData || []).filter(c => c && !c.deleted).slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  if(!list.length){ await uAlert('کوئی گاہک نہیں', 'پہلے گاہک بنائیں۔'); return; }
+  window.__bfCid = presetId != null ? presetId : list[0].customer_id;
+  const opts = list.map(c => `<option value="${c.customer_id}" ${c.customer_id === window.__bfCid ? 'selected' : ''}>${escRlHtml(c.name)} — ${f(c.total_receivable || 0)}</option>`).join('');
+  const okC = await uDialog({ title: '🛠️ بقایا درستی', message: `کس گاہک کا بقایا درست کرنا ہے؟<select onchange="window.__bfCid=Number(this.value)" style="width:100%; height:46px; margin-top:8px; border:2px solid #cbd5e1; border-radius:12px; font-size:16px; font-family:inherit;">${opts}</select>`, okText: 'آگے ←', cancelText: '✖ واپس' });
+  if(!okC) return;
+  const c = customersData.find(x => x.customer_id === window.__bfCid); if(!c) return;
+  const cur = Number(c.total_receivable) || 0;
+  const v = await uDialog({ title: '🛠️ ' + escRlHtml(c.name), message: `ابھی ایپ میں بقایا: <b>${f(cur)}</b><br>صحیح بقایا کتنا ہونا چاہیے؟`, input: 'number', okText: 'آگے ←', cancelText: '✖ واپس' });
+  if(v === null || v === false || String(v).trim() === '') return;
+  const target = Math.round(Number(v) * 100) / 100;
+  if(!isFinite(target) || target < 0){ await uAlert('غلط رقم', 'صحیح رقم لکھیں (صفر یا اس سے زیادہ)۔'); return; }
+  const delta = Math.round((target - cur) * 100) / 100;
+  if(!delta){ await uAlert('کوئی فرق نہیں', 'بقایا پہلے ہی یہی ہے۔'); return; }
+  const from = await uDialog({ title: '📅 غلطی کس تاریخ سے؟', message: 'اس تاریخ اور بعد کے اس گاہک کے بلوں کا سابقہ بھی اتنا ہی درست ہو گا (کوئی بل نہ بدلنا ہو تو آج کی تاریخ رہنے دیں)', input: 'date', okText: 'آگے ←', cancelText: '✖ واپس' });
+  if(from === null || from === false) return;
+  const fromDay = String(from || '').trim() || bizDateKey();
+  const reason = await uDialog({ title: '📝 وجہ', message: 'درستی کی وجہ لکھیں (کھاتے میں نظر آئے گی):', input: 'text', okText: 'آگے ←', cancelText: '✖ واپس' });
+  if(reason === null || reason === false) return;
+  const bills = (invoicesData || []).filter(i => i && i.customer_id === c.customer_id && i.status !== 'voided' && invDay(i) >= fromDay);
+  const rows = [{ label: 'ابھی بقایا', value: f(cur) }, { label: 'صحیح بقایا', value: f(target), big: true },
+    { label: delta > 0 ? '➕ بقایا بڑھے گا' : '➖ بقایا کم ہو گا', value: f(Math.abs(delta)), bg: '#fef9c3', fg: '#854d0e' },
+    { label: `بل جن کا سابقہ درست ہو گا (${bizFmt(fromDay)} سے)`, value: bills.length ? bills.map(b => b.invoice_no).join('، ') : 'کوئی نہیں' }];
+  if(!(await uDialog({ title: '⚠️ تصدیق — ' + escRlHtml(c.name), rows, okText: '✅ درست کریں', cancelText: '✖ واپس', tone: 'amber' }))) return;
+  if(!(await _askAdminPinForSerialMaster(`${c.name} کا بقایا ${f(cur)} سے ${f(target)} کرنے کے لیے`))) return;
+  try{ pauseCloudPolling(15000); }catch(e){}
+  c.total_receivable = target;
+  c.walletHistory = c.walletHistory || [];
+  c.walletHistory.unshift({ type: 'balance_fix', amount: Math.abs(delta), delta, before: cur, after: target, from_day: fromDay, date: bizDateKey(), at: new Date().toISOString(), by: (AppState.currentUser && AppState.currentUser.name) || 'Admin', note: String(reason || '').trim() });
+  bills.forEach(b => {
+    b.previous_balance = Math.round(((Number(b.previous_balance) || 0) + delta) * 100) / 100;
+    if(b.new_balance != null) b.new_balance = Math.round(((Number(b.new_balance) || 0) + delta) * 100) / 100;
+  });
+  persistAllData();
+  let ok = true;
+  try{ ok = (await pushCustomersToCloud()) !== false; if(bills.length) await pushInvoicesToCloud(); }catch(e){ ok = false; }
+  try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+  try{ renderHomeMoneySummary(); }catch(e){}
+  uAlert('✅ درست ہو گیا', `${escRlHtml(c.name)} کا بقایا اب <b>${f(target)}</b> ہے۔` + (bills.length ? `<br>${bills.length} بل کا سابقہ بھی درست۔` : '') + (ok ? '' : '<br>⚠️ انٹرنیٹ آنے پر کلاؤڈ میں چلا جائے گا۔'), 'green');
+}
 function fmZeroBalBtnHtml(kind){
   const isC = kind === 'customers';
   return `<button type="button" onclick="fmZeroAllBalances('${kind}')" style="width:100%; margin:2px 0 10px; height:44px; border:2px dashed #dc2626; border-radius:12px; background:#fef2f2; color:#b91c1c; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:17px; font-weight:700; cursor:pointer;">🧹 تمام ${isC ? 'گاہکوں' : 'بیوپاریوں'} کا بقایا زیرو کریں (عارضی)</button>`;
@@ -37725,6 +37777,7 @@ function openHistoryModal(customerId){
       let label;
       if(h.type === 'deposit') label = '➕ Add to Wallet';
       else if(h.type === 'redeem') label = '➖ Withdrawn from Wallet';
+      else if(h.type === 'balance_fix') label = `🛠️ بقایا درستی${h.note ? ' — ' + h.note : ''}`;
       else if(h.type === 'opening_balance') label = h.direction === 'add' ? `⚖️ Opening Balance Added${h.note ? ' — ' + h.note : ''}` : `⚖️ Balance Reduced${h.note ? ' — ' + h.note : ''}`;
       else label = `📥 Credit Collected (${h.via === 'wallet' ? 'via Wallet' : 'Cash'})`;
       return `
