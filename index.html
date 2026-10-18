@@ -6181,6 +6181,9 @@ function __appHostKind(h, p){
               <label class="pscCheckLabel">
                 <input type="checkbox" id="pscA4Chk" onchange="toggleInvoicePaperStyle(this.checked)"> 🖨️ Print A4
               </label>
+              <label class="pscCheckLabel" title="بل کے نیچے گاہک کے نام والا درخواست کا پیغام">
+                <input type="checkbox" id="pscWishChk" onchange="toggleBillWish(this.checked)"> 💌 نیچے پیغام
+              </label>
             </div>
             <!-- ---------- 🐛 صدام کی ہدایت (FM3SEPTH26): پرنٹ کرنے سے پہلے یہیں چھوٹا سا 58mm/80mm بٹن —
             تاکہ غلطی سے 58mm پرنٹر پر 80mm کی پرنٹنگ (یا اس کے برعکس) نہ چلی جائے۔ صرف تھرمل موڈ میں نظر
@@ -7349,6 +7352,10 @@ function __appHostKind(h, p){
         <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
           <input type="checkbox" id="printShowSalesmanChk" onchange="updatePrintToggle('printShowSalesman', this.checked)" style="width:18px; height:18px; margin:0;">
           <span style="font-size:13px;">بل پر ملازم کا نام</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
+          <input type="checkbox" id="printShowWishChk" onchange="toggleBillWish(this.checked)" style="width:18px; height:18px; margin:0;">
+          <span style="font-size:13px;">💌 بل کے نیچے درخواست کا پیغام ("محترم بھائی… ضرورت کا سامان منگوائیں")</span>
         </label>
         <div style="padding:8px 0; border-bottom:1px solid #eef1f6; font-size:12.5px; color:var(--muted);">
           💳 "میرا اکاؤنٹ" میں جس اکاؤنٹ پر "🧾 Show on Receipt" لگا ہو، اس کا نمبر اور QR بل کے نیچے خود چھپ جاتا ہے۔
@@ -9524,8 +9531,9 @@ function getDeveloperContact(){
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
 // 🆕 FM1910MO413: ریکوری والوں کی سارا دن کی نقد وصولی (منظوری کی منتظر بھی) "کیش آیا" میں؛ دوسرے فون کی منظور شدہ وصولیاں ہوم پر خود آتی ہیں
 // 🆕 FM1910MO414: "ٹوٹل کیش آیا" میں نقد + جاز کیش + ایزی پیسہ + بینک — دبانے پر ہر طریقے کی الگ رقم اور ٹوٹل؛ ہاتھ میں کیش صرف نقد
-const APP_BUILD_VERSION = 'FM1910MO414'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ٹوٹل کیش آیا میں اب جاز کیش، ایزی پیسہ اور بینک بھی — ڈبہ دبائیں، ہر ایک الگ نظر آئے گا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM1910MO415: (1) 🔁 بل کا شاپر/پورا بل دوسرے گاہک کے کھاتے میں (2) چالان کا حساب لگاتے وقت مزدوری لازمی (3) بل پر نقد/جاز/ایزی والی لائن اور نوٹ موٹے (4) بل کے نیچے درخواست والا پیغام آن/آف
+const APP_BUILD_VERSION = 'FM1910MO415'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'شاپر دوسرے گاہک کو منتقل، مزدوری لازمی، بل کی لکھائی موٹی، نیچے پیغام آن/آف'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -20106,6 +20114,8 @@ function saveChalanAccounting(variantId, chalanNo){
   const src = document.getElementById('chSrc_' + key)?.dataset.value || '';
   if(!(rate > 0)){ alert('⚠️ خرید قیمت لکھیں'); document.getElementById('chRate_' + key)?.focus(); return; }
   if(!(isb > 0)){ alert('⚠️ قیمت فروخت لکھیں'); document.getElementById('chIsb_' + key)?.focus(); return; }
+  // 🔒 FM1910MO415 (صدام بھائی): مزدوری بھی لازمی — خالی چھوڑ کر آگے نہیں (جان بوجھ کر 0 لکھیں تو چلے گا)، ورنہ بل بناتے وقت پتا چلتا تھا کہ مزدوری رہ گئی
+  if(String(document.getElementById('chLab_' + key)?.value || '').trim() === ''){ alert('⚠️ مزدوری لکھیں (نہ ہو تو 0 لکھیں)'); document.getElementById('chLab_' + key)?.focus(); return; }
   if(!src){ alert('⚠️ بیوپاری یا نقد چنیں'); document.getElementById('chSrc_' + key)?.focus(); return; }
   const qtyForBill = Number(c.origQty != null ? c.origQty : c.qty) || 0;
   const newSupplier = src === 'cash' ? null : suppliersData.find(s => String(s.supplier_id) === String(src));
@@ -42654,6 +42664,7 @@ function renderBillHistory(){
         ` : `
           <button class="btnRequestDelete" onclick="adminVoidBill(${inv.invoice_id})">🗑️ مٹائیں</button>
           <button class="btnCollect" onclick="openReturnItemModal(${inv.invoice_id})">↩️ واپسی</button>
+          ${inv.customer_id ? `<button class="btnCollect" style="background:#7c3aed;" onclick="openBillTransfer(${inv.invoice_id})">🔁 گاہک بدلیں</button>` : ''}
         `) : `
           <button class="btnRequestEdit" onclick="openRequestActionModal(${inv.invoice_id}, 'edit_bill')">✏️ Request Edit</button>
           <button class="btnRequestDelete" onclick="openRequestActionModal(${inv.invoice_id}, 'delete_bill')">🗑️ Request Delete</button>
@@ -42676,6 +42687,160 @@ function permanentlyDeleteBill(invoiceId){
   pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): مستقل ڈیلیٹ ہونا فوراً کلاؤڈ میں — دوسرے فون پر بھی غائب ہو ----------
 }
 
+// =====================================================================
+// 🔁 FM1910MO415 (صدام بھائی): غلط گاہک کے نام لکھا گیا شاپر (یا پورا بل) دوسرے گاہک کے کھاتے میں — صرف ایڈمن۔
+//   سٹاک نہیں بدلتا (مال جا چکا)؛ پہلے گاہک کا بقایا اتنا کم، دوسرے کا اتنا زیادہ۔ دوسرے گاہک کا اسی کاروباری دن کا بل ہو تو
+//   اسی میں جڑتا ہے، ورنہ اس کا نیا (ادھار) بل اسی تاریخ کا بنتا ہے۔ ہر منتقلی بل پر درج (transfers) رہتی ہے
+// =====================================================================
+function _xfLine(it, q){ return Math.round(q * ((Number(it.unitPrice) || 0) + (Number(it.laborPerUnit) || 0)) * 100) / 100; }
+function openBillTransfer(invoiceId){
+  if(AppState.currentRole !== 'admin'){ alert('🔒 یہ کام صرف ایڈمن کر سکتا ہے'); return; }
+  const inv = invoicesData.find(i => i.invoice_id === invoiceId);
+  if(!inv || inv.status === 'voided') return;
+  if(!inv.customer_id){ alert('یہ نقد گاہک کا بل ہے — اسے منتقل نہیں کیا جا سکتا'); return; }
+  const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const custs = (customersData || []).filter(c => c && c.customer_id !== inv.customer_id).slice()
+    .sort((a, b) => ((Number(a.serial_no) || 1e9) - (Number(b.serial_no) || 1e9)) || String(a.name || '').localeCompare(String(b.name || ''), 'ur'));
+  const rows = (inv.items || []).map((it, idx) => {
+    if(!it || it.returned || !(Number(it.qty) > 0)) return '';
+    return `<label style="display:flex; align-items:center; gap:8px; padding:8px; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:6px; background:#fff;">
+      <input type="checkbox" id="xfChk_${idx}" style="width:20px; height:20px; flex:0 0 auto;" onchange="xfRecalc(${invoiceId})">
+      <span style="flex:1; font-weight:800; color:#0f172a;">${esc(it.name)} <small style="color:#64748b; font-weight:600;" dir="ltr">(${it.qty} × ${(Number(it.unitPrice) || 0) + (Number(it.laborPerUnit) || 0)})</small></span>
+      <input type="number" id="xfQty_${idx}" min="0" max="${it.qty}" step="any" value="${it.qty}" oninput="xfRecalc(${invoiceId})" style="width:64px; padding:6px; border:1.5px solid #cbd5e1; border-radius:8px; text-align:center; font-weight:800; font-family:Arial,sans-serif;">
+    </label>`;
+  }).join('');
+  let ov = document.getElementById('xfOverlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'xfOverlay'; ov.style.cssText = 'position:fixed; inset:0; z-index:10080; background:rgba(15,23,42,.6); display:flex; align-items:center; justify-content:center; padding:10px;'; document.body.appendChild(ov); }
+  ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:460px; max-height:92vh; display:flex; flex-direction:column; background:#f8fafc; border-radius:18px; overflow:hidden; font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+    <div style="background:linear-gradient(135deg,#7c3aed,#4c1d95); color:#fff; text-align:center; padding:8px 10px;">
+      <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq',serif; font-size:21px; font-weight:800; line-height:1.9;">🔁 شاپر / بل دوسرے گاہک کو</div>
+      <div style="font-size:14px; line-height:1.8;">بل <span dir="ltr">${esc(inv.invoice_no)}</span> — ابھی: <b>${esc(inv.customer_name)}</b></div>
+    </div>
+    <div style="overflow:auto; padding:10px;">
+      <div style="font-weight:800; color:#334155; margin-bottom:6px;">1️⃣ کون سا شاپر (اور کتنا) منتقل کرنا ہے؟</div>
+      ${rows || '<div style="color:#64748b;">اس بل میں منتقل کرنے کو کچھ نہیں</div>'}
+      <button type="button" onclick="document.querySelectorAll('#xfOverlay input[id^=xfChk_]').forEach(c => c.checked = true); xfRecalc(${invoiceId});" style="padding:6px 10px; border:1px solid #7c3aed; border-radius:10px; background:#faf5ff; color:#5b21b6; font-weight:800; font-family:inherit; cursor:pointer;">☑️ پورا بل</button>
+      <div style="font-weight:800; color:#334155; margin:12px 0 6px;">2️⃣ کس گاہک کے کھاتے میں ڈالنا ہے؟</div>
+      <input type="text" id="xfSearch" placeholder="🔍 گاہک کا نام لکھیں" oninput="xfFilter()" style="width:100%; box-sizing:border-box; padding:9px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:15px; font-family:inherit; margin-bottom:6px;">
+      <select id="xfTarget" size="6" onchange="xfRecalc(${invoiceId})" style="width:100%; border:1.5px solid #cbd5e1; border-radius:10px; font-size:16px; font-family:inherit; padding:4px;">
+        ${custs.map(c => `<option value="${esc(c.customer_id)}">${c.serial_no ? esc(c.serial_no) + ' — ' : ''}${esc(c.name)}</option>`).join('')}
+      </select>
+      <div id="xfSummary" style="margin-top:10px; padding:10px; border-radius:12px; background:#fff; border:1px solid #e2e8f0; font-size:15px; line-height:1.9; color:#334155;">شاپر اور گاہک چنیں</div>
+    </div>
+    <div style="display:flex; gap:6px; padding:8px; border-top:1px solid #e2e8f0;">
+      <button type="button" onclick="confirmBillTransfer(${invoiceId})" style="flex:2; padding:11px 4px; border:none; border-radius:12px; background:linear-gradient(180deg,#8b5cf6,#6d28d9); color:#fff; font-weight:900; font-size:16px; cursor:pointer; font-family:inherit;">🔁 منتقل کریں</button>
+      <button type="button" onclick="document.getElementById('xfOverlay').style.display='none'" style="flex:1; padding:11px 4px; border:none; border-radius:12px; background:#e2e8f0; color:#334155; font-weight:900; font-size:16px; cursor:pointer; font-family:inherit;">✖ بند</button>
+    </div></div>`;
+  ov.style.display = 'flex';
+}
+function xfFilter(){
+  const q = String(document.getElementById('xfSearch')?.value || '').trim();
+  document.querySelectorAll('#xfTarget option').forEach(o => { o.hidden = !!q && !o.textContent.includes(q); });
+}
+function _xfPicks(inv){
+  const picks = [];
+  (inv.items || []).forEach((it, idx) => {
+    const chk = document.getElementById('xfChk_' + idx);
+    if(!chk || !chk.checked) return;
+    const q = Math.min(Number(it.qty) || 0, Math.max(0, parseFloat(document.getElementById('xfQty_' + idx)?.value) || 0));
+    if(q > 0) picks.push({idx, it, q, amt: _xfLine(it, q)});
+  });
+  return picks;
+}
+function xfRecalc(invoiceId){
+  const inv = invoicesData.find(i => i.invoice_id === invoiceId); if(!inv) return;
+  const picks = _xfPicks(inv);
+  const tid = document.getElementById('xfTarget')?.value;
+  const B = (customersData || []).find(c => c && String(c.customer_id) === String(tid));
+  const amt = picks.reduce((a, p) => a + p.amt, 0);
+  const el = document.getElementById('xfSummary'); if(!el) return;
+  if(!picks.length || !B){ el.innerHTML = 'شاپر اور گاہک چنیں'; return; }
+  el.innerHTML = `<b>${picks.map(p => bsEsc(p.it.name) + ' (' + p.q + ')').join('، ')}</b><br>
+    ➖ <b>${bsEsc(inv.customer_name)}</b> کے کھاتے سے <b dir="ltr">Rs. ${Math.round(amt).toLocaleString()}</b> کم<br>
+    ➕ <b>${bsEsc(B.name)}</b> کے کھاتے میں <b dir="ltr">Rs. ${Math.round(amt).toLocaleString()}</b> جمع<br>
+    <small style="color:#64748b;">سٹاک نہیں بدلے گا</small>`;
+}
+function confirmBillTransfer(invoiceId){
+  if(AppState.currentRole !== 'admin'){ alert('🔒 یہ کام صرف ایڈمن کر سکتا ہے'); return; }
+  const inv = invoicesData.find(i => i.invoice_id === invoiceId); if(!inv) return;
+  const picks = _xfPicks(inv);
+  if(!picks.length){ alert('پہلے کم از کم ایک شاپر چنیں'); return; }
+  const tid = document.getElementById('xfTarget')?.value;
+  const A = (customersData || []).find(c => c && c.customer_id === inv.customer_id);
+  const B = (customersData || []).find(c => c && String(c.customer_id) === String(tid));
+  if(!B){ alert('جس گاہک کو دینا ہے وہ چنیں'); return; }
+  if(!A){ alert('اس بل کا گاہک ریکارڈ میں نہیں ملا'); return; }
+  const amt = Math.round(picks.reduce((a, p) => a + p.amt, 0) * 100) / 100;
+  if(!confirm(`کیا یقین ہے؟\n\n${picks.map(p => p.it.name + ' (' + p.q + ')').join('، ')}\n\n${A.name} کے کھاتے سے Rs. ${Math.round(amt).toLocaleString()} کم\n${B.name} کے کھاتے میں Rs. ${Math.round(amt).toLocaleString()} جمع`)) return;
+  const day = invDay(inv), by = (AppState.currentUser && AppState.currentUser.name) || '';
+  const today = bizDateKey();
+
+  // ① پہلا بل: شاپر نکالیں
+  const moved = [];
+  picks.sort((a, b) => b.idx - a.idx).forEach(p => {
+    const copy = JSON.parse(JSON.stringify(p.it));
+    copy.qty = p.q;
+    if(p.it.chalanAlloc && p.q < (Number(p.it.qty) || 0)){
+      // چالان کی تقسیم: منتقل ہونے والی مقدار پہلے چالانوں سے (تناسب سے) — باقی پہلے بل میں
+      const k = p.q / (Number(p.it.qty) || 1), a2 = {}, a1 = {};
+      Object.keys(p.it.chalanAlloc).forEach(ch => { const v = Number(p.it.chalanAlloc[ch]) || 0; a2[ch] = _chRound(v * k); a1[ch] = _chRound(v - a2[ch]); });
+      copy.chalanAlloc = a2; p.it.chalanAlloc = a1;
+    }
+    moved.unshift(copy);
+    const left = _chRound((Number(p.it.qty) || 0) - p.q);
+    if(left > 0) p.it.qty = left; else inv.items.splice(p.idx, 1);
+  });
+  inv.grand_total = Math.max(0, Math.round(((Number(inv.grand_total) || 0) - amt) * 100) / 100);
+  inv.amount_due = Math.max(0, (Number(inv.amount_due) || 0) - amt);
+  inv.paid_now = Math.max(0, inv.grand_total - inv.amount_due);
+  if(!(inv.items || []).length && !(Number(inv.cash_received_now) > 0) && !(Number(inv.wallet_applied) > 0)){ inv.status = 'voided'; inv.voided_reason = 'پورا بل ' + B.name + ' کو منتقل'; } // خالی بل فہرست میں نہ رہے
+  inv.transfers = (inv.transfers || []).concat([{to: B.customer_id, toName: B.name, amount: amt, items: moved.map(m => ({name: m.name, qty: m.qty})), at: new Date().toISOString(), by}]);
+  // پہلے گاہک کا بقایا کم — بقایا سے زیادہ ہو تو باقی اس کے والٹ میں
+  const aBefore = Number(A.total_receivable) || 0;
+  A.total_receivable = Math.max(0, aBefore - amt);
+  const extra = Math.round((amt - aBefore) * 100) / 100;
+  A.walletHistory = A.walletHistory || [];
+  if(extra > 0){ A.wallet_balance = (Number(A.wallet_balance) || 0) + extra; A.walletHistory.unshift({type: 'deposit', amount: extra, date: today, note: `🔁 شاپر ${B.name} کو منتقل — زائد رقم والٹ میں`}); }
+  A.walletHistory.unshift({type: 'bill_transfer_out', amount: amt, date: today, note: `🔁 ${inv.invoice_no}: ${moved.map(m => m.name + ' (' + m.qty + ')').join('، ')} → ${B.name}`});
+
+  // ② دوسرا گاہک: اسی کاروباری دن کا بل ہو تو اسی میں، ورنہ نیا ادھار بل
+  const bBefore = Number(B.total_receivable) || 0;
+  let target = invoicesData.find(x => x && x.customer_id === B.customer_id && x.status !== 'voided' && invDay(x) === day);
+  if(target){
+    moved.forEach(m => {
+      const same = (target.items || []).find(x => x && !x.returned && x.variant_id === m.variant_id && Number(x.unitPrice) === Number(m.unitPrice) && (Number(x.laborPerUnit) || 0) === (Number(m.laborPerUnit) || 0));
+      if(same){ same.qty = _chRound((Number(same.qty) || 0) + m.qty); if(m.chalanAlloc){ same.chalanAlloc = same.chalanAlloc || {}; Object.keys(m.chalanAlloc).forEach(ch => { same.chalanAlloc[ch] = _chRound((Number(same.chalanAlloc[ch]) || 0) + (Number(m.chalanAlloc[ch]) || 0)); }); } }
+      else (target.items = target.items || []).push(m);
+    });
+    target.grand_total = Math.round(((Number(target.grand_total) || 0) + amt) * 100) / 100;
+    target.amount_due = (Number(target.amount_due) || 0) + amt;
+    target.paid_now = Math.max(0, target.grand_total - target.amount_due);
+  } else {
+    target = Object.assign({
+      invoice_id: Date.now(), ...generateBillNumbers(),
+      customer_id: B.customer_id, customer_name: B.name, customer_phone: B.phone || '',
+      sold_by: by || inv.sold_by || '', sale_mode: inv.sale_mode, payment_method: 'credit',
+      items: moved, discount: 0, tax_percent: 0, tax_amount: 0,
+      grand_total: amt, previous_balance: bBefore, status: 'completed',
+      wallet_applied: 0, cash_received_now: 0, change_given: 0, change_credited_to_wallet: 0,
+      amount_due: amt, paid_now: 0, new_balance: bBefore + amt,
+      created_at: new Date().toISOString(), biz_date: day
+    });
+    invoicesData.unshift(target);
+  }
+  target.transfers = (target.transfers || []).concat([{from: A.customer_id, fromName: A.name, fromInvoice: inv.invoice_no, amount: amt, items: moved.map(m => ({name: m.name, qty: m.qty})), at: new Date().toISOString(), by}]);
+  B.total_receivable = bBefore + amt;
+  B.walletHistory = B.walletHistory || [];
+  B.walletHistory.unshift({type: 'bill_transfer_in', amount: amt, date: today, note: `🔁 ${A.name} کے بل ${inv.invoice_no} سے: ${moved.map(m => m.name + ' (' + m.qty + ')').join('، ')}`});
+
+  persistAllData();
+  try{ pushInvoicesToCloud(); }catch(e){}
+  try{ pushCustomersToCloud(); }catch(e){}
+  document.getElementById('xfOverlay').style.display = 'none';
+  try{ renderBillHistory(); }catch(e){}
+  try{ if(typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary(); }catch(e){}
+  alert(`✅ منتقل ہو گیا\n\n${A.name}: نیا بقایا Rs. ${Math.round(A.total_receivable).toLocaleString()}\n${B.name}: نیا بقایا Rs. ${Math.round(B.total_receivable).toLocaleString()}\n\n${B.name} کا بل: ${target.invoice_no}`);
+}
 function adminVoidBill(invoiceId){
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
   if(!inv) return;
@@ -42886,7 +43051,7 @@ function _billPayLayout(invoice, fscale, rowScale){
   const y = getYesterdayPayInfo(invoice);
   const yTitleH = Math.round(54 * fscale);
   const redH = (y && y.lifeShort > 0) ? Math.round(30 * fscale) + Math.round(46 * fscale) + 8 : 0; // 🔴 FM1610FR393: اوپر جملہ + نیچے لال ڈبہ // 🔴 FM1610FR391: آج تک کی کل کم وصولی — بڑا ڈبہ
-  const noteH = (y && y.notes) ? Math.round(sumRowH * 1.9) : 0; // 📝 نوٹ کی جگہ (زیادہ سے زیادہ دو سطریں)
+  const noteH = (y && y.notes) ? Math.round(sumRowH * 2.5) : 0; // 📝 نوٹ کی جگہ (زیادہ سے زیادہ دو سطریں، موٹی لکھائی)
   const yH = y ? (yTitleH + _payRowsH(_yBoxRows(y), sumRowH) + noteH + 2 + redH) : 0;
   return { sumRowH, titleH, boxH, yTitleH, redH, noteH, yH, y };
 }
@@ -42949,7 +43114,7 @@ function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
   const labelW = Math.round(Math.min(W * 0.68, Math.max(W * 0.40, _maxL + 16 * fscale))), valueX = R - labelW;
   let rowTop = top;
   rows.forEach(([label, val, isFinal, sub], idx) => {
-    const subH = sub ? Math.round(rowH * 0.8) : 0; // 🧾 ضمنی (چھوٹی) تحریر کی جگہ — اسی لائن کے نیچے
+    const subH = _subH(sub, rowH); // 🧾 ضمنی تحریر کی جگہ — اسی لائن کے نیچے
     if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(L + 0.5, rowTop + 0.5, W - 1, rowH + subH); }
     if(isFinal){ ctx.fillStyle = '#e2e8f0'; ctx.fillRect(L + 0.5, rowTop + 0.5, W - 1, rowH); }
     let fpx = isFinal ? 18 : 15;
@@ -42966,10 +43131,13 @@ function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
     ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(valueX, rowTop); ctx.lineTo(valueX, rowTop + rowH); ctx.stroke();
     if(sub){
-      ctx.fillStyle = '#334155'; ctx.textAlign = 'center';
-      let spx = 12; ctx.font = FP(`${bw}${spx}px`);
-      while(ctx.measureText(sub).width > W - 8 && spx > 7){ spx -= 1; ctx.font = FP(`${bw}${spx}px`); }
-      ctx.fillText(sub, (L + R) / 2, rowTop + rowH + subH / 2 + Math.round(4 * fscale));
+      ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+      let lines = [sub];
+      if(_subLines(sub) === 2){ const ps = String(sub).replace(/^\(|\)$/g, '').split('·').map(x => x.trim()); const h = Math.ceil(ps.length / 2); lines = [ps.slice(0, h).join('  ·  '), ps.slice(h).join('  ·  ')]; }
+      let spx = 16; ctx.font = FP(`bold ${spx}px`);
+      while(lines.some(l => ctx.measureText(l).width > W - 8) && spx > 9){ spx -= 1; ctx.font = FP(`bold ${spx}px`); }
+      const lh2 = subH / lines.length;
+      lines.forEach((l, i) => ctx.fillText(l, (L + R) / 2, rowTop + rowH + lh2 * i + lh2 / 2 + Math.round(4 * fscale)));
       ctx.fillStyle = '#000';
     }
     rowTop += rowH + subH;
@@ -42988,7 +43156,10 @@ function _yBoxRows(y){
   const sub = parts.length ? '(' + parts.join('  ·  ') + ')' : '';
   return [['سابقہ بقایا', y.opening], [kal ? 'کل کی خریداری' : 'پچھلی خریداری', y.goods], ['ٹوٹل', y.total], [kal ? 'کل ادا کیا' : 'پچھلا ادا کیا', y.paid, false, sub], ['بقایا', y.final, true]];
 }
-function _payRowsH(rows, rowH){ return rows.reduce((a, r) => a + (r[3] ? rowH + Math.round(rowH * 0.8) : rowH), 0); }
+// 🔠 FM1910MO415 (صدام بھائی): نقد / جاز کیش / ایزی پیسہ والی ضمنی لائن موٹی اور بڑی — 3 یا زیادہ طریقے ہوں تو دو سطریں
+function _subLines(sub){ return String(sub || '').split('·').length >= 3 ? 2 : 1; }
+function _subH(sub, rowH){ return sub ? Math.round(rowH * (_subLines(sub) === 2 ? 1.75 : 1.0)) : 0; }
+function _payRowsH(rows, rowH){ return rows.reduce((a, r) => a + rowH + _subH(r[3], rowH), 0); }
 function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   const y = lay.y; if(!y) return top;
   const _rows = _yBoxRows(y);
@@ -43008,9 +43179,9 @@ function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   if(y.notes && lay.noteH){
     // 📝 FM1710SA398: اس دن کی وصولی کا نوٹ — ڈبے کے اندر، زیادہ سے زیادہ دو سطریں (لمبا ہو تو لکھائی چھوٹی)
     const txt = '📝 نوٹ: ' + y.notes, maxW = (R - L) - 10;
-    let px = 13, lines = [];
+    let px = 17, lines = []; // 🔠 FM1910MO415: نوٹ موٹا اور بڑا
     const wrap = () => { lines = []; let cur = ''; txt.split(' ').forEach(w => { const t = cur ? cur + ' ' + w : w; if(cur && ctx.measureText(t).width > maxW){ lines.push(cur); cur = w; } else cur = t; }); if(cur) lines.push(cur); };
-    do { ctx.font = FP(`${bw}${px}px`); wrap(); if(lines.length <= 2) break; px -= 1; } while(px > 7);
+    do { ctx.font = FP(`bold ${px}px`); wrap(); if(lines.length <= 2) break; px -= 1; } while(px > 9);
     if(lines.length > 2){ lines = lines.slice(0, 2); lines[1] = lines[1].slice(0, Math.max(0, lines[1].length - 2)) + '…'; }
     ctx.fillStyle = '#000'; ctx.textAlign = 'right';
     const lh = lay.noteH / 2;
@@ -43048,6 +43219,7 @@ function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
 function _wishLayout(ctx, F, boxW, invoice){
   const nm = String(invoice.customer_name || '').trim();
   if(!invoice.customer_id || !nm) return null;
+  if(AppState.settings.printShowWish === false) return null; // 💌 FM1910MO415: سیٹنگ / بل پریویو سے بند کیا جا سکتا ہے
   const msg = 'ہماری درخواست ہے کہ اپنی ضرورت اور سیل کے مطابق آرڈر لکھوائیں، تاکہ آپ کو روزانہ تازہ سٹاک ملے اور پیمنٹ کرنا بھی آسان ہو۔';
   ctx.font = F('bold 15px');
   const maxW = boxW - 24, lines = []; let cur = '';
@@ -44170,6 +44342,7 @@ function syncPreviewStyleControls(){
     }catch(e){ console.error('swatch render failed', e); }
   }
   document.getElementById('pscA4Chk').checked = AppState.settings.invoicePrintStyle === 'a4';
+  { const w = document.getElementById('pscWishChk'); if(w) w.checked = AppState.settings.printShowWish !== false; }
   const iOrientRow = document.getElementById('pscOrientRow');
   if(iOrientRow) iOrientRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'flex' : 'none';
   const iPwRow = document.getElementById('pscPaperWidthRow');
@@ -45814,6 +45987,7 @@ function renderBillSettingsScreen(){
   document.getElementById('printSortAlphaChk').checked = !!AppState.settings.printSortAlpha;
   document.getElementById('printShowSalesmanChk').checked = !!AppState.settings.printShowSalesman;
   document.getElementById('printShowBrandingChk').checked = !!AppState.settings.printShowBranding;
+  { const w = document.getElementById('printShowWishChk'); if(w) w.checked = AppState.settings.printShowWish !== false; }
   document.getElementById('printFontScaleSlider').value = AppState.settings.printFontScale || 100;
   document.getElementById('printFontScaleLabel').textContent = (AppState.settings.printFontScale || 100) + '%';
 
@@ -51264,6 +51438,13 @@ function syncPreviewPaperWidthButtons(){
 }
 
 // ---------- Receipt Content ٹوگلز — سادہ آن/آف، فوری محفوظ ----------
+// 💌 FM1910MO415 (صدام بھائی): بل کے نیچے والا درخواست کا ڈبہ — جب چاہیں پرنٹ میں، جب چاہیں نہیں
+function toggleBillWish(checked){
+  AppState.settings.printShowWish = !!checked;
+  persistAllData();
+  ['pscWishChk', 'printShowWishChk'].forEach(id => { const el = document.getElementById(id); if(el) el.checked = !!checked; });
+  try{ if(document.getElementById('invoicePreviewModal')?.classList.contains('show')) rerenderInvoicePreview(); }catch(e){}
+}
 function updatePrintToggle(key, checked){
   AppState.settings[key] = checked;
   persistAllData();
