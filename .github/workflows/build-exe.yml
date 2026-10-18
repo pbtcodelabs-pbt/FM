@@ -1,0 +1,62 @@
+# 💻 ونڈوز (لیپ ٹاپ/کمپیوٹر) کا .exe انسٹالر بنانے والا
+# چلانے کا طریقہ: Actions → "build-exe" → Run workflow   (یا .exe/ میں تبدیلی پر خود چلتا ہے)
+# نتیجہ: Releases میں "exe-latest" — ہمیشہ ایک ہی سیدھے لنک سے تازہ انسٹالر:
+#   https://github.com/pbtcodelabs-pbt/FM/releases/download/exe-latest/SaddamFruitMandi-Setup.exe
+# ⚠️ یہ فائربیس والی ویب سائٹ کو نہیں چھیڑتا؛ انسٹالر لائیو ایپ ہی کھولتا ہے
+name: build-exe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.exe/**', '.github/workflows/build-exe.yml']
+permissions:
+  contents: write
+concurrency:
+  group: build-exe
+  cancel-in-progress: true
+jobs:
+  exe:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "1) ایپ کا پتا (URL) چیک کریں — لائیو ہو اور اسی ایپ کا ہو"
+        run: |
+          set -e
+          URL=$(node -e "const s=require('fs').readFileSync('.exe/main.js','utf8');console.log(s.match(/APP_URL = '([^']+)'/)[1])")
+          echo "URL: $URL"
+          curl -fsSL "$URL" -o live.html
+          curl -fsSL "${URL}sw.js" -o live-sw.js
+          grep -q "APP_BUILD_VERSION" live.html || { echo "❌ اس پتے پر فروٹ منڈی ایپ نہیں ملی"; exit 1; }
+          LIVE_VER=$(grep -o "APP_BUILD_VERSION = '[^']*'" live.html | head -1)
+          echo "✅ لائیو ایپ ملی: $LIVE_VER"
+          echo "LIVE_VER=$(echo $LIVE_VER | cut -d"'" -f2)" >> $GITHUB_ENV
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: "2) انسٹالر بنائیں"
+        working-directory: .exe
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          set -e
+          npm install --no-audit --no-fund
+          npm run dist
+          ls -la dist
+
+      - name: "3) Release میں لگائیں (سیدھا ڈاؤن لوڈ لنک)"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          gh release delete exe-latest -y --cleanup-tag || true
+          gh release create exe-latest ".exe/dist/SaddamFruitMandi-Setup.exe" \
+            --title "💻 صدام فروٹ منڈی — کمپیوٹر انسٹالر (${LIVE_VER})" \
+            --notes "ونڈوز لیپ ٹاپ/کمپیوٹر کے لیے۔ ڈاؤن لوڈ کر کے کھولیں → Next → Install → Finish۔ ایپ خود کھل جائے گی اور ڈیسک ٹاپ پر آئیکن بن جائے گا۔ (بلڈ #${{ github.run_number }})"
+          echo "✅ https://github.com/${{ github.repository }}/releases/download/exe-latest/SaddamFruitMandi-Setup.exe"
