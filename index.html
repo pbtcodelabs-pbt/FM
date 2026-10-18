@@ -3502,6 +3502,9 @@ function __appHostKind(h, p){
         #homeMoneyBottom #homeMoneyMore:active{transform:translateY(3px); box-shadow:none;}
         #homeMoneyToggle{position:absolute; left:-6px; top:-11px; width:30px; height:24px; border:none; background:none; padding:0; cursor:pointer; line-height:0; z-index:2; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45));}
         #homeMoneyToggle svg{width:30px; height:24px; display:block;}
+        #homePeriodRow{display:flex; gap:5px; margin:7px 0 6px; direction:rtl;}
+        #homePeriodRow button{flex:1; min-width:0; padding:5px 2px; border-radius:999px; border:1.5px solid rgba(255,255,255,.55); background:rgba(255,255,255,.12); color:#fff; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; line-height:1.6;}
+        #homePeriodRow button.on{background:#fde047; color:#1e1b4b; border-color:#fde047; box-shadow:0 2px 0 #a16207;}
         #homeMoneyWrap.hmHidden{margin:0 2px 4px; height:24px;}
         #homeMoneyWrap.hmHidden #homeMoneyPanel{display:none;}
         #homeMoneyWrap.hmHidden #homeMoneyToggle{top:0; left:2px;}
@@ -3513,6 +3516,13 @@ function __appHostKind(h, p){
             <div class="hmCap hmK1" id="hmPayCap" onclick="hmExplain('pay')"><div class="hmLbl">بیوپاریوں کا قرض</div><div class="hmPill"><div class="hmVal" id="hmPayVal">0</div></div></div>
             <div class="hmCap hmK2" id="hmRecCap" onclick="hmExplain('rec')"><div class="hmLbl">گاہکوں کی طرف ادھار</div><div class="hmPill"><div class="hmVal" id="hmRecVal">0</div></div></div>
             <div class="hmCap hmK3" id="hmStkCap" onclick="hmExplain('stk')"><div class="hmLbl">سٹاک کی مالیت</div><div class="hmPill"><div class="hmVal" id="hmStkVal">0</div></div></div>
+          </div>
+          <!-- 📅 FM1810SU405: ادھار والے کاروبار کے لیے مدت — کیش آیا / کیش گیا / منافع / ہاتھ میں کیش اسی مدت کے -->
+          <div id="homePeriodRow">
+            <button type="button" data-hp="today" onclick="setHomePeriod('today')">آج</button>
+            <button type="button" data-hp="yesterday" onclick="setHomePeriod('yesterday')">گزشتہ کل</button>
+            <button type="button" data-hp="thisweek" onclick="setHomePeriod('thisweek')">یہ ہفتہ</button>
+            <button type="button" data-hp="thismonth" onclick="setHomePeriod('thismonth')">یہ مہینہ</button>
           </div>
           <div id="homeMoneyRow2">
             <div class="hmCap hmK4" id="hmCashCap" onclick="hmExplainCash('in')"><div class="hmLbl">ٹوٹل کیش آیا</div><div class="hmPill"><div class="hmVal" id="hmCashVal">0</div></div></div>
@@ -9367,6 +9377,7 @@ function getDeveloperContact(){
 // 🆕 FM1410WE386: بل بناتے وقت سٹاک ختم کی وارننگ پر "➕ سٹاک ایڈ کریں" بٹن — سٹاک جمع ہوتے ہی خودکار واپس بل پر اور چیز خود بل میں
 // 🆕 FM1410WE387: ہوم سمری کے ساتوں ڈبے درست — 'آج' اب کاروباری تاریخ (کیش/منافع کے زیرو ختم)، ادائیگی کی تاریخ UTC کی بجائے مقامی، ملی جلی وصولی میں صرف نقد کیش میں، سٹاک مالیت اصل سٹاک کے مطابق، ادھار سے زیرِ منظوری وصولی منہا، کیفیت میں ایڈوانس بھی شامل
 // 🆕 FM1410WE388: ریکوری والے کی سکرین — ہر گاہک کے کارڈ پر 'آج کی خریداری' ڈبہ (خریداری، وصولی، کم وصولی)، کل والے ڈبے کے اوپر
+// 🆕 FM1810SU405: ہوم سمری میں مدت (آج / گزشتہ کل / یہ ہفتہ / یہ مہینہ) — ادھار کاروبار میں کل کا منافع اور کیش بھی دکھے
 // 🆕 FM1410WE389: ریکوری کارڈ کی ترتیب — کل کی خریداری اوپر، آج کی خریداری نیچے (وصولی کے خانے کے سامنے)
 // 🆕 FM1510TH390: (1) بیوپاری کے پرچیز آرڈر — رنگین لمبا کیپسول، اوپر تاریخ، اس دن کی ادائیگی/بقایا کے کیپسول (2) آرڈر بکنگ میں چالان کا سٹاک بچا ہو تو دو وارننگ + PIN، باقی سٹاک کی ایڈمن کو فوراً اطلاع (ہوم پر پٹی + پاپ اپ)
 // 🆕 FM1610FR391: بل کا 'کل کی ادائیگی' ڈبہ — ادا کی گئی رقم کی تقسیم (نقد/جاز کیش/ایزی پیسہ/بینک، صرف جن میں رقم آئی)؛ نیچے بڑا سرخ (پرنٹ میں سیاہ) ڈبہ: آج تک کی کل کم وصولی
@@ -9383,7 +9394,7 @@ function getDeveloperContact(){
 // 🆕 FM1710SA401: اردو فونٹ ہلکی WOFF2 شکل میں (24 MB → 10.3 MB)، نئے ورژن پر فونٹ دوبارہ ڈاؤن لوڈ نہیں
 // 🆕 FM1710SA400: ہوم کے "کیش آیا / کیش گیا / ہاتھ میں کیش" ڈبے دبانے پر پوری تفصیل
 // 🆕 FM1710SA399: سروس ورکر — فون میں محفوظ فائلیں (فونٹ، ایپ) ہر بار دوبارہ ڈاؤن لوڈ نہیں ہوتیں؛ فائربیس ہوسٹنگ کا ڈیٹا خرچ بہت کم، نیا ورژن پھر بھی فوراً
-const APP_BUILD_VERSION = 'FM1710SA404'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1810SU405'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10148,7 +10159,8 @@ function toggleHomeEditMode(){
 function hmExplainCash(kind){ hmExplain(kind); }
 function hmExplain(kind){
   let S = null;
-  try{ S = computeBizSummary('today'); }catch(e){}
+  const hp = homePeriod();
+  try{ S = computeBizSummary(kind === 'net' ? 'today' : hp, kind !== 'net'); }catch(e){}
   if(!S){ goTo('bizsummary'); return; }
   const N = v => Math.round(Number(v) || 0);
   const f = n => (n < 0 ? '- ' : '') + Math.abs(N(n)).toLocaleString('en-US');
@@ -10164,7 +10176,8 @@ function hmExplain(kind){
   const box = (t, v, c) => `<div style="background:${c};color:#fff;border-radius:12px;padding:8px 12px;margin:8px 0;display:flex;justify-content:space-between;font-weight:900;font-size:17px;"><span>${t}</span>${num(v)}</div>`;
   const note = (t, warn) => `<div style="background:${warn ? '#fff7ed' : '#f1f5f9'};border:1px solid ${warn ? '#fdba74' : '#e2e8f0'};color:${warn ? '#9a3412' : '#475569'};border-radius:12px;padding:8px 10px;font-size:13px;margin-top:6px;">${t}</div>`;
   let dLbl = S.todayStr; try{ dLbl = new Date(S.todayStr + 'T12:00:00').toLocaleDateString('ur-PK', {weekday:'long', day:'numeric', month:'long'}); }catch(e){}
-  const dayNote = `📅 کاروباری تاریخ: <b>${E(dLbl)}</b>`;
+  let dayNote = `📅 کاروباری تاریخ: <b>${E(dLbl)}</b>`;
+  if(hp !== 'today' && kind !== 'net'){ const rr = S.range || {}; dayNote = `📅 مدت: <b>${HOME_PERIOD_LBL[hp]}</b> <span dir="ltr">(${E(bizFmt(rr.fromStr || ''))}${rr.toStr && rr.toStr !== rr.fromStr ? ' — ' + E(bizFmt(rr.toStr)) : ''})</span>`; }
 
   // --- ہوم والے ہی عدد ---
   const supPay = N((suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_payable) || 0), 0));
@@ -10202,7 +10215,7 @@ function hmExplain(kind){
     title = '💸 ٹوٹل کیش گیا'; sub = dayNote + ' — صرف نقد';
     body = outHtml(true) + box('= ٹوٹل کیش گیا', cashOut, R);
   } else if(kind === 'hand'){
-    title = '💵 اس وقت ہاتھ میں کیش'; sub = dayNote;
+    title = hp === 'today' ? '💵 اس وقت ہاتھ میں کیش' : '💵 ' + HOME_PERIOD_OF[hp] + ' میں بچا کیش'; sub = dayNote;
     body = line('➕ ٹوٹل کیش آیا', cashIn, [], G) + line('➖ ٹوٹل کیش گیا', cashOut, [], R)
       + box('= ہاتھ میں کیش', cashIn - cashOut, cashIn - cashOut < 0 ? R : B)
       + note('تفصیل کے لیے "ٹوٹل کیش آیا" یا "ٹوٹل کیش گیا" والا ڈبہ دبائیں')
@@ -10238,7 +10251,7 @@ function hmExplain(kind){
       + (custAdv ? line('➖ گاہکوں کا ایڈوانس (ہم نے دینا)', custAdv, [], R) : '')
       + box(net >= 0 ? '= منافع' : '= نقصان', net, net >= 0 ? G : R);
   } else if(kind === 'today'){
-    title = '📈 صرف آج کا منافع'; sub = dayNote + ' — ہر بل پر: فروخت ریٹ − خرید ریٹ − مزدوری';
+    title = '📈 ' + (hp === 'today' ? 'صرف آج' : HOME_PERIOD_OF[hp]) + ' کا منافع'; sub = dayNote + ' — ہر بل پر (ادھار بل بھی): فروخت ریٹ − خرید ریٹ − مزدوری';
     const vMap = {}; (productsData || []).filter(p => p && typeof p === 'object').forEach(p => (p.variants || []).filter(v => v && typeof v === 'object').forEach(v => { vMap[v.variant_id] = v; }));
     const bills = (S.tInvList || []).map(inv => {
       let pr = 0;
@@ -10252,10 +10265,10 @@ function hmExplain(kind){
       return [E(inv.customer_name || 'نقد گاہک') + ' <small style="color:#94a3b8;">' + E(inv.invoice_no || '') + ' — بل ' + f(Number(inv.grand_total) || 0) + '</small>', pr];
     });
     const tp = N(S.goodsProfit) - N(S.expTotal);
-    body = line('🧾 آج کے بلوں پر مال کا منافع', S.goodsProfit, bills, G)
-      + line('➖ آج کے اخراجات', S.expTotal, expItems, R)
-      + box(tp >= 0 ? '= آج کا منافع' : '= آج کا نقصان', tp, tp >= 0 ? G : R)
-      + (!bills.length ? note('آج (اس کاروباری تاریخ پر) ابھی کوئی بل نہیں بنا') : '');
+    body = line('🧾 بلوں پر مال کا منافع', S.goodsProfit, bills, G)
+      + line('➖ اخراجات', S.expTotal, (S.tExpList || []).map(e => [E(e.name || 'خرچہ'), Number(e.amount) || 0]), R)
+      + box('= ' + HOME_PERIOD_OF[hp] + (tp >= 0 ? ' کا منافع' : ' کا نقصان'), tp, tp >= 0 ? G : R)
+      + (!bills.length ? note(hp === 'today' ? 'آج (اس کاروباری تاریخ پر) ابھی کوئی بل نہیں بنا — اوپر "گزشتہ کل" چن کر کل کا منافع دیکھیں' : 'اس مدت میں کوئی بل نہیں') : '');
   }
   const old = document.getElementById('hmExplainOv'); if(old) old.remove();
   const ov = document.createElement('div');
@@ -10272,6 +10285,12 @@ function hmExplain(kind){
   ov.addEventListener('click', e => { if(e.target === ov) ov.remove(); });
   document.body.appendChild(ov);
 }
+// 📅 FM1810SU405 (صدام بھائی): سارا کام ادھار پر — صبح نئی کاروباری تاریخ پر "آج" کے ڈبے صفر ہوتے ہیں۔ اب مدت چنیں (فون میں یاد رہتی ہے)۔
+//   منافع = بلوں پر مال کا منافع (ادھار بل بھی شامل، نقد آنے کا انتظار نہیں) − اخراجات؛ کیش = اسی مدت میں اصل نقد آیا/گیا
+const HOME_PERIOD_LBL = {today:'آج', yesterday:'گزشتہ کل', thisweek:'یہ ہفتہ', thismonth:'یہ مہینہ'};
+const HOME_PERIOD_OF = {today:'آج', yesterday:'گزشتہ کل', thisweek:'اس ہفتے', thismonth:'اس مہینے'}; // "…کا منافع" کے لیے
+function homePeriod(){ const v = loadFromStorage('homePeriod', 'today'); return HOME_PERIOD_LBL[v] ? v : 'today'; }
+function setHomePeriod(v){ saveToStorage('homePeriod', HOME_PERIOD_LBL[v] ? v : 'today'); renderHomeMoneySummary(); }
 function renderHomeMoneySummary(){
   const row = document.getElementById('homeMoneyRow');
   if(!row) return;
@@ -10286,7 +10305,11 @@ function renderHomeMoneySummary(){
   //  ⑥ کاروبار کی کیفیت       = ② + ③ + ④ − ⑤ − ①   (یعنی ادھار + سٹاک + گلے کا کیش − بیوپاری قرض) — جمع ہو تو منافع، مائنس ہو تو نقصان
   //  ⑦ صرف آج کا منافع        = آج کے بلوں پر مال کا منافع (فروخت ریٹ − خرید ریٹ − مزدوری) − آج کے اخراجات
   let S = null;
-  try{ S = computeBizSummary('today'); }catch(e){ try{ console.error('computeBizSummary', e); }catch(_){} }
+  const hp = homePeriod();
+  document.querySelectorAll('#homePeriodRow button').forEach(b => b.classList.toggle('on', b.dataset.hp === hp));
+  try{ S = computeBizSummary(hp, true); }catch(e){ try{ console.error('computeBizSummary', e); }catch(_){} }
+  let S0 = S; // کیفیت ہمیشہ "اس وقت" کی — اس میں آج کا کیش
+  if(hp !== 'today'){ try{ S0 = computeBizSummary('today'); }catch(e){} }
   const N = v => Math.round(Number(v) || 0);
   const supPay = N((suppliersData || []).reduce((s, x) => s + Math.max(0, Number(x && x.total_payable) || 0), 0));
   // 🔧 FM1410WE387 (پیارے بھائی کی ہدایت): ادھار = کھاتوں کا کل بقایا − وہ وصولی جو ریکوری والا لے چکا مگر ابھی منظور نہیں ہوئی
@@ -10301,7 +10324,9 @@ function renderHomeMoneySummary(){
   const cashOut = S ? N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) + N(S.tCashBuy) : 0; // 🥬 FM1710SA396: نقد خریداری بھی
   // ⑥ کیفیت: ادھار + ریکوری والوں کے پاس وصول شدہ رقم + سٹاک + گلے کا کیش + بیوپاریوں کے پاس ہمارا ایڈوانس − بیوپاری قرض − گاہکوں کا ایڈوانس
   const supAdv = S ? N(S.supWallet) : 0, custAdv = S ? N(S.custWallet) : 0;
-  const net = rec + stock + cashIn - cashOut + supAdv - supPay - custAdv;
+  const cashIn0 = S0 ? N(S0.opening) + N(S0.otherManual) + N(S0.tBillCash) + N(S0.tRecovery) + N(S0.tOtherIn) : 0;
+  const cashOut0 = S0 ? N(S0.tSupOut) + N(S0.tOtherOut) + N(S0.tExp) + N(S0.tCashBuy) : 0;
+  const net = rec + stock + cashIn0 - cashOut0 + supAdv - supPay - custAdv;
   const todayProfit = S ? N(S.goodsProfit) - N(S.expTotal) : 0;
   // 💵 FM1210MO372: اس وقت ہاتھ میں کیش = ④ ٹوٹل کیش آیا − ⑤ ٹوٹل کیش گیا
   //    (اوپننگ کیش + دیگر آمدن + آج کے بلوں سے نقد + گاہکوں سے نقد وصولی + دیگر نقد آمد − بیوپاریوں کو ادائیگی − دیگر ادائیگی − آج کے اخراجات)
@@ -10323,7 +10348,9 @@ function renderHomeMoneySummary(){
   setVal('hmHandVal', (hUp ? '' : '- ') + f(hand));
   t0('hmHandCap', `کیش آیا ${f(cashIn)} − کیش گیا ${f(cashOut)} = ${hUp ? '' : '- '}${f(hand)}` + (hUp ? '' : ' — جتنا آیا اس سے زیادہ گیا، اوپننگ کیش چیک کریں'));
   const tUp = todayProfit >= 0; setPL('hmTodayCap', tUp);
-  setVal('hmTodayLbl', tUp ? 'صرف آج کا منافع' : 'صرف آج کا نقصان');
+  const _pl = HOME_PERIOD_OF[hp] || 'آج';
+  setVal('hmTodayLbl', (hp === 'today' ? 'صرف آج' : _pl) + (tUp ? ' کا منافع' : ' کا نقصان'));
+  setVal('hmHandLbl', hp === 'today' ? '💵 اس وقت ہاتھ میں کیش' : '💵 ' + _pl + ' میں بچا کیش');
   setVal('hmTodayVal', (tUp ? '+ ' : '- ') + f(todayProfit));
   const t = (id, txt) => { const el = document.getElementById(id); if(el) el.title = txt; };
   t('hmPayCap', `تمام بیوپاریوں کا کل بقایا ${f(supPay)}`);
@@ -23765,8 +23792,11 @@ function bsBillCash(inv){
 }
 
 // ---------- 🧮 پورا حساب ایک جگہ — سکرین اور پرنٹ دونوں یہی استعمال کرتے ہیں ----------
-function computeBizSummary(preset){
+function computeBizSummary(preset, cashByRange){
   const r = bsComputeRange(preset);
+  // 📅 FM1810SU405: cashByRange = ہوم والے ڈبوں کا کیش بھی چنی ہوئی مدت (آج / گزشتہ کل / یہ ہفتہ / یہ مہینہ) کا — ورنہ صرف آج کا
+  const _cr = (cashByRange && r.fromStr) ? r : null;
+  const inCash = d => _cr ? bsInRange(d, _cr) : d === bsToday();
   // 🛡️ FM1710SA394: ایک بھی خالی/خراب ریکارڈ (null گاہک، بیوپاری، خرچہ، سبزی، بل کا آئٹم) پورا حساب روک کر سب ڈبے صفر کر دیتا تھا — اب ایسے ریکارڈ خود چھوڑ دیے جاتے ہیں
   const _ok = x => !!x && typeof x === 'object';
   const _prods = (productsData || []).filter(_ok);
@@ -23777,18 +23807,19 @@ function computeBizSummary(preset){
   const exps = (typeof expenseData !== 'undefined' ? (expenseData || []) : []).filter(_ok);
 
   // --- ① آج کا کیش ---
-  const openingEntered = getOpeningCashFor(todayStr);
+  const openDay = _cr ? _cr.fromStr : todayStr; // مدت ہو تو پہلے دن کا اوپننگ کیش
+  const openingEntered = getOpeningCashFor(openDay);
   const opening = openingEntered == null ? 0 : openingEntered;
-  const _od = getOpeningDetailFor(todayStr);
+  const _od = getOpeningDetailFor(openDay);
   const otherManual = _od.otherAmt; // ➕ فارم والی دیگر آمدن (ہاتھ سے، اختیاری)
-  const tInv = invs.filter(i => bsInvDay(i) === todayStr);
+  const tInv = invs.filter(i => inCash(bsInvDay(i)));
   const tBillCash = tInv.reduce((s, i) => s + bsBillCash(i), 0);
-  const tPays = pays.filter(p => bsPayDay(p) === todayStr && bsPayCash(p) > 0);
+  const tPays = pays.filter(p => inCash(bsPayDay(p)) && bsPayCash(p) > 0);
   const tRecovery = tPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + bsPayCash(p), 0);
   const tOtherIn = tPays.filter(p => p.direction === 'in' && p.party_type !== 'customer').reduce((s, p) => s + bsPayCash(p), 0);
   const tSupOut = tPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
   const tOtherOut = tPays.filter(p => p.direction === 'out' && p.party_type !== 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
-  const tExp = exps.filter(e => e.date === todayStr).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const tExp = exps.filter(e => inCash(e.date)).reduce((s, e) => s + (Number(e.amount) || 0), 0);
   // 🥬 FM1710SA396: آج کی نقد خریداری (سبزی/پھل بغیر بیوپاری کے نقد خریدا) بھی کیش گیا میں — ایڈمن کی "نقد خریداری" + منشی کے نقد چالان جن کا ریٹ لگ چکا
   let tCashBuy = 0;
   try{
@@ -23798,13 +23829,13 @@ function computeBizSummary(preset){
     cps.forEach(cp => {
       if(cp.isDaily) return;
       let d = ''; try{ d = toLocalDateStr(new Date(Number(cp.id) || cp.date)); }catch(e){ d = cp.date || ''; }
-      if(d !== todayStr) return;
+      if(!inCash(d)) return;
       directIds.add(cp.id);
       tCashBuy += (cp.items || []).reduce((a, it) => a + lineAmt(it), 0);
     });
     const vById = {}; _prods.forEach(p => _vars(p).forEach(v => { vById[v.variant_id] = v; }));
     cps.forEach(cp => {
-      if(!cp.isDaily || cp.date !== todayStr) return;
+      if(!cp.isDaily || !inCash(cp.date)) return;
       (cp.items || []).forEach(it => {
         if(!_ok(it)) return;
         const v = vById[it.variant_id]; const ch = v ? (v.chalans || []).find(c => c && c.chalanNo === it.chalanNo) : null;
@@ -23860,7 +23891,7 @@ function computeBizSummary(preset){
   const netProfit = goodsProfit - expTotal;
 
   return {
-    preset, range: r, todayStr, tInvList: tInv, tPaysList: tPays, tExpList: exps.filter(e => e.date === todayStr),
+    preset, range: r, todayStr, tInvList: tInv, tPaysList: tPays, tExpList: exps.filter(e => inCash(e.date)),
     pendingRec, custWallet, supWallet, opening, openingEntered, openingParts: _od.parts, openingNote: _od.note, otherManual, otherManualNote: _od.otherNote, tBillCash, tRecovery, tOtherIn, tSupOut, tOtherOut, tExp, tCashBuy, cashNow,
     stockValue: Math.round(stockValue), receivable, payable, cashAsset, assets: Math.round(assets), netWorth: Math.round(netWorth), custs, sups,
     billCount: pInv.length, sales, salesCash, salesCredit: Math.max(0, sales - salesCash),
