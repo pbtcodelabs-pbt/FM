@@ -9542,8 +9542,9 @@ function getDeveloperContact(){
 // 🆕 FM1910MO419: ہر گاہک کا اپنا بل نمبر 001، 002، 003… — پچھلا/اگلا بل فوراً ملے
 // 🆕 FM1910MO420: گاہک کا بل نمبر بل کے نیچے (فوٹر) میں بھی، الگ نمایاں ڈبے میں
 // 🆕 FM1910MO421: بل پریویو میں سامنے "💌 پیغام: آن/آف" بٹن (درخواست والا ڈبہ چھاپنا ہے یا نہیں)
-const APP_BUILD_VERSION = 'FM1910MO422'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'اپڈیٹ پاپ اپ میں پورا نوٹ نظر آئے — کوئی لفظ نہیں کٹتا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM1910MO423: ریکوری والوں کی وصولی دوسرے فون سے آتے ہی ہوم کا "ٹوٹل کیش آیا" فوراً تازہ (پہلے 0 رہتا تھا)
+const APP_BUILD_VERSION = 'FM1910MO423'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ریکوری والوں کی وصولی آتے ہی ٹوٹل کیش آیا فوراً تازہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10372,7 +10373,13 @@ function hmExplain(kind){
     const items = (S.inItems || []).map(x => [nm(x) + mTag(x), x.amt]);
     body = mRows + box('= ٹوٹل کیش آیا', cashIn, G)
       + `<div style="font-weight:800;color:#334155;margin:10px 2px 2px;">📋 کس کس سے آیا</div>` + rows(items, G)
-      + (N(S.tRlPendAll) > 0 ? note(`⏳ اس میں <b dir="ltr">${f(S.tRlPendAll)}</b> وہ وصولی بھی شامل ہے جو ریکوری والوں نے لے لی مگر ابھی "وصولی کھاتے اپڈیٹ" میں منظور نہیں ہوئی`, true) : '');
+      + (N(S.tRlPendAll) > 0 ? note(`⏳ اس میں <b dir="ltr">${f(S.tRlPendAll)}</b> وہ وصولی بھی شامل ہے جو ریکوری والوں نے لے لی مگر ابھی "وصولی کھاتے اپڈیٹ" میں منظور نہیں ہوئی`, true) : '')
+      + (() => { // 📅 FM1910MO423: کوئی وصولی کسی اور کاروباری تاریخ میں درج ہے تو بتا دیں — "کیش آیا 0 کیوں؟"
+        const rr = S.range || {}, inR = d => rr.fromStr ? (d >= rr.fromStr && d <= (rr.toStr || rr.fromStr)) : d === S.todayStr;
+        const byDay = {}; (typeof recoveryListData !== 'undefined' ? recoveryListData : []).forEach(e => { if(!e || e.status !== 'pending') return; const d = recDay(e); if(d && !inR(d)) byDay[d] = (byDay[d] || 0) + (Number(e.amount) || 0); });
+        const ds = Object.keys(byDay).sort().reverse().slice(0, 5);
+        return ds.length ? note('📅 ریکوری والوں کی کچھ وصولی <b>دوسری تاریخ</b> میں درج ہے (اس لیے یہاں نہیں گنی گئی): ' + ds.map(d => `<b>${E(bizFmt(d))}</b> — <b dir="ltr">${f(byDay[d])}</b>`).join('، ') + ' — اوپر وہ مدت چنیں (مثلاً "گزشتہ کل")', true) : '';
+      })();
   } else if(kind === 'out'){
     title = '💸 ٹوٹل کیش گیا'; sub = dayNote + ' — صرف نقد';
     body = outHtml(true) + box('= ٹوٹل کیش گیا', cashOut, R);
@@ -10466,6 +10473,13 @@ function hmMaybeSyncPayments(){
     EXTRA_SYNC_DEFS.filter(d => d.key === 'payments' || d.key === 'cashPurchases').forEach(d => extraSyncOne(d));
   }catch(e){}
 }
+// 💵 FM1910MO423 (صدام بھائی): ہوم کھلا رہے تو بھی ریکوری والوں کی نئی وصولیاں ہر 30 سیکنڈ میں آئیں — پہلے صرف ہوم پر دوبارہ آنے سے آتی تھیں، "ٹوٹل کیش آیا" 0 رہتا
+setInterval(() => {
+  try{
+    if(document.hidden || currentScreenName !== 'home' || AppState.currentRole !== 'admin' || typeof fetchRecoveryListFromCloud !== 'function') return;
+    fetchRecoveryListFromCloud(true); // نئی آئی تو renderHomeIconGrid → ہوم کے ڈبے خود تازہ
+  }catch(e){}
+}, 30000);
 function renderHomeMoneySummary(){
   const row = document.getElementById('homeMoneyRow');
   if(!row) return;
@@ -34078,6 +34092,7 @@ async function fetchBizDay(){
     const cloud = JSON.parse(doc.fields?.json?.stringValue || 'null');
     if(!cloud || (cloud.updatedAt || 0) <= (bizDayState.updatedAt || 0)) return;
     bizDayState = cloud; saveToStorage('bizDayState', bizDayState);
+    try{ if(currentScreenName === 'home' && typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary(); }catch(e){} // 📅 FM1910MO423: کاروباری تاریخ بدلی تو ہوم کے ڈبے بھی
     try{ if(document.getElementById('screen-dailyRecovery')?.classList.contains('active')) renderDailyRecoveryScreen(); }catch(e){}
   }catch(e){}
 }
