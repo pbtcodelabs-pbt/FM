@@ -9538,8 +9538,9 @@ function getDeveloperContact(){
 // 🆕 FM1910MO416: ریمائنڈر/بل پر ڈویلپر کا ایزی پیسہ نہیں — صرف دکان کے اپنے اکاؤنٹ
 // 🆕 FM1910MO417: بقایا کی یاد دہانی (ریمائنڈر) کا پورا پیغام، عنوان اور بٹن اردو میں — بیوپاری کے آرڈر کی یاد دہانی بھی
 // 🆕 FM1910MO418: ہر پرنٹ/شیئر کے نیچے نیا اشتہار — موبائل اور لیپ ٹاپ / کمپیوٹر کے لیے سافٹ وئیر
-const APP_BUILD_VERSION = 'FM1910MO418'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بل اور رپورٹوں کے نیچے نیا اشتہار — موبائل اور لیپ ٹاپ کے لیے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM1910MO419: ہر گاہک کا اپنا بل نمبر 001، 002، 003… — پچھلا/اگلا بل فوراً ملے
+const APP_BUILD_VERSION = 'FM1910MO419'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'اب ہر گاہک کا اپنا بل نمبر — 001، 002، 003…'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16081,7 +16082,18 @@ function fmBillSeqOf(inv){
   const i = list.findIndex(x => x.invoice_id === inv.invoice_id);
   return i >= 0 ? i + 1 : list.length + 1;
 }
-function fmBillSeqStr(inv){ return String(fmBillSeqOf(inv)).padStart(4, '0'); }
+// 🔢 FM1910MO419 (پیارے بھائی): ہر گاہک کا اپنا بل نمبر — 001، 002، 003… (پچھلا اور اگلا بل فوراً مل جائے)۔
+//   نئے بلوں پر بنتے وقت لگتا ہے (cust_bill_no)؛ پرانے بلوں پر پہلے والا عام نمبر ہی دکھتا ہے
+function nextCustBillNo(cid){
+  if(cid == null) return 0;
+  return (invoicesData || []).reduce((m, x) => (x && x.customer_id === cid) ? Math.max(m, Number(x.cust_bill_no) || 0) : m, 0) + 1;
+}
+function stampCustBillNo(inv){ try{ if(inv && inv.customer_id != null && !(Number(inv.cust_bill_no) > 0)) inv.cust_bill_no = nextCustBillNo(inv.customer_id); }catch(e){} return inv; }
+function fmBillSeqStr(inv){
+  if(inv && Number(inv.cust_bill_no) > 0) return String(inv.cust_bill_no).padStart(3, '0');
+  if(inv && inv.customer_id != null && (inv.invoice_id === 'DRAFT' || !inv.created_at)) return String(nextCustBillNo(inv.customer_id)).padStart(3, '0'); // پریویو: اگلا نمبر
+  return String(fmBillSeqOf(inv)).padStart(4, '0');
+}
 const FM_URDU_DAYS = ['اتوار', 'سوموار', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'];
 
 // ---------- بل مکمل (Complete) کرنے سے پہلے کبھی بھی دیکھ سکیں کہ بل بالکل ویسا ہی بن رہا ہے جیسا چاہیے —
@@ -16398,6 +16410,7 @@ function finalizeInvoice(){
     status: 'completed',
     created_at: new Date().toISOString(), biz_date: bizCurrentDate()
   };
+  stampCustBillNo(invoice); // 🔢 گاہک کا اپنا بل نمبر
   // TODO: یہاں invoices + invoice_items table میں اصل INSERT ہوگا
   invoicesData.unshift(invoice);
 
@@ -16808,6 +16821,7 @@ function approvePendingBill(){
     reviewed_by_admin: true, // بل ایڈمن کی نظر سے گزر چکا ہے (بیج کے لیے استعمال ہوگا)
     created_at: new Date().toISOString(), biz_date: bizCurrentDate()
   };
+  stampCustBillNo(invoice); // 🔢 گاہک کا اپنا بل نمبر
   invoicesData.unshift(invoice);
 
   // ---------- اسٹاک کاٹیں ----------
@@ -42664,7 +42678,7 @@ function renderBillHistory(){
           <div class="bNo">${inv.invoice_no} <span class="billStatusTag ${inv.status}">${
             inv.status==='completed' ? 'مکمل' : inv.status==='edited' ? 'ترمیم شدہ' : 'ڈیلیٹ شدہ'
           }</span> ${payTag}${inv.reviewed_by_admin ? ' <span class="pendingStatusTag approved">✔ ADMIN REVIEWED</span>' : ''}</div>
-          <div class="bMeta">${creatorBadge} ${inv.customer_name} | Rs. ${inv.grand_total.toLocaleString()}</div>
+          <div class="bMeta">${creatorBadge} ${inv.customer_name}${Number(inv.cust_bill_no) > 0 ? ' <b style="color:#7c3aed;">· بل ' + String(inv.cust_bill_no).padStart(3, '0') + '</b>' : ''} | Rs. ${inv.grand_total.toLocaleString()}</div>
         </div>
       </div>
       <div class="billActions">
@@ -42837,6 +42851,7 @@ function confirmBillTransfer(invoiceId){
       amount_due: amt, paid_now: 0, new_balance: bBefore + amt,
       created_at: new Date().toISOString(), biz_date: day
     });
+    stampCustBillNo(target); // 🔢 گاہک کا اپنا بل نمبر
     invoicesData.unshift(target);
   }
   target.transfers = (target.transfers || []).concat([{from: A.customer_id, fromName: A.name, fromInvoice: inv.invoice_no, amount: amt, items: moved.map(m => ({name: m.name, qty: m.qty})), at: new Date().toISOString(), by}]);
