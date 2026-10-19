@@ -9537,8 +9537,9 @@ function getDeveloperContact(){
 // 🆕 FM1910MO415: (1) 🔁 بل کا شاپر/پورا بل دوسرے گاہک کے کھاتے میں (2) چالان کا حساب لگاتے وقت مزدوری لازمی (3) بل پر نقد/جاز/ایزی والی لائن اور نوٹ موٹے (4) بل کے نیچے درخواست والا پیغام آن/آف
 // 🆕 FM1910MO416: ریمائنڈر/بل پر ڈویلپر کا ایزی پیسہ نہیں — صرف دکان کے اپنے اکاؤنٹ
 // 🆕 FM1910MO417: بقایا کی یاد دہانی (ریمائنڈر) کا پورا پیغام، عنوان اور بٹن اردو میں — بیوپاری کے آرڈر کی یاد دہانی بھی
-const APP_BUILD_VERSION = 'FM1910MO417'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بقایا کی یاد دہانی اب پوری اردو میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM1910MO418: ہر پرنٹ/شیئر کے نیچے نیا اشتہار — موبائل اور لیپ ٹاپ / کمپیوٹر کے لیے سافٹ وئیر
+const APP_BUILD_VERSION = 'FM1910MO418'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بل اور رپورٹوں کے نیچے نیا اشتہار — موبائل اور لیپ ٹاپ کے لیے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -32059,7 +32060,7 @@ function smDistCompute(dayArg){
 // کے نیچے ہماری برانڈنگ۔ اصل کینوس نہیں بدلتا — باہر جاتے وقت نیچے ایک پٹی جڑ کر نیا کینوس بنتا ہے (دوبارہ نہیں جڑتی)
 // =====================================================================
 // ✏️ FM1810SU407 (پیارے بھائی): نیا اشتہار — صدام حسین مغل کا نمبر، ساتھ فون (☎) کا نشان
-const BRAND_AD_SEGS = ['یہ سافٹ وئیر آپ کو کیسا لگا۔؟؟', 'آپ اپنے موبائیل کے لیے یہ سافٹ بنوانا چاہتے ہیں؟؟؟', 'ہم سے رابطہ کریں ۔۔۔ صدام حسین مغل'];
+const BRAND_AD_SEGS = ['یہ سافٹ وئیر آپ کو کیسا لگا؟', 'آپ اپنے موبائل اور لیپ ٹاپ / کمپیوٹر کے لیے ایسا سافٹ وئیر بنوانا چاہتے ہیں؟', 'ہم سے رابطہ کریں ۔۔۔ صدام حسین مغل']; // ✏️ لیپ ٹاپ/کمپیوٹر کا ذکر (پیارے بھائی)
 const BRAND_AD_PHONE = '03425556364';
 const BRAND_AD_TEXT = BRAND_AD_SEGS.join(' ۔۔۔ ') + ' ۔۔۔ ☎ ' + BRAND_AD_PHONE;
 const BRAND_AD_FONT = "UrduAll, Arial, 'JameelNooriNastaleeq', sans-serif";
@@ -32069,19 +32070,18 @@ function brandFooterStrip(w){
   const c = document.createElement('canvas');
   const t = c.getContext('2d');
   const maxW = w - 2 * pad;
-  const fs = Math.max(15, Math.min(40, Math.round(w * 0.036)));
+  const fs0 = Math.max(17, Math.min(38, Math.round(w * 0.034)));
+  let fs = fs0; t.font = `bold ${fs}px ${BRAND_AD_FONT}`;
+  while(fs0 >= 24 && BRAND_AD_SEGS.some(sg => t.measureText(sg).width > maxW) && fs > Math.round(fs0 * 0.8)){ fs--; t.font = `bold ${fs}px ${BRAND_AD_FONT}`; } // تھوڑا چھوٹا کر کے ہر جملہ ایک سطر میں
   // جملے سطروں میں: جتنے ایک سطر میں آ جائیں؛ تنگ کاغذ (تھرمل) پر لمبا جملہ لفظوں سے اگلی سطر میں — لکھائی چھوٹی نہیں ہوتی
   t.font = `bold ${fs}px ${BRAND_AD_FONT}`;
   const fits = v => t.measureText(v).width <= maxW;
   const lines = []; let cur = '';
-  BRAND_AD_SEGS.forEach(sg => {
-    const tr = cur ? cur + ' ۔۔۔ ' + sg : sg;
-    if(fits(tr)){ cur = tr; return; }
-    if(cur) lines.push(cur);
-    if(fits(sg)){ cur = sg; return; }
+  BRAND_AD_SEGS.forEach(sg => { // ہر جملہ اپنی سطر میں؛ لمبا ہو تو لفظوں سے اگلی سطر — تاکہ جملے آپس میں نہ ملیں
+    if(fits(sg)){ lines.push(sg); return; }
     cur = ''; sg.split(' ').forEach(wd => { const t2 = cur ? cur + ' ' + wd : wd; if(cur && !fits(t2)){ lines.push(cur); cur = wd; } else cur = t2; });
+    if(cur) lines.push(cur);
   });
-  if(cur) lines.push(cur);
   const lh = Math.round(fs * 1.75), ph = Math.round(fs * 1.25), phH = Math.round(ph * 1.6);
   c.width = w; c.height = pad + lines.length * lh + phH + Math.round(pad / 2);
   const x = c.getContext('2d');
