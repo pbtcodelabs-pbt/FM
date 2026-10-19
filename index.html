@@ -6123,6 +6123,7 @@ function __appHostKind(h, p){
               <span class="pscValue" id="pscDecimalsVal">0</span>
               <button onclick="adjustPreviewStyle('priceDecimals', 1, 0, 4)">+</button>
             </div>
+            <button type="button" id="pscWishBtn" onclick="toggleBillWish(AppState.settings.printShowWish === false)" title="بل کے نیچے گاہک کے نام والا درخواست کا پیغام" style="padding:6px 10px; border-radius:10px; border:2px solid #16a34a; background:#dcfce7; color:#14532d; font-weight:900; font-size:13px; cursor:pointer; font-family:'JameelNooriNastaleeq',sans-serif; line-height:1.6;">💌 پیغام: آن</button>
             <button type="button" class="pscMoreToggleBtn" id="pscMoreToggleBtn" onclick="togglePscMoreOptions('pscMoreWrap','pscMoreToggleBtn')">⚙️ More ▾</button>
           </div>
           <div class="pscMoreWrap" id="pscMoreWrap">
@@ -9540,8 +9541,9 @@ function getDeveloperContact(){
 // 🆕 FM1910MO418: ہر پرنٹ/شیئر کے نیچے نیا اشتہار — موبائل اور لیپ ٹاپ / کمپیوٹر کے لیے سافٹ وئیر
 // 🆕 FM1910MO419: ہر گاہک کا اپنا بل نمبر 001، 002، 003… — پچھلا/اگلا بل فوراً ملے
 // 🆕 FM1910MO420: گاہک کا بل نمبر بل کے نیچے (فوٹر) میں بھی، الگ نمایاں ڈبے میں
-const APP_BUILD_VERSION = 'FM1910MO420'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بل نمبر اب بل کے اوپر بھی اور نیچے بھی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM1910MO421: بل پریویو میں سامنے "💌 پیغام: آن/آف" بٹن (درخواست والا ڈبہ چھاپنا ہے یا نہیں)
+const APP_BUILD_VERSION = 'FM1910MO421'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بل پریویو میں "💌 پیغام: آن/آف" بٹن — نیچے والا پیغام چھاپنا ہو یا نہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -44382,7 +44384,7 @@ function syncPreviewStyleControls(){
     }catch(e){ console.error('swatch render failed', e); }
   }
   document.getElementById('pscA4Chk').checked = AppState.settings.invoicePrintStyle === 'a4';
-  { const w = document.getElementById('pscWishChk'); if(w) w.checked = AppState.settings.printShowWish !== false; }
+  { const w = document.getElementById('pscWishChk'); if(w) w.checked = AppState.settings.printShowWish !== false; billWishBtnSync(); }
   const iOrientRow = document.getElementById('pscOrientRow');
   if(iOrientRow) iOrientRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'flex' : 'none';
   const iPwRow = document.getElementById('pscPaperWidthRow');
@@ -51479,10 +51481,18 @@ function syncPreviewPaperWidthButtons(){
 
 // ---------- Receipt Content ٹوگلز — سادہ آن/آف، فوری محفوظ ----------
 // 💌 FM1910MO415 (صدام بھائی): بل کے نیچے والا درخواست کا ڈبہ — جب چاہیں پرنٹ میں، جب چاہیں نہیں
+// 💌 FM1910MO421: بل پریویو میں سامنے نظر آنے والا بٹن — "💌 پیغام: آن / آف"
+function billWishBtnSync(){
+  const b = document.getElementById('pscWishBtn'); if(!b) return;
+  const on = AppState.settings.printShowWish !== false;
+  b.textContent = on ? '💌 پیغام: آن' : '💌 پیغام: آف';
+  b.style.background = on ? '#dcfce7' : '#fee2e2'; b.style.borderColor = on ? '#16a34a' : '#dc2626'; b.style.color = on ? '#14532d' : '#7f1d1d';
+}
 function toggleBillWish(checked){
   AppState.settings.printShowWish = !!checked;
   persistAllData();
   ['pscWishChk', 'printShowWishChk'].forEach(id => { const el = document.getElementById(id); if(el) el.checked = !!checked; });
+  billWishBtnSync();
   try{ if(document.getElementById('invoicePreviewModal')?.classList.contains('show')) rerenderInvoicePreview(); }catch(e){}
 }
 function updatePrintToggle(key, checked){
