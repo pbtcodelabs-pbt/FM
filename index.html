@@ -9543,8 +9543,9 @@ function getDeveloperContact(){
 // 🆕 FM1910MO420: گاہک کا بل نمبر بل کے نیچے (فوٹر) میں بھی، الگ نمایاں ڈبے میں
 // 🆕 FM1910MO421: بل پریویو میں سامنے "💌 پیغام: آن/آف" بٹن (درخواست والا ڈبہ چھاپنا ہے یا نہیں)
 // 🆕 FM1910MO423: ریکوری والوں کی وصولی دوسرے فون سے آتے ہی ہوم کا "ٹوٹل کیش آیا" فوراً تازہ (پہلے 0 رہتا تھا)
-const APP_BUILD_VERSION = 'FM1910MO423'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ریکوری والوں کی وصولی آتے ہی ٹوٹل کیش آیا فوراً تازہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM1910MO424: "کل" کی تاریخ میں ڈالی وصولی کا پیسہ آج "ٹوٹل کیش آیا" میں (کھاتہ پھر بھی کل کا)
+const APP_BUILD_VERSION = 'FM1910MO424'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'کل کی تاریخ والی وصولی کا پیسہ آج ٹوٹل کیش آیا میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10376,7 +10377,7 @@ function hmExplain(kind){
       + (N(S.tRlPendAll) > 0 ? note(`⏳ اس میں <b dir="ltr">${f(S.tRlPendAll)}</b> وہ وصولی بھی شامل ہے جو ریکوری والوں نے لے لی مگر ابھی "وصولی کھاتے اپڈیٹ" میں منظور نہیں ہوئی`, true) : '')
       + (() => { // 📅 FM1910MO423: کوئی وصولی کسی اور کاروباری تاریخ میں درج ہے تو بتا دیں — "کیش آیا 0 کیوں؟"
         const rr = S.range || {}, inR = d => rr.fromStr ? (d >= rr.fromStr && d <= (rr.toStr || rr.fromStr)) : d === S.todayStr;
-        const byDay = {}; (typeof recoveryListData !== 'undefined' ? recoveryListData : []).forEach(e => { if(!e || e.status !== 'pending') return; const d = recDay(e); if(d && !inR(d)) byDay[d] = (byDay[d] || 0) + (Number(e.amount) || 0); });
+        const byDay = {}; (typeof recoveryListData !== 'undefined' ? recoveryListData : []).forEach(e => { if(!e || e.status !== 'pending') return; const d = rlCashDay(e); if(d && !inR(d)) byDay[d] = (byDay[d] || 0) + (Number(e.amount) || 0); });
         const ds = Object.keys(byDay).sort().reverse().slice(0, 5);
         return ds.length ? note('📅 ریکوری والوں کی کچھ وصولی <b>دوسری تاریخ</b> میں درج ہے (اس لیے یہاں نہیں گنی گئی): ' + ds.map(d => `<b>${E(bizFmt(d))}</b> — <b dir="ltr">${f(byDay[d])}</b>`).join('، ') + ' — اوپر وہ مدت چنیں (مثلاً "گزشتہ کل")', true) : '';
       })();
@@ -23814,6 +23815,13 @@ function bsPayDay(p){
   return p.date || '';
 }
 // ادائیگی میں نقد حصہ کتنا: ریکوری کی ملی جلی ادائیگی (نقد + ایزی پیسہ/بینک) میں صرف نقد گنیں
+// 💵 FM1910MO424: ادائیگی کا پیسہ کس دن ہاتھ آیا — کھاتہ پچھلی تاریخ (backdated) میں ہو تب بھی کیش اگلے دن کا
+function bsPayCashDay(p){
+  if(!p) return '';
+  if(p.cash_day) return p.cash_day;
+  const d = bsPayDay(p);
+  return (p.backdated && d && typeof bizDayAfter === 'function') ? bizDayAfter(d) : d;
+}
 function bsPayCash(p){
   if(p && p.cash_amount != null) return Number(p.cash_amount) || 0;
   return bsIsCashMethod(p && p.method) ? (Number(p && p.amount) || 0) : 0;
@@ -24050,10 +24058,10 @@ function computeBizSummary(preset, cashByRange){
   const otherManual = _od.otherAmt; // ➕ فارم والی دیگر آمدن (ہاتھ سے، اختیاری)
   const tInv = invs.filter(i => inCash(bsInvDay(i)));
   const tBillCash = tInv.reduce((s, i) => s + bsBillCash(i), 0);
-  const tPays = pays.filter(p => inCash(bsPayDay(p)) && bsPayCash(p) > 0);
+  const tPays = pays.filter(p => inCash(bsPayCashDay(p)) && bsPayCash(p) > 0); // 💵 FM1910MO424: کل کی تاریخ والی وصولی کا پیسہ آج آیا تو آج
   // 🤝 FM1910MO413 (صدام بھائی): ریکوری والوں کی سارا دن کی وصولی بھی "کیش آیا" میں — جو ابھی منظوری کی منتظر ہے وہ بھی (پیسہ آ چکا)۔
   //   منظور ہونے پر یہی وصولی ادائیگی بن جاتی ہے (اوپر tPays میں)، اس لیے یہاں صرف منظوری کی منتظر — ڈبل نہیں
-  const tRlPend = (typeof recoveryListData !== 'undefined' ? (recoveryListData || []) : []).filter(e => e && e.status === 'pending' && inCash(recDay(e)));
+  const tRlPend = (typeof recoveryListData !== 'undefined' ? (recoveryListData || []) : []).filter(e => e && e.status === 'pending' && inCash(rlCashDay(e))); // 💵 FM1910MO424
   const _rlCash = e => getRecoverySplit(e).filter(m => !m.method || m.method === 'cash').reduce((a, m) => a + (Number(m.amount) || 0), 0);
   const tRlPendCash = tRlPend.reduce((a, e) => a + _rlCash(e), 0);
   const tRecovery = tPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + bsPayCash(p), 0) + tRlPendCash;
@@ -24094,7 +24102,7 @@ function computeBizSummary(preset, cashByRange){
     const rest = Math.max(0, (Number(opening) || 0) - oc - ow - ob); _addIn('open', null, {cash: oc + rest, mobile: ow, bank: ob}); }
   if(otherManual) _addIn('manual', _od.otherNote || '', {cash: Number(otherManual) || 0});
   tInv.forEach(i => { const a = bsBillCash(i); if(a > 0){ let k = bsMethodKey(i.payment_method); if(k === 'wallet') k = 'cash'; _addIn('bill', i, {[k]: a}); } });
-  pays.filter(p => p.direction === 'in' && inCash(bsPayDay(p))).forEach(p => _addIn(p.party_type === 'customer' ? 'rec' : 'oth', p, bsPaySplit(p)));
+  pays.filter(p => p.direction === 'in' && inCash(bsPayCashDay(p))).forEach(p => _addIn(p.party_type === 'customer' ? 'rec' : 'oth', p, bsPaySplit(p)));
   tRlPend.forEach(e => { const by = {}; getRecoverySplit(e).forEach(m => { let k = bsMethodKey(m.method); if(k === 'wallet') return; by[k] = (by[k] || 0) + (Number(m.amount) || 0); }); _addIn('rlp', e, by); });
   const inByM = {}; inItems.forEach(x => Object.keys(x.by).forEach(k => { inByM[k] = (inByM[k] || 0) + (Number(x.by[k]) || 0); }));
   const cashInAll = inItems.reduce((a, x) => a + x.amt, 0);
@@ -33919,6 +33927,7 @@ function buildRecoveryEntryFromSplit(c){
     employeeName: AppState.currentUser?.name || 'Unknown',
     status: 'pending', // ---------- ایڈمن Confirm کرنے تک اصل کھاتے میں کوئی تبدیلی نہیں ----------
     bizDate: rlEntryDate(),
+    cashDay: bizCurrentDate(), // 💵 FM1910MO424: پیسہ کس دن ہاتھ آیا — "کیش آیا" اسی دن
     ...(rlEntryDayMode === 'yesterday' ? { backdated: true } : {}), // 📅 FM910FR349: کل کی وصولی (تاریخ بدلنے کے بعد درج ہوئی)
     createdAt: new Date().toISOString(),
     confirmedAt: null
@@ -34069,6 +34078,9 @@ function localDateKey(d){ d = d || new Date(); const p = n => String(n).padStart
 function bizCurrentDate(){ return (bizDayState && bizDayState.cur) ? bizDayState.cur : localDateKey(); }
 function bizDateKey(){ return bizOverride || bizCurrentDate(); }
 function recDay(e){ return (e && e.bizDate) || ((e && e.createdAt) || '').split('T')[0]; }
+// 💵 FM1910MO424 (صدام بھائی): ساری وصولی "کل" کی تاریخ میں ڈالتے ہیں (کھاتہ کل کا) — مگر پیسہ آج ہاتھ میں آیا، اس لیے "کیش آیا" میں اسی دن گنیں جس دن درج ہوئی
+function bizDayAfter(d){ try{ const dt = new Date(d + 'T12:00:00'); dt.setDate(dt.getDate() + 1); return localDateKey(dt); }catch(e){ return d; } }
+function rlCashDay(e){ if(!e) return ''; if(e.cashDay) return e.cashDay; const d = recDay(e); return (e.backdated && d) ? bizDayAfter(d) : d; }
 function invDay(inv){ return (inv && inv.biz_date) || ((inv && inv.created_at) || '').split('T')[0]; }
 function bizFmt(d){ const a = (d || '').split('-'); return a.length === 3 ? a[2] + '/' + a[1] + '/' + a[0] : d; }
 function bizNextDate(D){ const dt = new Date(D + 'T12:00:00'); dt.setDate(dt.getDate() + 1); const n = localDateKey(dt), t = localDateKey(); return n > t ? n : t; }
@@ -34833,6 +34845,7 @@ function confirmRecoveryEntry(entryId){
       direction: 'in', party_type: 'customer', party_id: c.customer_id, party_name: c.name,
       amount: entry.amount, balance_before: c.total_receivable + (entry.amount - excess), balance_after: c.total_receivable,
       biz_date: entry.bizDate || bizDateKey(), ...(entry.backdated ? { backdated: true } : {}), // 📅 FM910FR349
+      cash_day: rlCashDay(entry) || bizDateKey(), // 💵 FM1910MO424: کیش اسی دن جس دن وصولی ہاتھ آئی
       method: recoverySplitLabel(entry) || 'Cash',
       cash_amount: _cashPart, // 💵 FM1410WE387: سمری میں صرف نقد حصہ کیش میں گنا جائے (ایزی پیسہ/بینک نہیں)
       note: `ریکوری لسٹ — ${entry.employeeName}${entry.note ? ' — 📝 ' + entry.note : ''}${excess > 0 ? ' — 💳 Rs. ' + excess.toLocaleString() + ' والٹ میں' : ''}`
