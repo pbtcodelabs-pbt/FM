@@ -9539,8 +9539,9 @@ function getDeveloperContact(){
 // 🆕 FM1910MO417: بقایا کی یاد دہانی (ریمائنڈر) کا پورا پیغام، عنوان اور بٹن اردو میں — بیوپاری کے آرڈر کی یاد دہانی بھی
 // 🆕 FM1910MO418: ہر پرنٹ/شیئر کے نیچے نیا اشتہار — موبائل اور لیپ ٹاپ / کمپیوٹر کے لیے سافٹ وئیر
 // 🆕 FM1910MO419: ہر گاہک کا اپنا بل نمبر 001، 002، 003… — پچھلا/اگلا بل فوراً ملے
-const APP_BUILD_VERSION = 'FM1910MO419'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'اب ہر گاہک کا اپنا بل نمبر — 001، 002، 003…'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM1910MO420: گاہک کا بل نمبر بل کے نیچے (فوٹر) میں بھی، الگ نمایاں ڈبے میں
+const APP_BUILD_VERSION = 'FM1910MO420'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بل نمبر اب بل کے اوپر بھی اور نیچے بھی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -43454,6 +43455,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   if(totalReturnedAmt > 0) estimatedHeight += 44; // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
   const _wishW = _wishLayout(ctx, F, pxWidth - 16, invoice);
   if(_wishW) estimatedHeight += _wishW.h + 16;
+  estimatedHeight += Math.round(46 * fscale) + 22; // 🔢 نیچے الگ ڈبے میں بل نمبر
   estimatedHeight += 34; // Grand Total لائن
   if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += 16;
   if(AppState.settings.printShowBranding) estimatedHeight += 20;
@@ -43889,6 +43891,18 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     summaryBottom = _drawYesterdayBox(ctx, FP, colX[0], tableRight, _t, _payLay, rc, _bw, fscale);
   }
   y = Math.max(summaryBottom, accountBottom, paymentBoxTop) + 24;
+  // 🔢 FM1910MO420 (پیارے بھائی): نیچے (فوٹر) میں بھی بل نمبر — پیسوں والے ڈبوں سے الگ، اپنے نمایاں ڈبے میں
+  {
+    const _bnT = 'بل نمبر:  ' + fmBillSeqStr(invoice);
+    ctx.font = F('bold 19px');
+    const _bW = Math.min(pxWidth - 16, ctx.measureText(_bnT).width + Math.round(44 * fscale)), _bH = Math.round(46 * fscale);
+    const _bL = Math.round(pxWidth / 2 - _bW / 2);
+    ctx.fillStyle = '#e5e7eb'; ctx.fillRect(_bL, y, _bW, _bH);
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 2.5; ctx.strokeRect(_bL + 1, y + 1, _bW - 2, _bH - 2);
+    ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+    ctx.fillText(_bnT, pxWidth / 2, y + _bH / 2 + Math.round(7 * fscale));
+    y += _bH + 22;
+  }
   { const _w = _wishLayout(ctx, F, pxWidth - 16, invoice); if(_w){ y = _drawWishBox(ctx, F, 8, pxWidth - 8, y, _w, rc) + 26; } }
 
   ctx.textAlign = 'center';
