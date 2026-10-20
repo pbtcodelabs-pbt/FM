@@ -2106,6 +2106,12 @@ function __appHostKind(h, p){
   .billStatusTabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;}
   .billTabBtn{flex:1 1 auto; padding:7px 8px; border:1px solid #dbe1ea; background:var(--card); border-radius:8px; font-size:12px; font-weight:700; color:var(--muted); cursor:pointer;}
   .billTabBtn.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+  /* 🎨 FM2010TU430 (صدام بھائی): پیمنٹس کے فلٹر اپنے کیپسول کے رنگ میں — وصولی سبز، ادائیگی سرخ؛ چنا ہوا گہرا */
+  #pmtTab-in{background:#dcfce7; color:#14532d; border:1.5px solid #16a34a; border-radius:20px;}
+  #pmtTab-in.active{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border-color:#14532d;}
+  #pmtTab-out{background:#fee2e2; color:#991b1b; border:1.5px solid #dc2626; border-radius:20px;}
+  #pmtTab-out.active{background:linear-gradient(180deg,#ef4444,#b91c1c); color:#fff; border-color:#7f1d1d;}
+  #pmtTab-all{border-radius:20px;}
   .billTabBtn.bulkToggleBtn{background:#fef2f2; color:var(--danger); border-color:#fecaca;}
   .billTabBtn.bulkToggleBtn.active{background:var(--danger); color:#fff;}
   .bulkDeleteBar{background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:10px 14px; margin-bottom:12px;}
@@ -5440,8 +5446,8 @@ function __appHostKind(h, p){
 
       <div class="billStatusTabs">
         <button class="billTabBtn active" id="pmtTab-all" onclick="setPaymentsFilter('all')">📋 تمام</button>
-        <button class="billTabBtn" id="pmtTab-in" onclick="setPaymentsFilter('in')" style="background:#dcfce7; color:#14532d;">💰 وصول کیے</button>
-        <button class="billTabBtn" id="pmtTab-out" onclick="setPaymentsFilter('out')" style="background:#fee2e2; color:#991b1b;">💸 ادا کیے</button>
+        <button class="billTabBtn" id="pmtTab-in" onclick="setPaymentsFilter('in')">💰 وصولی</button>
+        <button class="billTabBtn" id="pmtTab-out" onclick="setPaymentsFilter('out')">💸 ادائیگی</button>
       </div>
 
       <div class="billCompactBar">
@@ -9553,8 +9559,9 @@ function getDeveloperContact(){
 // 🆕 FM2010TU427: پرانے بلوں کی تلاش — نام (کچھ حصہ بھی)، بل نمبر (002) یا پوری رقم، ایک ہی خانے میں؛ تاریخ فلٹر کاروباری تاریخ سے
 // 🆕 FM2010TU428: بل ہسٹری میں "شاپر / بل منتقل" لمبا نیلا بٹن، باقی بٹنوں کے اوپر
 // 🆕 FM2010TU429: پیمنٹس — ہر پیمنٹ چھوٹا رنگین کیپسول (وصول سبز، ادا سرخ)، فلٹر "وصول کیے / ادا کیے"
-const APP_BUILD_VERSION = 'FM2010TU429'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'پیمنٹس: وصول کی رقم سبز کیپسول، ادا کی رقم سرخ کیپسول'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2010TU430: پیمنٹس کے فلٹر بٹن پرانے نام (وصولی / ادائیگی) اپنے رنگ میں — سبز / سرخ
+const APP_BUILD_VERSION = 'FM2010TU430'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'پیمنٹس: وصولی سبز، ادائیگی سرخ — فلٹر بٹن بھی اسی رنگ میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -38675,7 +38682,7 @@ function renderPaymentsScreen(){
     return `<div onclick="viewPaymentDetail(${p.payment_id})" style="cursor:pointer; background:${bg}; border:1.5px solid ${bd}; border-radius:22px; padding:5px 14px; margin-bottom:6px; display:flex; align-items:center; gap:8px; box-shadow:0 2px 0 ${bd}55;">
       <div style="flex:none; width:30px; height:30px; border-radius:50%; background:${bd}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900;">${isIn ? '⬇' : '⬆'}</div>
       <div style="flex:1; min-width:0; line-height:1.45;">
-        <div style="font-weight:800; font-size:14px; color:${fg}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${isIn ? 'وصول از' : 'ادا کیے'}: <bdi>${_e(p.party_name)}</bdi></div>
+        <div style="font-weight:800; font-size:14px; color:${fg}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${isIn ? '💰 وصولی' : '💸 ادائیگی'}: <bdi>${_e(p.party_name)}</bdi></div>
         <div style="font-size:11.5px; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:rtl;">${meta}${p.note ? ' • 📝 <bdi>' + _e(p.note) + '</bdi>' : ''}${p.slip_image ? ' • 🧾' : ''}</div>
       </div>
       <div style="flex:none; font-weight:900; font-size:16px; color:${fg}; font-family:Arial,sans-serif; direction:ltr; white-space:nowrap;">${isIn ? '+' : '−'} ${Number(p.amount || 0).toLocaleString('en-US')}</div>
