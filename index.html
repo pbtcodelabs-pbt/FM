@@ -5440,8 +5440,8 @@ function __appHostKind(h, p){
 
       <div class="billStatusTabs">
         <button class="billTabBtn active" id="pmtTab-all" onclick="setPaymentsFilter('all')">📋 تمام</button>
-        <button class="billTabBtn" id="pmtTab-in" onclick="setPaymentsFilter('in')">💰 وصولی</button>
-        <button class="billTabBtn" id="pmtTab-out" onclick="setPaymentsFilter('out')">💸 ادائیگی</button>
+        <button class="billTabBtn" id="pmtTab-in" onclick="setPaymentsFilter('in')" style="background:#dcfce7; color:#14532d;">💰 وصول کیے</button>
+        <button class="billTabBtn" id="pmtTab-out" onclick="setPaymentsFilter('out')" style="background:#fee2e2; color:#991b1b;">💸 ادا کیے</button>
       </div>
 
       <div class="billCompactBar">
@@ -9552,8 +9552,9 @@ function getDeveloperContact(){
 // 🆕 FM2010TU426: (1) اخراجات کے ڈراپ ڈاؤن میں لکھے جا چکے خرچوں کے آگے ✅ (2) پرچون ریٹ: سرخی ہمیشہ اوپر، پانچوں کالم کے نام خود بدلیں (3) بل ہسٹری میں بٹن کا نام "🔁 شاپر / بل منتقل"
 // 🆕 FM2010TU427: پرانے بلوں کی تلاش — نام (کچھ حصہ بھی)، بل نمبر (002) یا پوری رقم، ایک ہی خانے میں؛ تاریخ فلٹر کاروباری تاریخ سے
 // 🆕 FM2010TU428: بل ہسٹری میں "شاپر / بل منتقل" لمبا نیلا بٹن، باقی بٹنوں کے اوپر
-const APP_BUILD_VERSION = 'FM2010TU428'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بل منتقل کرنے کا نیلا لمبا بٹن اب باقی بٹنوں کے اوپر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2010TU429: پیمنٹس — ہر پیمنٹ چھوٹا رنگین کیپسول (وصول سبز، ادا سرخ)، فلٹر "وصول کیے / ادا کیے"
+const APP_BUILD_VERSION = 'FM2010TU429'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'پیمنٹس: وصول کی رقم سبز کیپسول، ادا کی رقم سرخ کیپسول'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -38663,19 +38664,23 @@ function renderPaymentsScreen(){
     wrap.innerHTML = `<div class="profileEmpty">کوئی پیمنٹ ریکارڈ نہیں</div>`;
     return;
   }
-  wrap.innerHTML = list.map(p => `
-    <div class="bankAccCard" style="cursor:pointer;" onclick="viewPaymentDetail(${p.payment_id})">
-      <div class="bankAccCardTop">
-        <div style="min-width:0;">
-          <div class="bankAccType">${p.direction === 'in' ? '💰 Received from' : '💸 Paid to'} ${p.party_name}</div>
-          <div class="bankAccTitle">${p.date}${p.method ? ' • ' + p.method : ''}${p.account_number ? ' • ' + p.account_number : ''}</div>
-        </div>
-        <div style="font-weight:800; font-size:16px; color:${p.direction === 'in' ? '#166534' : 'var(--danger)'};">Rs. ${p.amount.toLocaleString()}</div>
+  // 🎨 FM2010TU429 (صدام بھائی): ہر پیمنٹ چھوٹا رنگین کیپسول — آئی رقم سبز، دی ہوئی رقم سرخ؛ رنگ سے فوراً پہچان
+  const _e = t => String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const _tm = p => { try{ if(!p.created_at) return ''; const d = new Date(p.created_at); if(isNaN(d)) return ''; let h = d.getHours(); const m = String(d.getMinutes()).padStart(2,'0'); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return h + ':' + m + ' ' + ap; }catch(e){ return ''; } };
+  wrap.innerHTML = list.map(p => {
+    const isIn = p.direction === 'in';
+    const bg = isIn ? 'linear-gradient(180deg,#dcfce7,#bbf7d0)' : 'linear-gradient(180deg,#fee2e2,#fecaca)';
+    const bd = isIn ? '#16a34a' : '#dc2626', fg = isIn ? '#14532d' : '#7f1d1d';
+    const meta = [p.date, p.method, p.account_number, _tm(p)].filter(Boolean).map(x => '<bdi>' + _e(x) + '</bdi>').join(' • ');
+    return `<div onclick="viewPaymentDetail(${p.payment_id})" style="cursor:pointer; background:${bg}; border:1.5px solid ${bd}; border-radius:22px; padding:5px 14px; margin-bottom:6px; display:flex; align-items:center; gap:8px; box-shadow:0 2px 0 ${bd}55;">
+      <div style="flex:none; width:30px; height:30px; border-radius:50%; background:${bd}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900;">${isIn ? '⬇' : '⬆'}</div>
+      <div style="flex:1; min-width:0; line-height:1.45;">
+        <div style="font-weight:800; font-size:14px; color:${fg}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${isIn ? 'وصول از' : 'ادا کیے'}: <bdi>${_e(p.party_name)}</bdi></div>
+        <div style="font-size:11.5px; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:rtl;">${meta}${p.note ? ' • 📝 <bdi>' + _e(p.note) + '</bdi>' : ''}${p.slip_image ? ' • 🧾' : ''}</div>
       </div>
-      ${p.note ? `<div class="bankAccMeta">📝 ${p.note}</div>` : ''}
-      ${p.slip_image ? `<img src="${p.slip_image}" class="bankAccImg">` : ''}
-    </div>
-  `).join('');
+      <div style="flex:none; font-weight:900; font-size:16px; color:${fg}; font-family:Arial,sans-serif; direction:ltr; white-space:nowrap;">${isIn ? '+' : '−'} ${Number(p.amount || 0).toLocaleString('en-US')}</div>
+    </div>`;
+  }).join('');
 }
 
 // ---------- 💳 Record Payment Modal — کسی بھی سمت کی پیمنٹ ایک ہی فارم سے ----------
