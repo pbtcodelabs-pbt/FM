@@ -5695,7 +5695,7 @@ function __appHostKind(h, p){
           <option value="thisyear">یہ سال</option>
           <option value="custom">📅 تاریخ منتخب کریں</option>
         </select>
-        <input type="text" id="billSearchInput" class="bcbItem bcbName" placeholder="🔍 نام لکھیں" oninput="renderBillHistory()">
+        <input type="text" id="billSearchInput" class="bcbItem bcbName" placeholder="🔍 نام، بل نمبر (002) یا رقم لکھیں" oninput="renderBillHistory()">
         <input type="date" id="billDateFilter" class="bcbItem bcbDate" onchange="onBillDateFilterChange()">
         <select id="billDayFilter" class="bcbItem bcbDay" onchange="onBillDayFilterChange()">
           <option value="">دن</option>
@@ -9546,8 +9546,9 @@ function getDeveloperContact(){
 // 🆕 FM1910MO424: "کل" کی تاریخ میں ڈالی وصولی کا پیسہ آج "ٹوٹل کیش آیا" میں (کھاتہ پھر بھی کل کا)
 // 🆕 FM2010TU425: منشی/سیلزمین کے بھیجے بل ایڈمن کو پورے ملیں — کلاؤڈ پر ملاپ (پہلے پوری فہرست اوور رائٹ ہو کر بل غائب، منظوری واپس)؛ ریکوری انٹری کا نمبر ہر فون پر الگ
 // 🆕 FM2010TU426: (1) اخراجات کے ڈراپ ڈاؤن میں لکھے جا چکے خرچوں کے آگے ✅ (2) پرچون ریٹ: سرخی ہمیشہ اوپر، پانچوں کالم کے نام خود بدلیں (3) بل ہسٹری میں بٹن کا نام "🔁 شاپر / بل منتقل"
-const APP_BUILD_VERSION = 'FM2010TU426'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'اخراجات میں لکھے خرچوں پر ✅، پرچون ریٹ کے کالم کے نام خود بدلیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2010TU427: پرانے بلوں کی تلاش — نام (کچھ حصہ بھی)، بل نمبر (002) یا پوری رقم، ایک ہی خانے میں؛ تاریخ فلٹر کاروباری تاریخ سے
+const APP_BUILD_VERSION = 'FM2010TU427'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'پرانے بلوں کی تلاش: نام، بل نمبر یا رقم — سب ایک خانے میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -42649,6 +42650,24 @@ async function generateBillHistoryReport(){
 
 let lastFilteredBills = []; // ---------- Bill History کی سب سے تازہ فلٹر شدہ فہرست — Report Generator اسی کو استعمال کرتا ہے ----------
 // ---------- Render Bill History List ----------
+// 🔍 FM2010TU427: ہر لفظ (خالی جگہ سے الگ) نام، کسی بل نمبر، یا پوری رقم سے ملے — سب لفظ ملیں تو بل دکھے
+function billSearchMatch(inv, q){
+  const toks = String(q || '').toLowerCase().replace(/[,،]/g, '').split(/\s+/).filter(Boolean);
+  if(!toks.length) return true;
+  const name = String(inv.customer_name || '').toLowerCase();
+  const nos = [inv.invoice_no, inv.daily_bill_no, inv.monthly_bill_no, inv.cust_bill_no].filter(v => v != null && v !== '').map(v => String(v).toLowerCase());
+  const amts = [inv.grand_total, inv.amount_due, inv.paid_now].map(v => Math.round(Number(v) || 0)).filter(v => v > 0);
+  return toks.every(t => {
+    if(name.includes(t)) return true;
+    if(nos.some(n => n.includes(t))) return true;
+    if(/^\d+(\.\d+)?$/.test(t)){
+      const n = Number(t);
+      if([inv.cust_bill_no, inv.daily_bill_no, inv.monthly_bill_no].some(v => v != null && v !== '' && Number(String(v).replace(/\D/g, '')) === n)) return true; // 002 = 2
+      if(amts.includes(Math.round(n))) return true; // پوری رقم
+    }
+    return false;
+  });
+}
 function renderBillHistory(){
   const wrap = document.getElementById('billHistoryWrap');
   const isAdmin = AppState.currentRole === 'admin';
@@ -42707,13 +42726,14 @@ function renderBillHistory(){
     }
     if(dateFilterVal){
       // تاریخ منتخب ہو تو صرف اسی تاریخ کے بل (دن خودکار میچ ہو چکا ہے)
-      filtered = filtered.filter(inv => (inv.created_at || '').split('T')[0] === dateFilterVal);
+      filtered = filtered.filter(inv => bsInvDay(inv) === dateFilterVal); // 📅 FM2010TU427: دکان کی کاروباری تاریخ (رات 12 کے بعد کا بل بھی اسی دن)
     } else if(dayFilterVal){
       // صرف دن منتخب ہو (تاریخ نہیں) تو ہر ہفتے کے اسی دن کے سارے بل
       filtered = filtered.filter(inv => getDayAbbrev(inv.created_at) === dayFilterVal);
     }
     if(partyQuery){
-      filtered = filtered.filter(inv => (inv.customer_name || '').toLowerCase().includes(partyQuery));
+      // 🔍 FM2010TU427 (صدام بھائی): ایک ہی تلاش میں سب — گاہک کا نام (پورا یا کچھ حصہ)، بل نمبر (002، 2، Bill#18…)، یا بل کی پوری رقم
+      filtered = filtered.filter(inv => billSearchMatch(inv, partyQuery));
     }
     // ---------- Date Range Preset (Today/This Week/.../Custom) — موجودہ Date/Day فلٹرز کے ساتھ مل کر کام کرتا ہے ----------
     const rangePreset = document.getElementById('billRangePreset')?.value || 'all';
