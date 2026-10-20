@@ -5946,7 +5946,7 @@ function __appHostKind(h, p){
         <h3>➕ نیا خرچہ</h3>
         <div class="expTodayBox" id="expModalTotal">آج کا کل خرچ: Rs. 0</div>
         <div class="expRow2">
-          <input type="date" id="expNewDate" class="expF" style="flex:1;" onchange="expUpdateModalTotal()">
+          <input type="date" id="expNewDate" class="expF" style="flex:1;" onchange="expUpdateModalTotal(); expFillCategorySelect(document.getElementById('expNewCat').value)">
           <select id="expNewCat" class="expF" style="flex:1.2;" onchange="onExpCatChange()"></select>
         </div>
         <input type="text" id="expNewCatInput" class="expF" placeholder="نئی کیٹیگری کا نام (مثلاً کمیٹی، لوڈنگ، ذاتی خرچ)" style="display:none;">
@@ -9545,8 +9545,9 @@ function getDeveloperContact(){
 // 🆕 FM1910MO423: ریکوری والوں کی وصولی دوسرے فون سے آتے ہی ہوم کا "ٹوٹل کیش آیا" فوراً تازہ (پہلے 0 رہتا تھا)
 // 🆕 FM1910MO424: "کل" کی تاریخ میں ڈالی وصولی کا پیسہ آج "ٹوٹل کیش آیا" میں (کھاتہ پھر بھی کل کا)
 // 🆕 FM2010TU425: منشی/سیلزمین کے بھیجے بل ایڈمن کو پورے ملیں — کلاؤڈ پر ملاپ (پہلے پوری فہرست اوور رائٹ ہو کر بل غائب، منظوری واپس)؛ ریکوری انٹری کا نمبر ہر فون پر الگ
-const APP_BUILD_VERSION = 'FM2010TU425'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'منشی کے بھیجے سارے بل اب ایڈمن کو پورے ملتے ہیں — کوئی بل غائب نہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2010TU426: (1) اخراجات کے ڈراپ ڈاؤن میں لکھے جا چکے خرچوں کے آگے ✅ (2) پرچون ریٹ: سرخی ہمیشہ اوپر، پانچوں کالم کے نام خود بدلیں (3) بل ہسٹری میں بٹن کا نام "🔁 شاپر / بل منتقل"
+const APP_BUILD_VERSION = 'FM2010TU426'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'اخراجات میں لکھے خرچوں پر ✅، پرچون ریٹ کے کالم کے نام خود بدلیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -25560,8 +25561,11 @@ function getExpCategories(){
 function expFillCategorySelect(selected){
   const sel = document.getElementById('expNewCat'); if(!sel) return;
   const cats = getExpCategories();
+  // ✅ FM2010TU426 (صدام بھائی): اس تاریخ کو جو خرچہ لکھا جا چکا اس کے آگے ✅ (رقم کے ساتھ)، باقی ⬜ — ڈراپ ڈاؤن کھولتے ہی پتا چلے کیا رہ گیا
+  const _d = document.getElementById('expNewDate')?.value || bsToday();
+  const _done = {}; (expenseData || []).forEach(e => { if(e && e.date === _d){ const k = String(e.category || e.name || '').trim(); if(k) _done[k] = (_done[k] || 0) + (Number(e.amount) || 0); } });
   sel.innerHTML = '<option value="">— کیٹیگری چنیں —</option>' +
-    cats.map(c => `<option value="${c.replace(/"/g, '&quot;')}">${c.replace(/</g, '&lt;')}</option>`).join('') +
+    cats.map(c => `<option value="${c.replace(/"/g, '&quot;')}">${_done[c] != null ? '✅' : '⬜'} ${c.replace(/</g, '&lt;')}${_done[c] != null ? ' — ' + Math.round(_done[c]).toLocaleString('en-US') : ''}</option>`).join('') +
     '<option value="__new__">➕ نئی کیٹیگری بنائیں…</option>';
   sel.value = (selected && cats.includes(selected)) ? selected : '';
   onExpCatChange(true);
@@ -32198,6 +32202,10 @@ const RR_COLS = [
   {k:'nag', label:'نگ'}
 ];
 let rrShowAll = false;
+// ✏️ FM2010TU426 (صدام بھائی): پانچوں کالموں کے نام اپنی مرضی سے (آدھا کلو، 2 کلو، 3 کلو، پیٹی، بوری، شاپر…) — فون میں یاد رہتے ہیں، تصویر/پرنٹ میں یہی
+function rrLabels(){ const m = loadFromStorage('retailRateCols', {}); return (m && typeof m === 'object') ? m : {}; }
+function rrLabel(c){ const v = String(rrLabels()[c.k] || '').trim(); return v || c.label; }
+function rrSetLabel(el){ const m = rrLabels(); const v = String(el.value || '').trim().slice(0, 14); if(v) m[el.dataset.k] = v; else delete m[el.dataset.k]; saveToStorage('retailRateCols', m); }
 function rrStore(){ const m = loadFromStorage('retailRates', {}); return (m && typeof m === 'object') ? m : {}; }
 function rrDayMap(day){
   const m = rrStore();
@@ -32234,7 +32242,7 @@ function renderRetailRates(){
   const {day, rows, givenCount} = rrRows();
   const map = rrDayMap(day);
   const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-  const th = 'padding:6px 2px; font-size:14px; font-weight:800; color:#fff; background:#065f46; border:1px solid #047857; line-height:1.8;';
+  const th = 'padding:6px 2px; font-size:14px; font-weight:800; color:#fff; background:#065f46; border:1px solid #047857; line-height:1.8; position:sticky; top:-8px; z-index:3; box-shadow:0 2px 0 #047857;'; // 📌 FM2010TU426: سرخی ہمیشہ اوپر
   const body = rows.length ? rows.map((r, i) => {
     const vr = map[r.vid] || {};
     return `<tr style="background:${i % 2 ? '#f0fdf4' : '#fff'};">
@@ -32250,11 +32258,11 @@ function renderRetailRates(){
     </div>
     <div style="overflow:auto; padding:8px;">
       <table style="width:100%; border-collapse:collapse;">
-        <thead><tr><th style="${th} text-align:right; padding-right:8px;">${givenCount && !rrShowAll ? 'آج کی سبزی' : 'سبزی'}</th>${RR_COLS.map(c => `<th style="${th}">${c.label}</th>`).join('')}</tr></thead>
+        <thead><tr><th style="${th} text-align:right; padding-right:8px;">${givenCount && !rrShowAll ? 'آج کی سبزی' : 'سبزی'}</th>${RR_COLS.map(c => `<th style="${th} padding:3px 2px;"><input type="text" value="${esc(rrLabel(c))}" data-k="${c.k}" placeholder="${esc(c.label)}" oninput="rrSetLabel(this)" onfocus="this.select()" title="کالم کا نام بدلیں" style="width:100%; min-width:52px; box-sizing:border-box; padding:2px 2px; background:rgba(255,255,255,.14); border:1.5px dashed #a7f3d0; border-radius:8px; color:#fff; text-align:center; font-family:inherit; font-size:14px; font-weight:800; line-height:1.9;"></th>`).join('')}</tr></thead>
         <tbody>${body}</tbody>
       </table>
       <label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:14px; color:#334155; font-weight:700;"><input type="checkbox" ${rrShowAll ? 'checked' : ''} onchange="rrShowAll=this.checked; renderRetailRates();"> سب سبزیاں دکھائیں (جو آج تقسیم نہیں ہوئیں وہ بھی)</label>
-      <div style="font-size:13px; color:#64748b; margin-top:4px; line-height:1.8;">خالی خانہ تصویر میں "—" آئے گا؛ جس کا کوئی ریٹ نہ لکھا ہو وہ تصویر میں نہیں جائے گی</div>
+      <div style="font-size:13px; color:#64748b; margin-top:4px; line-height:1.8;">✏️ اوپر سبز خانوں میں کالم کا نام بدل سکتے ہیں (مثلاً آدھا کلو، 2 کلو، پیٹی، بوری) — خالی چھوڑیں تو پرانا نام۔ خالی خانہ تصویر میں "—" آئے گا؛ جس کا کوئی ریٹ نہ لکھا ہو وہ تصویر میں نہیں جائے گی</div>
     </div>
     <div style="display:flex; gap:6px; padding:8px; border-top:1px solid #e2e8f0;">
       <button type="button" onclick="rrShare()" style="flex:2; padding:11px 4px; border:none; border-radius:12px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; font-weight:900; font-size:16px; cursor:pointer; font-family:inherit;">📲 واٹس ایپ شیئر</button>
@@ -32300,7 +32308,7 @@ async function rrCanvas(){
   x.fillStyle = '#065f46'; x.fillRect(P, y + 10, W - 2 * P, thH - 10);
   x.fillStyle = '#fff'; x.font = `bold 34px ${NF}`;
   x.textAlign = 'right'; x.fillText('سبزی / پھل', W - P - 16, y + 10 + (thH - 10) / 2);
-  x.textAlign = 'center'; RR_COLS.forEach((c, i) => x.fillText(c.label, colX(i), y + 10 + (thH - 10) / 2));
+  x.textAlign = 'center'; RR_COLS.forEach((c, i) => { const lb = rrLabel(c); let f = 34; x.font = `bold ${f}px ${NF}`; while(x.measureText(lb).width > cW - 10 && f > 18){ f -= 2; x.font = `bold ${f}px ${NF}`; } x.fillText(lb, colX(i), y + 10 + (thH - 10) / 2); });
   y += thH;
   list.forEach((r, i) => {
     const vr = map[r.vid] || {};
@@ -42769,7 +42777,7 @@ function renderBillHistory(){
         ` : `
           <button class="btnRequestDelete" onclick="adminVoidBill(${inv.invoice_id})">🗑️ مٹائیں</button>
           <button class="btnCollect" onclick="openReturnItemModal(${inv.invoice_id})">↩️ واپسی</button>
-          ${inv.customer_id ? `<button class="btnCollect" style="background:#7c3aed;" onclick="openBillTransfer(${inv.invoice_id})">🔁 گاہک بدلیں</button>` : ''}
+          ${inv.customer_id ? `<button class="btnCollect" style="background:#7c3aed;" onclick="openBillTransfer(${inv.invoice_id})">🔁 شاپر / بل منتقل</button>` : ''}
         `) : `
           <button class="btnRequestEdit" onclick="openRequestActionModal(${inv.invoice_id}, 'edit_bill')">✏️ Request Edit</button>
           <button class="btnRequestDelete" onclick="openRequestActionModal(${inv.invoice_id}, 'delete_bill')">🗑️ Request Delete</button>
