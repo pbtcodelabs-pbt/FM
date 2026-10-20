@@ -2084,6 +2084,10 @@ function __appHostKind(h, p){
   .billStatusTag.edited{background:#fefce8; color:#a16207;}
   .billStatusTag.voided{background:#fef2f2; color:var(--danger); text-decoration:line-through;}
   .billActions{display:flex; gap:6px;}
+  /* 🔁 FM2010TU428 (صدام بھائی): بل منتقل کرنے کا لمبا نیلا بٹن — باقی بٹنوں کے اوپر پوری چوڑائی میں */
+  .billActsCol{display:flex; flex-direction:column; gap:6px; align-items:stretch;}
+  .btnXferWide{width:100%; padding:8px 10px; border:none; border-radius:10px; background:linear-gradient(180deg,#2563eb,#1d4ed8); color:#fff; font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:14px; font-weight:800; line-height:1.9; cursor:pointer; box-shadow:0 3px 0 #1e3a8a;}
+  .btnXferWide:active{transform:translateY(2px); box-shadow:0 1px 0 #1e3a8a;}
   .billActions button{padding:7px 12px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;}
   .btnPrint{background:#eef2ff; color:var(--primary-dark);}
   .billActions .btnReceiveShipment{background:var(--primary); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer;}
@@ -9547,8 +9551,9 @@ function getDeveloperContact(){
 // 🆕 FM2010TU425: منشی/سیلزمین کے بھیجے بل ایڈمن کو پورے ملیں — کلاؤڈ پر ملاپ (پہلے پوری فہرست اوور رائٹ ہو کر بل غائب، منظوری واپس)؛ ریکوری انٹری کا نمبر ہر فون پر الگ
 // 🆕 FM2010TU426: (1) اخراجات کے ڈراپ ڈاؤن میں لکھے جا چکے خرچوں کے آگے ✅ (2) پرچون ریٹ: سرخی ہمیشہ اوپر، پانچوں کالم کے نام خود بدلیں (3) بل ہسٹری میں بٹن کا نام "🔁 شاپر / بل منتقل"
 // 🆕 FM2010TU427: پرانے بلوں کی تلاش — نام (کچھ حصہ بھی)، بل نمبر (002) یا پوری رقم، ایک ہی خانے میں؛ تاریخ فلٹر کاروباری تاریخ سے
-const APP_BUILD_VERSION = 'FM2010TU427'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'پرانے بلوں کی تلاش: نام، بل نمبر یا رقم — سب ایک خانے میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2010TU428: بل ہسٹری میں "شاپر / بل منتقل" لمبا نیلا بٹن، باقی بٹنوں کے اوپر
+const APP_BUILD_VERSION = 'FM2010TU428'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بل منتقل کرنے کا نیلا لمبا بٹن اب باقی بٹنوں کے اوپر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -42789,6 +42794,8 @@ function renderBillHistory(){
           <div class="bMeta">${creatorBadge} ${inv.customer_name}${Number(inv.cust_bill_no) > 0 ? ' <b style="color:#7c3aed;">· بل ' + String(inv.cust_bill_no).padStart(3, '0') + '</b>' : ''} | Rs. ${inv.grand_total.toLocaleString()}</div>
         </div>
       </div>
+      <div class="billActsCol">
+      ${isAdmin && inv.status !== 'voided' && inv.customer_id ? `<button type="button" class="btnXferWide" onclick="openBillTransfer(${inv.invoice_id})">🔁 شاپر / بل کسی دوسرے گاہک کو منتقل کریں</button>` : ''}
       <div class="billActions">
         <button class="btnPrint" onclick="openInvoicePreview(${inv.invoice_id})">🖨️ پرنٹ</button>
         <button class="btnWhatsapp" onclick="openInvoicePreview(${inv.invoice_id})">📱 بھیجیں</button>
@@ -42797,11 +42804,11 @@ function renderBillHistory(){
         ` : `
           <button class="btnRequestDelete" onclick="adminVoidBill(${inv.invoice_id})">🗑️ مٹائیں</button>
           <button class="btnCollect" onclick="openReturnItemModal(${inv.invoice_id})">↩️ واپسی</button>
-          ${inv.customer_id ? `<button class="btnCollect" style="background:#7c3aed;" onclick="openBillTransfer(${inv.invoice_id})">🔁 شاپر / بل منتقل</button>` : ''}
         `) : `
           <button class="btnRequestEdit" onclick="openRequestActionModal(${inv.invoice_id}, 'edit_bill')">✏️ Request Edit</button>
           <button class="btnRequestDelete" onclick="openRequestActionModal(${inv.invoice_id}, 'delete_bill')">🗑️ Request Delete</button>
         `}
+      </div>
       </div>
     </div>
   `;}).join('');
