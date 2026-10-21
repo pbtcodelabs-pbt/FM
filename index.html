@@ -9560,8 +9560,9 @@ function getDeveloperContact(){
 // 🆕 FM2010TU428: بل ہسٹری میں "شاپر / بل منتقل" لمبا نیلا بٹن، باقی بٹنوں کے اوپر
 // 🆕 FM2010TU429: پیمنٹس — ہر پیمنٹ چھوٹا رنگین کیپسول (وصول سبز، ادا سرخ)، فلٹر "وصول کیے / ادا کیے"
 // 🆕 FM2010TU430: پیمنٹس کے فلٹر بٹن پرانے نام (وصولی / ادائیگی) اپنے رنگ میں — سبز / سرخ
-const APP_BUILD_VERSION = 'FM2010TU430'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'پیمنٹس: وصولی سبز، ادائیگی سرخ — فلٹر بٹن بھی اسی رنگ میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2110WE431: منشی کے بھیجے آرڈر ایڈمن تک پکے — دو فونز کا ایک ہی آرڈر نمبر اب ٹکراتا نہیں، نہ بھیجا گیا آرڈر خود دوبارہ جاتا ہے، منشی کو صاف پیغام
+const APP_BUILD_VERSION = 'FM2110WE431'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'منشی کے بھیجے سارے آرڈر اب ایڈمن کو پکے پہنچتے ہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -20900,7 +20901,27 @@ function _advSticky(pick, other){
   return o;
 }
 // ---------- local = یہ فون، cloud = ابھی کا کلاؤڈ، base = آخری معلوم کلاؤڈ ---------- -->
+// 🐞 FM2110WE431 (صدام بھائی: منشی نے آرڈر بھیجے، ایڈمن تک نہیں پہنچے): دو فون ایک ہی آرڈر نمبر دے دیتے تھے —
+//   ملاپ میں ایک فون کا آرڈر دوسرے کے آرڈر سے مٹ جاتا (منشی کے فون پر "بھیج دیا"، ایڈمن کے پاس کچھ اور)۔
+//   اب: ایک نمبر پر دو مختلف آرڈر (بننے کا وقت/ملازم/گاہک الگ) ہوں تو جو ابھی کلاؤڈ پر نہیں اسے نیا نمبر
+function _advIdent(o){ return o ? [o.createdAt || '', o.employeeName || '', o.customer_id != null ? o.customer_id : (o.customerName || '')].join('|') : ''; }
+function _advFixIdClash(local, cloud){
+  const cm = new Map((cloud || []).map(o => [o && o.id, o]));
+  const base = advOrdersSyncBase;
+  let maxId = Math.max(0, Number(nextAdvOrderId) - 1 || 0, ...(local || []).map(o => Number(o && o.id) || 0), ...(cloud || []).map(o => Number(o && o.id) || 0), ...(advDeletedIds || []).map(x => Number(x) || 0));
+  (local || []).forEach(l => {
+    if(!l) return;
+    const c = cm.get(l.id);
+    if(!c || _advIdent(c) === _advIdent(l)) return;
+    const inBase = !!(base && Object.prototype.hasOwnProperty.call(base, l.id));
+    if(inBase && base[l.id] === _stableStr(c)) return; // کلاؤڈ والا ہی پرانا ریکارڈ ہے — یہ اسی کی ترمیم
+    const oldId = l.id; l.id = ++maxId; l.renumberedFrom = oldId;
+    try{ if(typeof otSavedOrderId !== 'undefined' && otSavedOrderId === oldId) otSavedOrderId = l.id; }catch(e){}
+  });
+  if(maxId >= nextAdvOrderId){ nextAdvOrderId = maxId + 1; try{ saveToStorage('nextAdvOrderId', nextAdvOrderId); }catch(e){} }
+}
 function mergeAdvanceOrderLists(local, cloud){
+  try{ _advFixIdClash(local, cloud); }catch(e){}
   const del = new Set(advDeletedIds);
   const base = advOrdersSyncBase; // null = پہلی بار
   const lm = new Map((local || []).map(o => [o.id, o]));
@@ -20915,7 +20936,7 @@ function mergeAdvanceOrderLists(local, cloud){
       out.push(lChanged ? _advSticky(l, c) : _advSticky(c, l));
     } else if(l){
       // ---------- کلاؤڈ پر نہیں: اگر پہلے کلاؤڈ پر تھا تو کسی اور فون نے ہٹایا؛ ورنہ ابھی یہیں بنا ہے ---------- -->
-      if(!inBase && (base || (Date.now() - new Date(l.createdAt).getTime()) < 120000)) out.push(l);
+      if(!inBase) out.push(l); // 🐞 FM2110WE431: پہلے بنیاد نہ ہونے پر 2 منٹ سے پرانا (ابھی نہ بھیجا گیا) آرڈر خاموشی سے مٹ جاتا تھا
     } else if(c){
       if(!base || !inBase) out.push(c); // نیا، دوسرے فون سے
       else if(!lm.has(id) && inBase) { /* اس فون پر ڈیلیٹ ہوا */ }
@@ -20940,8 +20961,9 @@ let _advPushBusy = false, _advPushAgain = false;
 async function pushAdvanceOrdersToCloud(){
   saveToStorage('advanceOrders', advanceOrdersData);
   saveToStorage('nextAdvOrderId', nextAdvOrderId);
-  if(_advPushBusy){ _advPushAgain = true; return; }
+  if(_advPushBusy){ _advPushAgain = true; return true; }
   _advPushBusy = true;
+  let _ok = false;
   try{
     for(let attempt = 0; attempt < 3; attempt++){
       const cloud = await _advReadCloud();
@@ -20962,13 +20984,18 @@ async function pushAdvanceOrdersToCloud(){
           updatedAt: { integerValue: String(Date.now()) }
         }})
       });
-      if(res && res.ok){ _advSetBase(JSON.parse(sentAdvJson)); if(JSON.stringify(advanceOrdersData) !== sentAdvJson) _advPushAgain = true; break; } // 🐞 FM510MO317
+      if(res && res.ok){ _ok = true; _advSetBase(JSON.parse(sentAdvJson)); if(JSON.stringify(advanceOrdersData) !== sentAdvJson) _advPushAgain = true; break; } // 🐞 FM510MO317
       if(!(res && (res.status === 400 || res.status === 409 || res.status === 412))) break; // دوسری غلطی — اگلی بار
     }
   }catch(e){ /* آف لائن — مقامی محفوظ ہے */ }
   _advPushBusy = false;
+  try{ saveToStorage('advPushPending', !_ok); }catch(e){}
   if(_advPushAgain){ _advPushAgain = false; setTimeout(() => { try{ pushAdvanceOrdersToCloud(); }catch(e){} }, 300); }
+  return _ok;
 }
+// 📶 FM2110WE431: انٹرنیٹ نہ ہونے سے آرڈر کلاؤڈ پر نہ گیا ہو تو انٹرنیٹ آتے ہی اور ہر 30 سیکنڈ میں خود دوبارہ بھیجیں
+window.addEventListener('online', () => { try{ if(loadFromStorage('advPushPending', false)) pushAdvanceOrdersToCloud(); }catch(e){} });
+setInterval(() => { try{ if(!document.hidden && loadFromStorage('advPushPending', false)) pushAdvanceOrdersToCloud(); }catch(e){} }, 30000);
 async function fetchAdvanceOrdersFromCloud(silent){
   try{
     const cloud = await _advReadCloud();
@@ -33531,9 +33558,13 @@ function sendDraftOrderFinal(orderId){
   order.isDraft = false;
   order.finalSentAt = new Date().toISOString();
   persistAllData();
-  pushAdvanceOrdersToCloud();
   refreshOtDraftOrdersAll();
   renderMyDraftOrdersFiltered();
+  // 📶 FM2110WE431: بھیجنے کا نتیجہ صاف بتائیں — انٹرنیٹ نہ ہو تو آرڈر فون میں محفوظ رہتا ہے اور خود دوبارہ جاتا ہے
+  Promise.resolve(pushAdvanceOrdersToCloud()).then(ok => {
+    try{ if(ok) uAlert('✅ صدام کو پہنچ گیا', 'آرڈر ایڈمن کی آرڈر لسٹ میں چلا گیا۔', 'green');
+      else uAlert('📶 ابھی نہیں پہنچا', 'انٹرنیٹ ٹھیک نہیں — آرڈر فون میں محفوظ ہے، انٹرنیٹ آتے ہی خود صدام کو چلا جائے گا۔', 'amber'); }catch(e){}
+  });
 }
 
 // ---------- 📋 صدام کی ہدایت (5 ستمبر): ملازم کی بھیجی گئی وصولیوں کا مستقل ریکارڈ — نہ ترمیم، نہ حذف،
