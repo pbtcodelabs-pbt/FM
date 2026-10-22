@@ -9561,8 +9561,9 @@ function getDeveloperContact(){
 // 🆕 FM2010TU429: پیمنٹس — ہر پیمنٹ چھوٹا رنگین کیپسول (وصول سبز، ادا سرخ)، فلٹر "وصول کیے / ادا کیے"
 // 🆕 FM2010TU430: پیمنٹس کے فلٹر بٹن پرانے نام (وصولی / ادائیگی) اپنے رنگ میں — سبز / سرخ
 // 🆕 FM2110WE431: منشی کے بھیجے آرڈر ایڈمن تک پکے — دو فونز کا ایک ہی آرڈر نمبر اب ٹکراتا نہیں، نہ بھیجا گیا آرڈر خود دوبارہ جاتا ہے، منشی کو صاف پیغام
-const APP_BUILD_VERSION = 'FM2110WE431'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'منشی کے بھیجے سارے آرڈر اب ایڈمن کو پکے پہنچتے ہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2210TH432: بقایا درستی پکی — پرانی کاپی/بیک اپ والا فون درستی کو واپس نہیں کر سکتا، درستی کے بعد کلاؤڈ سے تصدیق
+const APP_BUILD_VERSION = 'FM2210TH432'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بقایا درستی اب پکی — کلاؤڈ سے تصدیق کے ساتھ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -34386,6 +34387,7 @@ async function fmBalanceFix(presetId){
   if(!(await _askAdminPinForSerialMaster(`${c.name} کا بقایا ${f(cur)} سے ${f(target)} کرنے کے لیے`))) return;
   try{ pauseCloudPolling(15000); }catch(e){}
   c.total_receivable = target;
+  c.balFixAt = new Date().toISOString(); c.balFixField = 'total_receivable'; // 🛠️ FM2210TH432: یہ رقم پکی — پرانی کاپی سے واپس نہ ہو
   c.walletHistory = c.walletHistory || [];
   c.walletHistory.unshift({ type: 'balance_fix', amount: Math.abs(delta), delta, before: cur, after: target, from_day: fromDay, date: bizDateKey(), at: new Date().toISOString(), by: (AppState.currentUser && AppState.currentUser.name) || 'Admin', note: String(reason || '').trim() });
   bills.forEach(b => {
@@ -34395,9 +34397,19 @@ async function fmBalanceFix(presetId){
   persistAllData();
   let ok = true;
   try{ ok = (await pushCustomersToCloud()) !== false; if(bills.length) await pushInvoicesToCloud(); }catch(e){ ok = false; }
+  // ✅ FM2210TH432: کلاؤڈ سے دوبارہ پڑھ کر تصدیق — رقم وہی نہ ملے تو دوبارہ لگا کر بھیجیں (2 بار تک)
+  let _cloudVal = null;
+  for(let _t = 0; _t < 3 && ok; _t++){
+    try{ await fetchCustomersFromCloud(true); }catch(e){}
+    const _c2 = (customersData || []).find(x => x && x.customer_id === c.customer_id);
+    _cloudVal = _c2 ? (Number(_c2.total_receivable) || 0) : null;
+    if(_cloudVal !== null && Math.abs(_cloudVal - target) < 0.01) break;
+    if(_c2 && _t < 2){ _c2.total_receivable = target; _c2.balFixAt = new Date().toISOString(); _c2.balFixField = 'total_receivable'; persistAllData(); try{ ok = (await pushCustomersToCloud()) !== false; }catch(e){ ok = false; } }
+  }
+  const _verified = ok && _cloudVal !== null && Math.abs(_cloudVal - target) < 0.01;
   try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
   try{ renderHomeMoneySummary(); }catch(e){}
-  uAlert('✅ درست ہو گیا', `<bdi dir="auto">${escRlHtml(c.name)}</bdi> کا بقایا اب <b>${f(target)}</b> ہے۔` + (bills.length ? `<br>${bills.length} بل کا سابقہ بھی درست۔` : '') + (ok ? '' : '<br>⚠️ انٹرنیٹ آنے پر کلاؤڈ میں چلا جائے گا۔'), 'green');
+  uAlert('✅ درست ہو گیا', `<bdi dir="auto">${escRlHtml(c.name)}</bdi> کا بقایا اب <b>${f(target)}</b> ہے۔` + (bills.length ? `<br>${bills.length} بل کا سابقہ بھی درست۔` : '') + (_verified ? '<br>☁️ کلاؤڈ سے تصدیق ہو گئی — سب فونز پر یہی رقم۔' : ok ? `<br>⚠️ کلاؤڈ میں ابھی ${f(_cloudVal || 0)} دکھ رہا ہے — دوبارہ درستی کریں` : '<br>⚠️ انٹرنیٹ آنے پر کلاؤڈ میں چلا جائے گا۔'), _verified ? 'green' : 'amber');
 }
 function fmZeroBalBtnHtml(kind){
   const isC = kind === 'customers';
@@ -40601,6 +40613,11 @@ function _mergeRecordsThreeWay(base, local, remote, idField, counters, hists, se
     const m = {};
     new Set([...Object.keys(r), ...Object.keys(l)]).forEach(f => {
       if(counters.includes(f)){
+        // 🛠️ FM2210TH432 (صدام بھائی: بقایا درستی کی، بعد میں پرانی رقم واپس آ گئی): اگر یہ فون درستی سے پہلے کی پرانی کاپی رکھتا ہے
+        //   (مثلاً پرانا بیک اپ بحال ہوا) تو اس کا "فرق" درستی کو الٹ دیتا تھا — اب درستی کے بعد والی کلاؤڈ رقم ہی رہے گی
+        const _bfB = String((b && b.balFixAt) || ''), _bfL = String((l && l.balFixAt) || ''), _bfR = String((r && r.balFixAt) || '');
+        if(_bfB && _bfL < _bfB){ m[f] = Number(r[f]) || 0; return; }
+        if(_bfL && _bfL > _bfB && _bfL >= _bfR && l.balFixField === f){ m[f] = Number(l[f]) || 0; return; } // اسی فون کی ابھی کی درستی — پکی رقم
         m[f] = Math.round(((Number(r[f])||0) + (Number(l[f])||0) - (Number(b[f])||0)) * 100) / 100;
       } else if(hists.includes(f)){
         m[f] = _mergeHistArr(b[f], l[f], r[f]);
