@@ -9569,8 +9569,9 @@ function getDeveloperContact(){
 // 🆕 FM2210TH432: بقایا درستی پکی — پرانی کاپی/بیک اپ والا فون درستی کو واپس نہیں کر سکتا، درستی کے بعد کلاؤڈ سے تصدیق
 // 🆕 FM2210TH433: گاہک اور بیوپاری کا 📒 لین دین لیجر — تاریخ کا فلٹر، سابقہ بقایا، سرخ (گیا) / سبز (آیا) کالم، ہر سطر پر بقایا، پرنٹ؛ کھاتے کے بٹنوں کے نام بڑے
 // 🆕 FM2210TH434: گاہک/بیوپاری کے کھاتے کے سب بٹن اور خانے اردو میں (نیا بل، والٹ، سابقہ بقایا، یاد دہانی، پروفائل…)
-const APP_BUILD_VERSION = 'FM2210TH434'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'گاہک اور بیوپاری کے کھاتے کے سب بٹن اب اردو میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2210TH435: ✂️ چالان کی قینچی آرڈرز میں بک مال کے باوجود چلتی ہے — بک مال حصوں میں خود بٹ جاتا ہے
+const APP_BUILD_VERSION = 'FM2210TH435'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'چالان کی قینچی دوبارہ چلتی ہے — آرڈر میں بک مال خود حصوں میں بٹتا ہے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -20389,7 +20390,8 @@ function openChalanSplit(variantId, chalanNo){
   const c = (v.chalans || []).find(x => x.chalanNo === chalanNo); if(!c) return;
   if(c.accounted){ alert('اس چالان کا حساب پہلے ہی لگ چکا ہے'); return; }
   const reserved = Number((getChalanReservedMap(variantId) || {})[String(chalanNo)]) || 0;
-  if(reserved > 0){ alert(`⚠️ اس چالان سے ${reserved} مال آرڈرز میں بک ہے۔\n\nپہلے وہ آرڈر مکمل/ختم کریں، پھر چالان تقسیم کریں۔`); return; }
+  // ✂️ FM2210TH435 (صدام بھائی: قینچی رک گئی): پہلے آرڈرز میں بک مال ہو تو تقسیم بند تھی — صبح منشی آرڈر لے لیتا ہے، اس لیے
+  //   قینچی تقریباً ہمیشہ رک جاتی تھی۔ اب تقسیم ہو جاتی ہے؛ بک شدہ مال محفوظ کرتے وقت حصوں میں خود بانٹ دیا جاتا ہے
   const orig = _chRound(Number(c.origQty != null ? c.origQty : c.qty) || 0);
   if(!(orig > 0)){ alert('اس چالان کی مقدار صفر ہے'); return; }
   const base = {
@@ -20538,6 +20540,7 @@ function saveChalanSplit(){
   parts.forEach((pt, idx) => {
     const take = Math.min(pt.qty, soldLeft); soldLeft = _chRound(soldLeft - take);
     const remain = _chRound(pt.qty - take);
+    pt.remain = remain;
     if(idx === 0){ c.origQty = pt.qty; c.qty = remain; pt.chalanNo = c.chalanNo; c.splitParts = parts.length; }
     else {
       const no = v.nextChalanNo || ((v.chalans || []).reduce((mx, x) => Math.max(mx, x.chalanNo || 0), 0) + 1);
@@ -20546,6 +20549,29 @@ function saveChalanSplit(){
       pt.chalanNo = no;
     }
   });
+  // ✂️ FM2210TH435: آرڈرز میں بک مال حصوں میں بانٹیں — پہلے پہلا حصہ، جگہ ختم ہو تو اگلا (ہر آرڈر کا چالان حوالہ بھی نیا)
+  let _ordersChanged = false;
+  try{
+    const cap = parts.map(pt => ({ no: pt.chalanNo, left: Number(pt.remain) || 0 }));
+    const key = String(st.chalanNo);
+    (advanceOrdersData || []).forEach(o => {
+      if(!o || o.status === 'fulfilled' || o.stockReleased) return;
+      (o.items || []).forEach(it => {
+        if(!it || it.variant_id !== st.variantId || !it.chalanAlloc || !(Number(it.chalanAlloc[key]) > 0)) return;
+        let need = _chRound(Number(it.chalanAlloc[key]) || 0);
+        delete it.chalanAlloc[key];
+        cap.forEach((cp, ci) => {
+          if(need <= 0) return;
+          const t = (ci === cap.length - 1) ? need : Math.min(need, Math.max(0, cp.left));
+          if(t <= 0) return;
+          it.chalanAlloc[String(cp.no)] = _chRound((Number(it.chalanAlloc[String(cp.no)]) || 0) + t);
+          cp.left = _chRound(cp.left - t); need = _chRound(need - t);
+        });
+        _ordersChanged = true;
+      });
+    });
+  }catch(e){}
+  if(_ordersChanged){ try{ saveToStorage('advanceOrders', advanceOrdersData); pushAdvanceOrdersToCloud(); recomputeReservedFromOrders(); }catch(e){} }
   let okAll = true;
   parts.forEach(pt => { if(!_chAccountCore(st.variantId, pt.chalanNo, {rate: pt.rate, labor: pt.labor, isb: pt.isb, rwp: pt.rwp, src: pt.src})) okAll = false; });
   const paidNames = [];
