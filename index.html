@@ -2372,6 +2372,11 @@ function __appHostKind(h, p){
   .profileSidebar button.active{outline:2px solid rgba(255,255,255,.8); outline-offset:1px;}
   .profileSidebar button .sideIcon{font-size:15px; line-height:1;}
   .profileSidebar button .sideLabel{font-size:6.8px; font-weight:800; line-height:1.05; text-align:center; padding:0 1px;}
+  /* 🔠 FM2210TH433 (صدام بھائی): گاہک/بیوپاری کے کھاتے کے بٹنوں کے نام بڑے اور موٹے — آسانی سے پڑھے جائیں */
+  .profileSidebar{flex-basis:76px !important; padding:12px 5px !important;}
+  .profileSidebar button{width:66px !important; min-height:64px !important; height:auto !important; padding:5px 2px !important; gap:2px !important;}
+  .profileSidebar button .sideIcon{font-size:19px !important;}
+  .profileSidebar button .sideLabel{font-size:14px !important; font-weight:900 !important; line-height:1.3 !important; font-family:Arial,"JameelNooriNastaleeq",sans-serif; text-shadow:0 1px 1px rgba(0,0,0,.35);}
   .profileMain{flex:1 1 auto; min-width:0; padding:12px 14px 20px; overflow-y:auto;}
 
   /* --- بالکل اوپر: مالی خلاصہ، ایک نظر میں — اب کمپیکٹ (پرانی رابطہ پٹی کی جگہ یہیں آ گئی) --- */
@@ -9562,8 +9567,9 @@ function getDeveloperContact(){
 // 🆕 FM2010TU430: پیمنٹس کے فلٹر بٹن پرانے نام (وصولی / ادائیگی) اپنے رنگ میں — سبز / سرخ
 // 🆕 FM2110WE431: منشی کے بھیجے آرڈر ایڈمن تک پکے — دو فونز کا ایک ہی آرڈر نمبر اب ٹکراتا نہیں، نہ بھیجا گیا آرڈر خود دوبارہ جاتا ہے، منشی کو صاف پیغام
 // 🆕 FM2210TH432: بقایا درستی پکی — پرانی کاپی/بیک اپ والا فون درستی کو واپس نہیں کر سکتا، درستی کے بعد کلاؤڈ سے تصدیق
-const APP_BUILD_VERSION = 'FM2210TH432'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بقایا درستی اب پکی — کلاؤڈ سے تصدیق کے ساتھ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2210TH433: گاہک اور بیوپاری کا 📒 لین دین لیجر — تاریخ کا فلٹر، سابقہ بقایا، سرخ (گیا) / سبز (آیا) کالم، ہر سطر پر بقایا، پرنٹ؛ کھاتے کے بٹنوں کے نام بڑے
+const APP_BUILD_VERSION = 'FM2210TH433'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'گاہک اور بیوپاری کا لین دین لیجر — تاریخ کے فلٹر اور سرخ/سبز کالم کے ساتھ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -28100,7 +28106,8 @@ function openCustomerProfile(customerId){
     <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
     ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareCustomerProfile(${c.customer_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
-    <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
+    <button style="background:linear-gradient(155deg,#2563eb,#1e3a8a);" onclick="openPartyLedger('customers', ${c.customer_id})"><span class="sideIcon">📒</span><span class="sideLabel">لین دین</span></button>
+    <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">والٹ / واپسی</span></button>
     ${AppState.currentRole === 'admin' ? `<button style="background:linear-gradient(155deg,#dc2626,#7f1d1d);" onclick="deleteCustomerFromProfile(${c.customer_id})"><span class="sideIcon">🗑️</span><span class="sideLabel">حذف</span></button>` : ''}
   `;
 
@@ -28450,6 +28457,7 @@ function openSupplierProfile(supplierId){
     <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id}, 'pay');"><span class="sideIcon">💵</span><span class="sideLabel">ادائیگی</span></button>
     <button style="background:linear-gradient(155deg,#10b981,#047857);" onclick="openPaySupplierModal(${s.supplier_id}, 'receive');"><span class="sideIcon">📥</span><span class="sideLabel">ادھار لیا</span></button>
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">پروفائل</span></button>
+    <button style="background:linear-gradient(155deg,#2563eb,#1e3a8a);" onclick="openPartyLedger('suppliers', ${s.supplier_id})"><span class="sideIcon">📒</span><span class="sideLabel">لیجر</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">لین دین</span></button>
     <!-- 🗑️ FM510MO318: صرف ایڈمن — دو تنبیہ + PIN -->
     ${AppState.currentRole === 'admin' ? `<button style="background:linear-gradient(155deg,#f87171,#7f1d1d);" onclick="deleteSupplierWithConfirm(${s.supplier_id})"><span class="sideIcon">🗑️</span><span class="sideLabel">حذف</span></button>` : ''}
@@ -28552,6 +28560,174 @@ function renderSupplierTransactionsSection(supplierId){
     <div class="profileSectionTitle"><span>📜 لین دین کی تاریخ</span><span class="cnt">${ledger.length} اندراجات</span></div>
     <div>${ledgerHtml}</div>
   `;
+}
+
+
+// =====================================================================
+// 📒 FM2210TH433 (صدام بھائی): گاہک/بیوپاری کا "لین دین لیجر" — تاریخ کا فلٹر (آج، کل، یہ ہفتہ، پچھلا ہفتہ، یہ مہینہ، پچھلا مہینہ،
+// اپنی تاریخ)، شروع میں اس تاریخ سے پہلے کا بقایا، پھر دو کالم: 🟥 جو ہماری طرف سے گیا، 🟩 جو ہمارے پاس آیا — ہر سطر کے
+// بعد اس وقت کا بقایا، آخر میں کل جوڑ اور تازہ بقایا۔ بقایا ہمیشہ اصل کھاتے (ابھی کی رقم) سے پیچھے کی طرف حساب ہوتا ہے
+// =====================================================================
+let pledState = { kind: 'customers', id: null, preset: 'thismonth', from: '', to: '' };
+function _pledDay(d){ return d ? String(d).slice(0, 10) : ''; }
+function _pledRange(preset){
+  const t = new Date(bizDateKey() + 'T12:00:00'), k = d => localDateKey(d);
+  const add = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  if(preset === 'today') return { from: k(t), to: k(t) };
+  if(preset === 'yesterday'){ const y = add(t, -1); return { from: k(y), to: k(y) }; }
+  if(preset === 'thisweek'){ const st = add(t, -t.getDay()); return { from: k(st), to: k(t) }; }
+  if(preset === 'lastweek'){ const st = add(t, -t.getDay() - 7); return { from: k(st), to: k(add(st, 6)) }; }
+  if(preset === 'thismonth') return { from: k(new Date(t.getFullYear(), t.getMonth(), 1)), to: k(t) };
+  if(preset === 'lastmonth') return { from: k(new Date(t.getFullYear(), t.getMonth() - 1, 1)), to: k(new Date(t.getFullYear(), t.getMonth(), 0)) };
+  if(preset === 'custom') return { from: pledState.from || '', to: pledState.to || '' };
+  return { from: '', to: '' }; // شروع سے
+}
+// ہر اندراج: {day, ts, desc, red, green} — red = ہماری طرف سے گیا، green = ہمارے پاس آیا
+function _pledEntries(kind, id){
+  const out = [];
+  const ts = (x, d) => { const t = x ? new Date(x).getTime() : NaN; return isNaN(t) ? new Date((d || '1970-01-01') + 'T12:00:00').getTime() : t; };
+  if(kind === 'customers'){
+    const c = (customersData || []).find(x => x && x.customer_id === id); if(!c) return { party: null, out };
+    (invoicesData || []).filter(i => i && i.customer_id === id && i.status !== 'voided' && i.status !== 'rejected').forEach(i => {
+      const d = _pledDay(bsInvDay(i)), t = ts(i.created_at, d);
+      const items = (i.items || []).length;
+      out.push({ day: d, ts: t, desc: '🧾 بل ' + (i.invoice_no || '') + (Number(i.cust_bill_no) > 0 ? ' (' + String(i.cust_bill_no).padStart(3, '0') + ')' : '') + ' — ' + items + ' مال', red: Number(i.grand_total) || 0, green: 0 });
+      const cash = (typeof bsBillCash === 'function') ? bsBillCash(i) : 0;
+      if(cash > 0) out.push({ day: d, ts: t + 1, desc: '💵 بل کے ساتھ وصولی', red: 0, green: cash });
+      (i.items || []).filter(it => it && it.returned && Number(it.returnAmount) > 0).forEach(it => out.push({ day: d, ts: t + 2, desc: '↩️ واپسی — ' + (it.name || '') + (it.returnQty ? ' × ' + it.returnQty : ''), red: 0, green: Number(it.returnAmount) || 0 }));
+    });
+    (paymentsData || []).filter(pm => pm && pm.party_type === 'customer' && pm.party_id === id).forEach(pm => {
+      const d = _pledDay(bsPayDay(pm)), a = Number(pm.amount) || 0; if(!a) return;
+      const note = (typeof _payUserNote === 'function' ? _payUserNote(pm.note) : '') || '';
+      if(pm.direction === 'in') out.push({ day: d, ts: ts(pm.created_at, d), desc: '📥 وصولی' + (pm.method ? ' — ' + pm.method : '') + (note ? ' — ' + note : ''), red: 0, green: a });
+      else out.push({ day: d, ts: ts(pm.created_at, d), desc: '💸 رقم دی / ادھار' + (pm.method ? ' — ' + pm.method : '') + (note ? ' — ' + note : ''), red: a, green: 0 });
+    });
+    (c.walletHistory || []).forEach(h => {
+      if(!h) return; const d = _pledDay(h.date);
+      if(h.type === 'balance_fix'){ const dl = Number(h.delta) || 0; if(dl) out.push({ day: d, ts: ts(h.at, d), desc: '🛠️ بقایا درستی' + (h.note ? ' — ' + h.note : ''), red: dl > 0 ? dl : 0, green: dl < 0 ? -dl : 0 }); }
+      else if(h.type === 'zero_reset' && Number(h.amount)) out.push({ day: d, ts: ts(h.at, d), desc: '🧹 بقایا زیرو کیا', red: 0, green: Number(h.amount) || 0 });
+    });
+    return { party: c, out, now: (Number(c.total_receivable) || 0) - (Number(c.wallet_balance) || 0), sign: 1 };
+  }
+  const sp = (suppliersData || []).find(x => x && x.supplier_id === id); if(!sp) return { party: null, out };
+  const poAmt = po => Math.round((po.items || []).reduce((t, it) => t + (Number(it.qty) || 0) * (Number(it.cost) || 0), 0));
+  (sp.purchaseHistory || []).filter(po => po && po.status === 'received').forEach(po => {
+    const d = _pledDay(po.date);
+    out.push({ day: d, ts: ts(po.receivedAt || po.created_at, d), desc: '📦 مال آیا — ' + (po.items || []).length + ' سبزیاں', red: 0, green: poAmt(po) });
+  });
+  (sp.ledgerHistory || []).forEach(h => {
+    if(!h) return; const d = _pledDay(h.date), a = Number(h.amount) || 0; if(!a) return;
+    const note = (typeof _payUserNote === 'function' ? _payUserNote(h.note) : h.note) || '';
+    if(h.type === 'payment') out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: (h.isDiscount ? '🏷️ چھوٹ' : '💵 ادائیگی بھیجی') + (note ? ' — ' + note : ''), red: a, green: 0 });
+    else if(h.type === 'received') out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: '📥 رقم آئی (ادھار لیا)' + (note ? ' — ' + note : ''), red: 0, green: a });
+  });
+  return { party: sp, out, now: (Number(sp.total_payable) || 0) - (Number(sp.wallet_balance) || 0), sign: -1 };
+}
+function openPartyLedger(kind, id){
+  pledState.kind = kind; pledState.id = id;
+  let ov = document.getElementById('pledOverlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'pledOverlay'; ov.style.cssText = 'position:fixed; inset:0; z-index:10070; background:rgba(15,23,42,.6); display:flex; align-items:center; justify-content:center; padding:8px;'; document.body.appendChild(ov); }
+  ov.style.display = 'flex';
+  renderPartyLedger();
+}
+function closePartyLedger(){ const ov = document.getElementById('pledOverlay'); if(ov) ov.style.display = 'none'; }
+function pledSetPreset(v){ pledState.preset = v; renderPartyLedger(); }
+function pledSetCustom(){ pledState.from = document.getElementById('pledFrom')?.value || ''; pledState.to = document.getElementById('pledTo')?.value || ''; pledState.preset = 'custom'; renderPartyLedger(); }
+function _pledCompute(){
+  const { kind, id, preset } = pledState;
+  const E = _pledEntries(kind, id); if(!E.party) return null;
+  const isC = kind === 'customers';
+  const net = e => isC ? (e.red - e.green) : (e.green - e.red); // بقایا پر اثر
+  const all = E.out.filter(e => e.red || e.green).sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : a.ts - b.ts));
+  const r = _pledRange(preset);
+  const after = all.filter(e => !r.from || e.day >= r.from);
+  const opening = Math.round((E.now - after.reduce((t, e) => t + net(e), 0)) * 100) / 100;
+  const rows = all.filter(e => (!r.from || e.day >= r.from) && (!r.to || e.day <= r.to));
+  let bal = opening; rows.forEach(e => { bal = Math.round((bal + net(e)) * 100) / 100; e.bal = bal; });
+  const tRed = rows.reduce((t, e) => t + e.red, 0), tGreen = rows.reduce((t, e) => t + e.green, 0);
+  return { E, isC, r, rows, opening, closing: bal, tRed, tGreen, now: E.now };
+}
+function _pledBalTxt(v, isC){
+  const f = n => Math.round(Math.abs(n)).toLocaleString('en-US');
+  if(Math.abs(v) < 0.5) return 'برابر — 0';
+  if(isC) return v > 0 ? f(v) + ' — ان کی طرف' : f(v) + ' — ہماری طرف (ایڈوانس)';
+  return v > 0 ? f(v) + ' — ہماری طرف (دینے ہیں)' : f(v) + ' — ان کی طرف (ہمارا ایڈوانس)';
+}
+const PLED_PRESETS = [['today','آج'],['yesterday','کل'],['thisweek','یہ ہفتہ'],['lastweek','پچھلا ہفتہ'],['thismonth','یہ مہینہ'],['lastmonth','پچھلا مہینہ'],['all','شروع سے'],['custom','اپنی تاریخ']];
+function _pledTableHtml(R, forPrint){
+  const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x).replace(/</g, '&lt;'));
+  const f = n => n ? Math.round(n).toLocaleString('en-US') : '';
+  const redH = R.isC ? '🟥 مال / رقم دی<br><small>(گیا)</small>' : '🟥 ادائیگی / چھوٹ<br><small>(گیا)</small>';
+  const grnH = R.isC ? '🟩 وصولی / واپسی<br><small>(آیا)</small>' : '🟩 مال / رقم آئی<br><small>(آیا)</small>';
+  const th = 'position:sticky; top:0; z-index:2; padding:5px 4px; font-size:13px; font-weight:800; line-height:1.6; color:#fff; border:1px solid rgba(255,255,255,.4);';
+  const body = R.rows.map(e => `<tr>
+      <td style="padding:4px; border:1px solid #e2e8f0; font:700 12.5px/1.4 Arial,sans-serif; white-space:nowrap; direction:ltr; text-align:center;">${esc(e.day.split('-').reverse().join('/'))}</td>
+      <td style="padding:4px 6px; border:1px solid #e2e8f0; font-size:13.5px; line-height:1.7; text-align:right;">${esc(e.desc)}</td>
+      <td style="padding:4px; border:1px solid #fecaca; background:#fee2e2; color:#991b1b; font:900 14px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${f(e.red)}</td>
+      <td style="padding:4px; border:1px solid #bbf7d0; background:#dcfce7; color:#166534; font:900 14px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${f(e.green)}</td>
+      <td style="padding:4px; border:1px solid #e2e8f0; background:#f8fafc; color:${e.bal > 0 ? (R.isC ? '#991b1b' : '#7c2d12') : '#166534'}; font:800 13px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${Math.round(Math.abs(e.bal)).toLocaleString('en-US')}</td>
+    </tr>`).join('') || `<tr><td colspan="5" style="padding:18px; text-align:center; color:#64748b; font-weight:700;">اس مدت میں کوئی لین دین نہیں</td></tr>`;
+  return `<table style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr>
+      <th style="${th} background:#334155; width:72px;">تاریخ</th>
+      <th style="${th} background:#334155;">تفصیل</th>
+      <th style="${th} background:#dc2626; width:20%;">${redH}</th>
+      <th style="${th} background:#16a34a; width:20%;">${grnH}</th>
+      <th style="${th} background:#1e3a8a; width:17%;">بقایا</th>
+    </tr></thead>
+    <tbody>
+      <tr><td colspan="4" style="padding:6px; border:1px solid #e2e8f0; background:#fef9c3; font-size:14px; font-weight:800; text-align:right; line-height:1.8;">💼 سابقہ بقایا ${R.r.from ? '(' + esc(R.r.from.split('-').reverse().join('/')) + ' سے پہلے)' : ''}</td>
+        <td style="padding:4px; border:1px solid #e2e8f0; background:#fef9c3; font:900 13px/1.4 Arial,sans-serif; text-align:center;">${Math.round(Math.abs(R.opening)).toLocaleString('en-US')}</td></tr>
+      ${body}
+      <tr style="background:#f1f5f9;">
+        <td colspan="2" style="padding:6px; border:1px solid #cbd5e1; font-size:14.5px; font-weight:900; text-align:right; line-height:1.8;">کل جوڑ (${R.rows.length} اندراج)</td>
+        <td style="padding:4px; border:1px solid #fca5a5; background:#fecaca; color:#7f1d1d; font:900 14px/1.4 Arial,sans-serif; text-align:center;">${f(R.tRed) || '0'}</td>
+        <td style="padding:4px; border:1px solid #86efac; background:#bbf7d0; color:#14532d; font:900 14px/1.4 Arial,sans-serif; text-align:center;">${f(R.tGreen) || '0'}</td>
+        <td style="padding:4px; border:1px solid #cbd5e1; background:#1e3a8a; color:#fff; font:900 13.5px/1.4 Arial,sans-serif; text-align:center;">${Math.round(Math.abs(R.closing)).toLocaleString('en-US')}</td>
+      </tr>
+    </tbody></table>`;
+}
+function renderPartyLedger(){
+  const ov = document.getElementById('pledOverlay'); if(!ov) return;
+  const R = _pledCompute(); if(!R){ ov.style.display = 'none'; return; }
+  const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x));
+  const nowTxt = _pledBalTxt(R.now, R.isC), endTxt = _pledBalTxt(R.closing, R.isC);
+  const chip = ([k, l]) => `<button type="button" onclick="pledSetPreset('${k}')" style="flex:0 0 auto; padding:5px 11px; border-radius:999px; border:1.5px solid ${pledState.preset === k ? '#1e3a8a' : '#cbd5e1'}; background:${pledState.preset === k ? '#1e3a8a' : '#fff'}; color:${pledState.preset === k ? '#fff' : '#334155'}; font-family:inherit; font-size:14px; font-weight:800; line-height:1.7; cursor:pointer;">${l}</button>`;
+  ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:760px; max-height:94vh; display:flex; flex-direction:column; background:#fff; border-radius:18px; overflow:hidden; font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+    <div style="background:linear-gradient(135deg,#1e3a8a,#0f172a); color:#fff; padding:8px 12px; display:flex; align-items:center; gap:8px;">
+      <div style="flex:1; min-width:0;">
+        <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq',serif; font-size:21px; font-weight:800; line-height:1.8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📒 لین دین — <bdi dir="auto">${esc(R.E.party.name)}</bdi></div>
+        <div style="display:inline-block; margin-top:2px; padding:2px 12px; border-radius:999px; background:${R.now > 0.5 ? '#fecaca' : '#bbf7d0'}; color:${R.now > 0.5 ? '#7f1d1d' : '#14532d'}; font-size:14px; font-weight:900; line-height:1.8;">اس وقت: <span dir="ltr" style="font-family:Arial,sans-serif;">${esc(nowTxt.split(' — ')[0])}</span> — ${esc(nowTxt.split(' — ')[1] || '')}</div>
+      </div>
+      <button type="button" onclick="closePartyLedger()" style="flex:0 0 auto; width:38px; height:38px; border:none; border-radius:50%; background:rgba(255,255,255,.18); color:#fff; font-size:18px; cursor:pointer;">✖</button>
+    </div>
+    <div style="padding:8px 8px 4px; border-bottom:1px solid #e2e8f0;">
+      <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px;">${PLED_PRESETS.map(chip).join('')}</div>
+      ${pledState.preset === 'custom' ? `<div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
+        <input type="date" id="pledFrom" value="${esc(pledState.from)}" style="flex:1; height:38px; border:1.5px solid #cbd5e1; border-radius:10px; padding:0 6px;">
+        <span style="font-weight:800;">سے</span>
+        <input type="date" id="pledTo" value="${esc(pledState.to)}" style="flex:1; height:38px; border:1.5px solid #cbd5e1; border-radius:10px; padding:0 6px;">
+        <button type="button" onclick="pledSetCustom()" style="height:38px; padding:0 14px; border:none; border-radius:10px; background:#1e3a8a; color:#fff; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer;">دیکھیں</button></div>` : ''}
+      <div style="font-size:13px; color:#475569; line-height:1.8;">📅 ${R.r.from ? esc(R.r.from.split('-').reverse().join('/')) + (R.r.to && R.r.to !== R.r.from ? ' سے ' + esc(R.r.to.split('-').reverse().join('/')) + ' تک' : '') : 'شروع سے اب تک'}</div>
+    </div>
+    <div style="overflow:auto; flex:1;">${_pledTableHtml(R)}</div>
+    <div style="display:flex; gap:6px; align-items:center; padding:8px; border-top:1px solid #e2e8f0; background:#f8fafc;">
+      <div style="flex:1; font-size:14.5px; font-weight:900; line-height:1.8; color:#1e3a8a;">مدت کے آخر میں: <span dir="ltr" style="font-family:Arial,sans-serif;">${esc(endTxt.split(' — ')[0])}</span> — ${esc(endTxt.split(' — ')[1] || '')}</div>
+      <button type="button" onclick="pledPrint()" style="flex:0 0 auto; padding:9px 14px; border:none; border-radius:12px; background:#1e3a8a; color:#fff; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer;">🖨️ پرنٹ / PDF</button>
+    </div></div>`;
+}
+function pledPrint(){
+  const R = _pledCompute(); if(!R) return;
+  const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x));
+  const w = window.open('', '_blank'); if(!w){ alert('پرنٹ والی ونڈو نہیں کھلی'); return; }
+  const biz = (AppState.settings.businessName || '').trim();
+  const rng = R.r.from ? R.r.from.split('-').reverse().join('/') + (R.r.to ? ' — ' + R.r.to.split('-').reverse().join('/') : '') : 'شروع سے اب تک';
+  w.document.write(`<!DOCTYPE html><html lang="ur" dir="rtl"><head><meta charset="utf-8"><title>لین دین — ${esc(R.E.party.name)}</title><style>@page{size:A4 portrait;margin:8mm} body{margin:0;font-family:UrduAll,'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;-webkit-print-color-adjust:exact;print-color-adjust:exact} h2{text-align:center;margin:2px 0;font-size:20px;line-height:1.9} .sub{text-align:center;font-size:13px;margin-bottom:6px;line-height:1.8} th{position:static!important}</style></head><body>
+    <h2>${esc(biz)}${biz ? ' — ' : ''}📒 لین دین: ${esc(R.E.party.name)}</h2>
+    <div class="sub">📅 ${esc(rng)} &nbsp;•&nbsp; اس وقت کا بقایا: ${esc(_pledBalTxt(R.now, R.isC))}</div>
+    ${_pledTableHtml(R, true)}${typeof brandHtmlFooter === 'function' ? brandHtmlFooter() : ''}
+    <script>window.onload=function(){setTimeout(function(){window.print();},350);};<\/script></body></html>`);
+  w.document.close();
 }
 
 // ---------- Purchase Orders فلٹر بار سے کال ہوتا ہے ----------
