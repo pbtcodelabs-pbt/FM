@@ -9568,8 +9568,9 @@ function getDeveloperContact(){
 // 🆕 FM2110WE431: منشی کے بھیجے آرڈر ایڈمن تک پکے — دو فونز کا ایک ہی آرڈر نمبر اب ٹکراتا نہیں، نہ بھیجا گیا آرڈر خود دوبارہ جاتا ہے، منشی کو صاف پیغام
 // 🆕 FM2210TH432: بقایا درستی پکی — پرانی کاپی/بیک اپ والا فون درستی کو واپس نہیں کر سکتا، درستی کے بعد کلاؤڈ سے تصدیق
 // 🆕 FM2210TH433: گاہک اور بیوپاری کا 📒 لین دین لیجر — تاریخ کا فلٹر، سابقہ بقایا، سرخ (گیا) / سبز (آیا) کالم، ہر سطر پر بقایا، پرنٹ؛ کھاتے کے بٹنوں کے نام بڑے
-const APP_BUILD_VERSION = 'FM2210TH433'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'گاہک اور بیوپاری کا لین دین لیجر — تاریخ کے فلٹر اور سرخ/سبز کالم کے ساتھ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2210TH434: گاہک/بیوپاری کے کھاتے کے سب بٹن اور خانے اردو میں (نیا بل، والٹ، سابقہ بقایا، یاد دہانی، پروفائل…)
+const APP_BUILD_VERSION = 'FM2210TH434'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'گاہک اور بیوپاری کے کھاتے کے سب بٹن اب اردو میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -28091,21 +28092,21 @@ function openCustomerProfile(customerId){
     ${pendingBannerHtml}
     <!-- ---------- 💳 صدام کی ہدایت (FM3SEPTH10): Wallet Balance واپس فعال — زیادہ وصولی ہونے پر یہیں ایڈوانس جمع ہوتا ہے ---------- -->
     ${c.wallet_balance > 0 ? `<div class="pfBox" style="grid-column:1/-1; background:#f0fdf4; border:1.5px solid #86efac;"><div class="pfLabel">💳 والٹ (ایڈوانس — اس کی رقم ہمارے پاس)</div><div class="pfValue wallet" style="font-size:19px; color:#15803d;">+ Rs. ${c.wallet_balance.toLocaleString()}</div></div>` : ''}
-    ${typeof c.openingBalance !== 'undefined' ? `<div class="pfBox"><div class="pfLabel">💼 سابقہ بقایہ (Opening)</div><div class="pfValue" style="color:var(--muted);">Rs. ${c.openingBalance.toLocaleString()}</div></div>` : ''}
-    <div class="pfBox"><div class="pfLabel">📥 Total بقایہ (Receivable)</div><div class="pfValue receivable" onclick="openCollectModal(${c.customer_id})" style="cursor:pointer;">Rs. ${c.total_receivable.toLocaleString()}</div></div>
+    ${typeof c.openingBalance !== 'undefined' ? `<div class="pfBox"><div class="pfLabel">💼 سابقہ بقایا</div><div class="pfValue" style="color:var(--muted);">Rs. ${c.openingBalance.toLocaleString()}</div></div>` : ''}
+    <div class="pfBox"><div class="pfLabel">📥 کل بقایا (لینے ہیں)</div><div class="pfValue receivable" onclick="openCollectModal(${c.customer_id})" style="cursor:pointer;">Rs. ${c.total_receivable.toLocaleString()}</div></div>
   `;
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم (New Bill سب سے اوپر — سب سے زیادہ استعمال ہونے والا عمل)؛ Transactions سب سے نیچے ---
   const sideEl = document.getElementById('profileQuickActions');
   sideEl.innerHTML = `
-    <button style="background:linear-gradient(155deg,#0f766e,#0b4a45);" onclick="startNewBillForCustomer(${c.customer_id})"><span class="sideIcon">🧾</span><span class="sideLabel">New Bill</span></button>
+    <button style="background:linear-gradient(155deg,#0f766e,#0b4a45);" onclick="startNewBillForCustomer(${c.customer_id})"><span class="sideIcon">🧾</span><span class="sideLabel">نیا بل</span></button>
     <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});"><span class="sideIcon">📥</span><span class="sideLabel">وصولی</span></button>
     <button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustLoanModal(${c.customer_id});"><span class="sideIcon">💸</span><span class="sideLabel">ادھار دیا</span></button>
     ${AppState.currentRole === 'admin' ? `<button style="background:linear-gradient(155deg,${c.isDormant ? '#22c55e,#15803d' : '#a16207,#78350f'});" onclick="closeProfileModal(); toggleCustomerActiveStatus(${c.customer_id}, ${c.isDormant ? 'true' : 'false'});"><span class="sideIcon">${c.isDormant ? '✅' : '🪦'}</span><span class="sideLabel">${c.isDormant ? 'حاضر کریں' : 'کھوہ کھاتے'}</span></button>` : ''}
-    <button style="background:linear-gradient(155deg,#22c55e,#15803d);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});"><span class="sideIcon">➕</span><span class="sideLabel">Wallet</span></button>
-    <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
-    ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
-    <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareCustomerProfile(${c.customer_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
+    <button style="background:linear-gradient(155deg,#22c55e,#15803d);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});"><span class="sideIcon">➕</span><span class="sideLabel">والٹ</span></button>
+    <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">سابقہ بقایا</span></button>
+    ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">یاد دہانی</span></button>` : ''}
+    <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareCustomerProfile(${c.customer_id})"><span class="sideIcon">🪪</span><span class="sideLabel">پروفائل</span></button>
     <button style="background:linear-gradient(155deg,#2563eb,#1e3a8a);" onclick="openPartyLedger('customers', ${c.customer_id})"><span class="sideIcon">📒</span><span class="sideLabel">لین دین</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">والٹ / واپسی</span></button>
     ${AppState.currentRole === 'admin' ? `<button style="background:linear-gradient(155deg,#dc2626,#7f1d1d);" onclick="deleteCustomerFromProfile(${c.customer_id})"><span class="sideIcon">🗑️</span><span class="sideLabel">حذف</span></button>` : ''}
@@ -28163,13 +28164,13 @@ function renderCustomerBillsSection(customerId){
           const statusTag = inv.status === 'voided' ? ' · VOIDED' : inv.status === 'edited' ? ' · EDITED' : '';
           // ---------- 🧹 صدام کی ہدایت: سامان کی تفصیل نہیں دکھانی — صرف تاریخ + Preview + بقایہ/کلیئر اسٹیٹس ----------
           const amountHtml = isPending
-            ? `<div class="brAmount" style="background:#fef2f2; color:#b91c1c; padding:4px 10px; border-radius:8px; font-weight:800; font-size:12px; white-space:nowrap;">Rs. ${amountDue.toLocaleString()}<br><span style="font-size:9.5px; font-weight:700;">Pending</span></div>`
+            ? `<div class="brAmount" style="background:#fef2f2; color:#b91c1c; padding:4px 10px; border-radius:8px; font-weight:800; font-size:12px; white-space:nowrap;">Rs. ${amountDue.toLocaleString()}<br><span style="font-size:11px; font-weight:700;">بقایا</span></div>`
             : `<div class="brAmount" style="color:#15803d; font-weight:800; font-size:20px;">✅</div>`;
           return `
             <div class="billRow ${isPending?'pending':''}" onclick="closeProfileModal(); openInvoicePreview(${inv.invoice_id});">
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(inv.created_at).toLocaleDateString('en-GB')} · ${inv.invoice_no}${statusTag}</div>
-                <div class="brDesc" style="color:var(--primary-dark); font-weight:700;">🔍 Preview کریں</div>
+                <div class="brDesc" style="color:var(--primary-dark); font-weight:700;">🔍 دیکھیں</div>
               </div>
               ${amountHtml}
             </div>`;
@@ -28181,18 +28182,18 @@ function renderCustomerBillsSection(customerId){
             <div class="billRow pending" onclick="closeProfileModal(); openPendingReview(${p.pending_id});">
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(p.submitted_at).toLocaleDateString('en-GB')} · ${tag} · via ${p.salesman_name}</div>
-                <div class="brDesc" style="color:var(--primary-dark); font-weight:700;">🔍 Preview کریں</div>
+                <div class="brDesc" style="color:var(--primary-dark); font-weight:700;">🔍 دیکھیں</div>
               </div>
-              <div class="brAmount" style="background:#fef2f2; color:#b91c1c; padding:4px 10px; border-radius:8px; font-weight:800; font-size:12px; white-space:nowrap;">Rs. ${total.toLocaleString()}<br><span style="font-size:9.5px; font-weight:700;">Pending</span></div>
+              <div class="brAmount" style="background:#fef2f2; color:#b91c1c; padding:4px 10px; border-radius:8px; font-weight:800; font-size:12px; white-space:nowrap;">Rs. ${total.toLocaleString()}<br><span style="font-size:11px; font-weight:700;">بقایا</span></div>
             </div>`;
         }
       }).join('');
 
   const filterBarHtml = buildFilterBarHtml('profileBills',
-    [['all','All'],['pending','Pending'],['cleared','Cleared']], profileBillFilter, 'applyCustomerBillFilter');
+    [['all','تمام'],['pending','بقایا والے'],['cleared','ادا شدہ']], profileBillFilter, 'applyCustomerBillFilter');
 
   document.getElementById('profileSections').innerHTML = `
-    <div class="profileSectionTitle"><span>📦 Orders</span><span class="cnt">${allBills.length} orders</span></div>
+    <div class="profileSectionTitle"><span>📦 بل</span><span class="cnt">${allBills.length} بل</span></div>
     ${filterBarHtml}
     <div id="profileBillsListWrap">${billsHtml}</div>
   `;
@@ -28204,7 +28205,7 @@ function renderCustomerTransactionsSection(customerId){
   if(!c) return;
 
   const ledgerHtml = c.walletHistory.length === 0
-    ? `<div class="profileEmpty">No transactions yet</div>`
+    ? `<div class="profileEmpty">ابھی کوئی لین دین نہیں</div>`
     : c.walletHistory.map(h => {
         let label, isGot;
         if(h.type === 'deposit'){ label = '💳 والٹ میں جمع (ایڈوانس)'; isGot = true; }
@@ -28226,7 +28227,7 @@ function renderCustomerTransactionsSection(customerId){
     });
   });
   const returnsHtml = returnedItems.length === 0
-    ? `<div class="profileEmpty">No items returned by this customer</div>`
+    ? `<div class="profileEmpty">اس گاہک نے کوئی مال واپس نہیں کیا</div>`
     : returnedItems.map(r => `
         <div class="ledgerRow"><div class="lrTop">
           <div><div class="lrDate">${r.invoice_no}</div><div class="lrDesc">↩️ ${r.name} · Qty: ${r.qty}</div></div>
@@ -28234,9 +28235,9 @@ function renderCustomerTransactionsSection(customerId){
         </div></div>`).join('');
 
   document.getElementById('profileSections').innerHTML = `
-    <div class="profileSectionTitle"><span>📜 Transaction History</span><span class="cnt">${c.walletHistory.length} entries</span></div>
+    <div class="profileSectionTitle"><span>📜 والٹ اور وصولی کی تفصیل</span><span class="cnt">${c.walletHistory.length} اندراج</span></div>
     <div>${ledgerHtml}</div>
-    <div class="profileSectionTitle"><span>↩️ Returned Items</span><span class="cnt">${returnedItems.length} item(s)</span></div>
+    <div class="profileSectionTitle"><span>↩️ واپس آیا مال</span><span class="cnt">${returnedItems.length} چیزیں</span></div>
     <div>${returnsHtml}</div>
   `;
 }
@@ -28445,7 +28446,7 @@ function openSupplierProfile(supplierId){
   figuresEl.innerHTML = `
     <!-- ---------- 💳 صدام کی ہدایت (FM28SEP شام): بیوپاری کا والٹ — ہمارا ایڈوانس جو اس کے پاس ہے (سبز، پلس میں) ---------- -->
     ${(s.wallet_balance||0) > 0 ? `<div class="pfBox" style="grid-column:1/-1; background:#f0fdf4; border:1.5px solid #86efac;"><div class="pfLabel">💳 والٹ (ہمارا ایڈوانس اس کے پاس)</div><div class="pfValue wallet" style="font-size:19px; color:#15803d;">+ Rs. ${s.wallet_balance.toLocaleString()}</div></div>` : ''}
-    ${typeof s.openingBalance !== 'undefined' ? `<div class="pfBox"><div class="pfLabel">💼 سابقہ بقایہ (Opening)</div><div class="pfValue" style="color:var(--muted);">Rs. ${s.openingBalance.toLocaleString()}</div></div>` : ''}
+    ${typeof s.openingBalance !== 'undefined' ? `<div class="pfBox"><div class="pfLabel">💼 سابقہ بقایا</div><div class="pfValue" style="color:var(--muted);">Rs. ${s.openingBalance.toLocaleString()}</div></div>` : ''}
     <div class="pfBox"><div class="pfLabel">📤 واجب الادا (ہم نے دینے ہیں)</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
   `;
 
@@ -28778,7 +28779,7 @@ function updateSupplierKeywords(supplierId, keywords){
 function renderProfileNicknameTag(keywords){
   const el = document.getElementById('profileNicknameTag');
   if(!el) return;
-  el.innerHTML = keywords ? `🔑 ${keywords}` : `🔑 Add nickname`;
+  el.innerHTML = keywords ? `🔑 ${keywords}` : `🔑 عرفی نام لکھیں`;
 }
 function editProfileNickname(){
   const isCustomer = currentProfileType === 'customers';
