@@ -5329,6 +5329,7 @@ function __appHostKind(h, p){
         </div>
         <input type="number" id="collectAmount" dir="rtl" placeholder="وصول شدہ رقم درج کریں" onfocus="this.select()" oninput="updateCollectRemainingHint()">
         <div id="collectRemainingHint" style="display:none; padding:10px 12px; border-radius:10px; font-size:14.5px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark); line-height:2;"></div>
+<div style="display:flex; align-items:center; gap:8px; margin-top:8px; padding:6px 10px; border:2px solid #2563eb; border-radius:12px; background:#eff6ff;"><span style="flex:0 0 auto; font-weight:800; color:#1e3a8a; font-size:15px;">📅 تاریخ</span><input type="date" id="collectDate" style="flex:1; min-width:0; height:40px; border:1.5px solid #93c5fd; border-radius:10px; padding:0 8px; font-size:16px; font-weight:800;"></div>
         <textarea id="collectNote" dir="rtl" placeholder="نوٹ (مثلاً ایزی پیسہ سے وصول ہوئے) — اختیاری" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:15px; min-height:44px; text-align:right;"></textarea>
         <button type="button" class="addBankAccBtn" onclick="attachPaymentSlipImage('collect')" style="font-family:inherit;">📷 رسید / سکرین شاٹ لگائیں (اختیاری)</button>
         <div id="collectSlipPreview" style="display:none; margin-top:8px; text-align:center;">
@@ -5358,6 +5359,7 @@ function __appHostKind(h, p){
         <select id="paySupplierAccountSelect" dir="rtl" style="width:100%; padding:10px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; font-family:inherit;">
           <option value="">نقد / کوئی خاص اکاؤنٹ نہیں</option>
         </select>
+<div style="display:flex; align-items:center; gap:8px; margin-top:8px; padding:6px 10px; border:2px solid #2563eb; border-radius:12px; background:#eff6ff;"><span style="flex:0 0 auto; font-weight:800; color:#1e3a8a; font-size:15px;">📅 تاریخ</span><input type="date" id="paySupplierDate" style="flex:1; min-width:0; height:40px; border:1.5px solid #93c5fd; border-radius:10px; padding:0 8px; font-size:16px; font-weight:800;"></div>
         <textarea id="paySupplierNote" dir="rtl" placeholder="نوٹ (مثلاً میزان بینک ٹرانسفر سے ادا کیا) — اختیاری" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:15px; min-height:44px; text-align:right;"></textarea>
         <button type="button" class="addBankAccBtn" onclick="attachPaymentSlipImage('paySupplier')">📷 پیمنٹ سلپ/سکرین شاٹ لگائیں (اختیاری)</button>
         <div id="paySupplierSlipPreview" style="display:none; margin-top:8px; text-align:center;">
@@ -9570,8 +9572,9 @@ function getDeveloperContact(){
 // 🆕 FM2210TH433: گاہک اور بیوپاری کا 📒 لین دین لیجر — تاریخ کا فلٹر، سابقہ بقایا، سرخ (گیا) / سبز (آیا) کالم، ہر سطر پر بقایا، پرنٹ؛ کھاتے کے بٹنوں کے نام بڑے
 // 🆕 FM2210TH434: گاہک/بیوپاری کے کھاتے کے سب بٹن اور خانے اردو میں (نیا بل، والٹ، سابقہ بقایا، یاد دہانی، پروفائل…)
 // 🆕 FM2210TH435: ✂️ چالان کی قینچی آرڈرز میں بک مال کے باوجود چلتی ہے — بک مال حصوں میں خود بٹ جاتا ہے
-const APP_BUILD_VERSION = 'FM2210TH435'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'چالان کی قینچی دوبارہ چلتی ہے — آرڈر میں بک مال خود حصوں میں بٹتا ہے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2310FR436: (1) بیوپاری کو ادائیگی پر 📅 تاریخ (پچھلی تاریخ بھی) (2) گاہک کی وصولی پر 📅 تاریخ (3) 🔁 خریداری کا بیوپاری بدلیں
+const APP_BUILD_VERSION = 'FM2310FR436'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ادائیگی اور وصولی پر تاریخ، خریداری کا بیوپاری بدلنے کا بٹن'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -28529,7 +28532,8 @@ function renderSupplierPoSection(supplierId){
              <button class="btnPrint" onclick="event.stopPropagation(); openPoReminderModal(${s.supplier_id}, ${idx});">📢 یاد دہانی</button>
              <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ حذف کریں</button>`
           : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ دیکھیں</button>
-             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ واپسی</button>`;
+             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ واپسی</button>
+             ${AppState.currentRole === 'admin' && !(po.accountedInDaily && !po.isDaily) ? `<button class="btnPrint" style="background:#1d4ed8; color:#fff;" onclick="event.stopPropagation(); supChangePurchaseSupplier(${s.supplier_id}, ${idx});">🔁 بیوپاری بدلیں</button>` : ''}`;
         // 🎨 FM1510TH390 (صدام صاحب کی ہدایت): ہر پرچیز آرڈر ایک لمبا رنگین کیپسول — اوپر بیچ میں رنگدار تاریخ، نیچے اس دن کی
         // ادائیگی/چھوٹ/بقایا کے کیپسول (وہی حساب جو چٹ میں کھلتا ہے: poDayStatement)، پھر پرانی لائن اور بٹن
         const _pal = [['#ecfdf5','#10b981','#065f46'],['#eff6ff','#3b82f6','#1e3a8a'],['#fff7ed','#f97316','#9a3412'],['#faf5ff','#a855f7','#6b21a8'],['#fdf2f8','#ec4899','#9d174d']][idx % 5];
@@ -28755,6 +28759,82 @@ function pledPrint(){
     ${_pledTableHtml(R, true)}${typeof brandHtmlFooter === 'function' ? brandHtmlFooter() : ''}
     <script>window.onload=function(){setTimeout(function(){window.print();},350);};<\/script></body></html>`);
   w.document.close();
+}
+
+
+// =====================================================================
+// 🔁 FM2310FR436 (صدام بھائی): غلطی سے مال دوسرے بیوپاری کے کھاتے میں چڑھ گیا (سلطان کی جگہ اسلم) — خریداری کا بیوپاری بدلیں۔
+// روزانہ (چالان) خریداری: چنی ہوئی سبزیاں نئے بیوپاری پر — پرانے کا بقایا کم، نئے کا زیادہ، چالان پر نیا نام (بلوں کا حساب وہی)
+// عام پرچیز آرڈر: پورا آرڈر نئے بیوپاری کو۔ ادائیگیاں نہیں ہلتیں (وہ جس کو دی گئیں اسی کی رہیں)
+// =====================================================================
+async function supChangePurchaseSupplier(supplierId, idx){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'بیوپاری صرف ایڈمن بدل سکتا ہے۔'); return; }
+  const s = suppliersData.find(x => x.supplier_id === supplierId); if(!s) return;
+  const po = (s.purchaseHistory || [])[idx]; if(!po) return;
+  const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x));
+  const f = n => 'Rs. ' + Math.round(Number(n) || 0).toLocaleString('en-US');
+  const items = (po.items || []).map((it, i) => ({ i, it })).filter(x => x.it);
+  window.__scSel = new Set(items.map(x => x.i)); window.__scTo = null;
+  const itemRows = po.isDaily ? items.map(({ i, it }) => `<label style="display:flex; align-items:center; gap:8px; padding:6px 8px; margin-top:5px; border:1.5px solid #cbd5e1; border-radius:10px; background:#fff; cursor:pointer;">
+      <input type="checkbox" checked onchange="if(this.checked) window.__scSel.add(${i}); else window.__scSel.delete(${i});" style="width:20px; height:20px;">
+      <span style="flex:1; font-size:16px; font-weight:700;">${esc(it.name || '')}${it.label ? ' (' + esc(it.label) + ')' : ''}${it.chalanNo != null ? ' <small>#' + it.chalanNo + '</small>' : ''}</span>
+      <span dir="ltr" style="font:900 14px Arial,sans-serif; color:#7c2d12; white-space:nowrap;">${Number(it.qty) || 0} × ${Number(it.cost) || 0}</span></label>`).join('') : '';
+  const others = (suppliersData || []).filter(x => x && x.supplier_id !== supplierId && !x.deleted).slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  const supRows = others.map(x => `<div class="scSup" data-nm="${esc(String(x.name).toLowerCase())}" onclick="window.__scTo=${x.supplier_id}; document.querySelectorAll('.scSup').forEach(e=>{const on=e===this; e.style.borderColor=on?'#16a34a':'#e2e8f0'; e.style.background=on?'#f0fdf4':'#fff';});" style="padding:8px 10px; margin-top:5px; border:2px solid #e2e8f0; border-radius:12px; background:#fff; cursor:pointer; font-size:16px; font-weight:700;"><bdi dir="auto">${esc(x.name)}</bdi></div>`).join('');
+  const ok = await uDialog({ title: '🔁 بیوپاری بدلیں', okText: 'آگے ←', cancelText: '✖ واپس', message:
+    `<div style="font-size:15px; line-height:1.9;">اب یہ خریداری <b><bdi dir="auto">${esc(s.name)}</bdi></b> کے کھاتے میں ہے (📅 ${esc(po.date || '')})</div>`
+    + (po.isDaily ? `<div style="font-size:14px; font-weight:800; margin-top:4px;">کون سی سبزیاں منتقل کرنی ہیں؟</div>${itemRows}` : `<div style="font-size:14px;">پورا آرڈر منتقل ہو گا — ${f(po.total)}</div>`)
+    + `<div style="font-size:14px; font-weight:800; margin-top:8px;">کس بیوپاری کے کھاتے میں ڈالنا ہے؟</div>
+       <input type="text" placeholder="🔍 نام سے تلاش" oninput="const q=this.value.trim().toLowerCase(); document.querySelectorAll('.scSup').forEach(e=>{ e.style.display=!q||e.dataset.nm.includes(q)?'block':'none'; })" style="width:100%; box-sizing:border-box; height:40px; margin-top:4px; border:2px solid #cbd5e1; border-radius:12px; padding:0 10px; font-size:15px; font-family:inherit;">
+       <div style="max-height:34vh; overflow-y:auto;">${supRows || '<div style="padding:10px; color:#64748b;">کوئی دوسرا بیوپاری نہیں</div>'}</div>` });
+  if(!ok) return;
+  const t = suppliersData.find(x => x.supplier_id === window.__scTo);
+  if(!t){ await uAlert('بیوپاری چنیں', 'فہرست میں سے نئے بیوپاری کے نام پر ٹیپ کریں۔'); return supChangePurchaseSupplier(supplierId, idx); }
+  const chosen = po.isDaily ? items.filter(x => window.__scSel.has(x.i)).map(x => x.it) : [];
+  if(po.isDaily && !chosen.length){ await uAlert('سبزی چنیں', 'کم از کم ایک سبزی پر ٹک لگائیں۔'); return; }
+  const amt = po.isDaily ? chosen.reduce((a, it) => a + (Number(it.qty) || 0) * (Number(it.cost) || 0), 0) : (Number(po.total) || 0);
+  if(!(await uDialog({ title: '⚠️ تصدیق', tone: 'amber', okText: '✅ بدل دیں', cancelText: '✖ واپس', rows: [
+      { label: 'پرانا بیوپاری', value: s.name }, { label: 'نیا بیوپاری', value: t.name, big: true },
+      { label: 'رقم جو منتقل ہو گی', value: f(amt), bg: '#fef9c3', fg: '#854d0e' },
+      { label: s.name + ' کا بقایا', value: f(s.total_payable) + ' ← ' + f((Number(s.total_payable) || 0) - amt) },
+      { label: t.name + ' کا بقایا', value: f(t.total_payable) + ' ← ' + f((Number(t.total_payable) || 0) + amt) }] }))) return;
+  try{ pauseCloudPolling(20000); }catch(e){}
+  let moved = 0, failed = 0;
+  if(po.isDaily){
+    chosen.forEach(it => {
+      const fv = findProductAndVariant(it.variant_id); const v = fv && fv.v;
+      const c = v ? (v.chalans || []).find(x => x.chalanNo === it.chalanNo) : null;
+      if(c && c.accounted){
+        const okC = _chAccountCore(it.variant_id, it.chalanNo, { rate: Number(c.rate) || Number(it.cost) || 0, labor: c.sellLabor, isb: c.retail, rwp: c.wholesale, src: String(t.supplier_id) });
+        if(okC) moved++; else failed++;
+      } else {
+        // چالان نہ ملے: صرف کھاتے کی سطر منتقل
+        po.items = (po.items || []).filter(x => x !== it);
+        po.total = (po.items || []).reduce((a, x) => a + (Number(x.qty) || 0) * (Number(x.cost) || 0), 0);
+        const lineAmt = Math.round((Number(it.qty) || 0) * (Number(it.cost) || 0));
+        s.total_payable = (Number(s.total_payable) || 0) - lineAmt; normalizeSupplierBalance(s);
+        t.total_payable = (Number(t.total_payable) || 0) + lineAmt; normalizeSupplierBalance(t);
+        t.purchaseHistory = t.purchaseHistory || [];
+        _chAddToDailyRecord(t.purchaseHistory, po.date, it, () => ({poId: 'D' + po.date, isDaily: true, date: po.date, status: 'received', receivedDate: po.date, items: [], total: 0, note: 'روزانہ خریداری (چالان)'}));
+        moved++;
+      }
+    });
+    s.purchaseHistory = (s.purchaseHistory || []).filter(x => !(x.isDaily && (x.items || []).length === 0));
+  } else {
+    s.purchaseHistory.splice(idx, 1);
+    if(po.status === 'received'){ s.total_payable = (Number(s.total_payable) || 0) - (Number(po.total) || 0); normalizeSupplierBalance(s); t.total_payable = (Number(t.total_payable) || 0) + (Number(po.total) || 0); normalizeSupplierBalance(t); }
+    po.movedFrom = s.name;
+    t.purchaseHistory = t.purchaseHistory || []; t.purchaseHistory.unshift(po);
+    (productsData || []).forEach(pp => (pp.variants || []).forEach(v => (v.chalans || []).forEach(c => { if(c && c.poRef === po.poId){ c.supplierId = t.supplier_id; c.supplierName = t.name; } })));
+    moved = 1;
+  }
+  persistAllData();
+  try{ saveToStorage('cashPurchases', cashPurchasesData); }catch(e){}
+  try{ pushSuppliersToCloud(); }catch(e){}
+  try{ pushProductsToCloud(); }catch(e){}
+  try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+  try{ openSupplierProfile(s.supplier_id); }catch(e){}
+  uAlert(failed ? '⚠️ کچھ منتقل نہیں ہوا' : '✅ بیوپاری بدل گیا', `${moved} ${po.isDaily ? 'سبزی' : 'آرڈر'} <bdi dir="auto">${esc(t.name)}</bdi> کے کھاتے میں چلی گئی (${f(amt)})۔` + (failed ? `<br>${failed} منتقل نہیں ہو سکیں۔` : '') + '<br><small>جو ادائیگی پہلے کی جا چکی وہ اسی بیوپاری کے کھاتے میں رہے گی۔</small>', failed ? 'amber' : 'green');
 }
 
 // ---------- Purchase Orders فلٹر بار سے کال ہوتا ہے ----------
@@ -29568,6 +29648,7 @@ function openPaySupplierModal(supplierId, onlyMode){
   document.getElementById('paySupplierAmount').value = '';
   document.getElementById('paySupplierDiscount').value = '';
   document.getElementById('paySupplierNote').value = '';
+  try{ const _d = document.getElementById('paySupplierDate'); if(_d){ _d.value = bizDateKey(); _d.max = bizDateKey(); } }catch(e){} // 📅 FM2310FR436
   document.getElementById('paySupplierRemainingHint').style.display = 'none';
   removePaymentSlipImage('paySupplier');
   // ---------- اسی سپلائر کے محفوظ شدہ بینک/والیٹ اکاؤنٹس ڈراپ ڈاؤن میں دکھائیں تاکہ کس اکاؤنٹ میں بھیجا گیا منتخب کیا جا سکے ----------
@@ -29708,7 +29789,11 @@ async function confirmPaySupplier(){
   const accounts = getSupplierBankAccounts(s);
   const chosenAcc = accIdx !== '' ? accounts[accIdx] : null;
   const balanceBefore = s.total_payable || 0;
-  const today = new Date().toISOString().split('T')[0];
+  // 📅 FM2310FR436 (صدام بھائی): ادائیگی/وصولی کی تاریخ خود چنیں — پچھلی تاریخ ڈالیں تو لین دین اسی تاریخ میں، نقد آج کے کیش میں
+  const _curDay = bizCurrentDate();
+  let today = (document.getElementById('paySupplierDate')?.value || '').trim() || _curDay;
+  if(today > _curDay) today = _curDay;
+  const _back = today < _curDay;
   s.ledgerHistory = s.ledgerHistory || [];
 
   // TODO: یہاں supplier_payments table میں INSERT ہوگا، suppliers.total_payable UPDATE ہوگا
@@ -29747,6 +29832,7 @@ async function confirmPaySupplier(){
     account_number: chosenAcc ? (chosenAcc.number || '') : '',
     slip_image: paymentSlipImages.paySupplier,
     note,
+    biz_date: today, cash_day: _curDay, ...(_back ? { backdated: true } : {}), // 📅 FM2310FR436
   }) : null;
 
   closePaySupplierModal();
@@ -38224,6 +38310,7 @@ function openCollectModal(customerId){
   setCollectMode('cash');
   document.getElementById('collectAmount').value = '';
   document.getElementById('collectNote').value = '';
+  try{ const _d = document.getElementById('collectDate'); if(_d){ _d.value = bizDateKey(); _d.max = bizDateKey(); } }catch(e){} // 📅 FM2310FR436
   document.getElementById('collectRemainingHint').style.display = 'none';
   removePaymentSlipImage('collect');
   document.getElementById('collectModal').classList.add('show');
@@ -38347,7 +38434,11 @@ function saveCollectReceivable(){
   }
   // ---------- نوٹ: totalReceivable اب Dashboard پر لائیو حساب ہوتا ہے (customersData سے براہ راست)، اس لیے یہاں الگ سے اپڈیٹ کرنے کی ضرورت نہیں ----------
 
-  const today = bizDateKey();
+  // 📅 FM2310FR436 (صدام بھائی): وصولی کی تاریخ خود چنیں — پچھلی تاریخ ڈالیں تو کھاتے/لین دین میں اسی تاریخ کو، نقد آج کے کیش میں
+  const _curDay = bizCurrentDate();
+  let today = (document.getElementById('collectDate')?.value || '').trim() || bizDateKey();
+  if(today > _curDay) today = _curDay;
+  const _back = today < _curDay;
   if(sp.toDue > 0){
     c.walletHistory.unshift({ type: 'receivable_collected', amount: sp.toDue, via: activeCollectMode, date: today, note: ((document.getElementById('collectNote') || {}).value || '').trim() }); // 📝 FM1710SA398: نوٹ کھاتے میں بھی
   }
@@ -38373,6 +38464,7 @@ function saveCollectReceivable(){
     method: activeCollectMode === 'wallet' ? 'Wallet' : 'Cash',
     slip_image: paymentSlipImages.collect,
     note: collectNote,
+    biz_date: today, cash_day: _curDay, ...(_back ? { backdated: true } : {}), // 📅 FM2310FR436
   });
 
   closeCollectModal();
