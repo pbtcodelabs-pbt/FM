@@ -5322,6 +5322,7 @@ function __appHostKind(h, p){
     <div class="modalOverlay" id="collectModal" onclick="if(event.target===this) this.classList.remove('show')" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="modalBox">
         <h3 id="collectModalTitle">💰 وصولی</h3>
+        <div class="dwBox"><input type="hidden" id="collectDate"></div>
         <div style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:15px; font-weight:700; margin-bottom:12px;" id="collectReceivableHint">کل بقایا: Rs. 0</div>
         <div class="txnTypeToggle">
           <button id="collectCash" class="active" onclick="setCollectMode('cash')" style="font-family:inherit;">💵 نقد وصولی</button>
@@ -5329,7 +5330,6 @@ function __appHostKind(h, p){
         </div>
         <input type="number" id="collectAmount" dir="rtl" placeholder="وصول شدہ رقم درج کریں" onfocus="this.select()" oninput="updateCollectRemainingHint()">
         <div id="collectRemainingHint" style="display:none; padding:10px 12px; border-radius:10px; font-size:14.5px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark); line-height:2;"></div>
-<div class="dwBox"><input type="hidden" id="collectDate"></div>
         <textarea id="collectNote" dir="rtl" placeholder="نوٹ (مثلاً ایزی پیسہ سے وصول ہوئے) — اختیاری" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:15px; min-height:44px; text-align:right;"></textarea>
         <button type="button" class="addBankAccBtn" onclick="attachPaymentSlipImage('collect')" style="font-family:inherit;">📷 رسید / سکرین شاٹ لگائیں (اختیاری)</button>
         <div id="collectSlipPreview" style="display:none; margin-top:8px; text-align:center;">
@@ -5347,6 +5347,7 @@ function __appHostKind(h, p){
     <div class="modalOverlay" id="paySupplierModal" onclick="if(event.target===this) this.classList.remove('show')" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
       <div class="modalBox">
         <h3 id="paySupplierModalTitle">💵 بیوپاری کو ادائیگی</h3>
+        <div class="dwBox"><input type="hidden" id="paySupplierDate"></div>
         <div style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:15px; font-weight:700; margin-bottom:12px; line-height:2;" id="paySupplierPayableHint">کل واجب الادا: Rs. 0</div>
         <!-- ---------- 🔁 صدام کی ہدایت (FM28SEP شام): ادائیگی (ہم نے دیے) یا وصولی (بیوپاری سے لیے — ایڈوانس/ادھار) ---------- -->
         <div class="txnTypeToggle" id="paySupModeToggle">
@@ -5359,7 +5360,6 @@ function __appHostKind(h, p){
         <select id="paySupplierAccountSelect" dir="rtl" style="width:100%; padding:10px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; font-family:inherit;">
           <option value="">نقد / کوئی خاص اکاؤنٹ نہیں</option>
         </select>
-<div class="dwBox"><input type="hidden" id="paySupplierDate"></div>
         <textarea id="paySupplierNote" dir="rtl" placeholder="نوٹ (مثلاً میزان بینک ٹرانسفر سے ادا کیا) — اختیاری" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:15px; min-height:44px; text-align:right;"></textarea>
         <button type="button" class="addBankAccBtn" onclick="attachPaymentSlipImage('paySupplier')">📷 پیمنٹ سلپ/سکرین شاٹ لگائیں (اختیاری)</button>
         <div id="paySupplierSlipPreview" style="display:none; margin-top:8px; text-align:center;">
@@ -9574,8 +9574,9 @@ function getDeveloperContact(){
 // 🆕 FM2210TH435: ✂️ چالان کی قینچی آرڈرز میں بک مال کے باوجود چلتی ہے — بک مال حصوں میں خود بٹ جاتا ہے
 // 🆕 FM2310FR436: (1) بیوپاری کو ادائیگی پر 📅 تاریخ (پچھلی تاریخ بھی) (2) گاہک کی وصولی پر 📅 تاریخ (3) 🔁 خریداری کا بیوپاری بدلیں
 // 🆕 FM2310FR437: ادائیگی/وصولی کی تاریخ اب تین چمکتے ویل (سال، مہینہ، دن) — اوپر بڑا دن
-const APP_BUILD_VERSION = 'FM2310FR437'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'تاریخ چننے کے لیے چمکتے ویل (سال، مہینہ، دن)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2310FR438: تاریخ کا ویل چھوٹا — فارم میں سب سے اوپر ایک لائن (ویل + دن)
+const APP_BUILD_VERSION = 'FM2310FR438'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'تاریخ کا ویل چھوٹا، فارم میں سب سے اوپر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -28841,26 +28842,26 @@ async function supChangePurchaseSupplier(supplierId, idx){
 // ---------- 📅 FM2310FR437: تاریخ کا ویل — دائیں سال، درمیان مہینہ، بائیں دن؛ بیچ والا چمکتا، باقی دھندلے ----------
 const DW_MONTHS = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];
 const DW_DAYS = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
-const DW_H = 38;
+const DW_H = 24;
 (function(){
   const st = document.createElement('style');
   st.textContent = `
-  .dwBox{margin-top:8px;border-radius:18px;padding:8px 10px 12px;background:radial-gradient(120% 90% at 50% 0%,#12324a,#06111a);border:2px solid #1f6f5c;box-shadow:inset 0 0 18px rgba(57,255,20,.08),0 4px 14px rgba(0,0,0,.25);direction:rtl}
-  .dwShow{text-align:center;margin-bottom:6px}
-  .dwDay{font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;font-size:34px;line-height:1.55;color:#c8ffc0;text-shadow:0 0 6px #39ff14,0 0 16px rgba(57,255,20,.75)}
-  .dwFull{font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;font-size:18px;line-height:1.6;color:#e6fbe3}
+  .dwBox{display:flex;align-items:center;gap:10px;margin:0 0 10px;border-radius:14px;padding:4px 10px;background:radial-gradient(120% 120% at 50% 0%,#12324a,#06111a);border:1.5px solid #1f6f5c;box-shadow:inset 0 0 12px rgba(57,255,20,.08);direction:rtl}
+  .dwShow{flex:1;min-width:0;text-align:center;line-height:1}
+  .dwDay{font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;font-size:24px;line-height:1.5;white-space:nowrap;color:#c8ffc0;text-shadow:0 0 6px #39ff14,0 0 16px rgba(57,255,20,.75)}
+  .dwFull{line-height:1.2}
   .dwFull .n{font-family:Arial,sans-serif;font-weight:900;direction:ltr;unicode-bidi:isolate;margin:0 6px}
-  .dwTag{display:inline-block;margin-inline-start:6px;padding:0 8px;border-radius:10px;font-size:13px;line-height:1.7;background:#f59e0b;color:#1f1300;font-family:Arial,sans-serif;font-weight:800}
-  .dwWheels{position:relative;display:flex;justify-content:center;gap:8px;height:${DW_H*5}px}
-  .dwCol{height:${DW_H*5}px;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:14px;background:linear-gradient(#08141d,#10283a 50%,#08141d);-webkit-mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent)}
+  .dwTag{display:inline-block;margin-inline-start:6px;padding:0 8px;border-radius:10px;font-size:11px;line-height:1.7;background:#f59e0b;color:#1f1300;font-family:Arial,sans-serif;font-weight:800}
+  .dwWheels{position:relative;display:flex;justify-content:center;gap:4px;height:${DW_H*3}px;flex:0 0 auto}
+  .dwCol{height:${DW_H*3}px;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:14px;background:linear-gradient(#08141d,#10283a 50%,#08141d);-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
   .dwCol::-webkit-scrollbar{display:none}
-  .dwCol[data-k="y"]{width:76px}.dwCol[data-k="m"]{width:96px}.dwCol[data-k="d"]{width:60px}
-  .dwSp{height:${DW_H*2}px}
-  .dwIt{height:${DW_H}px;line-height:${DW_H}px;text-align:center;scroll-snap-align:center;color:#8fc9a2;font:900 19px Arial,sans-serif;line-height:${DW_H}px;cursor:pointer;user-select:none;will-change:transform,opacity,filter}
-  .dwCol[data-k="m"] .dwIt{font:19px 'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;line-height:${DW_H}px}
+  .dwCol[data-k="y"]{width:50px}.dwCol[data-k="m"]{width:62px}.dwCol[data-k="d"]{width:36px}
+  .dwSp{height:${DW_H}px}
+  .dwIt{height:${DW_H}px;line-height:${DW_H}px;text-align:center;scroll-snap-align:center;color:#8fc9a2;font:900 15px Arial,sans-serif;line-height:${DW_H}px;cursor:pointer;user-select:none;will-change:transform,opacity,filter}
+  .dwCol[data-k="m"] .dwIt{font:15px 'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;line-height:${DW_H}px}
   .dwIt.on{color:#eaffe4;text-shadow:0 0 4px #39ff14,0 0 12px #39ff14,0 0 22px rgba(57,255,20,.6)}
   .dwIt.dis{color:#7a4a4a}
-  .dwBand{position:absolute;left:50%;transform:translateX(-50%);top:${DW_H*2}px;height:${DW_H}px;width:256px;border-top:1.5px solid rgba(57,255,20,.6);border-bottom:1.5px solid rgba(57,255,20,.6);border-radius:10px;pointer-events:none;box-shadow:0 0 12px rgba(57,255,20,.3),inset 0 0 12px rgba(57,255,20,.14)}`;
+  .dwBand{position:absolute;left:50%;transform:translateX(-50%);top:${DW_H}px;height:${DW_H}px;width:158px;border-top:1.5px solid rgba(57,255,20,.6);border-bottom:1.5px solid rgba(57,255,20,.6);border-radius:10px;pointer-events:none;box-shadow:0 0 12px rgba(57,255,20,.3),inset 0 0 12px rgba(57,255,20,.14)}`;
   document.head.appendChild(st);
 })();
 function dwP2(n){ return String(n).padStart(2,'0'); }
@@ -28898,14 +28899,14 @@ function dwApply(box, smooth){
   box.querySelector('input').value = key;
   let today = ''; try{ today = bizDateKey(); }catch(e){}
   box.querySelector('.dwDay').textContent = DW_DAYS[new Date(v.y, v.m-1, v.d).getDay()];
-  box.querySelector('.dwFull').innerHTML = `<span class="n">${v.d}</span> ${DW_MONTHS[v.m-1]} <span class="n">${v.y}</span>` + (key === today ? '<span class="dwTag">آج</span>' : (key < today ? '<span class="dwTag">پچھلی تاریخ</span>' : ''));
+  box.querySelector('.dwFull').innerHTML = (key === today ? '<span class="dwTag">آج</span>' : (key < today ? '<span class="dwTag">پچھلی تاریخ</span>' : ''));
 }
 function dwSync(id){
   const inp = document.getElementById(id); if(!inp) return;
   const box = inp.closest('.dwBox'); if(!box) return;
   if(!box.__dw){
     box.__dw = true;
-    box.insertAdjacentHTML('afterbegin', '<div class="dwShow"><div class="dwDay"></div><div class="dwFull"></div></div><div class="dwWheels"><div class="dwCol" data-k="y"></div><div class="dwCol" data-k="m"></div><div class="dwCol" data-k="d"></div><div class="dwBand"></div></div>');
+    box.insertAdjacentHTML('afterbegin', '<div class="dwWheels"><div class="dwCol" data-k="y"></div><div class="dwCol" data-k="m"></div><div class="dwCol" data-k="d"></div><div class="dwBand"></div></div><div class="dwShow"><div class="dwDay"></div><div class="dwFull"></div></div>');
     box.querySelectorAll('.dwCol').forEach(col => {
       col.addEventListener('scroll', () => {
         dwPaint(col); clearTimeout(col.__t); col.__pending = true;
