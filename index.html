@@ -9575,8 +9575,9 @@ function getDeveloperContact(){
 // 🆕 FM2310FR436: (1) بیوپاری کو ادائیگی پر 📅 تاریخ (پچھلی تاریخ بھی) (2) گاہک کی وصولی پر 📅 تاریخ (3) 🔁 خریداری کا بیوپاری بدلیں
 // 🆕 FM2310FR437: ادائیگی/وصولی کی تاریخ اب تین چمکتے ویل (سال، مہینہ، دن) — اوپر بڑا دن
 // 🆕 FM2310FR438: تاریخ کا ویل چھوٹا — فارم میں سب سے اوپر ایک لائن (ویل + دن)
-const APP_BUILD_VERSION = 'FM2310FR438'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'تاریخ کا ویل چھوٹا، فارم میں سب سے اوپر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2410SA439: بیوپاری کا الگ لیجر بٹن ختم — پورا لیجر اب 📜 لین دین کے اندر
+const APP_BUILD_VERSION = 'FM2410SA439'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بیوپاری کا لیجر اب لین دین کے اندر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -28489,7 +28490,6 @@ function openSupplierProfile(supplierId){
     <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id}, 'pay');"><span class="sideIcon">💵</span><span class="sideLabel">ادائیگی</span></button>
     <button style="background:linear-gradient(155deg,#10b981,#047857);" onclick="openPaySupplierModal(${s.supplier_id}, 'receive');"><span class="sideIcon">📥</span><span class="sideLabel">ادھار لیا</span></button>
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">پروفائل</span></button>
-    <button style="background:linear-gradient(155deg,#2563eb,#1e3a8a);" onclick="openPartyLedger('suppliers', ${s.supplier_id})"><span class="sideIcon">📒</span><span class="sideLabel">لیجر</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">لین دین</span></button>
     <!-- 🗑️ FM510MO318: صرف ایڈمن — دو تنبیہ + PIN -->
     ${AppState.currentRole === 'admin' ? `<button style="background:linear-gradient(155deg,#f87171,#7f1d1d);" onclick="deleteSupplierWithConfirm(${s.supplier_id})"><span class="sideIcon">🗑️</span><span class="sideLabel">حذف</span></button>` : ''}
@@ -28575,6 +28575,11 @@ function renderSupplierPoSection(supplierId){
 function renderSupplierTransactionsSection(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
+  // 📜 FM2410SA439 (صدام بھائی): الگ "لیجر" بٹن ختم — پورا لیجر (تاریخ کا فلٹر، سابقہ بقایا، سرخ/سبز کالم، ہر سطر کا بقایا، پرنٹ) یہیں
+  pledState.kind = 'suppliers'; pledState.id = supplierId; pledState.embed = true;
+  document.getElementById('profileSections').innerHTML = '<div id="pledEmbed" style="margin-top:4px; border:1.5px solid #c7d2fe; border-radius:18px; overflow:hidden;"></div>';
+  renderPartyLedger();
+  return;
   const ledger = s.ledgerHistory || [];
   const ledgerHtml = ledger.length === 0
     ? `<div class="profileEmpty">ابھی تک کوئی لین دین نہیں</div>`
@@ -28657,7 +28662,7 @@ function _pledEntries(kind, id){
   return { party: sp, out, now: (Number(sp.total_payable) || 0) - (Number(sp.wallet_balance) || 0), sign: -1 };
 }
 function openPartyLedger(kind, id){
-  pledState.kind = kind; pledState.id = id;
+  pledState.kind = kind; pledState.id = id; pledState.embed = false;
   let ov = document.getElementById('pledOverlay');
   if(!ov){ ov = document.createElement('div'); ov.id = 'pledOverlay'; ov.style.cssText = 'position:fixed; inset:0; z-index:10070; background:rgba(15,23,42,.6); display:flex; align-items:center; justify-content:center; padding:8px;'; document.body.appendChild(ov); }
   ov.style.display = 'flex';
@@ -28721,18 +28726,19 @@ function _pledTableHtml(R, forPrint){
     </tbody></table>`;
 }
 function renderPartyLedger(){
-  const ov = document.getElementById('pledOverlay'); if(!ov) return;
-  const R = _pledCompute(); if(!R){ ov.style.display = 'none'; return; }
+  const emb = pledState.embed ? document.getElementById('pledEmbed') : null; // 📜 FM2410SA439: بیوپاری کے "لین دین" کے اندر
+  const ov = emb || document.getElementById('pledOverlay'); if(!ov) return;
+  const R = _pledCompute(); if(!R){ if(!emb) ov.style.display = 'none'; return; }
   const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x));
   const nowTxt = _pledBalTxt(R.now, R.isC), endTxt = _pledBalTxt(R.closing, R.isC);
   const chip = ([k, l]) => `<button type="button" onclick="pledSetPreset('${k}')" style="flex:0 0 auto; padding:5px 11px; border-radius:999px; border:1.5px solid ${pledState.preset === k ? '#1e3a8a' : '#cbd5e1'}; background:${pledState.preset === k ? '#1e3a8a' : '#fff'}; color:${pledState.preset === k ? '#fff' : '#334155'}; font-family:inherit; font-size:14px; font-weight:800; line-height:1.7; cursor:pointer;">${l}</button>`;
-  ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:760px; max-height:94vh; display:flex; flex-direction:column; background:#fff; border-radius:18px; overflow:hidden; font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+  ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:760px; max-height:${emb ? 'none' : '94vh'}; display:flex; flex-direction:column; background:#fff; border-radius:18px; overflow:hidden; font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
     <div style="background:linear-gradient(135deg,#1e3a8a,#0f172a); color:#fff; padding:8px 12px; display:flex; align-items:center; gap:8px;">
       <div style="flex:1; min-width:0;">
         <div style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq',serif; font-size:21px; font-weight:800; line-height:1.8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📒 لین دین — <bdi dir="auto">${esc(R.E.party.name)}</bdi></div>
         <div style="display:inline-block; margin-top:2px; padding:2px 12px; border-radius:999px; background:${R.now > 0.5 ? '#fecaca' : '#bbf7d0'}; color:${R.now > 0.5 ? '#7f1d1d' : '#14532d'}; font-size:14px; font-weight:900; line-height:1.8;">اس وقت: <span dir="ltr" style="font-family:Arial,sans-serif;">${esc(nowTxt.split(' — ')[0])}</span> — ${esc(nowTxt.split(' — ')[1] || '')}</div>
       </div>
-      <button type="button" onclick="closePartyLedger()" style="flex:0 0 auto; width:38px; height:38px; border:none; border-radius:50%; background:rgba(255,255,255,.18); color:#fff; font-size:18px; cursor:pointer;">✖</button>
+      ${emb ? '' : `<button type="button" onclick="closePartyLedger()" style="flex:0 0 auto; width:38px; height:38px; border:none; border-radius:50%; background:rgba(255,255,255,.18); color:#fff; font-size:18px; cursor:pointer;">✖</button>`}
     </div>
     <div style="padding:8px 8px 4px; border-bottom:1px solid #e2e8f0;">
       <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px;">${PLED_PRESETS.map(chip).join('')}</div>
@@ -28743,7 +28749,7 @@ function renderPartyLedger(){
         <button type="button" onclick="pledSetCustom()" style="height:38px; padding:0 14px; border:none; border-radius:10px; background:#1e3a8a; color:#fff; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer;">دیکھیں</button></div>` : ''}
       <div style="font-size:13px; color:#475569; line-height:1.8;">📅 ${R.r.from ? esc(R.r.from.split('-').reverse().join('/')) + (R.r.to && R.r.to !== R.r.from ? ' سے ' + esc(R.r.to.split('-').reverse().join('/')) + ' تک' : '') : 'شروع سے اب تک'}</div>
     </div>
-    <div style="overflow:auto; flex:1;">${_pledTableHtml(R)}</div>
+    <div style="overflow:auto; flex:1;${emb ? ' max-height:62vh;' : ''}">${_pledTableHtml(R)}</div>
     <div style="display:flex; gap:6px; align-items:center; padding:8px; border-top:1px solid #e2e8f0; background:#f8fafc;">
       <div style="flex:1; font-size:14.5px; font-weight:900; line-height:1.8; color:#1e3a8a;">مدت کے آخر میں: <span dir="ltr" style="font-family:Arial,sans-serif;">${esc(endTxt.split(' — ')[0])}</span> — ${esc(endTxt.split(' — ')[1] || '')}</div>
       <button type="button" onclick="pledPrint()" style="flex:0 0 auto; padding:9px 14px; border:none; border-radius:12px; background:#1e3a8a; color:#fff; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer;">🖨️ پرنٹ / PDF</button>
