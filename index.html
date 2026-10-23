@@ -8607,7 +8607,7 @@ setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خو
 // فروٹ منڈی میں بحال نہ ہو سکے (ورنہ ایک دکان کا سارا ڈیٹا دوسری دکان کی ایپ میں چلا جاتا) ---------- -->
 function appKindCode(){ return String(typeof APP_BUILD_VERSION !== 'undefined' ? APP_BUILD_VERSION : '').slice(0, 2).toUpperCase() === 'SM' ? 'SM' : 'FM'; }
 function backupKindOf(b){
-  if(b && (b.appKind === 'FM' || b.appKind === 'SM')) return b.appKind;
+  if(b && b.appKind) return String(b.appKind); // 🛡️ کسی بھی دوسری ایپ (مثلاً آڑھت بک AB) کی پہچان والی فائل بھی رد
   // پرانی فائلیں (پہچان کے بغیر): سبزی منڈی کی سیٹنگ میں ہمیشہ sm... والی چیزیں ہوتی ہیں (smRegistered, smPlan وغیرہ)
   const s = (b && b.settings) || {};
   return Object.keys(s).some(k => /^sm[A-Z]/.test(k)) ? 'SM' : 'FM';
@@ -8615,6 +8615,7 @@ function backupKindOf(b){
 function backupKindErrorMsg(b){
   const k = backupKindOf(b);
   if(k === appKindCode()) return '';
+  if(k !== 'FM' && k !== 'SM') return '❌ یہ کسی دوسری ایپ (' + k + ') کی بیک اپ فائل ہے — اس ایپ میں نہیں لگ سکتی۔';
   return k === 'FM'
     ? '❌ یہ فروٹ منڈی (FM) کی بیک اپ فائل ہے — سبزی منڈی (SM) کی ایپ میں نہیں لگ سکتی۔'
     : '❌ یہ سبزی منڈی (SM) کی بیک اپ فائل ہے — فروٹ منڈی (FM) کی ایپ میں نہیں لگ سکتی۔';
@@ -9575,9 +9576,9 @@ function getDeveloperContact(){
 // 🆕 FM2310FR436: (1) بیوپاری کو ادائیگی پر 📅 تاریخ (پچھلی تاریخ بھی) (2) گاہک کی وصولی پر 📅 تاریخ (3) 🔁 خریداری کا بیوپاری بدلیں
 // 🆕 FM2310FR437: ادائیگی/وصولی کی تاریخ اب تین چمکتے ویل (سال، مہینہ، دن) — اوپر بڑا دن
 // 🆕 FM2310FR438: تاریخ کا ویل چھوٹا — فارم میں سب سے اوپر ایک لائن (ویل + دن)
-// 🆕 FM2410SA439: بیوپاری کا الگ لیجر بٹن ختم — پورا لیجر اب 📜 لین دین کے اندر
-const APP_BUILD_VERSION = 'FM2410SA439'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بیوپاری کا لیجر اب لین دین کے اندر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2310FR440: بیوپاری کا الگ لیجر بٹن ختم — پورا لیجر اب 📜 لین دین کے اندر
+const APP_BUILD_VERSION = 'FM2310FR440'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'دوسری ایپس کا کیش اور ڈیٹا اب کبھی نہیں مٹتا؛ دوسری ایپ کی بیک اپ فائل رد'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -28575,7 +28576,7 @@ function renderSupplierPoSection(supplierId){
 function renderSupplierTransactionsSection(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
-  // 📜 FM2410SA439 (صدام بھائی): الگ "لیجر" بٹن ختم — پورا لیجر (تاریخ کا فلٹر، سابقہ بقایا، سرخ/سبز کالم، ہر سطر کا بقایا، پرنٹ) یہیں
+  // 📜 FM2310FR440 (صدام بھائی): الگ "لیجر" بٹن ختم — پورا لیجر (تاریخ کا فلٹر، سابقہ بقایا، سرخ/سبز کالم، ہر سطر کا بقایا، پرنٹ) یہیں
   pledState.kind = 'suppliers'; pledState.id = supplierId; pledState.embed = true;
   document.getElementById('profileSections').innerHTML = '<div id="pledEmbed" style="margin-top:4px; border:1.5px solid #c7d2fe; border-radius:18px; overflow:hidden;"></div>';
   renderPartyLedger();
@@ -28726,7 +28727,7 @@ function _pledTableHtml(R, forPrint){
     </tbody></table>`;
 }
 function renderPartyLedger(){
-  const emb = pledState.embed ? document.getElementById('pledEmbed') : null; // 📜 FM2410SA439: بیوپاری کے "لین دین" کے اندر
+  const emb = pledState.embed ? document.getElementById('pledEmbed') : null; // 📜 FM2310FR440: بیوپاری کے "لین دین" کے اندر
   const ov = emb || document.getElementById('pledOverlay'); if(!ov) return;
   const R = _pledCompute(); if(!R){ if(!emb) ov.style.display = 'none'; return; }
   const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x));
