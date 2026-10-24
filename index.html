@@ -3419,6 +3419,7 @@ function __appHostKind(h, p){
     <!-- ---------- 🔁 صدام کی ہدایت (FM4SEPFR08): تین پیغامات (لاگ ان، سبسکرپشن یاد دہانی، اسکرین شاٹ یاد دہانی)
          اب اکٹھے نہیں بلکہ ایک ایک کر کے، ہمیشہ دائیں سے بائیں، آہستہ رفتار سے چلتے ہیں —
          ایک ہی span (mqActivePart) کا متن اور رنگ ہر بار بدلا جاتا ہے (buildMarqueeQueue / playNextMarqueeMessage دیکھیں) ---------- -->
+    <style>#loginMarqueeWrap{display:none !important;}</style><!-- 🚫 FM2410SA444 (پیارے بھائی): چلنے والے پیغامات کی پٹی کا پورا نظام بند -->
     <div id="loginMarqueeWrap">
       <span id="loginMarqueeText" class="loginMarqueeText"><span id="mqActivePart" class="mqPartLogin"></span></span>
       <!-- ---------- 💊 صدام کی ہدایت (FM13SEPSU): بیک اپ/ری سٹور/ورژن اپڈیٹ کے دوران مووِنگ پٹی کی جگہ
@@ -7583,7 +7584,7 @@ function __appHostKind(h, p){
       <!-- ---------- 📢 صدام کی ہدایت (5 ستمبر): سلائیڈنگ پیغامات — صرف Developer Panel سے، عام Admin کے لیے نہیں —
            ہر پیغام کا اپنا آن/آف، رنگ، رفتار (سیکنڈ)، سمت (دائیں/بائیں)، اور اگلے پیغام تک وقفہ الگ سے سیٹ ہو سکتا ہے۔
            💡 صدام کی ہدایت (FM5SEPTH): لائیو پریویو + پٹی کا اپنا بیک گراؤنڈ/بارڈر رنگ + چمک کنٹرول شامل کیا گیا ---------- -->
-      <div style="background:#fffbeb; border:1.5px solid #fcd34d; border-radius:12px; padding:12px; margin-bottom:16px;" dir="rtl">
+      <div id="devMarqueeBox" style="display:none; background:#fffbeb; border:1.5px solid #fcd34d; border-radius:12px; padding:12px; margin-bottom:16px;" dir="rtl">
         <h3 style="margin:0 0 4px; font-size:14px; color:#92400e;">📢 سلائیڈنگ پیغامات (صرف ڈویلپر)</h3>
         <p style="font-size:11.5px; color:#78716c; margin:0 0 10px;">اوپر چلنے والی پٹی کے پیغامات یہاں سے ترتیب دیں — آن/آف، رنگ، چمک، رفتار، سمت، وقفہ۔</p>
 
@@ -9583,8 +9584,9 @@ function getDeveloperContact(){
 // 🆕 FM2410SA441: 📊 فائربیس کا میٹر (ڈویلپر پینل)؛ کوئی ایپ نہ چھوئے تو سرور سے پوچھنا 5 منٹ میں ایک بار؛ لائسنس کوڈ صرف ڈویلپر کی شناخت سے
 // 🆕 FM2410SA442: ڈویلپر پینل کے پاس ورڈ خانے میں 👁️ (لکھا ہوا پاس ورڈ دیکھ سکیں)
 // 🆕 FM2410SA443: ڈویلپر پینل میں اوپر فوری بٹن (استعمال، کوڈ بنائیں، کوڈز، پلان، PIN، مینٹیننس…)
-const APP_BUILD_VERSION = 'FM2410SA443'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ڈویلپر پینل میں اوپر فوری بٹن — سیدھا کوڈ بنانے یا استعمال پر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2410SA444: چلنے والے پیغامات کی پٹی (marquee) کا نظام بند — ایپ اور ڈویلپر پینل دونوں سے
+const APP_BUILD_VERSION = 'FM2410SA444'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'چلنے والے پیغامات کی پٹی ختم'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -47124,7 +47126,6 @@ function devNavBuild(){
     ['💰 پلان/ریٹ', () => byText('Rate Per Day')],
     ['👥 اکاؤنٹ PIN', () => byId('devPinBox')],
     ['🚧 مینٹیننس', () => byId('maintenanceToggleBtn')],
-    ['📢 پیغامات', () => byText('📢 سلائیڈنگ پیغامات')],
     ['📞 رابطہ', () => byText('Developer WhatsApp Number')],
     ['💳 اکاؤنٹس', () => byText('Accounts to Receive')],
     ['🔑 پاس ورڈ', () => byText('🔑 Change Developer')]
