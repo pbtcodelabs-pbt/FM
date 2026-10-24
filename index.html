@@ -9577,8 +9577,9 @@ function getDeveloperContact(){
 // 🆕 FM2310FR437: ادائیگی/وصولی کی تاریخ اب تین چمکتے ویل (سال، مہینہ، دن) — اوپر بڑا دن
 // 🆕 FM2310FR438: تاریخ کا ویل چھوٹا — فارم میں سب سے اوپر ایک لائن (ویل + دن)
 // 🆕 FM2310FR440: بیوپاری کا الگ لیجر بٹن ختم — پورا لیجر اب 📜 لین دین کے اندر
-const APP_BUILD_VERSION = 'FM2310FR440'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'دوسری ایپس کا کیش اور ڈیٹا اب کبھی نہیں مٹتا؛ دوسری ایپ کی بیک اپ فائل رد'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2410SA441: 📊 فائربیس کا میٹر (ڈویلپر پینل)؛ کوئی ایپ نہ چھوئے تو سرور سے پوچھنا 5 منٹ میں ایک بار؛ لائسنس کوڈ صرف ڈویلپر کی شناخت سے
+const APP_BUILD_VERSION = 'FM2410SA441'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'فائربیس کا استعمال کم (ایپ نہ چھوئیں تو سرور سے کم پوچھنا)؛ ڈویلپر پینل میں استعمال کا میٹر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9688,6 +9689,156 @@ async function authFirestoreFetch(path, options = {}){
   if(!token) throw new Error('offline-or-auth-failed');
   const headers = Object.assign({}, options.headers, { 'Authorization': `Bearer ${token}` });
   return fetch(`${FIRESTORE_BASE}/${path}`, Object.assign({}, options, { headers }));
+}
+
+/* =====================================================================
+   📊 FM2410SA441: فائربیس کا میٹر (موبائل کے نیٹ پیکج جیسا) + فالتو پڑھنا کم + کوڈ صرف ڈویلپر بنائے
+   - اس فائربیس کو جانے والی ہر درخواست گنی جاتی ہے (پڑھنا / لکھنا / مٹانا)؛ ہر 10 منٹ بعد usage/<دن> میں جمع
+   - مفت حد روزانہ: 50,000 پڑھنا، 20,000 لکھنا، 20,000 مٹانا (امریکی وقت کی آدھی رات کو نئی)
+   - کوئی 3 منٹ سے ایپ نہ چھوئے تو بار بار والا پوچھنا 5 منٹ میں ایک بار (fbPollDue)
+   - لائسنس کوڈ بنانا/معطل/حذف/فہرست: ڈویلپر کی ای میل/پاس ورڈ والی شناخت (devFirestoreFetch)
+   ===================================================================== */
+const FB_DEV_EMAIL = 'piarybhai@gmail.com';
+const FB_FREE = { r: 50000, w: 20000, d: 20000 };
+const FB_PRICE = { r: 0.035, w: 0.105, d: 0.0115 }; // ڈالر فی 1,00,000 — اندازاً
+const FB_PKR = 280;
+const FB_USAGE_KEY = 'fm_fbUsage';
+function fbDay(t){
+  try{ return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).format(t || new Date()); }
+  catch(e){ return new Date(Date.now() - 8 * 3600e3).toISOString().slice(0, 10); }
+}
+let _fbU = {};
+try{ _fbU = JSON.parse(localStorage.getItem(FB_USAGE_KEY) || '{}') || {}; }catch(e){ _fbU = {}; }
+function _fbUSave(){ try{ localStorage.setItem(FB_USAGE_KEY, JSON.stringify(_fbU)); }catch(e){} }
+function _fbURoll(){
+  const d = fbDay();
+  if(_fbU.day !== d){
+    if(_fbU.day && (_fbU.pr || _fbU.pw || _fbU.pd)) _fbU.old = { day: _fbU.day, r: _fbU.pr || 0, w: _fbU.pw || 0, d: _fbU.pd || 0 };
+    Object.assign(_fbU, { day: d, r: 0, w: 0, d: 0, pr: 0, pw: 0, pd: 0 });
+  }
+}
+function fbCount(r, w, d){ _fbURoll(); _fbU.r += r; _fbU.w += w; _fbU.d += d; _fbU.pr += r; _fbU.pw += w; _fbU.pd += d; _fbUSave(); }
+// ---------- ہر فائربیس درخواست کی گنتی: fetch کے اوپر ایک پتلا غلاف ----------
+(function(){
+  const _f = window.fetch.bind(window);
+  const mark = `firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+  window.fetch = function(input, init){
+    const url = typeof input === 'string' ? input : (input && input.url) || '';
+    const p = _f(input, init);
+    if(url.indexOf(mark) < 0 || (init && init._noCount)) return p;
+    const method = String((init && init.method) || 'GET').toUpperCase();
+    return p.then(res => {
+      try{
+        const tail = url.split(mark)[1].split('?')[0];
+        if(/:runQuery$/.test(tail)){ res.clone().json().then(j => fbCount(Math.max(1, (Array.isArray(j) ? j : []).filter(x => x.document).length), 0, 0)).catch(() => fbCount(1, 0, 0)); }
+        else if(/:commit$/.test(tail)){ let ws = []; try{ ws = JSON.parse(init.body || '{}').writes || []; }catch(e){} fbCount(0, ws.filter(x => !x.delete).length, ws.filter(x => x.delete).length); }
+        else if(method === 'GET'){
+          const segs = tail.replace(/^\//, '').split('/').filter(Boolean);
+          if(segs.length % 2 === 1 && res.ok) res.clone().json().then(j => fbCount(Math.max(1, (j.documents || []).length), 0, 0)).catch(() => fbCount(1, 0, 0));
+          else fbCount(1, 0, 0);
+        }
+        else if(method === 'DELETE') fbCount(0, 0, 1);
+        else fbCount(0, 1, 0);
+      }catch(e){}
+      return res;
+    });
+  };
+})();
+async function fbUsageFlush(){
+  _fbURoll();
+  if(!navigator.onLine || (!_fbU.old && !_fbU.pr && !_fbU.pw && !_fbU.pd)) return;
+  const token = await ensureFirebaseAuth(); if(!token) return;
+  const one = async (day, r, w, d) => {
+    const inc = (f, n) => ({ fieldPath: f, increment: { integerValue: String(n) } });
+    const res = await fetch(`https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:commit`, {
+      method: 'POST', _noCount: true, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ writes: [{ transform: { document: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/usage/${day}`, fieldTransforms: [inc('r', r), inc('w', w + 1), inc('d', d)] } }] })
+    });
+    return res.ok;
+  };
+  try{
+    if(_fbU.old){ if(await one(_fbU.old.day, _fbU.old.r, _fbU.old.w, _fbU.old.d)){ delete _fbU.old; _fbUSave(); } }
+    if(_fbU.pr || _fbU.pw || _fbU.pd){
+      const r = _fbU.pr, w = _fbU.pw, d = _fbU.pd;
+      if(await one(_fbU.day, r, w, d)){ _fbU.pr -= r; _fbU.pw -= w; _fbU.pd -= d; _fbU.w += 1; _fbUSave(); }
+    }
+  }catch(e){}
+}
+setInterval(() => { try{ fbUsageFlush(); }catch(e){} }, 10 * 60000);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') try{ fbUsageFlush(); }catch(e){} });
+
+// ---------- فالتو پوچھنا کم: کوئی 3 منٹ ایپ نہ چھوئے تو 5 منٹ میں ایک بار ----------
+let fbLastAct = Date.now();
+['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(ev => document.addEventListener(ev, () => { fbLastAct = Date.now(); }, { passive: true, capture: true }));
+const _fbPollAt = {};
+function fbPollDue(key, activeMs){
+  const gap = (Date.now() - fbLastAct > 3 * 60000) ? 5 * 60000 : activeMs;
+  if(Date.now() - (_fbPollAt[key] || 0) < gap) return false;
+  _fbPollAt[key] = Date.now();
+  return true;
+}
+
+// ---------- ڈویلپر کی شناخت (ای میل/پاس ورڈ) — لائسنس کوڈ صرف اسی سے ----------
+let _fbDevTok = null;
+async function fbDevSignIn(password){
+  try{
+    const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: FB_DEV_EMAIL, password: String(password || ''), returnSecureToken: true })
+    });
+    if(!r.ok) return false;
+    const j = await r.json();
+    _fbDevTok = { t: j.idToken, until: Date.now() + 50 * 60000 }; // پاس ورڈ کہیں محفوظ نہیں
+    return true;
+  }catch(e){ return false; }
+}
+function fbDevSignedIn(){ return !!(_fbDevTok && _fbDevTok.until > Date.now()); }
+async function devFirestoreFetch(path, options = {}){
+  if(fbDevSignedIn()){
+    const headers = Object.assign({}, options.headers, { 'Authorization': `Bearer ${_fbDevTok.t}` });
+    return fetch(`${FIRESTORE_BASE}/${path}`, Object.assign({}, options, { headers }));
+  }
+  return authFirestoreFetch(path, options); // ڈویلپر شناخت نہ ہو تو پرانا طریقہ (نئے اصول لگنے کے بعد سرور خود روکے گا)
+}
+
+// ---------- 📊 ڈویلپر پینل میں میٹر ----------
+async function renderFbUsageBox(){
+  const box = document.getElementById('fbUsageBox'); if(!box) return;
+  box.innerHTML = '<div style="text-align:center; font-size:13px; color:#64748b;">⏳ فائربیس کا استعمال دیکھا جا رہا ہے…</div>';
+  try{ await fbUsageFlush(); }catch(e){}
+  let days = {};
+  try{
+    const res = await authFirestoreFetch(`usage?pageSize=40&key=${FIREBASE_API_KEY}`);
+    if(!res.ok) throw new Error(res.status);
+    const j = await res.json();
+    (j.documents || []).forEach(x => { const f = x.fields || {}; days[x.name.split('/').pop()] = { r: +(f.r?.integerValue || 0), w: +(f.w?.integerValue || 0), d: +(f.d?.integerValue || 0) }; });
+  }catch(e){
+    box.innerHTML = '<div style="text-align:center; font-size:13px; color:#b91c1c;">⚠️ سرور سے استعمال نہیں مل سکا — فائربیس کے اصول (usage) لگنے باقی ہیں یا انٹرنیٹ نہیں</div>';
+    return;
+  }
+  const n = v => Math.round(v || 0).toLocaleString('en-US');
+  const over = (u, k) => Math.max(0, (u[k] || 0) - FB_FREE[k]);
+  const cost = u => (over(u, 'r') * FB_PRICE.r + over(u, 'w') * FB_PRICE.w + over(u, 'd') * FB_PRICE.d) / 1e5;
+  const bar = (label, used, free) => {
+    const pct = Math.min(100, Math.round(used * 100 / free));
+    const col = pct >= 80 ? 'linear-gradient(90deg,#b91c1c,#f87171)' : pct >= 50 ? 'linear-gradient(90deg,#d97706,#fbbf24)' : 'linear-gradient(90deg,#16a34a,#4ade80)';
+    return `<div style="margin:7px 0;"><div style="display:flex; justify-content:space-between; font-weight:800; font-size:13.5px;"><span>${label}</span><span dir="ltr">${n(used)} / ${n(free)}</span></div>
+      <div style="height:13px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden; direction:rtl;"><i style="display:block; height:100%; width:${Math.max(2, pct)}%; background:${col}; border-radius:8px;"></i></div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; color:#475569;"><span>استعمال: <b>${pct}%</b></span><span>باقی: <b>${n(Math.max(0, free - used))}</b> (${Math.max(0, 100 - pct)}%)</span></div></div>`;
+  };
+  const t = days[fbDay()] || { r: 0, w: 0, d: 0 };
+  const mk = fbDay().slice(0, 7), month = Object.keys(days).filter(k => k.indexOf(mk) === 0);
+  let mCost = 0; month.forEach(k => { mCost += cost(days[k]); });
+  const full = new Date(+mk.slice(0, 4), +mk.slice(5, 7), 0).getDate(), proj = mCost / Math.max(1, month.length) * full;
+  const last = Object.keys(days).sort().slice(-7).reverse();
+  box.innerHTML = `<div style="font-weight:900; font-size:15px; margin-bottom:4px;">📊 آج کا مفت فائربیس پیکج (سب فون ملا کر)</div>
+    ${bar('📖 پڑھنا', t.r, FB_FREE.r)}${bar('✍️ لکھنا', t.w, FB_FREE.w)}${bar('🗑️ مٹانا', t.d, FB_FREE.d)}
+    <div style="font-size:12px; color:#475569;">مفت حد ہر روز نئی — پاکستان میں دوپہر 12 بجے (سردیوں میں 1 بجے)۔ اس فون کا آج کا حصہ: پڑھنا ${n(_fbU.r)}، لکھنا ${n(_fbU.w)}۔</div>
+    <div style="font-weight:900; font-size:14px; margin-top:8px;">💳 اگر Blaze (پیسوں والا) پیکج ہوتا</div>
+    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:6px 8px; font-size:13px; line-height:1.8;">آج کا بل: <b dir="ltr">$${cost(t).toFixed(2)}</b> (تقریباً ${n(cost(t) * FB_PKR)} روپے)<br>اس مہینے اب تک: <b dir="ltr">$${mCost.toFixed(2)}</b> (${n(mCost * FB_PKR)} روپے) • پورے مہینے کا اندازہ: <b dir="ltr">$${proj.toFixed(2)}</b> (${n(proj * FB_PKR)} روپے)</div>
+    <div style="font-weight:900; font-size:14px; margin-top:8px;">📅 پچھلے دن</div>
+    ${last.map(k => `<div style="display:grid; grid-template-columns:repeat(4,1fr); font-size:12.5px; border-bottom:1px dotted #cbd5e1;"><span dir="ltr">${k.slice(8)}/${k.slice(5, 7)}</span><span>📖 ${n(days[k].r)}</span><span>✍️ ${n(days[k].w)}</span><span>${Math.round(days[k].r * 100 / FB_FREE.r)}%</span></div>`).join('') || '<div style="font-size:12px;">ابھی کچھ نہیں</div>'}
+    <div style="font-size:12px; margin-top:6px; color:${fbDevSignedIn() ? '#166534' : '#b91c1c'};">${fbDevSignedIn() ? '✅ ڈویلپر کی شناخت چالو — کوڈ بنانا، معطل اور حذف کرنا اسی سے' : '⚠️ ڈویلپر کی فائربیس شناخت نہیں ہوئی (فائربیس میں ' + FB_DEV_EMAIL + ' کا پاس ورڈ وہی ہو جو یہاں لکھا)'}</div>
+    <div style="font-size:11.5px; color:#64748b; margin-top:4px;">یہ گنتی ایپ خود کرتی ہے (اندازاً، 10 منٹ دیر سے)۔ پکا حساب: فائربیس کنسول ← Usage۔</div>`;
 }
 
 // ---------- ہر انسٹالیشن کی منفرد شناخت — ڈیوائس کے fingerprint سے بنتی ہے (بالکل بے ترتیب نہیں) —
@@ -10511,6 +10662,7 @@ function hmMaybeSyncPayments(){
 setInterval(() => {
   try{
     if(document.hidden || currentScreenName !== 'home' || AppState.currentRole !== 'admin' || typeof fetchRecoveryListFromCloud !== 'function') return;
+    if(!fbPollDue('recoveryHome', 29000)) return; // 📊 FM2410SA441: کوئی ایپ نہ چھوئے تو 5 منٹ میں ایک بار
     fetchRecoveryListFromCloud(true); // نئی آئی تو renderHomeIconGrid → ہوم کے ڈبے خود تازہ
   }catch(e){}
 }, 30000);
@@ -33152,7 +33304,7 @@ async function chLeftoverAdminTick(){
   if(fresh.length && onHome && !busy) openChLeftoverReport();
 }
 setTimeout(() => { try{ chLeftoverAdminTick(); }catch(e){} }, 6000);
-setInterval(() => { try{ chLeftoverAdminTick(); }catch(e){} }, 15000);
+setInterval(() => { try{ if(fbPollDue('chLeftover', 14000)) chLeftoverAdminTick(); }catch(e){} }, 15000); // 📊 FM2410SA441
 
 // ---------- سکرین ۱: سبزیوں کی فہرست ----------
 function pdOpenList(){
@@ -34555,7 +34707,7 @@ async function fetchBizDay(){
   }catch(e){}
 }
 setTimeout(() => { try{ fetchBizDay(); }catch(e){} }, 4000);
-setInterval(() => { try{ if(!document.hidden) fetchBizDay(); }catch(e){} }, 15000);
+setInterval(() => { try{ if(!document.hidden && fbPollDue('bizDay', 14000)) fetchBizDay(); }catch(e){} }, 15000); // 📊 FM2410SA441: کوئی ایپ نہ چھوئے تو 5 منٹ میں ایک بار
 
 async function endBizDay(){
   if(!bizIsAdmin()){ alert('صرف ایڈمن تاریخ اینڈ کر سکتا ہے'); return; }
@@ -46743,7 +46895,7 @@ async function generateGiftCode(){
 
   try{
     // ---------- 🐞 FM10SEPTH0844AM فکس: یہاں بھی Auth Token شامل کیا (وجہ اوپر activateSubscription میں دیکھیں) ---------- -->
-    const res = await authFirestoreFetch(`licenses/${encodeURIComponent(code)}?key=${FIREBASE_API_KEY}`, {
+    const res = await devFirestoreFetch(`licenses/${encodeURIComponent(code)}?key=${FIREBASE_API_KEY}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields })
@@ -46775,7 +46927,7 @@ async function loadIssuedCodesList(){
   const wrap = document.getElementById('issuedCodesListWrap');
   wrap.innerHTML = '<div style="text-align:center; color:var(--muted); font-size:12.5px; padding:10px;">⏳ لوڈ ہو رہا ہے...</div>';
   try{
-    const res = await fetch(`${FIRESTORE_BASE}/licenses?key=${FIREBASE_API_KEY}&pageSize=300`);
+    const res = await devFirestoreFetch(`licenses?key=${FIREBASE_API_KEY}&pageSize=300`); // 📊 FM2410SA441: فہرست صرف ڈویلپر
     if(!res.ok) throw new Error('فہرست نہیں مل سکی');
     const data = await res.json();
     const docs = data.documents || [];
@@ -46882,7 +47034,7 @@ function renderIssuedCodesList(){
 async function suspendLicenseCode(code){
   if(!confirm(`کوڈ ${code} معطل کریں؟ یہ اب کسی کے لیے بھی کام نہیں کرے گا۔`)) return;
   // ---------- 🐞 FM10SEPTH0844AM فکس: Auth Token شامل کیا (وجہ اوپر activateSubscription میں دیکھیں) ---------- -->
-  await authFirestoreFetch(`licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=active&key=${FIREBASE_API_KEY}`, {
+  await devFirestoreFetch(`licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=active&key=${FIREBASE_API_KEY}`, {
     method: 'PATCH', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ fields: { active: { booleanValue: false } } })
   });
@@ -46890,7 +47042,7 @@ async function suspendLicenseCode(code){
 }
 async function reactivateLicenseCode(code){
   // ---------- 🐞 FM10SEPTH0844AM فکس: Auth Token شامل کیا ---------- -->
-  await authFirestoreFetch(`licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=active&key=${FIREBASE_API_KEY}`, {
+  await devFirestoreFetch(`licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=active&key=${FIREBASE_API_KEY}`, {
     method: 'PATCH', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ fields: { active: { booleanValue: true } } })
   });
@@ -46899,7 +47051,7 @@ async function reactivateLicenseCode(code){
 async function deleteLicenseCode(code){
   if(!confirm(`کوڈ ${code} مکمل طور پر ڈیلیٹ کریں؟ یہ عمل واپس نہیں ہو سکتا۔`)) return;
   // ---------- 🐞 FM10SEPTH0844AM فکس: Auth Token شامل کیا ---------- -->
-  await authFirestoreFetch(`licenses/${encodeURIComponent(code)}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
+  await devFirestoreFetch(`licenses/${encodeURIComponent(code)}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
   loadIssuedCodesList();
 }
 
@@ -46967,6 +47119,9 @@ async function unlockDevSecretPanel(){
   markDevDevice(); // 🔐 FM210FR277: یہ فون اب ڈویلپر کا فون ہے — مینٹیننس کا لفظ صرف یہاں نظر آئے گا
   document.getElementById('devSecretLocked').style.display = 'none';
   document.getElementById('devSecretUnlocked').style.display = 'block';
+  // 📊 FM2410SA441: فائربیس کا میٹر + ڈویلپر کی فائربیس شناخت (کوڈ صرف اسی سے بنیں)
+  (function(){ const u = document.getElementById('devSecretUnlocked'); if(u && !document.getElementById('fbUsageBox')){ const b = document.createElement('div'); b.id = 'fbUsageBox'; b.dir = 'rtl'; b.style.cssText = 'margin:0 0 12px; padding:10px; border:2px solid #cbd5e1; border-radius:14px; background:#fff;'; u.insertBefore(b, u.firstChild); } })();
+  fbDevSignIn(entered).then(() => renderFbUsageBox());
   renderMarqueeDevList();
   try{ renderDevPinList(); }catch(e){} // 👁️ FM110TH275
   refreshMaintenanceToggleBtnLabel();
