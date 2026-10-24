@@ -9582,8 +9582,9 @@ function getDeveloperContact(){
 // 🆕 FM2310FR440: بیوپاری کا الگ لیجر بٹن ختم — پورا لیجر اب 📜 لین دین کے اندر
 // 🆕 FM2410SA441: 📊 فائربیس کا میٹر (ڈویلپر پینل)؛ کوئی ایپ نہ چھوئے تو سرور سے پوچھنا 5 منٹ میں ایک بار؛ لائسنس کوڈ صرف ڈویلپر کی شناخت سے
 // 🆕 FM2410SA442: ڈویلپر پینل کے پاس ورڈ خانے میں 👁️ (لکھا ہوا پاس ورڈ دیکھ سکیں)
-const APP_BUILD_VERSION = 'FM2410SA442'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ڈویلپر پینل کے پاس ورڈ میں 👁️ — لکھا ہوا پاس ورڈ دیکھیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2410SA443: ڈویلپر پینل میں اوپر فوری بٹن (استعمال، کوڈ بنائیں، کوڈز، پلان، PIN، مینٹیننس…)
+const APP_BUILD_VERSION = 'FM2410SA443'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ڈویلپر پینل میں اوپر فوری بٹن — سیدھا کوڈ بنانے یا استعمال پر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -47111,6 +47112,34 @@ try{ localStorage.removeItem('fmDevDeviceTrusted'); }catch(e){} // 🧹 FM210FR2
 function isDevDevice(){ try{ return sessionStorage.getItem('fmDevDeviceTrusted') === '1'; }catch(e){ return false; } }
 function markDevDevice(){ try{ sessionStorage.setItem('fmDevDeviceTrusted', '1'); }catch(e){} try{ refreshMaintenanceQuickUi(); }catch(e){} }
 
+// 🧭 FM2410SA443 (پیارے بھائی): ڈویلپر پینل بہت لمبا تھا — اوپر چپکی پٹی میں چھوٹے بٹن، دبائیں تو سیدھا اسی حصے پر
+function devNavBuild(){
+  const u = document.getElementById('devSecretUnlocked'); if(!u || document.getElementById('devNavBar')) return;
+  const byId = id => document.getElementById(id);
+  const byText = t => Array.from(u.querySelectorAll('.settingsSubLabel, h3, div')).find(el => el.children.length <= 2 && (el.textContent || '').trim().indexOf(t) === 0);
+  const items = [
+    ['📊 استعمال', () => byId('fbUsageBox')],
+    ['🎁 کوڈ بنائیں', () => byText('🎁 Generate Gift')],
+    ['📋 کوڈز', () => byText('📋 جاری کردہ تمام کوڈز')],
+    ['💰 پلان/ریٹ', () => byText('Rate Per Day')],
+    ['👥 اکاؤنٹ PIN', () => byId('devPinBox')],
+    ['🚧 مینٹیننس', () => byId('maintenanceToggleBtn')],
+    ['📢 پیغامات', () => byText('📢 سلائیڈنگ پیغامات')],
+    ['📞 رابطہ', () => byText('Developer WhatsApp Number')],
+    ['💳 اکاؤنٹس', () => byText('Accounts to Receive')],
+    ['🔑 پاس ورڈ', () => byText('🔑 Change Developer')]
+  ].filter(x => x[1]());
+  const bar = document.createElement('div');
+  bar.id = 'devNavBar'; bar.dir = 'rtl';
+  bar.style.cssText = 'position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:5px; padding:7px; margin:0 0 10px; background:#f1f5f9; border:1.5px solid #cbd5e1; border-radius:12px; box-shadow:0 3px 8px rgba(0,0,0,.08);';
+  items.forEach(([label, find]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
+    b.style.cssText = 'flex:1 1 auto; padding:6px 8px; border:1.5px solid var(--primary); border-radius:999px; background:#fff; color:var(--primary-dark); font-weight:800; font-size:12.5px; cursor:pointer; white-space:nowrap;';
+    b.onclick = () => { const el = find(); if(el){ el.style.scrollMarginTop = (bar.offsetHeight + 12) + 'px'; el.scrollIntoView({behavior:'smooth', block:'start'}); el.style.transition = 'box-shadow .3s'; el.style.boxShadow = '0 0 0 3px #f59e0b'; setTimeout(() => { el.style.boxShadow = ''; }, 1600); } };
+    bar.appendChild(b);
+  });
+  u.insertBefore(bar, u.firstChild);
+}
 async function unlockDevSecretPanel(){
   const entered = (document.getElementById('devSecretPasswordInput').value || '').trim();
   const okHash = await devPasswordOk(entered);
@@ -47126,6 +47155,7 @@ async function unlockDevSecretPanel(){
   // 📊 FM2410SA441: فائربیس کا میٹر + ڈویلپر کی فائربیس شناخت (کوڈ صرف اسی سے بنیں)
   (function(){ const u = document.getElementById('devSecretUnlocked'); if(u && !document.getElementById('fbUsageBox')){ const b = document.createElement('div'); b.id = 'fbUsageBox'; b.dir = 'rtl'; b.style.cssText = 'margin:0 0 12px; padding:10px; border:2px solid #cbd5e1; border-radius:14px; background:#fff;'; u.insertBefore(b, u.firstChild); } })();
   fbDevSignIn(entered).then(() => renderFbUsageBox());
+  try{ devNavBuild(); }catch(e){} // 🧭 FM2410SA443: اوپر فوری بٹن
   renderMarqueeDevList();
   try{ renderDevPinList(); }catch(e){} // 👁️ FM110TH275
   refreshMaintenanceToggleBtnLabel();
