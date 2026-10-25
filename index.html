@@ -9585,8 +9585,9 @@ function getDeveloperContact(){
 // 🆕 FM2410SA442: ڈویلپر پینل کے پاس ورڈ خانے میں 👁️ (لکھا ہوا پاس ورڈ دیکھ سکیں)
 // 🆕 FM2410SA443: ڈویلپر پینل میں اوپر فوری بٹن (استعمال، کوڈ بنائیں، کوڈز، پلان، PIN، مینٹیننس…)
 // 🆕 FM2410SA444: چلنے والے پیغامات کی پٹی (marquee) کا نظام بند — ایپ اور ڈویلپر پینل دونوں سے
-const APP_BUILD_VERSION = 'FM2510SU445'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'وصولی میں ترمیم اور حذف (ایڈمن PIN کے ساتھ)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2510SU446: لین دین میں گاہک کی وصولی بدلیں/حذف کریں (صرف ایڈمن، تنبیہ + PIN)
+const APP_BUILD_VERSION = 'FM2510SU446'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'لین دین میں وصولی بدلنے اور حذف کرنے کا اختیار (ایڈمن PIN)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -28801,7 +28802,7 @@ function _pledEntries(kind, id){
     (paymentsData || []).filter(pm => pm && pm.party_type === 'customer' && pm.party_id === id).forEach(pm => {
       const d = _pledDay(bsPayDay(pm)), a = Number(pm.amount) || 0; if(!a) return;
       const note = (typeof _payUserNote === 'function' ? _payUserNote(pm.note) : '') || '';
-      if(pm.direction === 'in') out.push({ day: d, ts: ts(pm.created_at, d), desc: '📥 وصولی' + (pm.method ? ' — ' + pm.method : '') + (note ? ' — ' + note : ''), red: 0, green: a });
+      if(pm.direction === 'in') out.push({ day: d, ts: ts(pm.created_at, d), desc: '📥 وصولی' + (pm.method ? ' — ' + pm.method : '') + (note ? ' — ' + note : '') + (pm.edited ? ' (✏️ درست کی گئی)' : ''), red: 0, green: a, pid: pm.payment_id });
       else out.push({ day: d, ts: ts(pm.created_at, d), desc: '💸 رقم دی / ادھار' + (pm.method ? ' — ' + pm.method : '') + (note ? ' — ' + note : ''), red: a, green: 0 });
     });
     (c.walletHistory || []).forEach(h => {
@@ -28824,6 +28825,121 @@ function _pledEntries(kind, id){
     else if(h.type === 'received') out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: '📥 رقم آئی (ادھار لیا)' + (note ? ' — ' + note : ''), red: 0, green: a });
   });
   return { party: sp, out, now: (Number(sp.total_payable) || 0) - (Number(sp.wallet_balance) || 0), sign: -1 };
+}
+// =====================================================================
+// ✏️ FM2510SU446 (صدام بھائی): گاہک کی وصولی (لین دین میں) بدلنا یا حذف کرنا — صرف ایڈمن، پہلے تنبیہ، پھر ایڈمن PIN۔
+// پرانی وصولی کا اثر پورا واپس (بقایا، والٹ، کیش، بلوں کا باقی)، پھر نئی رقم دوبارہ لگتی ہے۔ ہر تبدیلی کا نشان کھاتے میں
+// =====================================================================
+function _pmParts(pm){
+  const amt = Number(pm.amount) || 0;
+  const isW = pm.method === 'Wallet';
+  let toDue = (pm.balance_before != null && pm.balance_after != null) ? (Number(pm.balance_before) - Number(pm.balance_after)) : amt;
+  toDue = Math.max(0, Math.min(amt, Math.round(toDue * 100) / 100));
+  const toWallet = isW ? 0 : Math.max(0, amt - toDue);
+  const cash = isW ? 0 : (pm.cash_amount != null ? (Number(pm.cash_amount) || 0) : (pm.method === 'Cash' || !pm.method ? amt : 0));
+  return { amt, isW, toDue, toWallet, cash };
+}
+function _pmDueApply(c, amt, back){
+  let left = amt;
+  (invoicesData || []).filter(inv => inv && inv.customer_id === c.customer_id && inv.status !== 'voided' && inv.status !== 'rejected')
+    .sort((a, b) => back ? (new Date(b.created_at) - new Date(a.created_at)) : (new Date(a.created_at) - new Date(b.created_at)))
+    .forEach(inv => {
+      if(left <= 0) return;
+      const due = getInvoiceAmountDue(inv);
+      const room = back ? Math.max(0, (Number(inv.grand_total) || 0) - due) : due;
+      const g = Math.min(room, left); if(g <= 0) return;
+      inv.amount_due = back ? due + g : due - g; left -= g;
+    });
+}
+function _pmUndo(c, pm){
+  const P = _pmParts(pm);
+  c.total_receivable = (Number(c.total_receivable) || 0) + P.toDue;
+  _pmDueApply(c, P.toDue, true);
+  if(P.isW) c.wallet_balance = (Number(c.wallet_balance) || 0) + P.amt;
+  else {
+    const w = Number(c.wallet_balance) || 0;
+    if(w >= P.toWallet) c.wallet_balance = w - P.toWallet;
+    else { c.wallet_balance = 0; c.total_receivable += (P.toWallet - w); } // والٹ پہلے ہی خرچ ہو چکا — باقی بقایا میں
+    financeDummy.cashInHand = (Number(financeDummy.cashInHand) || 0) - P.cash;
+  }
+  return P;
+}
+function _pmAfterChange(c){
+  persistAllData();
+  try{ pushCustomersToCloud(); }catch(e){}
+  try{ pushInvoicesToCloud(); }catch(e){}
+  try{ pushFinanceToCloud(); }catch(e){}
+  try{ renderPartyLedger(); }catch(e){}
+  try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+  try{ if(currentProfileType === 'customers' && currentProfileId === c.customer_id && document.getElementById('profileModal').classList.contains('show')) openCustomerProfile(c.customer_id); }catch(e){}
+}
+function _pmFind(pid){
+  const pm = (paymentsData || []).find(x => x && x.payment_id === pid && x.direction === 'in' && x.party_type === 'customer');
+  const c = pm ? (customersData || []).find(x => x && x.customer_id === pm.party_id) : null;
+  return { pm, c };
+}
+function _pmRows(pm){
+  const f = n => 'Rs. ' + Math.round(Number(n) || 0).toLocaleString('en-US');
+  return [{ label: 'گاہک', value: pm.party_name || '', big: true }, { label: 'رقم', value: f(pm.amount), bg: '#dcfce7', fg: '#14532d' }, { label: 'تاریخ', value: String(bsPayDay(pm) || '').split('-').reverse().join('/') }, ...(pm.method ? [{ label: 'طریقہ', value: pm.method }] : [])];
+}
+async function pmDeleteCollection(pid){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'وصولی صرف ایڈمن حذف کر سکتا ہے۔'); return; }
+  const { pm, c } = _pmFind(pid); if(!pm || !c) return;
+  if(!(await uDialog({ title: '⚠️ وصولی حذف کریں؟', message: 'یہ وصولی کھاتے سے نکل جائے گی اور گاہک کا بقایا اتنا <b>بڑھ جائے گا</b>۔ نقد ہو تو کیش سے بھی کم ہوگی۔', rows: _pmRows(pm), okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'red' }))) return;
+  if(!(await _askAdminPinForSerialMaster('وصولی حذف کرنا'))) return;
+  pauseCloudPolling && pauseCloudPolling(10000);
+  const P = _pmUndo(c, pm);
+  paymentsData = paymentsData.filter(x => x !== pm);
+  c.walletHistory = c.walletHistory || [];
+  c.walletHistory.unshift({ type: 'collection_deleted', amount: P.amt, date: bizDateKey(), at: new Date().toISOString(), by: (AppState.currentUser && AppState.currentUser.name) || 'admin', note: `وصولی حذف — ${bsPayDay(pm)} — ${pm.method || ''}` });
+  _pmAfterChange(c);
+  uAlert('✅ حذف ہو گئی', `وصولی Rs. ${P.amt.toLocaleString('en-US')} حذف — نیا بقایا Rs. ${Math.round(c.total_receivable).toLocaleString('en-US')}`, 'green');
+}
+async function pmEditCollection(pid){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'وصولی صرف ایڈمن بدل سکتا ہے۔'); return; }
+  const { pm, c } = _pmFind(pid); if(!pm || !c) return;
+  if(!(await uDialog({ title: '⚠️ وصولی بدلیں؟', message: 'وصولی بدلنے سے گاہک کا بقایا بھی بدل جائے گا۔ صرف غلطی درست کرنے کے لیے بدلیں۔', rows: _pmRows(pm), okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'red' }))) return;
+  if(!(await _askAdminPinForSerialMaster('وصولی بدلنا'))) return;
+  const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x).replace(/[<>"]/g, ''));
+  const day = bsPayDay(pm) || bizDateKey();
+  const note0 = (typeof _payUserNote === 'function' ? _payUserNote(pm.note) : pm.note) || '';
+  window.__pe = { amt: String(Number(pm.amount) || 0), day, note: note0 };
+  const box = 'width:100%; box-sizing:border-box; height:44px; margin-top:4px; border:1.5px solid #93c5fd; border-radius:10px; padding:0 10px; font-size:17px; font-weight:800;';
+  const ok = await uDialog({ title: '✏️ وصولی درست کریں', okText: '💾 محفوظ کریں', cancelText: '✖ واپس', message:
+    `<div style="text-align:right; font-size:15px; font-weight:800;">رقم</div><input type="number" inputmode="decimal" value="${esc(window.__pe.amt)}" oninput="window.__pe.amt=this.value" style="${box} direction:ltr;">
+     <div style="text-align:right; font-size:15px; font-weight:800; margin-top:8px;">📅 تاریخ</div><input type="date" value="${esc(day)}" max="${esc(bizCurrentDate())}" oninput="window.__pe.day=this.value" style="${box}">
+     <div style="text-align:right; font-size:15px; font-weight:800; margin-top:8px;">نوٹ</div><input type="text" value="${esc(note0)}" oninput="window.__pe.note=this.value" style="${box} font-weight:600;">` });
+  if(!ok) return;
+  const nAmt = Math.round((parseFloat(window.__pe.amt) || 0) * 100) / 100;
+  if(nAmt <= 0){ await uAlert('⚠️ رقم درست نہیں', 'رقم صفر سے زیادہ ہو۔ پوری وصولی ختم کرنی ہو تو 🗑️ حذف دبائیں۔'); return; }
+  let nDay = /^\d{4}-\d{2}-\d{2}$/.test(window.__pe.day || '') ? window.__pe.day : day;
+  if(nDay > bizCurrentDate()) nDay = bizCurrentDate();
+  if(pm.method === 'Wallet' && nAmt > (Number(c.wallet_balance) || 0) + (Number(pm.amount) || 0)){ await uAlert('⚠️ والٹ میں اتنی رقم نہیں', 'والٹ سے اتنی رقم نہیں کاٹی جا سکتی۔'); return; }
+  pauseCloudPolling && pauseCloudPolling(10000);
+  const P = _pmUndo(c, pm);
+  // نئی رقم دوبارہ لگائیں (پرانے بل پہلے)
+  const before = Number(c.total_receivable) || 0;
+  const toDue = Math.min(Math.max(0, before), nAmt), toWallet = Math.max(0, nAmt - toDue);
+  c.total_receivable = before - toDue;
+  _pmDueApply(c, toDue, false);
+  let cash = 0;
+  if(pm.method === 'Wallet') c.wallet_balance = (Number(c.wallet_balance) || 0) - nAmt;
+  else {
+    c.wallet_balance = (Number(c.wallet_balance) || 0) + toWallet;
+    cash = P.cash >= P.amt ? nAmt : Math.min(P.cash, nAmt); // پورا نقد تھا تو پورا نقد؛ ملا جلا تھا تو نقد حصہ وہی
+    financeDummy.cashInHand = (Number(financeDummy.cashInHand) || 0) + cash;
+  }
+  const userNote = String(window.__pe.note || '').trim();
+  Object.assign(pm, { amount: nAmt, balance_before: before, balance_after: c.total_receivable, wallet_added: pm.method === 'Wallet' ? 0 : toWallet, wallet_after: c.wallet_balance,
+    biz_date: nDay, note: userNote, edited: true, edited_at: new Date().toISOString(), edited_by: (AppState.currentUser && AppState.currentUser.name) || 'admin',
+    edit_from: { amount: P.amt, day } });
+  if(pm.cash_amount != null) pm.cash_amount = cash;
+  const cd = pm.cash_day || bsPayCashDay(pm) || bizCurrentDate();
+  if(nDay < cd) pm.backdated = true; else delete pm.backdated;
+  c.walletHistory = c.walletHistory || [];
+  c.walletHistory.unshift({ type: 'collection_edited', amount: nAmt, date: bizDateKey(), at: new Date().toISOString(), by: pm.edited_by, note: `وصولی درست — پہلے Rs. ${P.amt.toLocaleString('en-US')} (${day}) — اب Rs. ${nAmt.toLocaleString('en-US')} (${nDay})` });
+  _pmAfterChange(c);
+  uAlert('✅ درست ہو گئی', `وصولی اب Rs. ${nAmt.toLocaleString('en-US')} — نیا بقایا Rs. ${Math.round(c.total_receivable).toLocaleString('en-US')}`, 'green');
 }
 function openPartyLedger(kind, id){
   pledState.kind = kind; pledState.id = id; pledState.embed = false;
@@ -28864,7 +28980,7 @@ function _pledTableHtml(R, forPrint){
   const th = 'position:sticky; top:0; z-index:2; padding:5px 4px; font-size:13px; font-weight:800; line-height:1.6; color:#fff; border:1px solid rgba(255,255,255,.4);';
   const body = R.rows.map(e => `<tr>
       <td style="padding:4px; border:1px solid #e2e8f0; font:700 12.5px/1.4 Arial,sans-serif; white-space:nowrap; direction:ltr; text-align:center;">${esc(e.day.split('-').reverse().join('/'))}</td>
-      <td style="padding:4px 6px; border:1px solid #e2e8f0; font-size:13.5px; line-height:1.7; text-align:right;">${esc(e.desc)}</td>
+      <td style="padding:4px 6px; border:1px solid #e2e8f0; font-size:13.5px; line-height:1.7; text-align:right;">${esc(e.desc)}${!forPrint && e.pid != null && AppState.currentRole === 'admin' ? `<div style="display:flex; gap:6px; margin-top:3px;"><button type="button" onclick="pmEditCollection(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #2563eb; border-radius:8px; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">✏️ بدلیں</button><button type="button" onclick="pmDeleteCollection(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #dc2626; border-radius:8px; background:#fef2f2; color:#b91c1c; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">🗑️ حذف</button></div>` : ''}</td>
       <td style="padding:4px; border:1px solid #fecaca; background:#fee2e2; color:#991b1b; font:900 14px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${f(e.red)}</td>
       <td style="padding:4px; border:1px solid #bbf7d0; background:#dcfce7; color:#166534; font:900 14px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${f(e.green)}</td>
       <td style="padding:4px; border:1px solid #e2e8f0; background:#f8fafc; color:${e.bal > 0 ? (R.isC ? '#991b1b' : '#7c2d12') : '#166534'}; font:800 13px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${Math.round(Math.abs(e.bal)).toLocaleString('en-US')}</td>
