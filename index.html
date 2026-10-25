@@ -9585,8 +9585,8 @@ function getDeveloperContact(){
 // 🆕 FM2410SA442: ڈویلپر پینل کے پاس ورڈ خانے میں 👁️ (لکھا ہوا پاس ورڈ دیکھ سکیں)
 // 🆕 FM2410SA443: ڈویلپر پینل میں اوپر فوری بٹن (استعمال، کوڈ بنائیں، کوڈز، پلان، PIN، مینٹیننس…)
 // 🆕 FM2410SA444: چلنے والے پیغامات کی پٹی (marquee) کا نظام بند — ایپ اور ڈویلپر پینل دونوں سے
-const APP_BUILD_VERSION = 'FM2410SA444'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'چلنے والے پیغامات کی پٹی ختم'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2510SU445'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'وصولی میں ترمیم اور حذف (ایڈمن PIN کے ساتھ)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -28279,6 +28279,10 @@ function openCustomerProfile(customerId){
         ${pendingRec.amount > c.total_receivable ? `<br>💰 اضافی رقم Rs. ${(pendingRec.amount - c.total_receivable).toLocaleString()} خودکار Wallet میں جمع ہوگی` : ''}
       </div>
       <button onclick="confirmRecoveryEntry(${pendingRec.id}); closeProfileModal();" style="width:100%; margin-top:10px; padding:12px; background:#15803d; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; font-family:inherit;">✅ OK — اب کھاتے میں درج کریں</button>
+      ${AppState.currentRole === 'admin' ? `<div style="display:flex; gap:6px; margin-top:8px;">
+        <button onclick="openRecoveryEditModal(${pendingRec.id})" style="flex:1; padding:9px; background:#eff6ff; color:#1d4ed8; border:1.5px solid #93c5fd; border-radius:10px; font-weight:800; font-size:13.5px; cursor:pointer; font-family:inherit;">✏️ ترمیم</button>
+        <button onclick="deleteRecoveryEntry(${pendingRec.id})" style="flex:1; padding:9px; background:#fef2f2; color:#b91c1c; border:1.5px solid #fca5a5; border-radius:10px; font-weight:800; font-size:13.5px; cursor:pointer; font-family:inherit;">🗑️ حذف</button>
+      </div>` : ''}
     </div>` : '';
   figuresEl.innerHTML = `
     ${pendingBannerHtml}
@@ -34177,17 +34181,79 @@ function warnEmployeeCannotDeleteRecovery(){
   alert('❌ صرف صدام حسین (ایڈمن) ہی یہ وصولی کا اندراج حذف کر سکتے ہیں۔');
 }
 // ---------- ایڈمن کے لیے اصل ڈیلیٹ فنکشن — role کی سختی سے جانچ کے ساتھ ---------- -->
-function deleteRecoveryEntry(entryId){
+async function deleteRecoveryEntry(entryId){
   if(AppState.currentRole !== 'admin'){
     warnEmployeeCannotDeleteRecovery();
     return;
   }
-  if(!confirm('کیا آپ واقعی یہ وصولی کا اندراج حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔')) return;
-  recoveryListData = recoveryListData.filter(r => r.id !== entryId);
+  const r = recoveryListData.find(x => x.id === entryId);
+  if(!r) return;
+  // ---------- ⚠️ مالک کی ہدایت (25 اکتوبر): حذف سے پہلے واضح وارننگ + ایڈمن PIN لازمی ---------- -->
+  if(!confirm(`⚠️ وارننگ!\n\nکسٹمر: ${r.customerName}\nرقم: Rs. ${(Number(r.amount)||0).toLocaleString()}\nبھیجا از: ${r.employeeName || ''}\n\nکیا آپ واقعی یہ وصولی کا اندراج حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔`)) return;
+  if(!(await confirmAdminPinForDelete('وصولی — ' + r.customerName))) return;
+  recoveryListData = recoveryListData.filter(x => x.id !== entryId);
   if(!recoveryDeletedIds.includes(entryId)){ recoveryDeletedIds.push(entryId); saveToStorage('recoveryDeletedIds', recoveryDeletedIds); }
   persistAllData();
   pushRecoveryListToCloud();
+  refreshRecoveryViewsAfterAdminChange();
+}
+function refreshRecoveryViewsAfterAdminChange(){
   if(typeof renderRecoveryListAdminView === 'function') renderRecoveryListAdminView();
+  try{ const pm = document.getElementById('profileModal'); if(pm && pm.classList.contains('show') && typeof closeProfileModal === 'function') closeProfileModal(); }catch(e){}
+}
+// ---------- ✏️ مالک کی ہدایت (25 اکتوبر): ایڈمن ملازم کی بھیجی وصولی میں ترمیم کر سکے (رقم/طریقہ/نوٹ) ---------- -->
+function openRecoveryEditModal(entryId){
+  if(AppState.currentRole !== 'admin'){ alert('❌ صرف ایڈمن ہی وصولی میں ترمیم کر سکتا ہے۔'); return; }
+  const r = recoveryListData.find(x => x.id === entryId);
+  if(!r) return;
+  const sp = getRecoverySplit(r);
+  const val = k => { const m = sp.find(x => x.method === k); return m ? m.amount : ''; };
+  let ov = document.getElementById('rlEditOverlay');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'rlEditOverlay';
+  ov.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:99999; display:flex; align-items:center; justify-content:center; padding:16px;';
+  ov.innerHTML = `
+    <div dir="rtl" style="background:#fff; border-radius:14px; padding:16px; width:100%; max-width:380px; max-height:90vh; overflow:auto;">
+      <div style="font-size:17px; font-weight:900; margin-bottom:4px;">✏️ وصولی میں ترمیم</div>
+      <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">${escRlHtml(r.customerName)} — بھیجا از: ${escRlHtml(r.employeeName || '')}</div>
+      ${Object.keys(RECOVERY_METHODS).map(k => `
+        <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; font-weight:700;">
+          <span>${RECOVERY_METHODS[k]}</span>
+          <input type="number" inputmode="numeric" min="0" class="rlEditAmt" data-m="${k}" value="${val(k)}" placeholder="0" style="width:55%; padding:8px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:15px;">
+        </label>`).join('')}
+      <div id="rlEditTotal" style="font-weight:900; color:var(--success); margin:6px 0 10px;"></div>
+      <textarea id="rlEditNote" rows="2" placeholder="نوٹ (اختیاری)" style="width:100%; box-sizing:border-box; padding:8px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px;">${escRlHtml(r.note || '')}</textarea>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button type="button" onclick="saveRecoveryEdit(${r.id})" style="flex:1; padding:11px; background:#15803d; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">💾 محفوظ کریں</button>
+        <button type="button" onclick="document.getElementById('rlEditOverlay').remove()" style="flex:1; padding:11px; background:#e2e8f0; color:#334155; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">منسوخ</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  const upd = () => { const t = [...ov.querySelectorAll('.rlEditAmt')].reduce((s, i) => s + (Number(i.value) || 0), 0); document.getElementById('rlEditTotal').textContent = 'کل رقم: Rs. ' + t.toLocaleString(); };
+  ov.querySelectorAll('.rlEditAmt').forEach(i => i.addEventListener('input', upd));
+  upd();
+}
+function saveRecoveryEdit(entryId){
+  if(AppState.currentRole !== 'admin') return;
+  const r = recoveryListData.find(x => x.id === entryId);
+  const ov = document.getElementById('rlEditOverlay');
+  if(!r || !ov) return;
+  const methods = [...ov.querySelectorAll('.rlEditAmt')].map(i => ({ method: i.dataset.m, amount: Math.round(Number(i.value) || 0) })).filter(m => m.amount > 0);
+  const total = methods.reduce((s, m) => s + m.amount, 0);
+  if(total <= 0){ alert('❌ رقم صفر نہیں ہو سکتی — اگر اندراج غلط ہے تو 🗑️ حذف کریں۔'); return; }
+  if(!confirm(`کیا یہ تبدیلی محفوظ کرنی ہے؟\n\nپرانی رقم: Rs. ${(Number(r.amount)||0).toLocaleString()}\nنئی رقم: Rs. ${total.toLocaleString()}`)) return;
+  if(!r.editedFrom) r.editedFrom = Number(r.amount) || 0;
+  r.amount = total;
+  r.methods = methods;
+  r.method = methods[0].method;
+  r.note = (document.getElementById('rlEditNote').value || '').trim();
+  r.editedAt = Date.now();
+  ov.remove();
+  persistAllData();
+  pushRecoveryListToCloud();
+  refreshRecoveryViewsAfterAdminChange();
+  alert('✅ وصولی میں ترمیم محفوظ ہو گئی۔');
 }
 
 /* =====================================================================
@@ -34656,7 +34722,10 @@ function renderRecoveryListAdminView(){
            اب صاف سوالیہ انداز — دبانے پر کسٹمر کے کھاتے پر لے جائے گا، وہیں سے اصل تصدیق (OK) ہوگی —
            جب تک وہاں OK نہ دبے، پیسے کھاتے سے نہیں نکلتے، یہ ابھی صرف "کچی" (غیر تصدیق شدہ) انٹری ہے ---------- -->
       <button type="button" onclick="closeSidebar(); openCustomerProfile(${r.customer_id});" style="width:100%; margin-top:8px; padding:9px; background:#fef3c7; color:#92400e; border:1.5px solid #d97706; border-radius:8px; font-weight:800; font-size:12.5px; cursor:pointer;">❓ کھاتے میں درج کریں — کسٹمر کا ریکارڈ دیکھیں</button>
-      <button type="button" onclick="deleteRecoveryEntry(${r.id})" style="width:100%; margin-top:6px; padding:7px; background:#fef2f2; color:#b91c1c; border:1px solid #fca5a5; border-radius:8px; font-weight:700; font-size:11.5px; cursor:pointer;">🗑️ غلط اندراج — حذف کریں (صرف ایڈمن)</button>
+      <div style="display:flex; gap:6px; margin-top:6px;">
+        <button type="button" onclick="openRecoveryEditModal(${r.id})" style="flex:1; padding:8px; background:#eff6ff; color:#1d4ed8; border:1px solid #93c5fd; border-radius:8px; font-weight:800; font-size:12.5px; cursor:pointer;">✏️ ترمیم</button>
+        <button type="button" onclick="deleteRecoveryEntry(${r.id})" style="flex:1; padding:8px; background:#fef2f2; color:#b91c1c; border:1px solid #fca5a5; border-radius:8px; font-weight:800; font-size:12.5px; cursor:pointer;">🗑️ حذف</button>
+      </div>
     </div>`).join('');
 }
 
@@ -40740,6 +40809,11 @@ async function fetchRecoveryListFromCloud(silent){
       const localN = recoveryListData.find(r => r.id === cr.id);
       if(localN && (Number(cr.noteUpdatedAt) || 0) > (Number(localN.noteUpdatedAt) || 0)){
         localN.note = cr.note; localN.noteUpdatedAt = cr.noteUpdatedAt; addedAny = true;
+      }
+      // ---------- ✏️ (25 اکتوبر): ایڈمن کی ترمیم (رقم/طریقہ/نوٹ) دوسرے فونز تک بھی پہنچے ----------
+      if(localN && (Number(cr.editedAt) || 0) > (Number(localN.editedAt) || 0)){
+        localN.amount = cr.amount; localN.methods = cr.methods; localN.method = cr.method; localN.note = cr.note;
+        localN.editedAt = cr.editedAt; localN.editedFrom = cr.editedFrom; addedAny = true;
       }
       if(!localIds.has(cr.id)){
         recoveryListData.push(cr);
