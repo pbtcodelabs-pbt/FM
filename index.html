@@ -9595,8 +9595,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU458: بلوں کی کلاؤڈ کاپی 5-5 دن کے ٹکڑوں میں (ڈبہ 881KB تک بھر چکا تھا) — فون کا پورا ریکارڈ اور بیک اپ وہی
 // 🆕 FM2710TU459: 📦 ڈبوں کا میٹر (ڈویلپر پینل) — کوئی کلاؤڈ ڈبہ 60% سے اوپر جائے تو ایڈمن کو تنبیہ
 // 🆕 FM2710TU460: نقد خریداری مہینہ وار کلاؤڈ ٹکڑوں میں؛ ریکوری لسٹ اور منشی سٹاک ریکارڈ کی کلاؤڈ کاپی صرف 30 دن (فون میں پورا)
-const APP_BUILD_VERSION = 'FM2710TU460'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'نقد خریداری، ریکوری اور منشی ریکارڈ کے ڈبے بھی کبھی نہیں بھریں گے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
+const APP_BUILD_VERSION = 'FM2710TU461'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'میٹر میں فون کی جگہ بھی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9822,7 +9823,22 @@ function renderDocMeterBox(){
       <button type="button" onclick="docMeterScanAll()" style="flex:0 0 auto; padding:7px 12px; border:none; border-radius:10px; background:#1e3a8a; color:#fff; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">🔄 ابھی سب ناپیں</button></div>
     <div style="font-size:12.5px; line-height:1.8; padding:5px 8px; border-radius:9px; margin-bottom:6px; background:${worst >= 0.6 ? '#fee2e2' : '#dcfce7'}; color:${worst >= 0.6 ? '#7f1d1d' : '#14532d'}; font-weight:800;">${worst >= 0.6 ? '⚠️ کوئی ڈبہ 60% سے اوپر — اسے بانٹنا ضروری ہے' : '✅ سب ڈبے محفوظ حد میں'}</div>
     <div id="docMeterRows">${_docMeterRows(m)}</div>
+    ${_lsMeterHtml()}
     <div style="font-size:11.5px; color:#64748b; margin-top:6px;">🟢 60% تک ٹھیک · 🟠 60–80% نظر رکھیں · 🔴 80% سے اوپر فوراً بانٹیں</div>`;
+}
+// 📱 FM2710TU461: فون کی اپنی جگہ (localStorage — تقریباً 50 لاکھ حروف) — کون سی چیز کتنی جگہ لے رہی ہے
+const LS_LIMIT = 5000000;
+function _lsMeterHtml(){
+  let tot = 0; const rows = [];
+  try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); const n = (k || '').length + (localStorage.getItem(k) || '').length; tot += n; rows.push([k, n]); } }catch(e){ return ''; }
+  rows.sort((a, b) => b[1] - a[1]);
+  const pct = Math.min(100, tot / LS_LIMIT * 100), col = pct >= 80 ? '#dc2626' : pct >= 60 ? '#f59e0b' : '#16a34a';
+  const pre = (typeof STORAGE_PREFIX === 'string') ? STORAGE_PREFIX : '';
+  return `<div style="margin-top:10px; padding-top:8px; border-top:2px dashed #cbd5e1;">
+    <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:900; line-height:1.8;"><span>📱 اس فون کی جگہ</span><span dir="ltr" style="font-family:Arial,sans-serif; color:${col};">${(tot / 1e6).toFixed(2)}M / 5M · ${pct.toFixed(0)}%</span></div>
+    <div style="height:10px; border-radius:6px; background:#e2e8f0; overflow:hidden;"><div style="height:100%; width:${Math.max(1, pct)}%; background:${col};"></div></div>
+    ${rows.slice(0, 8).map(([k, n]) => `<div dir="ltr" style="display:flex; justify-content:space-between; font:11.5px Arial,sans-serif; color:#475569; margin-top:2px;"><span>${String(k).replace(pre, '')}</span><span>${(n / 1e3).toFixed(0)}K</span></div>`).join('')}
+    <div style="font-size:11.5px; color:#64748b; margin-top:4px;">80% سے اوپر ہو تو فوراً ڈویلپر کو تصویر بھیجیں</div></div>`;
 }
 async function docMeterScanAll(){
   const rowsEl = document.getElementById('docMeterRows'); if(rowsEl) rowsEl.innerHTML = '<div style="text-align:center; font-size:13px; color:#64748b;">⏳ کلاؤڈ کے سب ڈبے ناپے جا رہے ہیں…</div>';
