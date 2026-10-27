@@ -9587,8 +9587,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU450: ہر صفحے پر زوم ➕ ➖ (100% سے 200%) — ڈبے نہیں ٹوٹتے
 // 🆕 FM2710TU451: منشی کے بل ایڈمن تک نہ پہنچنے کا مسئلہ — کلاؤڈ فہرست سے پرانے منظور/مسترد بل صاف، خود دوبارہ بھیجنا، سچا پیغام
 // 🆕 FM2710TU452: آرڈر ٹیکنگ کے آرڈر ادھورے/غائب — کلاؤڈ فہرست سے مکمل شدہ پرانے آرڈر صاف (1MB حد)
-const APP_BUILD_VERSION = 'FM2710TU452'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'منشی کے آرڈر اب پورے اور پکا ایڈمن تک پہنچیں گے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU453: زوم بٹن ریکارڈ کے بیچ سے ہٹا — اوپر کی پٹی میں چھوٹا 🔍، دبانے پر ➖ ➕
+const APP_BUILD_VERSION = 'FM2710TU453'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'زوم بٹن اب اوپر کی پٹی میں چھوٹا 🔍'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -53282,31 +53283,41 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script>
 /* =====================================================================
-   🔍 FM2710TU450 (صدام بھائی): ہر صفحے پر زوم کے ➕ ➖ بٹن (100% سے 200%)۔ صفحہ ویسے ہی بڑا ہوتا ہے جیسے دو انگلیوں
-   سے بڑا کرتے ہیں — ڈبوں کی ترتیب نہیں بدلتی، لکھائی ڈبوں سے باہر نہیں جاتی؛ انگلی سے کھسکا کر باقی حصہ دیکھیں۔
-   بٹن ہمیشہ اسکرین پر ایک ہی جگہ اور ایک ہی سائز میں رہتے ہیں۔ دبائے رکھیں تو مسلسل بڑھتا/گھٹتا ہے
+   🔍 زوم (100% سے 200%) — صفحہ دو انگلیوں والے زوم کی طرح بڑا ہوتا ہے، ترتیب نہیں ٹوٹتی۔
+   FM2710TU453 (صدام بھائی): بٹن ریکارڈ کے بیچ میں نہیں — اوپر کی پٹی میں "Online" کے ساتھ صرف چھوٹا 🔍؛ دبائیں تو اس کے نیچے
+   ➖ % ➕ کھلتا ہے، کچھ سیکنڈ بعد خود بند۔ بٹن ہمیشہ اسکرین پر اسی جگہ اور اسی سائز میں
    ===================================================================== */
 (function(){
-  const KEY = 'fmZoomPct', STEP = 5, MIN = 100, MAX = 200;
+  const KEY = 'fmZoomPct', STEP = 5, MIN = 100, MAX = 200, X = 60, Y = 4;
   const META = document.querySelector('meta[name="viewport"]');
   const BASE = META ? META.getAttribute('content') : '';
   const touch = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
-  let z = MIN;
+  let z = MIN, open = false, tClose = null;
   try{ z = Math.min(MAX, Math.max(MIN, parseInt(localStorage.getItem(KEY), 10) || MIN)); }catch(e){}
   const el = document.createElement('div');
   el.id = 'appZoomCtl';
   el.setAttribute('dir', 'ltr');
-  el.innerHTML = '<button type="button" data-d="1" aria-label="بڑا کریں">+</button><span id="appZoomPct"></span><button type="button" data-d="-1" aria-label="چھوٹا کریں">−</button>';
+  el.innerHTML = '<button type="button" id="appZoomToggle" aria-label="زوم">🔍<b id="appZoomBadge"></b></button>'
+    + '<div id="appZoomPanel"><button type="button" data-d="-1" aria-label="چھوٹا کریں">−</button><span id="appZoomPct"></span><button type="button" data-d="1" aria-label="بڑا کریں">+</button></div>';
   const st = document.createElement('style');
-  st.textContent = '#appZoomCtl{position:fixed;left:0;top:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 3px;border-radius:16px;background:rgba(15,23,42,.55);box-shadow:0 2px 8px rgba(0,0,0,.3);transform-origin:0 0;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}'
-    + '#appZoomCtl button{width:30px;height:30px;padding:0;border:none;border-radius:50%;background:linear-gradient(145deg,#2563eb,#1e3a8a);color:#fff;font:900 22px/30px Arial,sans-serif;cursor:pointer;box-shadow:inset 0 1px 1px rgba(255,255,255,.45)}'
-    + '#appZoomCtl button:disabled{opacity:.35}'
-    + '#appZoomPct{font:900 10px/1.2 Arial,sans-serif;color:#fff;min-width:30px;text-align:center}';
+  st.textContent = '#appZoomCtl{position:fixed;left:0;top:0;z-index:2147483000;transform-origin:0 0;display:flex;align-items:center;gap:6px;width:max-content;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}'
+    + '#appZoomToggle{position:relative;flex:0 0 auto;width:24px!important;min-width:24px!important;height:24px!important;padding:0!important;border:1px solid rgba(255,255,255,.55);border-radius:50%;background:rgba(255,255,255,.18);font-size:12px;line-height:22px;cursor:pointer}'
+    + '#appZoomBadge{position:absolute;left:16px;top:-5px;padding:0 3px;border-radius:6px;background:#f59e0b;color:#111;font:900 8px/12px Arial,sans-serif;white-space:nowrap}'
+    + '#appZoomBadge:empty{display:none}'
+    + '#appZoomPanel{display:none;width:max-content;align-items:center;gap:5px;padding:2px 5px;border-radius:999px;background:#0f172a;box-shadow:0 3px 10px rgba(0,0,0,.35)}'
+    + '#appZoomCtl.open #appZoomPanel{display:flex}'
+    + '#appZoomPanel button{flex:0 0 auto;width:30px!important;min-width:30px!important;max-width:30px!important;height:30px!important;margin:0!important;padding:0!important;border:none;border-radius:50%;background:linear-gradient(145deg,#2563eb,#1e3a8a);color:#fff;font:900 22px/30px Arial,sans-serif!important;cursor:pointer}'
+    + '#appZoomPanel button:disabled{opacity:.35}'
+    + '#appZoomPct{flex:0 0 auto;font:900 12px Arial,sans-serif;color:#fff;min-width:38px;text-align:center}';
   function place(){
     const vv = window.visualViewport;
-    if(!touch || !vv){ el.style.transform = 'translate(6px,' + Math.round(window.innerHeight * 0.42) + 'px)'; return; }
+    if(!touch || !vv){ el.style.transform = 'translate(' + X + 'px,' + Y + 'px)'; return; }
     const k = 1 / (vv.scale || 1);
-    el.style.transform = 'translate(' + (vv.offsetLeft + 6 * k) + 'px,' + (vv.offsetTop + vv.height * 0.42) + 'px) scale(' + k + ')';
+    el.style.transform = 'translate(' + (vv.offsetLeft + X * k) + 'px,' + (vv.offsetTop + Y * k) + 'px) scale(' + k + ')';
+  }
+  function setOpen(v){
+    open = v; el.classList.toggle('open', v);
+    clearTimeout(tClose); if(v) tClose = setTimeout(() => setOpen(false), 5000);
   }
   function apply(save){
     const f = z / 100;
@@ -53314,10 +53325,11 @@ document.addEventListener('DOMContentLoaded', () => {
       META.setAttribute('content', z === MIN ? BASE
         : 'width=device-width, initial-scale=' + f + ', minimum-scale=1, maximum-scale=' + f + ', viewport-fit=cover');
     } else {
-      document.body.style.zoom = z === MIN ? '' : String(f); // کمپیوٹر: اسکرین چوڑی، سیدھا زوم
+      document.body.style.zoom = z === MIN ? '' : String(f);
     }
     const pct = document.getElementById('appZoomPct'); if(pct) pct.textContent = z + '%';
-    const b = el.querySelectorAll('button'); b[0].disabled = z >= MAX; b[1].disabled = z <= MIN;
+    const bd = document.getElementById('appZoomBadge'); if(bd) bd.textContent = z === MIN ? '' : String(z);
+    const b = el.querySelectorAll('#appZoomPanel button'); b[0].disabled = z <= MIN; b[1].disabled = z >= MAX;
     if(save){ try{ localStorage.setItem(KEY, String(z)); }catch(e){} }
     requestAnimationFrame(place); setTimeout(place, 120); setTimeout(place, 400);
     if(touch && z > MIN) setTimeout(panRight, 90);
@@ -53331,11 +53343,12 @@ document.addEventListener('DOMContentLoaded', () => {
       place();
     }catch(e){}
   }
-  function step(d){ const n = Math.min(MAX, Math.max(MIN, z + d * STEP)); if(n !== z){ z = n; apply(true); } }
+  function step(d){ const n = Math.min(MAX, Math.max(MIN, z + d * STEP)); if(n !== z){ z = n; apply(true); } setOpen(true); }
   let tHold = null, tRep = null;
   function stop(){ clearTimeout(tHold); clearInterval(tRep); tHold = tRep = null; }
   el.addEventListener('pointerdown', e => {
-    const b = e.target.closest('button'); if(!b || b.disabled) return;
+    if(e.target.closest('#appZoomToggle')){ e.preventDefault(); setOpen(!open); return; }
+    const b = e.target.closest('#appZoomPanel button'); if(!b || b.disabled) return;
     e.preventDefault(); const d = +b.dataset.d; step(d);
     stop(); tHold = setTimeout(() => { tRep = setInterval(() => step(d), 110); }, 450);
   });
