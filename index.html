@@ -9786,8 +9786,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
-const APP_BUILD_VERSION = 'FM2810WE468'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'پرانے بل اور ادائیگیاں لیجر/بل ہسٹری میں کلاؤڈ سے خود'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE469'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'سبزیاں/چالان، گاہک، بیوپاری کے کلاؤڈ ڈبے دبا کر — کبھی نہ بھریں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9926,13 +9926,62 @@ function _fbURoll(){
   }
 }
 function fbCount(r, w, d){ _fbURoll(); _fbU.r += r; _fbU.w += w; _fbU.d += d; _fbU.pr += r; _fbU.pw += w; _fbU.pd += d; _fbUSave(); }
+// ---------- 🗜️ مالک کی ہدایت (28 اکتوبر): سبزیاں/چالان، گاہک اور بیوپاری کے کلاؤڈ ڈبے بھی کبھی نہ بھریں ----------
+// یہ ڈبہ 150KB سے بڑا ہو تو کلاؤڈ پر دبا کر (تقریباً 5–8 گنا چھوٹا) لکھا جاتا ہے، پڑھتے وقت خود کھلتا ہے — باقی سارا کوڈ ویسے ہی چلتا ہے۔
+// ہر دبایا ڈبہ لکھنے سے پہلے واپس کھول کر جانچا جاتا ہے؛ جانچ ناکام ہو تو عام (بغیر دبا) لکھا جاتا ہے۔
+const CZ_MIN = 150000, CZ_DOCS = /^(products|customers|suppliers|snap\d_(products|customers|suppliers))$/;
+const _CZ_A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+function _cz15to64(z){
+  const out = []; let buf = 0, bl = 0;
+  for(let i = 0; i < z.length; i++){ buf = (buf << 15) | ((z.charCodeAt(i) - 32) & 0x7fff); bl += 15; while(bl >= 6){ bl -= 6; out.push(_CZ_A[(buf >>> bl) & 63]); } buf &= (1 << bl) - 1; }
+  if(bl > 0) out.push(_CZ_A[(buf << (6 - bl)) & 63]);
+  return out.join('');
+}
+function _cz64to15(t, n){
+  const out = []; let buf = 0, bl = 0;
+  for(let i = 0; i < t.length && out.length < n; i++){ buf = (buf << 6) | _CZ_A.indexOf(t[i]); bl += 6; if(bl >= 15){ bl -= 15; out.push(String.fromCharCode(((buf >>> bl) & 0x7fff) + 32)); } buf &= (1 << bl) - 1; }
+  return out.join('');
+}
+// ٹکڑوں میں دبانا — جو ٹکڑا نہ بدلا اس کا دبا روپ دوبارہ استعمال (ہر بل پر ایپ سست نہ ہو)؛ ہر نیا ٹکڑا واپس کھول کر جانچا جاتا ہے
+const _czT = {};
+function _czPack(s, name){
+  const r = _lzEncode('cz_' + name, s), parts = r.charCodeAt(0) === 2 ? r.slice(2).split('\u0001') : [_lzPack(s)];
+  const old = _czT[name] || new Map(), nm = new Map();
+  const out = parts.map(z => { let t = old.get(z); if(t === undefined){ t = _cz15to64(z); if(_cz64to15(t, z.length) !== z) throw new Error('cz verify'); } nm.set(z, t); return z.length + ':' + t; });
+  _czT[name] = nm;
+  return '\u0002Y' + out.join('.');
+}
+function _czUnpack(v){ return v.slice(2).split('.').map(c => { const i = c.indexOf(':'); return _lzUnpack(_cz64to15(c.slice(i + 1), +c.slice(0, i))); }).join(''); }
+function _czEncodeBody(tail, body){
+  if(body.length < CZ_MIN) return body;
+  const name = String(tail || '').split('/').filter(Boolean).pop() || '';
+  if(!CZ_DOCS.test(name)) return body;
+  const o = JSON.parse(body), f = o && o.fields && o.fields.json;
+  if(!f || typeof f.stringValue !== 'string' || f.stringValue.length < CZ_MIN || f.stringValue.charCodeAt(0) === 2) return body;
+  f.stringValue = _czPack(f.stringValue, name);
+  return JSON.stringify(o);
+}
+function _czFix(fields){ const j = fields && fields.json; if(j && typeof j.stringValue === 'string' && j.stringValue.charCodeAt(0) === 2 && j.stringValue.charAt(1) === 'Y') j.stringValue = _czUnpack(j.stringValue); }
+async function _czDecodeRes(res){
+  try{
+    if(!res || !res.ok) return res;
+    const txt = await res.clone().text();
+    if(txt.indexOf('\\u0002Y') < 0) return res;
+    const o = JSON.parse(txt);
+    const each = d => { if(d && d.fields) _czFix(d.fields); };
+    if(Array.isArray(o)) o.forEach(x => each(x && x.document)); else { each(o); (o.documents || []).forEach(each); }
+    return new Response(JSON.stringify(o), { status: res.status, statusText: res.statusText, headers: res.headers });
+  }catch(e){ console.warn('cz decode', e); return res; }
+}
 // ---------- ہر فائربیس درخواست کی گنتی: fetch کے اوپر ایک پتلا غلاف ----------
 (function(){
   const _f = window.fetch.bind(window);
   const mark = `firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
   window.fetch = function(input, init){
     const url = typeof input === 'string' ? input : (input && input.url) || '';
-    const p = _f(input, init);
+    if(url.indexOf(mark) >= 0 && init && typeof init.body === 'string'){ try{ const nb = _czEncodeBody(url.split(mark)[1].split('?')[0], init.body); if(nb !== init.body) init = Object.assign({}, init, { body: nb }); }catch(e){} } // 🗜️ بڑا ڈبہ دبا کر
+    const p0 = _f(input, init);
+    const p = (url.indexOf(mark) >= 0 && !(init && init._raw)) ? p0.then(_czDecodeRes) : p0; // 🗜️ دبا ہوا ڈبہ کھول کر
     if(url.indexOf(mark) < 0 || (init && init._noCount)) return p;
     const method = String((init && init.method) || 'GET').toUpperCase();
     return p.then(res => {
@@ -9982,7 +10031,7 @@ function _docMeterNote(tail, body){
 function _docMeterWarn(name, b){
   try{
     const isDev = (typeof isDevDevice === 'function' && isDevDevice());
-    if(!(AppState && (AppState.currentRole === 'admin' || isDev))) return;
+    if(!isDev) return; // 🔕 (28 اکتوبر): ڈبوں کی تنبیہ صرف ڈویلپر فون پر — ایڈمن/ملازم کو کبھی نہیں
     const k = DOC_METER_KEY + '_warn_' + name, last = Number(localStorage.getItem(k) || 0);
     if(Date.now() - last < 12 * 3600e3) return;
     localStorage.setItem(k, String(Date.now()));
@@ -10098,7 +10147,7 @@ async function docMeterScanAll(){
   try{
     let token = '';
     for(let page = 0; page < 20; page++){
-      const res = await authFirestoreFetch(`${'shopData'}?pageSize=100${token ? '&pageToken=' + encodeURIComponent(token) : ''}&key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+      const res = await authFirestoreFetch(`${'shopData'}?pageSize=100${token ? '&pageToken=' + encodeURIComponent(token) : ''}&key=${FIREBASE_API_KEY}`, { cache: 'no-store', _raw: true }); // 🗜️ اصل (دبا ہوا) سائز
       if(!res || !res.ok) throw new Error(res ? res.status : 0);
       const j = await res.json();
       (j.documents || []).forEach(d => { const n = String(d.name || '').split('/').pop(); m[n] = { b: JSON.stringify(d.fields || {}).length, at: Date.now() }; });
