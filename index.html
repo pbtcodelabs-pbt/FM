@@ -9598,8 +9598,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
-const APP_BUILD_VERSION = 'FM2710TU464'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'پاس ورڈ کی آنکھ والا بٹن: بڑے خانے اب سکڑتے نہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2710TU465'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بل میں ترمیم ہمیشہ بل پر لگے گی؛ فون کی میموری میں جگہ خالی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -22205,6 +22205,7 @@ function _mkShardSync(o){
         }
       }
       if(idx.cut == null) throw new Error('no-cut');
+      _dropLegacyBase([_xBaseKey(legDef())]);
       const seenK = o.key + 'ShardSeen', sigK = o.key + 'ShardSig';
       const seen = loadFromStorage(seenK, {}) || {}, sigs = loadFromStorage(sigK, {}) || {};
       const ld = legDef(), groups = new Map();
@@ -22214,9 +22215,9 @@ function _mkShardSync(o){
       for(const sk of keys){
         const sig = _stableStr(_xHeavyStrip(groups.get(sk) || []));
         const cur = _utNum(idx.m[sk]);
-        if(cur > 0 && cur <= (Number(seen[sk]) || 0) && sigs[sk] === sig) continue;
+        if(cur > 0 && cur <= (Number(seen[sk]) || 0) && sigs[sk] === _sigH(sig)) continue;
         const res = await syncShard(sk); if(!res.ok) continue;
-        sigs[sk] = _stableStr(_xHeavyStrip((ld.get() || []).filter(x => o.shardOf(x) === sk)));
+        sigs[sk] = _sigH(_stableStr(_xHeavyStrip((ld.get() || []).filter(x => o.shardOf(x) === sk))));
         const u = _utNum(res.ut); if(u){ seen[sk] = u; if(u > cur) bump[sk] = u; }
       }
       if(Object.keys(bump).length) await idxUpdate(i => { let ch = false; Object.keys(bump).forEach(k => { if(_utNum(i.m[k]) < bump[k]){ i.m[k] = bump[k]; ch = true; } }); return ch ? i : null; });
@@ -22253,6 +22254,10 @@ function _payShard(p){
 }
 const _payDefs = {};
 function _payDef(sk){ return _payDefs[sk] || (_payDefs[sk] = { key: 'payments_' + sk, idOf: x => x && x.payment_id }); }
+// 🧹 FM2710TU465: ٹکڑوں کا نشان پوری لکھائی کی جگہ چھوٹا ہیش (فون کی میموری بچانے کو)
+function _sigH(s){ s = String(s); let h1 = 0x811c9dc5, h2 = 0x1b873593; for(let i = 0; i < s.length; i++){ const c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 16777619); h2 = Math.imul(h2 ^ c, 2246822519) + i; } return s.length.toString(36) + '.' + (h1 >>> 0).toString(36) + '.' + (h2 >>> 0).toString(36); }
+// 🧹 FM2710TU465: ٹکڑے بن جانے کے بعد پرانی ایک دستاویز والی بنیاد فون سے ہٹا دیں (اب صرف پڑھی جاتی ہے)
+function _dropLegacyBase(keys){ (keys || []).forEach(k => { try{ if(localStorage.getItem(STORAGE_PREFIX + k) !== null) localStorage.removeItem(STORAGE_PREFIX + k); }catch(e){} }); }
 function _payLegacyDef(){ return EXTRA_SYNC_DEFS.find(d => d.key === 'payments'); }
 function _paySort(a){
   return a.sort((x, y) => String(y.created_at || '').localeCompare(String(x.created_at || '')) || ((Number(y.payment_id) || 0) - (Number(x.payment_id) || 0)));
@@ -22348,6 +22353,7 @@ async function paySyncAll(){
       }
     }
     if(idx.cut == null) throw new Error('no-cut'); // پرانا ریکارڈ ابھی نہیں ملا — اگلی بار
+    _dropLegacyBase([_xBaseKey(_payLegacyDef())]);
     const seen = loadFromStorage('payShardSeen', {}) || {}, sigs = loadFromStorage('payShardSig', {}) || {};
     const groups = new Map();
     (paymentsData || []).forEach(p => { if(!p) return; const k = _payShard(p); if(!groups.has(k)) groups.set(k, []); groups.get(k).push(p); });
@@ -22356,10 +22362,10 @@ async function paySyncAll(){
     for(const sk of keys){
       const sig = _stableStr(_xHeavyStrip(groups.get(sk) || []));
       const cur = _utNum(idx.m[sk]);
-      if(cur > 0 && cur <= (Number(seen[sk]) || 0) && sigs[sk] === sig) continue; // نہ یہاں بدلا، نہ کلاؤڈ پر
+      if(cur > 0 && cur <= (Number(seen[sk]) || 0) && sigs[sk] === _sigH(sig)) continue; // نہ یہاں بدلا، نہ کلاؤڈ پر
       const res = await _paySyncShard(sk);
       if(!res.ok) continue;
-      sigs[sk] = _stableStr(_xHeavyStrip((paymentsData || []).filter(p => _payShard(p) === sk)));
+      sigs[sk] = _sigH(_stableStr(_xHeavyStrip((paymentsData || []).filter(p => _payShard(p) === sk))));
       const u = _utNum(res.ut);
       if(u){ seen[sk] = u; if(u > cur) bump[sk] = u; }
     }
@@ -43067,6 +43073,7 @@ async function _invSyncAllRun(){
       }
     }
     if(idx.cut == null) return false;
+    _dropLegacyBase(['invoicesSyncBase', _sentKey(_invCfg())]); invoicesSyncBase = null;
     const seen = loadFromStorage('invShardSeen', {}) || {}, sigs = loadFromStorage('invShardSig', {}) || {};
     const groups = new Map();
     (invoicesData || []).forEach(i => { if(!i) return; const k = _invShard(i); if(!groups.has(k)) groups.set(k, []); groups.get(k).push(i); });
@@ -43075,7 +43082,7 @@ async function _invSyncAllRun(){
     for(const sk of keys){
       const sig = _stableStr(groups.get(sk) || []);
       const cur = _utNum(idx.m[sk]);
-      const localChanged = sigs[sk] !== sig;
+      const localChanged = sigs[sk] !== _sigH(sig);
       const cloudChanged = !(cur > 0) || cur > (Number(seen[sk]) || 0);
       if(!localChanged && !cloudChanged) continue;
       const cfg = _invShardCfg(sk);
@@ -43085,7 +43092,7 @@ async function _invSyncAllRun(){
         else { const f = await _invFetchShard(cfg); ok = f.ok; if(ok && !f.same){ ok = await _pushMerged(cfg); w = ok; } }
       }catch(e){ ok = false; }
       if(!ok){ allOk = false; continue; }
-      sigs[sk] = _stableStr((invoicesData || []).filter(i => _invShard(i) === sk));
+      sigs[sk] = _sigH(_stableStr((invoicesData || []).filter(i => _invShard(i) === sk)));
       const u = _utNum(cfg.lastUT);
       if(u){ seen[sk] = u; if(u > cur) bump[sk] = u; }
     }
@@ -44542,7 +44549,7 @@ function _beGive(v, q, alloc){
   v.salesCount = Math.max(0, (Number(v.salesCount) || 0) - q);
 }
 async function beSave(){
-  const st = window.__be; const inv = (invoicesData || []).find(i => i.invoice_id === (st && st.id)); if(!inv) return;
+  const st = window.__be; let inv = (invoicesData || []).find(i => i.invoice_id === (st && st.id)); if(!inv) return;
   if(AppState.currentRole !== 'admin'){ alert('🔒 صرف ایڈمن'); return; }
   const oldItems = inv.items || [];
   const changes = [];
@@ -44562,6 +44569,9 @@ async function beSave(){
   if(!ok) return;
   if(!(await _askAdminPinForSerialMaster('بل ' + (inv.invoice_no || '') + ' میں ترمیم'))) return;
   try{ pauseCloudPolling(15000); }catch(e){}
+  // 🛠️ FM2710TU465 (جھنگی Bill#2/247): PIN کے دوران کلاؤڈ تازہ ہو جائے تو پرانی کاپی پر ترمیم لگتی تھی — بقایا بدلتا، بل نہیں
+  inv = (invoicesData || []).find(i => i.invoice_id === st.id);
+  if(!inv || inv.status === 'voided' || _stableStr(inv.items || []) !== _stableStr(oldItems)){ await uAlert('⚠️ بل اسی دوران بدل گیا', 'کوئی تبدیلی نہیں ہوئی۔ بل دوبارہ کھول کر ترمیم کریں۔', 'red'); return; }
   const by = (AppState.currentUser && AppState.currentUser.name) || 'admin';
   const before = JSON.parse(JSON.stringify({ items: oldItems, grand_total: oldGrand, amount_due: getInvoiceAmountDue(inv) }));
   const newItems = [];
