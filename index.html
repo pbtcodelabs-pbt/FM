@@ -8534,11 +8534,23 @@ function loadFromStorage(key, fallback){
   }
 }
 let storageQuotaWarned = false; // ---------- ایک سیشن میں بار بار الرٹ نہ آئے، صرف پہلی بار ----------
+// 🧹 FM2710TU465: صرف وہ چیزیں جو دوبارہ خود بن جاتی ہیں — پرانی ایک دستاویز والی بنیادیں اور ٹکڑوں کے لمبے نشان
+function _storageEmergencyFree(){
+  let freed = 0;
+  const legacy = ['invoicesSyncBase', 'xsyncBase_payments', 'xsyncBase_cashPurchases'];
+  try{ legacy.push(_sentKey(_invCfg())); }catch(e){}
+  legacy.forEach(k => { const v = localStorage.getItem(STORAGE_PREFIX + k); if(v !== null){ freed += v.length; localStorage.removeItem(STORAGE_PREFIX + k); } });
+  try{ invoicesSyncBase = null; }catch(e){}
+  ['invShardSig', 'payShardSig', 'cashPurchasesShardSig'].forEach(k => { const v = localStorage.getItem(STORAGE_PREFIX + k); if(v !== null && v.length > 2000){ freed += v.length; localStorage.removeItem(STORAGE_PREFIX + k); } });
+  return freed > 0;
+}
 function saveToStorage(key, value){
   try{
     localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
     return true;
   }catch(e){
+    // 🧹 FM2710TU465: جگہ بھر گئی — پہلے فالتو پرانی بنیادیں/لمبے نشان خود ہٹا کر دوبارہ کوشش (اصل ڈیٹا کو ہاتھ نہیں لگتا)
+    try{ if(_storageEmergencyFree()){ localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value)); return true; } }catch(e2){}
     console.warn('ڈیٹا محفوظ کرنے میں مسئلہ:', key, e);
     if(!storageQuotaWarned){
       storageQuotaWarned = true;
