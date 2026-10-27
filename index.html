@@ -3097,9 +3097,8 @@ function __appHostKind(h, p){
         </div>
         <div class="loginRoleInputBar">
           <button type="button"
-            onmousedown="showPinWhilePressed('pinInput')" onmouseup="hidePinAfterRelease('pinInput')" onmouseleave="hidePinAfterRelease('pinInput')"
-            ontouchstart="showPinWhilePressed('pinInput')" ontouchend="hidePinAfterRelease('pinInput')" ontouchcancel="hidePinAfterRelease('pinInput')"
-            class="loginEyeBtn" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+            onclick="togglePinEyeBtn('pinInput', this)"
+            class="loginEyeBtn" title="ایک بار دبائیں تو PIN نظر آئے، دوبارہ دبائیں تو چھپے">👁️</button>
           <input type="password" id="pinInput" placeholder="پاسورڈ درج کریں" maxlength="8" inputmode="numeric" class="loginRoleInput" onkeydown="if(event.key==='Enter') login()">
           <button type="button" onclick="login()" class="loginRole3dBtn">⏎</button>
         </div>
@@ -3118,9 +3117,8 @@ function __appHostKind(h, p){
         <select id="employeeLoginSelect" class="loginRoleSelect"></select>
         <div class="loginRoleInputBar">
           <button type="button"
-            onmousedown="showPinWhilePressed('employeePinInput')" onmouseup="hidePinAfterRelease('employeePinInput')" onmouseleave="hidePinAfterRelease('employeePinInput')"
-            ontouchstart="showPinWhilePressed('employeePinInput')" ontouchend="hidePinAfterRelease('employeePinInput')" ontouchcancel="hidePinAfterRelease('employeePinInput')"
-            class="loginEyeBtn" title="دبائے رکھیں تاکہ PIN نظر آئے">👁️</button>
+            onclick="togglePinEyeBtn('employeePinInput', this)"
+            class="loginEyeBtn" title="ایک بار دبائیں تو PIN نظر آئے، دوبارہ دبائیں تو چھپے">👁️</button>
           <input type="password" id="employeePinInput" placeholder="پاسورڈ درج کریں" maxlength="8" inputmode="numeric" class="loginRoleInput" onkeydown="if(event.key==='Enter') employeeLogin()">
           <button type="button" onclick="employeeLogin()" class="loginRole3dBtn">⏎</button>
         </div>
@@ -3140,8 +3138,7 @@ function __appHostKind(h, p){
       <div class="loginRoleTitle">🧑‍🤝‍🧑 کسٹمر</div>
       <div class="loginRoleInputBar">
         <button type="button"
-          onmousedown="showPinWhilePressed('customerLoginPasswordInput')" onmouseup="hidePinAfterRelease('customerLoginPasswordInput')" onmouseleave="hidePinAfterRelease('customerLoginPasswordInput')"
-          ontouchstart="showPinWhilePressed('customerLoginPasswordInput')" ontouchend="hidePinAfterRelease('customerLoginPasswordInput')" ontouchcancel="hidePinAfterRelease('customerLoginPasswordInput')"
+          onclick="togglePinEyeBtn('customerLoginPasswordInput', this)"
           class="loginEyeBtn" title="دبائے رکھیں تاکہ پاسورڈ نظر آئے">👁️</button>
         <input type="password" id="customerLoginPasswordInput" placeholder="پاسورڈ درج کریں" maxlength="20" class="loginRoleInput" oninput="onCustomerLoginPasswordInput()" onkeydown="if(event.key==='Enter') attemptCustomerLogin()">
         <button type="button" onclick="attemptCustomerLogin()" class="loginRole3dBtn">⏎</button>
@@ -9587,8 +9584,8 @@ function getDeveloperContact(){
 // 🆕 FM2410SA444: چلنے والے پیغامات کی پٹی (marquee) کا نظام بند — ایپ اور ڈویلپر پینل دونوں سے
 // 🆕 FM2510SU446: لین دین میں گاہک کی وصولی بدلیں/حذف کریں (صرف ایڈمن، تنبیہ + PIN)
 // 🆕 FM2710TU447: ڈویلپر پینل میں کیپسول بٹن + ڈویلپر ان لاک
-const APP_BUILD_VERSION = 'FM2710TU448'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو دکھے، دوبارہ دبائیں تو چھپے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2710TU449'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ہر PIN اور پاس ورڈ کے خانے میں آنکھ کا بٹن — دبائیں تو دکھے، دوبارہ دبائیں تو چھپے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11951,6 +11948,12 @@ function onUnifiedLoginSelectChange(){
 function showPinWhilePressed(inputId){
   const el = document.getElementById(inputId);
   if(el) el.type = 'text';
+}
+// 👁️ مالک کی ہدایت: دبائے رکھنا نہیں — ایک بار دبائیں تو دکھے، دوبارہ دبائیں تو چھپے
+function togglePinEyeBtn(inputId, btn){
+  const el = document.getElementById(inputId); if(!el) return;
+  el.type = el.type === 'password' ? 'text' : 'password';
+  if(btn) btn.textContent = el.type === 'text' ? '🙈' : '👁️';
 }
 function hidePinAfterRelease(inputId){
   const el = document.getElementById(inputId);
@@ -53153,10 +53156,9 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 <script>
-/* 👁️ FM2710TU448: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
+/* 👁️ (ہر PIN/پاس ورڈ خانہ) FM2710TU448: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
    جب تک خود نہ دبائیں، ویسا ہی رہتا ہے (دبائے رکھنے کی ضرورت نہیں) */
 (function(){
-  var IDS = ["devSecretNewPasswordInput"];
   var SVG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
   var EYE = SVG + '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
   var EYE_OFF = SVG + '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
@@ -53165,9 +53167,12 @@ document.addEventListener('DOMContentLoaded', () => {
     inp.setAttribute('data-pw-eye', '1');
     var cs = getComputedStyle(inp);
     var wrap = document.createElement('span');
-    wrap.style.cssText = 'position:relative; display:block; margin-top:' + cs.marginTop + '; margin-bottom:' + cs.marginBottom + ';';
+    wrap.style.cssText = 'position:relative; display:block; margin:' + cs.marginTop + ' ' + cs.marginRight + ' ' + cs.marginBottom + ' ' + cs.marginLeft + ';';
+    var pd = inp.parentElement ? getComputedStyle(inp.parentElement).display : '';
+    if(/flex|grid/.test(pd)){ wrap.style.flex = cs.flexGrow + ' ' + cs.flexShrink + ' ' + cs.flexBasis; wrap.style.minWidth = '0'; wrap.style.alignSelf = cs.alignSelf; }
+    else if(/inline/.test(cs.display) && !/100%/.test(inp.style.width || '')){ wrap.style.display = 'inline-block'; wrap.style.verticalAlign = 'middle'; }
     inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
-    inp.style.marginTop = '0'; inp.style.marginBottom = '0'; inp.style.boxSizing = 'border-box';
+    inp.style.margin = '0'; inp.style.boxSizing = 'border-box';
     var rtl = cs.direction === 'rtl';
     inp.style[rtl ? 'paddingLeft' : 'paddingRight'] = '48px';
     if(cs.textAlign === 'center') inp.style[rtl ? 'paddingRight' : 'paddingLeft'] = '48px';
@@ -53188,7 +53193,25 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.appendChild(b);
   }
   var queued = false;
-  function scan(){ queued = false; IDS.forEach(function(id){ var list = document.querySelectorAll('[id="' + id + '"]'); for(var i = 0; i < list.length; i++) attach(list[i]); }); }
+  // ---------- ہر PIN / پاس ورڈ خانہ خود — جس کے ساتھ پہلے سے آنکھ ہو یا ایک ایک ہندسے والے چھوٹے خانے ہوں، انہیں نہ چھیڑیں ----------
+  function hasOwnEye(inp){
+    var p = inp.parentElement; if(!p) return false;
+    for(var i = 0; i < p.children.length; i++){
+      var k = p.children[i]; if(k === inp) continue;
+      var t = (k.textContent || '').trim(), idc = ((k.id || '') + ' ' + (typeof k.className === 'string' ? k.className : '') + ' ' + (k.getAttribute('onclick') || '')).toLowerCase();
+      if((t.length <= 4 && /👁|🙈/.test(t)) || /eye|visib|showpass|togglepass/.test(idc)) return true;
+    }
+    return false;
+  }
+  function scan(){
+    queued = false;
+    var list = document.querySelectorAll('input[type="password"]:not([data-pw-eye])');
+    for(var i = 0; i < list.length; i++){
+      var inp = list[i];
+      if(inp.maxLength === 1 || (inp.offsetWidth > 0 && inp.offsetWidth < 70) || hasOwnEye(inp)){ inp.setAttribute('data-pw-eye', 'skip'); continue; }
+      attach(inp);
+    }
+  }
   scan();
   try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
 })();
