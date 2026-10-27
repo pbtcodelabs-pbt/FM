@@ -9586,8 +9586,9 @@ function getDeveloperContact(){
 // 🆕 FM2410SA443: ڈویلپر پینل میں اوپر فوری بٹن (استعمال، کوڈ بنائیں، کوڈز، پلان، PIN، مینٹیننس…)
 // 🆕 FM2410SA444: چلنے والے پیغامات کی پٹی (marquee) کا نظام بند — ایپ اور ڈویلپر پینل دونوں سے
 // 🆕 FM2510SU446: لین دین میں گاہک کی وصولی بدلیں/حذف کریں (صرف ایڈمن، تنبیہ + PIN)
-const APP_BUILD_VERSION = 'FM2510SU446'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'لین دین میں وصولی بدلنے اور حذف کرنے کا اختیار (ایڈمن PIN)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU447: ڈویلپر پینل میں کیپسول بٹن + ڈویلپر ان لاک
+const APP_BUILD_VERSION = 'FM2710TU447'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ڈویلپر پینل: اوپر کیپسول بٹن، سب سے پہلے ڈویلپر ان لاک (یہ ایپ اس فون پر ہمیشہ کھلی)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10163,6 +10164,7 @@ async function resyncLicenseOnline(){
 }
 
 function isSubscriptionActive(){
+  if(devPermUnlocked()) return true; // 🔓 FM2710TU447: ڈویلپر ان لاک — صرف اسی فون پر
   // ---------- 🔒 صدام کی ہدایت (FM3SEPTH10): لاک واپس فعال — سبسکرپشن ختم ہونے پر ایپ لاک ہو گی ----------
   const exp = AppState.settings.subscriptionExpiry;
   if(!exp) return false;
@@ -10276,7 +10278,7 @@ function renderSubscriptionBanner(){
   // ---------- صرف Home صفحے پر نظر آئے — باقی صفحات پر چھپی رہے (اب یہ ایلیمنٹ سیدھا screen-home کے اندر ہی رہتا ہے) ----------
   const activeScreen = document.querySelector('.screen.active');
   const isHomePage = activeScreen && activeScreen.id === 'screen-home';
-  if(!isHomePage || !isSubscriptionActive() || AppState.currentRole !== 'admin'){ row.style.display = 'none'; return; } // 🏪 FM110TH274: ملازم کو دن/ایکسپائری نہیں
+  if(!isHomePage || !isSubscriptionActive() || devPermUnlocked() || AppState.currentRole !== 'admin'){ row.style.display = 'none'; return; } // 🏪 FM110TH274: ملازم کو دن/ایکسپائری نہیں
 
   const daysLeft = daysLeftInSubscription();
   document.getElementById('subBoxStartLabel').textContent = AppState.settings.isOnFreeTrial ? '🎁 Free Trial' : 'Subscribed';
@@ -47305,31 +47307,133 @@ function isDevDevice(){ try{ return sessionStorage.getItem('fmDevDeviceTrusted')
 function markDevDevice(){ try{ sessionStorage.setItem('fmDevDeviceTrusted', '1'); }catch(e){} try{ refreshMaintenanceQuickUi(); }catch(e){} }
 
 // 🧭 FM2410SA443 (پیارے بھائی): ڈویلپر پینل بہت لمبا تھا — اوپر چپکی پٹی میں چھوٹے بٹن، دبائیں تو سیدھا اسی حصے پر
+// ---------- 🔓 FM2710TU447: ڈویلپر ان لاک — یہ ایپ صرف اسی فون پر ہمیشہ کے لیے کھلی (ایکسپائری/سبسکرپشن لاگو نہیں)۔
+// صرف اسی ایپ کی اپنی کلید میں (fm/sm الگ)؛ AppState/کلاؤڈ/بیک اپ میں کبھی نہیں — کسی دکاندار کے فون پر خود نہیں جاتا ----------
+function devPermKey(){ return String(typeof APP_BUILD_VERSION !== 'undefined' ? APP_BUILD_VERSION : 'xx').slice(0, 2).toLowerCase() + 'DevPermUnlock'; }
+function devPermUnlocked(){ try{ return localStorage.getItem(devPermKey()) === '1'; }catch(e){ return false; } }
+function setDevPermUnlock(on){
+  if(!on && !confirm('اس فون پر مستقل ان لاک بند کریں؟ پھر یہاں بھی عام سبسکرپشن چلے گی۔')) return;
+  try{ on ? localStorage.setItem(devPermKey(), '1') : localStorage.removeItem(devPermKey()); }catch(e){}
+  try{ renderSubscriptionBanner(); }catch(e){}
+  devRenderUnlockSec();
+  alert(on ? '✅ یہ ایپ اب اس فون پر ہمیشہ کے لیے کھلی ہے' : 'مستقل ان لاک بند ہو گیا');
+}
+function devRenderUnlockSec(){
+  const el = document.getElementById('devUnlockState'); if(!el) return;
+  const on = devPermUnlocked();
+  el.innerHTML = (on
+    ? `<div class="devStateBox on">✅ اس فون پر مستقل ان لاک ہے<small>یہاں ایپ کبھی ختم نہیں ہوگی — سبسکرپشن اور ایکسپائری اس فون پر لاگو نہیں۔</small></div>
+       <button type="button" class="devBigBtn stop" onclick="setDevPermUnlock(false)">مستقل ان لاک بند کریں</button>`
+    : `<div class="devStateBox off">🔒 ان لاک نہیں<small>یہ فون باقی سب گاہکوں کی طرح عام سبسکرپشن اور ایکسپائری پر چل رہا ہے۔</small></div>
+       <button type="button" class="devBigBtn go" onclick="setDevPermUnlock(true)">🔓 یہ ایپ اس فون پر ہمیشہ کے لیے کھولیں</button>`) +
+    `<div class="devSecHint">صرف یہی فون کھلتا ہے — بیک اپ یا کلاؤڈ کے ذریعے کسی اور فون پر کبھی نہیں جاتا۔</div>`;
+}
+function devRenderDeviceSec(){
+  const el = document.getElementById('devDeviceInfo'); if(!el) return;
+  const st = AppState.settings, esc = v => String(v == null || v === '' ? '—' : v).replace(/</g,'&lt;');
+  let uid = ''; try{ uid = getOrCreateDeviceUID(); }catch(e){}
+  let active = false; try{ active = isSubscriptionActive(); }catch(e){}
+  const rows = [
+    ['ورژن', typeof APP_BUILD_VERSION !== 'undefined' ? APP_BUILD_VERSION : ''],
+    ['Device ID', uid],
+    ['مستقل ان لاک', devPermUnlocked() ? '✅ آن' : 'بند'],
+    ['سبسکرپشن', active ? '🟢 فعال' : '🔴 ختم / نہیں'],
+    ['پلان', devPermUnlocked() ? '🛠️ ڈویلپر (مستقل)' : (st.isOnFreeTrial ? 'فری ٹرائل' : (st.subscriptionExpiry ? 'سبسکرپشن' : '—'))],
+    ['شروع', st.subscriptionActivatedOn],
+    ['ختم', st.subscriptionExpiry],
+  ];
+  el.innerHTML = rows.map(([k, v]) => `<div class="devInfoRow"><span>${k}</span><b dir="ltr">${esc(v)}</b></div>`).join('') +
+    (uid ? `<button type="button" class="devBigBtn go" onclick="navigator.clipboard && navigator.clipboard.writeText('${String(uid).replace(/'/g,'')}').then(() => alert('📋 Device ID کاپی ہو گئی'))">📋 Device ID کاپی کریں</button>` : '');
+}
+async function devSaveFrom(btn){
+  await saveDevSecretPanel();
+  const t = btn.textContent; btn.textContent = '✅ محفوظ ہو گیا'; setTimeout(() => { btn.textContent = t; }, 1500);
+}
+// ---------- 🧭 FM2710TU447 (مالک کی ہدایت): پینل لمبا اسکرول نہیں — اوپر خوبصورت کیپسول بٹن، ہر بٹن کے نیچے لکھا کہ کیا ہے؛
+// جو دبائیں صرف وہی حصہ سامنے کھلے، باقی سب چھپ جائیں۔ سب سے پہلے 🔓 ڈویلپر ان لاک ----------
+function devShowSec(key){
+  const u = document.getElementById('devSecretUnlocked'); if(!u) return;
+  u.querySelectorAll('.devTab').forEach(b => { const on = b.dataset.sec === key; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  u.querySelectorAll(':scope > .devSec').forEach(sec => { sec.style.display = sec.dataset.sec === key ? 'block' : 'none'; });
+  if(key === 'unlock') devRenderUnlockSec();
+  if(key === 'device') devRenderDeviceSec();
+  const tabs = document.getElementById('devTabsBar');
+  u.scrollTop = 0;
+}
 function devNavBuild(){
-  const u = document.getElementById('devSecretUnlocked'); if(!u || document.getElementById('devNavBar')) return;
-  const byId = id => document.getElementById(id);
-  const byText = t => Array.from(u.querySelectorAll('.settingsSubLabel, h3, div')).find(el => el.children.length <= 2 && (el.textContent || '').trim().indexOf(t) === 0);
-  const items = [
-    ['📊 استعمال', () => byId('fbUsageBox')],
-    ['🎁 کوڈ بنائیں', () => byText('🎁 Generate Gift')],
-    ['📋 کوڈز', () => byText('📋 جاری کردہ تمام کوڈز')],
-    ['💰 پلان/ریٹ', () => byText('Rate Per Day')],
-    ['👥 اکاؤنٹ PIN', () => byId('devPinBox')],
-    ['🚧 مینٹیننس', () => byId('maintenanceToggleBtn')],
-    ['📞 رابطہ', () => byText('Developer WhatsApp Number')],
-    ['💳 اکاؤنٹس', () => byText('Accounts to Receive')],
-    ['🔑 پاس ورڈ', () => byText('🔑 Change Developer')]
-  ].filter(x => x[1]());
-  const bar = document.createElement('div');
-  bar.id = 'devNavBar'; bar.dir = 'rtl';
-  bar.style.cssText = 'position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:5px; padding:7px; margin:0 0 10px; background:#f1f5f9; border:1.5px solid #cbd5e1; border-radius:12px; box-shadow:0 3px 8px rgba(0,0,0,.08);';
-  items.forEach(([label, find]) => {
-    const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
-    b.style.cssText = 'flex:1 1 auto; padding:6px 8px; border:1.5px solid var(--primary); border-radius:999px; background:#fff; color:var(--primary-dark); font-weight:800; font-size:12.5px; cursor:pointer; white-space:nowrap;';
-    b.onclick = () => { const el = find(); if(el){ el.style.scrollMarginTop = (bar.offsetHeight + 12) + 'px'; el.scrollIntoView({behavior:'smooth', block:'start'}); el.style.transition = 'box-shadow .3s'; el.style.boxShadow = '0 0 0 3px #f59e0b'; setTimeout(() => { el.style.boxShadow = ''; }, 1600); } };
-    bar.appendChild(b);
-  });
-  u.insertBefore(bar, u.firstChild);
+  const u = document.getElementById('devSecretUnlocked'); if(!u) return;
+  if(!document.getElementById('devTabsCss')){
+    const css = document.createElement('style'); css.id = 'devTabsCss';
+    css.textContent = `
+      .devTabs{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:0 0 12px;}
+      .devTab{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:58px; padding:7px 6px; border:1.5px solid #dbe1ea; border-radius:20px; background:linear-gradient(180deg,#fff,#eef2f7); box-shadow:0 2px 0 #cbd5e1, 0 4px 10px rgba(15,23,42,.08); color:#0f172a; cursor:pointer; text-align:center; font-family:inherit; -webkit-tap-highlight-color:transparent;}
+      .devTab b{font-size:12.5px; font-weight:800; line-height:1.25;}
+      .devTab small{font-size:10px; font-weight:600; color:#64748b; line-height:1.3;}
+      .devTab.active{background:linear-gradient(180deg,#14b8a6,#0f766e); border-color:#0f766e; color:#fff; box-shadow:0 2px 0 #115e59, 0 6px 14px rgba(15,118,110,.35);}
+      .devTab.active small{color:#ccfbf1;}
+      .devTab:focus-visible{outline:3px solid #f59e0b; outline-offset:2px;}
+      .devSec{animation:devSecIn .18s ease;}
+      @keyframes devSecIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+      .devStateBox{border-radius:14px; padding:12px; font-weight:800; font-size:14px; text-align:center; margin-bottom:10px;}
+      .devStateBox.on{background:#dcfce7; color:#166534; border:1.5px solid #86efac;}
+      .devStateBox.off{background:#f1f5f9; color:#334155; border:1.5px solid #e2e8f0;}
+      .devStateBox small{display:block; font-weight:600; font-size:12px; margin-top:4px;}
+      .devBigBtn{width:100%; padding:13px; border:none; border-radius:999px; font-weight:900; font-size:14px; cursor:pointer; font-family:inherit; margin-top:6px;}
+      .devBigBtn.go{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; box-shadow:0 3px 0 #166534;}
+      .devBigBtn.stop{background:#fff; color:#b91c1c; border:1.5px solid #fca5a5;}
+      .devInfoRow{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:#f8fafc; border:1px solid #eef2f7; margin-bottom:6px; font-size:13px;}
+      .devInfoRow span{color:#64748b; font-weight:700; white-space:nowrap;}
+      .devInfoRow b{color:#0f172a; word-break:break-all;}
+      .devSecHint{font-size:12px; color:#64748b; margin-top:8px; text-align:center;}
+      @media (max-width:340px){ .devTabs{grid-template-columns:1fr 1fr;} }`;
+    document.head.appendChild(css);
+  }
+  if(!u.dataset.devTabs){
+    u.dataset.devTabs = '1';
+    const old = document.getElementById('devNavBar'); if(old) old.remove();
+    const byId = id => document.getElementById(id);
+    const byText = t => Array.from(u.querySelectorAll('.settingsSubLabel, h3, div')).find(el => el.children.length <= 2 && (el.textContent || '').trim().indexOf(t) === 0);
+    const topOf = el => { while(el && el.parentElement !== u) el = el.parentElement; return el || null; };
+    // ---------- بٹنوں کی ترتیب (key, عنوان, نیچے کی وضاحت, کہاں سے شروع) ----------
+    const items = [
+      ['unlock', '🔓 ڈویلپر ان لاک', 'یہ ایپ اس فون پر ہمیشہ کھلی', () => byId('devCloudSyncStatus')],
+      ['usage', '📊 استعمال', 'فائربیس میٹر اور شناخت', () => byId('fbUsageBox')],
+      ['pins', '👥 اکاؤنٹ PIN', 'سب اکاؤنٹس کے PIN', () => byId('devPinBox')],
+      ['maint', '🚧 مینٹیننس', 'ایپ عارضی بند / سنک تشخیص', () => byText('🚧')],
+      ['marquee', '📢 سلائیڈنگ پیغام', 'اوپر چلنے والی پٹی', () => byId('devMarqueeBox')],
+      ['contact', '📞 رابطہ و شیئر', 'واٹس ایپ، SMS، Gmail، لنک', () => byText('Developer WhatsApp Number')],
+      ['accounts', '💳 وصولی اکاؤنٹس', 'جہاں گاہک رقم بھیجیں', () => byText('Accounts to Receive')],
+      ['plans', '💰 ریٹ اور پلان', 'فی دن ریٹ، پیکج پلان', () => byText('Rate Per Day')],
+      ['gen', '🎁 کوڈ بنائیں', 'گفٹ / ایکٹیویشن کوڈ', () => byText('🎁 Generate Gift')],
+      ['codes', '📋 جاری کوڈز', 'فعال، استعمال شدہ، معطل', () => byText('📋 جاری کردہ تمام کوڈز')],
+      ['pass', '🔑 پاس ورڈ', 'ڈویلپر پاس ورڈ بدلیں', () => byText('🔑 Change Developer')],
+      ['device', '📱 یہ فون', 'Device ID اور سبسکرپشن', null],
+    ];
+    const kids = Array.from(u.children);
+    const starts = [];
+    items.forEach(it => { const el = it[3] ? topOf(it[3]()) : null; if(el && !starts.some(x => x.el === el)) starts.push({key: it[0], el}); });
+    starts.sort((a, b) => kids.indexOf(a.el) - kids.indexOf(b.el));
+    // ---------- ہر حصے کو اپنے ڈبے میں — شروع سے اگلے حصے تک ----------
+    const secs = {};
+    starts.forEach((st, i) => {
+      const from = kids.indexOf(st.el), to = i + 1 < starts.length ? kids.indexOf(starts[i + 1].el) : kids.length;
+      const sec = document.createElement('div'); sec.className = 'devSec'; sec.dataset.sec = st.key; sec.style.display = 'none';
+      u.insertBefore(sec, st.el);
+      kids.slice(from, to).forEach(k => sec.appendChild(k));
+      secs[st.key] = sec;
+    });
+    // ---------- 🔓 اور 📱 والے حصے ----------
+    const ensure = key => { if(!secs[key]){ const sec = document.createElement('div'); sec.className = 'devSec'; sec.dataset.sec = key; sec.style.display = 'none'; u.appendChild(sec); secs[key] = sec; } return secs[key]; };
+    ensure('unlock').insertAdjacentHTML('afterbegin', '<div id="devUnlockState"></div><div style="height:10px;"></div>');
+    ensure('device').insertAdjacentHTML('afterbegin', '<div id="devDeviceInfo"></div>');
+    // ---------- 💾 جن حصوں کے خانے Save سے محفوظ ہوتے ہیں، ان میں اپنا Save بٹن (پاس ورڈ والے حصے تک جانا نہ پڑے) ----------
+    ['contact', 'accounts', 'plans'].forEach(k => { if(secs[k]) secs[k].insertAdjacentHTML('beforeend', '<button type="button" class="testPrintBtn" style="margin-top:10px;" onclick="devSaveFrom(this)">💾 Save</button>'); });
+    // ---------- اوپر کیپسول بٹن ----------
+    const bar = document.createElement('div'); bar.id = 'devTabsBar'; bar.className = 'devTabs'; bar.dir = 'rtl'; bar.setAttribute('role', 'tablist');
+    bar.innerHTML = items.filter(it => secs[it[0]]).map(it => `<button type="button" class="devTab" role="tab" data-sec="${it[0]}" onclick="devShowSec('${it[0]}')"><b>${it[1]}</b><small>${it[2]}</small></button>`).join('');
+    u.insertBefore(bar, u.firstChild);
+  }
+  devShowSec('unlock');
 }
 async function unlockDevSecretPanel(){
   const entered = (document.getElementById('devSecretPasswordInput').value || '').trim();
