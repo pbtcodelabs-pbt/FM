@@ -8523,15 +8523,106 @@ async function hydratePhotosFromIndexedDB(){
   }
 }
 
+// ---------- 🗜️ FM2810WE466: فون میں بھاری ڈیٹا دبا کر (12–16 گنا چھوٹا) — اپنا LZW، ہر ٹکڑا محفوظ کرنے سے پہلے واپس کھول کر جانچا جاتا ہے ----------
+//   20 ہزار سے بڑی چیز ٹکڑوں میں دبتی ہے؛ جو ٹکڑا نہ بدلا اس کا دبا ہوا روپ دوبارہ استعمال (بل بناتے وقت ایپ سست نہ ہو)؛ جو چیز بدلی ہی نہیں وہ دوبارہ لکھی نہیں جاتی
+function _lzPack(s){
+  const out = []; let buf = 0, blen = 0;
+  const put = (v, w) => { while(w > 0){ const n = w > 15 ? 15 : w; w -= n; buf = (buf << n) | ((v / Math.pow(2, w)) & ((1 << n) - 1)); blen += n; if(blen >= 15){ blen -= 15; out.push(String.fromCharCode(((buf >>> blen) & 0x7fff) + 32)); buf &= (1 << blen) - 1; } } };
+  const dict = new Map(); let next = 2, w = '';
+  const width = () => { let b = 1; while((1 << b) <= next) b++; return b; };
+  const code = c => put(c, width());
+  for(let i = 0; i < s.length; i++){
+    const c = s[i];
+    if(!dict.has(c)){
+      if(w){ code(dict.get(w)); dict.set(w + c, next++); w = ''; }
+      code(0); put(c.charCodeAt(0), 16); dict.set(c, next++);
+      continue;
+    }
+    const wc = w + c;
+    if(dict.has(wc)) w = wc;
+    else { code(dict.get(w)); dict.set(wc, next++); w = c; }
+  }
+  if(w){ code(dict.get(w)); next++; }
+  code(1);
+  if(blen > 0) out.push(String.fromCharCode(((buf << (15 - blen)) & 0x7fff) + 32));
+  return out.join('');
+}
+function _lzUnpack(z){
+  let pos = 0, buf = 0, blen = 0;
+  const get = w => { let v = 0; while(w > 0){ if(blen === 0){ if(pos >= z.length) throw new Error('lz eof'); buf = z.charCodeAt(pos++) - 32; blen = 15; } const n = w < blen ? w : blen; blen -= n; w -= n; v = v * Math.pow(2, n) + ((buf >>> blen) & ((1 << n) - 1)); } return v; };
+  const d = [null, null], out = []; let prev = null;
+  for(;;){
+    const nx = d.length + (prev !== null ? 1 : 0); let b = 1; while((1 << b) <= nx) b++;
+    const k = get(b);
+    if(k === 1) break;
+    if(k === 0){ const c = String.fromCharCode(get(16)); if(prev !== null) d.push(prev + c); d.push(c); out.push(c); prev = null; continue; }
+    let e;
+    if(k < d.length) e = d[k]; else if(k === d.length && prev !== null) e = prev + prev[0]; else throw new Error('lz bad');
+    if(prev !== null) d.push(prev + e[0]);
+    out.push(e); prev = e;
+  }
+  return out.join('');
+}
+function _lsC(){ return window.__lsC || (window.__lsC = { last: {}, raw: {}, chunks: {} }); }
+function _lzH(s){ let h1 = 0x811c9dc5, h2 = 0x1b873593; for(let i = 0; i < s.length; i++){ const c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 16777619); h2 = Math.imul(h2 ^ c, 2246822519) + i; } return s.length.toString(36) + '.' + (h1 >>> 0).toString(36) + '.' + (h2 >>> 0).toString(36); }
+function _lzChunks(s){
+  if(s.length < 90000) return [s];
+  const out = []; let st = 0, i = s.indexOf('},{', st + 30000);
+  while(i !== -1){
+    const p = i + 2, len = p - st;
+    let h = 0; for(let j = p; j < p + 40 && j < s.length; j++) h = (Math.imul(h, 31) + s.charCodeAt(j)) | 0;
+    if((len >= 30000 && (h & 7) === 0) || len >= 150000){ out.push(s.slice(st, p)); st = p; i = s.indexOf('},{', st + 30000); }
+    else i = s.indexOf('},{', i + 3);
+  }
+  out.push(s.slice(st));
+  return out;
+}
+function _lzEncode(key, json){
+  const C = _lsC(), old = C.chunks[key] || new Map(), nm = new Map(), out = [];
+  for(const p of _lzChunks(json)){
+    const h = _lzH(p); let z = old.get(h);
+    if(z === undefined){ z = _lzPack(p); if(_lzUnpack(z) !== p) throw new Error('lz verify'); }
+    nm.set(h, z); out.push(z);
+  }
+  C.chunks[key] = nm;
+  return '\u0002L' + out.join('\u0001');
+}
+function _lzDecode(key, raw){
+  const m = new Map();
+  const parts = raw.slice(2).split('\u0001').map(z => { const p = _lzUnpack(z); m.set(_lzH(p), z); return p; });
+  _lsC().chunks[key] = m;
+  return parts.join('');
+}
 function loadFromStorage(key, fallback){
   try{
     const raw = localStorage.getItem(STORAGE_PREFIX + key);
     if(raw === null || raw === undefined) return fallback;
-    return JSON.parse(raw);
+    const C = _lsC();
+    let json = raw;
+    if(raw.charCodeAt(0) === 2 && raw.charAt(1) === 'L') json = (C.raw[key] === raw && typeof C.last[key] === 'string') ? C.last[key] : _lzDecode(key, raw);
+    const v = JSON.parse(json);
+    C.last[key] = json; C.raw[key] = raw;
+    return v;
   }catch(e){
     console.warn('محفوظ شدہ ڈیٹا پڑھنے میں مسئلہ:', key, e);
     return fallback;
   }
+}
+// پہلے سے پڑی بڑی چیزیں (پرانے ورژن والی، بغیر دبی) ایک بار دبا دیں
+function _lzMigrateAll(){
+  try{
+    const keys = []; for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i) || ''; if(k.indexOf(STORAGE_PREFIX) === 0) keys.push(k); }
+    keys.forEach(k => { const raw = localStorage.getItem(k); if(!raw || raw.length < 20000 || raw.charCodeAt(0) === 2) return; const key = k.slice(STORAGE_PREFIX.length); try{ JSON.parse(raw); _lsWrite(key, raw); }catch(e){} });
+  }catch(e){}
+}
+setTimeout(_lzMigrateAll, 4000);
+function _lsWrite(key, json){
+  const C = _lsC(), PK = STORAGE_PREFIX + key;
+  if(typeof json === 'string' && C.last[key] === json && C.raw[key] !== undefined && !(json.length >= 20000 && C.raw[key].charCodeAt(0) !== 2) && localStorage.getItem(PK) === C.raw[key]) return; // کچھ نہیں بدلا
+  let v = json;
+  if(typeof json === 'string' && json.length >= 20000){ try{ v = _lzEncode(key, json); }catch(e){ v = json; } }
+  localStorage.setItem(PK, v);
+  C.last[key] = json; C.raw[key] = v;
 }
 let storageQuotaWarned = false; // ---------- ایک سیشن میں بار بار الرٹ نہ آئے، صرف پہلی بار ----------
 // 🧹 FM2710TU465: صرف وہ چیزیں جو دوبارہ خود بن جاتی ہیں — پرانی ایک دستاویز والی بنیادیں اور ٹکڑوں کے لمبے نشان
@@ -8546,11 +8637,11 @@ function _storageEmergencyFree(){
 }
 function saveToStorage(key, value){
   try{
-    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+    _lsWrite(key, JSON.stringify(value));
     return true;
   }catch(e){
     // 🧹 FM2710TU465: جگہ بھر گئی — پہلے فالتو پرانی بنیادیں/لمبے نشان خود ہٹا کر دوبارہ کوشش (اصل ڈیٹا کو ہاتھ نہیں لگتا)
-    try{ if(_storageEmergencyFree()){ localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value)); return true; } }catch(e2){}
+    try{ if(_storageEmergencyFree()){ _lsWrite(key, JSON.stringify(value)); return true; } }catch(e2){}
     console.warn('ڈیٹا محفوظ کرنے میں مسئلہ:', key, e);
     if(!storageQuotaWarned){
       storageQuotaWarned = true;
@@ -9610,8 +9701,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
-const APP_BUILD_VERSION = 'FM2710TU465'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بل میں ترمیم ہمیشہ بل پر لگے گی؛ فون کی میموری میں جگہ خالی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE466'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'فون میں ڈیٹا دبا کر رکھا گیا — 10 گنا کم جگہ؛ جگہ بھرنے سے پہلے ایڈمن کو تنبیہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9838,14 +9929,75 @@ function renderDocMeterBox(){
     <div style="font-size:12.5px; line-height:1.8; padding:5px 8px; border-radius:9px; margin-bottom:6px; background:${worst >= 0.6 ? '#fee2e2' : '#dcfce7'}; color:${worst >= 0.6 ? '#7f1d1d' : '#14532d'}; font-weight:800;">${worst >= 0.6 ? '⚠️ کوئی ڈبہ 60% سے اوپر — اسے بانٹنا ضروری ہے' : '✅ سب ڈبے محفوظ حد میں'}</div>
     <div id="docMeterRows">${_docMeterRows(m)}</div>
     ${_lsMeterHtml()}
+    <div style="margin-top:10px; padding-top:8px; border-top:2px dashed #cbd5e1;"><div style="font-size:15px; font-weight:900; line-height:1.8;">📱 سب فونوں کی جگہ <small style="font-size:11.5px; color:#64748b;">(ہر فون خود بھیجتا ہے)</small></div><div id="psRows"><div style="font-size:12px; color:#64748b;">⏳</div></div></div>
     <div style="font-size:11.5px; color:#64748b; margin-top:6px;">🟢 60% تک ٹھیک · 🟠 60–80% نظر رکھیں · 🔴 80% سے اوپر فوراً بانٹیں</div>`;
+  try{ _psReport(true).then(_psRenderAll, _psRenderAll); }catch(e){}
 }
 // 📱 FM2710TU461: فون کی اپنی جگہ (localStorage — تقریباً 50 لاکھ حروف) — کون سی چیز کتنی جگہ لے رہی ہے
 const LS_LIMIT = 5000000;
+// ---------- 📱 FM2810WE466: ہر فون کی جگہ پر خود نظر — 60% پر فالتو چیزیں خود صاف، 70% پر ایڈمن کو اردو تنبیہ؛
+//   ہر فون اپنا حال کلاؤڈ (phoneSpace) میں لکھتا ہے، اس لیے ایڈمن کو منشی/ملازم کے فون کی تنبیہ بھی ملتی ہے اور ڈویلپر پینل میں سب فون دکھتے ہیں ----------
+const PS_WARN = 0.7, PS_CLEAN = 0.6;
+function _lsUsed(){ let t = 0; try{ Object.keys(localStorage).forEach(k => { const v = localStorage[k]; t += k.length + (typeof v === 'string' ? v.length : 0); }); }catch(e){} return t; } // پوری ویب سائٹ کی جگہ (حد سب ایپس کی مشترک)
+function _psDevId(){ let id = ''; try{ id = localStorage.getItem('fm_psDevId') || ''; if(!id){ id = 'd_' + Math.random().toString(36).slice(2, 10); localStorage.setItem('fm_psDevId', id); } }catch(e){ id = 'd_x'; } return id; }
+function _psPath(){ return 'shopData/' + 'phoneSpace'; }
+function _psIsBoss(){ return !!(typeof AppState !== 'undefined' && (AppState.currentRole === 'admin' || (typeof isDevDevice === 'function' && isDevDevice()))); }
+function _psWarnOnce(tag, title, msg){
+  try{
+    const k = 'fm_psWarn_' + tag, last = Number(localStorage.getItem(k) || 0);
+    if(Date.now() - last < 12 * 3600000) return;
+    localStorage.setItem(k, String(Date.now()));
+    setTimeout(() => { try{ (typeof uAlert === 'function') ? uAlert(title, msg, 'red') : alert(msg); }catch(e){} }, 800);
+  }catch(e){}
+}
+async function _psReport(force){
+  if(typeof AppState === 'undefined' || !AppState.currentRole || AppState.currentRole === 'customer') return;
+  const used = _lsUsed(), pct = Math.round(used / LS_LIMIT * 100);
+  if(used >= LS_LIMIT * PS_CLEAN){ try{ _storageEmergencyFree(); }catch(e){} }
+  if(used >= LS_LIMIT * PS_WARN && _psIsBoss()) _psWarnOnce('me', '📱 اس فون کی جگہ بھر رہی ہے', `اس فون میں ایپ کی جگہ ${pct}% بھر گئی ہے۔ ریکارڈ محفوظ ہے، مگر ڈویلپر کو فوراً بتائیں۔`);
+  let st = {}; try{ st = JSON.parse(localStorage.getItem('fm_psLast') || '{}') || {}; }catch(e){}
+  if(!force && Date.now() - (st.at || 0) < 6 * 3600000 && Math.abs(pct - (st.p || 0)) < 5) return;
+  const id = _psDevId(), ua = String(navigator.userAgent || ''), mm = ua.match(/Android[^;)]*;\s*([^;)]+)/);
+  const val = JSON.stringify({ n: (AppState.currentUser && AppState.currentUser.name) || '', r: AppState.currentRole, p: pct, u: used, v: (typeof APP_BUILD_VERSION !== 'undefined' ? APP_BUILD_VERSION : ''), m: mm ? mm[1].trim().slice(0, 30) : '', at: Date.now() });
+  try{
+    const res = await authFirestoreFetch(`${_psPath()}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: { [id]: { stringValue: val } } }) });
+    if(res && res.ok) localStorage.setItem('fm_psLast', JSON.stringify({ at: Date.now(), p: pct }));
+  }catch(e){}
+  if(_psIsBoss()){ // دوسرے فونوں کا حال — کوئی 70% سے اوپر ہو تو ایڈمن کو بتائیں
+    const list = await _psLoad();
+    list.filter(o => o.id !== id && o.p >= PS_WARN * 100 && Date.now() - (o.at || 0) < 3 * 86400000).forEach(o => {
+      _psWarnOnce(o.id, '📱 ایک فون کی جگہ بھر رہی ہے', `${o.n || 'ملازم'} کے فون${o.m ? ' (' + o.m + ')' : ''} میں ایپ کی جگہ ${o.p}% بھر گئی ہے۔ ریکارڈ محفوظ ہے، مگر ڈویلپر کو فوراً بتائیں۔`);
+    });
+  }
+}
+async function _psLoad(){
+  try{
+    const res = await authFirestoreFetch(`${_psPath()}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(!res || !res.ok) return [];
+    const f = (await res.json()).fields || {};
+    return Object.keys(f).filter(k => k.indexOf('d_') === 0).map(k => { try{ return Object.assign({ id: k }, JSON.parse(f[k].stringValue || '{}')); }catch(e){ return null; } }).filter(Boolean).sort((a, b) => (b.p || 0) - (a.p || 0));
+  }catch(e){ return []; }
+}
+async function _psRenderAll(){
+  const el = document.getElementById('psRows'); if(!el) return;
+  const list = await _psLoad();
+  if(!list.length){ el.innerHTML = '<div style="font-size:12px; color:#64748b;">ابھی کسی فون کا حال نہیں آیا</div>'; return; }
+  const esc2 = s => String(s == null ? '' : s).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+  el.innerHTML = list.map(o => {
+    const p = Math.min(100, o.p || 0), col = p >= 70 ? '#dc2626' : p >= 50 ? '#f59e0b' : '#16a34a';
+    const when = o.at ? new Date(o.at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+    return `<div style="margin:4px 0;"><div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800;"><span>${esc2(o.n || '؟')} <small style="color:#64748b;">${esc2(o.m || '')}</small></span><span dir="ltr" style="font-family:Arial,sans-serif; color:${col};">${p}%</span></div>
+      <div style="height:8px; border-radius:6px; background:#e2e8f0; overflow:hidden;"><div style="height:100%; width:${Math.max(1, p)}%; background:${col};"></div></div>
+      <div dir="ltr" style="font:10px Arial,sans-serif; color:#94a3b8; text-align:right;">${esc2(o.v || '')}${when ? ' · ' + when : ''}</div></div>`;
+  }).join('');
+}
+setTimeout(() => { try{ _psReport(false); }catch(e){} }, 30000);
+setInterval(() => { try{ _psReport(false); }catch(e){} }, 30 * 60000);
 function _lsMeterHtml(){
   let tot = 0; const rows = [];
   try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); const n = (k || '').length + (localStorage.getItem(k) || '').length; tot += n; rows.push([k, n]); } }catch(e){ return ''; }
   rows.sort((a, b) => b[1] - a[1]);
+  tot = Math.max(tot, _lsUsed()); // پوری ویب سائٹ
   const pct = Math.min(100, tot / LS_LIMIT * 100), col = pct >= 80 ? '#dc2626' : pct >= 60 ? '#f59e0b' : '#16a34a';
   const pre = (typeof STORAGE_PREFIX === 'string') ? STORAGE_PREFIX : '';
   return `<div style="margin-top:10px; padding-top:8px; border-top:2px dashed #cbd5e1;">
@@ -42305,6 +42457,7 @@ async function _pushMergedRaw(cfg){
     if(ok){
       if(cfg.createOnly){ try{ cfg.lastUT = (await res.json()).updateTime; }catch(e){} } // 🧾 ٹکڑے کا کلاؤڈ وقت
       cfg.setBase(JSON.parse(sentJson)); // 🐞 FM510MO317: بنیاد = جو واقعی لکھا گیا
+      try{ localStorage.removeItem(STORAGE_PREFIX + _sentKey(cfg)); }catch(e){} // 🗜️ FM2810WE466: لکھائی پکی — بنیاد ہی بھیجی ہوئی کاپی ہے، الگ کاپی کی جگہ خالی
       if(JSON.stringify(cfg.get()) !== sentJson && cfg.push) setTimeout(() => { try{ cfg.push(); }catch(e){} }, 300); // بیچ میں ہوئی تبدیلی بھی جائے
     }
     else if(!(res && (res.status === 400 || res.status === 409 || res.status === 412))) break;
