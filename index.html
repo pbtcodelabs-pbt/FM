@@ -9593,8 +9593,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU456: زوم بٹن ہٹا دیا؛ منشی کا نیا آرڈر حذف شدہ نمبر پر بنے تو مٹنے کی بجائے نیا نمبر
 // 🆕 FM2710TU457: آرڈر صفائی صرف مکمل آرڈر کی؛ منشی کے غائب/ادھورے آرڈر سیف الماری سے واپس لائے گئے
 // 🆕 FM2710TU458: بلوں کی کلاؤڈ کاپی 5-5 دن کے ٹکڑوں میں (ڈبہ 881KB تک بھر چکا تھا) — فون کا پورا ریکارڈ اور بیک اپ وہی
-const APP_BUILD_VERSION = 'FM2710TU458'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بلوں کا کلاؤڈ ریکارڈ اب چھوٹے حصوں میں — کبھی بھرے گا نہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU459: 📦 ڈبوں کا میٹر (ڈویلپر پینل) — کوئی کلاؤڈ ڈبہ 60% سے اوپر جائے تو ایڈمن کو تنبیہ
+const APP_BUILD_VERSION = 'FM2710TU459'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ڈبوں کا میٹر — کلاؤڈ ڈبہ بھرنے سے پہلے تنبیہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9753,12 +9754,93 @@ function fbCount(r, w, d){ _fbURoll(); _fbU.r += r; _fbU.w += w; _fbU.d += d; _f
           else fbCount(1, 0, 0);
         }
         else if(method === 'DELETE') fbCount(0, 0, 1);
-        else fbCount(0, 1, 0);
+        else { fbCount(0, 1, 0); try{ _docMeterNote(tail, init && init.body); }catch(e){} } // 📦 FM2710TU459: ڈبے کا سائز
       }catch(e){}
       return res;
     });
   };
 })();
+
+/* =====================================================================
+   📦 FM2710TU459 (صدام بھائی): ڈبوں کا میٹر — کلاؤڈ کی ہر دستاویز (ڈبے) کی حد 1MB ہے۔ ہر بار لکھتے وقت اس کا سائز
+   یاد رکھا جاتا ہے؛ کوئی ڈبہ 60% سے اوپر جائے تو ایڈمن/ڈویلپر کو فوراً سرخ تنبیہ (دن میں ایک بار)۔
+   ڈویلپر پینل میں "📦 ڈبوں کا میٹر": سب ڈبے، سائز اور فیصد — "ابھی سب ناپیں" سے کلاؤڈ سے تازہ
+   ===================================================================== */
+const DOC_LIMIT = 1048576, DOC_WARN = 0.6, DOC_METER_KEY = 'fm_docMeter';
+const DOC_NAMES = { invoices: 'بل (پرانا ایک ڈبہ)', payments: 'ادائیگیاں (پرانا ایک ڈبہ)', products: 'سبزیاں / سٹاک / چالان', customers: 'گاہک', suppliers: 'بیوپاری',
+  advanceOrders: 'آرڈر لسٹ', pendingBills: 'منشی کے بل (منظوری)', recoveryList: 'ریکوری لسٹ', munshiStockLog: 'منشی سٹاک ریکارڈ', cashPurchases: 'نقد خریداری',
+  diary: 'میری ڈائری', finance: 'کیش / اخراجات', categories: 'کیٹیگری', staffUsers: 'ملازم', invoicesIndex: 'بلوں کی فہرست', paymentsIndex: 'ادائیگیوں کی فہرست' };
+function _docLabel(n){
+  if(DOC_NAMES[n]) return DOC_NAMES[n];
+  let m;
+  if((m = n.match(/^invoices_(\d{4})(\d{2})(\d)$/))) return 'بل ' + m[2] + '/' + m[1] + ' (حصہ ' + m[3] + ')';
+  if((m = n.match(/^payments_(\d{4})(\d{2})(\d)$/))) return 'ادائیگیاں ' + m[2] + '/' + m[1] + ' (حصہ ' + m[3] + ')';
+  if((m = n.match(/^sv_(\w)_(\d{4})(\d{2})_(\d)$/))) return 'سیف الماری ' + ({ b: 'بل', o: 'آرڈر', r: 'ریکوری' }[m[1]] || m[1]) + ' ' + m[3] + '/' + m[2] + ' (' + (+m[4] + 1) + ')';
+  if((m = n.match(/^snap(\d)_(\w+)$/))) return 'روزانہ کاپی ' + m[1] + ' — ' + (DOC_NAMES[m[2]] || m[2]);
+  return n;
+}
+function _docMeterLoad(){ try{ return JSON.parse(localStorage.getItem(DOC_METER_KEY) || '{}') || {}; }catch(e){ return {}; } }
+function _docMeterSave(m){ try{ localStorage.setItem(DOC_METER_KEY, JSON.stringify(m)); }catch(e){} }
+function _docMeterNote(tail, body){
+  if(typeof body !== 'string' || !tail) return;
+  const name = String(tail).split('/').filter(Boolean).pop(); if(!name) return;
+  const m = _docMeterLoad(); m[name] = { b: body.length, at: Date.now() }; _docMeterSave(m);
+  if(body.length >= DOC_LIMIT * DOC_WARN && !_docRetired(name, m)) _docMeterWarn(name, body.length);
+}
+function _docMeterWarn(name, b){
+  try{
+    const isDev = (typeof isDevDevice === 'function' && isDevDevice());
+    if(!(AppState && (AppState.currentRole === 'admin' || isDev))) return;
+    const k = DOC_METER_KEY + '_warn_' + name, last = Number(localStorage.getItem(k) || 0);
+    if(Date.now() - last < 12 * 3600e3) return;
+    localStorage.setItem(k, String(Date.now()));
+    const pct = Math.round(b / DOC_LIMIT * 100);
+    const msg = `کلاؤڈ کا ڈبہ "${_docLabel(name)}" ${pct}% بھر گیا ہے (حد 1MB)۔ ریکارڈ محفوظ ہے، مگر بھرنے سے پہلے ڈویلپر کو فوراً بتائیں تاکہ اسے چھوٹے حصوں میں بانٹا جائے۔`;
+    setTimeout(() => { try{ (typeof uAlert === 'function') ? uAlert('⚠️ ڈبہ بھر رہا ہے', msg, 'red') : alert(msg); }catch(e){} }, 600);
+  }catch(e){}
+}
+// پرانا ایک ڈبہ — ٹکڑوں والا نظام شروع ہونے کے بعد اس پر لکھا نہیں جاتا (صرف پڑھا جاتا ہے)، بھرنے سے کوئی نقصان نہیں
+function _docRetired(n, m){ return (n === 'invoices' && m && m.invoicesIndex) || (n === 'payments' && m && m.paymentsIndex); }
+function _docMeterRows(m){
+  const rows = Object.keys(m).map(n => ({ n, b: m[n].b || 0, at: m[n].at || 0, old: !!_docRetired(n, m) })).sort((a, b) => (a.old - b.old) || (b.b - a.b));
+  if(!rows.length) return '<div style="font-size:13px; color:#64748b; text-align:center;">ابھی کوئی ناپ نہیں — "🔄 ابھی سب ناپیں" دبائیں</div>';
+  return rows.map(r => {
+    const pct = Math.min(100, r.b / DOC_LIMIT * 100), col = r.old ? '#94a3b8' : pct >= 80 ? '#dc2626' : pct >= 60 ? '#f59e0b' : '#16a34a';
+    const when = r.at ? new Date(r.at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+    return `<div style="margin:5px 0;"><div style="display:flex; justify-content:space-between; gap:6px; font-size:13px; font-weight:800; line-height:1.7;"><span>${_docLabel(r.n)}${r.old ? ' <small style="color:#64748b;">— پرانا، اب اس پر لکھا نہیں جاتا</small>' : ''}</span><span dir="ltr" style="font-family:Arial,sans-serif; color:${col}; white-space:nowrap;">${Math.round(r.b / 1024)} KB · ${pct.toFixed(0)}%</span></div>
+      <div style="height:9px; border-radius:6px; background:#e2e8f0; overflow:hidden;"><div style="height:100%; width:${Math.max(1, pct)}%; background:${col};"></div></div>
+      <div dir="ltr" style="font:10px Arial,sans-serif; color:#94a3b8; text-align:right;">${r.n}${when ? ' · ' + when : ''}</div></div>`;
+  }).join('');
+}
+function renderDocMeterBox(){
+  const box = document.getElementById('docMeterBox'); if(!box) return;
+  const m = _docMeterLoad();
+  const worst = Object.keys(m).filter(n => !_docRetired(n, m)).reduce((a, n) => Math.max(a, m[n].b || 0), 0) / DOC_LIMIT;
+  box.innerHTML = `<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
+      <div style="font-size:16px; font-weight:900;">📦 ڈبوں کا میٹر <span style="font-size:12px; font-weight:700; color:#64748b;">(ہر ڈبہ زیادہ سے زیادہ 1MB)</span></div>
+      <button type="button" onclick="docMeterScanAll()" style="flex:0 0 auto; padding:7px 12px; border:none; border-radius:10px; background:#1e3a8a; color:#fff; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">🔄 ابھی سب ناپیں</button></div>
+    <div style="font-size:12.5px; line-height:1.8; padding:5px 8px; border-radius:9px; margin-bottom:6px; background:${worst >= 0.6 ? '#fee2e2' : '#dcfce7'}; color:${worst >= 0.6 ? '#7f1d1d' : '#14532d'}; font-weight:800;">${worst >= 0.6 ? '⚠️ کوئی ڈبہ 60% سے اوپر — اسے بانٹنا ضروری ہے' : '✅ سب ڈبے محفوظ حد میں'}</div>
+    <div id="docMeterRows">${_docMeterRows(m)}</div>
+    <div style="font-size:11.5px; color:#64748b; margin-top:6px;">🟢 60% تک ٹھیک · 🟠 60–80% نظر رکھیں · 🔴 80% سے اوپر فوراً بانٹیں</div>`;
+}
+async function docMeterScanAll(){
+  const rowsEl = document.getElementById('docMeterRows'); if(rowsEl) rowsEl.innerHTML = '<div style="text-align:center; font-size:13px; color:#64748b;">⏳ کلاؤڈ کے سب ڈبے ناپے جا رہے ہیں…</div>';
+  const m = {};
+  try{
+    let token = '';
+    for(let page = 0; page < 20; page++){
+      const res = await authFirestoreFetch(`${'shopData'}?pageSize=100${token ? '&pageToken=' + encodeURIComponent(token) : ''}&key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+      if(!res || !res.ok) throw new Error(res ? res.status : 0);
+      const j = await res.json();
+      (j.documents || []).forEach(d => { const n = String(d.name || '').split('/').pop(); m[n] = { b: JSON.stringify(d.fields || {}).length, at: Date.now() }; });
+      token = j.nextPageToken || ''; if(!token) break;
+    }
+    _docMeterSave(m);
+  }catch(e){ if(rowsEl) rowsEl.innerHTML = '<div style="text-align:center; font-size:13px; color:#b91c1c;">⚠️ کلاؤڈ سے ناپ نہیں ہو سکی — انٹرنیٹ دیکھیں</div>'; return; }
+  renderDocMeterBox();
+  const worstN = Object.keys(m).filter(n => !_docRetired(n, m)).sort((a, b) => m[b].b - m[a].b)[0];
+  if(worstN && m[worstN].b >= DOC_LIMIT * DOC_WARN) _docMeterWarn(worstN, m[worstN].b);
+}
 async function fbUsageFlush(){
   _fbURoll();
   if(!navigator.onLine || (!_fbU.old && !_fbU.pr && !_fbU.pw && !_fbU.pd)) return;
@@ -47790,6 +47872,7 @@ function devNavBuild(){
     const items = [
       ['unlock', '🔓 ڈویلپر ان لاک', 'یہ ایپ اس فون پر ہمیشہ کھلی', () => byId('devCloudSyncStatus')],
       ['usage', '📊 استعمال', 'فائربیس میٹر اور شناخت', () => byId('fbUsageBox')],
+      ['docmeter', '📦 ڈبوں کا میٹر', 'کلاؤڈ کے ڈبے کتنے بھرے', () => byId('docMeterBox')],
       ['pins', '👥 اکاؤنٹ PIN', 'سب اکاؤنٹس کے PIN', () => byId('devPinBox')],
       ['maint', '🚧 مینٹیننس', 'ایپ عارضی بند / سنک تشخیص', () => byText('🚧')],
       ['marquee', '📢 سلائیڈنگ پیغام', 'اوپر چلنے والی پٹی', () => byId('devMarqueeBox')],
@@ -47842,6 +47925,7 @@ async function unlockDevSecretPanel(){
   // 📊 FM2410SA441: فائربیس کا میٹر + ڈویلپر کی فائربیس شناخت (کوڈ صرف اسی سے بنیں)
   (function(){ const u = document.getElementById('devSecretUnlocked'); if(u && !document.getElementById('fbUsageBox')){ const b = document.createElement('div'); b.id = 'fbUsageBox'; b.dir = 'rtl'; b.style.cssText = 'margin:0 0 12px; padding:10px; border:2px solid #cbd5e1; border-radius:14px; background:#fff;'; u.insertBefore(b, u.firstChild); } })();
   fbDevSignIn(entered).then(() => renderFbUsageBox());
+  try{ const fu = document.getElementById('fbUsageBox'); if(fu && !document.getElementById('docMeterBox')){ const b = document.createElement('div'); b.id = 'docMeterBox'; b.dir = 'rtl'; b.style.cssText = 'margin:0 0 12px; padding:10px; border:2px solid #cbd5e1; border-radius:14px; background:#f8fafc;'; fu.after(b); } renderDocMeterBox(); }catch(e){} // 📦 FM2710TU459
   try{ devNavBuild(); }catch(e){} // 🧭 FM2410SA443: اوپر فوری بٹن
   renderMarqueeDevList();
   try{ renderDevPinList(); }catch(e){} // 👁️ FM110TH275
