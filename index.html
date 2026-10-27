@@ -9596,8 +9596,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU459: 📦 ڈبوں کا میٹر (ڈویلپر پینل) — کوئی کلاؤڈ ڈبہ 60% سے اوپر جائے تو ایڈمن کو تنبیہ
 // 🆕 FM2710TU460: نقد خریداری مہینہ وار کلاؤڈ ٹکڑوں میں؛ ریکوری لسٹ اور منشی سٹاک ریکارڈ کی کلاؤڈ کاپی صرف 30 دن (فون میں پورا)
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
-const APP_BUILD_VERSION = 'FM2710TU461'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'میٹر میں فون کی جگہ بھی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
+const APP_BUILD_VERSION = 'FM2710TU462'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'منشی کا کوئی آرڈر اب کبھی خاموشی سے غائب نہیں ہوگا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21264,7 +21265,10 @@ function mergeAdvanceOrderLists(local, cloud){
       out.push(lChanged ? _advSticky(l, c) : _advSticky(c, l));
     } else if(l){
       // ---------- کلاؤڈ پر نہیں: اگر پہلے کلاؤڈ پر تھا تو کسی اور فون نے ہٹایا؛ ورنہ ابھی یہیں بنا ہے ---------- -->
-      if(!inBase) out.push(l); // 🐞 FM2110WE431: پہلے بنیاد نہ ہونے پر 2 منٹ سے پرانا (ابھی نہ بھیجا گیا) آرڈر خاموشی سے مٹ جاتا تھا
+      // 🛡️ FM2710TU462 (صدام بھائی — منشی کے ڈرافٹ 11:31 پر غائب): پہلے "کلاؤڈ پر نہیں مگر بنیاد میں تھا" = کسی اور فون نے ہٹایا، اور
+      //   آرڈر خاموشی سے مٹ جاتا۔ حذف ہمیشہ "حذف شدہ" فہرست سے ہوتا ہے (اوپر del)، اور صفائی صرف 3 دن پرانے مکمل آرڈر کی —
+      //   اس کے علاوہ کوئی آرڈر کبھی نہیں مٹے گا، واپس کلاؤڈ پر چلا جائے گا
+      if(!inBase || !(_advDone(l) && _advAgeDays(l) >= 1)) out.push(l); // 🐞 FM2110WE431: بنیاد نہ ہو تو بھی کبھی نہ مٹے: پہلے بنیاد نہ ہونے پر 2 منٹ سے پرانا (ابھی نہ بھیجا گیا) آرڈر خاموشی سے مٹ جاتا تھا
     } else if(c){
       if(!base || !inBase) out.push(c); // نیا، دوسرے فون سے
       else if(!lm.has(id) && inBase) { /* اس فون پر ڈیلیٹ ہوا */ }
@@ -21347,6 +21351,7 @@ async function fetchAdvanceOrdersFromCloud(silent){
     const needPush = _stableStr(merged) !== _stableStr([...cloud.list].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     advanceOrdersData = merged;
     _advSetBase(cloud.list);
+    try{ _advVaultHeal(false); }catch(e){} // 🛟 FM2710TU462
     saveToStorage('advanceOrders', advanceOrdersData);
     saveToStorage('nextAdvOrderId', nextAdvOrderId);
     recomputeReservedFromOrders();
@@ -33731,6 +33736,34 @@ function pdShowStep(id){
   try{ window.scrollTo(0, 0); }catch(e){}
 }
 // ---------- اسی ملازم کا اسی کسٹمر کا کھلا (ابھی نہ بھیجا گیا) ڈرافٹ ----------
+
+// 🛟 FM2710TU462: کوئی آرڈر (ڈرافٹ یا بھیجا ہوا) فون سے غائب ہو جائے مگر سیف الماری میں ہو، حذف نہ کیا گیا ہو، مکمل نہ ہو اور
+//   2 دن سے نیا ہو — تو خود واپس آ جاتا ہے (اسی فون اور کلاؤڈ دونوں میں)۔ آج صبح کے پرانے ڈرافٹ (جن کی جگہ نئے بن چکے) شامل نہیں
+const ADV_HEAL_FROM = Date.parse('2026-10-27T09:00:00Z');
+function _advVaultHeal(quiet){
+  try{
+    if(typeof svMem === 'undefined' || !svMem.size) return 0;
+    const have = new Set((advanceOrdersData || []).map(o => o && o.id)), del = new Set(advDeletedIds || []);
+    const lim = Math.max(ADV_HEAL_FROM, Date.now() - 2 * 86400000), best = new Map();
+    svMem.forEach(e => {
+      if(!e || e.del || e.k !== 'order' || !e.snap) return;
+      const sn = e.snap; if(sn.id == null || have.has(sn.id) || del.has(sn.id)) return;
+      if(sn.status === 'fulfilled' || sn.stockReleased) return;
+      const t = Date.parse(sn.createdAt || e.ts || ''); if(!(t >= lim)) return;
+      const prev = best.get(sn.id); if(!prev || (e.u || 0) > (prev.u || 0)) best.set(sn.id, e);
+    });
+    if(!best.size) return 0;
+    const me = (AppState.currentUser && AppState.currentUser.name) || '';
+    let mine = 0;
+    best.forEach(e => { const o = JSON.parse(JSON.stringify(e.snap)); o.restoredFromVault = Date.now(); advanceOrdersData.unshift(o); if(o.employeeName === me) mine++; });
+    advanceOrdersData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    saveToStorage('advanceOrders', advanceOrdersData);
+    try{ recomputeReservedFromOrders(); }catch(e){}
+    if(mine && !quiet) setTimeout(() => { try{ uAlert('🛟 آرڈر واپس آ گئے', `آپ کے ${mine} آرڈر فون سے غائب ہو گئے تھے — سیف الماری سے پورے واپس آ گئے ہیں اور صدام تک بھیجے جا رہے ہیں۔`, 'green'); }catch(x){} }, 500);
+    setTimeout(() => { try{ pushAdvanceOrdersToCloud(); }catch(x){} }, 300);
+    return best.size;
+  }catch(e){ return 0; }
+}
 function pdFindOpenDraft(cid){
   const me = _pdMyName();
   let best = null;
@@ -34150,6 +34183,7 @@ async function pdApplyQty(cid, q, vid, chNo){
       pdLastFetch = Date.now();
     }
     order = pdFindOpenDraft(cid); // کلاؤڈ ملاپ کے بعد دوبارہ دیکھیں
+    if(!order && _advVaultHeal(false)) order = pdFindOpenDraft(cid); // 🛟 FM2710TU462: غائب ڈرافٹ پہلے سیف الماری سے واپس، نیا 1 چیز والا آرڈر نہ بنے
   }
   if(order) releaseOrderStock(order.items); // پرانی بکنگ واپس، نئی نیچے لگے گی
   let item = order ? pdItemOf(order, vid) : null;
@@ -34244,6 +34278,7 @@ async function openOtReview(){
   const itemsForSave = items.map(i => ({variant_id: i.variant_id, name: i.name, label: i.label, qty: i.qty, unitPrice: 0, chalanAlloc: i.chalanAlloc || null}));
   // ---------- 📦 صدام کی ہدایت (FM10SEPTH): آرڈر محفوظ/اپڈیٹ ہوتے ہی سٹاک "بک" کریں — پہلے اگر یہی آرڈر
   // پہلے سے محفوظ تھا تو اس کی پرانی مقدار واپس کریں، پھر نئی مقدار بک کریں (تاکہ ترمیم پر دگنی کٹوتی نہ ہو) ---------- -->
+  if(otSavedOrderId && !advanceOrdersData.some(o => o.id === otSavedOrderId)) _advVaultHeal(false); // 🛟 FM2710TU462: غائب آرڈر پہلے سیف الماری سے واپس
   if(otSavedOrderId && (!advanceOrdersData.some(o => o.id === otSavedOrderId) || (advDeletedIds || []).includes(otSavedOrderId))) otSavedOrderId = null; // 🛡️ FM610TU326: حذف شدہ پرانا آرڈر — نیا بنے
   if(otSavedOrderId){
     const existing = advanceOrdersData.find(o => o.id === otSavedOrderId);
