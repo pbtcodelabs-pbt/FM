@@ -9594,8 +9594,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU457: آرڈر صفائی صرف مکمل آرڈر کی؛ منشی کے غائب/ادھورے آرڈر سیف الماری سے واپس لائے گئے
 // 🆕 FM2710TU458: بلوں کی کلاؤڈ کاپی 5-5 دن کے ٹکڑوں میں (ڈبہ 881KB تک بھر چکا تھا) — فون کا پورا ریکارڈ اور بیک اپ وہی
 // 🆕 FM2710TU459: 📦 ڈبوں کا میٹر (ڈویلپر پینل) — کوئی کلاؤڈ ڈبہ 60% سے اوپر جائے تو ایڈمن کو تنبیہ
-const APP_BUILD_VERSION = 'FM2710TU459'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ڈبوں کا میٹر — کلاؤڈ ڈبہ بھرنے سے پہلے تنبیہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU460: نقد خریداری مہینہ وار کلاؤڈ ٹکڑوں میں؛ ریکوری لسٹ اور منشی سٹاک ریکارڈ کی کلاؤڈ کاپی صرف 30 دن (فون میں پورا)
+const APP_BUILD_VERSION = 'FM2710TU460'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'نقد خریداری، ریکوری اور منشی ریکارڈ کے ڈبے بھی کبھی نہیں بھریں گے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -22056,6 +22057,7 @@ async function _xReadCloud(def){
 const _xBusy = {};
 const _xLastSig = {};
 async function extraSyncOne(def, forcePush){
+  if(def && def.key === 'cashPurchases' && !_cpSS.off) return _cpSS.syncAll(); // 📦 FM2710TU460: نقد خریداری مہینہ وار ٹکڑوں میں
   if(def && def.key === 'payments' && !_payShardOff) return paySyncAll(); // 💳 FM2710TU455: ادائیگیاں 10 دن کے ٹکڑوں میں
   if(_xBusy[def.key]) return;
   _xBusy[def.key] = true;
@@ -22099,6 +22101,120 @@ function extraSyncAll(){ EXTRA_SYNC_DEFS.forEach(d => { extraSyncOne(d); }); }
      نئی ادائیگیاں (نمبر cut سے بڑا) بھی وہیں سے آتی رہتی ہیں
    - کلاؤڈ نئے ٹکڑے قبول نہ کرے (اجازت/403) تو خود پرانے طریقے پر واپس
    ===================================================================== */
+
+/* =====================================================================
+   📦 FM2710TU460: عام ٹکڑوں والا ملاپ (ادائیگیوں والا ہی طریقہ، ہر فہرست کے لیے) — پہلا استعمال: نقد خریداری (مہینہ وار)
+   پرانی ایک دستاویز صرف پڑھی جاتی ہے؛ اس کے بعد پرانے ورژن والے فون کی نئی چیزیں (ترتیب cut یا اس سے آگے) وہیں سے آتی ہیں
+   ===================================================================== */
+function _mkShardSync(o){
+  const st = { off: false, busy: false, again: false, legacyAt: 0, legacyMax: null };
+  const idxPath = () => _shB() + o.key + 'Index';
+  const shDef = sk => ({ key: o.key + '_' + sk, idOf: o.idOf });
+  const legDef = () => EXTRA_SYNC_DEFS.find(d => d.key === o.key);
+  const sortL = a => a.sort((x, y) => String(o.ord(y)).localeCompare(String(o.ord(x))));
+  async function idxRead(){
+    const res = await authFirestoreFetch(`${idxPath()}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(res && res.status === 404) return { ok: true, idx: { m: {}, cut: null }, ut: null };
+    if(!res || !res.ok) return { ok: false, status: res ? res.status : 0 };
+    const d = await res.json(); let idx = { m: {}, cut: null };
+    try{ const j = JSON.parse(d.fields?.json?.stringValue || '{}'); idx = { m: (j && j.m) || {}, cut: (j && j.cut != null) ? j.cut : null }; }catch(e){}
+    return { ok: true, idx, ut: d.updateTime || null };
+  }
+  async function idxUpdate(fn){
+    for(let a = 0; a < 4; a++){
+      const r = await idxRead(); if(!r.ok) return null;
+      const idx = fn(JSON.parse(JSON.stringify(r.idx))); if(!idx) return r.idx;
+      const pre = r.ut ? `&currentDocument.updateTime=${encodeURIComponent(r.ut)}` : '&currentDocument.exists=false';
+      const res = await authFirestoreFetch(`${idxPath()}?key=${FIREBASE_API_KEY}${pre}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { json: { stringValue: JSON.stringify(idx) }, updatedAt: { integerValue: String(Date.now()) } } }) });
+      if(res && res.ok) return idx;
+      if(res && res.status === 403){ st.off = true; return null; }
+      if(!(res && (res.status === 400 || res.status === 404 || res.status === 409 || res.status === 412))) return null;
+    }
+    return null;
+  }
+  async function legacyImport(cut){
+    const ld = legDef(); const cloud = await _xReadCloud(ld); if(!cloud.ok) return false;
+    st.legacyMax = (cloud.list || []).reduce((a, x) => { const v = String(o.ord(x)); return (a == null || v > a) ? v : a; }, null);
+    if(cloud.missing) return true;
+    if(cut == null){ ld.set(sortL(_xMerge(ld, ld.get() || [], cloud.list))); }
+    else {
+      const d2 = { key: o.key + 'LegacyNew', idOf: o.idOf }, big = x => String(o.ord(x)) >= String(cut);
+      const cl = (cloud.list || []).filter(big);
+      const merged = _xMerge(d2, (ld.get() || []).filter(big), cl);
+      ld.set(sortL([...(ld.get() || []).filter(x => !big(x)), ...merged])); _xSetBase(d2, cl);
+    }
+    return true;
+  }
+  async function syncShard(sk){
+    const def = shDef(sk), ld = legDef(); let ok = false, ut = null;
+    try{
+      for(let a = 0; a < 3; a++){
+        const cloud = await _xReadCloud(def);
+        if(!cloud.ok){ if(cloud.status === 403) st.off = true; break; }
+        const merged = _xMerge(def, (ld.get() || []).filter(x => o.shardOf(x) === sk), cloud.list);
+        ld.set(sortL([...(ld.get() || []).filter(x => o.shardOf(x) !== sk), ...merged]));
+        const strip = _xHeavyStrip(merged);
+        if(_stableStr(strip) === _stableStr(cloud.list)){ _xSetBase(def, merged); ok = true; ut = cloud.updateTime; break; }
+        const body = JSON.stringify(strip);
+        if(body.length > 950000){ console.warn('shard too large', def.key, body.length); break; }
+        const pre = cloud.updateTime ? `&currentDocument.updateTime=${encodeURIComponent(cloud.updateTime)}` : '&currentDocument.exists=false';
+        const res = await authFirestoreFetch(`${_shB()}${def.key}?key=${FIREBASE_API_KEY}${pre}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields: { json: { stringValue: body }, updatedAt: { integerValue: String(Date.now()) } } }) });
+        if(res && res.ok){ _xSetBase(def, merged); ok = true; try{ ut = (await res.json()).updateTime; }catch(e){} break; }
+        if(res && res.status === 403){ st.off = true; break; }
+        if(!(res && (res.status === 400 || res.status === 404 || res.status === 409 || res.status === 412))) break;
+      }
+    }catch(e){}
+    return { ok, ut };
+  }
+  async function syncAll(){
+    if(st.off) return extraSyncOne(legDef());
+    if(st.busy){ st.again = true; return; }
+    st.busy = true;
+    try{
+      const r = await idxRead();
+      if(!r.ok){ if(r.status === 403) st.off = true; throw new Error('idx'); }
+      let idx = r.idx;
+      if(idx.cut == null || Date.now() - st.legacyAt > 600000){
+        if(await legacyImport(idx.cut)){
+          st.legacyAt = Date.now();
+          if(idx.cut == null){ const cut = st.legacyMax == null ? '' : st.legacyMax; idx = (await idxUpdate(i => { if(i.cut == null){ i.cut = cut; return i; } return null; })) || idx; }
+        }
+      }
+      if(idx.cut == null) throw new Error('no-cut');
+      const seenK = o.key + 'ShardSeen', sigK = o.key + 'ShardSig';
+      const seen = loadFromStorage(seenK, {}) || {}, sigs = loadFromStorage(sigK, {}) || {};
+      const ld = legDef(), groups = new Map();
+      (ld.get() || []).forEach(x => { if(!x) return; const k = o.shardOf(x); if(!groups.has(k)) groups.set(k, []); groups.get(k).push(x); });
+      const keys = new Set([...Object.keys(idx.m || {}), ...groups.keys()]);
+      const bump = {};
+      for(const sk of keys){
+        const sig = _stableStr(_xHeavyStrip(groups.get(sk) || []));
+        const cur = _utNum(idx.m[sk]);
+        if(cur > 0 && cur <= (Number(seen[sk]) || 0) && sigs[sk] === sig) continue;
+        const res = await syncShard(sk); if(!res.ok) continue;
+        sigs[sk] = _stableStr(_xHeavyStrip((ld.get() || []).filter(x => o.shardOf(x) === sk)));
+        const u = _utNum(res.ut); if(u){ seen[sk] = u; if(u > cur) bump[sk] = u; }
+      }
+      if(Object.keys(bump).length) await idxUpdate(i => { let ch = false; Object.keys(bump).forEach(k => { if(_utNum(i.m[k]) < bump[k]){ i.m[k] = bump[k]; ch = true; } }); return ch ? i : null; });
+      saveToStorage(seenK, seen); saveToStorage(sigK, sigs);
+      try{ o.after && o.after(); }catch(e){}
+      try{ persistAllData(); }catch(e){}
+      try{ _xLastSig[o.key] = JSON.stringify(_xHeavyStrip(ld.get() || [])); }catch(e){}
+    }catch(e){}
+    st.busy = false;
+    if(st.off) return extraSyncOne(legDef());
+    if(st.again){ st.again = false; setTimeout(() => { try{ syncAll(); }catch(e){} }, 400); }
+  }
+  st.syncAll = syncAll;
+  return st;
+}
+const _shB = () => 'shopData/';
+const _cpSS = _mkShardSync({ key: 'cashPurchases', idOf: x => x && x.id,
+  ord: x => String((x && x.date) || ''),
+  shardOf: x => { const m = String((x && x.date) || '').match(/^(\d{4})-(\d{2})/); return m ? m[1] + m[2] : '000000'; },
+  after: () => { saveToStorage('cashPurchases', cashPurchasesData); if(typeof currentScreenName !== 'undefined' && currentScreenName === 'home' && typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary(); } });
 let _payShardOff = false;
 // کلاؤڈ کا اپنا وقت (updateTime) نمبر میں — فہرست میں یہی لکھا جاتا ہے تاکہ دو فون ایک ساتھ لکھیں تو بھی کسی کی تبدیلی نظر سے نہ چھوٹے
 function _utNum(v){
@@ -41167,6 +41283,14 @@ async function confirmReturnCredit(){
    ☁️ RECOVERY LIST — Firestore Sync (ملٹی موبائل: ملازم جو وصولی اپنے فون پر
    درج کرے، وہ خودکار صدام کے فون پر Pending Confirmation میں نظر آ جائے) ----------
    ===================================================================== */
+
+// 📦 FM2710TU460 (صدام بھائی): ریکوری لسٹ اور منشی سٹاک ریکارڈ کا ملاپ صرف "نیا شامل کرو" ہے — کلاؤڈ پر پرانا نہ بھیجنے سے کسی فون
+//   سے کچھ نہیں مٹتا۔ ہر فون میں پورا ریکارڈ (اور بیک اپ) پہلے کی طرح؛ کلاؤڈ پر صرف پچھلے 30 دن (اور ہر منتظر اندراج)
+function _cloudWindow30(list, keep, timesOf){
+  const lim = Date.now() - 30 * 86400000;
+  return (list || []).filter(x => { if(!x) return false; if(keep(x)) return true;
+    return (timesOf(x) || []).some(t => { const n = typeof t === 'number' ? t : Date.parse(t || ''); return !isNaN(n) && n >= lim; }); });
+}
 const RECOVERY_LIST_DOC_PATH = 'shopData/recoveryList';
 let recoveryListPollTimer = null;
 
@@ -41182,7 +41306,7 @@ async function pushRecoveryListToCloud(){
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         fields: {
-          json: { stringValue: JSON.stringify(recoveryListData) },
+          json: { stringValue: JSON.stringify(_cloudWindow30(recoveryListData, r => r.status === 'pending', r => [r.createdAt, r.confirmedAt, r.editedAt, r.noteUpdatedAt])) }, // 📦 FM2710TU460: کلاؤڈ پر صرف 30 دن
           deletedIds: { stringValue: JSON.stringify(recoveryDeletedIds) },
           nextRecoveryId: { integerValue: String(nextRecoveryId) },
           updatedAt: { integerValue: String(Date.now()) }
@@ -41287,7 +41411,7 @@ async function pushMunshiStockLogToCloud(){
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         fields: {
-          json: { stringValue: JSON.stringify(munshiStockLogData) },
+          json: { stringValue: JSON.stringify(_cloudWindow30(munshiStockLogData, () => false, x => [x.ts])) }, // 📦 FM2710TU460: کلاؤڈ پر صرف 30 دن
           nextMunshiLogId: { integerValue: String(nextMunshiLogId) },
           clearedAt: { integerValue: String(Number(loadFromStorage('munshiLogClearedAt', 0)) || 0) }, // 🧹 FM610TU324
           clearedMaxId: { integerValue: String(Number(loadFromStorage('munshiLogClearedMaxId', 0)) || 0) },
