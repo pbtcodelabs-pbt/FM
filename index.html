@@ -9586,8 +9586,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU447: ڈویلپر پینل میں کیپسول بٹن + ڈویلپر ان لاک
 // 🆕 FM2710TU450: ہر صفحے پر زوم ➕ ➖ (100% سے 200%) — ڈبے نہیں ٹوٹتے
 // 🆕 FM2710TU451: منشی کے بل ایڈمن تک نہ پہنچنے کا مسئلہ — کلاؤڈ فہرست سے پرانے منظور/مسترد بل صاف، خود دوبارہ بھیجنا، سچا پیغام
-const APP_BUILD_VERSION = 'FM2710TU451'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'منشی کے بل اب پکا ایڈمن تک پہنچیں گے — نہ پہنچیں تو خود دوبارہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU452: آرڈر ٹیکنگ کے آرڈر ادھورے/غائب — کلاؤڈ فہرست سے مکمل شدہ پرانے آرڈر صاف (1MB حد)
+const APP_BUILD_VERSION = 'FM2710TU452'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'منشی کے آرڈر اب پورے اور پکا ایڈمن تک پہنچیں گے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21168,6 +21169,21 @@ async function _advReadCloud(){
   if(cn > nextAdvOrderId) nextAdvOrderId = cn;
   return { ok: true, list, updateTime: doc.updateTime || null };
 }
+// =====================================================================
+// 🚑 FM2710TU452 (صدام بھائی: منشی نے 14 آرڈر بھیجے، 7 پہنچے اور وہ بھی ادھورے — 30 کی جگہ 1 چیز): سب آرڈر کلاؤڈ کی ایک ہی
+// دستاویز میں جاتے ہیں (حد 1MB)۔ مکمل ہو چکے پرانے آرڈر کبھی صاف نہیں ہوتے تھے، دستاویز بھر گئی — آرڈر کا پہلا چھوٹا حصہ چلا
+// گیا، پوری چیزوں والا بڑا حصہ رد ہوتا رہا۔ اب: مکمل/جاری شدہ آرڈر 3 دن بعد اس فہرست سے ہٹ جاتے ہیں (ان کا بل اپنی جگہ)
+// =====================================================================
+const ADV_MAX_BYTES = 880000;
+function _advDone(o){ return !!o && (o.status === 'fulfilled' || o.stockReleased); }
+function _advAgeDays(o){ const t = Date.parse((o && (o.fulfilledAt || o.finalSentAt || o.createdAt)) || ''); return isNaN(t) ? 999 : (Date.now() - t) / 86400000; }
+function _advPrune(list){
+  let out = (list || []).filter(o => o && !(_advDone(o) && _advAgeDays(o) >= 3));
+  const size = a => { try{ return JSON.stringify(a).length; }catch(e){ return 0; } };
+  if(size(out) > ADV_MAX_BYTES) out = out.filter(o => !(_advDone(o) && _advAgeDays(o) >= 1));
+  if(size(out) > ADV_MAX_BYTES) out = out.filter(o => !_advDone(o));
+  return out;
+}
 let _advPushBusy = false, _advPushAgain = false;
 async function pushAdvanceOrdersToCloud(){
   saveToStorage('advanceOrders', advanceOrdersData);
@@ -21179,7 +21195,7 @@ async function pushAdvanceOrdersToCloud(){
     for(let attempt = 0; attempt < 3; attempt++){
       const cloud = await _advReadCloud();
       if(!cloud.ok) break;
-      advanceOrdersData = mergeAdvanceOrderLists(advanceOrdersData, cloud.list);
+      advanceOrdersData = _advPrune(mergeAdvanceOrderLists(advanceOrdersData, cloud.list));
       if(advanceOrdersData.some(o => o.id >= nextAdvOrderId)) nextAdvOrderId = Math.max(...advanceOrdersData.map(o => Number(o.id) || 0)) + 1;
       saveToStorage('advanceOrders', advanceOrdersData);
       try{ recomputeReservedFromOrders(); }catch(e){}
@@ -21211,7 +21227,7 @@ async function fetchAdvanceOrdersFromCloud(silent){
   try{
     const cloud = await _advReadCloud();
     if(!cloud.ok || cloud.missing) return false;
-    const merged = mergeAdvanceOrderLists(advanceOrdersData, cloud.list);
+    const merged = _advPrune(mergeAdvanceOrderLists(advanceOrdersData, cloud.list));
     const needPush = _stableStr(merged) !== _stableStr([...cloud.list].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     advanceOrdersData = merged;
     _advSetBase(cloud.list);
