@@ -9588,8 +9588,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU451: منشی کے بل ایڈمن تک نہ پہنچنے کا مسئلہ — کلاؤڈ فہرست سے پرانے منظور/مسترد بل صاف، خود دوبارہ بھیجنا، سچا پیغام
 // 🆕 FM2710TU452: آرڈر ٹیکنگ کے آرڈر ادھورے/غائب — کلاؤڈ فہرست سے مکمل شدہ پرانے آرڈر صاف (1MB حد)
 // 🆕 FM2710TU453: زوم بٹن ریکارڈ کے بیچ سے ہٹا — اوپر کی پٹی میں چھوٹا 🔍، دبانے پر ➖ ➕
-const APP_BUILD_VERSION = 'FM2710TU453'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'زوم بٹن اب اوپر کی پٹی میں چھوٹا 🔍'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU454: فنگر پرنٹ فون سے مٹ جائے (No passkeys available) تو پن سے اندر آتے ہی ایک ٹچ میں دوبارہ لگانے کا پیغام
+const APP_BUILD_VERSION = 'FM2710TU454'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'فنگر پرنٹ غائب ہو جائے تو ایک ٹچ میں دوبارہ لگائیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11189,6 +11190,7 @@ function finishLogin(user, rememberOverride){
   }
 
   applyRole(user.role, user.name);
+  try{ _bioOfferReEnable(); }catch(e){} // 🔑 FM2710TU454
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('pinInput').value = '';
   const empPinEl = document.getElementById('employeePinInput');
@@ -22433,9 +22435,24 @@ async function bioLogin(){
     }});
     if(a){ window.__bioVerified = true; try{ sessionStorage.setItem('fm_bioSessionOk','1'); }catch(e){} _bioBusy = false; finishLogin(admin, true); return; }
   }catch(e){
-    const m = document.getElementById('bioLoginMsg'); if(m){ m.textContent = '❌ ٹچ نہیں ہوا — دوبارہ 👆 دبائیں یا پن لکھیں'; }
+    // 🔑 FM2710TU454: فون میں یہ فنگر پرنٹ تالا (passkey) ہی نہ رہا ہو تو فون "No passkeys available" دکھاتا ہے — یاد رکھیں، پن سے اندر آتے ہی دوبارہ لگانے کا کہیں
+    try{ localStorage.setItem('fm_bioFailed', String(Date.now())); }catch(x){}
+    const m = document.getElementById('bioLoginMsg'); if(m){ m.textContent = '❌ فنگر پرنٹ نہیں ملا — پن سے اندر آئیں، ایپ خود دوبارہ لگانے کا پوچھے گی'; }
   }
   _bioBusy = false;
+}
+// 🔑 FM2710TU454 (صدام بھائی: "No passkeys available" — فنگر پرنٹ غائب): پن سے ایڈمن اندر آئے اور پچھلا فنگر پرنٹ ناکام ہوا تھا تو ایک ٹچ میں نیا لگائیں
+function _bioOfferReEnable(){
+  let f = null; try{ f = localStorage.getItem('fm_bioFailed'); }catch(e){}
+  if(!f || AppState.currentRole !== 'admin' || window.__bioVerified) return;
+  try{ localStorage.removeItem('fm_bioFailed'); }catch(e){}
+  setTimeout(async () => {
+    const msg = 'اس فون میں ایپ کا پرانا فنگر پرنٹ نہیں ملا (فون کی سیٹنگ/گوگل اکاؤنٹ بدلنے سے مٹ جاتا ہے)۔ ابھی نیا فنگر پرنٹ لگا دیں؟';
+    const ok = (typeof uDialog === 'function') ? await uDialog({ title: '👆 فنگر پرنٹ دوبارہ لگائیں', message: msg, okText: '👆 ہاں، ابھی لگائیں', cancelText: 'بعد میں', tone: 'green' }) : confirm(msg);
+    if(!ok) return;
+    try{ localStorage.removeItem('fm_bioCred'); }catch(e){}
+    try{ await enableBioLogin(); }catch(e){}
+  }, 900);
 }
 
 // ---------- 👆 صدام کی ہدایت (13 اکتوبر): کوئی بڑا بلاک نہیں، کوئی عبارت/لنک نہیں۔
