@@ -9585,8 +9585,9 @@ function getDeveloperContact(){
 // 🆕 FM2510SU446: لین دین میں گاہک کی وصولی بدلیں/حذف کریں (صرف ایڈمن، تنبیہ + PIN)
 // 🆕 FM2710TU447: ڈویلپر پینل میں کیپسول بٹن + ڈویلپر ان لاک
 // 🆕 FM2710TU450: ہر صفحے پر زوم ➕ ➖ (100% سے 200%) — ڈبے نہیں ٹوٹتے
-const APP_BUILD_VERSION = 'FM2710TU450'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ہر صفحے پر زوم کے پلس مائنس بٹن (200% تک)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU451: منشی کے بل ایڈمن تک نہ پہنچنے کا مسئلہ — کلاؤڈ فہرست سے پرانے منظور/مسترد بل صاف، خود دوبارہ بھیجنا، سچا پیغام
+const APP_BUILD_VERSION = 'FM2710TU451'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'منشی کے بل اب پکا ایڈمن تک پہنچیں گے — نہ پہنچیں تو خود دوبارہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16780,8 +16781,11 @@ function submitBillForApproval(customer, method, subtotal){
   renderAutoPaymentNote();
 
   closeCartSheet();
-  pushPendingBillsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): سیلزمین کا بل جمع ہوتے ہی فوراً کلاؤڈ میں — ایڈمن کسی بھی ڈیوائس سے فوراً دیکھ سکے ----------
-  alert('✅ بل ایڈمن کو منظوری کے لیے بھیج دیا گیا۔\nمنظور ہونے کے بعد یہ بل ہسٹری میں نظر آئے گا اور پرنٹ کیا جا سکے گا۔');
+  // 🚑 FM2710TU451: اصل نتیجہ بتائیں — پہلے کلاؤڈ ناکام ہونے پر بھی "بھیج دیا گیا" لکھا آتا تھا
+  pushPendingBillsToCloud().then(ok => {
+    if(ok) alert('✅ بل ایڈمن کو منظوری کے لیے بھیج دیا گیا۔\nمنظور ہونے کے بعد یہ بل ہسٹری میں نظر آئے گا اور پرنٹ کیا جا سکے گا۔');
+    else alert('⚠️ بل اس فون میں محفوظ ہے، مگر ابھی ایڈمن تک نہیں پہنچا (انٹرنیٹ/کلاؤڈ)۔\nایپ خود ہر 30 سیکنڈ بعد دوبارہ بھیجتی رہے گی — نیچے سرخ پٹی دبا کر ابھی بھی بھیج سکتے ہیں۔');
+  });
 }
 
 /* =====================================================================
@@ -42595,6 +42599,48 @@ async function _pbReadCloud(){
   return { ok: true, list, updateTime: doc.updateTime || null };
 }
 let _pbBusy = false, _pbAgain = false;
+// =====================================================================
+// 🚑 FM2710TU451 (صدام بھائی — منشی کے 7 آرڈر ایڈمن تک نہیں پہنچے): سارے منشی بل کلاؤڈ کی ایک ہی دستاویز میں جاتے ہیں جس کی حد
+// 1MB ہے۔ منظور/مسترد پرانے بل وہاں سے کبھی صاف نہیں ہوتے تھے — دستاویز بھر جاتی تو نیا بل جا ہی نہیں سکتا تھا (منشی کو پھر بھی
+// "بھیج دیا گیا" لکھا آتا)۔ اب: منظور شدہ 3 دن، مسترد 7 دن بعد اس فہرست سے ہٹ جاتے ہیں (اصل بل/ہسٹری اپنی جگہ محفوظ)،
+// سائز پھر بھی بڑا ہو تو اور ہلکا کیا جاتا ہے؛ نہ پہنچے تو ہر 30 سیکنڈ خود دوبارہ؛ منشی کو سچ بتایا جاتا ہے
+// =====================================================================
+const PB_MAX_BYTES = 880000;
+function _pbAgeDays(p){ const t = Date.parse((p && (p.approved_at || p.rejected_at || p.submitted_at)) || ''); return isNaN(t) ? 999 : (Date.now() - t) / 86400000; }
+function _pbPrune(list){
+  let out = (list || []).filter(p => {
+    if(!p) return false;
+    const st = p.status || 'pending';
+    if(st === 'approved') return _pbAgeDays(p) < 3;
+    if(st === 'rejected') return _pbAgeDays(p) < 7;
+    return true; // منتظر کبھی نہیں ہٹتا
+  });
+  const size = a => { try{ return JSON.stringify(a).length; }catch(e){ return 0; } };
+  if(size(out) > PB_MAX_BYTES) out = out.filter(p => (p.status || 'pending') === 'pending' || _pbAgeDays(p) < 1);
+  if(size(out) > PB_MAX_BYTES) out = out.filter(p => (p.status || 'pending') === 'pending');
+  if(size(out) > PB_MAX_BYTES){ // آخری حل: پرانی پیمنٹ رسیدوں کی تصویر ہٹائیں (رقم/تفصیل وہی)
+    const withShot = out.filter(p => p.screenshot_base64).sort((a, b) => String(a.submitted_at || '').localeCompare(String(b.submitted_at || '')));
+    for(const p of withShot){ if(size(out) <= PB_MAX_BYTES) break; p.screenshot_base64 = ''; p.screenshot_removed = true; }
+  }
+  return out;
+}
+setInterval(() => { // نہ پہنچا ہو تو ہر 30 سیکنڈ خود دوبارہ
+  try{ if(AppState?.settings?.pendingBillsPendingSync && !_pbBusy && !document.hidden) pushPendingBillsToCloud(); }catch(e){}
+  try{ _pbSyncPill(); }catch(e){}
+}, 30000);
+function _pbSyncPill(){
+  let el = document.getElementById('pbSyncPill');
+  const show = !!(AppState?.settings?.pendingBillsPendingSync) && AppState.currentRole && AppState.currentRole !== 'admin';
+  if(!show){ if(el) el.style.display = 'none'; return; }
+  if(!el){
+    el = document.createElement('div'); el.id = 'pbSyncPill'; el.setAttribute('dir', 'rtl');
+    el.style.cssText = 'position:fixed; left:50%; transform:translateX(-50%); bottom:74px; z-index:99990; padding:8px 14px; border-radius:999px; background:#dc2626; color:#fff; font:800 14px/1.7 UrduAll,"JameelNooriNastaleeq",serif; box-shadow:0 4px 14px rgba(0,0,0,.35); cursor:pointer; white-space:nowrap;';
+    el.onclick = () => { el.textContent = '⏳ بھیج رہا ہے…'; pushPendingBillsToCloud().then(ok => { _pbSyncPill(); if(ok) alert('✅ سب بل ایڈمن تک پہنچ گئے۔'); }); };
+    document.body.appendChild(el);
+  }
+  el.textContent = '⚠️ بل ابھی ایڈمن تک نہیں پہنچے — یہاں دبا کر دوبارہ بھیجیں';
+  el.style.display = 'block';
+}
 async function pushPendingBillsToCloud(){
   // نئے بل کو پکی کلید — نمبر بعد میں بدلے تب بھی وہی بل رہے
   (pendingBillsData || []).forEach(p => { if(p && !p.uid) p.uid = String(p.pending_id) + '|' + (p.submitted_at || ''); });
@@ -42607,7 +42653,7 @@ async function pushPendingBillsToCloud(){
     for(let attempt = 0; attempt < 4 && !ok; attempt++){
       const cloud = await _pbReadCloud();
       if(!cloud.ok) break;
-      pendingBillsData = _pbMerge(pendingBillsData, cloud.list);
+      pendingBillsData = _pbPrune(_pbMerge(pendingBillsData, cloud.list));
       saveToStorage('pendingBills', pendingBillsData);
       saveToStorage('nextPendingId', nextPendingId);
       const sent = JSON.stringify(pendingBillsData);
@@ -42630,6 +42676,7 @@ async function pushPendingBillsToCloud(){
   persistAllData();
   if(_pbAgain){ _pbAgain = false; setTimeout(() => { try{ pushPendingBillsToCloud(); }catch(e){} }, 400); }
   try{ _pbRerender(); }catch(e){}
+  try{ _pbSyncPill(); }catch(e){}
   return ok;
 }
 function _pbRerender(){
@@ -42648,7 +42695,7 @@ async function fetchPendingBillsFromCloud(silent){
       if(cloud.missing && (pendingBillsData || []).length) pushPendingBillsToCloud();
       return false;
     }
-    const merged = _pbMerge(pendingBillsData, cloud.list);
+    const merged = _pbPrune(_pbMerge(pendingBillsData, cloud.list));
     const needPush = AppState.settings.pendingBillsPendingSync || _stableStr(merged) !== _stableStr(cloud.list);
     pendingBillsData = merged;
     if(!needPush) _xSetBase(_PB_DEF, cloud.list);
