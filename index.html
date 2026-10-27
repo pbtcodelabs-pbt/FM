@@ -8626,6 +8626,63 @@ function _lsWrite(key, json){
 }
 let storageQuotaWarned = false; // ---------- ایک سیشن میں بار بار الرٹ نہ آئے، صرف پہلی بار ----------
 // 🧹 FM2710TU465: صرف وہ چیزیں جو دوبارہ خود بن جاتی ہیں — پرانی ایک دستاویز والی بنیادیں اور ٹکڑوں کے لمبے نشان
+// ---------- 🗄️ مالک کی ہدایت (28 اکتوبر): فون کی جگہ خود بنتی رہے، کسی کو کوئی پیغام نہ آئے ----------
+// پرانے بل (5 دن کا ٹکڑا) اور ادائیگیاں (10 دن کا ٹکڑا) جو کلاؤڈ میں پہنچ چکے ہوں، اس فون سے ہٹا دیے جاتے ہیں — کلاؤڈ میں سب محفوظ رہتا ہے۔
+// شرطیں: ٹکڑا minDays سے پرانا ہو، اس فون پر کوئی بغیر بھیجی تبدیلی نہ ہو (نشان برابر)، اور بلوں میں کوئی باقی رقم نہ ہو۔
+// حفاظت: پہلے اس ٹکڑے کی بنیاد (base) مٹتی ہے، پھر بل — اس لیے غلطی سے ہم وقت سازی ہو بھی جائے تو کلاؤڈ سے کچھ نہیں مٹتا، صرف واپس آتا ہے۔
+// کھاتے (لیجر) کا حساب موجودہ بقایا سے پیچھے کو لگتا ہے، اس لیے بقایا پر کوئی اثر نہیں۔
+function _storageAutoArchive(minDays, targetFrac){
+  let done = 0;
+  try{
+    if(typeof LS_LIMIT === 'undefined' || _lsUsed() < LS_LIMIT * targetFrac) return 0;
+    const cutMs = Date.now() - (minDays + 11) * 86400000, cand = [];
+    let invOk = false, payOk = false;
+    try{ invOk = !_invShardOff && typeof invoicesData !== 'undefined'; }catch(e){}
+    try{ payOk = !_payShardOff && typeof paymentsData !== 'undefined'; }catch(e){}
+    const iSig = invOk ? (loadFromStorage('invShardSig', {}) || {}) : {}, pSig = payOk ? (loadFromStorage('payShardSig', {}) || {}) : {};
+    const grp = (arr, f) => { const g = new Map(); (arr || []).forEach(x => { if(!x) return; const k = f(x); if(!g.has(k)) g.set(k, []); g.get(k).push(x); }); return g; };
+    if(invOk) grp(invoicesData, _invShard).forEach((list, sk) => {
+      const m = sk.match(/^(\d{4})(\d{2})(\d)$/); if(!m || sk === '0000000') return;
+      const st = Date.UTC(+m[1], +m[2] - 1, 1 + (+m[3] - 1) * 5);
+      if(st > cutMs || iSig[sk] !== _sigH(_stableStr(list))) return;
+      if(list.some(i => Math.abs(Number(i.amount_due) || 0) > 0.5)) return;
+      cand.push({ t: 'inv', sk, st });
+    });
+    if(payOk) grp(paymentsData, _payShard).forEach((list, sk) => {
+      const m = sk.match(/^(\d{4})(\d{2})(\d)$/); if(!m || sk === '0000000') return;
+      const st = Date.UTC(+m[1], +m[2] - 1, 1 + (+m[3] - 1) * 10);
+      if(st > cutMs || pSig[sk] !== _sigH(_stableStr(_xHeavyStrip(list)))) return;
+      cand.push({ t: 'pay', sk, st });
+    });
+    cand.sort((a, b) => a.st - b.st);
+    for(const c of cand){
+      if(_lsUsed() < LS_LIMIT * targetFrac) break;
+      if(c.t === 'inv'){
+        localStorage.removeItem(STORAGE_PREFIX + 'invSyncBase_' + c.sk); // پہلے بنیاد
+        const ar = loadFromStorage('invArchived', {}) || {}; ar[c.sk] = Date.now(); _lsWrite('invArchived', JSON.stringify(ar));
+        invoicesData = invoicesData.filter(i => _invShard(i) !== c.sk);
+        delete iSig[c.sk]; _lsWrite('invShardSig', JSON.stringify(iSig));
+        _lsWrite('invoices', JSON.stringify(invoicesData));
+      } else {
+        localStorage.removeItem(STORAGE_PREFIX + _xBaseKey(_payDef(c.sk)));
+        const ar = loadFromStorage('payArchived', {}) || {}; ar[c.sk] = Date.now(); _lsWrite('payArchived', JSON.stringify(ar));
+        paymentsData = paymentsData.filter(x => _payShard(x) !== c.sk);
+        delete pSig[c.sk]; _lsWrite('payShardSig', JSON.stringify(pSig));
+        _lsWrite('payments', JSON.stringify(paymentsData));
+      }
+      done++;
+    }
+  }catch(e){ console.warn('auto archive', e); }
+  return done;
+}
+// ہم وقت سازی میں: ہٹایا ہوا ٹکڑا چھوڑ دیں — مگر اگر اس میں اس فون پر کوئی نئی چیز آ جائے تو واپس عام ہم وقت سازی (بنیاد نہیں، اس لیے صرف ملاپ)
+function _archSkip(arKey, sk, groups){
+  const ar = loadFromStorage(arKey, null);
+  if(!ar || !ar[sk]) return false;
+  if(!groups.has(sk)) return true;
+  delete ar[sk]; saveToStorage(arKey, ar);
+  return false;
+}
 function _storageEmergencyFree(){
   let freed = 0;
   const legacy = ['invoicesSyncBase', 'xsyncBase_payments', 'xsyncBase_cashPurchases'];
@@ -8643,18 +8700,9 @@ function saveToStorage(key, value){
     // 🧹 FM2710TU465: جگہ بھر گئی — پہلے فالتو پرانی بنیادیں/لمبے نشان خود ہٹا کر دوبارہ کوشش (اصل ڈیٹا کو ہاتھ نہیں لگتا)
     try{ if(_storageEmergencyFree()){ _lsWrite(key, JSON.stringify(value)); return true; } }catch(e2){}
     console.warn('ڈیٹا محفوظ کرنے میں مسئلہ:', key, e);
-    if(!storageQuotaWarned){
-      storageQuotaWarned = true;
-      alert(
-        '⚠️ Storage Full — Recent changes may NOT be saved!\n\n' +
-        'Your device\'s storage for this app is full (this usually happens after adding many product photos). ' +
-        'Anything you change from now on — including product photos — may be lost when you close the app.\n\n' +
-        'Please do this now:\n' +
-        '1) Go to Dashboard → Export Backup (save it somewhere safe)\n' +
-        '2) Delete a few old/unused product photos to free up space\n' +
-        '3) Re-check that your latest changes were saved'
-      );
-    }
+    // 🗄️ مالک کی ہدایت (28 اکتوبر): کوئی پیغام نہیں — پرانے (کلاؤڈ میں محفوظ) بل/ادائیگیاں اس فون سے خود ہٹا کر جگہ بنائیں اور دوبارہ کوشش
+    try{ if(_storageAutoArchive(30, 0.5) > 0){ _lsWrite(key, JSON.stringify(value)); return true; } }catch(e3){}
+    try{ if(!storageQuotaWarned){ storageQuotaWarned = true; setTimeout(() => { try{ _psReport(true); }catch(e){} }, 1000); } }catch(e4){} // صرف ڈویلپر پینل میں نظر آئے
     return false;
   }
 }
@@ -9701,8 +9749,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
-const APP_BUILD_VERSION = 'FM2810WE466'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'فون میں ڈیٹا دبا کر رکھا گیا — 10 گنا کم جگہ؛ جگہ بھرنے سے پہلے ایڈمن کو تنبیہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE467'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'فون کی جگہ خود بنتی ہے — پرانے بل کلاؤڈ میں، کوئی پیغام نہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -9954,7 +10002,8 @@ async function _psReport(force){
   if(typeof AppState === 'undefined' || !AppState.currentRole || AppState.currentRole === 'customer') return;
   const used = _lsUsed(), pct = Math.round(used / LS_LIMIT * 100);
   if(used >= LS_LIMIT * PS_CLEAN){ try{ _storageEmergencyFree(); }catch(e){} }
-  if(used >= LS_LIMIT * PS_WARN && _psIsBoss()) _psWarnOnce('me', '📱 اس فون کی جگہ بھر رہی ہے', `اس فون میں ایپ کی جگہ ${pct}% بھر گئی ہے۔ ریکارڈ محفوظ ہے، مگر ڈویلپر کو فوراً بتائیں۔`);
+  if(used >= LS_LIMIT * 0.45){ try{ _storageAutoArchive(90, 0.35); }catch(e){} } // 🗄️ خاموشی سے پرانے ٹکڑے ہٹائیں
+  if(false) _psWarnOnce('me', '📱 اس فون کی جگہ بھر رہی ہے', `اس فون میں ایپ کی جگہ ${pct}% بھر گئی ہے۔ ریکارڈ محفوظ ہے، مگر ڈویلپر کو فوراً بتائیں۔`);
   let st = {}; try{ st = JSON.parse(localStorage.getItem('fm_psLast') || '{}') || {}; }catch(e){}
   if(!force && Date.now() - (st.at || 0) < 6 * 3600000 && Math.abs(pct - (st.p || 0)) < 5) return;
   const id = _psDevId(), ua = String(navigator.userAgent || ''), mm = ua.match(/Android[^;)]*;\s*([^;)]+)/);
@@ -9965,7 +10014,7 @@ async function _psReport(force){
   }catch(e){}
   if(_psIsBoss()){ // دوسرے فونوں کا حال — کوئی 70% سے اوپر ہو تو ایڈمن کو بتائیں
     const list = await _psLoad();
-    list.filter(o => o.id !== id && o.p >= PS_WARN * 100 && Date.now() - (o.at || 0) < 3 * 86400000).forEach(o => {
+    if(false) list.filter(o => o.id !== id && o.p >= PS_WARN * 100 && Date.now() - (o.at || 0) < 3 * 86400000).forEach(o => {
       _psWarnOnce(o.id, '📱 ایک فون کی جگہ بھر رہی ہے', `${o.n || 'ملازم'} کے فون${o.m ? ' (' + o.m + ')' : ''} میں ایپ کی جگہ ${o.p}% بھر گئی ہے۔ ریکارڈ محفوظ ہے، مگر ڈویلپر کو فوراً بتائیں۔`);
     });
   }
@@ -22524,6 +22573,7 @@ async function paySyncAll(){
     const keys = new Set([...Object.keys(idx.m || {}), ...groups.keys()]);
     const bump = {};
     for(const sk of keys){
+      if(_archSkip('payArchived', sk, groups)) continue; // 🗄️ اس فون سے ہٹایا گیا پرانا ٹکڑا (کلاؤڈ میں محفوظ)
       const sig = _stableStr(_xHeavyStrip(groups.get(sk) || []));
       const cur = _utNum(idx.m[sk]);
       if(cur > 0 && cur <= (Number(seen[sk]) || 0) && sigs[sk] === _sigH(sig)) continue; // نہ یہاں بدلا، نہ کلاؤڈ پر
@@ -43245,6 +43295,7 @@ async function _invSyncAllRun(){
     const keys = new Set([...Object.keys(idx.m || {}), ...groups.keys()]);
     const bump = {}; let allOk = true;
     for(const sk of keys){
+      if(_archSkip('invArchived', sk, groups)) continue; // 🗄️ اس فون سے ہٹایا گیا پرانا ٹکڑا (کلاؤڈ میں محفوظ)
       const sig = _stableStr(groups.get(sk) || []);
       const cur = _utNum(idx.m[sk]);
       const localChanged = sigs[sk] !== _sigH(sig);
