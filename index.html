@@ -9589,8 +9589,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU452: آرڈر ٹیکنگ کے آرڈر ادھورے/غائب — کلاؤڈ فہرست سے مکمل شدہ پرانے آرڈر صاف (1MB حد)
 // 🆕 FM2710TU453: زوم بٹن ریکارڈ کے بیچ سے ہٹا — اوپر کی پٹی میں چھوٹا 🔍، دبانے پر ➖ ➕
 // 🆕 FM2710TU454: فنگر پرنٹ فون سے مٹ جائے (No passkeys available) تو پن سے اندر آتے ہی ایک ٹچ میں دوبارہ لگانے کا پیغام
-const APP_BUILD_VERSION = 'FM2710TU454'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'فنگر پرنٹ غائب ہو جائے تو ایک ٹچ میں دوبارہ لگائیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU455: ادائیگیوں کی کلاؤڈ کاپی 10-10 دن کے ٹکڑوں میں (1MB حد کا مسئلہ ختم) — فون کا پورا ریکارڈ اور بیک اپ وہی
+const APP_BUILD_VERSION = 'FM2710TU455'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ادائیگیوں کا کلاؤڈ ریکارڈ اب چھوٹے حصوں میں — کبھی بھرے گا نہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21951,7 +21952,7 @@ function _xSetBase(def, list){
 async function _xReadCloud(def){
   const res = await authFirestoreFetch(`shopData/${def.key}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
   if(res && res.status === 404) return { ok: true, list: [], updateTime: null, missing: true };
-  if(!res || !res.ok) return { ok: false };
+  if(!res || !res.ok) return { ok: false, status: res ? res.status : 0 };
   const doc = await res.json();
   let list = [];
   try{ const s = doc.fields?.json?.stringValue; if(s){ const p = JSON.parse(s); if(Array.isArray(p)) list = p; } }catch(e){}
@@ -21960,6 +21961,7 @@ async function _xReadCloud(def){
 const _xBusy = {};
 const _xLastSig = {};
 async function extraSyncOne(def, forcePush){
+  if(def && def.key === 'payments' && !_payShardOff) return paySyncAll(); // 💳 FM2710TU455: ادائیگیاں 10 دن کے ٹکڑوں میں
   if(_xBusy[def.key]) return;
   _xBusy[def.key] = true;
   try{
@@ -21993,6 +21995,153 @@ async function extraSyncOne(def, forcePush){
   }catch(e){}
 }
 function extraSyncAll(){ EXTRA_SYNC_DEFS.forEach(d => { extraSyncOne(d); }); }
+/* =====================================================================
+   💳 FM2710TU455 (صدام بھائی): ادائیگیوں کی کلاؤڈ کاپی 10-10 دن کے ٹکڑوں میں — پہلے سب ایک ہی دستاویز میں جاتی تھیں (حد 1MB)،
+   بھرنے پر نئی ادائیگیاں دوسرے فون تک جانا بند ہو جاتیں۔ ہر فون کے اندر پوری فہرست پہلے کی طرح (paymentsData، بیک اپ بھی وہی)۔
+   - ٹکڑا: shopData/payments_YYYYMM1|2|3 (بننے کی تاریخ سے — ترمیم سے ادائیگی کا ٹکڑا نہیں بدلتا)
+   - فہرست: shopData/paymentsIndex — ہر ٹکڑے کا آخری نشان؛ فون صرف وہی ٹکڑا پڑھتا ہے جو بدلا ہو
+   - پرانی دستاویز shopData/payments مٹائی نہیں جاتی: پہلا نیا فون اس سے سب لے لیتا ہے؛ بعد میں پرانے ورژن والے فون کی
+     نئی ادائیگیاں (نمبر cut سے بڑا) بھی وہیں سے آتی رہتی ہیں
+   - کلاؤڈ نئے ٹکڑے قبول نہ کرے (اجازت/403) تو خود پرانے طریقے پر واپس
+   ===================================================================== */
+let _payShardOff = false;
+const PAY_IDX_PATH = 'shopData/paymentsIndex';
+function _payShard(p){
+  const m = String((p && (p.created_at || p.date)) || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!m) return '0000000';
+  const d = +m[3]; return m[1] + m[2] + (d <= 10 ? '1' : d <= 20 ? '2' : '3');
+}
+const _payDefs = {};
+function _payDef(sk){ return _payDefs[sk] || (_payDefs[sk] = { key: 'payments_' + sk, idOf: x => x && x.payment_id }); }
+function _payLegacyDef(){ return EXTRA_SYNC_DEFS.find(d => d.key === 'payments'); }
+function _paySort(a){
+  return a.sort((x, y) => String(y.created_at || '').localeCompare(String(x.created_at || '')) || ((Number(y.payment_id) || 0) - (Number(x.payment_id) || 0)));
+}
+async function _payIdxRead(){
+  const res = await authFirestoreFetch(`${PAY_IDX_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+  if(res && res.status === 404) return { ok: true, idx: { m: {}, cut: null }, ut: null };
+  if(!res || !res.ok) return { ok: false, status: res ? res.status : 0 };
+  const d = await res.json();
+  let idx = { m: {}, cut: null };
+  try{ const j = JSON.parse(d.fields?.json?.stringValue || '{}'); idx = { m: (j && j.m) || {}, cut: (j && j.cut != null) ? Number(j.cut) : null }; }catch(e){}
+  return { ok: true, idx, ut: d.updateTime || null };
+}
+async function _payIdxUpdate(fn){
+  for(let a = 0; a < 4; a++){
+    const r = await _payIdxRead(); if(!r.ok) return null;
+    const idx = fn(JSON.parse(JSON.stringify(r.idx))); if(!idx) return r.idx;
+    const pre = r.ut ? `&currentDocument.updateTime=${encodeURIComponent(r.ut)}` : '&currentDocument.exists=false';
+    const res = await authFirestoreFetch(`${PAY_IDX_PATH}?key=${FIREBASE_API_KEY}${pre}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { json: { stringValue: JSON.stringify(idx) }, updatedAt: { integerValue: String(Date.now()) } } })
+    });
+    if(res && res.ok) return idx;
+    if(res && res.status === 403){ _payShardOff = true; return null; }
+    if(!(res && (res.status === 400 || res.status === 404 || res.status === 409 || res.status === 412))) return null;
+  }
+  return null;
+}
+// پرانی (ایک) دستاویز سے لینا — کبھی اس پر لکھنا نہیں
+let _payLegacyAt = 0, _payLegacyMax = 0;
+async function _payLegacyImport(cut){
+  const ld = _payLegacyDef();
+  const cloud = await _xReadCloud(ld);
+  if(!cloud.ok) return false;
+  _payLegacyMax = (cloud.list || []).reduce((a, x) => Math.max(a, Number(x && x.payment_id) || 0), 0);
+  if(cloud.missing) return true;
+  if(cut == null){
+    paymentsData = _paySort(_xMerge(ld, paymentsData || [], cloud.list));
+  } else {
+    const d2 = { key: 'paymentsLegacyNew', idOf: ld.idOf };
+    const big = x => (Number(x && x.payment_id) || 0) > cut;
+    const cl = (cloud.list || []).filter(big);
+    const merged = _xMerge(d2, (paymentsData || []).filter(big), cl);
+    paymentsData = _paySort([...(paymentsData || []).filter(x => !big(x)), ...merged]);
+    _xSetBase(d2, cl);
+  }
+  return true;
+}
+const _payBusy = {};
+async function _paySyncShard(sk){
+  if(_payBusy[sk]) return { ok: false };
+  _payBusy[sk] = true;
+  const def = _payDef(sk);
+  let ok = false, wrote = false;
+  try{
+    for(let a = 0; a < 3; a++){
+      const cloud = await _xReadCloud(def);
+      if(!cloud.ok){ if(cloud.status === 403) _payShardOff = true; break; }
+      const merged = _xMerge(def, (paymentsData || []).filter(p => _payShard(p) === sk), cloud.list);
+      paymentsData = _paySort([...(paymentsData || []).filter(p => _payShard(p) !== sk), ...merged]);
+      const strip = _xHeavyStrip(merged);
+      if(_stableStr(strip) === _stableStr(cloud.list)){ _xSetBase(def, merged); ok = true; break; }
+      const body = JSON.stringify(strip);
+      if(body.length > 950000){ console.warn('payments shard too large', sk, body.length); break; }
+      const pre = cloud.updateTime ? `&currentDocument.updateTime=${encodeURIComponent(cloud.updateTime)}` : '&currentDocument.exists=false';
+      const res = await authFirestoreFetch(`shopData/${def.key}?key=${FIREBASE_API_KEY}${pre}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { json: { stringValue: body }, updatedAt: { integerValue: String(Date.now()) } } })
+      });
+      if(res && res.ok){ _xSetBase(def, merged); ok = true; wrote = true; break; }
+      if(res && res.status === 403){ _payShardOff = true; break; }
+      if(!(res && (res.status === 400 || res.status === 404 || res.status === 409 || res.status === 412))) break;
+    }
+  }catch(e){}
+  _payBusy[sk] = false;
+  return { ok, wrote };
+}
+let _payAllBusy = false, _payAllAgain = false;
+async function paySyncAll(){
+  if(_payShardOff){ return extraSyncOne(_payLegacyDef()); }
+  if(_payAllBusy){ _payAllAgain = true; return; }
+  _payAllBusy = true;
+  try{
+    const r = await _payIdxRead();
+    if(!r.ok){ if(r.status === 403) _payShardOff = true; throw new Error('idx'); }
+    let idx = r.idx;
+    // پرانی دستاویز: پہلی بار سب کچھ، بعد میں ہر 10 منٹ میں ایک بار (پرانے ورژن والے فون کی نئی ادائیگیاں)
+    if(idx.cut == null || Date.now() - _payLegacyAt > 600000){
+      const okL = await _payLegacyImport(idx.cut);
+      if(okL){
+        _payLegacyAt = Date.now();
+        if(idx.cut == null){ const cut = _payLegacyMax; idx = (await _payIdxUpdate(i => { if(i.cut == null){ i.cut = cut; return i; } return null; })) || idx; }
+      }
+    }
+    if(idx.cut == null) throw new Error('no-cut'); // پرانا ریکارڈ ابھی نہیں ملا — اگلی بار
+    const seen = loadFromStorage('payShardSeen', {}) || {}, sigs = loadFromStorage('payShardSig', {}) || {};
+    const groups = new Map();
+    (paymentsData || []).forEach(p => { if(!p) return; const k = _payShard(p); if(!groups.has(k)) groups.set(k, []); groups.get(k).push(p); });
+    const keys = new Set([...Object.keys(idx.m || {}), ...groups.keys()]);
+    const wrote = [];
+    for(const sk of keys){
+      const sig = _stableStr(_xHeavyStrip(groups.get(sk) || []));
+      if(idx.m[sk] != null && idx.m[sk] === seen[sk] && sigs[sk] === sig) continue; // نہ یہاں بدلا، نہ کلاؤڈ پر
+      const res = await _paySyncShard(sk);
+      if(!res.ok) continue;
+      sigs[sk] = _stableStr(_xHeavyStrip((paymentsData || []).filter(p => _payShard(p) === sk)));
+      if(res.wrote || idx.m[sk] == null) wrote.push(sk); else seen[sk] = idx.m[sk];
+    }
+    if(wrote.length){
+      const stamp = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+      const ni = await _payIdxUpdate(i => { wrote.forEach(k => { i.m[k] = stamp; }); return i; });
+      if(ni) wrote.forEach(k => { seen[k] = ni.m[k]; });
+    }
+    saveToStorage('payShardSeen', seen); saveToStorage('payShardSig', sigs);
+    try{ _payLegacyDef().bumpNext(paymentsData); }catch(e){}
+    try{ persistAllData(); }catch(e){}
+    try{ _xLastSig['payments'] = JSON.stringify(_xHeavyStrip(paymentsData || [])); }catch(e){}
+  }catch(e){ /* آف لائن — اگلی بار */ }
+  _payAllBusy = false;
+  try{
+    if(typeof currentScreenName !== 'undefined'){
+      if(currentScreenName === 'payments' && typeof renderPaymentsScreen === 'function') renderPaymentsScreen();
+      if(currentScreenName === 'home' && typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary();
+    }
+  }catch(e){}
+  if(_payShardOff) return extraSyncOne(_payLegacyDef());
+  if(_payAllAgain){ _payAllAgain = false; setTimeout(() => { try{ paySyncAll(); }catch(e){} }, 400); }
+}
+
 // ---------- تبدیلی ہوتے ہی (persistAllData کے بعد) — صرف اسی فہرست کو بھیجیں جو واقعی بدلی ہو ---------- -->
 let _xCheckTimer = null;
 function extraSyncScheduleCheck(){
