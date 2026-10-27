@@ -8676,6 +8676,43 @@ function _storageAutoArchive(minDays, targetFrac){
   return done;
 }
 // ہم وقت سازی میں: ہٹایا ہوا ٹکڑا چھوڑ دیں — مگر اگر اس میں اس فون پر کوئی نئی چیز آ جائے تو واپس عام ہم وقت سازی (بنیاد نہیں، اس لیے صرف ملاپ)
+// ---------- 📂 (28 اکتوبر): فون سے ہٹے پرانے بل/ادائیگیاں کلاؤڈ سے خود منگوا کر لیجر اور بل ہسٹری میں دکھائیں (صرف یادداشت میں، فون میں جگہ نہیں لیتے) ----------
+const _archMem = { inv: [], pay: [], at: 0, busy: null };
+function _archHas(){ try{ const a = loadFromStorage('invArchived', null), b = loadFromStorage('payArchived', null); return !!((a && Object.keys(a).length) || (b && Object.keys(b).length)); }catch(e){ return false; } }
+function _withArch(arr, t){
+  const base = arr || [];
+  if(!_archHas()) return base;
+  if(!_archMem.busy && Date.now() - _archMem.at > 600000) _archLoad();
+  const idf = t === 'inv' ? 'invoice_id' : 'payment_id', have = new Set(base.map(x => x && x[idf]));
+  const extra = _archMem[t].filter(x => x && !have.has(x[idf]));
+  return extra.length ? base.concat(extra) : base;
+}
+function _archLoad(){
+  _archMem.busy = (async () => {
+    const inv = [], pay = [];
+    try{
+      const ia = loadFromStorage('invArchived', {}) || {}, pa = loadFromStorage('payArchived', {}) || {};
+      for(const sk of Object.keys(ia)){ const r = await _xReadCloud({ key: 'invoices_' + sk, idOf: x => x && x.invoice_id }); if(r.ok) inv.push(...r.list); }
+      for(const sk of Object.keys(pa)){ const r = await _xReadCloud(_payDef(sk)); if(r.ok) pay.push(...r.list); }
+      if(inv.length || pay.length || !Object.keys(ia).length){ _archMem.inv = inv; _archMem.pay = pay; _archMem.at = Date.now(); }
+    }catch(e){}
+    _archMem.busy = null;
+    try{ if(document.getElementById('pledOverlay')?.style.display === 'flex' || (pledState && pledState.embed)) renderPartyLedger(); }catch(e){}
+    try{ if(typeof currentScreenName !== 'undefined' && currentScreenName === 'billhistory') renderBillHistory(); }catch(e){}
+  })();
+  return _archMem.busy;
+}
+// پرانا بل کھولنا/پرنٹ/ترمیم ہو تو اس کا پورا ٹکڑا واپس فون میں (ہم وقت سازی میں صرف ملاپ — کچھ نہیں مٹتا)
+function _archRestoreInv(id){
+  try{
+    if((invoicesData || []).some(i => i && i.invoice_id === id)) return;
+    const hit = _archMem.inv.find(i => i && i.invoice_id === id); if(!hit) return;
+    const sk = _invShard(hit), have = new Set(invoicesData.map(i => i && i.invoice_id));
+    invoicesData = _invSort([...invoicesData, ..._archMem.inv.filter(i => i && _invShard(i) === sk && !have.has(i.invoice_id)).map(i => JSON.parse(JSON.stringify(i)))]);
+    const ar = loadFromStorage('invArchived', {}) || {}; delete ar[sk]; saveToStorage('invArchived', ar);
+    saveToStorage('invoices', invoicesData);
+  }catch(e){}
+}
 function _archSkip(arKey, sk, groups){
   const ar = loadFromStorage(arKey, null);
   if(!ar || !ar[sk]) return false;
@@ -9749,8 +9786,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
-const APP_BUILD_VERSION = 'FM2810WE467'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'فون کی جگہ خود بنتی ہے — پرانے بل کلاؤڈ میں، کوئی پیغام نہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE468'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'پرانے بل اور ادائیگیاں لیجر/بل ہسٹری میں کلاؤڈ سے خود'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29444,7 +29481,7 @@ function _pledEntries(kind, id){
   const ts = (x, d) => { const t = x ? new Date(x).getTime() : NaN; return isNaN(t) ? new Date((d || '1970-01-01') + 'T12:00:00').getTime() : t; };
   if(kind === 'customers'){
     const c = (customersData || []).find(x => x && x.customer_id === id); if(!c) return { party: null, out };
-    (invoicesData || []).filter(i => i && i.customer_id === id && i.status !== 'voided' && i.status !== 'rejected').forEach(i => {
+    _withArch(invoicesData, 'inv').filter(i => i && i.customer_id === id && i.status !== 'voided' && i.status !== 'rejected').forEach(i => {
       const d = _pledDay(bsInvDay(i)), t = ts(i.created_at, d);
       const items = (i.items || []).length;
       out.push({ day: d, ts: t, desc: '🧾 بل ' + (i.invoice_no || '') + (Number(i.cust_bill_no) > 0 ? ' (' + String(i.cust_bill_no).padStart(3, '0') + ')' : '') + ' — ' + items + ' مال', red: Number(i.grand_total) || 0, green: 0 });
@@ -29452,7 +29489,7 @@ function _pledEntries(kind, id){
       if(cash > 0) out.push({ day: d, ts: t + 1, desc: '💵 بل کے ساتھ وصولی', red: 0, green: cash });
       (i.items || []).filter(it => it && it.returned && Number(it.returnAmount) > 0).forEach(it => out.push({ day: d, ts: t + 2, desc: '↩️ واپسی — ' + (it.name || '') + (it.returnQty ? ' × ' + it.returnQty : ''), red: 0, green: Number(it.returnAmount) || 0 }));
     });
-    (paymentsData || []).filter(pm => pm && pm.party_type === 'customer' && pm.party_id === id).forEach(pm => {
+    _withArch(paymentsData, 'pay').filter(pm => pm && pm.party_type === 'customer' && pm.party_id === id).forEach(pm => {
       const d = _pledDay(bsPayDay(pm)), a = Number(pm.amount) || 0; if(!a) return;
       const note = (typeof _payUserNote === 'function' ? _payUserNote(pm.note) : '') || '';
       if(pm.direction === 'in') out.push({ day: d, ts: ts(pm.created_at, d), desc: '📥 وصولی' + (pm.method ? ' — ' + pm.method : '') + (note ? ' — ' + note : '') + (pm.edited ? ' (✏️ درست کی گئی)' : ''), red: 0, green: a, pid: pm.payment_id });
@@ -38673,6 +38710,7 @@ function confirmShipmentReceipt(){
    Item Return — کسٹمر (والٹ میں رقم + اسٹاک واپس)
    ===================================================================== */
 function openReturnItemModal(invoiceId){
+  _archRestoreInv(invoiceId);
   document.getElementById('returnModalMeta').textContent = 'Viewing invoice…';
   renderReturnItemModal(invoiceId);
   document.getElementById('returnItemModal').classList.add('show');
@@ -44377,7 +44415,7 @@ function renderBillHistory(){
   const dayFilterVal = document.getElementById('billDayFilter')?.value || '';
 
   // ---------- Role Scoping ہمیشہ لاگو رہتا ہے (سیکیورٹی): سیلزمین صرف اپنے بل دیکھے، ایڈمن سب/منتخب سیلزمین ----------
-  let base = invoicesData.slice();
+  let base = _withArch(invoicesData, 'inv').slice(); // 📂 پرانے بل کلاؤڈ سے بھی
   if(!isAdmin){
     base = base.filter(inv => inv.sold_by === AppState.currentUser?.name);
   } else if(salesmanFilterVal && salesmanFilterVal !== 'all'){
@@ -44500,6 +44538,7 @@ function renderBillHistory(){
 // ---------- اہم: صرف status بدلنا کافی نہیں — جو بھی اثر اس بل نے چھوڑا تھا (اسٹاک، کیش، بقایہ، والٹ) وہ سب واپس پلٹنا ضروری ہے ----------
 // ---------- Voided ٹیب کے اندر — پرانا Voided بل ہمیشہ کے لیے صاف کریں (مالی اثرات پہلے ہی واپس لیے جا چکے، اب صرف فہرست سے ہٹانا ہے) ----------
 function permanentlyDeleteBill(invoiceId){
+  _archRestoreInv(invoiceId);
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
   if(!inv) return;
   if(!confirm(`Permanently delete voided bill ${inv.invoice_no}? This cannot be undone.`)) return;
@@ -44516,6 +44555,7 @@ function permanentlyDeleteBill(invoiceId){
 // =====================================================================
 function _xfLine(it, q){ return Math.round(q * ((Number(it.unitPrice) || 0) + (Number(it.laborPerUnit) || 0)) * 100) / 100; }
 function openBillTransfer(invoiceId){
+  _archRestoreInv(invoiceId);
   if(AppState.currentRole !== 'admin'){ alert('🔒 یہ کام صرف ایڈمن کر سکتا ہے'); return; }
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
   if(!inv || inv.status === 'voided') return;
@@ -44678,6 +44718,7 @@ function _beAllVariants(){
 function _beFindV(vid){ for(const p of (productsData || [])) for(const v of (p.variants || [])) if(v.variant_id === vid) return v; return null; }
 function _beRound(n){ return Math.round((Number(n) || 0) * 100) / 100; }
 function openBillEdit(invoiceId){
+  _archRestoreInv(invoiceId);
   if(AppState.currentRole !== 'admin'){ alert('🔒 بل میں ترمیم صرف ایڈمن کر سکتا ہے'); return; }
   const inv = (invoicesData || []).find(i => i.invoice_id === invoiceId); if(!inv) return;
   if(inv.status === 'voided'){ alert('یہ بل مٹایا جا چکا ہے'); return; }
@@ -44836,6 +44877,7 @@ async function beSave(){
   try{ openInvoicePreview(inv.invoice_id); }catch(e){} // دوبارہ پرنٹ / بھیجنے کے لیے
 }
 function adminVoidBill(invoiceId){
+  _archRestoreInv(invoiceId);
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
   if(!inv) return;
   if(inv.status === 'voided'){
@@ -46266,6 +46308,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 // (مثلاً 🔁 Sale Record لسٹ سے "👁 Preview" دبانے پر — تاکہ فوراً نظر آ جائے کہ یہ آئٹم اس بل میں کس ریٹ پر تھا) ----------
 let currentPreviewHighlightKey = null;
 function openInvoicePreview(invoiceId, highlightMatchKey){
+  _archRestoreInv(invoiceId);
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
   if(!inv) return;
   currentPreviewInvoiceId = invoiceId;
