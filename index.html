@@ -9597,8 +9597,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU460: نقد خریداری مہینہ وار کلاؤڈ ٹکڑوں میں؛ ریکوری لسٹ اور منشی سٹاک ریکارڈ کی کلاؤڈ کاپی صرف 30 دن (فون میں پورا)
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
-const APP_BUILD_VERSION = 'FM2710TU462'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'منشی کا کوئی آرڈر اب کبھی خاموشی سے غائب نہیں ہوگا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
+const APP_BUILD_VERSION = 'FM2710TU463'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بنے ہوئے بل میں ترمیم — نئی چیز ڈالیں یا تعداد/ریٹ بدلیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -44259,6 +44260,7 @@ function renderBillHistory(){
         ${isAdmin ? (inv.status === 'voided' ? `
           <button class="btnRequestDelete" onclick="permanentlyDeleteBill(${inv.invoice_id})">🗑️ Permanently Delete</button>
         ` : `
+          <button class="btnCollect" onclick="openBillEdit(${inv.invoice_id})" style="background:#1d4ed8; color:#fff;">✏️ ترمیم</button>
           <button class="btnRequestDelete" onclick="adminVoidBill(${inv.invoice_id})">🗑️ مٹائیں</button>
           <button class="btnCollect" onclick="openReturnItemModal(${inv.invoice_id})">↩️ واپسی</button>
         `) : `
@@ -44438,6 +44440,174 @@ function confirmBillTransfer(invoiceId){
   try{ renderBillHistory(); }catch(e){}
   try{ if(typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary(); }catch(e){}
   alert(`✅ منتقل ہو گیا\n\n${A.name}: نیا بقایا Rs. ${Math.round(A.total_receivable).toLocaleString()}\n${B.name}: نیا بقایا Rs. ${Math.round(B.total_receivable).toLocaleString()}\n\n${B.name} کا بل: ${target.invoice_no}`);
+}
+
+// =====================================================================
+// ✏️ FM2710TU463 (صدام بھائی): بنے ہوئے (پرنٹ ہو چکے) بل میں ترمیم — صرف ایڈمن۔ نئی چیز ڈالیں، تعداد/ریٹ/مزدوری بدلیں، چیز ہٹائیں۔
+//   سٹاک چالان سمیت درست (بڑھی تو کٹے، گھٹی تو اسی چالان میں واپس)؛ فرق گاہک کے بقایا میں (کم ہو کر منفی ہو تو والٹ میں)؛
+//   نقد گاہک ہو تو کیش میں۔ ہر ترمیم بل پر درج (edits)۔ پہلے پوری تبدیلی دکھا کر تنبیہ، پھر ایڈمن PIN
+// =====================================================================
+function _beAllVariants(){
+  const out = [];
+  (productsData || []).forEach(p => (p.variants || []).forEach(v => out.push({ vid: v.variant_id, name: `${p.name} ${v.label || ''}`.trim(), label: v.label || '', unit: p.unit || v.unit || '', price: Number(v.retail) || 0, labor: Number(v.sellLabor) || 0, serial: p.serial_no || 0 })));
+  return out.sort((a, b) => (a.serial || 1e9) - (b.serial || 1e9));
+}
+function _beFindV(vid){ for(const p of (productsData || [])) for(const v of (p.variants || [])) if(v.variant_id === vid) return v; return null; }
+function _beRound(n){ return Math.round((Number(n) || 0) * 100) / 100; }
+function openBillEdit(invoiceId){
+  if(AppState.currentRole !== 'admin'){ alert('🔒 بل میں ترمیم صرف ایڈمن کر سکتا ہے'); return; }
+  const inv = (invoicesData || []).find(i => i.invoice_id === invoiceId); if(!inv) return;
+  if(inv.status === 'voided'){ alert('یہ بل مٹایا جا چکا ہے'); return; }
+  window.__be = { id: invoiceId, rows: (inv.items || []).map((it, idx) => ({ idx, vid: it.variant_id, name: it.name || '', qty: Number(it.qty) || 0, price: Number(it.unitPrice) || 0, labor: Number(it.laborPerUnit) || 0, locked: !!it.returned, removed: false, isNew: false })) };
+  let ov = document.getElementById('beOverlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'beOverlay'; ov.style.cssText = 'position:fixed; inset:0; z-index:10075; background:rgba(15,23,42,.6); display:flex; align-items:center; justify-content:center; padding:8px;'; document.body.appendChild(ov); }
+  ov.style.display = 'flex';
+  beRender();
+}
+function _beTotals(inv){
+  const rows = window.__be.rows.filter(r => !r.removed);
+  const sub = rows.reduce((a, r) => a + r.qty * r.price, 0), lab = rows.reduce((a, r) => a + r.qty * r.labor, 0);
+  const tax = Math.round(sub * (Number(inv.tax_percent) || 0) / 100);
+  return { grand: _beRound(sub + lab + (Number(inv.discount) || 0) + tax), tax };
+}
+function beRender(){
+  const ov = document.getElementById('beOverlay'), st = window.__be; if(!ov || !st) return;
+  const inv = (invoicesData || []).find(i => i.invoice_id === st.id); if(!inv){ ov.style.display = 'none'; return; }
+  const esc = x => (typeof bsEsc === 'function' ? bsEsc(x) : String(x == null ? '' : x).replace(/</g, '&lt;'));
+  const f = n => Math.round(Number(n) || 0).toLocaleString('en-US');
+  const T = _beTotals(inv), d = _beRound(T.grand - (Number(inv.grand_total) || 0));
+  const inp = 'width:100%; box-sizing:border-box; height:36px; border:1.5px solid #cbd5e1; border-radius:8px; padding:0 4px; text-align:center; font:800 15px Arial,sans-serif;';
+  const rowsHtml = st.rows.map((r, i) => r.removed ? '' : `<tr style="background:${r.isNew ? '#ecfdf5' : '#fff'};">
+      <td style="padding:4px; border-bottom:1px solid #e2e8f0; font-size:14px; line-height:1.6;">${esc(r.name)}${r.locked ? '<br><small style="color:#b45309;">↩️ واپسی ہو چکی — بند</small>' : ''}${r.isNew ? '<br><small style="color:#15803d;">نئی</small>' : ''}</td>
+      <td style="padding:3px; border-bottom:1px solid #e2e8f0; width:62px;"><input type="number" inputmode="decimal" value="${r.qty}" ${r.locked ? 'disabled' : ''} oninput="window.__be.rows[${i}].qty=Math.max(0,parseFloat(this.value)||0); beUpdTotal()" style="${inp}"></td>
+      <td style="padding:3px; border-bottom:1px solid #e2e8f0; width:72px;"><input type="number" inputmode="decimal" value="${r.price}" ${r.locked ? 'disabled' : ''} oninput="window.__be.rows[${i}].price=Math.max(0,parseFloat(this.value)||0); beUpdTotal()" style="${inp}"></td>
+      <td style="padding:3px; border-bottom:1px solid #e2e8f0; width:54px;"><input type="number" inputmode="decimal" value="${r.labor}" ${r.locked ? 'disabled' : ''} oninput="window.__be.rows[${i}].labor=Math.max(0,parseFloat(this.value)||0); beUpdTotal()" style="${inp}"></td>
+      <td style="padding:3px; border-bottom:1px solid #e2e8f0; width:34px; text-align:center;">${r.locked ? '' : `<button type="button" onclick="window.__be.rows[${i}].removed=true; beRender()" style="width:30px; height:30px; border:none; border-radius:8px; background:#fee2e2; color:#b91c1c; font-size:15px; cursor:pointer;">✖</button>`}</td></tr>`).join('');
+  const opts = _beAllVariants().map(v => `<option value="${v.vid}">${esc((v.serial ? v.serial + ' — ' : '') + v.name)}</option>`).join('');
+  ov.innerHTML = `<div dir="rtl" style="width:100%; max-width:640px; max-height:94vh; display:flex; flex-direction:column; background:#fff; border-radius:18px; overflow:hidden; font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+    <div style="background:linear-gradient(135deg,#1d4ed8,#1e3a8a); color:#fff; padding:8px 12px; display:flex; align-items:center; gap:8px;">
+      <div style="flex:1; min-width:0; font-size:19px; font-weight:800; line-height:1.8;">✏️ بل میں ترمیم — <bdi dir="auto">${esc(inv.invoice_no)}</bdi> · <bdi dir="auto">${esc(inv.customer_name)}</bdi></div>
+      <button type="button" onclick="document.getElementById('beOverlay').style.display='none'" style="width:36px; height:36px; border:none; border-radius:50%; background:rgba(255,255,255,.2); color:#fff; font-size:17px; cursor:pointer;">✖</button></div>
+    <div style="overflow:auto; flex:1; padding:6px 8px;">
+      <table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#f1f5f9; font-size:13px;"><th style="padding:5px; text-align:right;">چیز</th><th>تعداد</th><th>ریٹ</th><th>مزدوری</th><th></th></tr></thead><tbody>${rowsHtml}</tbody></table>
+      <div style="margin-top:10px; padding:8px; border:2px dashed #16a34a; border-radius:12px; background:#f0fdf4;">
+        <div style="font-size:15px; font-weight:800; line-height:1.8;">➕ نئی چیز ڈالیں</div>
+        <input type="text" id="beSearch" placeholder="🔍 نام یا سیریل" oninput="beFilter()" style="width:100%; box-sizing:border-box; height:38px; margin:3px 0; border:1.5px solid #86efac; border-radius:9px; padding:0 8px; font-size:15px;">
+        <select id="beVar" onchange="bePick()" style="width:100%; height:40px; border:1.5px solid #86efac; border-radius:9px; font-size:15px; font-family:inherit;"><option value="">— چیز چنیں —</option>${opts}</select>
+        <div style="display:flex; gap:6px; margin-top:6px; align-items:center;">
+          <input type="number" id="beQty" inputmode="decimal" placeholder="تعداد" style="${inp} flex:1;">
+          <input type="number" id="bePrice" inputmode="decimal" placeholder="ریٹ" style="${inp} flex:1;">
+          <input type="number" id="beLabor" inputmode="decimal" placeholder="مزدوری" style="${inp} flex:1;">
+          <button type="button" onclick="beAdd()" style="flex:0 0 auto; height:38px; padding:0 14px; border:none; border-radius:9px; background:#16a34a; color:#fff; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer;">ڈالیں</button></div></div>
+    </div>
+    <div style="padding:8px 10px; border-top:1px solid #e2e8f0; background:#f8fafc;">
+      <div id="beTotal" style="font-size:15px; font-weight:900; line-height:1.9;">پہلے: <span dir="ltr" style="font-family:Arial,sans-serif;">Rs. ${f(inv.grand_total)}</span> · اب: <span dir="ltr" style="font-family:Arial,sans-serif;">Rs. ${f(T.grand)}</span> · فرق: <span dir="ltr" style="font-family:Arial,sans-serif; color:${d > 0 ? '#b91c1c' : d < 0 ? '#15803d' : '#475569'};">${d > 0 ? '+' : ''}${f(d)}</span></div>
+      <button type="button" onclick="beSave()" style="width:100%; height:46px; margin-top:4px; border:none; border-radius:12px; background:linear-gradient(135deg,#1d4ed8,#1e3a8a); color:#fff; font-family:inherit; font-size:17px; font-weight:800; cursor:pointer;">💾 ترمیم محفوظ کریں</button></div></div>`;
+}
+function beUpdTotal(){
+  const st = window.__be; const inv = (invoicesData || []).find(i => i.invoice_id === (st && st.id)); const el = document.getElementById('beTotal'); if(!inv || !el) return;
+  const f = n => Math.round(Number(n) || 0).toLocaleString('en-US'); const T = _beTotals(inv), d = _beRound(T.grand - (Number(inv.grand_total) || 0));
+  el.innerHTML = `پہلے: <span dir="ltr" style="font-family:Arial,sans-serif;">Rs. ${f(inv.grand_total)}</span> · اب: <span dir="ltr" style="font-family:Arial,sans-serif;">Rs. ${f(T.grand)}</span> · فرق: <span dir="ltr" style="font-family:Arial,sans-serif; color:${d > 0 ? '#b91c1c' : d < 0 ? '#15803d' : '#475569'};">${d > 0 ? '+' : ''}${f(d)}</span>`;
+}
+function beFilter(){
+  const q = String(document.getElementById('beSearch')?.value || '').trim().toLowerCase();
+  document.querySelectorAll('#beVar option').forEach(o => { if(!o.value) return; o.hidden = !!q && !o.textContent.toLowerCase().includes(q); });
+  const first = Array.from(document.querySelectorAll('#beVar option')).find(o => o.value && !o.hidden);
+  if(first && q){ document.getElementById('beVar').value = first.value; bePick(); }
+}
+function bePick(){
+  const vid = Number(document.getElementById('beVar')?.value); const v = _beAllVariants().find(x => x.vid === vid); if(!v) return;
+  document.getElementById('bePrice').value = v.price || ''; document.getElementById('beLabor').value = v.labor || '';
+  const q = document.getElementById('beQty'); if(q && !q.value) q.focus();
+}
+function beAdd(){
+  const vid = Number(document.getElementById('beVar')?.value); const v = _beAllVariants().find(x => x.vid === vid);
+  const qty = parseFloat(document.getElementById('beQty')?.value) || 0, price = parseFloat(document.getElementById('bePrice')?.value) || 0, labor = parseFloat(document.getElementById('beLabor')?.value) || 0;
+  if(!v){ alert('پہلے چیز چنیں'); return; } if(!(qty > 0)){ alert('تعداد لکھیں'); return; }
+  window.__be.rows.push({ idx: -1, vid: v.vid, name: v.name, qty, price, labor, locked: false, removed: false, isNew: true });
+  beRender();
+}
+// سٹاک کاٹنا اور معلوم کرنا کہ کس چالان سے کٹا (منافع کے لیے chalanAlloc)
+function _beTake(v, q){
+  const before = {}; (v.chalans || []).forEach(c => { before[c.chalanNo] = Number(c.qty) || 0; });
+  deductVariantStock(v, q, null);
+  const alloc = {}; (v.chalans || []).forEach(c => { const t = _beRound((before[c.chalanNo] || 0) - (Number(c.qty) || 0)); if(t > 0) alloc[c.chalanNo] = t; });
+  v.salesCount = (Number(v.salesCount) || 0) + q;
+  return alloc;
+}
+function _beGive(v, q, alloc){
+  const give = {}; let left = q;
+  Object.keys(alloc || {}).reverse().forEach(no => { if(left <= 0) return; const t = Math.min(Number(alloc[no]) || 0, left); if(t > 0){ give[no] = t; alloc[no] = _beRound((Number(alloc[no]) || 0) - t); if(!(alloc[no] > 0)) delete alloc[no]; left = _beRound(left - t); } });
+  restoreVariantStock(v, q, give);
+  v.salesCount = Math.max(0, (Number(v.salesCount) || 0) - q);
+}
+async function beSave(){
+  const st = window.__be; const inv = (invoicesData || []).find(i => i.invoice_id === (st && st.id)); if(!inv) return;
+  if(AppState.currentRole !== 'admin'){ alert('🔒 صرف ایڈمن'); return; }
+  const oldItems = inv.items || [];
+  const changes = [];
+  st.rows.forEach(r => {
+    if(r.isNew){ if(!r.removed && r.qty > 0) changes.push(`➕ ${r.name}: ${r.qty} × ${r.price}`); return; }
+    const o = oldItems[r.idx]; if(!o) return;
+    if(r.removed || !(r.qty > 0)) changes.push(`✖ ${r.name} ہٹائی (${o.qty})`);
+    else if(r.qty !== Number(o.qty) || r.price !== Number(o.unitPrice) || r.labor !== (Number(o.laborPerUnit) || 0)) changes.push(`✏️ ${r.name}: ${o.qty} × ${o.unitPrice} → ${r.qty} × ${r.price}${r.labor !== (Number(o.laborPerUnit) || 0) ? ' (مزدوری ' + (o.laborPerUnit || 0) + ' → ' + r.labor + ')' : ''}`);
+  });
+  if(!changes.length){ alert('کوئی تبدیلی نہیں کی گئی'); return; }
+  const T = _beTotals(inv), oldGrand = Number(inv.grand_total) || 0, delta = _beRound(T.grand - oldGrand);
+  const f = n => Math.round(Number(n) || 0).toLocaleString('en-US');
+  const esc = x => String(x == null ? '' : x).replace(/</g, '&lt;');
+  const ok = await uDialog({ title: '⚠️ بل میں ترمیم کریں؟', tone: 'red', okText: 'ہاں، آگے', cancelText: '✖ واپس',
+    message: `<div style="text-align:right; font-size:14px; line-height:1.9;">${changes.map(esc).join('<br>')}</div><div style="margin-top:6px; font-weight:800;">سٹاک اور ${inv.customer_id != null ? 'گاہک کا بقایا' : 'کیش'} بھی اسی حساب سے بدلیں گے۔</div>`,
+    rows: [{ label: 'پہلے بل', value: 'Rs. ' + f(oldGrand) }, { label: 'اب بل', value: 'Rs. ' + f(T.grand), big: true }, { label: 'فرق', value: (delta > 0 ? '+' : '') + f(delta), bg: delta > 0 ? '#fee2e2' : '#dcfce7', fg: delta > 0 ? '#7f1d1d' : '#14532d' }] });
+  if(!ok) return;
+  if(!(await _askAdminPinForSerialMaster('بل ' + (inv.invoice_no || '') + ' میں ترمیم'))) return;
+  try{ pauseCloudPolling(15000); }catch(e){}
+  const by = (AppState.currentUser && AppState.currentUser.name) || 'admin';
+  const before = JSON.parse(JSON.stringify({ items: oldItems, grand_total: oldGrand, amount_due: getInvoiceAmountDue(inv) }));
+  const newItems = [];
+  st.rows.forEach(r => {
+    const v = _beFindV(r.vid);
+    if(!r.isNew){
+      const o = oldItems[r.idx]; if(!o) return;
+      if(r.locked){ newItems.push(o); return; }
+      const oq = Number(o.qty) || 0, nq = (r.removed || !(r.qty > 0)) ? 0 : r.qty, dq = _beRound(nq - oq);
+      const alloc = Object.assign({}, o.chalanAlloc || {});
+      if(v && dq > 0){ const a = _beTake(v, dq); Object.keys(a).forEach(k => { alloc[k] = _beRound((Number(alloc[k]) || 0) + a[k]); }); }
+      if(v && dq < 0) _beGive(v, -dq, alloc);
+      if(nq > 0) newItems.push(Object.assign({}, o, { qty: nq, unitPrice: r.price, laborPerUnit: r.labor, chalanAlloc: Object.keys(alloc).length ? alloc : null }));
+    } else if(!r.removed && r.qty > 0){
+      const a = v ? _beTake(v, r.qty) : {};
+      newItems.push({ variant_id: r.vid, name: r.name, label: (v && v.label) || '', qty: r.qty, unitPrice: r.price, unit: '', laborPerUnit: r.labor, chalanAlloc: Object.keys(a).length ? a : null, addedByEdit: true });
+    }
+  });
+  inv.items = newItems; inv.tax_amount = T.tax; inv.grand_total = T.grand;
+  const c = inv.customer_id != null ? (customersData || []).find(x => x && x.customer_id === inv.customer_id) : null;
+  if(c){
+    const due = getInvoiceAmountDue(inv), nd = _beRound(due + delta);
+    c.walletHistory = c.walletHistory || [];
+    if(nd >= 0){ c.total_receivable = _beRound((Number(c.total_receivable) || 0) + delta); inv.amount_due = nd; }
+    else {
+      c.total_receivable = _beRound((Number(c.total_receivable) || 0) - due); inv.amount_due = 0;
+      c.wallet_balance = _beRound((Number(c.wallet_balance) || 0) - nd);
+      c.walletHistory.unshift({ type: 'deposit', amount: -nd, date: bizDateKey(), note: `✏️ ${inv.invoice_no} کم ہوا — زائد رقم والٹ میں` });
+    }
+    c.walletHistory.unshift({ type: 'bill_edit', amount: delta, date: bizDateKey(), at: new Date().toISOString(), by, note: `✏️ بل ${inv.invoice_no} میں ترمیم: Rs. ${f(oldGrand)} → Rs. ${f(T.grand)}` });
+  } else {
+    financeDummy.cashInHand = (Number(financeDummy.cashInHand) || 0) + delta;
+  }
+  inv.paid_now = Math.max(0, _beRound(inv.grand_total - (Number(inv.amount_due) || 0)));
+  inv.edited = true;
+  inv.edits = (inv.edits || []).concat([{ at: new Date().toISOString(), by, from: oldGrand, to: T.grand, changes, before }]);
+  try{ recomputeReservedFromOrders(); }catch(e){}
+  persistAllData();
+  try{ pushInvoicesToCloud(); }catch(e){}
+  try{ pushProductsToCloud(); }catch(e){}
+  try{ if(c) pushCustomersToCloud(); else pushFinanceToCloud(); }catch(e){}
+  document.getElementById('beOverlay').style.display = 'none';
+  try{ renderBillHistory(); }catch(e){}
+  try{ if(typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary(); }catch(e){}
+  await uAlert('✅ بل میں ترمیم ہو گئی', `نیا بل: Rs. ${f(T.grand)} (فرق ${delta > 0 ? '+' : ''}${f(delta)})` + (c ? `<br>${esc(c.name)} کا نیا بقایا: Rs. ${f(c.total_receivable)}` : ''), 'green');
+  try{ openInvoicePreview(inv.invoice_id); }catch(e){} // دوبارہ پرنٹ / بھیجنے کے لیے
 }
 function adminVoidBill(invoiceId){
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
