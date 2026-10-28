@@ -27,6 +27,85 @@ function __appHostKind(h, p){
   }catch(e){}
 })();
 </script>
+<script>
+/* 🗄️ FM2810WE470: بڑی الماری — مالک کی ہدایت: «سٹوریج فل ہونے کا کوئی مسئلہ پیدا نہ ہو»
+   فون کا چھوٹا خانہ (localStorage) صرف تقریباً 5MB کا ہے؛ وہ بھرتے ہی بل نہیں بنتے تھے۔
+   اب 20 ہزار حروف سے بڑی ہر چیز (بل، ادائیگیاں، سبزیاں، گاہک، بیوپاری…) فون کی بڑی الماری (IndexedDB — سینکڑوں MB) میں رہتی ہے،
+   چھوٹے خانے میں صرف اس کا نشان۔ ایپ کھلنے سے پہلے الماری کا سارا ڈیٹا یادداشت میں آ جاتا ہے، اس لیے باقی کوڈ ویسے ہی
+   localStorage.getItem / setItem چلاتا ہے — کچھ نہیں بدلتا۔ پرانا بڑا ڈیٹا پہلی بار کھلتے ہی خود منتقل (پہلے الماری میں لکھ کر
+   پکا کیا جاتا ہے، پھر چھوٹے خانے سے ہٹتا ہے — کبھی کچھ ضائع نہیں)۔ الماری نہ کھلے تو سب کچھ پہلے کی طرح چھوٹے خانے میں۔ */
+(function(){
+  'use strict';
+  var PFX = 'fmPos_', MIN = 20000, STUB = '\u0002I', DBN = 'fmBigStore_v1';
+  var LS; try{ LS = window.localStorage; }catch(e){ return; }
+  if(window.__APP_WRONG_REPO || !LS) return;
+  var SP = Storage.prototype, g = SP.getItem, st = SP.setItem, rm = SP.removeItem;
+  var cache = new Map(), pend = new Map(), db = null, flushing = null, bc = null;
+  // ترتیبات (settings) ہمیشہ چھوٹے خانے میں — ایپ کھلنے سے پہلے والا حفاظتی حصہ بھی انہیں پڑھتا ہے
+  function mine(s, k){ return s === LS && typeof k === 'string' && k.indexOf(PFX) === 0 && k !== PFX + 'settings'; }
+  function keys(){ var out = []; try{ for(var i = 0; i < LS.length; i++){ var k = LS.key(i); if(k && k.indexOf(PFX) === 0 && k !== PFX + 'settings') out.push(k); } }catch(e){} return out; }
+  function open(){ return new Promise(function(res, rej){ var r = indexedDB.open(DBN, 1); r.onupgradeneeded = function(){ r.result.createObjectStore('kv'); }; r.onsuccess = function(){ res(r.result); }; r.onerror = function(){ rej(r.error); }; r.onblocked = function(){ rej(new Error('blocked')); }; }); }
+  function tx(fn){ return new Promise(function(res, rej){ var t = db.transaction('kv', 'readwrite'); fn(t.objectStore('kv')); t.oncomplete = function(){ res(); }; t.onerror = function(){ rej(t.error); }; t.onabort = function(){ rej(t.error); }; }); }
+  // لکھائی: ایک ہی لمحے کی سب تبدیلیاں ایک ساتھ الماری میں (ترتیب پکی)؛ ناکام ہو تو دوبارہ
+  function flush(){
+    if(flushing || !pend.size) return flushing;
+    var batch = pend; pend = new Map();
+    flushing = tx(function(s){ batch.forEach(function(v, k){ if(v === null) s.delete(k); else s.put(v, k); }); })
+      .catch(function(e){ batch.forEach(function(v, k){ if(!pend.has(k)) pend.set(k, v); }); console.warn('بڑی الماری: لکھائی دوبارہ', e); return new Promise(function(r){ setTimeout(r, 400); }); })
+      .then(function(){ flushing = null; if(pend.size) return flush(); });
+    return flushing;
+  }
+  function queue(k, v){ pend.set(k, v); Promise.resolve().then(flush); if(bc) try{ bc.postMessage({ k: k, v: v }); }catch(e){} }
+  SP.getItem = function(k){
+    var v = g.apply(this, arguments);
+    if(v === STUB && mine(this, k)) return cache.has(k) ? cache.get(k) : null;
+    return v;
+  };
+  SP.setItem = function(k, v){
+    if(!mine(this, k)) return st.apply(this, arguments);
+    v = String(v);
+    if(db && v.length >= MIN){
+      cache.set(k, v); queue(k, v);
+      if(g.call(LS, k) !== STUB) st.call(LS, k, STUB);
+      return;
+    }
+    st.call(LS, k, v);
+    if(cache.has(k)){ cache.delete(k); if(db) queue(k, null); }
+  };
+  SP.removeItem = function(k){
+    if(mine(this, k) && cache.has(k)){ cache.delete(k); if(db) queue(k, null); }
+    return rm.apply(this, arguments);
+  };
+  window.__bigStore = {
+    size: function(){ var n = 0; cache.forEach(function(v){ n += v.length; }); return n; },
+    count: function(){ return cache.size; }, on: function(){ return !!db; }, flush: flush, raw: function(k){ return g.call(LS, k); }
+  };
+  window.__fmStoreReady = (async function(){
+    if(!window.indexedDB) return;
+    try{
+      db = await open();
+      var all = await new Promise(function(res, rej){ var out = new Map(), t = db.transaction('kv', 'readonly'), c = t.objectStore('kv').openCursor();
+        c.onsuccess = function(e){ var cur = e.target.result; if(cur){ out.set(cur.key, cur.value); cur.continue(); } }; t.oncomplete = function(){ res(out); }; t.onerror = function(){ rej(t.error); }; });
+      var ks = keys(), stale = [];
+      ks.forEach(function(k){ if(g.call(LS, k) === STUB && all.has(k)) cache.set(k, all.get(k)); });
+      all.forEach(function(v, k){ if(!cache.has(k)) stale.push(k); });   // چھوٹے خانے میں نیا (اصل) ڈیٹا ہے تو الماری والی پرانی کاپی بیکار
+      // پرانا بڑا ڈیٹا: پہلے الماری میں پکا، پھر چھوٹے خانے میں صرف نشان
+      var move = ks.filter(function(k){ var v = g.call(LS, k); return v && v !== STUB && v.length >= MIN; });
+      if(move.length || stale.length){
+        var vals = {}; move.forEach(function(k){ vals[k] = g.call(LS, k); });
+        await tx(function(s){ stale.forEach(function(k){ s.delete(k); }); move.forEach(function(k){ s.put(vals[k], k); }); });
+        move.forEach(function(k){ cache.set(k, vals[k]); st.call(LS, k, STUB); });
+      }
+      try{ bc = new BroadcastChannel(DBN); bc.onmessage = function(e){ var d = e.data || {}; if(typeof d.k !== 'string') return; if(d.v === null) cache.delete(d.k); else cache.set(d.k, d.v); }; }catch(e){}
+      try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
+      window.addEventListener('pagehide', flush);
+      document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') flush(); });
+    }catch(e){
+      console.warn('بڑی الماری نہیں کھلی — چھوٹا خانہ', e); db = null;
+    }
+  })();
+})();
+</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -2941,7 +3020,7 @@ function __appHostKind(h, p){
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 <script>window.APP_UPD_LANG='ur';</script>
-<script>
+<script type="text/fm-boot">
 /* ===== یکساں اپڈیٹ پاپ اپ (سب ایپس میں ایک جیسا) — انتظار کی پٹی + "اپڈیٹ مکمل" کارڈ =====
    AppUpd.waiting(sub) — اوپر چھوٹا کارڈ، ریت والی گھڑی؛ AppUpd.hideWaiting()
    AppUpd.done(oldV, newV, note) — پرانا (کٹا ہوا) → نیا ورژن، ایک لائن میں کیا بدلا، نیچے درمیان OK */
@@ -8290,7 +8369,7 @@ function __appHostKind(h, p){
   </div>
 </div>
 
-<script>
+<script type="text/fm-boot">
 /* =====================================================================
    بنیادی ڈھانچہ (SKELETON) — صرف ساخت اور نیویگیشن، ابھی کوئی حقیقی فیچر نہیں
    ===================================================================== */
@@ -9786,8 +9865,9 @@ function getDeveloperContact(){
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
-const APP_BUILD_VERSION = 'FM2810WE469'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'سبزیاں/چالان، گاہک، بیوپاری کے کلاؤڈ ڈبے دبا کر — کبھی نہ بھریں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM2810WE470: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
+const APP_BUILD_VERSION = 'FM2810WE470'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بڑا ڈیٹا فون کی بڑی الماری (IndexedDB) میں — فون کی جگہ بھرنے سے بل رکنا ختم'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -53952,7 +54032,7 @@ document.addEventListener('DOMContentLoaded', () => {
   @keyframes fmUpdSpin{to{transform:rotate(360deg)}}
   @keyframes fmUpdIn{from{transform:translateY(-100%)}to{transform:none}}
 </style>
-<script>
+<script type="text/fm-boot">
 (function(){
   const KEY = 'fmUpdSeenBuild';
   function bar(){
@@ -53976,7 +54056,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- ========================================================================
      🔄 PWA رجسٹریشن: آف لائن سپورٹ + اپڈیٹ کا نظام
      ====================================================================== -->
-<script>
+<script type="text/fm-boot">
 (function(){
   if(!('serviceWorker' in navigator)) return; // پرانا براؤزر — خاموشی سے چھوڑ دیں
 
@@ -54116,7 +54196,7 @@ document.addEventListener('DOMContentLoaded', () => {
   #presenceBar span{background:rgba(0,0,0,.35); border-radius:10px; padding:2px 12px; display:inline-block; text-shadow:0 1px 2px rgba(0,0,0,.5);}
 </style>
 <div id="presenceBar"></div>
-<script>
+<script type="text/fm-boot">
 (function(){
   if(true) return; // 🚫 FM910FR352: "ایڈمن/ملازم کام کر رہا ہے" والی ترچھی پٹی بند — فائدہ نہیں تھا (کوڈ محفوظ ہے)
   const SID = 'x' + Math.random().toString(36).slice(2, 10);          // ہر کھلے ٹیب/ایپ کی اپنی شناخت
@@ -54203,7 +54283,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
-<script>
+<script type="text/fm-boot">
 /* ---------- FM1110SU367: ہر سلیکٹ کے لیے نوری نستعلیق کشیدہ والی اپنی چھوٹی لسٹ (دائیں سائیڈ، لکھائی جتنی چوڑائی، منتخب پر ٹک) ---------- */
 (function(){
   'use strict';
@@ -54291,7 +54371,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, true);
 })();
 </script>
-<script>
+<script type="text/fm-boot">
 /* 👁️ (ہر PIN/پاس ورڈ خانہ) FM2710TU448: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
    جب تک خود نہ دبائیں، ویسا ہی رہتا ہے (دبائے رکھنے کی ضرورت نہیں) */
 (function(){
@@ -54353,5 +54433,25 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 <script>try{ localStorage.removeItem('fmZoomPct'); }catch(e){}</script> <!-- 🔍 FM2710TU456: زوم بٹن صدام بھائی کی ہدایت پر ہٹا دیا (دائیں بائیں کھسکانے سے کھاتا ہل جاتا تھا) -->
+<script>
+/* 🗄️ FM2810WE470: بڑی الماری کا ڈیٹا یادداشت میں آنے کے بعد ایپ کا کوڈ چلتا ہے (ترتیب وہی)؛ اگر صفحہ پہلے ہی پورا کھل چکا ہو تو
+   DOMContentLoaded / load کے بعد جوڑے گئے کام فوراً چلتے ہیں — کوئی کام رہ نہ جائے */
+(function(){
+  var done = false;
+  function run(){
+    if(done) return; done = true;
+    var D = document, W = window;
+    function late(t, f, tgt){ setTimeout(function(){ try{ var ev = new Event(t); if(typeof f === 'function') f.call(tgt, ev); else if(f && f.handleEvent) f.handleEvent(ev); }catch(e){ setTimeout(function(){ throw e; }); } }, 0); }
+    var da = D.addEventListener, wa = W.addEventListener;
+    D.addEventListener = function(t, f, o){ if(t === 'DOMContentLoaded' && D.readyState !== 'loading'){ late(t, f, D); return; } return da.call(this, t, f, o); };
+    W.addEventListener = function(t, f, o){ if((t === 'load' && D.readyState === 'complete') || (t === 'DOMContentLoaded' && D.readyState !== 'loading')){ late(t, f, W); return; } return wa.call(this, t, f, o); };
+    var list = D.querySelectorAll('script[type="text/fm-boot"]');
+    for(var i = 0; i < list.length; i++){ var old = list[i], s = D.createElement('script'); s.text = old.text; old.parentNode.replaceChild(s, old); }
+    if(D.readyState === 'complete' && typeof W.onload === 'function'){ /* کسی کوڈ نے window.onload رکھا ہو */ late('load', W.onload, W); }
+  }
+  var p = window.__fmStoreReady;
+  if(p && p.then) p.then(run, run); else run();
+})();
+</script>
 </body>
 </html>
