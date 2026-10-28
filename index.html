@@ -9987,8 +9987,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE478'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'روزانہ خودکار بیک اپ فون میں (پچھلے 7 دن) — سیٹنگ میں فائل لیں یا واپس لائیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE479'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بیوپاری کی خریداری میں ریٹ بدلیں یا غلط لائن ہٹائیں (ایڈمن، تنبیہ + PIN)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29565,6 +29565,7 @@ function renderPurchaseOrdersScreen(){
         <div class="poActs">
           <button style="background:#eef2ff; color:var(--primary-dark);" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})">🖨️ پرنٹ</button>
           <button style="background:#dcfce7; color:#166534;" onclick="poPaySupplier(${po.supplier_id})">💵 پیمنٹ</button>
+          ${!isPending && AppState.currentRole === 'admin' && !(po.accountedInDaily && !po.isDaily) ? `<button style="background:#7c3aed; color:#fff;" onclick="supEditPurchase(${po.supplier_id}, ${po.po_idx}); setTimeout(() => { try{ renderPurchaseOrdersScreen(); }catch(e){} }, 300);">✏️ ریٹ / 🗑️</button>` : ''}
           ${isPending
             ? `<button style="background:var(--primary); color:#fff;" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 مال وصول</button>
                <button style="background:#eef2ff; color:var(--primary-dark);" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 یاد دہانی</button>
@@ -29725,7 +29726,8 @@ function renderSupplierPoSection(supplierId){
              <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ حذف کریں</button>`
           : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ دیکھیں</button>
              <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ واپسی</button>
-             ${AppState.currentRole === 'admin' && !(po.accountedInDaily && !po.isDaily) ? `<button class="btnPrint" style="background:#1d4ed8; color:#fff;" onclick="event.stopPropagation(); supChangePurchaseSupplier(${s.supplier_id}, ${idx});">🔁 بیوپاری بدلیں</button>` : ''}`;
+             ${AppState.currentRole === 'admin' && !(po.accountedInDaily && !po.isDaily) ? `<button class="btnPrint" style="background:#1d4ed8; color:#fff;" onclick="event.stopPropagation(); supChangePurchaseSupplier(${s.supplier_id}, ${idx});">🔁 بیوپاری بدلیں</button>` : ''}
+             ${AppState.currentRole === 'admin' && !(po.accountedInDaily && !po.isDaily) ? `<button class="btnPrint" style="background:#7c3aed; color:#fff;" onclick="event.stopPropagation(); supEditPurchase(${s.supplier_id}, ${idx});">✏️ ریٹ بدلیں / 🗑️ ہٹائیں</button>` : ''}`;
         // 🎨 FM1510TH390 (صدام صاحب کی ہدایت): ہر پرچیز آرڈر ایک لمبا رنگین کیپسول — اوپر بیچ میں رنگدار تاریخ، نیچے اس دن کی
         // ادائیگی/چھوٹ/بقایا کے کیپسول (وہی حساب جو چٹ میں کھلتا ہے: poDayStatement)، پھر پرانی لائن اور بٹن
         const _pal = [['#ecfdf5','#10b981','#065f46'],['#eff6ff','#3b82f6','#1e3a8a'],['#fff7ed','#f97316','#9a3412'],['#faf5ff','#a855f7','#6b21a8'],['#fdf2f8','#ec4899','#9d174d']][idx % 5];
@@ -30164,6 +30166,78 @@ async function supChangePurchaseSupplier(supplierId, idx){
   try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
   try{ openSupplierProfile(s.supplier_id); }catch(e){}
   uAlert(failed ? '⚠️ کچھ منتقل نہیں ہوا' : '✅ بیوپاری بدل گیا', `${moved} ${po.isDaily ? 'سبزی' : 'آرڈر'} <bdi dir="auto">${esc(t.name)}</bdi> کے کھاتے میں چلی گئی (${f(amt)})۔` + (failed ? `<br>${failed} منتقل نہیں ہو سکیں۔` : '') + '<br><small>جو ادائیگی پہلے کی جا چکی وہ اسی بیوپاری کے کھاتے میں رہے گی۔</small>', failed ? 'amber' : 'green');
+}
+
+// =====================================================================
+// ✏️ (28 اکتوبر، صدام بھائی): خریدی ہوئی سبزی کا ریٹ غلط لگ گیا — ریٹ بدلیں یا لائن ہٹائیں (صرف ایڈمن، تنبیہ + PIN)
+//  • روزانہ (چالان) خریداری: چالان کا حساب نئے ریٹ سے دوبارہ (پرانی رقم بیوپاری کے کھاتے سے واپس، نئی جمع)
+//  • 🗑️ ہٹائیں: صرف بیوپاری کے کھاتے سے یہ خریداری ہٹتی ہے؛ سٹاک وہی رہتا ہے اور چالان دوبارہ «ریٹ باقی» میں آ جاتا ہے
+//  • عام پرچیز آرڈر: لائن کا ریٹ/ہٹانا — فرق بیوپاری کے بقایا میں
+// =====================================================================
+async function supEditPurchase(supplierId, idx){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'خریداری صرف ایڈمن بدل سکتا ہے۔'); return; }
+  const s = suppliersData.find(x => x.supplier_id === supplierId); if(!s) return;
+  const po = (s.purchaseHistory || [])[idx]; if(!po) return;
+  const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x));
+  const f = n => 'Rs. ' + Math.round(Number(n) || 0).toLocaleString('en-US');
+  const items = (po.items || []).map((it, i) => ({ i, it })).filter(x => x.it);
+  window.__pe2 = { rate: {}, del: new Set() };
+  const inp = 'width:96px; height:40px; border:2px solid #a78bfa; border-radius:999px; text-align:center; font:900 16px Arial,sans-serif; direction:ltr;';
+  const rows = items.map(({ i, it }) => `<div style="display:flex; align-items:center; gap:6px; padding:7px 9px; margin-top:6px; border:1.5px solid #ddd6fe; border-radius:16px; background:#faf5ff;">
+      <span style="flex:1; min-width:0; font-size:16px; font-weight:800;">${esc(it.name || '')}${it.label ? ' (' + esc(it.label) + ')' : ''}<br><small dir="ltr" style="font:800 13px Arial,sans-serif; color:#6b21a8;">${Number(it.qty) || 0} × ${Number(it.cost) || 0} = ${Math.round((Number(it.qty) || 0) * (Number(it.cost) || 0)).toLocaleString('en-US')}</small></span>
+      <input type="number" inputmode="decimal" value="${Number(it.cost) || 0}" oninput="window.__pe2.rate[${i}]=this.value" style="${inp}">
+      <label style="display:flex; flex-direction:column; align-items:center; font-size:11px; font-weight:800; color:#b91c1c;"><input type="checkbox" onchange="if(this.checked) window.__pe2.del.add(${i}); else window.__pe2.del.delete(${i});" style="width:22px; height:22px;">ہٹائیں</label></div>`).join('');
+  const ok = await uDialog({ title: '✏️ خریداری میں ترمیم', okText: 'آگے ←', cancelText: '✖ واپس', message:
+    `<div style="font-size:15px; line-height:1.8;"><b><bdi dir="auto">${esc(s.name)}</bdi></b> — 📅 ${esc(po.date || '')}</div><div style="font-size:13px; color:#475569;">نیا خرید ریٹ لکھیں، یا غلط لائن پر «ہٹائیں» کا ٹک لگائیں</div>${rows}` });
+  if(!ok) return;
+  const changes = [];
+  items.forEach(({ i, it }) => {
+    const oldR = Number(it.cost) || 0, q = Number(it.qty) || 0;
+    if(window.__pe2.del.has(i)){ changes.push({ i, it, del: true, diff: -Math.round(q * oldR) }); return; }
+    const raw = window.__pe2.rate[i]; if(raw == null || raw === '') return;
+    const nr = Math.round((parseFloat(raw) || 0) * 100) / 100;
+    if(!(nr > 0)){ return; }
+    if(Math.abs(nr - oldR) >= 0.01) changes.push({ i, it, nr, diff: Math.round(q * nr) - Math.round(q * oldR) });
+  });
+  if(!changes.length){ await uAlert('کوئی تبدیلی نہیں', 'نہ ریٹ بدلا، نہ کوئی لائن ہٹائی گئی۔'); return; }
+  const tot = changes.reduce((a, c) => a + c.diff, 0);
+  if(!(await uDialog({ title: '⚠️ تصدیق', tone: 'red', okText: '✅ ہاں، بدل دیں', cancelText: '✖ واپس',
+      message: `<div style="text-align:right; font-size:14px; line-height:1.9;">${changes.map(c => esc(c.it.name || '') + ': ' + (c.del ? '🗑️ ہٹائی جائے گی' : (Number(c.it.cost) || 0) + ' → ' + c.nr)).join('<br>')}</div>`,
+      rows: [{ label: s.name + ' کا بقایا', value: f(s.total_payable) + ' ← ' + f((Number(s.total_payable) || 0) + tot), big: true }, { label: 'فرق', value: (tot > 0 ? '+' : '') + f(tot), bg: tot > 0 ? '#fee2e2' : '#dcfce7', fg: tot > 0 ? '#991b1b' : '#166534' }] }))) return;
+  if(!(await _askAdminPinForSerialMaster('خریداری میں ترمیم'))) return;
+  try{ pauseCloudPolling(20000); }catch(e){}
+  const by = (AppState.currentUser && AppState.currentUser.name) || 'admin';
+  changes.forEach(ch => {
+    const it = ch.it;
+    const fv = (it.variant_id != null && it.chalanNo != null) ? findProductAndVariant(it.variant_id) : null;
+    const v = fv && fv.v, c = v ? (v.chalans || []).find(x => x.chalanNo === it.chalanNo) : null;
+    if(po.isDaily && c && c.accounted){
+      if(ch.del){
+        if(c.bookedSupplierId != null){ const so = suppliersData.find(x => x.supplier_id === c.bookedSupplierId); if(so){ so.total_payable = (Number(so.total_payable) || 0) - (Number(c.bookedAmount) || 0); normalizeSupplierBalance(so); } }
+        c.bookedSupplierId = null; c.bookedAmount = 0; c.accounted = false; c.ratePending = true; c.supplierId = null; c.supplierName = ''; c.isCash = false;
+        _chRemoveFromDailyRecords(chalanKeyOf(v, c));
+      } else {
+        _chAccountCore(it.variant_id, it.chalanNo, { rate: ch.nr, labor: c.sellLabor, isb: c.retail, rwp: c.wholesale, src: String(s.supplier_id) });
+      }
+    } else {
+      // چالان سے نہ جڑی لائن — سیدھی کھاتے کی سطر
+      if(ch.del) po.items = (po.items || []).filter(x => x !== it); else it.cost = ch.nr;
+      po.total = (po.items || []).reduce((a, x) => a + (Number(x.qty) || 0) * (Number(x.cost) || 0), 0);
+      if(po.status === 'received' || po.isDaily){ s.total_payable = (Number(s.total_payable) || 0) + ch.diff; normalizeSupplierBalance(s); }
+      if(c && !po.isDaily && !ch.del){ c.rate = ch.nr; }
+    }
+  });
+  s.purchaseHistory = (s.purchaseHistory || []).filter(x => !((x.isDaily || x === po) && (x.items || []).length === 0));
+  s.ledgerHistory = s.ledgerHistory || [];
+  s.ledgerHistory.unshift({ type: 'purchase_edit', amount: tot, date: bizDateKey(), at: new Date().toISOString(), by, note: `✏️ ${po.date || ''} کی خریداری میں ترمیم: ` + changes.map(c => (c.it.name || '') + (c.del ? ' ہٹائی' : ' ' + (Number(c.it.cost) || 0) + '→' + c.nr)).join('، ') });
+  persistAllData();
+  try{ saveToStorage('cashPurchases', cashPurchasesData); }catch(e){}
+  try{ pushSuppliersToCloud(); }catch(e){}
+  try{ pushProductsToCloud(); }catch(e){}
+  try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+  try{ openSupplierProfile(s.supplier_id); }catch(e){}
+  try{ if(typeof currentScreenName !== 'undefined' && currentScreenName === 'purchaseorders') renderPurchaseOrdersScreen(); }catch(e){}
+  uAlert('✅ خریداری درست ہو گئی', `${esc(s.name)} کا نیا بقایا: ${f(s.total_payable)}`, 'green');
 }
 
 // ---------- 📅 FM2310FR437: تاریخ کا ویل — دائیں سال، درمیان مہینہ، بائیں دن؛ بیچ والا چمکتا، باقی دھندلے ----------
