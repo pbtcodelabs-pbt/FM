@@ -5,3 +5,5 @@
 - کام مکمل کر کے خود commit، push، PR بنا کر `main` میں merge کریں؛ جواب مختصر، اسکرین شاٹ کے ساتھ۔
 
 - **ایک ہی ویب سائٹ، کئی ایپس (مستقل اصول):** `pbtcodelabs-pbt.github.io` پر کئی ایپس چلتی ہیں۔ `sw.js` اور «تازہ کریں» بٹن صرف **اسی ایپ** کے کیش/سروس ورکر مٹائیں (`getRegistration()`، `getRegistrations()` نہیں)؛ `localStorage.clear()` کبھی نہیں — صرف اپنی کلیدیں ہٹائیں۔
+
+- **🗄️ بڑی الماری (FM2810WE471 / SM2810WE212 — مالک کی ہدایت: سٹوریج فل کا مسئلہ کبھی نہ آئے):** 20 ہزار حروف سے بڑی ہر `fmPos_` چیز localStorage کی بجائے IndexedDB (`fmBigStore_v1` / `smBigStore_v1`) میں؛ localStorage میں صرف نشان `\u0002I`۔ `localStorage.getItem/setItem` ویسے ہی کام کرتے ہیں (سب سے اوپر والا الماری کا حصہ)۔ **ایپ کا ہر نیا inline اسکرپٹ `<script type="text/fm-boot">` سے لکھیں** (سادہ `<script>` الماری کا ڈیٹا آنے سے پہلے چلے گا اور بڑا ڈیٹا خالی ملے گا)؛ آخر والا لوڈر انہیں ترتیب سے چلاتا ہے۔ `fmPos_settings` ہمیشہ چھوٹے خانے میں۔ `Storage.prototype.getItem.call(...)` سے خام نشان نہ پڑھیں — `localStorage.getItem` استعمال کریں۔
