@@ -5746,12 +5746,22 @@ function __appHostKind(h, p){
         #screen-purchaseorders .poActs{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px;}
         #screen-purchaseorders .poActs button{height:32px; padding:0 12px; border:none; border-radius:16px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer;}
       </style>
+      <style>
+        #poSupplierFilterSelect.fltTopSel{border-color:#c2410c; color:#7c2d12; background:linear-gradient(180deg,#fff7ed,#ffedd5); box-shadow:0 2px 0 #fdba74; text-align-last:auto;}
+        .pcmp{padding:0 !important; border:none !important; background:none !important; box-shadow:none !important; margin:0 0 5px !important;}
+        .pcmp.open > .bcmpLine{border-color:#c026d3; background:#fdf4ff;}
+        .pcmp.open > .bcmpMore{display:block;}
+      </style>
+      <select id="poSupplierFilterSelect" class="fltTopSel" onchange="renderPurchaseOrdersScreen()" dir="rtl">
+        <option value="all">🚚 بیوپاری چنیں — سب بیوپاری</option>
+      </select>
+      <details class="fltBox" id="poFltBox"><summary>⚙️ فلٹر <span class="fltSum" id="poFltSum"></span></summary>
       <div class="poCapRow c3">
         <button id="poFilterall" class="poCap active" onclick="setPoListFilter('all')">سب</button>
         <button id="poFilterpending" class="poCap" onclick="setPoListFilter('pending')">⏳ زیرِ التوا</button>
         <button id="poFilterreceived" class="poCap" onclick="setPoListFilter('received')">✅ موصول شدہ</button>
       </div>
-      <div class="poCapRow c3">
+      <div class="poCapRow c2">
         <select id="poRangeSelect" class="poCap" onchange="renderPurchaseOrdersScreen()" dir="rtl">
           <option value="all">📅 تمام</option>
           <option value="today">آج</option>
@@ -5765,10 +5775,8 @@ function __appHostKind(h, p){
           <option value="newest">🕐 نئے پہلے</option>
           <option value="oldest">🕐 پرانے پہلے</option>
         </select>
-        <select id="poSupplierFilterSelect" class="poCap" onchange="renderPurchaseOrdersScreen()" dir="rtl">
-          <option value="all">🏭 تمام بیوپاری</option>
-        </select>
       </div>
+      </details>
       <div class="poCapRow" style="grid-template-columns:1fr;">
         <button type="button" class="poCap pay" onclick="poPayFromTop()">💵 بیوپاری کو پیمنٹ</button>
       </div>
@@ -5782,6 +5790,32 @@ function __appHostKind(h, p){
     <div class="screen" id="screen-billhistory">
       <div class="pageTitle">🧾 گاہکوں کے پرانے بل</div>
       <!-- ---------- سب سے پہلے Status چنیں: All / Pending / Clear / Voided ---------- -->
+      <!-- 🧭 (28 اکتوبر، مالک): اوپر صرف گاہک کی فہرست + ایک «فلٹر» ڈراپ ڈاؤن — باقی صفحہ بلوں کے لیے -->
+      <style>
+        .fltTopSel{width:100%; box-sizing:border-box; height:48px; padding:6px 14px; margin-bottom:8px; border:2px solid #16a34a; border-radius:999px; font-size:16.5px; font-weight:900; font-family:inherit; color:#14532d; background:linear-gradient(180deg,#f0fdf4,#dcfce7); box-shadow:0 2px 0 #86efac;}
+        .fltBox{margin-bottom:10px;}
+        .fltBox > summary{list-style:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px; height:44px; padding:0 16px; border:2px solid #1d4ed8; border-radius:999px; background:linear-gradient(180deg,#eff6ff,#dbeafe); color:#1e3a8a; font-size:16px; font-weight:900; box-shadow:0 2px 0 #93c5fd;}
+        .fltBox > summary::-webkit-details-marker{display:none;}
+        .fltBox > summary .fltSum{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13.5px; font-weight:800; color:#334155; text-align:left;}
+        .fltBox > summary::after{content:'▼'; font-size:12px;}
+        .fltBox[open] > summary::after{content:'▲';}
+        .fltBox[open] > summary{margin-bottom:8px;}
+        .fltBox #billAdvFilters .bcbItem{height:40px; font-size:14.5px;}
+        .bcmp, .pcmp{display:block !important; width:100%;}
+        .bcmp{padding:0 !important; border:none !important; background:none !important; box-shadow:none !important; margin:0 0 5px !important;}
+        .bcmpLine{display:flex; align-items:center; gap:7px; padding:7px 12px; border:1.5px solid #e2e8f0; border-radius:999px; background:#fff; font-size:14.5px; font-weight:800; color:#0f172a; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,.05); font-family:Arial,sans-serif;}
+        .bcmpLine .cNo{color:#1e3a8a; white-space:nowrap; font-size:13px;}
+        .bcmpLine .cName{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:'JameelNooriNastaleeq','Noto Nastaliq Urdu',Arial,sans-serif; font-size:15.5px;}
+        .bcmpLine .cDate{color:#64748b; white-space:nowrap; font-size:12.5px;}
+        .bcmpLine .cAmt{white-space:nowrap;}
+        .bcmpLine .cDue{white-space:nowrap; background:#fee2e2; color:#b91c1c; border-radius:999px; padding:1px 8px; font-size:12.5px;}
+        .bcmpLine .cOk{white-space:nowrap; background:#dcfce7; color:#166534; border-radius:999px; padding:1px 8px; font-size:12.5px;}
+        .bcmp.open > .bcmpLine{border-color:#1d4ed8; background:#eff6ff;}
+        .bcmpMore{display:none; margin-top:4px; padding:8px; border:1.5px solid #dbeafe; border-radius:14px; background:#fff;}
+        .bcmp.open > .bcmpMore{display:block;}
+      </style>
+      <select id="billCustomerFilter" class="fltTopSel" onchange="renderBillHistory()"><option value="">👤 گاہک چنیں — سب گاہک</option></select>
+      <details class="fltBox" id="billFltBox"><summary>⚙️ فلٹر <span class="fltSum" id="billFltSum"></span></summary>
       <div class="billStatusTabs">
         <button class="billTabBtn active" id="billTab-all" onclick="setBillStatusFilter('all')">📋 تمام</button>
         <button class="billTabBtn" id="billTab-pending" onclick="setBillStatusFilter('pending')">⏳ ادھار</button>
@@ -5807,7 +5841,6 @@ function __appHostKind(h, p){
         #billAdvFilters .bcbCust{order:1} #billAdvFilters .bcbSup{order:2} #billAdvFilters .bcbName{order:3} #billRangePreset{order:4} #billDateFilter{order:5} #billAdvFilters .bcbDay{order:6} #billAdvFilters .bcbNo{order:7} #billAdvFilters .bcbAmt{order:8} #billAdvFilters .bcbSales{order:9} #billAdvFilters .bcbSort{order:10} #billAdvFilters .billAdvClearBtn{order:11}
       </style>
       <div class="billCompactBar" id="billAdvFilters">
-        <select id="billCustomerFilter" class="bcbItem bcbCust" onchange="renderBillHistory()"><option value="">👤 گاہک چنیں — سب گاہک</option></select>
         <select id="billRangePreset" class="bcbItem bcbDate" onchange="onBillRangePresetChange()">
           <option value="all">📅 تمام</option>
           <option value="today">آج</option>
@@ -5844,6 +5877,7 @@ function __appHostKind(h, p){
         </select>
         <button class="billAdvClearBtn bcbItem" onclick="clearBillAdvFilters()">✖ سب فلٹر صاف کریں</button>
       </div>
+      </details>
       <div id="billCustomRangeRow" style="display:none; gap:8px; align-items:center; padding:8px 4px; font-size:12px;">
         <span>From</span>
         <input type="date" id="billCustomFrom" onchange="renderBillHistory()" style="padding:6px; border:1px solid #dbe1ea; border-radius:6px; font-size:12px;">
@@ -9895,8 +9929,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE472'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'پرانے بل اب گاہک اور بیوپاری صفحے پر — اپنے اپنے فلٹر کے ساتھ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE473'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'پرانے بل: اوپر صرف گاہک/بیوپاری کی فہرست + ایک فلٹر ڈراپ ڈاؤن؛ ہر بل ایک پتلی لائن'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29344,7 +29378,7 @@ function renderPurchaseOrdersScreen(){
   const supplierSelect = document.getElementById('poSupplierFilterSelect');
   const currentSupplierVal = supplierSelect.value || 'all';
   const uniqueSuppliers = [...new Map(allOrders.map(po => [po.supplier_id, po.supplier_name])).entries()];
-  supplierSelect.innerHTML = `<option value="all">🏭 تمام بیوپاری</option>` +
+  supplierSelect.innerHTML = `<option value="all">🚚 بیوپاری چنیں — سب بیوپاری</option>` +
     uniqueSuppliers.map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
   supplierSelect.value = uniqueSuppliers.some(([id]) => String(id) === currentSupplierVal) ? currentSupplierVal : 'all';
 
@@ -29370,6 +29404,13 @@ function renderPurchaseOrdersScreen(){
 
   // ---------- خلاصہ پٹی ----------
   const totalAmount = filtered.reduce((s,po) => s + po.total, 0);
+  try{
+    const tx = id => { const e = document.getElementById(id); return e && e.selectedIndex >= 0 ? e.options[e.selectedIndex].text : ''; };
+    const parts = [{ all: '', pending: '⏳ زیرِ التوا', received: '✅ موصول شدہ' }[poListFilter] || ''];
+    if((document.getElementById('poRangeSelect')?.value || 'all') !== 'all') parts.push(tx('poRangeSelect'));
+    if((document.getElementById('poSortSelect')?.value || 'newest') !== 'newest') parts.push(tx('poSortSelect'));
+    document.getElementById('poFltSum').textContent = parts.filter(Boolean).join(' • ') || 'سب — نئے پہلے';
+  }catch(e){}
   document.getElementById('poSummaryBar').innerHTML = `<span>📦 بیوپاری خریداری</span><span>${filtered.length} آرڈر • Rs. ${totalAmount.toLocaleString()}</span>`;
 
   const wrap = document.getElementById('poListWrap');
@@ -29390,7 +29431,9 @@ function renderPurchaseOrdersScreen(){
       ? `<span style="color:#b91c1c;">📤 بقایا (ہم نے دینا): Rs. ${bal.toLocaleString()}</span>`
       : (wal > 0 ? `<span style="color:#15803d;">💳 ایڈوانس اس کے پاس: Rs. ${wal.toLocaleString()}</span>` : `<span style="color:#15803d;">✅ کھاتہ صاف</span>`);
     return `
-      <div class="poCard" dir="rtl">
+      <div class="poCard pcmp" dir="rtl">
+        <div class="bcmpLine" onclick="this.parentNode.classList.toggle('open')"><span class="cName">🏭 ${escRlHtml(po.supplier_name || '')}</span><span class="cDate">${String(po.date || '').slice(0, 10).split('-').slice(1).reverse().join('/')}</span><span class="cAmt">${Math.round(Number(po.total) || 0).toLocaleString()}</span>${isPending ? '<span class="cDue">⏳</span>' : '<span class="cOk">✅</span>'}</div>
+        <div class="bcmpMore">
         <div class="poTop"><span class="poName">🏭 ${po.supplier_name}</span>${statusTag}</div>
         <div class="poMeta">${po.date} | ${po.items.length} آئٹم | Rs. ${po.total.toLocaleString()}</div>
         <div class="poBal">${balHtml}</div>
@@ -29402,6 +29445,7 @@ function renderPurchaseOrdersScreen(){
                <button style="background:#eef2ff; color:var(--primary-dark);" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 یاد دہانی</button>
                <button style="background:#fee2e2; color:#b91c1c;" onclick="deletePendingPurchaseOrder(${po.supplier_id}, ${po.po_idx}); renderPurchaseOrdersScreen();">🗑️ حذف</button>`
             : ''}
+        </div>
         </div>
       </div>`;
   }).join('');
@@ -44682,6 +44726,19 @@ function renderBillHistory(){
     : 'آپ کے بل';
   document.getElementById('billSummaryBar').innerHTML =
     `<span>${summaryLabel}</span><span>${filtered.length} بل • Rs. ${totalAmount.toLocaleString()}</span>`;
+  try{ // ⚙️ فلٹر کے بٹن پر چنے ہوئے فلٹر کا خلاصہ
+    const tx = id => { const e = document.getElementById(id); return e && e.selectedIndex >= 0 ? e.options[e.selectedIndex].text : ''; };
+    const parts = [{ all: '', pending: '⏳ ادھار', clear: '✅ وصول', voided: '🗑️ ڈیلیٹ شدہ' }[billStatusFilter] || ''];
+    if((document.getElementById('billRangePreset')?.value || 'all') !== 'all') parts.push(tx('billRangePreset'));
+    if(dateFilterVal) parts.push(dateFilterVal.split('-').reverse().join('/')); else if(dayFilterVal) parts.push(tx('billDayFilter'));
+    if(partyQuery) parts.push('🔍 ' + partyQuery);
+    if(billNumberQuery) parts.push('# ' + billNumberQuery);
+    if(amountRaw) parts.push('Rs. ' + amountRaw);
+    if(isAdmin && salesmanFilterVal && salesmanFilterVal !== 'all') parts.push(salesmanFilterVal);
+    if((document.getElementById('billSortSelect')?.value || 'newest') !== 'newest') parts.push(tx('billSortSelect'));
+    const t = parts.filter(Boolean).join(' • ');
+    document.getElementById('billFltSum').textContent = t || 'تمام بل — نئے پہلے';
+  }catch(e){}
 
   if(filtered.length === 0){
     wrap.innerHTML = `<div class="placeholder">No bills found</div>`;
@@ -44698,7 +44755,9 @@ function renderBillHistory(){
       ? `<span class="billStatusTag voided" style="text-decoration:none;">⏳ Pending (Rs. ${inv.amount_due.toLocaleString()})</span>`
       : `<span class="billStatusTag completed">✅ وصول</span>`;
     return `
-    <div class="billCard">
+    <div class="billCard bcmp${bulkDeleteMode ? ' open' : ''}">
+      <div class="bcmpLine" onclick="this.parentNode.classList.toggle('open')"><span class="cNo">${(inv.invoice_no || '').replace('Bill#', '#')}</span><span class="cName">${escRlHtml(inv.customer_name || 'نقد گاہک')}</span><span class="cDate">${(typeof bsInvDay === 'function' ? bsInvDay(inv) : String(inv.created_at || '').slice(0, 10)).split('-').slice(1).reverse().join('/')}</span><span class="cAmt">${Math.round(Number(inv.grand_total) || 0).toLocaleString()}</span>${inv.status === 'voided' ? '<span class="cDue">🗑️</span>' : ((inv.amount_due || 0) > 0 ? `<span class="cDue">⏳ ${Math.round(inv.amount_due).toLocaleString()}</span>` : '<span class="cOk">✅</span>')}</div>
+      <div class="bcmpMore">
       <div class="billCardRow">
         ${isAdmin && bulkDeleteMode ? `<input type="checkbox" class="billCheckbox" data-invoice-id="${inv.invoice_id}" ${selectedBillIds.has(inv.invoice_id) ? 'checked' : ''} onchange="toggleBillSelection(${inv.invoice_id}, this.checked)">` : ''}
         <div>
@@ -44723,6 +44782,7 @@ function renderBillHistory(){
           <button class="btnRequestEdit" onclick="openRequestActionModal(${inv.invoice_id}, 'edit_bill')">✏️ Request Edit</button>
           <button class="btnRequestDelete" onclick="openRequestActionModal(${inv.invoice_id}, 'delete_bill')">🗑️ Request Delete</button>
         `}
+      </div>
       </div>
       </div>
     </div>
