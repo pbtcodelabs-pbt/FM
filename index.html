@@ -9929,8 +9929,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE474'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'حساب کی جانچ (ڈویلپر پینل) + بل مٹانے/واپسی/ترمیم کے حساب کی خرابیاں درست؛ لال ڈبہ بائیں، آج تک کی کم وصولی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE475'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ٹوٹل کیش آیا/گیا اب اصل آج کی تاریخ کے حساب سے (صبح کی وصولی کل میں نہیں جاتی)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -24997,6 +24997,8 @@ function bsPayDay(p){
 // 💵 FM1910MO424: ادائیگی کا پیسہ کس دن ہاتھ آیا — کھاتہ پچھلی تاریخ (backdated) میں ہو تب بھی کیش اگلے دن کا
 function bsPayCashDay(p){
   if(!p) return '';
+  if(p.cash_at) return bsLocalDayOf(p.cash_at) || p.cash_day || ''; // ریکوری لسٹ سے بنی: جس دن ملازم نے پیسہ لیا
+  if(p.created_at && !/^(ریکوری لسٹ|Recovery List)/.test(String(p.note || ''))) return bsLocalDayOf(p.created_at) || p.cash_day || ''; // 💵 (28 اکتوبر): اصل دن
   if(p.cash_day) return p.cash_day;
   const d = bsPayDay(p);
   return (p.backdated && d && typeof bizDayAfter === 'function') ? bizDayAfter(d) : d;
@@ -25034,7 +25036,7 @@ function getOpeningCashFor(dateStr){
   return isNaN(n) ? null : n;
 }
 function getTodayOpeningCash(){
-  const v = getOpeningCashFor(bsToday());
+  const v = getOpeningCashFor(bsCashToday());
   return v == null ? (AppState.settings.openingCashBalance || 0) : v; // پرانی رپورٹیں: درج نہ ہو تو پرانی سیٹنگ
 }
 function getOpeningDetailFor(dateStr){
@@ -25110,7 +25112,7 @@ function saveOpeningCashDaily(zero){
     if(!confirm('رقم خالی ہے — کیا آج اوپننگ کیش صفر (0) لکھ دیں؟')) return;
     val = 0;
   }
-  setOpeningCashFor(bsToday(), val);
+  setOpeningCashFor(bsCashToday(), val);
   document.getElementById('openingCashDailyModal').classList.remove('show');
   const fn = _bsOpeningAfter; _bsOpeningAfter = null;
   if(fn) try{ fn(); }catch(e){}
@@ -25175,7 +25177,7 @@ function saveSummaryForm(){
 function maybeAskOpeningCash(){
   try{
     if(AppState.currentRole !== 'admin') return;
-    if(getOpeningCashFor(bsToday()) != null) return;
+    if(getOpeningCashFor(bsCashToday()) != null) return;
     const m = document.getElementById('openingCashDailyModal');
     if(m && m.classList.contains('show')) return;
     openOpeningCashModal(null, false);
@@ -25183,8 +25185,14 @@ function maybeAskOpeningCash(){
 }
 
 // ---------- مدت (فلٹر) — اخراجات والی سکرین جیسے ہی اختیارات ----------
-function bsComputeRange(preset){
-  const now = (() => { try{ const d = new Date(bsToday() + 'T12:00:00'); return isNaN(d) ? new Date() : d; }catch(e){ return new Date(); } })(); // 📅 کاروباری تاریخ
+// 💵 (28 اکتوبر، صدام بھائی): کیش آیا/گیا ہمیشہ اصل دن (فون کی آج کی تاریخ) کے حساب سے — جس دن پیسہ واقعی ہاتھ آیا/گیا۔
+//   پہلے کاروباری تاریخ (جو ایڈمن کے "تاریخ اینڈ" کرنے تک کل ہی رہتی ہے) سے جڑا تھا — صبح کی وصولی کل کے کیش میں چلی جاتی تھی
+function bsCashToday(){ return localDateKey(); }
+function bsLocalDayOf(iso){ try{ if(!iso) return ''; const d = new Date(iso); return isNaN(d) ? '' : localDateKey(d); }catch(e){ return ''; } }
+function bsInvCashDay(inv){ return bsLocalDayOf(inv && inv.created_at) || bsInvDay(inv); }
+function bsExpCashDay(e){ return bsLocalDayOf(e && e.createdAt) || (e && e.date) || ''; }
+function bsComputeRange(preset, calendar){
+  const now = (() => { if(calendar) return new Date(); try{ const d = new Date(bsToday() + 'T12:00:00'); return isNaN(d) ? new Date() : d; }catch(e){ return new Date(); } })(); // 📅 کاروباری تاریخ (کیش کے لیے اصل تاریخ)
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   let from = null, to = null;
   if(preset === 'today'){ from = today; to = today; }
@@ -25218,8 +25226,9 @@ function bsBillCash(inv){
 function computeBizSummary(preset, cashByRange){
   const r = bsComputeRange(preset);
   // 📅 FM1810SU405: cashByRange = ہوم والے ڈبوں کا کیش بھی چنی ہوئی مدت (آج / گزشتہ کل / یہ ہفتہ / یہ مہینہ) کا — ورنہ صرف آج کا
-  const _cr = (cashByRange && r.fromStr) ? r : null;
-  const inCash = d => _cr ? bsInRange(d, _cr) : d === bsToday();
+  const _rc = cashByRange ? bsComputeRange(preset, true) : null; // 💵 کیش: اصل تاریخ
+  const _cr = (_rc && _rc.fromStr) ? _rc : null;
+  const inCash = d => _cr ? bsInRange(d, _cr) : d === bsCashToday();
   // 🛡️ FM1710SA394: ایک بھی خالی/خراب ریکارڈ (null گاہک، بیوپاری، خرچہ، سبزی، بل کا آئٹم) پورا حساب روک کر سب ڈبے صفر کر دیتا تھا — اب ایسے ریکارڈ خود چھوڑ دیے جاتے ہیں
   const _ok = x => !!x && typeof x === 'object';
   const _prods = (productsData || []).filter(_ok);
@@ -25230,12 +25239,12 @@ function computeBizSummary(preset, cashByRange){
   const exps = (typeof expenseData !== 'undefined' ? (expenseData || []) : []).filter(_ok);
 
   // --- ① آج کا کیش ---
-  const openDay = _cr ? _cr.fromStr : todayStr; // مدت ہو تو پہلے دن کا اوپننگ کیش
+  const openDay = _cr ? _cr.fromStr : bsCashToday(); // مدت ہو تو پہلے دن کا اوپننگ کیش (اصل تاریخ)
   const openingEntered = getOpeningCashFor(openDay);
   const opening = openingEntered == null ? 0 : openingEntered;
   const _od = getOpeningDetailFor(openDay);
   const otherManual = _od.otherAmt; // ➕ فارم والی دیگر آمدن (ہاتھ سے، اختیاری)
-  const tInv = invs.filter(i => inCash(bsInvDay(i)));
+  const tInv = invs.filter(i => inCash(bsInvCashDay(i))); // 💵 بل کی نقدی اسی دن جس دن بل بنا
   const tBillCash = tInv.reduce((s, i) => s + bsBillCash(i), 0);
   const tPays = pays.filter(p => inCash(bsPayCashDay(p)) && bsPayCash(p) > 0); // 💵 FM1910MO424: کل کی تاریخ والی وصولی کا پیسہ آج آیا تو آج
   // 🤝 FM1910MO413 (صدام بھائی): ریکوری والوں کی سارا دن کی وصولی بھی "کیش آیا" میں — جو ابھی منظوری کی منتظر ہے وہ بھی (پیسہ آ چکا)۔
@@ -25247,7 +25256,7 @@ function computeBizSummary(preset, cashByRange){
   const tOtherIn = tPays.filter(p => p.direction === 'in' && p.party_type !== 'customer').reduce((s, p) => s + bsPayCash(p), 0);
   const tSupOut = tPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
   const tOtherOut = tPays.filter(p => p.direction === 'out' && p.party_type !== 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
-  const tExp = exps.filter(e => inCash(e.date)).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const tExp = exps.filter(e => inCash(bsExpCashDay(e))).reduce((s, e) => s + (Number(e.amount) || 0), 0);
   // 🥬 FM1710SA396: آج کی نقد خریداری (سبزی/پھل بغیر بیوپاری کے نقد خریدا) بھی کیش گیا میں — ایڈمن کی "نقد خریداری" + منشی کے نقد چالان جن کا ریٹ لگ چکا
   let tCashBuy = 0;
   try{
@@ -35714,7 +35723,7 @@ function buildRecoveryEntryFromSplit(c){
     employeeName: AppState.currentUser?.name || 'Unknown',
     status: 'pending', // ---------- ایڈمن Confirm کرنے تک اصل کھاتے میں کوئی تبدیلی نہیں ----------
     bizDate: rlEntryDate(),
-    cashDay: bizCurrentDate(), // 💵 FM1910MO424: پیسہ کس دن ہاتھ آیا — "کیش آیا" اسی دن
+    cashDay: localDateKey(), // 💵 (28 اکتوبر): پیسہ کس اصل دن ہاتھ آیا — "کیش آیا" اسی دن (کاروباری تاریخ نہیں)
     ...(rlEntryDayMode === 'yesterday' ? { backdated: true } : {}), // 📅 FM910FR349: کل کی وصولی (تاریخ بدلنے کے بعد درج ہوئی)
     createdAt: new Date().toISOString(),
     confirmedAt: null
@@ -35870,7 +35879,7 @@ function bizDateKey(){ return bizOverride || bizCurrentDate(); }
 function recDay(e){ return (e && e.bizDate) || ((e && e.createdAt) || '').split('T')[0]; }
 // 💵 FM1910MO424 (صدام بھائی): ساری وصولی "کل" کی تاریخ میں ڈالتے ہیں (کھاتہ کل کا) — مگر پیسہ آج ہاتھ میں آیا، اس لیے "کیش آیا" میں اسی دن گنیں جس دن درج ہوئی
 function bizDayAfter(d){ try{ const dt = new Date(d + 'T12:00:00'); dt.setDate(dt.getDate() + 1); return localDateKey(dt); }catch(e){ return d; } }
-function rlCashDay(e){ if(!e) return ''; if(e.cashDay) return e.cashDay; const d = recDay(e); return (e.backdated && d) ? bizDayAfter(d) : d; }
+function rlCashDay(e){ if(!e) return ''; if(e.createdAt){ const _d = bsLocalDayOf(e.createdAt); if(_d) return _d; } if(e.cashDay) return e.cashDay; const d = recDay(e); return (e.backdated && d) ? bizDayAfter(d) : d; }
 function invDay(inv){ return (inv && inv.biz_date) || ((inv && inv.created_at) || '').split('T')[0]; }
 function bizFmt(d){ const a = (d || '').split('-'); return a.length === 3 ? a[2] + '/' + a[1] + '/' + a[0] : d; }
 function bizNextDate(D){ const dt = new Date(D + 'T12:00:00'); dt.setDate(dt.getDate() + 1); const n = localDateKey(dt), t = localDateKey(); return n > t ? n : t; }
@@ -36647,6 +36656,7 @@ function confirmRecoveryEntry(entryId){
       amount: entry.amount, balance_before: c.total_receivable + (entry.amount - excess), balance_after: c.total_receivable,
       biz_date: entry.bizDate || bizDateKey(), ...(entry.backdated ? { backdated: true } : {}), // 📅 FM910FR349
       cash_day: rlCashDay(entry) || bizDateKey(), // 💵 FM1910MO424: کیش اسی دن جس دن وصولی ہاتھ آئی
+      cash_at: entry.createdAt || new Date().toISOString(), // 💵 (28 اکتوبر): ملازم نے پیسہ کب لیا — کیش آیا اسی اصل دن
       method: recoverySplitLabel(entry) || 'Cash',
       cash_amount: _cashPart, // 💵 FM1410WE387: سمری میں صرف نقد حصہ کیش میں گنا جائے (ایزی پیسہ/بینک نہیں)
       note: `ریکوری لسٹ — ${entry.employeeName}${entry.note ? ' — 📝 ' + entry.note : ''}${excess > 0 ? ' — 💳 Rs. ' + excess.toLocaleString() + ' والٹ میں' : ''}`
