@@ -28,7 +28,7 @@ function __appHostKind(h, p){
 })();
 </script>
 <script>
-/* 🗄️ FM2810WE470: بڑی الماری — مالک کی ہدایت: «سٹوریج فل ہونے کا کوئی مسئلہ پیدا نہ ہو»
+/* 🗄️ FM2810WE471: بڑی الماری — مالک کی ہدایت: «سٹوریج فل ہونے کا کوئی مسئلہ پیدا نہ ہو»
    فون کا چھوٹا خانہ (localStorage) صرف تقریباً 5MB کا ہے؛ وہ بھرتے ہی بل نہیں بنتے تھے۔
    اب 20 ہزار حروف سے بڑی ہر چیز (بل، ادائیگیاں، سبزیاں، گاہک، بیوپاری…) فون کی بڑی الماری (IndexedDB — سینکڑوں MB) میں رہتی ہے،
    چھوٹے خانے میں صرف اس کا نشان۔ ایپ کھلنے سے پہلے الماری کا سارا ڈیٹا یادداشت میں آ جاتا ہے، اس لیے باقی کوڈ ویسے ہی
@@ -5778,7 +5778,25 @@ function __appHostKind(h, p){
         <button class="billTabBtn bulkToggleBtn admin-only" id="bulkDeleteToggleBtn" onclick="toggleBulkDeleteMode()">🗑️</button>
       </div>
       <!-- ---------- کمپیکٹ سرچ لائن: سب باکس ایک ساتھ، کم سے کم جگہ — تاکہ نیچے زیادہ سے زیادہ بل نظر آئیں ---------- -->
+      <!-- 🎨 (28 اکتوبر، مالک): فلٹر موٹے، خوبصورت کیپسول، دو دو کی سیدھی قطار؛ گاہک اور بیوپاری کی فہرست -->
+      <style>
+        #billAdvFilters{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;}
+        #billAdvFilters .bcbItem{width:100%; min-width:0; box-sizing:border-box; height:46px; padding:6px 12px; border:2px solid #cbd5e1; border-radius:999px; font-size:15.5px; font-weight:800; color:#0f172a; background:linear-gradient(180deg,#ffffff,#f1f5f9); box-shadow:0 2px 0 #cbd5e1; font-family:inherit;}
+        #billAdvFilters .bcbItem::placeholder{color:#475569; font-weight:700; opacity:1;}
+        #billAdvFilters .bcbItem:focus{outline:none; border-color:#1d4ed8; box-shadow:0 0 0 3px rgba(29,78,216,.18);}
+        #billAdvFilters .bcbCust{grid-column:1 / -1; border-color:#16a34a; background:linear-gradient(180deg,#f0fdf4,#dcfce7); color:#14532d; box-shadow:0 2px 0 #86efac;}
+        #billAdvFilters .bcbSup{grid-column:1 / -1; border-color:#c2410c; background:linear-gradient(180deg,#fff7ed,#ffedd5); color:#7c2d12; box-shadow:0 2px 0 #fdba74;}
+        #billAdvFilters .bcbName{grid-column:1 / -1; border-color:#1d4ed8; background:#fff;}
+        #billAdvFilters .billAdvClearBtn{grid-column:1 / -1; color:#b91c1c; border-color:#fca5a5; background:linear-gradient(180deg,#fff,#fee2e2); box-shadow:0 2px 0 #fca5a5;}
+        #billAdvFilters .bcbDate, #billAdvFilters .bcbDay, #billAdvFilters .bcbNo, #billAdvFilters .bcbAmt, #billAdvFilters .bcbSales, #billAdvFilters .bcbSort{flex:none;}
+        #screen-billhistory .billTabBtn{font-size:15px; font-weight:800; color:#1e293b; border:2px solid #cbd5e1; border-radius:999px; padding:9px 10px; background:linear-gradient(180deg,#fff,#f1f5f9);}
+        #screen-billhistory .billTabBtn.active{color:#fff; border-color:var(--primary); background:var(--primary);}
+        #screen-billhistory .billTabBtn.bulkToggleBtn{flex:0 0 auto;}
+        #billAdvFilters .bcbCust{order:1} #billAdvFilters .bcbSup{order:2} #billAdvFilters .bcbName{order:3} #billRangePreset{order:4} #billDateFilter{order:5} #billAdvFilters .bcbDay{order:6} #billAdvFilters .bcbNo{order:7} #billAdvFilters .bcbAmt{order:8} #billAdvFilters .bcbSales{order:9} #billAdvFilters .bcbSort{order:10} #billAdvFilters .billAdvClearBtn{order:11}
+      </style>
       <div class="billCompactBar" id="billAdvFilters">
+        <select id="billCustomerFilter" class="bcbItem bcbCust" onchange="renderBillHistory()"><option value="">👤 گاہک چنیں — سب گاہک</option></select>
+        <select id="billSupplierFilter" class="bcbItem bcbSup" onchange="onBillSupplierPick()"><option value="">🚚 بیوپاری چنیں — اس کا پورا کھاتہ</option></select>
         <select id="billRangePreset" class="bcbItem bcbDate" onchange="onBillRangePresetChange()">
           <option value="all">📅 تمام</option>
           <option value="today">آج</option>
@@ -5813,7 +5831,7 @@ function __appHostKind(h, p){
           <option value="amount_low">💰 کم رقم</option>
           <option value="az">🔤 A-Z</option>
         </select>
-        <button class="billAdvClearBtn bcbItem" onclick="clearBillAdvFilters()">✖</button>
+        <button class="billAdvClearBtn bcbItem" onclick="clearBillAdvFilters()">✖ سب فلٹر صاف کریں</button>
       </div>
       <div id="billCustomRangeRow" style="display:none; gap:8px; align-items:center; padding:8px 4px; font-size:12px;">
         <span>From</span>
@@ -9865,8 +9883,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
-// 🆕 FM2810WE470: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE470'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+// 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
+const APP_BUILD_VERSION = 'FM2810WE471'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 const UPDATE_NOTE = 'بڑا ڈیٹا فون کی بڑی الماری (IndexedDB) میں — فون کی جگہ بھرنے سے بل رکنا ختم'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
@@ -44425,6 +44443,7 @@ function clearBillAdvFilters(){
   document.getElementById('billDayFilter').value = '';
   document.getElementById('billNumberFilter').value = '';
   document.getElementById('billAmountFilter').value = '';
+  try{ document.getElementById('billCustomerFilter').value = ''; }catch(e){}
   document.getElementById('billRangePreset').value = 'all';
   document.getElementById('billCustomRangeRow').style.display = 'none';
   document.getElementById('billCustomFrom').value = '';
@@ -44521,6 +44540,30 @@ function billSearchMatch(inv, q){
     return false;
   });
 }
+function fillBillPartyFilters(){
+  const opt = (v, t) => `<option value="${escRlHtml(String(v))}">${escRlHtml(t)}</option>`;
+  const lbl = x => (x.serial_no ? x.serial_no + ' = ' : '') + (x.name || '');
+  const ord = (a, b) => ((Number(a.serial_no) || 1e9) - (Number(b.serial_no) || 1e9)) || String(a.name || '').localeCompare(String(b.name || ''));
+  const ce = document.getElementById('billCustomerFilter');
+  if(ce){
+    const list = (customersData || []).filter(c => c && c.customer_id != null).slice().sort(ord);
+    const sig = list.map(c => c.customer_id + ':' + lbl(c)).join('|');
+    if(ce._sig !== sig){ const cur = ce.value; ce.innerHTML = opt('', '👤 گاہک چنیں — سب گاہک') + list.map(c => opt(c.customer_id, lbl(c))).join(''); ce.value = cur; if(ce.value !== cur) ce.value = ''; ce._sig = sig; }
+  }
+  const se = document.getElementById('billSupplierFilter');
+  if(se){
+    const list = (suppliersData || []).filter(x => x && x.supplier_id != null).slice().sort(ord);
+    const sig = list.map(x => x.supplier_id + ':' + lbl(x)).join('|');
+    if(se._sig !== sig){ se.innerHTML = opt('', '🚚 بیوپاری چنیں — اس کا پورا کھاتہ') + list.map(x => opt(x.supplier_id, lbl(x))).join(''); se._sig = sig; }
+  }
+}
+// بیوپاری کے بل (مال آنا، ادائیگیاں) اس کے کھاتے (📒 لین دین) میں ہیں — چنتے ہی وہی کھلتا ہے، وہیں سے پرنٹ
+function onBillSupplierPick(){
+  const se = document.getElementById('billSupplierFilter'); if(!se || !se.value) return;
+  const sp = (suppliersData || []).find(x => x && String(x.supplier_id) === se.value);
+  se.value = '';
+  if(sp) openPartyLedger('suppliers', sp.supplier_id);
+}
 function renderBillHistory(){
   const wrap = document.getElementById('billHistoryWrap');
   const isAdmin = AppState.currentRole === 'admin';
@@ -44543,8 +44586,12 @@ function renderBillHistory(){
   const dateFilterVal = document.getElementById('billDateFilter')?.value || '';
   const dayFilterVal = document.getElementById('billDayFilter')?.value || '';
 
+  // ---------- 👤 (28 اکتوبر): گاہک کی فہرست — ایک گاہک کے سب پرانے بل ----------
+  fillBillPartyFilters();
+  const custPick = document.getElementById('billCustomerFilter')?.value || '';
   // ---------- Role Scoping ہمیشہ لاگو رہتا ہے (سیکیورٹی): سیلزمین صرف اپنے بل دیکھے، ایڈمن سب/منتخب سیلزمین ----------
   let base = _withArch(invoicesData, 'inv').slice(); // 📂 پرانے بل کلاؤڈ سے بھی
+  if(custPick) base = base.filter(inv => String(inv.customer_id) === custPick);
   if(!isAdmin){
     base = base.filter(inv => inv.sold_by === AppState.currentUser?.name);
   } else if(salesmanFilterVal && salesmanFilterVal !== 'all'){
@@ -54434,7 +54481,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script>try{ localStorage.removeItem('fmZoomPct'); }catch(e){}</script> <!-- 🔍 FM2710TU456: زوم بٹن صدام بھائی کی ہدایت پر ہٹا دیا (دائیں بائیں کھسکانے سے کھاتا ہل جاتا تھا) -->
 <script>
-/* 🗄️ FM2810WE470: بڑی الماری کا ڈیٹا یادداشت میں آنے کے بعد ایپ کا کوڈ چلتا ہے (ترتیب وہی)؛ اگر صفحہ پہلے ہی پورا کھل چکا ہو تو
+/* 🗄️ FM2810WE471: بڑی الماری کا ڈیٹا یادداشت میں آنے کے بعد ایپ کا کوڈ چلتا ہے (ترتیب وہی)؛ اگر صفحہ پہلے ہی پورا کھل چکا ہو تو
    DOMContentLoaded / load کے بعد جوڑے گئے کام فوراً چلتے ہیں — کوئی کام رہ نہ جائے */
 (function(){
   var done = false;
