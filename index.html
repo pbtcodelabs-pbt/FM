@@ -950,6 +950,7 @@ function __appHostKind(h, p){
        (Billing/Bill History/Advance Orders/Order Taking/Recovery List/Home)۔ اسی طرح "Change My PIN" بھی
        اب سیلزمین سے مکمل چھپا دیا گیا ہے — صرف ایڈمن اب PIN تبدیل/سیٹ کر کے دے سکتا ہے --- */
   body.role-salesman #sidebar .navItem{display:none;}
+  body.role-admin #sidebar .navItem[data-screen="billhistory"]{display:none !important;} /* 🧾 (28 اکتوبر): ایڈمن کے لیے پرانے بل گاہک/بیوپاری صفحے پر */
   body.role-salesman #sidebar .navItem.perm-allowed{display:flex;}
 
   /* ---------- 🧪 FMtest01 — کسٹمر رول: صرف اپنی مخصوص اسکرینز (customer-only کلاس والی) نظر آئیں،
@@ -4699,6 +4700,8 @@ function __appHostKind(h, p){
       <div class="stickyFilterZone">
       <!-- ---------- 🧹 صدام کی ہدایت: Customers/Suppliers/Diary تینوں ایک ہی صفحے کی طرح محسوس ہوں — یہ ٹیب بار ---------- -->
       <div id="hubTabsBarParties"></div>
+      <!-- 🧾 (28 اکتوبر، مالک): پرانے بل اب اپنے اپنے صفحے پر — گاہک ٹیب پر گاہکوں کے، بیوپاری ٹیب پر بیوپاریوں کے -->
+      <button type="button" id="partyOldBillsBtn" onclick="currentPartyTab === 'suppliers' ? goTo('purchaseorders') : goTo('billhistory')" style="width:100%; margin-bottom:10px; padding:12px; border:none; border-radius:999px; background:linear-gradient(180deg,#f97316,#ea580c); color:#fff; font-family:inherit; font-size:17px; font-weight:900; box-shadow:0 3px 0 #9a3412; cursor:pointer;">🧾 گاہکوں کے پرانے بل</button>
 
       <div class="partyToolbar">
         <input type="text" id="partySearchInput" placeholder="🔍 نام، فون نمبر یا سیریل نمبر لکھیں" oninput="renderPartyList(this.value)">
@@ -5723,7 +5726,7 @@ function __appHostKind(h, p){
 
     <!-- PURCHASE ORDERS (مرکزی صفحہ — تمام سپلائرز کے تمام PO ایک جگہ) -->
     <div class="screen admin-only" id="screen-purchaseorders" dir="rtl" style="font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">
-      <div class="pageTitle">📦 بیوپاری خریداری</div>
+      <div class="pageTitle">🧾 بیوپاریوں کے پرانے بل (مال آیا)</div>
 
       <!-- ---------- 📦 FM410SU301: فلٹر اب اوپر سے نیچے سیدھی قطاروں میں، کم سے کم جگہ — نیچے زیادہ بل نظر آئیں ---------- -->
       <style>
@@ -5748,7 +5751,16 @@ function __appHostKind(h, p){
         <button id="poFilterpending" class="poCap" onclick="setPoListFilter('pending')">⏳ زیرِ التوا</button>
         <button id="poFilterreceived" class="poCap" onclick="setPoListFilter('received')">✅ موصول شدہ</button>
       </div>
-      <div class="poCapRow c2">
+      <div class="poCapRow c3">
+        <select id="poRangeSelect" class="poCap" onchange="renderPurchaseOrdersScreen()" dir="rtl">
+          <option value="all">📅 تمام</option>
+          <option value="today">آج</option>
+          <option value="thisweek">یہ ہفتہ</option>
+          <option value="lastweek">پچھلا ہفتہ</option>
+          <option value="thismonth">یہ مہینہ</option>
+          <option value="lastmonth">پچھلا مہینہ</option>
+          <option value="thisyear">یہ سال</option>
+        </select>
         <select id="poSortSelect" class="poCap" onchange="renderPurchaseOrdersScreen()" dir="rtl">
           <option value="newest">🕐 نئے پہلے</option>
           <option value="oldest">🕐 پرانے پہلے</option>
@@ -5768,7 +5780,7 @@ function __appHostKind(h, p){
 
     <!-- BILL HISTORY (دونوں roles کو نظر آتی ہے، لیکن salesman کو edit/delete پر approval درکار ہوگی) -->
     <div class="screen" id="screen-billhistory">
-      <div class="pageTitle">🧾 پرانے بل</div>
+      <div class="pageTitle">🧾 گاہکوں کے پرانے بل</div>
       <!-- ---------- سب سے پہلے Status چنیں: All / Pending / Clear / Voided ---------- -->
       <div class="billStatusTabs">
         <button class="billTabBtn active" id="billTab-all" onclick="setBillStatusFilter('all')">📋 تمام</button>
@@ -5796,7 +5808,6 @@ function __appHostKind(h, p){
       </style>
       <div class="billCompactBar" id="billAdvFilters">
         <select id="billCustomerFilter" class="bcbItem bcbCust" onchange="renderBillHistory()"><option value="">👤 گاہک چنیں — سب گاہک</option></select>
-        <select id="billSupplierFilter" class="bcbItem bcbSup" onchange="onBillSupplierPick()"><option value="">🚚 بیوپاری چنیں — اس کا پورا کھاتہ</option></select>
         <select id="billRangePreset" class="bcbItem bcbDate" onchange="onBillRangePresetChange()">
           <option value="all">📅 تمام</option>
           <option value="today">آج</option>
@@ -9884,8 +9895,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE471'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بڑا ڈیٹا فون کی بڑی الماری (IndexedDB) میں — فون کی جگہ بھرنے سے بل رکنا ختم'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE472'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'پرانے بل اب گاہک اور بیوپاری صفحے پر — اپنے اپنے فلٹر کے ساتھ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10835,7 +10846,6 @@ function dismissTrialUrgentModal(){
 const HOME_TILE_GROUPS_ADMIN = [
   { section: '💰 Sales', tiles: [
     {icon:'🛒', label:'بل بنائیں', screen:'billing'},
-    {icon:'🧾', label:'پرانے بل', screen:'billhistory'},
     {icon:'📝', label:'آرڈر لسٹ', screen:'advanceorders'},
   ]},
   { section: '📦 Inventory', tiles: [
@@ -28833,6 +28843,7 @@ function buildCompactPartyRow(opts){
 }
 
 function renderPartyList(query = ''){
+  try{ const ob = document.getElementById('partyOldBillsBtn'); if(ob) ob.textContent = currentPartyTab === 'suppliers' ? '🧾 بیوپاریوں کے پرانے بل (مال آیا)' : '🧾 گاہکوں کے پرانے بل'; }catch(e){}
   const wrap = document.getElementById('partyListWrap');
   renderCustFilterBar();
 
@@ -29344,6 +29355,14 @@ function renderPurchaseOrdersScreen(){
 
   const supplierFilterVal = supplierSelect.value;
   if(supplierFilterVal !== 'all') filtered = filtered.filter(po => String(po.supplier_id) === supplierFilterVal);
+  // 📅 (28 اکتوبر، مالک): تاریخ کا فلٹر — گاہکوں کے پرانے بل جیسا
+  const poRange = document.getElementById('poRangeSelect')?.value || 'all';
+  if(poRange !== 'all' && typeof getBillRangeDates === 'function'){
+    const {from, to} = getBillRangeDates(poRange);
+    const dOf = po => new Date(String(po.date || '').split('T')[0]);
+    if(from) filtered = filtered.filter(po => dOf(po) >= from);
+    if(to) filtered = filtered.filter(po => dOf(po) <= to);
+  }
 
   // ---------- ترتیب ----------
   const sortVal = document.getElementById('poSortSelect').value;
