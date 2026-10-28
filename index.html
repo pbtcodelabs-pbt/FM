@@ -7415,6 +7415,13 @@ function __appHostKind(h, p){
           <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px;"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 4 16.3"/><path d="M12 12v9"/><path d="M8 17l4 4 4-4"/></svg> Restore from Google Drive</button>
         </div>
 
+        <!-- 📱 (28 اکتوبر، مالک): روزانہ خودکار بیک اپ — گوگل کے بغیر، اسی فون میں (پچھلے 7 دن)؛ ہر 2 گھنٹے میں آج کی کاپی تازہ -->
+        <div class="settingsCard admin-only" id="autoLocalBackupCard">
+          <h3>📱 روزانہ خودکار بیک اپ (فون میں)</h3>
+          <div class="settingsHint">ہر دن کا بیک اپ خود بنتا ہے — پچھلے 7 دن محفوظ۔ ⬇️ سے فائل لیں (واٹس ایپ/ڈرائیو پر بھیج دیں)، ↩️ سے اسی دن کا ریکارڈ واپس لائیں۔</div>
+          <div id="autoLocalBackupList" style="margin-top:8px;"></div>
+        </div>
+
         <!-- --- 🔒 Account Security — PIN سے محفوظ، صرف اسی دکان کے Admin کی اپنی سیکیورٹی سیٹنگز
              (ڈویلپر کی رابطہ معلومات اب یہاں نہیں — وہ الگ، چھپے ہوئے Developer Panel میں منتقل ہو چکی ہیں) --- -->
         <div class="settingsCard admin-only" id="bioSettingsCard">
@@ -8997,6 +9004,57 @@ function buildBackupObject(){
   };
 }
 
+// =====================================================================
+// 📱 (28 اکتوبر، مالک: «خودکار بیک اپ کیوں نہیں ہو رہا؟»): گوگل ڈرائیو کا خودکار بیک اپ فون کا براؤزر بغیر بٹن دبائے
+//   اکثر روک دیتا ہے (اجازت کی کھڑکی صرف ہاتھ سے دبانے پر کھلتی ہے)۔ اس لیے اب ایک پکا خودکار بیک اپ اسی فون میں:
+//   ایپ کھلتے ہی اور ہر 2 گھنٹے بعد آج کی پوری کاپی؛ پچھلے 7 دن رکھے جاتے ہیں
+// =====================================================================
+const AUTO_LB_DB = 'fmAutoBackup_v1';
+function _albOpen(){ return new Promise((res, rej) => { try{ const r = indexedDB.open(AUTO_LB_DB, 1); r.onupgradeneeded = () => { try{ r.result.createObjectStore('b', { keyPath: 'day' }); }catch(e){} }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }catch(e){ rej(e); } }); }
+function _albReq(db, mode, fn){ return new Promise((res) => { try{ const tx = db.transaction('b', mode), st = tx.objectStore('b'); const q = fn(st); if(q){ q.onsuccess = () => res(q.result); q.onerror = () => res(null); } else { tx.oncomplete = () => res(true); tx.onerror = () => res(null); } }catch(e){ res(null); } }); }
+async function autoLocalBackupNow(){
+  if(AppState.currentRole !== 'admin') return false;
+  try{
+    const json = JSON.stringify(buildBackupObject());
+    const db = await _albOpen(), day = localDateKey();
+    await _albReq(db, 'readwrite', st => st.put({ day, at: new Date().toISOString(), json, size: json.length }));
+    const keys = ((await _albReq(db, 'readonly', st => st.getAllKeys())) || []).sort();
+    for(const k of keys.slice(0, Math.max(0, keys.length - 7))) await _albReq(db, 'readwrite', st => st.delete(k));
+    try{ renderAutoLocalBackupList(); }catch(e){}
+    return true;
+  }catch(e){ console.warn('auto local backup', e); return false; }
+}
+async function renderAutoLocalBackupList(){
+  const el = document.getElementById('autoLocalBackupList'); if(!el) return;
+  let rows = [];
+  try{ const db = await _albOpen(); rows = ((await _albReq(db, 'readonly', st => st.getAll())) || []).sort((a, b) => String(b.day).localeCompare(String(a.day))); }catch(e){}
+  if(!rows.length){ el.innerHTML = '<div style="font-size:13px; color:#64748b;">ابھی کوئی خودکار بیک اپ نہیں — چند منٹ میں پہلا بن جائے گا</div>'; return; }
+  const b = 'border:none; border-radius:999px; padding:6px 12px; font-weight:800; font-size:13px; cursor:pointer; font-family:inherit;';
+  el.innerHTML = rows.map(r => `<div dir="rtl" style="display:flex; align-items:center; gap:6px; padding:7px 10px; margin-bottom:5px; border:1.5px solid #bbf7d0; border-radius:999px; background:#f0fdf4;">
+    <span style="flex:1; font-weight:900; font-size:14px;">📅 ${bizFmt(r.day)} <small style="color:#64748b; font-weight:700;">${new Date(r.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} • ${Math.round((r.size || 0) / 1024)} KB</small></span>
+    <button type="button" onclick="autoLocalBackupDownload('${r.day}')" style="${b} background:#16a34a; color:#fff;">⬇️ فائل</button>
+    <button type="button" onclick="autoLocalBackupRestore('${r.day}')" style="${b} background:#fff7ed; color:#9a3412; border:1.5px solid #fdba74;">↩️ واپس لائیں</button></div>`).join('');
+}
+async function _albGet(day){ try{ const db = await _albOpen(); return await _albReq(db, 'readonly', st => st.get(day)); }catch(e){ return null; } }
+async function autoLocalBackupDownload(day){
+  const r = await _albGet(day); if(!r) return;
+  const blob = new Blob([r.json], { type: 'application/json' }), url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = generateBackupFileName().replace(/\.json$/i, '') + '-auto-' + day + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+async function autoLocalBackupRestore(day){
+  const r = await _albGet(day); if(!r) return;
+  let backup = null; try{ backup = JSON.parse(r.json); }catch(e){}
+  if(!backup || !backup.products || !backup.customers){ alert('یہ بیک اپ پڑھا نہیں جا سکا'); return; }
+  if(backupKindErrorMsg(backup)){ alert(backupKindErrorMsg(backup)); return; }
+  pendingImportBackup = backup; pendingImportFileName = 'خودکار بیک اپ ' + bizFmt(day);
+  document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
+  document.getElementById('importConfirmModal').classList.add('show');
+}
+setTimeout(() => { try{ autoLocalBackupNow(); }catch(e){} }, 60000);
+setInterval(() => { try{ autoLocalBackupNow(); }catch(e){} }, 2 * 3600 * 1000);
+setTimeout(() => { try{ renderAutoLocalBackupList(); }catch(e){} }, 5000);
+
 function exportBackupData(){
   const backup = buildBackupObject();
   // ---------- مختصر (compact) فارمیٹ — کوئی اضافی خالی جگہ/لائن بریک نہیں، فائل چھوٹی اور سادہ ----------
@@ -9929,8 +9987,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE477'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'مال واپسی پر نقد واپس دی رقم بھی سمری کے کیش گیا میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE478'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'روزانہ خودکار بیک اپ فون میں (پچھلے 7 دن) — سیٹنگ میں فائل لیں یا واپس لائیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
