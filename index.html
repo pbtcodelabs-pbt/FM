@@ -9929,8 +9929,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE475'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ٹوٹل کیش آیا/گیا اب اصل آج کی تاریخ کے حساب سے (صبح کی وصولی کل میں نہیں جاتی)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE476'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'سارا نظام آج کی تاریخ سے — آج کی وصولی، آج کا اوپننگ کیش، آج کا کیش؛ کاروباری تاریخ کل پر نہیں رکتی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16988,8 +16988,10 @@ function fmBillRecStatus(cid){
   out.pending = recoveryListData.filter(r => Number(r.customer_id) === id && r.status === 'pending');
   out.pendSum = out.pending.reduce((a, r) => a + (Number(r.amount) || 0), 0);
   invoicesData.forEach(inv => { if(Number(inv.customer_id) === id && inv.status !== 'voided' && invDay(inv) === out.Y) out.goodsY += _drGoodsOrig(inv); });
-  (c.walletHistory || []).forEach(h => { if(h && h.type === 'receivable_collected' && h.date === out.Y) out.recY += Number(h.amount) || 0; });
-  recoveryListData.forEach(r => { if(Number(r.customer_id) === id && recDay(r) === out.Y) out.recY += Number(r.amount) || 0; });
+  // 📅 (28 اکتوبر، مالک): کل کے مال کی وصولی آج ہوتی ہے — اس لیے کل اور آج دونوں کی وصولی گنیں
+  const _T = bizDateKey();
+  (c.walletHistory || []).forEach(h => { if(h && h.type === 'receivable_collected' && (h.date === out.Y || h.date === _T)) out.recY += Number(h.amount) || 0; });
+  recoveryListData.forEach(r => { if(Number(r.customer_id) === id && (recDay(r) === out.Y || recDay(r) === _T)) out.recY += Number(r.amount) || 0; });
   return out;
 }
 function fmBillRecoveryGate(cid, onProceed){
@@ -17004,9 +17006,9 @@ function fmBillRecoveryGate(cid, onProceed){
   }
   const key = st.c.customer_id + '|' + st.Y;
   if(st.goodsY > 0 && st.recY <= 0 && !fmBillNoRecOk.has(key)){
-    fmGateDialog('⚠️ کل کی وصولی درج نہیں', `<b>${escRlHtml(st.c.name)}</b> کو کل (${bizFmt(st.Y)}) <b>Rs. ${f(st.goodsY)}</b> کا مال گیا، مگر کل کی کوئی وصولی درج نہیں۔<br>اگر وصولی آئی ہے تو پہلے درج کریں۔`,
+    fmGateDialog('⚠️ آج کی وصولی درج نہیں', `<b>${escRlHtml(st.c.name)}</b> کو کل (${bizFmt(st.Y)}) <b>Rs. ${f(st.goodsY)}</b> کا مال گیا، مگر کل کی کوئی وصولی درج نہیں۔<br>اگر وصولی آئی ہے تو پہلے درج کریں۔`,
       [{ txt: '📥 وصولی درج کرنے چلیں', bg: '#0f766e', sh: '#134e4a', fn: () => fmGoConfirmRecovery(st.c.customer_id) },
-       { txt: '✅ کل کوئی وصولی نہیں ہوئی — بل بنائیں', bg: '#b45309', sh: '#78350f', fn: () => { fmBillNoRecOk.add(key); if(onProceed) onProceed(); } }]);
+       { txt: '✅ آج کوئی وصولی نہیں ہوئی — بل بنائیں', bg: '#b45309', sh: '#78350f', fn: () => { fmBillNoRecOk.add(key); if(onProceed) onProceed(); } }]);
     return false;
   }
   return true;
@@ -35874,7 +35876,11 @@ var bizDayState = loadFromStorage('bizDayState', null) || { cur: null, closed: {
 var bizOverride = null;   // ---------- صرف اسی فون پر، صرف میموری میں (ری لوڈ پر خودبخود ختم — غلطی سے پرانی تاریخ میں اینٹری نہ ہو) ----------
 var drViewDate = null;    // ---------- رپورٹ میں دیکھنے کی تاریخ (None = موجودہ) ----------
 function localDateKey(d){ d = d || new Date(); const p = n => String(n).padStart(2,'0'); return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()); }
-function bizCurrentDate(){ return (bizDayState && bizDayState.cur) ? bizDayState.cur : localDateKey(); }
+// 📅 (28 اکتوبر، مالک کی ہدایت): آج کی ہر اینٹری (وصولی، ادائیگی، بل) آج کی تاریخ میں — پہلے جب تک ایڈمن «تاریخ اینڈ» نہ کرتا،
+//   کاروباری تاریخ کل ہی رہتی اور صبح کی وصولی کل کے ساتھ جڑ جاتی۔ اب کاروباری تاریخ کبھی اصل تاریخ سے پیچھے نہیں رہتی۔
+//   کل کی وصولی جان بوجھ کر ڈالنی ہو تو «کل کی وصولی» والا انتخاب یا ایڈمن کا «پچھلی تاریخ کھولیں» پہلے کی طرح
+function bizStoredCur(){ return (bizDayState && bizDayState.cur) ? bizDayState.cur : localDateKey(); }
+function bizCurrentDate(){ const s = bizStoredCur(), t = localDateKey(); return s > t ? s : t; }
 function bizDateKey(){ return bizOverride || bizCurrentDate(); }
 function recDay(e){ return (e && e.bizDate) || ((e && e.createdAt) || '').split('T')[0]; }
 // 💵 FM1910MO424 (صدام بھائی): ساری وصولی "کل" کی تاریخ میں ڈالتے ہیں (کھاتہ کل کا) — مگر پیسہ آج ہاتھ میں آیا، اس لیے "کیش آیا" میں اسی دن گنیں جس دن درج ہوئی
@@ -35914,7 +35920,7 @@ async function endBizDay(){
   if(!bizIsAdmin()){ alert('صرف ایڈمن تاریخ اینڈ کر سکتا ہے'); return; }
   if(bizOverride){ alert('پہلے پچھلی تاریخ کی اینٹری کو دوبارہ لاک کریں'); return; }
   await fetchBizDay();
-  const D = bizCurrentDate(), N = bizNextDate(D);
+  const D = bizStoredCur(), N = bizNextDate(D); // 📅 جو دن ابھی بند نہیں ہوا (کیلنڈر آگے جا چکا ہو تب بھی وہی بند ہو)
   const pend = recoveryListData.filter(e => e.status === 'pending' && recDay(e) === D).length;
   if(!confirm(`📅 تاریخ: ${bizFmt(D)}\n\nکیا اس تاریخ کی تمام سبزی اور تمام ریکوری/وصولی کا حساب مکمل ہو گیا ہے؟` + (pend ? `\n\n⚠️ ${pend} کچی وصولیاں ابھی کھاتے میں درج نہیں ہوئیں۔` : ''))) return;
   if(!confirm(`🔒 آخری تصدیق\n\nکیا آپ پکا ${bizFmt(D)} کی تاریخ کو لاک کرنا چاہتے ہیں؟\n\nOK دبانے پر یہ تاریخ لاک ہو جائے گی اور نیا دن ${bizFmt(N)} شروع ہو جائے گا۔ اس کے بعد ہر نئی اینٹری ${bizFmt(N)} میں جائے گی۔\n(پچھلی تاریخ میں اینٹری صرف ایڈمن PIN سے کھول کر ہو سکے گی)`)) return;
