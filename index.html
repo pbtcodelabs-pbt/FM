@@ -9929,8 +9929,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE476'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'سارا نظام آج کی تاریخ سے — آج کی وصولی، آج کا اوپننگ کیش، آج کا کیش؛ کاروباری تاریخ کل پر نہیں رکتی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE477'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'مال واپسی پر نقد واپس دی رقم بھی سمری کے کیش گیا میں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -25257,7 +25257,9 @@ function computeBizSummary(preset, cashByRange){
   const tRecovery = tPays.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s, p) => s + bsPayCash(p), 0) + tRlPendCash;
   const tOtherIn = tPays.filter(p => p.direction === 'in' && p.party_type !== 'customer').reduce((s, p) => s + bsPayCash(p), 0);
   const tSupOut = tPays.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
-  const tOtherOut = tPays.filter(p => p.direction === 'out' && p.party_type !== 'supplier').reduce((s, p) => s + bsPayCash(p), 0);
+  // 💵 (28 اکتوبر، حساب کی جانچ): مال واپسی پر گاہک کو نقد واپس دی رقم بھی کیش گیا میں (پہلے گنی نہیں جاتی تھی)
+  const tRetCashOut = (invoicesData || []).filter(_ok).reduce((s, i) => s + (Array.isArray(i.return_log) ? i.return_log.filter(x => x && inCash(bsLocalDayOf(x.at))).reduce((a, x) => a + (Number(x.cash) || 0), 0) : 0), 0);
+  const tOtherOut = tPays.filter(p => p.direction === 'out' && p.party_type !== 'supplier').reduce((s, p) => s + bsPayCash(p), 0) + tRetCashOut;
   const tExp = exps.filter(e => inCash(bsExpCashDay(e))).reduce((s, e) => s + (Number(e.amount) || 0), 0);
   // 🥬 FM1710SA396: آج کی نقد خریداری (سبزی/پھل بغیر بیوپاری کے نقد خریدا) بھی کیش گیا میں — ایڈمن کی "نقد خریداری" + منشی کے نقد چالان جن کا ریٹ لگ چکا
   let tCashBuy = 0;
@@ -39183,6 +39185,7 @@ function confirmBatchReturn(invoiceId){
       pushCustomersToCloud();
     }
     inv.return_cash_out = (inv.return_cash_out != null ? Number(inv.return_cash_out) || 0 : _pledRetCashOut(inv) - (picks.reduce((t, x) => t + (x.amount || 0), 0))) + _cashRefund; // 🛠️ (28 اکتوبر): نقد واپس دی رقم کا الگ ریکارڈ (کھاتے کے لیے)
+    if(_cashRefund > 0) inv.return_log = (inv.return_log || []).concat([{ at: new Date().toISOString(), cash: _cashRefund, amount: totalRefund }]); // 💵 (28 اکتوبر): سمری کے «کیش گیا» کے لیے
     financeDummy.cashInHand -= _cashRefund; // TODO: نقدی لیجر (cash ledger) میں INSERT
     pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): کیش ریفنڈ سے Cash in Hand کم ہونا فوراً کلاؤڈ میں ----------
   }
