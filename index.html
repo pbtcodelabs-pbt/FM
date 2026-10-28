@@ -9929,8 +9929,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE473'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'پرانے بل: اوپر صرف گاہک/بیوپاری کی فہرست + ایک فلٹر ڈراپ ڈاؤن؛ ہر بل ایک پتلی لائن'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE474'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'حساب کی جانچ (ڈویلپر پینل) + بل مٹانے/واپسی/ترمیم کے حساب کی خرابیاں درست؛ لال ڈبہ بائیں، آج تک کی کم وصولی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -10195,6 +10195,60 @@ function _docMeterRows(m){
       <div style="height:9px; border-radius:6px; background:#e2e8f0; overflow:hidden;"><div style="height:100%; width:${Math.max(1, pct)}%; background:${col};"></div></div>
       <div dir="ltr" style="font:10px Arial,sans-serif; color:#94a3b8; text-align:right;">${r.n}${when ? ' · ' + when : ''}</div></div>`;
   }).join('');
+}
+// =====================================================================
+// 🩺 (28 اکتوبر، مالک: «کوئی گڑبڑ نہیں رہنی چاہیے»): حساب کی جانچ — صرف پڑھتی ہے، کچھ نہیں بدلتی
+//  1) ہر گاہک/بیوپاری: سابقہ بقایا + پورا کھاتہ (بل، وصولی، ادائیگی، واپسی، درستی) = موجودہ بقایا؟
+//  2) ہر بل: اشیاء + مزدوری + اضافی + ٹیکس = بل کا ٹوٹل؟ باقی رقم 0 اور ٹوٹل کے بیچ؟
+//  3) ایک ہی نمبر کے دو ریکارڈ (بل، ادائیگی، گاہک، بیوپاری)
+// =====================================================================
+function runIntegrityAudit(){
+  const out = { party: [], bills: [], dups: [], checked: { c: 0, s: 0, b: 0 } };
+  const r2 = n => Math.round((Number(n) || 0) * 100) / 100;
+  const partyCheck = (kind, list, idf) => {
+    (list || []).forEach(x => {
+      if(!x || x[idf] == null) return;
+      let E; try{ E = _pledEntries(kind, x[idf]); }catch(e){ return; }
+      if(!E || !E.party) return;
+      const isC = kind === 'customers';
+      const sum = E.out.reduce((t, e) => t + (isC ? (Number(e.red) || 0) - (Number(e.green) || 0) : (Number(e.green) || 0) - (Number(e.red) || 0)), 0);
+      const expect = r2((Number(x.openingBalance) || 0) + sum), now = r2(E.now);
+      out.checked[isC ? 'c' : 's']++;
+      if(Math.abs(expect - now) >= 1) out.party.push({ kind, id: x[idf], name: x.name || '', serial: x.serial_no || '', now, expect, diff: r2(now - expect) });
+    });
+  };
+  partyCheck('customers', customersData, 'customer_id');
+  partyCheck('suppliers', suppliersData, 'supplier_id');
+  (invoicesData || []).forEach(inv => {
+    if(!inv || inv.status === 'voided' || inv.status === 'rejected') return;
+    out.checked.b++;
+    const items = inv.items || [];
+    const calc = r2(items.reduce((t, i) => t + (Number(i.qty) || 0) * ((Number(i.unitPrice) || 0) + (Number(i.laborPerUnit) || 0)), 0) + (Number(inv.discount) || 0) + (Number(inv.tax_amount) || 0) - items.reduce((t, i) => t + ((i && i.returned) ? (Number(i.returnAmount) || 0) : 0), 0));
+    const gt = r2(inv.grand_total), due = r2(getInvoiceAmountDue(inv));
+    const probs = [];
+    if(items.length && Math.abs(calc - gt) >= 1) probs.push('ٹوٹل ' + gt.toLocaleString() + ' مگر اشیاء کا جوڑ ' + calc.toLocaleString());
+    if(due < -0.5) probs.push('باقی رقم منفی (' + due + ')');
+    if(due > gt + 0.5) probs.push('باقی رقم ' + due.toLocaleString() + ' ٹوٹل سے زیادہ');
+    if(probs.length) out.bills.push({ id: inv.invoice_id, no: inv.invoice_no || '', name: inv.customer_name || '', day: String(inv.created_at || '').slice(0, 10), probs });
+  });
+  const dupOf = (arr, idf, label) => { const seen = new Map(); (arr || []).forEach(x => { if(!x || x[idf] == null) return; const k = String(x[idf]); seen.set(k, (seen.get(k) || 0) + 1); }); seen.forEach((n, k) => { if(n > 1) out.dups.push({ label, id: k, n }); }); };
+  dupOf(invoicesData, 'invoice_id', 'بل'); dupOf(paymentsData, 'payment_id', 'ادائیگی'); dupOf(customersData, 'customer_id', 'گاہک'); dupOf(suppliersData, 'supplier_id', 'بیوپاری');
+  return out;
+}
+function renderAuditBox(run){
+  const box = document.getElementById('auditBox'); if(!box) return;
+  const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x));
+  let body = '<div style="font-size:13px; color:#64748b; text-align:center;">«🩺 ابھی جانچیں» دبائیں — صرف دیکھتی ہے، کچھ نہیں بدلتی</div>';
+  if(run){
+    const R = runIntegrityAudit(), f = n => Math.round(n).toLocaleString('en-US');
+    const ok = !R.party.length && !R.bills.length && !R.dups.length;
+    body = `<div style="padding:8px 10px; border-radius:10px; margin-bottom:8px; font-weight:900; font-size:15px; background:${ok ? '#dcfce7' : '#fee2e2'}; color:${ok ? '#14532d' : '#991b1b'};">${ok ? '✅ سب حساب درست' : '⚠️ کچھ فرق ملے'} — ${R.checked.c} گاہک، ${R.checked.s} بیوپاری، ${R.checked.b} بل جانچے</div>`;
+    if(R.party.length) body += '<div style="font-weight:900; margin:6px 0 4px;">👥 کھاتے میں فرق (موجودہ بقایا ≠ پورا کھاتہ جوڑ کر)</div>' + R.party.slice(0, 80).map(p => `<div onclick="openPartyLedger('${p.kind}', ${JSON.stringify(p.id)})" style="cursor:pointer; padding:6px 10px; margin-bottom:4px; border:1.5px solid #fecaca; border-radius:999px; background:#fff; font-size:13.5px; font-weight:800; display:flex; justify-content:space-between; gap:6px;"><span>${p.kind === 'customers' ? '👤' : '🚚'} ${esc((p.serial ? p.serial + '= ' : '') + p.name)}</span><span style="font-family:Arial; direction:ltr;">${f(p.now)} / ${f(p.expect)} (${p.diff > 0 ? '+' : ''}${f(p.diff)})</span></div>`).join('');
+    if(R.bills.length) body += '<div style="font-weight:900; margin:8px 0 4px;">🧾 بلوں میں فرق</div>' + R.bills.slice(0, 80).map(b => `<div style="padding:6px 10px; margin-bottom:4px; border:1.5px solid #fde68a; border-radius:12px; background:#fff; font-size:13px; font-weight:700;">${esc(b.no)} — ${esc(b.name)} — ${esc(b.day)}<br><span style="color:#b45309;">${b.probs.map(esc).join('، ')}</span></div>`).join('');
+    if(R.dups.length) body += '<div style="font-weight:900; margin:8px 0 4px;">🔁 ایک نمبر کے دو ریکارڈ</div>' + R.dups.map(d => `<div style="font-size:13px; font-weight:700;">${esc(d.label)} نمبر ${esc(d.id)} — ${d.n} بار</div>`).join('');
+    try{ window.__lastAudit = R; }catch(e){}
+  }
+  box.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;"><div style="font-size:15px; font-weight:900;">🩺 حساب کی جانچ</div><button type="button" onclick="renderAuditBox(true)" style="padding:7px 14px; border:none; border-radius:999px; background:#1e3a8a; color:#fff; font-family:inherit; font-size:13.5px; font-weight:800; cursor:pointer;">🩺 ابھی جانچیں</button></div>${body}`;
 }
 function renderDocMeterBox(){
   const box = document.getElementById('docMeterBox'); if(!box) return;
@@ -29672,6 +29726,12 @@ function renderSupplierTransactionsSection(supplierId){
 // بعد اس وقت کا بقایا، آخر میں کل جوڑ اور تازہ بقایا۔ بقایا ہمیشہ اصل کھاتے (ابھی کی رقم) سے پیچھے کی طرف حساب ہوتا ہے
 // =====================================================================
 let pledState = { kind: 'customers', id: null, preset: 'thismonth', from: '', to: '' };
+// 🛠️ (28 اکتوبر): بل میں واپسی ہو تو grand_total کم ہو جاتا ہے — کھاتے میں پورا بل + الگ واپسی؛ نقد واپس دی رقم الگ سرخ
+function _pledBillGross(i){ return (Number(i.grand_total) || 0) + (i.items || []).reduce((t, it) => t + ((it && it.returned) ? (Number(it.returnAmount) || 0) : 0), 0); }
+function _pledRetCashOut(i){
+  if(i.return_cash_out != null) return Number(i.return_cash_out) || 0;
+  return (i.items || []).reduce((t, it) => t + ((it && it.returned && it.returnMethod === 'cash') ? (Number(it.returnAmount) || 0) : 0), 0); // پرانی واپسی — اندازہ: پوری نقد
+}
 function _pledDay(d){ return d ? String(d).slice(0, 10) : ''; }
 function _pledRange(preset){
   const t = new Date(bizDateKey() + 'T12:00:00'), k = d => localDateKey(d);
@@ -29694,20 +29754,30 @@ function _pledEntries(kind, id){
     _withArch(invoicesData, 'inv').filter(i => i && i.customer_id === id && i.status !== 'voided' && i.status !== 'rejected').forEach(i => {
       const d = _pledDay(bsInvDay(i)), t = ts(i.created_at, d);
       const items = (i.items || []).length;
-      out.push({ day: d, ts: t, desc: '🧾 بل ' + (i.invoice_no || '') + (Number(i.cust_bill_no) > 0 ? ' (' + String(i.cust_bill_no).padStart(3, '0') + ')' : '') + ' — ' + items + ' مال', red: Number(i.grand_total) || 0, green: 0 });
+      out.push({ day: d, ts: t, desc: '🧾 بل ' + (i.invoice_no || '') + (Number(i.cust_bill_no) > 0 ? ' (' + String(i.cust_bill_no).padStart(3, '0') + ')' : '') + ' — ' + items + ' مال', red: _pledBillGross(i), green: 0 }); // 🛠️ (28 اکتوبر): واپسی سے پہلے کا پورا بل — واپسی الگ سبز لائن میں (پہلے دو بار کٹتی تھی)
       const cash = (typeof bsBillCash === 'function') ? bsBillCash(i) : 0;
       if(cash > 0) out.push({ day: d, ts: t + 1, desc: '💵 بل کے ساتھ وصولی', red: 0, green: cash });
       (i.items || []).filter(it => it && it.returned && Number(it.returnAmount) > 0).forEach(it => out.push({ day: d, ts: t + 2, desc: '↩️ واپسی — ' + (it.name || '') + (it.returnQty ? ' × ' + it.returnQty : ''), red: 0, green: Number(it.returnAmount) || 0 }));
+      const co = _pledRetCashOut(i); if(co > 0) out.push({ day: d, ts: t + 3, desc: '💸 واپسی کی رقم نقد واپس دی', red: co, green: 0 });
     });
     _withArch(paymentsData, 'pay').filter(pm => pm && pm.party_type === 'customer' && pm.party_id === id).forEach(pm => {
       const d = _pledDay(bsPayDay(pm)), a = Number(pm.amount) || 0; if(!a) return;
       const note = (typeof _payUserNote === 'function' ? _payUserNote(pm.note) : '') || '';
+      if(pm.direction === 'in' && pm.method === 'Wallet') return; // 🛠️ (28 اکتوبر): والٹ (ایڈوانس) سے بقایا کاٹنا — گاہک کا کل حساب نہیں بدلتا، اس لیے کھاتے میں دوہری وصولی نہ دکھے
       if(pm.direction === 'in') out.push({ day: d, ts: ts(pm.created_at, d), desc: '📥 وصولی' + (pm.method ? ' — ' + pm.method : '') + (note ? ' — ' + note : '') + (pm.edited ? ' (✏️ درست کی گئی)' : ''), red: 0, green: a, pid: pm.payment_id });
       else out.push({ day: d, ts: ts(pm.created_at, d), desc: '💸 رقم دی / ادھار' + (pm.method ? ' — ' + pm.method : '') + (note ? ' — ' + note : ''), red: a, green: 0 });
+    });
+    // 🛠️ (28 اکتوبر): مٹائے گئے بل (نیا طریقہ) کے ساتھ ملی نقدی گاہک کی وصولی ہی رہتی ہے
+    _withArch(invoicesData, 'inv').filter(i => i && i.customer_id === id && i.status === 'voided' && i.void_v2).forEach(i => {
+      const d = _pledDay(bsInvDay(i)), cash = (typeof bsBillCash === 'function') ? bsBillCash(i) : 0;
+      if(cash > 0) out.push({ day: d, ts: ts(i.created_at, d) + 1, desc: '💵 وصولی (مٹائے گئے بل ' + (i.invoice_no || '') + ' کے ساتھ)', red: 0, green: cash });
+      const co = _pledRetCashOut(i); if(co > 0) out.push({ day: d, ts: ts(i.created_at, d) + 3, desc: '💸 واپسی کی رقم نقد واپس دی (مٹایا گیا بل ' + (i.invoice_no || '') + ')', red: co, green: 0 });
     });
     (c.walletHistory || []).forEach(h => {
       if(!h) return; const d = _pledDay(h.date);
       if(h.type === 'balance_fix'){ const dl = Number(h.delta) || 0; if(dl) out.push({ day: d, ts: ts(h.at, d), desc: '🛠️ بقایا درستی' + (h.note ? ' — ' + h.note : ''), red: dl > 0 ? dl : 0, green: dl < 0 ? -dl : 0 }); }
+      else if(h.type === 'return_credit' && Number(h.amount)) out.push({ day: d, ts: ts(h.at || h.date, d), desc: '↩️ واپسی (ملازم کی درخواست)' + (h.note ? ' — ' + h.note : ''), red: 0, green: Number(h.amount) || 0 }); // 🛠️ (28 اکتوبر): پہلے کھاتے میں نظر نہیں آتی تھی
+      else if(h.type === 'opening_balance' && Number(h.amount)) out.push({ day: d, ts: ts(h.at, d), desc: '💼 سابقہ بقایا ' + (h.direction === 'add' ? 'میں اضافہ' : 'میں کمی') + (h.note ? ' — ' + h.note : ''), red: h.direction === 'add' ? Number(h.amount) : 0, green: h.direction === 'add' ? 0 : Number(h.amount) }); // 🛠️ (28 اکتوبر)
       else if(h.type === 'zero_reset' && Number(h.amount)) out.push({ day: d, ts: ts(h.at, d), desc: '🧹 بقایا زیرو کیا', red: 0, green: Number(h.amount) || 0 });
     });
     return { party: c, out, now: (Number(c.total_receivable) || 0) - (Number(c.wallet_balance) || 0), sign: 1 };
@@ -35939,7 +36009,7 @@ function _drGoodsOrig(inv){
 //   • جس دن صرف وصولی ہوئی (مال نہیں لیا) وہ بھی پرانی کم وصولی میں سے منہا — پہلے یہ دن چھوٹ جاتے تھے
 //   • بل بناتے وقت پرانے بقایا میں دی گئی نقد رقم بھی وصولی — پہلے گنی نہیں جاتی تھی
 //   • آخری "تمام بقایا زیرو" کے بعد سے؛ والٹ سے خودکار کٹوتی دوبارہ نہیں گنی جاتی (بل کا ادھار پہلے ہی اتنا کم ہے)
-function custShortThrough(c, D){
+function custShortThrough(c, D, noGoodsDay){ // noGoodsDay: اس دن کا مال شامل نہیں (آج کا مال کل ادا ہوتا ہے) — صرف اس دن کی وصولی
   if(!c) return 0;
   const hist = c.walletHistory || [];
   const zLast = hist.filter(h => h && h.type === 'zero_reset' && h.date && h.date <= D).map(h => h.date).sort().pop() || '';
@@ -35947,13 +36017,13 @@ function custShortThrough(c, D){
   (invoicesData || []).forEach(inv => {
     if(!inv || inv.customer_id !== c.customer_id || inv.status === 'voided') return;
     const d = invDay(inv);
-    ad(gD, d, _drGoodsOrig(inv));
+    if(d !== noGoodsDay) ad(gD, d, _drGoodsOrig(inv));
     const billCash = Math.max(0, (Number(inv.paid_now) || 0) - (Number(inv.wallet_applied) || 0));
     ad(rD, d, Math.max(0, (Number(inv.cash_received_now) || 0) - billCash)); // بل کے ساتھ پرانے بقایا میں دی رقم
   });
   hist.forEach(h => {
     if(!h) return;
-    if(h.type === 'cash_given') ad(gD, h.date, h.amount);
+    if(h.type === 'cash_given'){ if(h.date !== noGoodsDay) ad(gD, h.date, h.amount); }
     else if(h.type === 'receivable_collected' && !(h.via === 'wallet' && /^Auto-applied/.test(String(h.note || '')))) ad(rD, h.date, h.amount);
   });
   (recoveryListData || []).forEach(e => { if(e && e.customer_id === c.customer_id && e.status === 'pending') ad(rD, recDay(e), e.amount); });
@@ -39068,8 +39138,16 @@ function confirmBatchReturn(invoiceId){
 
   if(method === 'wallet'){
     // ---------- طے شدہ رقم کسٹمر کے والٹ میں شامل کریں ----------
-    customer.wallet_balance += totalRefund; // ✅ Firestore Sync (قدم 1) — نیچے pushCustomersToCloud() موجود ہے
-    customer.walletHistory.unshift({type:'deposit', amount: totalRefund, date:new Date().toISOString().split('T')[0], note:`Item Return: ${returnedNames.join(', ')}`});
+    // 🛠️ (28 اکتوبر، حساب کی جانچ): اس بل کا بقایا باقی ہو تو واپسی پہلے اسی میں سے کٹے (ورنہ بل کا "باقی" ٹوٹل سے بڑا رہ جاتا تھا)، بچی رقم والٹ میں
+    let _toWallet = totalRefund;
+    const _wDue = (inv.status !== 'voided') ? Math.max(0, Number(getInvoiceAmountDue(inv)) || 0) : 0;
+    if(_wDue > 0){
+      const _off = Math.min(totalRefund, _wDue, Math.max(0, Number(customer.total_receivable) || 0));
+      inv.amount_due = _wDue - _off; customer.total_receivable = (Number(customer.total_receivable) || 0) - _off; _toWallet = totalRefund - _off;
+      if(_off > 0) _returnOffsetNote = `\n📒 Rs. ${_off.toLocaleString()} customer's pending balance reduced`;
+    }
+    customer.wallet_balance += _toWallet; // ✅ Firestore Sync (قدم 1) — نیچے pushCustomersToCloud() موجود ہے
+    if(_toWallet > 0) customer.walletHistory.unshift({type:'deposit', amount: _toWallet, date:new Date().toISOString().split('T')[0], note:`Item Return: ${returnedNames.join(', ')}`});
     persistAllData();
     pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1) ----------
   } else {
@@ -39088,6 +39166,7 @@ function confirmBatchReturn(invoiceId){
       persistAllData();
       pushCustomersToCloud();
     }
+    inv.return_cash_out = (inv.return_cash_out != null ? Number(inv.return_cash_out) || 0 : _pledRetCashOut(inv) - (picks.reduce((t, x) => t + (x.amount || 0), 0))) + _cashRefund; // 🛠️ (28 اکتوبر): نقد واپس دی رقم کا الگ ریکارڈ (کھاتے کے لیے)
     financeDummy.cashInHand -= _cashRefund; // TODO: نقدی لیجر (cash ledger) میں INSERT
     pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): کیش ریفنڈ سے Cash in Hand کم ہونا فوراً کلاؤڈ میں ----------
   }
@@ -44987,7 +45066,9 @@ function _beTotals(inv){
   const rows = window.__be.rows.filter(r => !r.removed);
   const sub = rows.reduce((a, r) => a + r.qty * r.price, 0), lab = rows.reduce((a, r) => a + r.qty * r.labor, 0);
   const tax = Math.round(sub * (Number(inv.tax_percent) || 0) / 100);
-  return { grand: _beRound(sub + lab + (Number(inv.discount) || 0) + tax), tax };
+  // 🛠️ (28 اکتوبر، حساب کی جانچ): واپس ہوئی لائن (تالا لگی) کی واپسی رقم بل کے ٹوٹل سے پہلے ہی کٹ چکی — ترمیم پر دوبارہ نہ جڑے
+  const ret = rows.reduce((a, r) => { const o = (inv.items || [])[r.idx]; return a + ((!r.isNew && r.locked && o && o.returned) ? (Number(o.returnAmount) || 0) : 0); }, 0);
+  return { grand: _beRound(sub + lab + (Number(inv.discount) || 0) + tax - ret), tax };
 }
 function beRender(){
   const ov = document.getElementById('beOverlay'), st = window.__be; if(!ov || !st) return;
@@ -45151,32 +45232,38 @@ function adminVoidBill(invoiceId){
     });
   });
 
-  // ---------- نقد اثر واپس کریں — اگر یہ نقد بل تھا تو Cash in Hand سے وہی رقم منہا کریں ----------
-  if(inv.payment_method === 'cash'){
-    financeDummy.cashInHand -= inv.grand_total;
-  }
-
-  // ---------- کسٹمر کا بقایہ/والٹ اثر واپس کریں ----------
+  // ---------- 🛠️ (28 اکتوبر، حساب کی جانچ میں ملی خرابی): پہلے صرف اس بل کا "باقی" بقایا سے ہٹتا تھا — جو حصہ گاہک بعد کی
+  //   وصولیوں سے ادا کر چکا تھا وہ ضائع ہو جاتا تھا (مثلاً 1600 کا ادا شدہ بل مٹایا تو گاہک کو کچھ واپس نہ ملا)۔
+  //   اب: گاہک کی دی ہوئی کوئی رقم ضائع نہیں — بل کی پوری رقم (واپسی کے بعد) گاہک کے حق میں: پہلے اس بل کا باقی، پھر
+  //   دوسرے بلوں کا بقایا، باقی بچے تو والٹ (ایڈوانس)۔ گاہک والے بل کی نقدی دکان میں رہتی ہے (کھاتے میں وصولی برقرار)؛
+  //   رقم واپس دینی ہو تو کھاتے سے "رقم دی" درج کریں۔ بغیر گاہک (نقد) بل کی نقدی پہلے کی طرح کیش سے کم ---------- -->
   const customer = inv.customer_id ? customersData.find(c => c.customer_id === inv.customer_id) : null;
+  inv.status = 'voided';
   if(customer){
-    const amountDue = (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0);
-    if(amountDue > 0) customer.total_receivable -= amountDue;
-
-    if(inv.wallet_applied > 0){
-      customer.wallet_balance += inv.wallet_applied; // والٹ سے کاٹی گئی رقم واپس کر دیں
+    const _r = n => Math.round((Number(n) || 0) * 100) / 100;
+    let credit = _r(Math.max(0, Number(inv.grand_total) || 0)); // واپسی کے بعد کا بل (واپسی پہلے ہی گاہک کے حق میں لگ چکی)
+    const ownDue = _r(Math.min(Math.max(0, Number(getInvoiceAmountDue(inv)) || 0), credit, Math.max(0, Number(customer.total_receivable) || 0)));
+    customer.total_receivable = _r((Number(customer.total_receivable) || 0) - ownDue); credit = _r(credit - ownDue);
+    inv.amount_due = 0;
+    const other = _r(Math.min(credit, Math.max(0, Number(customer.total_receivable) || 0)));
+    if(other > 0){ customer.total_receivable = _r(customer.total_receivable - other); _pmDueApply(customer, other, false); credit = _r(credit - other); }
+    if(credit > 0){
+      customer.wallet_balance = _r((Number(customer.wallet_balance) || 0) + credit);
       customer.walletHistory = customer.walletHistory || [];
-      customer.walletHistory.unshift({type:'deposit', amount:inv.wallet_applied, date:new Date().toISOString().split('T')[0], note:`Refund — ${inv.invoice_no} voided`});
+      customer.walletHistory.unshift({type:'deposit', amount:credit, date:new Date().toISOString().split('T')[0], note:`Refund — ${inv.invoice_no} voided`});
     }
+    inv.void_v2 = { ownDue, other, toWallet: credit, at: new Date().toISOString() }; // کھاتہ اسی نشان سے وصولی دکھاتا ہے
+  } else if(inv.payment_method === 'cash'){
+    financeDummy.cashInHand -= inv.grand_total; // بغیر گاہک نقد بل — رقم واپس
   }
 
   // TODO: یہاں invoices.status = 'voided' کا DB UPDATE ہوگا
-  inv.status = 'voided';
   persistAllData();
   renderBillHistory();
   pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): Void ہوتے ہی فوراً کلاؤڈ میں — دوسرے فون پر بھی فوراً Voided ٹیب میں چلا جائے ----------
   pushProductsToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 3): اسٹاک واپس آنا بھی فوراً کلاؤڈ میں ----------
   if(customer) pushCustomersToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 1): بقایا/والٹ کی واپسی بھی فوراً کلاؤڈ میں ----------
-  if(inv.payment_method === 'cash') pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد بل Void ہونے پر Cash in Hand کم ہونا بھی فوراً کلاؤڈ میں ----------
+  if(!customer && inv.payment_method === 'cash') pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد بل Void ہونے پر Cash in Hand کم ہونا بھی فوراً کلاؤڈ میں ----------
   alert('✅ Bill voided — stock and any cash/receivable/wallet effects have been reversed.');
 }
 
@@ -45341,10 +45428,13 @@ function _billPayLayout(invoice, fscale, rowScale){
   const boxH = titleH + n * sumRowH + 2;
   const y = getYesterdayPayInfo(invoice);
   const yTitleH = Math.round(54 * fscale);
-  const redH = (y && y.lifeShort > 0) ? Math.round(30 * fscale) + Math.round(46 * fscale) + 8 : 0; // 🔴 FM1610FR393: اوپر جملہ + نیچے لال ڈبہ // 🔴 FM1610FR391: آج تک کی کل کم وصولی — بڑا ڈبہ
+  const redH = 0; // 🔴 (28 اکتوبر، صدام بھائی): لال ڈبہ اب بائیں — «ادائیگی کی تفصیل» کے نیچے (todayShort) // 🔴 FM1610FR393: اوپر جملہ + نیچے لال ڈبہ // 🔴 FM1610FR391: آج تک کی کل کم وصولی — بڑا ڈبہ
   const noteH = (y && y.notes) ? Math.round(sumRowH * 2.5) : 0; // 📝 نوٹ کی جگہ (زیادہ سے زیادہ دو سطریں، موٹی لکھائی)
   const yH = y ? (yTitleH + _payRowsH(_yBoxRows(y), sumRowH) + noteH + 2 + redH) : 0;
-  return { sumRowH, titleH, boxH, yTitleH, redH, noteH, yH, y };
+  let todayShort = 0, todayD = '';
+  try{ const c = invoice.customer_id != null ? (customersData || []).find(x => x && x.customer_id === invoice.customer_id) : null; todayD = invDay(invoice); if(c && todayD) todayShort = custShortThrough(c, todayD, todayD); }catch(e){}
+  const shortH = todayShort > 0 ? Math.round(30 * fscale) + Math.round(58 * fscale) + 14 : 0;
+  return { sumRowH, titleH, boxH: boxH, boxOnlyH: boxH, shortH, todayShort, todayD, yTitleH, redH, noteH, yH, y, leftH: boxH + shortH };
 }
 // ---------- 📅 بل کی تاریخ سے ایک دن پہلے (کل) کی ادائیگی — بالکل روزانہ ریکوری رپورٹ والا حساب، صرف دیکھنے کے لیے ----------
 // 📝 FM1710SA398: ادائیگی/وصولی کے نوٹ میں سے صرف وہ حصہ جو ہاتھ سے لکھا گیا (خودکار حصے — والٹ، چھوٹ، ریکوری لسٹ/ملازم کا نام — نہیں)
@@ -45451,6 +45541,36 @@ function _yBoxRows(y){
 function _subLines(sub){ return String(sub || '').split('·').length >= 3 ? 2 : 1; }
 function _subH(sub, rowH){ return sub ? Math.round(rowH * (_subLines(sub) === 2 ? 1.75 : 1.0)) : 0; }
 function _payRowsH(rows, rowH){ return rows.reduce((a, r) => a + rowH + _subH(r[3], rowH), 0); }
+// 🔴 (28 اکتوبر، صدام بھائی): آج تک کی کل کم وصولی — بائیں ڈبے کے نیچے، ابھرا ہوا 3D لال کیپسول، موٹے صاف ہندسے
+// حساب: پچھلی سب کم وصولیاں + کل تک کا مال − آج تک کی وصولی (آج کا مال شامل نہیں، وہ کل ادا ہوتا ہے)
+function _drawShortCapsule(ctx, FP, L, R, top, lay, fscale){
+  const _UM = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];
+  const _UD = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
+  const _d = new Date(lay.todayD + 'T12:00:00');
+  const t1 = 'آج ' + _d.getDate() + ' ' + _UM[_d.getMonth()] + ' ' + _UD[_d.getDay()] + ' تک ٹوٹل کم وصولی';
+  const lh = Math.round(30 * fscale);
+  ctx.save();
+  ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+  let px = 16; ctx.font = FP(`bold ${px}px`);
+  while(ctx.measureText(t1).width > (R - L) - 6 && px > 9){ px -= 1; ctx.font = FP(`bold ${px}px`); }
+  ctx.fillText(t1, (L + R) / 2, top + lh - Math.round(8 * fscale));
+  const h = Math.round(58 * fscale), x = L + 2, w = (R - L) - 4, y = top + lh, rr = h / 2;
+  const cap = (dx, dy) => { ctx.beginPath(); ctx.moveTo(x + rr + dx, y + dy); ctx.lineTo(x + w - rr + dx, y + dy); ctx.arc(x + w - rr + dx, y + rr + dy, rr, -Math.PI / 2, Math.PI / 2); ctx.lineTo(x + rr + dx, y + h + dy); ctx.arc(x + rr + dx, y + rr + dy, rr, Math.PI / 2, Math.PI * 1.5); ctx.closePath(); };
+  cap(0, 5); ctx.fillStyle = '#7f1d1d'; ctx.fill(); // نیچے کا گہرا کنارہ (ابھار)
+  cap(0, 0); const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#f87171'); g.addColorStop(0.45, '#dc2626'); g.addColorStop(1, '#991b1b'); ctx.fillStyle = g; ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = '#7f1d1d'; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + rr, y + 5); ctx.lineTo(x + w - rr, y + 5); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.stroke(); // اوپر چمک
+  const t2 = Math.round(lay.todayShort).toLocaleString('en-US');
+  let vx = 34; ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`;
+  while(ctx.measureText(t2).width > w - rr && vx > 12){ vx -= 1; ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`; }
+  const ty = y + h / 2 + Math.round(vx * fscale * 0.36);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#450a0a'; ctx.fillText(t2, (L + R) / 2 + 2, ty + 3); // ہندسوں کا سایہ (ابھرے ہوئے)
+  ctx.lineWidth = Math.max(2, Math.round(3 * fscale)); ctx.strokeStyle = '#7f1d1d'; ctx.strokeText(t2, (L + R) / 2, ty);
+  ctx.fillStyle = '#ffffff'; ctx.fillText(t2, (L + R) / 2, ty);
+  ctx.restore();
+  return y + h + 8;
+}
 function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   const y = lay.y; if(!y) return top;
   const _rows = _yBoxRows(y);
@@ -45479,28 +45599,7 @@ function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
     lines.forEach((ln, i) => ctx.fillText(ln, R - 5, _rowsBottom + lh * i + lh / 2 + Math.round(5 * fscale)));
   }
   let bottom = top + boxH;
-  // 🔴 FM1610FR391: آج تک کی کل کم وصولی — صرف دیکھنے کے لیے (کسی جمع/تفریق میں نہیں)؛ سکرین/شیئر پر سرخ، پرنٹ میں خودکار سیاہ ڈبہ + سفید لکھائی
-  if(y.lifeShort > 0){
-    // 🔴 FM1610FR393: اوپر سیاہ جملہ "کل 15 اکتوبر جمعرات تک ٹوٹل کم وصولی"، نیچے لال ڈبے میں صرف رقم (پرنٹ میں سیاہ ڈبہ)
-    const _UM = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];
-    const _UD = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
-    const _d = new Date(y.D + 'T12:00:00');
-    const t1 = (y.isYesterday !== false ? 'کل ' : '') + _d.getDate() + ' ' + _UM[_d.getMonth()] + ' ' + _UD[_d.getDay()] + ' تک ٹوٹل کم وصولی';
-    const lh = Math.round(30 * fscale), rt0 = bottom + 8;
-    ctx.fillStyle = '#000'; ctx.textAlign = 'center';
-    let px = 16; ctx.font = FP(`bold ${px}px`);
-    while(ctx.measureText(t1).width > (R - L) - 6 && px > 9){ px -= 1; ctx.font = FP(`bold ${px}px`); }
-    ctx.fillText(t1, (L + R) / 2, rt0 + lh - Math.round(8 * fscale));
-    const rh = Math.round(46 * fscale), rt = rt0 + lh;
-    ctx.fillStyle = '#b91c1c';
-    ctx.fillRect(L + 0.5, rt, R - L, rh);
-    ctx.fillStyle = '#ffffff';
-    let vx = 26; const t2 = Math.round(y.lifeShort).toLocaleString();
-    ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`;
-    while(ctx.measureText(t2).width > (R - L) - 10 && vx > 10){ vx -= 1; ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`; }
-    ctx.fillText(t2, (L + R) / 2, rt + rh / 2 + Math.round(9 * fscale));
-    bottom = rt + rh;
-  }
+  // 🔴 (28 اکتوبر): لال ڈبہ یہاں سے ہٹ کر بائیں «ادائیگی کی تفصیل» کے نیچے — _drawShortCapsule
   ctx.fillStyle = '#000';
   return bottom;
 }
@@ -45702,7 +45801,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   let summaryBlockH = 0, accountBlockH = 0;
   if(invoice.customer_id){
     const _lay = _billPayLayout(invoice, fscale, rowScale); // 🧾 FM610TU323
-    summaryBlockH = receiptAccounts.length ? _lay.boxH : Math.max(_lay.boxH, _lay.yH);
+    summaryBlockH = receiptAccounts.length ? _lay.leftH : Math.max(_lay.leftH, _lay.yH);
     if(receiptAccounts.length && _lay.yH) estimatedHeight += _lay.yH + 14;
   } else {
     const laborChk = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
@@ -46092,7 +46191,8 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     ctx.beginPath(); ctx.moveTo(sumLeft, rowTop0); ctx.lineTo(sumRight, rowTop0); ctx.stroke();
     _drawPayRows(ctx, FP, sumLeft, sumRight, rowTop0, _payLay.sumRowH, [...summary.rows, [summary.finalLabel, summary.finalValue, true]], rc, _bw, fscale);
     summaryBottom = boxTop + boxH;
-    summaryBlockHForCentering = boxH;
+    if(_payLay.todayShort > 0) summaryBottom = _drawShortCapsule(ctx, FP, sumLeft, sumRight, summaryBottom + 6, _payLay, fscale);
+    summaryBlockHForCentering = summaryBottom - boxTop;
     // 📅 کل کی ادائیگی — دائیں طرف کی خالی جگہ میں (اکاؤنٹ/QR لگا ہو تو نیچے پوری چوڑائی میں)
     if(_payLay.y && !receiptAccounts.length){
       const yb = _drawYesterdayBox(ctx, FP, colX[4] + 8, tableRight, paymentBoxTop, _payLay, rc, _bw, fscale);
@@ -48742,6 +48842,7 @@ function devNavBuild(){
       ['unlock', '🔓 ڈویلپر ان لاک', 'یہ ایپ اس فون پر ہمیشہ کھلی', () => byId('devCloudSyncStatus')],
       ['usage', '📊 استعمال', 'فائربیس میٹر اور شناخت', () => byId('fbUsageBox')],
       ['docmeter', '📦 ڈبوں کا میٹر', 'کلاؤڈ کے ڈبے کتنے بھرے', () => byId('docMeterBox')],
+      ['audit', '🩺 حساب کی جانچ', 'ہر کھاتہ اور بل جوڑ کر دیکھیں', () => byId('auditBox')],
       ['pins', '👥 اکاؤنٹ PIN', 'سب اکاؤنٹس کے PIN', () => byId('devPinBox')],
       ['maint', '🚧 مینٹیننس', 'ایپ عارضی بند / سنک تشخیص', () => byText('🚧')],
       ['marquee', '📢 سلائیڈنگ پیغام', 'اوپر چلنے والی پٹی', () => byId('devMarqueeBox')],
@@ -48795,6 +48896,7 @@ async function unlockDevSecretPanel(){
   (function(){ const u = document.getElementById('devSecretUnlocked'); if(u && !document.getElementById('fbUsageBox')){ const b = document.createElement('div'); b.id = 'fbUsageBox'; b.dir = 'rtl'; b.style.cssText = 'margin:0 0 12px; padding:10px; border:2px solid #cbd5e1; border-radius:14px; background:#fff;'; u.insertBefore(b, u.firstChild); } })();
   fbDevSignIn(entered).then(() => renderFbUsageBox());
   try{ const fu = document.getElementById('fbUsageBox'); if(fu && !document.getElementById('docMeterBox')){ const b = document.createElement('div'); b.id = 'docMeterBox'; b.dir = 'rtl'; b.style.cssText = 'margin:0 0 12px; padding:10px; border:2px solid #cbd5e1; border-radius:14px; background:#f8fafc;'; fu.after(b); } renderDocMeterBox(); }catch(e){} // 📦 FM2710TU459
+  try{ const dm = document.getElementById('docMeterBox'); if(dm && !document.getElementById('auditBox')){ const b = document.createElement('div'); b.id = 'auditBox'; b.dir = 'rtl'; b.style.cssText = 'margin:0 0 12px; padding:10px; border:2px solid #cbd5e1; border-radius:14px; background:#f8fafc;'; dm.after(b); } renderAuditBox(false); }catch(e){} // 🩺 حساب کی جانچ
   try{ devNavBuild(); }catch(e){} // 🧭 FM2410SA443: اوپر فوری بٹن
   renderMarqueeDevList();
   try{ renderDevPinList(); }catch(e){} // 👁️ FM110TH275
