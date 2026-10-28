@@ -9987,8 +9987,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE480'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'گاہک اور بیوپاری کے بل/خریداری کے رنگین کارڈ، گول ابھرے بٹن، تھوڑے چھوٹے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE481'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'کارڈ میں رنگ: ہمیں آیا سبز، ہم نے دیا سرخ، بقایا نیلا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29384,13 +29384,13 @@ function renderCustomerBillsSection(customerId){
           return `
             <div class="billRow pcCard ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; cursor:default; background:linear-gradient(180deg, ${voided ? '#f1f5f9' : _pal[0]}, #ffffff); border:2px solid ${voided ? '#94a3b8' : _pal[1]}; box-shadow:0 4px 12px rgba(0,0,0,.08);${voided ? ' opacity:.75;' : ''}">
               <div style="text-align:center;"><span class="pcDate" dir="ltr" style="background:linear-gradient(135deg, ${_pal[1]}, ${_pal[2]});">📅 ${_day}</span></div>
-              <div dir="rtl" style="display:flex; gap:5px;">${_cap('🧾 بل', _f(inv.grand_total), '#ffffff', '#0f172a')}${_cash > 0 ? _cap('💵 ساتھ وصولی', _f(_cash), '#dcfce7', '#166534') : ''}${inv.new_balance != null ? _cap('📒 بل کے بعد بقایا', _f(inv.new_balance), '#fee2e2', '#991b1b') : ''}</div>
+              <div dir="rtl" style="display:flex; gap:5px;">${_cap('📤 مال دیا (بل)', _f(inv.grand_total), '#fee2e2', '#991b1b')}${_cash > 0 ? _cap('💵 ساتھ وصولی', _f(_cash), '#dcfce7', '#166534') : ''}${inv.new_balance != null ? _cap('📒 بل کے بعد بقایا', _f(inv.new_balance), '#e0f2fe', '#075985') : ''}</div>
               <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fff; border-radius:16px; padding:4px 8px; border:1px solid ${_pal[1]}55;">
                 <div class="brInfo">
                   <div class="brDate">${inv.invoice_no || ''}${Number(inv.cust_bill_no) > 0 ? ' · بل ' + String(inv.cust_bill_no).padStart(3, '0') : ''} · ${_items} مال${voided ? ' · 🗑️ مٹایا گیا' : (inv.status === 'edited' || inv.edited ? ' · ✏️ ترمیم شدہ' : '')}</div>
                   <div class="brDesc">${escRlHtml(_desc)}</div>
                 </div>
-                <div class="brAmount" style="white-space:nowrap; font-weight:900; ${isPending ? 'color:#b91c1c;' : 'color:#15803d;'}">${isPending ? 'باقی ' + _f(amountDue) : '✅ ادا'}</div>
+                <div class="brAmount" style="white-space:nowrap; font-weight:900; ${isPending ? 'color:#92400e; background:#fef3c7; border-radius:999px; padding:3px 10px;' : 'color:#15803d;'}">${isPending ? 'اس بل کا باقی ' + _f(amountDue) : '✅ ادا'}</div>
               </div>
               <div class="pcBtns">${btns}</div>
             </div>`;
@@ -29764,9 +29764,9 @@ function renderSupplierPoSection(supplierId){
         let _st = null; try{ if(!isPending) _st = poDayStatement(s, po.date); }catch(e){}
         const _f = n => 'Rs. ' + Math.round(Number(n) || 0).toLocaleString('en-US');
         const _cap = (t, v, bg, fg) => `<div style="flex:1 1 0; min-width:0; background:${bg}; color:${fg}; border-radius:999px; padding:3px 6px; text-align:center; box-shadow:inset 0 -2px 0 rgba(0,0,0,.08), 0 2px 5px rgba(0,0,0,.08);"><div style="font-size:11px; font-weight:800; line-height:1.6;">${t}</div><div dir="ltr" style="font:900 14px/1.3 Arial,sans-serif; white-space:nowrap;">${v}</div></div>`;
-        const _caps = _st ? (_cap('💵 اس دن کی ادائیگی', _f(_st.dayPaid), '#dcfce7', '#166534')
+        const _caps = _st ? (_cap('💸 اس دن ادائیگی دی', _f(_st.dayPaid), '#fee2e2', '#991b1b')
             + (_st.dayDisc > 0 ? _cap('🏷️ چھوٹ', _f(_st.dayDisc), '#fef9c3', '#854d0e') : '')
-            + _cap('📒 اس دن کے بعد بقایا', _f(_st.closing), '#fee2e2', '#991b1b')) : '';
+            + _cap('📒 اس دن کے بعد بقایا', _f(_st.closing), '#e0f2fe', '#075985')) : ''; // 🎨 (28 اکتوبر): ہمیں آیا = سبز، ہم نے دیا = سرخ، بقایا = نیلا
         return `
         <div class="billRow pcCard ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; gap:6px; cursor:default; background:linear-gradient(180deg, ${_pal[0]}, #ffffff); border:2px solid ${_pal[1]}; border-radius:26px; padding:8px 10px 10px; box-shadow:0 4px 12px rgba(0,0,0,.08);">
           <div style="text-align:center;"><span dir="ltr" style="display:inline-block; background:linear-gradient(135deg, ${_pal[1]}, ${_pal[2]}); color:#fff; font:900 15px/1 Arial,sans-serif; padding:7px 18px; border-radius:999px; box-shadow:0 3px 8px rgba(0,0,0,.18);">📅 ${po.date}</span></div>
@@ -29776,7 +29776,7 @@ function renderSupplierPoSection(supplierId){
               <div class="brDate">${po.items.length} items · ${statusTxt}</div>
               <div class="brDesc">${itemsDesc}</div>
             </div>
-            <div class="brAmount">Rs. ${po.total.toLocaleString()}</div>
+            <div class="brAmount" style="white-space:nowrap; background:#dcfce7; color:#166534; border:1.5px solid #86efac; border-radius:999px; padding:4px 12px; font-weight:900;">📥 مال آیا Rs. ${po.total.toLocaleString()}</div>
           </div>
           <div class="pcBtns">${actionBtn}</div>
         </div>`;
