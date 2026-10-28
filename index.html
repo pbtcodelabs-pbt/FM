@@ -9987,8 +9987,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE479'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بیوپاری کی خریداری میں ریٹ بدلیں یا غلط لائن ہٹائیں (ایڈمن، تنبیہ + PIN)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2810WE480'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'گاہک اور بیوپاری کے بل/خریداری کے رنگین کارڈ، گول ابھرے بٹن، تھوڑے چھوٹے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -29365,18 +29365,34 @@ function renderCustomerBillsSection(customerId){
           const inv = row.inv;
           const amountDue = getInvoiceAmountDue(inv);
           const isPending = amountDue > 0;
-          const statusTag = inv.status === 'voided' ? ' · VOIDED' : inv.status === 'edited' ? ' · EDITED' : '';
-          // ---------- 🧹 صدام کی ہدایت: سامان کی تفصیل نہیں دکھانی — صرف تاریخ + Preview + بقایہ/کلیئر اسٹیٹس ----------
-          const amountHtml = isPending
-            ? `<div class="brAmount" style="background:#fef2f2; color:#b91c1c; padding:4px 10px; border-radius:8px; font-weight:800; font-size:12px; white-space:nowrap;">Rs. ${amountDue.toLocaleString()}<br><span style="font-size:11px; font-weight:700;">بقایا</span></div>`
-            : `<div class="brAmount" style="color:#15803d; font-weight:800; font-size:20px;">✅</div>`;
+          // 🎨 (28 اکتوبر، صدام بھائی): بیوپاری والے جیسا رنگین کارڈ — تاریخ، بل/وصولی/بعد کا بقایا، اور گول ابھرے بٹن
+          const _ix = allBills.indexOf(row);
+          const _pal = [['#ecfdf5','#10b981','#065f46'],['#eff6ff','#3b82f6','#1e3a8a'],['#fff7ed','#f97316','#9a3412'],['#faf5ff','#a855f7','#6b21a8'],['#fdf2f8','#ec4899','#9d174d']][_ix % 5];
+          const _f = n => 'Rs. ' + Math.round(Number(n) || 0).toLocaleString('en-US');
+          const _cap = (t, v, bg, fg) => `<div class="pcCap" style="background:${bg}; color:${fg};"><div class="t">${t}</div><div class="v">${v}</div></div>`;
+          const voided = inv.status === 'voided';
+          const _cash = (typeof bsBillCash === 'function') ? bsBillCash(inv) : 0;
+          const _day = (typeof bsInvDay === 'function' ? bsInvDay(inv) : String(inv.created_at || '').slice(0, 10)).split('-').reverse().join('-');
+          const _items = (inv.items || []).length;
+          const _desc = (inv.items || []).slice(0, 2).map(i => i.name).join('، ') + (_items > 2 ? ` +${_items - 2} مزید` : '');
+          const isAdm = AppState.currentRole === 'admin';
+          const btns = `<button onclick="event.stopPropagation(); closeProfileModal(); openInvoicePreview(${inv.invoice_id});">👁️ دیکھیں</button>`
+            + (isAdm && !voided ? `<button class="b-blue" onclick="event.stopPropagation(); closeProfileModal(); openBillEdit(${inv.invoice_id});">✏️ ترمیم</button>
+               <button onclick="event.stopPropagation(); closeProfileModal(); openReturnItemModal(${inv.invoice_id});">↩️ واپسی</button>
+               <button class="b-purple" onclick="event.stopPropagation(); closeProfileModal(); openBillTransfer(${inv.invoice_id});">🔁 منتقل</button>
+               <button class="b-red" onclick="event.stopPropagation(); adminVoidBill(${inv.invoice_id}); setTimeout(() => { try{ renderCustomerBillsSection(${customerId}); }catch(e){} }, 400);">🗑️ مٹائیں</button>` : '');
           return `
-            <div class="billRow ${isPending?'pending':''}" onclick="closeProfileModal(); openInvoicePreview(${inv.invoice_id});">
-              <div class="brInfo">
-                <div class="brDate">📅 ${new Date(inv.created_at).toLocaleDateString('en-GB')} · ${inv.invoice_no}${statusTag}</div>
-                <div class="brDesc" style="color:var(--primary-dark); font-weight:700;">🔍 دیکھیں</div>
+            <div class="billRow pcCard ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; cursor:default; background:linear-gradient(180deg, ${voided ? '#f1f5f9' : _pal[0]}, #ffffff); border:2px solid ${voided ? '#94a3b8' : _pal[1]}; box-shadow:0 4px 12px rgba(0,0,0,.08);${voided ? ' opacity:.75;' : ''}">
+              <div style="text-align:center;"><span class="pcDate" dir="ltr" style="background:linear-gradient(135deg, ${_pal[1]}, ${_pal[2]});">📅 ${_day}</span></div>
+              <div dir="rtl" style="display:flex; gap:5px;">${_cap('🧾 بل', _f(inv.grand_total), '#ffffff', '#0f172a')}${_cash > 0 ? _cap('💵 ساتھ وصولی', _f(_cash), '#dcfce7', '#166534') : ''}${inv.new_balance != null ? _cap('📒 بل کے بعد بقایا', _f(inv.new_balance), '#fee2e2', '#991b1b') : ''}</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fff; border-radius:16px; padding:4px 8px; border:1px solid ${_pal[1]}55;">
+                <div class="brInfo">
+                  <div class="brDate">${inv.invoice_no || ''}${Number(inv.cust_bill_no) > 0 ? ' · بل ' + String(inv.cust_bill_no).padStart(3, '0') : ''} · ${_items} مال${voided ? ' · 🗑️ مٹایا گیا' : (inv.status === 'edited' || inv.edited ? ' · ✏️ ترمیم شدہ' : '')}</div>
+                  <div class="brDesc">${escRlHtml(_desc)}</div>
+                </div>
+                <div class="brAmount" style="white-space:nowrap; font-weight:900; ${isPending ? 'color:#b91c1c;' : 'color:#15803d;'}">${isPending ? 'باقی ' + _f(amountDue) : '✅ ادا'}</div>
               </div>
-              ${amountHtml}
+              <div class="pcBtns">${btns}</div>
             </div>`;
         } else {
           const p = row.p;
@@ -29397,6 +29413,20 @@ function renderCustomerBillsSection(customerId){
     [['all','تمام'],['pending','بقایا والے'],['cleared','ادا شدہ']], profileBillFilter, 'applyCustomerBillFilter');
 
   document.getElementById('profileSections').innerHTML = `
+    <style>
+      /* 🎨 (28 اکتوبر، صدام بھائی): بل/خریداری کے کارڈ تھوڑے چھوٹے — زیادہ ریکارڈ ایک نظر میں؛ سب بٹن گول ابھرے 3D */
+      .pcCard{padding:6px 7px 7px !important; border-radius:22px !important; gap:5px !important; margin:0 auto 8px !important; width:96%; box-sizing:border-box;}
+      .pcCard .pcDate{display:inline-block; color:#fff; font:900 13.5px/1 Arial,sans-serif; padding:6px 14px; border-radius:999px; box-shadow:0 3px 0 rgba(0,0,0,.22), 0 4px 8px rgba(0,0,0,.12);}
+      .pcCard .pcBtns{display:flex; flex-wrap:wrap; gap:5px; justify-content:center;}
+      .pcCard .pcBtns button{flex:1 1 auto; min-width:0; height:36px; padding:0 9px !important; border:none !important; border-radius:999px !important; font-size:12.5px !important; font-weight:800 !important; font-family:inherit; cursor:pointer; color:#1e293b; background:linear-gradient(180deg,#ffffff,#e2e8f0) !important; box-shadow:0 3px 0 #94a3b8, 0 5px 10px rgba(0,0,0,.12) !important; white-space:nowrap;}
+      .pcCard .pcBtns button:active{transform:translateY(2px); box-shadow:0 1px 0 #94a3b8 !important;}
+      .pcCard .pcBtns button.b-blue{color:#fff; background:linear-gradient(180deg,#3b82f6,#1d4ed8) !important; box-shadow:0 3px 0 #1e3a8a, 0 5px 10px rgba(0,0,0,.15) !important;}
+      .pcCard .pcBtns button.b-purple{color:#fff; background:linear-gradient(180deg,#a855f7,#7c3aed) !important; box-shadow:0 3px 0 #4c1d95, 0 5px 10px rgba(0,0,0,.15) !important;}
+      .pcCard .pcBtns button.b-red{color:#b91c1c; background:linear-gradient(180deg,#fff1f2,#fecaca) !important; box-shadow:0 3px 0 #f87171, 0 5px 10px rgba(0,0,0,.1) !important;}
+      .pcCard .pcBtns button.b-green{color:#fff; background:linear-gradient(180deg,#22c55e,#15803d) !important; box-shadow:0 3px 0 #14532d, 0 5px 10px rgba(0,0,0,.15) !important;}
+      .pcCard .pcCap{flex:1 1 0; min-width:0; border-radius:999px; padding:3px 6px; text-align:center; box-shadow:inset 0 -2px 0 rgba(0,0,0,.08), 0 2px 5px rgba(0,0,0,.08);}
+      .pcCard .pcCap .t{font-size:11px; font-weight:800;} .pcCard .pcCap .v{font:900 14px Arial,sans-serif;}
+    </style>
     <div class="profileSectionTitle"><span>📦 بل</span><span class="cnt">${allBills.length} بل</span></div>
     ${filterBarHtml}
     <div id="profileBillsListWrap">${billsHtml}</div>
@@ -29726,8 +29756,8 @@ function renderSupplierPoSection(supplierId){
              <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ حذف کریں</button>`
           : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ دیکھیں</button>
              <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ واپسی</button>
-             ${AppState.currentRole === 'admin' && !(po.accountedInDaily && !po.isDaily) ? `<button class="btnPrint" style="background:#1d4ed8; color:#fff;" onclick="event.stopPropagation(); supChangePurchaseSupplier(${s.supplier_id}, ${idx});">🔁 بیوپاری بدلیں</button>` : ''}
-             ${AppState.currentRole === 'admin' && !(po.accountedInDaily && !po.isDaily) ? `<button class="btnPrint" style="background:#7c3aed; color:#fff;" onclick="event.stopPropagation(); supEditPurchase(${s.supplier_id}, ${idx});">✏️ ریٹ بدلیں / 🗑️ ہٹائیں</button>` : ''}`;
+             ${AppState.currentRole === 'admin' && !(po.accountedInDaily && !po.isDaily) ? `<button class="btnPrint b-blue" style="background:#1d4ed8; color:#fff;" onclick="event.stopPropagation(); supChangePurchaseSupplier(${s.supplier_id}, ${idx});">🔁 بیوپاری بدلیں</button>` : ''}
+             ${AppState.currentRole === 'admin' && !(po.accountedInDaily && !po.isDaily) ? `<button class="btnPrint b-purple" style="background:#7c3aed; color:#fff;" onclick="event.stopPropagation(); supEditPurchase(${s.supplier_id}, ${idx});">✏️ ریٹ بدلیں / 🗑️ ہٹائیں</button>` : ''}`;
         // 🎨 FM1510TH390 (صدام صاحب کی ہدایت): ہر پرچیز آرڈر ایک لمبا رنگین کیپسول — اوپر بیچ میں رنگدار تاریخ، نیچے اس دن کی
         // ادائیگی/چھوٹ/بقایا کے کیپسول (وہی حساب جو چٹ میں کھلتا ہے: poDayStatement)، پھر پرانی لائن اور بٹن
         const _pal = [['#ecfdf5','#10b981','#065f46'],['#eff6ff','#3b82f6','#1e3a8a'],['#fff7ed','#f97316','#9a3412'],['#faf5ff','#a855f7','#6b21a8'],['#fdf2f8','#ec4899','#9d174d']][idx % 5];
@@ -29738,7 +29768,7 @@ function renderSupplierPoSection(supplierId){
             + (_st.dayDisc > 0 ? _cap('🏷️ چھوٹ', _f(_st.dayDisc), '#fef9c3', '#854d0e') : '')
             + _cap('📒 اس دن کے بعد بقایا', _f(_st.closing), '#fee2e2', '#991b1b')) : '';
         return `
-        <div class="billRow ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; gap:6px; cursor:default; background:linear-gradient(180deg, ${_pal[0]}, #ffffff); border:2px solid ${_pal[1]}; border-radius:26px; padding:8px 10px 10px; box-shadow:0 4px 12px rgba(0,0,0,.08);">
+        <div class="billRow pcCard ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; gap:6px; cursor:default; background:linear-gradient(180deg, ${_pal[0]}, #ffffff); border:2px solid ${_pal[1]}; border-radius:26px; padding:8px 10px 10px; box-shadow:0 4px 12px rgba(0,0,0,.08);">
           <div style="text-align:center;"><span dir="ltr" style="display:inline-block; background:linear-gradient(135deg, ${_pal[1]}, ${_pal[2]}); color:#fff; font:900 15px/1 Arial,sans-serif; padding:7px 18px; border-radius:999px; box-shadow:0 3px 8px rgba(0,0,0,.18);">📅 ${po.date}</span></div>
           ${_caps ? `<div dir="rtl" style="display:flex; gap:5px;">${_caps}</div>` : ''}
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fff; border-radius:16px; padding:4px 8px; border:1px solid ${_pal[1]}55;">
@@ -29748,7 +29778,7 @@ function renderSupplierPoSection(supplierId){
             </div>
             <div class="brAmount">Rs. ${po.total.toLocaleString()}</div>
           </div>
-          <div style="display:flex; gap:6px; justify-content:center;">${actionBtn}</div>
+          <div class="pcBtns">${actionBtn}</div>
         </div>`;
       }).join('');
 
@@ -29757,6 +29787,20 @@ function renderSupplierPoSection(supplierId){
 
   document.getElementById('profileSections').innerHTML = `
     ${buildSupplierBankAccountsHtml(s)}
+    <style>
+      /* 🎨 (28 اکتوبر، صدام بھائی): بل/خریداری کے کارڈ تھوڑے چھوٹے — زیادہ ریکارڈ ایک نظر میں؛ سب بٹن گول ابھرے 3D */
+      .pcCard{padding:6px 7px 7px !important; border-radius:22px !important; gap:5px !important; margin:0 auto 8px !important; width:96%; box-sizing:border-box;}
+      .pcCard .pcDate{display:inline-block; color:#fff; font:900 13.5px/1 Arial,sans-serif; padding:6px 14px; border-radius:999px; box-shadow:0 3px 0 rgba(0,0,0,.22), 0 4px 8px rgba(0,0,0,.12);}
+      .pcCard .pcBtns{display:flex; flex-wrap:wrap; gap:5px; justify-content:center;}
+      .pcCard .pcBtns button{flex:1 1 auto; min-width:0; height:36px; padding:0 9px !important; border:none !important; border-radius:999px !important; font-size:12.5px !important; font-weight:800 !important; font-family:inherit; cursor:pointer; color:#1e293b; background:linear-gradient(180deg,#ffffff,#e2e8f0) !important; box-shadow:0 3px 0 #94a3b8, 0 5px 10px rgba(0,0,0,.12) !important; white-space:nowrap;}
+      .pcCard .pcBtns button:active{transform:translateY(2px); box-shadow:0 1px 0 #94a3b8 !important;}
+      .pcCard .pcBtns button.b-blue{color:#fff; background:linear-gradient(180deg,#3b82f6,#1d4ed8) !important; box-shadow:0 3px 0 #1e3a8a, 0 5px 10px rgba(0,0,0,.15) !important;}
+      .pcCard .pcBtns button.b-purple{color:#fff; background:linear-gradient(180deg,#a855f7,#7c3aed) !important; box-shadow:0 3px 0 #4c1d95, 0 5px 10px rgba(0,0,0,.15) !important;}
+      .pcCard .pcBtns button.b-red{color:#b91c1c; background:linear-gradient(180deg,#fff1f2,#fecaca) !important; box-shadow:0 3px 0 #f87171, 0 5px 10px rgba(0,0,0,.1) !important;}
+      .pcCard .pcBtns button.b-green{color:#fff; background:linear-gradient(180deg,#22c55e,#15803d) !important; box-shadow:0 3px 0 #14532d, 0 5px 10px rgba(0,0,0,.15) !important;}
+      .pcCard .pcCap{flex:1 1 0; min-width:0; border-radius:999px; padding:3px 6px; text-align:center; box-shadow:inset 0 -2px 0 rgba(0,0,0,.08), 0 2px 5px rgba(0,0,0,.08);}
+      .pcCard .pcCap .t{font-size:11px; font-weight:800;} .pcCard .pcCap .v{font:900 14px Arial,sans-serif;}
+    </style>
     <div class="profileSectionTitle"><span>📦 تمام پرچیز آرڈرز</span><span class="cnt">${orders.length} آرڈرز</span></div>
     ${filterBarHtml}
     <div id="profilePoListWrap">${ordersHtml}</div>
