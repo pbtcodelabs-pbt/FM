@@ -10090,8 +10090,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2810WE482'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ایپ شیئر: اب ہر بٹن سے پوسٹر کی تصویر ساتھ جاتی ہے (واٹس ایپ، فیس بک، ٹیلی گرام)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2910TH483'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'منشی کا آرڈر: کم مال کا بل بنے تو باقی مال الگ زیرِ التوا آرڈر میں؛ بلنگ میں کھولا آرڈر چھوڑنے پر مال واپس بک'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -17410,9 +17410,35 @@ function finalizeInvoice(){
   if(Billing.sourceAdvanceOrderId){
     const srcOrder = advanceOrdersData.find(o => o.id === Billing.sourceAdvanceOrderId);
     if(srcOrder && srcOrder.status !== 'fulfilled'){
+      // 🛠️ (29 اکتوبر، بلال/صدام: «منشی نے پورا آرڈر بھیجا، آدھا بکا آدھا نہیں»): بل میں آرڈر سے کم مال گیا ہو (سٹاک کم تھا یا کچھ
+      //   ہٹایا) تو پہلے پورا آرڈر «مکمل» ہو کر غائب ہو جاتا تھا — باقی مال کا پتا ہی نہ چلتا۔ اب باقی مال کا الگ زیرِ التوا آرڈر بنتا ہے
+      try{
+        const billed = {}; (invoice.items || []).forEach(it => { if(it && it.variant_id != null) billed[it.variant_id] = (billed[it.variant_id] || 0) + (Number(it.qty) || 0); });
+        const rest = [];
+        (srcOrder.items || []).forEach(i => {
+          if(!i || i.variant_id === null || i.variant_id === undefined) return;
+          const want = Number(i.qty) || 0, got = Math.min(want, billed[i.variant_id] || 0);
+          billed[i.variant_id] = (billed[i.variant_id] || 0) - got;
+          const left = Math.round((want - got) * 100) / 100;
+          if(left > 0.0001) rest.push(Object.assign({}, i, { qty: left }));
+        });
+        if(rest.length){
+          const restTxt = rest.map(i => (i.name || '') + ' ' + i.qty).join('، ');
+          if(confirm(`📦 اس آرڈر کا کچھ مال بل میں نہیں گیا:\n${restTxt}\n\nOK = یہ باقی مال الگ زیرِ التوا آرڈر میں رکھیں (بعد میں بل بنے گا)\nCancel = نہیں، آرڈر یہیں ختم`)){
+            const ro = JSON.parse(JSON.stringify(srcOrder));
+            nextAdvOrderId = Math.max(Number(nextAdvOrderId) || 1, ...advanceOrdersData.map(x => (Number(x && x.id) || 0) + 1)); // نمبر کبھی نہ ٹکرائے
+            Object.assign(ro, { id: nextAdvOrderId++, items: rest, status: 'pending', stockReleased: false, createdAt: new Date().toISOString(), restOf: srcOrder.id, note: ((srcOrder.note ? srcOrder.note + ' — ' : '') + 'باقی مال (پچھلے بل ' + (invoice.invoice_no || '') + ' کے بعد)') });
+            delete ro.fulfilledAt; delete ro.fulfilledInvoiceId;
+            advanceOrdersData.unshift(ro);
+            srcOrder.restOrderId = ro.id;
+            try{ saveToStorage('nextAdvOrderId', nextAdvOrderId); }catch(e){}
+          } else { srcOrder.restDropped = rest; }
+        }
+      }catch(e){ console.warn('order remainder', e); }
       srcOrder.status = 'fulfilled';
       srcOrder.fulfilledAt = new Date().toISOString();
       srcOrder.fulfilledInvoiceId = invoice.invoice_id; // ---------- یہ Pending Order آخرکار کس بل میں تبدیل ہوا — ٹریسنگ کے لیے ----------
+      try{ recomputeReservedFromOrders(); }catch(e){}
       pushAdvanceOrdersToCloud();
       if(typeof renderAdvanceOrdersScreen === 'function') renderAdvanceOrdersScreen();
     }
@@ -20196,11 +20222,19 @@ function releaseOrderStock(items){
 // چاہے آرڈر/بل خود ڈیلیٹ ہو چکا ہو۔ اب v.reserved کبھی خود سے نہیں بدلتا — بلکہ ہمیشہ موجودہ پینڈنگ (نامکمل)
 // آرڈرز کی فہرست سے دوبارہ، صفر سے شمار ہوتا ہے۔ یعنی اگر کوئی آرڈر واقعی ڈیلیٹ ہو چکا ہے تو اس کی بکنگ خودکار
 // صفر ہو جائے گی — کسی "بھوت" نمبر کا امکان ہی نہیں رہتا ---------- -->
+// 🛠️ (29 اکتوبر، بلال/صدام: «آدھا مال واپس سٹاک میں چلا گیا»): پہلے بلنگ میں کھولا گیا آرڈر (stockReleased) ہمیشہ کے لیے
+//   بکنگ سے نکل جاتا تھا — بل بنائے بغیر واپس آ گئے تو آرڈر زیرِ التوا رہتا مگر اس کا مال کھلا سٹاک بن کر دوسروں کو بک جاتا۔
+//   اب بکنگ صرف تب ہٹتی ہے جب یہی آرڈر اس وقت اسی فون کی بلنگ میں کھلا ہو؛ بل مکمل ہو تو آرڈر «مکمل» ہو کر ہٹتا ہے
+function _ordHoldsStock(o){
+  if(!o || o.status === 'fulfilled') return false;
+  if(o.stockReleased){ try{ if(typeof Billing !== 'undefined' && Billing && Billing.sourceAdvanceOrderId === o.id) return false; }catch(e){} }
+  return true;
+}
 function recomputeReservedFromOrders(){
   try{
     productsData.forEach(p => (p.variants || []).forEach(v => { v.reserved = 0; }));
     (advanceOrdersData || []).forEach(o => {
-      if(!o || o.status === 'fulfilled' || o.stockReleased) return; // 🧾 26 ستمبر: منشی کے ڈرافٹ آرڈر بھی بکنگ میں — سٹاک فوراً منفی دکھے
+      if(!_ordHoldsStock(o)) return; // 🧾 26 ستمبر: منشی کے ڈرافٹ آرڈر بھی بکنگ میں — سٹاک فوراً منفی دکھے
       (o.items || []).forEach(i => {
         if(!i || i.variant_id === null || i.variant_id === undefined) return;
         const v = findVariantByVariantId(i.variant_id);
@@ -20417,7 +20451,7 @@ function findProductAndVariant(variantId){
 function getChalanReservedMap(variantId, excludeOrderId){
   const map = {};
   (advanceOrdersData || []).forEach(o => {
-    if(!o || o.status === 'fulfilled' || o.stockReleased) return;
+    if(!_ordHoldsStock(o)) return;
     if(excludeOrderId != null && o.id === excludeOrderId) return;
     (o.items || []).forEach(i => {
       if(!i || i.variant_id !== variantId || !i.chalanAlloc) return;
@@ -21494,7 +21528,7 @@ function saveChalanSplit(){
     const cap = parts.map(pt => ({ no: pt.chalanNo, left: Number(pt.remain) || 0 }));
     const key = String(st.chalanNo);
     (advanceOrdersData || []).forEach(o => {
-      if(!o || o.status === 'fulfilled' || o.stockReleased) return;
+      if(!_ordHoldsStock(o)) return;
       (o.items || []).forEach(it => {
         if(!it || it.variant_id !== st.variantId || !it.chalanAlloc || !(Number(it.chalanAlloc[key]) > 0)) return;
         let need = _chRound(Number(it.chalanAlloc[key]) || 0);
@@ -22027,7 +22061,7 @@ let _bookingFromStockPage = false;
 function bookingOrdersForVariant(variantId){
   const rows = [];
   (advanceOrdersData || []).forEach(o => {
-    if(!o || o.status === 'fulfilled' || o.stockReleased) return;
+    if(!_ordHoldsStock(o)) return;
     let q = 0;
     (o.items || []).forEach(i => { if(i && i.variant_id === variantId) q += Number(i.qty) || 0; });
     if(q > 0) rows.push({ o, q: Math.round(q * 100) / 100 });
@@ -37667,6 +37701,7 @@ function fulfillAdvanceOrder(orderId){
   // گا۔ یہاں صرف یہ نشان چھوڑتے ہیں کہ موجودہ بلنگ کارٹ کس Pending Order سے آیا ہے (ہوم پیج کے پیلے کارڈ میں بھی
   // اسی نشان سے کسٹمر کا نام نظر آئے گا، جب تک بل مکمل نہ ہو) ---------- -->
   Billing.sourceAdvanceOrderId = order.id;
+  try{ recomputeReservedFromOrders(); }catch(e){} // 🛠️ (29 اکتوبر): اسی آرڈر کی بکنگ اب بلنگ میں — دوہری نہ گنی جائے
   persistAllData();
   if(typeof closeAdvOrderPreview === 'function') closeAdvOrderPreview(); // ---------- پریویو کے اندر سے فُل فِل کیا ہو تو موڈل بھی بند ہو جائے ----------
 
