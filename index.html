@@ -10090,8 +10090,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2910TH483'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'منشی کا آرڈر: کم مال کا بل بنے تو باقی مال الگ زیرِ التوا آرڈر میں؛ بلنگ میں کھولا آرڈر چھوڑنے پر مال واپس بک'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM2910TH484'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'منشی کا آرڈر اب پورا پہنچتا ہے — ایڈمن کی پرانی کاپی منشی کی نئی چیزیں نہیں کاٹتی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -17410,31 +17410,6 @@ function finalizeInvoice(){
   if(Billing.sourceAdvanceOrderId){
     const srcOrder = advanceOrdersData.find(o => o.id === Billing.sourceAdvanceOrderId);
     if(srcOrder && srcOrder.status !== 'fulfilled'){
-      // 🛠️ (29 اکتوبر، بلال/صدام: «منشی نے پورا آرڈر بھیجا، آدھا بکا آدھا نہیں»): بل میں آرڈر سے کم مال گیا ہو (سٹاک کم تھا یا کچھ
-      //   ہٹایا) تو پہلے پورا آرڈر «مکمل» ہو کر غائب ہو جاتا تھا — باقی مال کا پتا ہی نہ چلتا۔ اب باقی مال کا الگ زیرِ التوا آرڈر بنتا ہے
-      try{
-        const billed = {}; (invoice.items || []).forEach(it => { if(it && it.variant_id != null) billed[it.variant_id] = (billed[it.variant_id] || 0) + (Number(it.qty) || 0); });
-        const rest = [];
-        (srcOrder.items || []).forEach(i => {
-          if(!i || i.variant_id === null || i.variant_id === undefined) return;
-          const want = Number(i.qty) || 0, got = Math.min(want, billed[i.variant_id] || 0);
-          billed[i.variant_id] = (billed[i.variant_id] || 0) - got;
-          const left = Math.round((want - got) * 100) / 100;
-          if(left > 0.0001) rest.push(Object.assign({}, i, { qty: left }));
-        });
-        if(rest.length){
-          const restTxt = rest.map(i => (i.name || '') + ' ' + i.qty).join('، ');
-          if(confirm(`📦 اس آرڈر کا کچھ مال بل میں نہیں گیا:\n${restTxt}\n\nOK = یہ باقی مال الگ زیرِ التوا آرڈر میں رکھیں (بعد میں بل بنے گا)\nCancel = نہیں، آرڈر یہیں ختم`)){
-            const ro = JSON.parse(JSON.stringify(srcOrder));
-            nextAdvOrderId = Math.max(Number(nextAdvOrderId) || 1, ...advanceOrdersData.map(x => (Number(x && x.id) || 0) + 1)); // نمبر کبھی نہ ٹکرائے
-            Object.assign(ro, { id: nextAdvOrderId++, items: rest, status: 'pending', stockReleased: false, createdAt: new Date().toISOString(), restOf: srcOrder.id, note: ((srcOrder.note ? srcOrder.note + ' — ' : '') + 'باقی مال (پچھلے بل ' + (invoice.invoice_no || '') + ' کے بعد)') });
-            delete ro.fulfilledAt; delete ro.fulfilledInvoiceId;
-            advanceOrdersData.unshift(ro);
-            srcOrder.restOrderId = ro.id;
-            try{ saveToStorage('nextAdvOrderId', nextAdvOrderId); }catch(e){}
-          } else { srcOrder.restDropped = rest; }
-        }
-      }catch(e){ console.warn('order remainder', e); }
       srcOrder.status = 'fulfilled';
       srcOrder.fulfilledAt = new Date().toISOString();
       srcOrder.fulfilledInvoiceId = invoice.invoice_id; // ---------- یہ Pending Order آخرکار کس بل میں تبدیل ہوا — ٹریسنگ کے لیے ----------
@@ -21891,6 +21866,21 @@ function _advMergeDeletedList(list){
   if(advDeletedIds.length > 800) advDeletedIds = advDeletedIds.slice(-800);
   try{ saveToStorage('advDeletedIds', advDeletedIds); }catch(e){}
 }
+// 🛠️ (29 اکتوبر): آرڈر بنانے والا (منشی) جب بھی چیزیں بدلے، اس آرڈر پر وقت کا نشان — ملاپ میں چیزیں اسی تازہ کاپی سے آتی ہیں
+function _advItemsSig(items){ return _stableStr((items || []).map(i => [i && i.variant_id, i && i.name, i && Number(i.qty) || 0])); }
+function _advStampItems(){
+  try{
+    const me = (AppState.currentUser && AppState.currentUser.name) || '';
+    (advanceOrdersData || []).forEach(o => {
+      if(!o || o.status === 'fulfilled') return;
+      const mine = !o.employeeName || o.employeeName === me;
+      let baseItems = null;
+      try{ if(advOrdersSyncBase && advOrdersSyncBase[o.id]) baseItems = JSON.parse(advOrdersSyncBase[o.id]).items; }catch(e){}
+      const changed = baseItems ? _advItemsSig(baseItems) !== _advItemsSig(o.items) : !o.itemsTs;
+      if(changed && mine) o.itemsTs = Date.now();
+    });
+  }catch(e){}
+}
 function _advSetBase(list){
   const m = {};
   (list || []).forEach(o => { if(o && o.id != null) m[o.id] = _stableStr(o); });
@@ -21950,7 +21940,16 @@ function mergeAdvanceOrderLists(local, cloud){
     const inBase = !!(base && Object.prototype.hasOwnProperty.call(base, id));
     if(l && c){
       const lChanged = !base || !inBase || _stableStr(l) !== base[id];
-      out.push(lChanged ? _advSticky(l, c) : _advSticky(c, l));
+      const m = lChanged ? _advSticky(l, c) : _advSticky(c, l);
+      // 🛠️ (29 اکتوبر، بلال: «منشی نے 50 چیزوں کا آرڈر بھیجا، ایڈمن کو 30 پہنچیں»): پہلے پورا آرڈر ایک طرف کا لیا جاتا تھا —
+      //   ایڈمن کے فون پر اسی آرڈر کی پرانی کاپی میں ذرا سی تبدیلی (مثلاً خالی ریٹ خود بھرنا) ہوتی تو وہ پرانی کاپی (30 چیزیں)
+      //   منشی کی نئی (50 چیزیں) پر لکھ دی جاتی۔ اب چیزیں ہمیشہ اسی کاپی سے جس میں منشی نے آخری بار چیزیں بدلیں (itemsTs)
+      const lt = Number(l.itemsTs) || 0, ct = Number(c.itemsTs) || 0;
+      let src = null;
+      if(lt !== ct) src = lt > ct ? l : c;
+      else if(!lt && (l.items || []).length !== (c.items || []).length) src = (l.items || []).length > (c.items || []).length ? l : c; // پرانے آرڈر: زیادہ چیزوں والی کاپی
+      if(src && src.items){ m.items = JSON.parse(JSON.stringify(src.items)); if(src.itemsTs) m.itemsTs = src.itemsTs; }
+      out.push(m);
     } else if(l){
       // ---------- کلاؤڈ پر نہیں: اگر پہلے کلاؤڈ پر تھا تو کسی اور فون نے ہٹایا؛ ورنہ ابھی یہیں بنا ہے ---------- -->
       // 🛡️ FM2710TU462 (صدام بھائی — منشی کے ڈرافٹ 11:31 پر غائب): پہلے "کلاؤڈ پر نہیں مگر بنیاد میں تھا" = کسی اور فون نے ہٹایا، اور
@@ -21994,6 +21993,7 @@ function _advPrune(list){
 }
 let _advPushBusy = false, _advPushAgain = false;
 async function pushAdvanceOrdersToCloud(){
+  _advStampItems(); // 🛠️ (29 اکتوبر)
   saveToStorage('advanceOrders', advanceOrdersData);
   saveToStorage('nextAdvOrderId', nextAdvOrderId);
   if(_advPushBusy){ _advPushAgain = true; return true; }
