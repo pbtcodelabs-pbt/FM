@@ -10090,8 +10090,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM2910TH484'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'منشی کا آرڈر اب پورا پہنچتا ہے — ایڈمن کی پرانی کاپی منشی کی نئی چیزیں نہیں کاٹتی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0111SU485'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'سٹاک، آرڈر اور گلے کا کیش اب کئی فونوں پر بھی بالکل برابر — ایک وقت میں ایک ملاپ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21991,8 +21991,21 @@ function _advPrune(list){
   if(size(out) > ADV_MAX_BYTES) out = out.filter(o => !_advDone(o));
   return out;
 }
+// ---------- 🔒 FM0111SU485 (اسد بھائی/صدام: «منشی نے 78 بیچے، کہیں 86 دکھے کہیں 62»): سٹاک اور آرڈر کا بھیجنا/لینا اب ایک وقت میں ایک —
+//   پہلے ایک ہی فون سے دو کوششیں ایک دوسرے کے اوپر چڑھ جاتیں: ایک کی لکھائی کلاؤڈ میں پہنچ چکی ہوتی مگر دوسری پرانی بنیاد سے ملاتی، اور
+//   وہی کٹوتی/خریداری دوبارہ لگ جاتی۔ تین فون والے ٹیسٹ (sim.js) میں یہی خرابی دہرا کر اسی قطار سے صفر فرق ثابت کیا۔
+//   جو کام قطار میں پہلے سے انتظار میں ہو، نیا اسی کے ساتھ — وہ چلتے وقت تازہ ترین حالت لے جاتا ہے
+function _sqRun(lock, wait, fn){
+  const W = window.__sqWait || (window.__sqWait = {}), Q = window.__sqQ || (window.__sqQ = {});
+  if(W[wait]) return W[wait];
+  const prev = Q[lock] || Promise.resolve();
+  const run = prev.catch(() => {}).then(() => { W[wait] = null; return fn(); });
+  W[wait] = run; Q[lock] = run.catch(() => {});
+  return run;
+}
 let _advPushBusy = false, _advPushAgain = false;
-async function pushAdvanceOrdersToCloud(){
+function pushAdvanceOrdersToCloud(){ return _sqRun('adv', 'adv:push', _pushAdvanceOrdersRaw); }
+async function _pushAdvanceOrdersRaw(){
   _advStampItems(); // 🛠️ (29 اکتوبر)
   saveToStorage('advanceOrders', advanceOrdersData);
   saveToStorage('nextAdvOrderId', nextAdvOrderId);
@@ -22031,7 +22044,8 @@ async function pushAdvanceOrdersToCloud(){
 // 📶 FM2110WE431: انٹرنیٹ نہ ہونے سے آرڈر کلاؤڈ پر نہ گیا ہو تو انٹرنیٹ آتے ہی اور ہر 30 سیکنڈ میں خود دوبارہ بھیجیں
 window.addEventListener('online', () => { try{ if(loadFromStorage('advPushPending', false)) pushAdvanceOrdersToCloud(); }catch(e){} });
 setInterval(() => { try{ if(!document.hidden && loadFromStorage('advPushPending', false)) pushAdvanceOrdersToCloud(); }catch(e){} }, 30000);
-async function fetchAdvanceOrdersFromCloud(silent){
+function fetchAdvanceOrdersFromCloud(silent){ return _sqRun('adv', 'adv:fetch', () => _fetchAdvanceOrdersRaw(silent)); }
+async function _fetchAdvanceOrdersRaw(silent){
   try{
     const cloud = await _advReadCloud();
     if(!cloud.ok || cloud.missing) return false;
@@ -43245,7 +43259,8 @@ function _reattachLocalImages(merged, local){
 }
 
 let _prodPushAgain = false; // 🐞 FM510MO317
-async function pushProductsToCloud(){
+function pushProductsToCloud(){ return _sqRun('prod', 'prod:push', _pushProductsRaw); } // 🔒 FM0111SU485: ایک وقت میں ایک
+async function _pushProductsRaw(){
   saveProductsLight(); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں (تصویریں الگ IndexedDB میں)
   saveToStorage('nextProductId', nextProductId);
   saveToStorage('nextVariantId', nextVariantId);
@@ -43323,7 +43338,8 @@ async function pushProductsToCloud(){
   }
 }
 
-async function fetchProductsFromCloud(silent){
+function fetchProductsFromCloud(silent){ return _sqRun('prod', 'prod:fetch', () => _fetchProductsRaw(silent)); } // 🔒 FM0111SU485
+async function _fetchProductsRaw(silent){
   if(!silent && isCloudPollingPaused()) return false;
   // ---------- اگر اسی فون پر کوئی پراڈکٹ/سٹاک تبدیلی (نیا آئٹم، ریٹ، سٹاک ایڈجسٹمنٹ، فروخت وغیرہ) ابھی کلاؤڈ میں نہیں گئی
   // تو پہلے وہی بھیجیں — ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی (مثلاً ابھی کٹا ہوا سٹاک) مٹ جانے کا خطرہ ہوگا ----------
@@ -44213,57 +44229,83 @@ window.addEventListener('online', () => {
 const FINANCE_DOC_PATH = 'shopData/finance';
 let financePollTimer = null;
 
-async function pushFinanceToCloud(){
+// ---------- 🔒 FM0111SU485 (اسد بھائی: «ہر پانچ دن بعد ٹوٹل نہیں ملتے»): گلے کا کیش اور خرچے پہلے «جو آخر میں لکھے وہی صحیح» تھے —
+//   دو فون ایک ساتھ کیش بدلتے تو ایک کی رقم مٹ جاتی۔ اب تین طرفہ ملاپ: کیش = کلاؤڈ + (اس فون کی تبدیلی)؛ خرچے ہر ایک الگ (id سے)؛
+//   لکھائی صرف تب جب بیچ میں کسی اور نے نہ لکھا ہو (updateTime شرط)، اور ایک وقت میں ایک (قطار)
+function _finBase(){ return loadFromStorage('financeSyncBase', null); }
+function _finSetBase(cash, exps){ const m = {}; (exps || []).forEach(e => { if(e && e.id != null) m[String(e.id)] = _stableStr(e); }); saveToStorage('financeSyncBase', { cash: Number(cash) || 0, exp: m }); }
+function _finMerge(rCash, rExp){
+  const b = _finBase(), lCash = Number(financeDummy.cashInHand) || 0;
+  if(!b){ // پہلی بار (پرانے ورژن سے): اس فون پر نہ بھیجی تبدیلی ہو تو اسی کی، ورنہ کلاؤڈ کی
+    if(AppState.settings.financePendingSync) return { cash: lCash, exp: (expenseData || []).slice() };
+    return { cash: Number(rCash) || 0, exp: (rExp || []).slice() };
+  }
+  const cash = Math.round(((Number(rCash) || 0) + lCash - (Number(b.cash) || 0)) * 100) / 100;
+  const bm = b.exp || {}, lm = new Map((expenseData || []).filter(e => e && e.id != null).map(e => [String(e.id), e])), out = [], seen = new Set();
+  (rExp || []).forEach(r => {
+    if(!r || r.id == null) return; const k = String(r.id); seen.add(k); const l = lm.get(k);
+    if(!l){ if(!(k in bm)) out.push(r); return; }          // یہاں مٹایا گیا (بنیاد میں تھا) — نہ لیں
+    out.push((_stableStr(l) !== bm[k]) ? l : r);              // اس فون نے بدلا تو اس کا، ورنہ کلاؤڈ کا
+  });
+  lm.forEach((l, k) => { if(!seen.has(k) && !(k in bm)) out.push(l); }); // یہاں نیا بنا
+  return { cash, exp: out };
+}
+async function _finRead(){
+  const res = await authFirestoreFetch(`${FINANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+  if(res && res.status === 404) return { ok: true, missing: true };
+  if(!res || !res.ok) return { ok: false };
+  const doc = await res.json(); const f = doc.fields || {};
+  const c = f.cashInHand?.doubleValue ?? f.cashInHand?.integerValue;
+  let exp = []; try{ const a = JSON.parse(f.expensesJson?.stringValue || '[]'); if(Array.isArray(a)) exp = a; }catch(e){}
+  if(f.openingCashJson?.stringValue){ try{ mergeOpeningCashFromCloud(f.openingCashJson.stringValue); }catch(e){} } // 🌅 FM1010SA355
+  const n = parseInt(f.nextExpenseId?.integerValue || '0'); if(n > nextExpenseId) nextExpenseId = n;
+  return { ok: true, cash: c !== undefined ? parseFloat(c) : 0, exp, ut: doc.updateTime || null };
+}
+function pushFinanceToCloud(){ return _sqRun('fin', 'fin:push', _pushFinanceRaw); }
+async function _pushFinanceRaw(){
   saveToStorage('expenses', expenseData); // آف لائن فال بیک ہمیشہ پہلے محفوظ کریں
   saveToStorage('nextExpenseId', nextExpenseId);
+  let ok = false;
   try{
-    const res = await authFirestoreFetch(`${FINANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          cashInHand: { doubleValue: financeDummy.cashInHand },
-          expensesJson: { stringValue: JSON.stringify(expenseData) },
-          nextExpenseId: { integerValue: String(nextExpenseId) },
-          openingCashJson: { stringValue: JSON.stringify(AppState.settings.dailyOpeningCash || {}) }, // 🌅 FM1010SA355
-          updatedAt: { integerValue: String(Date.now()) }
-        }
-      })
-    });
-    const ok = !!(res && res.ok);
-    AppState.settings.financePendingSync = !ok; // ---------- آف لائن/ناکامی ہو تو یاد رکھیں کہ اس فون پر نئی تبدیلی ابھی کلاؤڈ میں نہیں گئی ----------
-    persistAllData();
-    return ok;
-  }catch(e){
-    AppState.settings.financePendingSync = true;
-    persistAllData();
-    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا ہے، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
-  }
+    for(let attempt = 0; attempt < 4 && !ok; attempt++){
+      const r = await _finRead(); if(!r.ok) break;
+      let pre = '&currentDocument.exists=false';
+      if(!r.missing){ const m = _finMerge(r.cash, r.exp); financeDummy.cashInHand = m.cash; expenseData = m.exp; _finSetBase(r.cash, r.exp); pre = `&currentDocument.updateTime=${encodeURIComponent(r.ut)}`; }
+      const sentCash = Number(financeDummy.cashInHand) || 0, sentExp = JSON.parse(JSON.stringify(expenseData || []));
+      const res = await authFirestoreFetch(`${FINANCE_DOC_PATH}?key=${FIREBASE_API_KEY}${pre}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            cashInHand: { doubleValue: sentCash },
+            expensesJson: { stringValue: JSON.stringify(sentExp) },
+            nextExpenseId: { integerValue: String(nextExpenseId) },
+            openingCashJson: { stringValue: JSON.stringify(AppState.settings.dailyOpeningCash || {}) }, // 🌅 FM1010SA355
+            updatedAt: { integerValue: String(Date.now()) }
+          }
+        })
+      });
+      if(res && res.ok){ ok = true; _finSetBase(sentCash, sentExp); break; }
+      if(!(res && (res.status === 400 || res.status === 404 || res.status === 409 || res.status === 412))) break;
+    }
+  }catch(e){ ok = false; }
+  AppState.settings.financePendingSync = !ok; // آف لائن/ناکامی — اگلی بار
+  saveToStorage('expenses', expenseData);
+  persistAllData();
+  return ok;
 }
 
-async function fetchFinanceFromCloud(silent){
-  // ---------- اگر اسی فون پر کوئی خرچہ/کیش تبدیلی ابھی کلاؤڈ میں نہیں گئی تو پہلے وہی بھیجیں —
-  // ورنہ کلاؤڈ سے پرانا ڈیٹا کھینچ کر اسی فون کی نئی تبدیلی مٹ جانے کا خطرہ ہوگا ----------
-  if(AppState.settings.financePendingSync){
-    const pushed = await pushFinanceToCloud();
-    if(pushed) return true;
-    return false;
-  }
+function fetchFinanceFromCloud(silent){ return _sqRun('fin', 'fin:fetch', () => _fetchFinanceRaw(silent)); }
+async function _fetchFinanceRaw(silent){
   try{
-    const res = await authFirestoreFetch(`${FINANCE_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا ----------
-    if(!res.ok) return false;
-    const doc = await res.json();
-    const cloudCash = doc.fields?.cashInHand?.doubleValue ?? doc.fields?.cashInHand?.integerValue;
-    if(cloudCash !== undefined) financeDummy.cashInHand = parseFloat(cloudCash);
-    const jsonStr = doc.fields?.expensesJson?.stringValue;
-    if(jsonStr){
-      const cloudExpenses = JSON.parse(jsonStr);
-      if(Array.isArray(cloudExpenses)) expenseData = cloudExpenses;
-    }
-    if(doc.fields?.openingCashJson?.stringValue) mergeOpeningCashFromCloud(doc.fields.openingCashJson.stringValue); // 🌅 FM1010SA355
-    const cloudNextId = parseInt(doc.fields?.nextExpenseId?.integerValue || '0');
-    if(cloudNextId > nextExpenseId) nextExpenseId = cloudNextId;
+    const r = await _finRead();
+    if(!r.ok) return false;
+    if(r.missing){ if(AppState.settings.financePendingSync) setTimeout(() => { try{ pushFinanceToCloud(); }catch(e){} }, 300); return false; }
+    const m = _finMerge(r.cash, r.exp);
+    const mine = Math.abs(m.cash - r.cash) > 0.001 || _stableStr(m.exp) !== _stableStr(r.exp);
+    financeDummy.cashInHand = m.cash; expenseData = m.exp;
+    _finSetBase(r.cash, r.exp);
+    if(mine){ AppState.settings.financePendingSync = true; setTimeout(() => { try{ pushFinanceToCloud(); }catch(e){} }, 300); } // اس فون کی تبدیلی ابھی کلاؤڈ میں نہیں
     saveToStorage('expenses', expenseData);
     saveToStorage('nextExpenseId', nextExpenseId);
     if(!silent){
