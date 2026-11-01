@@ -10090,8 +10090,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0111SU488'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ریٹ بدلتے ہی پڑے ہوئے مال پر بھی نیا ریٹ — بل میں پرانا ریٹ نہیں لگے گا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0111SU489'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'حساب کی جانچ: بل کے ساتھ پرانے بقایا کی نقدی پرانے بلوں پر؛ ہر جگہ ایک ہی کیش؛ واپس مال منافع سے باہر'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -17470,6 +17470,14 @@ function finalizeInvoice(){
   invoice.change_given = changeGiven;
   invoice.change_credited_to_wallet = changeCreditedToWallet;
   invoice.amount_due = remainingDue;
+  // 🛠️ FM0111SU489 (حساب کی جانچ میں ملی خرابی): بل کے ساتھ ملی نقدی کا جو حصہ پرانے بقایا میں گیا وہ کھاتے سے تو کم ہوتا تھا مگر پرانے بل
+  //   «باقی» ہی دکھتے رہتے (ٹیسٹ: کھاتہ 0، بلوں پر 710 باقی) — اب وہ رقم پرانے بلوں پر بھی لگتی ہے، پرانا بل پہلے
+  if(customer && method === 'credit'){
+    let _toOld = Math.max(0, Math.min(cashReceivedNow, previousBalance));
+    (invoicesData || []).filter(x => x && x !== invoice && x.customer_id === customer.customer_id && x.status !== 'voided' && x.status !== 'rejected' && getInvoiceAmountDue(x) > 0)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      .forEach(x => { if(_toOld <= 0) return; const d = Number(getInvoiceAmountDue(x)) || 0, g = Math.min(d, _toOld); x.amount_due = Math.round((d - g) * 100) / 100; _toOld = Math.round((_toOld - g) * 100) / 100; });
+  }
   invoice.paid_now = grandTotal - remainingDue; // ---------- اس بل میں سے ابھی کتنا ادا ہوا (نقد یا والٹ سے)، بل پر دکھانے کے لیے ----------
   invoice.new_balance = customer ? customer.total_receivable : 0; // ---------- اس بل کے بعد کسٹمر کا کل بقایہ — ہمیشہ کے لیے بل پر محفوظ ----------
   if(walletApplied > 0 || cashReceivedNow > 0) invoice.payment_method = remainingDue > 0 ? 'partial+credit' : (walletApplied > 0 ? 'wallet' : 'cash');
@@ -21496,7 +21504,8 @@ function saveChalanSplit(){
   });
   if(payTotal > 0) lines.push('', `💸 کل ادائیگی: Rs. ${payTotal.toLocaleString()}`);
   if(!confirm(`✂️ ${p ? p.name : ''} #${st.chalanNo}\n\n${lines.join('\n')}\n\nتقسیم کر کے حساب محفوظ کریں؟`)) return;
-  if(payTotal > financeDummy.cashInHand && !confirm(`ادائیگی (Rs. ${payTotal.toLocaleString()}) آپ کے موجودہ نقد (Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)) return;
+  const _hc = fmHandCash(); // 💵 FM0111SU489
+  if(payTotal > _hc && !confirm(`ادائیگی (Rs. ${payTotal.toLocaleString()}) آپ کے موجودہ نقد (Rs. ${_hc.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)) return;
 
   // ---------- چالان بانٹیں: بک چکا مال پہلے حصوں سے مانا جاتا ہے، کل سٹاک وہی رہتا ہے ----------
   const sold = _chRound(Math.max(0, st.orig - (Number(c.qty) || 0)));
@@ -25451,6 +25460,15 @@ function bsBillCash(inv){
 }
 
 // ---------- 🧮 پورا حساب ایک جگہ — سکرین اور پرنٹ دونوں یہی استعمال کرتے ہیں ----------
+// 💵 FM0111SU489 (حساب کی جانچ میں ملی خرابی): ایپ میں «گلے کا کیش» دو جگہ الگ حساب ہوتا تھا — ہوم کے ڈبے میں خرچے/نقد خریداری
+//   کٹتی، مالی سمری اور «ادائیگی کیش سے زیادہ» والی تنبیہ میں نہیں (ٹیسٹ: 650 کا فرق)۔ اب ہر جگہ ایک ہی عدد — ہوم والا
+function fmHandCash(){
+  try{
+    const S = computeBizSummary('today');
+    const N = v => Math.round(Number(v) || 0);
+    return N((S.inByM || {}).cash) - (N(S.tSupOut) + N(S.tOtherOut) + N(S.tExp) + N(S.tCashBuy));
+  }catch(e){ return Math.round(Number(financeDummy.cashInHand) || 0); }
+}
 function computeBizSummary(preset, cashByRange){
   const r = bsComputeRange(preset);
   // 📅 FM1810SU405: cashByRange = ہوم والے ڈبوں کا کیش بھی چنی ہوئی مدت (آج / گزشتہ کل / یہ ہفتہ / یہ مہینہ) کا — ورنہ صرف آج کا
@@ -25556,7 +25574,8 @@ function computeBizSummary(preset, cashByRange){
       let cost = base;
       if(v && it.chalanAlloc){ try{ cost = (getChalanAllocUnitCost(v, it.chalanAlloc, Number(v.purchase) || 0) || 0) + (Number(v.labor) || 0); }catch(e){} }
       if(cost == null) return; // مال اب فہرست میں نہیں — لاگت معلوم نہیں
-      goodsProfit += (Number(it.qty) || 0) * ((Number(it.unitPrice) || 0) - cost);
+      const _soldQ = (Number(it.qty) || 0) - (it.returned ? (Number(it.returnQty) || 0) : 0); // 🛠️ FM0111SU489: واپس آیا مال منافع میں نہیں
+      goodsProfit += _soldQ * ((Number(it.unitPrice) || 0) - cost);
     });
   });
   const pExpList = exps.filter(e => bsInRange(e.date, r) || (!r.fromStr && !r.toStr));
@@ -25871,14 +25890,15 @@ function renderHealthBand(){
   });
 
   document.getElementById('hlStock').textContent = 'Rs. ' + stockValue.toLocaleString();
-  document.getElementById('hlCash').textContent = 'Rs. ' + financeDummy.cashInHand.toLocaleString();
+  const _hand = fmHandCash(); // 💵 FM0111SU489
+  document.getElementById('hlCash').textContent = 'Rs. ' + _hand.toLocaleString();
   document.getElementById('hlReceivable').textContent = 'Rs. ' + totalReceivable.toLocaleString();
   document.getElementById('hlPayable').textContent = 'Rs. ' + totalPayable.toLocaleString();
   document.getElementById('hlDiaryReceivable').textContent = 'Rs. ' + diaryReceivable.toLocaleString();
   document.getElementById('hlDiaryPayable').textContent = 'Rs. ' + diaryPayable.toLocaleString();
 
   // ---------- سبز کالم (آنے والے پیسے) اور سرخ کالم (جانے والے پیسے) کے اپنے اپنے ٹوٹل ----------
-  const greenTotal = stockValue + financeDummy.cashInHand + totalReceivable; // 📔 FM1110SU367: ڈائری ذاتی ہے، سمری سے باہر
+  const greenTotal = stockValue + _hand + totalReceivable; // 📔 FM1110SU367: ڈائری ذاتی ہے، سمری سے باہر
   const redTotal = totalPayable;
   document.getElementById('finGreenTotal').textContent = 'کل: Rs. ' + greenTotal.toLocaleString();
   document.getElementById('finRedTotal').textContent = 'کل: Rs. ' + redTotal.toLocaleString();
@@ -40373,7 +40393,8 @@ function saveCustLoan(){
   const recovery = Math.max(0, parseFloat(document.getElementById('custLoanRecovery').value) || 0);
   if(amount <= 0){ alert('دستی کیش کی رقم لکھیں۔'); return; }
   if(!confirm(`👤 ${c.name}\n\n${custLoanLines(c, amount, recovery)}\n\nمحفوظ کریں؟`)) return;
-  if(amount > financeDummy.cashInHand + recovery && !confirm(`یہ آپ کے موجودہ نقد (Rs. ${financeDummy.cashInHand.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)) return;
+  const _hc = fmHandCash(); // 💵 FM0111SU489
+  if(amount > _hc + recovery && !confirm(`یہ آپ کے موجودہ نقد (Rs. ${_hc.toLocaleString()}) سے زیادہ ہے۔ پھر بھی جاری رکھیں؟`)) return;
 
   const sp = calcCustLoan(c, amount, recovery);
   const memo = document.getElementById('custLoanNote').value.trim();
