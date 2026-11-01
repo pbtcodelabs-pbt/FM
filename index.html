@@ -10090,8 +10090,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0111SU487'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'واپسی کی درخواستیں اب کسی فون سے غائب نہیں ہوتیں — ریٹرن، منشی بل منظوری اور بل ترمیم کا تین فون ٹیسٹ پاس'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0111SU488'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ریٹ بدلتے ہی پڑے ہوئے مال پر بھی نیا ریٹ — بل میں پرانا ریٹ نہیں لگے گا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16307,7 +16307,9 @@ function confirmBillingQuickPrice(){
   for(const p of productsData){
     const v = p.variants.find(x => x.variant_id === variantId);
     if(v){
+      const _oR = v.retail; // 🛠️ FM0111SU488
       v.retail = val; v.wholesale = val;
+      fmApplyNewSalePrice(v, _oR);
       break;
     }
   }
@@ -20936,11 +20938,25 @@ function chalanSalePrice(v, alloc, mode){
     if(!c) return null;
     let price = Number(c.retail);
     if(!(price > 0) && (isLegacyChalan(c) || !chalanNeedsAccounting(c))) price = Number(v.retail);
+    // 🛠️ FM0111SU488 (صدام بھائی: «ریٹ 1920 سے 2650 کیا، بل میں پرانا 1920 لگا»): سبزی کا ریٹ چالان کے ریٹ کے بعد بدلا ہو تو ہمیشہ تازہ ریٹ
+    const _newer = Number(v.retailAt) > (Number(c.rateTs) || Number(c.ts) || 0);
+    if(_newer && Number(v.retail) > 0) price = Number(v.retail);
     if(!(price > 0)) return null;
-    const labor = (c.sellLabor != null && c.sellLabor !== '') ? Number(c.sellLabor) : (Number(v.sellLabor) || 0);
+    const labor = (_newer && v.sellLabor != null && v.sellLabor !== '') ? Number(v.sellLabor) : (c.sellLabor != null && c.sellLabor !== '') ? Number(c.sellLabor) : (Number(v.sellLabor) || 0);
     q += aq; amt += aq * price; lab += aq * labor;
   }
   return q > 0 ? { price: _chRound(amt / q), labor: _chRound(lab / q) } : null;
+}
+// 🛠️ FM0111SU488: سبزی کا قیمت فروخت/مزدوری بدلا تو جو مال ابھی پڑا ہے (کھلے چالان) وہ بھی نئے ریٹ پر — پرانا ریٹ بل میں نہ جائے
+function fmApplyNewSalePrice(v, oldRetail, oldLabor){
+  if(!v) return false;
+  const nr = Number(v.retail) || 0, nl = Number(v.sellLabor);
+  const pc = nr > 0 && nr !== (Number(oldRetail) || 0);
+  const lc = oldLabor !== undefined && v.sellLabor != null && v.sellLabor !== '' && !isNaN(nl) && nl !== (Number(oldLabor) || 0);
+  if(!pc && !lc) return false;
+  v.retailAt = Date.now();
+  (v.chalans || []).forEach(c => { if((Number(c.qty) || 0) > 0){ if(pc){ c.retail = nr; c.wholesale = nr; } if(lc) c.sellLabor = nl; } });
+  return true;
 }
 function applyChalanPricingToItems(items, mode){
   (items || []).forEach(it => {
@@ -24421,7 +24437,10 @@ function updateVariantField(productId, variantId, field, value, inputEl){
     const newStock = parseFloat(value) || 0;
     if(newStock > oldStock) recordStockAddedToday(variantId, newStock - oldStock);
   }
+  const _oR = variant.retail, _oL = variant.sellLabor; // 🛠️ FM0111SU488
   variant[field] = numericFields.includes(field) ? parseFloat(value) || 0 : value;
+  if(field === 'wholesale' && Number(variant.retail) !== Number(variant.wholesale)) variant.retail = variant.wholesale; // ایک ہی قیمت فروخت
+  if(field === 'retail' || field === 'wholesale' || field === 'sellLabor') fmApplyNewSalePrice(variant, _oR, _oL);
 
   // TODO: یہاں product_variants table میں UPDATE query چلے گی
   openProductCards.add(productId); // کارڈ کھلا رہے گا، محض حفاظتی ریکارڈ کے لیے (اب اصل رینڈر پر انحصار نہیں)
@@ -25093,12 +25112,14 @@ function saveNewProduct(){
         product.variants[0].image = npProductPhotoDataUrl || product.variants[0].image;
         product.variants[0].barcode = barcode;
         product.variants[0].label = variantLabel;
+        const _oR = product.variants[0].retail, _oL = product.variants[0].sellLabor; // 🛠️ FM0111SU488
         product.variants[0].purchase = purchase;
         product.variants[0].labor = labor;
         product.variants[0].sellLabor = sellLabor;
         product.variants[0].retail = retail;
         product.variants[0].wholesale = wholesale;
         product.variants[0].stock = stock;
+        fmApplyNewSalePrice(product.variants[0], _oR, _oL); // 🛠️ FM0111SU488: پڑے ہوئے مال کا ریٹ بھی نیا
       }
     }
     closeNewProductModal();
