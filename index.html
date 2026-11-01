@@ -10090,8 +10090,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0111SU485'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'سٹاک، آرڈر اور گلے کا کیش اب کئی فونوں پر بھی بالکل برابر — ایک وقت میں ایک ملاپ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0111SU486'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ریکوری، منشی سٹاک ریکارڈ اور کھاتے کی لائنیں اب کئی فونوں پر بھی پوری — کچھ غائب نہیں ہوتا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -20856,7 +20856,7 @@ function logMunshiPurchaseEntry(v, qty, chalan, sourceLabel){
   if(AppState.currentRole === 'admin' || !v) return false;
   const {p} = findProductAndVariant(v.variant_id);
   munshiStockLogData.push({
-    id: nextMunshiLogId++, ts: Date.now(),
+    id: (() => { const u = _uidNext(nextMunshiLogId); nextMunshiLogId = u + 1; return u; })(), ts: Date.now(), // 🔢 FM0111SU486
     product_id: p ? p.product_id : null, variant_id: v.variant_id,
     serial_no: p ? (p.serial_no ?? null) : null, name: p ? p.name : '', label: v.label || '',
     qty: qty, chalanNo: chalan ? chalan.chalanNo : null, source: sourceLabel || '',
@@ -22870,7 +22870,7 @@ function _mkShardSync(o){
     return true;
   }
   async function syncShard(sk){
-    const def = shDef(sk), ld = legDef(); let ok = false, ut = null;
+    const def = shDef(sk), ld = legDef(); let ok = false, ut = null, syn = null;
     try{
       for(let a = 0; a < 3; a++){
         const cloud = await _xReadCloud(def);
@@ -22878,18 +22878,18 @@ function _mkShardSync(o){
         const merged = _xMerge(def, (ld.get() || []).filter(x => o.shardOf(x) === sk), cloud.list);
         ld.set(sortL([...(ld.get() || []).filter(x => o.shardOf(x) !== sk), ...merged]));
         const strip = _xHeavyStrip(merged);
-        if(_stableStr(strip) === _stableStr(cloud.list)){ _xSetBase(def, merged); ok = true; ut = cloud.updateTime; break; }
+        if(_stableStr(strip) === _stableStr(cloud.list)){ _xSetBase(def, merged); ok = true; ut = cloud.updateTime; syn = merged; break; }
         const body = JSON.stringify(strip);
         if(body.length > 950000){ console.warn('shard too large', def.key, body.length); break; }
         const pre = cloud.updateTime ? `&currentDocument.updateTime=${encodeURIComponent(cloud.updateTime)}` : '&currentDocument.exists=false';
         const res = await authFirestoreFetch(`${_shB()}${def.key}?key=${FIREBASE_API_KEY}${pre}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fields: { json: { stringValue: body }, updatedAt: { integerValue: String(Date.now()) } } }) });
-        if(res && res.ok){ _xSetBase(def, merged); ok = true; try{ ut = (await res.json()).updateTime; }catch(e){} break; }
+        if(res && res.ok){ _xSetBase(def, merged); ok = true; syn = merged; try{ ut = (await res.json()).updateTime; }catch(e){} break; }
         if(res && res.status === 403){ st.off = true; break; }
         if(!(res && (res.status === 400 || res.status === 404 || res.status === 409 || res.status === 412))) break;
       }
     }catch(e){}
-    return { ok, ut };
+    return { ok, ut, syn };
   }
   async function syncAll(){
     if(st.off) return extraSyncOne(legDef());
@@ -22918,10 +22918,10 @@ function _mkShardSync(o){
         const cur = _utNum(idx.m[sk]);
         if(cur > 0 && cur <= (Number(seen[sk]) || 0) && sigs[sk] === _sigH(sig)) continue;
         const res = await syncShard(sk); if(!res.ok) continue;
-        sigs[sk] = _sigH(_stableStr(_xHeavyStrip((ld.get() || []).filter(x => o.shardOf(x) === sk))));
+        if(res.syn) sigs[sk] = _sigH(_stableStr(_xHeavyStrip(sortL(res.syn.slice())))); else delete sigs[sk]; // 🛠️ FM0111SU486: نشان صرف اسی کا جو واقعی کلاؤڈ میں لکھا گیا — بھیجتے وقت درج ہوئی نئی وصولی/بل اب «بھیجی ہوئی» نہیں مانی جاتی (پہلے کبھی نہ جاتی)
         const u = _utNum(res.ut); if(u){ seen[sk] = u; if(u > cur) bump[sk] = u; }
       }
-      if(Object.keys(bump).length) await idxUpdate(i => { let ch = false; Object.keys(bump).forEach(k => { if(_utNum(i.m[k]) < bump[k]){ i.m[k] = bump[k]; ch = true; } }); return ch ? i : null; });
+      if(Object.keys(bump).length){ const _okI = await idxUpdate(i => { let ch = false; Object.keys(bump).forEach(k => { if(_utNum(i.m[k]) < bump[k]){ i.m[k] = bump[k]; ch = true; } }); return ch ? i : null; }); if(!_okI) Object.keys(bump).forEach(k => { delete seen[k]; delete sigs[k]; }); } // 🛠️ FM0111SU486: فہرست نہ لکھی جا سکی تو «دیکھ لیا» کا نشان واپس — اگلی بار دوبارہ کوشش، ورنہ دوسرے فونوں کو نئی ادائیگی/بل کا کبھی پتا نہ چلتا
       saveToStorage(seenK, seen); saveToStorage(sigK, sigs);
       try{ o.after && o.after(); }catch(e){}
       try{ persistAllData(); }catch(e){}
@@ -23012,7 +23012,7 @@ async function _paySyncShard(sk){
   if(_payBusy[sk]) return { ok: false };
   _payBusy[sk] = true;
   const def = _payDef(sk);
-  let ok = false, wrote = false, ut = null;
+  let ok = false, wrote = false, ut = null, syn = null;
   try{
     for(let a = 0; a < 3; a++){
       const cloud = await _xReadCloud(def);
@@ -23020,7 +23020,7 @@ async function _paySyncShard(sk){
       const merged = _xMerge(def, (paymentsData || []).filter(p => _payShard(p) === sk), cloud.list);
       paymentsData = _paySort([...(paymentsData || []).filter(p => _payShard(p) !== sk), ...merged]);
       const strip = _xHeavyStrip(merged);
-      if(_stableStr(strip) === _stableStr(cloud.list)){ _xSetBase(def, merged); ok = true; ut = cloud.updateTime; break; }
+      if(_stableStr(strip) === _stableStr(cloud.list)){ _xSetBase(def, merged); ok = true; ut = cloud.updateTime; syn = merged; break; }
       const body = JSON.stringify(strip);
       if(body.length > 950000){ console.warn('payments shard too large', sk, body.length); break; }
       const pre = cloud.updateTime ? `&currentDocument.updateTime=${encodeURIComponent(cloud.updateTime)}` : '&currentDocument.exists=false';
@@ -23028,13 +23028,13 @@ async function _paySyncShard(sk){
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { json: { stringValue: body }, updatedAt: { integerValue: String(Date.now()) } } })
       });
-      if(res && res.ok){ _xSetBase(def, merged); ok = true; wrote = true; try{ ut = (await res.json()).updateTime; }catch(e){} break; }
+      if(res && res.ok){ _xSetBase(def, merged); ok = true; wrote = true; syn = merged; try{ ut = (await res.json()).updateTime; }catch(e){} break; }
       if(res && res.status === 403){ _payShardOff = true; break; }
       if(!(res && (res.status === 400 || res.status === 404 || res.status === 409 || res.status === 412))) break;
     }
   }catch(e){}
   _payBusy[sk] = false;
-  return { ok, wrote, ut };
+  return { ok, wrote, ut, syn };
 }
 let _payAllBusy = false, _payAllAgain = false;
 async function paySyncAll(){
@@ -23067,12 +23067,13 @@ async function paySyncAll(){
       if(cur > 0 && cur <= (Number(seen[sk]) || 0) && sigs[sk] === _sigH(sig)) continue; // نہ یہاں بدلا، نہ کلاؤڈ پر
       const res = await _paySyncShard(sk);
       if(!res.ok) continue;
-      sigs[sk] = _sigH(_stableStr(_xHeavyStrip((paymentsData || []).filter(p => _payShard(p) === sk))));
+      if(res.syn) sigs[sk] = _sigH(_stableStr(_xHeavyStrip(_paySort(res.syn.slice())))); else delete sigs[sk]; // 🛠️ FM0111SU486: نشان صرف اسی کا جو واقعی کلاؤڈ میں لکھا گیا — بھیجتے وقت درج ہوئی نئی وصولی/بل اب «بھیجی ہوئی» نہیں مانی جاتی (پہلے کبھی نہ جاتی)
       const u = _utNum(res.ut);
       if(u){ seen[sk] = u; if(u > cur) bump[sk] = u; }
     }
     if(Object.keys(bump).length){
-      await _payIdxUpdate(i => { let ch = false; Object.keys(bump).forEach(k => { if(_utNum(i.m[k]) < bump[k]){ i.m[k] = bump[k]; ch = true; } }); return ch ? i : null; });
+      const _okI = await _payIdxUpdate(i => { let ch = false; Object.keys(bump).forEach(k => { if(_utNum(i.m[k]) < bump[k]){ i.m[k] = bump[k]; ch = true; } }); return ch ? i : null; });
+      if(!_okI) Object.keys(bump).forEach(k => { delete seen[k]; delete sigs[k]; }); // 🛠️ FM0111SU486: فہرست نہ لکھی جا سکی تو «دیکھ لیا» کا نشان واپس — اگلی بار دوبارہ کوشش، ورنہ دوسرے فونوں کو نئی ادائیگی/بل کا کبھی پتا نہ چلتا
     }
     saveToStorage('payShardSeen', seen); saveToStorage('payShardSig', sigs);
     try{ _payLegacyDef().bumpNext(paymentsData); }catch(e){}
@@ -27011,7 +27012,7 @@ function saveNewExpense(){
     try{ const st = loadFromStorage('expenseCategories', []) || []; st.push(cat); saveToStorage('expenseCategories', st); }catch(e){}
   }
   expenseData.push({
-    id: nextExpenseId++,
+    id: (() => { const u = _uidNext(nextExpenseId); nextExpenseId = u + 1; return u; })(), // 🔢 FM0111SU486
     name: cat, category: cat, amount: Math.abs(amountRaw), date, note,
     createdAt: new Date().toISOString()
   });
@@ -28738,9 +28739,12 @@ function shareLaborReport(){
   showImageSharePreview(canvas, 'Labor_Report.png', '💪 مزدوری فروخت رپورٹ', 'مزدوری رپورٹ');
 }
 
+// 🔢 FM0111SU486: ہر فون اپنا 1، 2، 3 گنتا تھا — دو فون ایک ہی نمبر دیتے تو ملاپ میں ایک اندراج مٹ جاتا (منشی سٹاک ریکارڈ میں ٹیسٹ سے ثابت)۔
+//   اب نمبر وقت + اتفاقی ہندسوں سے، ہمیشہ پچھلے سے بڑا
+function _uidNext(cur){ return Math.max(Number(cur) || 0, Date.now() * 100 + Math.floor(Math.random() * 100)); }
 function recordPaymentEntry(entry){
   const payment = Object.assign({
-    payment_id: nextPaymentId++,
+    payment_id: (() => { const u = _uidNext(nextPaymentId); nextPaymentId = u + 1; return u; })(), // 🔢 FM0111SU486
     date: new Date().toISOString().split('T')[0],
     created_at: new Date().toISOString(),
     biz_date: (typeof bizDateKey === 'function' ? bizDateKey() : undefined), // 📅 ہر ادائیگی پر دکان کی کاروباری تاریخ (بل کا حساب اسی سے)
@@ -31037,7 +31041,7 @@ async function drawSupplierReceiptCanvas(p){
   y += Math.round(32 * k);
   const dt = p.created_at ? new Date(p.created_at) : new Date();
   x.font = `bold ${Math.round(17 * k)}px ${numF}`;
-  x.fillText(`${dt.toLocaleDateString('en-GB')}  ${dt.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})}   #${p.payment_id}`, W/2, y);
+  x.fillText(`${dt.toLocaleDateString('en-GB')}  ${dt.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})}   #${String(p.payment_id).slice(-6)}`, W/2, y);
   y += Math.round(16 * k);
   x.fillRect(m, y, W - m*2, Math.max(2, 3 * k));
   y += Math.round(8 * k);
@@ -33000,7 +33004,7 @@ function otAddStockCommit(productId, variantId){
   // ---------- 🧑‍🌾 صدام کی ہدایت (19 ستمبر، شام): ہر اندراج اپنے وقت کے ساتھ الگ لاگ میں محفوظ —
   // اگر ایک ہی سبزی دن میں دو دفعہ فیڈ ہو تو دونوں الگ الگ اندراج کے طور پر رہیں گی، مدغم نہیں ہوں گی ---------- -->
   munshiStockLogData.push({
-    id: nextMunshiLogId++,
+    id: (() => { const u = _uidNext(nextMunshiLogId); nextMunshiLogId = u + 1; return u; })(), // 🔢 FM0111SU486
     ts: Date.now(),
     product_id: productId,
     variant_id: variantId,
@@ -41244,7 +41248,7 @@ async function renderPaymentReceiptToCanvas(p){
 
   ctx.fillStyle = '#94a3b8';
   ctx.font = `500 11px Poppins, sans-serif`;
-  ctx.fillText(`Payment ID: ${p.payment_id}`, W/2, H-20);
+  ctx.fillText(`Payment ID: ${String(p.payment_id).slice(-6)}`, W/2, H-20);
 
   return canvas;
 }
@@ -42236,13 +42240,18 @@ const RECOVERY_LIST_DOC_PATH = 'shopData/recoveryList';
 let recoveryListPollTimer = null;
 
 // ---------- 🗑️ FM28SEP شام: ایڈمن کے حذف کیے اندراج دوسرے فونوں سے دوبارہ نہ آئیں ----------
-async function pushRecoveryListToCloud(){
+function pushRecoveryListToCloud(){ return _sqRun('rl', 'rl:push', _pushRecoveryListRaw); } // 🔒 FM0111SU486: ایک وقت میں ایک + بیچ میں کسی اور نے لکھا ہو تو دوبارہ ملا کر
+async function _pushRecoveryListRaw(){
   saveToStorage('recoveryList', recoveryListData);
   saveToStorage('nextRecoveryId', nextRecoveryId);
   // ---------- 🔄 FM28SEP شام: بھیجنے سے پہلے کلاؤڈ کی تازہ حالت ملا لیں — تاکہ کسی اور فون کی تبدیلی (تصدیق/نوٹ) نہ مٹے ----------
-  try{ await fetchRecoveryListFromCloud(true); }catch(e){}
+  for(let attempt = 0; attempt < 4; attempt++){
+  window.__ut_rl = undefined;
+  try{ await _fetchRecoveryListRaw(true); }catch(e){}
+  if(window.__ut_rl === undefined) return false; // آف لائن
+  const _pre = window.__ut_rl ? `&currentDocument.updateTime=${encodeURIComponent(window.__ut_rl)}` : '&currentDocument.exists=false';
   try{
-    await authFirestoreFetch(`${RECOVERY_LIST_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+    const _res = await authFirestoreFetch(`${RECOVERY_LIST_DOC_PATH}?key=${FIREBASE_API_KEY}${_pre}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -42254,17 +42263,23 @@ async function pushRecoveryListToCloud(){
         }
       })
     });
+    if(_res && _res.ok) return true;
+    if(!(_res && (_res.status === 400 || _res.status === 404 || _res.status === 409 || _res.status === 412))) return false;
   }catch(e){
-    // ---------- آف لائن — اگلی بار انٹرنیٹ ملتے ہی sync ہو جائے گا ----------
+    return false; // آف لائن — اگلی بار انٹرنیٹ ملتے ہی
   }
+  }
+  return false;
 }
 
-async function fetchRecoveryListFromCloud(silent){
+function fetchRecoveryListFromCloud(silent){ return _sqRun('rl', 'rl:fetch', () => _fetchRecoveryListRaw(silent)); } // 🔒 FM0111SU486
+async function _fetchRecoveryListRaw(silent){
   try{
-    const res = await authFirestoreFetch(`${RECOVERY_LIST_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-    if(res.status === 404) return false;
+    const res = await authFirestoreFetch(`${RECOVERY_LIST_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(res.status === 404){ window.__ut_rl = null; window.__miss_rl = true; return false; }
     if(!res.ok) return false;
     const doc = await res.json();
+    window.__ut_rl = doc.updateTime || null; window.__miss_rl = false;
     const jsonStr = doc.fields?.json?.stringValue;
     if(!jsonStr) return false;
     const cloudList = JSON.parse(jsonStr);
@@ -42341,13 +42356,18 @@ function stopRecoveryListPolling(){
 const MUNSHI_LOG_DOC_PATH = 'shopData/munshiStockLog';
 let munshiLogPollTimer = null;
 
-async function pushMunshiStockLogToCloud(){
+function pushMunshiStockLogToCloud(){ return _sqRun('ml', 'ml:push', _pushMunshiLogRaw); } // 🔒 FM0111SU486
+async function _pushMunshiLogRaw(){
   // ---------- پہلے کلاؤڈ کے ساتھ ضم کر لیں — تاکہ کسی دوسرے فون کا ریکارڈ اوور رائٹ ہو کر ضائع نہ ہو ---------- -->
-  await fetchMunshiStockLogFromCloud(true);
+  for(let attempt = 0; attempt < 4; attempt++){
+  window.__ut_ml = undefined;
+  try{ await _fetchMunshiLogRaw(true); }catch(e){}
+  if(window.__ut_ml === undefined) return false; // آف لائن
+  const _pre = window.__ut_ml ? `&currentDocument.updateTime=${encodeURIComponent(window.__ut_ml)}` : '&currentDocument.exists=false';
   saveToStorage('munshiStockLog', munshiStockLogData);
   saveToStorage('nextMunshiLogId', nextMunshiLogId);
   try{
-    await authFirestoreFetch(`${MUNSHI_LOG_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
+    const _res = await authFirestoreFetch(`${MUNSHI_LOG_DOC_PATH}?key=${FIREBASE_API_KEY}${_pre}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -42360,17 +42380,23 @@ async function pushMunshiStockLogToCloud(){
         }
       })
     });
+    if(_res && _res.ok) return true;
+    if(!(_res && (_res.status === 400 || _res.status === 404 || _res.status === 409 || _res.status === 412))) return false;
   }catch(e){
-    // ---------- آف لائن — اگلی بار انٹرنیٹ ملتے ہی sync ہو جائے گا ----------
+    return false;
   }
+  }
+  return false;
 }
 
-async function fetchMunshiStockLogFromCloud(silent){
+function fetchMunshiStockLogFromCloud(silent){ return _sqRun('ml', 'ml:fetch', () => _fetchMunshiLogRaw(silent)); } // 🔒 FM0111SU486
+async function _fetchMunshiLogRaw(silent){
   try{
-    const res = await authFirestoreFetch(`${MUNSHI_LOG_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-    if(res.status === 404) return false;
+    const res = await authFirestoreFetch(`${MUNSHI_LOG_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(res.status === 404){ window.__ut_ml = null; window.__miss_ml = true; return false; }
     if(!res.ok) return false;
     const doc = await res.json();
+    window.__ut_ml = doc.updateTime || null; window.__miss_ml = false;
     const jsonStr = doc.fields?.json?.stringValue;
     let addedAny = false;
     // 🧹 FM610TU324: "سٹاک زیرو" کے وقت سے پہلے کا منشی ریکارڈ کبھی واپس نہیں
@@ -42690,12 +42716,16 @@ async function _shrinkLockCheck(remoteArr, mergedArr, idField, label){
   return mergedArr.concat(removed.map(x => JSON.parse(JSON.stringify(x))));
 }
 
+// 🛠️ FM0111SU486 (اسد بھائی: «لین دین خراب»): پہلے ایک جیسی دو لائنیں (مثلاً ایک ہی دن ایک ہی گاہک سے دو بار 500 کی وصولی) ایک بن جاتیں —
+//   بقایا ٹھیک رہتا مگر کھاتے/لین دین سے ایک وصولی غائب۔ اب ہر لائن گنی جاتی ہے: نتیجہ = کلاؤڈ + (اس فون نے جو جوڑا) − (جو مٹایا)
 function _mergeHistArr(b, l, r){
-  const k = x => _stableStr(x);
-  const bs = new Set((b || []).map(k)), ls = new Set((l || []).map(k)), rs = new Set((r || []).map(k));
-  const localNew = (l || []).filter(x => !bs.has(k(x)) && !rs.has(k(x)));
-  const remoteKeep = (r || []).filter(x => !(bs.has(k(x)) && !ls.has(k(x)))); // اس فون نے حذف کیا ہو تو نکال دیں
-  return [...localNew.map(_syncClone), ...remoteKeep.map(_syncClone)];
+  const k = x => _stableStr(x), cnt = a => { const m = new Map(); (a || []).forEach(x => { const s = k(x); m.set(s, (m.get(s) || 0) + 1); }); return m; };
+  const bc = cnt(b), lc = cnt(l), add = new Map(), del = new Map();
+  new Set([...bc.keys(), ...lc.keys()]).forEach(s => { const d = (lc.get(s) || 0) - (bc.get(s) || 0); if(d > 0) add.set(s, d); else if(d < 0) del.set(s, -d); });
+  const out = [];
+  (l || []).forEach(x => { const s = k(x), n = add.get(s) || 0; if(n > 0){ out.push(_syncClone(x)); add.set(s, n - 1); } });
+  (r || []).forEach(x => { const s = k(x), n = del.get(s) || 0; if(n > 0){ del.set(s, n - 1); return; } out.push(_syncClone(x)); });
+  return out;
 }
 function _mergeRecordsThreeWay(base, local, remote, idField, counters, hists, seedArr){
   if(idField === 'customer_id'){ // 🧹 FM309WE#267: ڈیمو کسٹمر کبھی نہ ملائیں، کلاؤڈ میں ہوں تو بھی ہٹ جائیں
@@ -43167,6 +43197,7 @@ async function _pushMergedRaw(cfg){
     }
     const pre = updateTime ? `&currentDocument.updateTime=${encodeURIComponent(updateTime)}` : (cfg.createOnly ? '&currentDocument.exists=false' : ''); // 🧾 FM2710TU458
     const sentJson = JSON.stringify(cfg.get()); // 🐞 FM510MO317: بھیجی جانے والی اسی لمحے کی کاپی
+    cfg.synced = null;
     try{ saveToStorage(_sentKey(cfg), JSON.parse(sentJson)); }catch(e){} // 🔒 FM1810SU410: جواب گم بھی ہو جائے تو یاد رہے کیا بھیجا
     const fields = Object.assign({ json: { stringValue: sentJson }, updatedAt: { integerValue: String(Date.now()) } }, cfg.extra ? cfg.extra() : {});
     const res = await authFirestoreFetch(`${cfg.path}?key=${FIREBASE_API_KEY}${pre}`, {
@@ -43176,6 +43207,7 @@ async function _pushMergedRaw(cfg){
     if(ok){
       if(cfg.createOnly){ try{ cfg.lastUT = (await res.json()).updateTime; }catch(e){} } // 🧾 ٹکڑے کا کلاؤڈ وقت
       cfg.setBase(JSON.parse(sentJson)); // 🐞 FM510MO317: بنیاد = جو واقعی لکھا گیا
+      cfg.synced = JSON.parse(sentJson); // 🛠️ FM0111SU486
       try{ localStorage.removeItem(STORAGE_PREFIX + _sentKey(cfg)); }catch(e){} // 🗜️ FM2810WE466: لکھائی پکی — بنیاد ہی بھیجی ہوئی کاپی ہے، الگ کاپی کی جگہ خالی
       if(JSON.stringify(cfg.get()) !== sentJson && cfg.push) setTimeout(() => { try{ cfg.push(); }catch(e){} }, 300); // بیچ میں ہوئی تبدیلی بھی جائے
     }
@@ -43935,7 +43967,8 @@ async function _invFetchShard(cfg){
   try{ const st = doc.fields?.json?.stringValue; if(st){ const a = JSON.parse(st); if(Array.isArray(a)) remote = a; } }catch(e){ return { ok: false }; }
   const merged = _mergeRecordsThreeWay(_baseWithSent(cfg, remote), cfg.get(), remote, 'invoice_id', ['amount_due'], [], null);
   cfg.set(merged); cfg.setBase(remote); cfg.save(); cfg.lastUT = doc.updateTime;
-  return { ok: true, same: _syncEq(merged, remote) };
+  const _same = _syncEq(merged, remote); cfg.synced = _same ? merged : null; // 🛠️ FM0111SU486
+  return { ok: true, same: _same };
 }
 let _invChain = Promise.resolve();
 function invSyncAll(){ const run = _invChain.catch(() => {}).then(_invSyncAllRun); _invChain = run.catch(() => {}); return run; } // قطار — ایک وقت میں ایک
@@ -43979,13 +44012,13 @@ async function _invSyncAllRun(){
         else { const f = await _invFetchShard(cfg); ok = f.ok; if(ok && !f.same){ ok = await _pushMerged(cfg); w = ok; } }
       }catch(e){ ok = false; }
       if(!ok){ allOk = false; continue; }
-      sigs[sk] = _sigH(_stableStr((invoicesData || []).filter(i => _invShard(i) === sk)));
+      if(cfg.synced) sigs[sk] = _sigH(_stableStr(_invSort(cfg.synced.slice()))); else delete sigs[sk]; // 🛠️ FM0111SU486: نشان صرف اسی کا جو واقعی کلاؤڈ میں لکھا گیا — بھیجتے وقت درج ہوئی نئی وصولی/بل اب «بھیجی ہوئی» نہیں مانی جاتی (پہلے کبھی نہ جاتی)
       const u = _utNum(cfg.lastUT);
       if(u){ seen[sk] = u; if(u > cur) bump[sk] = u; }
     }
     if(Object.keys(bump).length){
       const ni = await _invIdxUpdate(i => { let ch = false; Object.keys(bump).forEach(k => { if(_utNum(i.m[k]) < bump[k]){ i.m[k] = bump[k]; ch = true; } }); return ch ? i : null; });
-      if(!ni) allOk = false;
+      if(!ni){ allOk = false; Object.keys(bump).forEach(k => { delete seen[k]; delete sigs[k]; }); } // 🛠️ FM0111SU486: فہرست نہ لکھی جا سکی تو «دیکھ لیا» کا نشان واپس — اگلی بار دوبارہ کوشش، ورنہ دوسرے فونوں کو نئی ادائیگی/بل کا کبھی پتا نہ چلتا
     }
     saveToStorage('invShardSeen', seen); saveToStorage('invShardSig', sigs);
     AppState.settings.invoicesPendingSync = !allOk;
