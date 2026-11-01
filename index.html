@@ -10090,8 +10090,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0111SU486'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ریکوری، منشی سٹاک ریکارڈ اور کھاتے کی لائنیں اب کئی فونوں پر بھی پوری — کچھ غائب نہیں ہوتا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0111SU487'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'واپسی کی درخواستیں اب کسی فون سے غائب نہیں ہوتیں — ریٹرن، منشی بل منظوری اور بل ترمیم کا تین فون ٹیسٹ پاس'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -41891,29 +41891,43 @@ function stopAdvanceOrdersPolling(){
    ===================================================================== */
 const RETURN_REQUESTS_DOC_PATH = 'shopData/returnRequests';
 let returnRequestsPollTimer = null;
-async function pushReturnRequestsToCloud(){
+// 🔒 FM0111SU487 (ٹیسٹ میں ثابت: 12 درخواستیں بھیجیں، فونوں پر 9/10/11 پہنچیں): پہلے ہر فون پوری فہرست بغیر ملائے لکھ دیتا — دوسرے منشی کی
+//   درخواست یا ایڈمن کا «کھاتے میں» مٹ جاتا۔ اب: ایک وقت میں ایک، پہلے کلاؤڈ ملاؤ، لکھائی صرف تب جب بیچ میں کسی اور نے نہ لکھا ہو
+function pushReturnRequestsToCloud(){ return _sqRun('rr', 'rr:push', _pushReturnReqRaw); }
+async function _pushReturnReqRaw(){
   saveToStorage('returnRequests', returnRequestsData);
   saveToStorage('nextReturnId', nextReturnId);
-  try{
-    await authFirestoreFetch(`${RETURN_REQUESTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          json: { stringValue: JSON.stringify(returnRequestsData) },
-          nextReturnId: { integerValue: String(nextReturnId) },
-          updatedAt: { integerValue: String(Date.now()) }
-        }
-      })
-    });
-  }catch(e){ /* آف لائن — localStorage میں محفوظ ہو چکا، اگلی بار sync ہو جائے گا */ }
+  for(let attempt = 0; attempt < 4; attempt++){
+    window.__ut_rr = undefined;
+    try{ await _fetchReturnReqRaw(true); }catch(e){}
+    if(window.__ut_rr === undefined) return false; // آف لائن — localStorage میں محفوظ، اگلی بار
+    const pre = window.__ut_rr ? `&currentDocument.updateTime=${encodeURIComponent(window.__ut_rr)}` : '&currentDocument.exists=false';
+    try{
+      const res = await authFirestoreFetch(`${RETURN_REQUESTS_DOC_PATH}?key=${FIREBASE_API_KEY}${pre}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            json: { stringValue: JSON.stringify(returnRequestsData) },
+            nextReturnId: { integerValue: String(nextReturnId) },
+            updatedAt: { integerValue: String(Date.now()) }
+          }
+        })
+      });
+      if(res && res.ok) return true;
+      if(!(res && (res.status === 400 || res.status === 404 || res.status === 409 || res.status === 412))) return false;
+    }catch(e){ return false; }
+  }
+  return false;
 }
-async function fetchReturnRequestsFromCloud(silent){
+function fetchReturnRequestsFromCloud(silent){ return _sqRun('rr', 'rr:fetch', () => _fetchReturnReqRaw(silent)); } // 🔒 FM0111SU487
+async function _fetchReturnReqRaw(silent){
   try{
-    const res = await authFirestoreFetch(`${RETURN_REQUESTS_DOC_PATH}?key=${FIREBASE_API_KEY}`);
-    if(res.status === 404) return false;
+    const res = await authFirestoreFetch(`${RETURN_REQUESTS_DOC_PATH}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(res.status === 404){ window.__ut_rr = null; return false; }
     if(!res.ok) return false;
     const doc = await res.json();
+    window.__ut_rr = doc.updateTime || null;
     const jsonStr = doc.fields?.json?.stringValue;
     if(!jsonStr) return false;
     const cloudReturns = JSON.parse(jsonStr);
@@ -42072,7 +42086,7 @@ async function submitReturnRequest(){
   try{ await fetchReturnRequestsFromCloud(true); }catch(e){}
 
   returnRequestsData.push({
-    id: nextReturnId++,
+    id: (() => { const u = _uidNext(nextReturnId); nextReturnId = u + 1; return u; })(), // 🔢 FM0111SU487
     customer_id: rrCustomer.customer_id,
     customerName: rrCustomer.name,
     customerPhone: rrCustomer.phone,
