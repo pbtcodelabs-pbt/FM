@@ -10096,8 +10096,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0311TU491'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ہوم کارڈ کا 💬 ہٹایا — مسئلہ یا مشورہ اب «Help Desk · مسائل و تجاویز» سے؛ سبسکرپشن / کوڈ والا واٹس ایپ ویسے ہی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0311TU492'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'غلطی سے «نقد» لکھی خریداری اب بیوپاری کے ادھار میں بدل سکتے ہیں — چالانوں کا حساب ← «🔁 نقد خریداری کو ادھار میں بدلیں»'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -20676,6 +20676,7 @@ function refreshChalanRateFab(){
   }
 }
 let chalanRateModalTab = 'pending';
+let chalanCashOnly = false; // 🔁 FM0311TU492: صرف نقد والے چالان (نقد → ادھار)
 function ensureChalanRateModal(){
   if(document.getElementById('chalanRateModal')) return;
   const el = document.createElement('div');
@@ -20690,6 +20691,7 @@ function ensureChalanRateModal(){
         <button type="button" id="chalanRateTabAll" onclick="setChalanRateTab('all')" style="flex:1; padding:9px; border:none; border-radius:10px; font-weight:900; cursor:pointer;">📋 تمام چالان</button>
       </div>
       <button type="button" onclick="closeChalanRateModal(); openPurchaseChalanReport();" style="width:100%; margin-bottom:8px; padding:9px; border:none; border-radius:10px; background:#1e3a8a; color:#fff; font-weight:900; cursor:pointer;">📊 خرید اور چالان رپورٹ</button>
+      <button type="button" id="chalanRateCashOnly" onclick="chalanCashOnly=!chalanCashOnly; if(chalanCashOnly) chalanRateModalTab='all'; renderChalanRateModal();" style="width:100%; margin-bottom:8px; padding:9px; border:2px solid #059669; border-radius:10px; background:#ecfdf5; color:#065f46; font-weight:900; cursor:pointer;">🔁 نقد خریداری کو ادھار میں بدلیں</button>
       <input type="text" id="chalanRateSearch" placeholder="🔍 سبزی کا نام یا سیریل نمبر" oninput="renderChalanRateModal()" style="width:100%; box-sizing:border-box; padding:9px; border:2px solid var(--primary); border-radius:10px; font-size:13px; text-align:center; margin-bottom:8px;">
       <div id="chalanRateList"></div>
       <button type="button" onclick="closeChalanRateModal()" style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:10px; background:#f1f5f9; color:#334155; font-weight:800; cursor:pointer;">✖ بند کریں</button>
@@ -20758,6 +20760,13 @@ function renderChalanRateModal(){
     }));
   }
   if(q) rows = rows.filter(r => r.p.name.toLowerCase().includes(q) || String(r.p.serial_no ?? '') === q);
+  let cashHead = '';
+  { const cb = document.getElementById('chalanRateCashOnly');
+    if(cb){ cb.style.background = chalanCashOnly ? '#059669' : '#ecfdf5'; cb.style.color = chalanCashOnly ? '#fff' : '#065f46'; cb.textContent = chalanCashOnly ? '✖ سب چالان دکھائیں' : '🔁 نقد خریداری کو ادھار میں بدلیں'; } }
+  if(chalanCashOnly && !pendingTab){
+    rows = rows.filter(r => r.c.isCash || r.c.source === 'نقد خریداری');
+    cashHead = `<div style="background:#ecfdf5; color:#065f46; border:1.5px solid #6ee7b7; border-radius:10px; padding:8px; margin-bottom:8px; font-size:13px; line-height:1.9; text-align:center;">💵 یہ نقد والے چالان ہیں — جسے ادھار کرنا ہے اس پر «💵 نقد» والا بٹن دبا کر بیوپاری کا نام چنیں، پھر ✅ — رقم اس بیوپاری کے بقایا میں چلی جائے گی اور گلے کا نقد خود ٹھیک ہو جائے گا</div>`;
+  }
   // ---------- 🧾 بل والا فلٹر: صرف اسی بل کے ریٹ باقی چالان، سب لگ جائیں تو "بل مکمل کریں" بٹن ---------- -->
   const flt = chalanRateModalFilter;
   let fltHead = '';
@@ -20774,7 +20783,7 @@ function renderChalanRateModal(){
     wrap.innerHTML = `<div style="text-align:center; color:var(--muted); padding:18px 0;">${pendingTab ? '✅ کسی چالان کا ریٹ باقی نہیں' : 'کوئی چالان نہیں'}</div>`;
     return;
   }
-  wrap.innerHTML = fltHead + rows.map(({p, v, c}) => {
+  wrap.innerHTML = fltHead + cashHead + rows.map(({p, v, c}) => {
     const key = `${v.variant_id}_${c.chalanNo}`;
     return `
       <div style="padding:9px 10px; margin-bottom:8px; border-radius:12px; background:${c.ratePending ? 'linear-gradient(155deg,#fffbeb,#fef3c7)' : 'linear-gradient(155deg,#ffffff,#f0fdf4)'}; border:2px solid ${c.ratePending ? '#f59e0b' : '#bbf7d0'};">
@@ -21013,10 +21022,17 @@ function renderChalanRateModal(){
     rows = getPendingRateChalans();
   } else {
     productsData.slice().sort((a,b) => (a.serial_no||0) - (b.serial_no||0)).forEach(p => (p.variants || []).forEach(v => {
-      ensureVariantChalans(v).forEach(c => { if(!isLegacyChalan(c) && ((Number(c.qty) || 0) > 0 || chalanNeedsAccounting(c))) rows.push({p, v, c}); });
+      ensureVariantChalans(v).forEach(c => { if(!isLegacyChalan(c) && ((Number(c.qty) || 0) > 0 || chalanNeedsAccounting(c) || (chalanCashOnly && (c.isCash || c.source === 'نقد خریداری')))) rows.push({p, v, c}); });
     }));
   }
   if(q) rows = rows.filter(r => r.p.name.toLowerCase().includes(q) || String(r.p.serial_no ?? '') === q);
+  let cashHead = '';
+  { const cb = document.getElementById('chalanRateCashOnly');
+    if(cb){ cb.style.background = chalanCashOnly ? '#059669' : '#ecfdf5'; cb.style.color = chalanCashOnly ? '#fff' : '#065f46'; cb.textContent = chalanCashOnly ? '✖ سب چالان دکھائیں' : '🔁 نقد خریداری کو ادھار میں بدلیں'; } }
+  if(chalanCashOnly && !pendingTab){
+    rows = rows.filter(r => r.c.isCash || r.c.source === 'نقد خریداری');
+    cashHead = `<div style="background:#ecfdf5; color:#065f46; border:1.5px solid #6ee7b7; border-radius:10px; padding:8px; margin-bottom:8px; font-size:13px; line-height:1.9; text-align:center;">💵 یہ نقد والے چالان ہیں — جسے ادھار کرنا ہے اس پر «💵 نقد» والا بٹن دبا کر بیوپاری کا نام چنیں، پھر ✅ — رقم اس بیوپاری کے بقایا میں چلی جائے گی اور گلے کا نقد خود ٹھیک ہو جائے گا</div>`;
+  }
   const flt = chalanRateModalFilter;
   let fltHead = '';
   if(flt && pendingTab){
@@ -21033,7 +21049,7 @@ function renderChalanRateModal(){
     return;
   }
   const inp = (id, val, ph, color) => `<div style="flex:1; min-width:0; text-align:center;"><div style="font-size:10px; font-weight:900; color:${color}; line-height:1.3;">${ph}</div><input type="text" inputmode="decimal" id="${id}" value="${val ?? ''}" placeholder="0" onfocus="this.select()" style="width:100%; height:34px; box-sizing:border-box; border:2px solid ${color}; border-radius:9px; text-align:center; font-weight:900; font-size:14px; font-family:UrduAll,Arial,Helvetica,sans-serif;"></div>`;
-  wrap.innerHTML = fltHead + rows.map(({p, v, c}) => {
+  wrap.innerHTML = fltHead + cashHead + rows.map(({p, v, c}) => {
     const key = `${v.variant_id}_${c.chalanNo}`;
     const need = chalanNeedsAccounting(c);
     const rateVal = c.ratePending ? '' : (c.rate ?? '');
@@ -21171,6 +21187,8 @@ function saveChalanAccounting(variantId, chalanNo){
     if(so){ so.total_payable = (Number(so.total_payable) || 0) - (Number(c.bookedAmount) || 0); normalizeSupplierBalance(so); suppliersChanged = true; }
   }
   if(newSupplier){ newSupplier.total_payable = (Number(newSupplier.total_payable) || 0) + newAmount; normalizeSupplierBalance(newSupplier); suppliersChanged = true; }
+  const _wasCash = !!c.isCash;
+  if(newSupplier && _chDetachDirectCash(variantId, c, qtyForBill)) suppliersChanged = true;
   c.bookedSupplierId = newSupplier ? newSupplier.supplier_id : null;
   c.bookedAmount = newAmount;
 
@@ -21210,10 +21228,15 @@ function saveChalanAccounting(variantId, chalanNo){
     }));
   }
 
+  if(_wasCash && newSupplier){
+    newSupplier.ledgerHistory = newSupplier.ledgerHistory || [];
+    newSupplier.ledgerHistory.unshift({ type: 'purchase_edit', amount: newAmount, date: bizDateKey(), at: new Date().toISOString(), by: c.rateBy, note: `🔁 نقد سے ادھار: ${p ? p.name : ''} چالان #${chalanNo} (${qtyForBill} × ${rate})` });
+  }
   persistAllData();
   pushProductsToCloud();
   if(suppliersChanged){ try{ pushSuppliersToCloud(); }catch(e){} }
   try{ pauseCloudPolling(20000); }catch(e){}
+  if(_wasCash && newSupplier){ try{ uAlert('✅ نقد سے ادھار', `${p ? p.name : ''} (چالان #${chalanNo}) کی ${Math.round(newAmount).toLocaleString()} روپے کی خریداری اب <bdi dir="auto">${newSupplier.name}</bdi> کے ادھار میں — گلے کا نقد بھی خود ٹھیک ہو گیا۔`); }catch(e){} }
   const card = document.getElementById('chRate_' + key)?.closest('div[style*="border-radius:12px"]');
   if(chalanRateModalTab === 'pending' && card){ card.style.transition = 'opacity .25s'; card.style.opacity = '0'; setTimeout(renderChalanRateModal, 260); }
   else renderChalanRateModal();
@@ -21284,6 +21307,25 @@ let chSplitState = null; // {variantId, chalanNo, orig, parts:[{qty, rate, labor
 function _chPn(x){ const n = parseFloat(String(x == null ? '' : x).replace(',', '.')); return isFinite(n) ? n : 0; }
 
 // ---------- حساب کا مرکزی کام (saveChalanAccounting جیسا ہی) — اب تقسیم کے ہر حصے کے لیے بھی ----------
+// ---------- 🔁 FM0311TU492 (ہیلپ ڈیسک #34، صدام بھائی): غلطی سے «💵 نقد خریداری» لکھی گئی — چالان پر بیوپاری چنیں تو یہ مال اس کے ادھار میں
+// اور «نقد خریداری» کے ریکارڈ سے اتنی لائن ہٹے (ورنہ گلے سے نقد بھی کٹا رہتا اور بیوپاری کا بقایا بھی بنتا — دوہرا حساب) ---------- -->
+function _chDetachDirectCash(variantId, c, qtyForBill){
+  if(!c || c.poRef == null) return false;
+  const cp = (cashPurchasesData || []).find(x => x && !x.isDaily && x.id === c.poRef);
+  if(!cp) return false;
+  let left = Number(qtyForBill) || 0;
+  (cp.items || []).forEach(it => {
+    if(!it || it.variant_id !== variantId || left <= 0) return;
+    const q = Number(it.qty) || 0, take = Math.min(q, left);
+    it.qty = _chRound(q - take); left = _chRound(left - take);
+  });
+  cp.items = (cp.items || []).filter(it => it && (Number(it.qty) || 0) > 0);
+  cp.total = (cp.items || []).reduce((sm, it) => sm + (Number(it.qty) || 0) * (Number(it.cost) || 0), 0);
+  cashPurchasesData = (cashPurchasesData || []).filter(x => !(x === cp && !(cp.items || []).length));
+  c.poRef = null; c.source = 'نقد سے ادھار';
+  saveToStorage('cashPurchases', cashPurchasesData);
+  return true;
+}
 function _chAccountCore(variantId, chalanNo, vals){
   const {p, v} = findProductAndVariant(variantId); if(!v) return false;
   const c = (v.chalans || []).find(x => x.chalanNo === chalanNo); if(!c) return false;
@@ -21297,6 +21339,7 @@ function _chAccountCore(variantId, chalanNo, vals){
     if(so){ so.total_payable = (Number(so.total_payable) || 0) - (Number(c.bookedAmount) || 0); normalizeSupplierBalance(so); }
   }
   if(newSupplier){ newSupplier.total_payable = (Number(newSupplier.total_payable) || 0) + newAmount; normalizeSupplierBalance(newSupplier); }
+  if(newSupplier) _chDetachDirectCash(variantId, c, qtyForBill);
   c.bookedSupplierId = newSupplier ? newSupplier.supplier_id : null;
   c.bookedAmount = newAmount;
   c.rate = rate; c.ratePending = false;
