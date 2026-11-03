@@ -10097,8 +10097,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0311TU493'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بل کے لال ڈبے (ٹوٹل کم وصولی) کی رقم ایڈمن خود درست کر سکتا ہے — بل کھول کر «✏️ لال ڈبہ»'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0311TU494'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ایک دن کی ہر وصولی بل پر الگ لائن میں — وقت اور نقد، جاز کیش، ایزی پیسہ، بینک کی تفصیل کے ساتھ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -37085,6 +37085,7 @@ function confirmRecoveryEntry(entryId){
     amount: entry.amount - excess,
     via: entry.method,
     methods: getRecoverySplit(entry),
+    at: entry.createdAt || new Date().toISOString(), // 🧾 FM0311TU494: وصولی کا وقت — بل پر الگ الگ ترتیب سے
     date: entry.bizDate || bizDateKey(),
     note: `Recovery List — ${recoverySplitLabel(entry)} — ${entry.employeeName}${entry.note ? ' — 📝 ' + entry.note : ''}`
   });
@@ -46020,13 +46021,19 @@ function getYesterdayPayInfo(invoice){
     (recoveryListData || []).forEach(e => { if(e && e.customer_id === c.customer_id && e.status === 'pending' && recDay(e) === D) _addSp(getRecoverySplit(e)); });
     const _spSum = Object.keys(split).reduce((a, k) => a + split[k], 0);
     if(r.todayRecovery - _spSum > 1) split.other = r.todayRecovery - _spSum;
+    // 🧾 FM0311TU494 (ہیلپ ڈیسک #37): اس دن کی ہر وصولی الگ لائن میں، ترتیب سے (وقت + نقد / جاز کیش / ایزی پیسہ / بینک)
+    const recs = [];
+    (c.walletHistory || []).forEach(h => { if(h && h.type === 'receivable_collected' && h.date === D && !(h.via === 'wallet' && /^Auto-applied/.test(String(h.note || '')))) recs.push({ amt: Number(h.amount) || 0, at: h.at || '', methods: Array.isArray(h.methods) && h.methods.length ? h.methods : [{ method: h.via, amount: h.amount }] }); });
+    (recoveryListData || []).forEach(e => { if(e && e.customer_id === c.customer_id && e.status === 'pending' && recDay(e) === D) recs.push({ amt: Number(e.amount) || 0, at: e.createdAt || '', methods: getRecoverySplit(e) }); });
+    recs.forEach(x => { const sp2 = {}; (x.methods || []).forEach(m => { const a = Number(m.amount) || 0; if(a > 0){ const k = _mk(m.method); sp2[k] = (sp2[k] || 0) + a; } }); x.split = sp2; });
+    recs.sort((a, b) => String(a.at).localeCompare(String(b.at)));
     const lifeShort = custShortThrough(c, D); // 🔴 FM1710SA397: ریکوری لسٹ والا وہی حساب
     // 📝 FM1710SA398: اس دن کی وصولی کے ہاتھ سے لکھے نوٹ (منظور شدہ ادائیگیاں + منظوری کی منتظر وصولی)
     const _notes = [];
     (paymentsData || []).forEach(pm => { if(pm && pm.direction === 'in' && pm.party_type === 'customer' && pm.party_id === c.customer_id && bsPayDay(pm) === D){ const n = _payUserNote(pm.note); if(n) _notes.push(n); } });
     (recoveryListData || []).forEach(e => { if(e && e.customer_id === c.customer_id && e.status === 'pending' && recDay(e) === D && e.note){ _notes.push(String(e.note).trim()); } });
     const notes = Array.from(new Set(_notes)).join('  ·  ');
-    return { D, isYesterday, label: p[2] + '-' + p[1] + '-' + p[0], opening: r.openingBalance, goods: r.todayGoods, total: r.totalBalance, paid: r.todayRecovery, final: r.finalBalance, dayShort: r.dayShort, split, lifeShort, notes };
+    return { D, isYesterday, label: p[2] + '-' + p[1] + '-' + p[0], opening: r.openingBalance, goods: r.todayGoods, total: r.totalBalance, paid: r.todayRecovery, final: r.finalBalance, dayShort: r.dayShort, split, lifeShort, notes, recs: recs.filter(x => x.amt > 0) };
   }catch(e){ return null; }
 }
 function _drawPayRows(ctx, FP, L, R, top, rowH, rows, rc, bw, fscale){
@@ -46077,6 +46084,14 @@ function _yBoxRows(y){
   const sp = y.split || {};
   const parts = ['cash', 'jazzcash', 'easypaisa', 'bank', 'wallet', 'other'].filter(k => (sp[k] || 0) > 0).map(k => _Y_SPLIT_LBL[k] + ' ' + Math.round(sp[k]).toLocaleString());
   const sub = parts.length ? '(' + parts.join('  ·  ') + ')' : '';
+  // 🧾 FM0311TU494 (ہیلپ ڈیسک #37): ایک سے زیادہ وصولی ہو تو ہر ایک الگ لائن (وقت اور طریقے کے ساتھ)، پھر کل ادا کیا
+  const recs = Array.isArray(y.recs) ? y.recs : [];
+  if(recs.length >= 2){
+    const _tm = a => { try{ if(!a) return ''; const d = new Date(a); if(isNaN(d)) return ''; let h = d.getHours(), m = d.getMinutes(); const ap = h < 12 ? 'صبح' : (h < 16 ? 'دوپہر' : (h < 19 ? 'شام' : 'رات')); h = h % 12 || 12; return ap + ' ' + h + ':' + String(m).padStart(2, '0'); }catch(e){ return ''; } };
+    const recRows = recs.map((x, i) => { const sp2 = x.split || {}; const pp = ['cash', 'jazzcash', 'easypaisa', 'bank', 'wallet', 'other'].filter(k => (sp2[k] || 0) > 0).map(k => _Y_SPLIT_LBL[k] + ' ' + Math.round(sp2[k]).toLocaleString()); const t = _tm(x.at);
+      return ['وصولی ' + (i + 1) + (t ? ' — ' + t : ''), x.amt, false, pp.length ? '(' + pp.join('  ·  ') + ')' : '']; });
+    return [['سابقہ بقایا', y.opening], [kal ? 'کل کی خریداری' : 'پچھلی خریداری', y.goods], ['ٹوٹل', y.total], ...recRows, [kal ? 'کل ادا کیا' : 'پچھلا ادا کیا', y.paid, false, sub], ['بقایا', y.final, true]];
+  }
   return [['سابقہ بقایا', y.opening], [kal ? 'کل کی خریداری' : 'پچھلی خریداری', y.goods], ['ٹوٹل', y.total], [kal ? 'کل ادا کیا' : 'پچھلا ادا کیا', y.paid, false, sub], ['بقایا', y.final, true]];
 }
 // 🔠 FM1910MO415 (صدام بھائی): نقد / جاز کیش / ایزی پیسہ والی ضمنی لائن موٹی اور بڑی — 3 یا زیادہ طریقے ہوں تو دو سطریں
