@@ -6373,7 +6373,7 @@ function __appHostKind(h, p){
           <strong>🖨️ Bill Ready To Print</strong>
           <div style="display:flex; align-items:center; gap:10px;">
             <span style="cursor:pointer; font-size:13px; font-weight:700; color:var(--primary-dark); background:#eef2ff; padding:5px 10px; border-radius:8px;" onclick="openEditBillCustomerModal()">✏️ Edit Customer</span>
-            <span class="adminOnlyShort" style="cursor:pointer; font-size:13px; font-weight:700; color:#b91c1c; background:#fee2e2; padding:5px 10px; border-radius:8px; white-space:nowrap;" onclick="editBillShort()" title="بل کے لال ڈبے (ٹوٹل کم وصولی) کی رقم درست کریں">✏️ لال ڈبہ</span>
+            <span class="adminOnlyShort" style="cursor:pointer; font-size:13px; font-weight:700; color:#b91c1c; background:#fee2e2; padding:5px 10px; border-radius:8px; white-space:nowrap;" onclick="editBillShort()" title="بل کے لال ڈبے (ٹوٹل کم وصولی) کی رقم درست کریں">✏️ لال ڈبہ لکھیں</span>
             <span style="cursor:pointer;" onclick="closeInvoicePreview()">✖</span>
           </div>
         </div>
@@ -10148,8 +10148,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0311TU497'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'وصولی والے کے کارڈ پر «🥬 اس دن کا مال دیکھیں» — کل / آج کی سبزی، نگ، ریٹ اور رقم گاہک کے سامنے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0311TU498'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'وصولی والے کے کارڈ پر بڑا «➕ دوبارہ وصولی درج کریں» بٹن؛ بل کا لال ڈبہ ملازم کے فون سے بھی ایڈمن PIN کے ساتھ لکھا جا سکتا ہے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -36154,7 +36154,7 @@ function buildRlEmployeeCard(c, dr){
       ${doneSummaryHtml}
       ${splitRowsHtml}
       ${isDone ? `
-        <button type="button" onclick="reopenRlCard(${cid})" style="width:100%; padding:5px; margin-bottom:5px; background:#fff; color:#15803d; border:1.5px dashed #86efac; border-radius:7px; font-size:${z(10.5)}px; font-weight:800; cursor:pointer; font-family:inherit;">➕ اسی گاہک سے مزید وصولی</button>` : `
+        <button type="button" onclick="reopenRlCard(${cid})" style="width:100%; padding:9px 6px; margin-bottom:5px; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; border:2px solid #fff; border-radius:10px; font-size:${z(13.5)}px; font-weight:900; cursor:pointer; font-family:inherit; box-shadow:0 3px 0 #92400e;">➕ دوبارہ وصولی درج کریں — ${todayEntries.length + 1}ویں بار (نقد / جاز کیش / ایزی پیسہ / بینک)</button>` : `
         <div style="display:flex; gap:4px; margin-bottom:5px;">
           <button type="button" onclick="addRlSplitRow(${cid})" style="flex:1; padding:6px; background:#eef2ff; color:var(--primary-dark); border:1.5px dashed #a5b4fc; border-radius:7px; font-size:${z(10.5)}px; font-weight:800; cursor:pointer; font-family:inherit;">➕ دوسرا طریقہ (نقد + جاز کیش…)</button>
           <button type="button" onclick="submitSingleRecovery(${cid})" style="flex:0 0 auto; padding:6px 14px; background:var(--primary); color:#fff; border:none; border-radius:7px; font-size:${z(12)}px; font-weight:800; cursor:pointer; white-space:nowrap;">✅ OK</button>
@@ -36545,22 +36545,22 @@ function _drGoodsOrig(inv){
 // ---------- ✏️ FM0311TU493 (ہیلپ ڈیسک #36، صدام بھائی): بل کے لال ڈبے («… تک ٹوٹل کم وصولی») کی رقم ہاتھ سے درست — صرف ایڈمن + PIN
 // گاہک کا اصل بقایا / کھاتہ نہیں بدلتا؛ گاہک پر `shortAdj` [{date, delta, before, after, at, by, note}] — اسی تاریخ سے آگے کی کم وصولی (بل کا ڈبہ + ریکوری لسٹ) اتنی بدلتی ہے
 async function editBillShort(){
-  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'لال ڈبے کی رقم صرف ایڈمن درست کر سکتا ہے۔'); return; }
+  // 🔓 FM0311TU498 (ہیلپ ڈیسک #46): ملازم کے فون پر بھی کھلے — اجازت نیچے ایڈمن PIN سے (پہلے غیر ایڈمن کو سیدھا «صرف ایڈمن»)
   const inv = (invoicesData || []).find(i => i && i.invoice_id === currentPreviewInvoiceId); if(!inv) return;
   const c = inv.customer_id != null ? (customersData || []).find(x => x && x.customer_id === inv.customer_id) : null;
   if(!c){ await uAlert('گاہک نہیں', 'یہ بل کسی کھاتے والے گاہک کا نہیں (واک اِن) — لال ڈبہ صرف کھاتے والے گاہک کا ہوتا ہے۔'); return; }
   const D = invDay(inv); if(!D) return;
   const cur = custShortThrough(c, D, D);
   const f = n => 'Rs. ' + Math.round(n).toLocaleString('en-US');
-  const v = await uDialog({ title: '✏️ لال ڈبہ — <bdi dir="auto">' + escRlHtml(c.name) + '</bdi>', message: `ابھی «${bizFmt(D)} تک ٹوٹل کم وصولی»: <b dir="ltr" style="display:inline-block;padding:1px 10px;border-radius:999px;background:#fee2e2;color:#b91c1c;">${f(cur)}</b><br>صحیح رقم لکھیں (صفر لکھیں تو ڈبہ نہیں چھپے گا):<div style="font-size:13px;color:#64748b;line-height:1.7;">صرف لال ڈبہ اور ریکوری لسٹ کی کم وصولی بدلے گی — گاہک کا بقایا (کھاتہ) نہیں بدلے گا</div>`, input: 'number', okText: 'آگے ←', cancelText: '✖ واپس' });
+  const v = await uDialog({ title: '✏️ لال ڈبہ — <bdi dir="auto">' + escRlHtml(c.name) + '</bdi>', message: `ابھی «${bizFmt(D)} تک ٹوٹل کم وصولی»: <b dir="ltr" style="display:inline-block;padding:1px 10px;border-radius:999px;background:#fee2e2;color:#b91c1c;">${f(cur)}</b><br>صحیح رقم لکھیں (صفر لکھیں تو ڈبہ نہیں چھپے گا):<div style="font-size:13px;color:#64748b;line-height:1.7;">صرف لال ڈبہ اور ریکوری لسٹ کی کم وصولی بدلے گی — گاہک کا بقایا (کھاتہ) نہیں بدلے گا</div>`, input: 'text', okText: 'آگے ←', cancelText: '✖ واپس' });
   if(v === null || v === false || String(v).trim() === '') return;
-  const target = Math.round(Number(v));
+  const target = Math.round(Number(String(v).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[,\s]/g, '')));
   if(!isFinite(target) || target < 0){ await uAlert('غلط رقم', 'صحیح رقم لکھیں (صفر یا اس سے زیادہ)۔'); return; }
   if(target === cur){ await uAlert('کوئی فرق نہیں', 'لال ڈبے میں پہلے ہی یہی رقم ہے۔'); return; }
   if(!(await uDialog({ title: '⚠️ تصدیق', tone: 'amber', okText: '✅ درست کریں', cancelText: '✖ واپس', rows: [
       { label: 'ابھی لال ڈبہ', value: f(cur) }, { label: 'صحیح رقم', value: f(target), big: true },
       { label: 'تاریخ', value: bizFmt(D) }] }))) return;
-  if(!(await _askAdminPinForSerialMaster(`${c.name} کا لال ڈبہ ${f(cur)} سے ${f(target)} کرنے کے لیے`))) return;
+  if(AppState.currentRole !== 'admin' || (usersData || []).some(u => u && u.role === 'admin' && u.is_active && u.pin)){ if(!(await _askAdminPinForSerialMaster(`${c.name} کا لال ڈبہ ${f(cur)} سے ${f(target)} کرنے کے لیے`))) return; }
   // ہر دن 0 سے کم نہیں ہوتا، اس لیے بار بار ناپ کر فرق لگائیں (زیادہ سے زیادہ 3 بار)
   c.shortAdj = Array.isArray(c.shortAdj) ? c.shortAdj : [];
   for(let t = 0; t < 3; t++){
@@ -43480,7 +43480,7 @@ let customersSyncBase = loadFromStorage('customersSyncBase', null);
 let suppliersSyncBase = loadFromStorage('suppliersSyncBase', null);
 let invoicesSyncBase = loadFromStorage('invoicesSyncBase', null);
 function _custCfg(){
-  return { path: CUSTOMERS_DOC_PATH, id: 'customer_id', label: 'کسٹمر', counters: ['total_receivable','wallet_balance'], hists: ['walletHistory'], seed: CUSTOMERS_SEED_DATA,
+  return { path: CUSTOMERS_DOC_PATH, id: 'customer_id', label: 'کسٹمر', counters: ['total_receivable','wallet_balance'], hists: ['walletHistory', 'shortAdj'], seed: CUSTOMERS_SEED_DATA,
     get: () => customersData, set: v => { customersData = v; },
     getBase: () => customersSyncBase, setBase: v => { customersSyncBase = _syncClone(v); try{ saveToStorage('customersSyncBase', customersSyncBase); }catch(e){} },
     dg: 'customers', extra: () => ({ nextCustomerId: { integerValue: String(nextCustomerId) }, delGuard: _dgField('customers') }),
