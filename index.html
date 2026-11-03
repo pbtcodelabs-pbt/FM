@@ -10148,8 +10148,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0311TU496'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بیک اپ واپس لاتے وقت اوپر صاف پیش رفت کی پٹی (فیصد اور ہر قدم کا نام) — فائل سے بھی اور گوگل ڈرائیو سے بھی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0311TU497'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'وصولی والے کے کارڈ پر «🥬 اس دن کا مال دیکھیں» — کل / آج کی سبزی، نگ، ریٹ اور رقم گاہک کے سامنے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -35998,7 +35998,10 @@ function rlHistRows(c){
   const entryD = rlEntryDate();
   const gDay = {}, rDay = {};
   const add = (o, d, v) => { if(!d) return; o[d] = (o[d] || 0) + (Number(v) || 0); };
-  invoicesData.forEach(inv => { if(inv.customer_id === c.customer_id) add(gDay, invDay(inv), _drGoodsOrig(inv)); });
+  // 🛒 FM0311TU497 (ہیلپ ڈیسک #41، صدام): «خریداری» = اس دن کے بلوں کی پوری رقم (پہلے صرف ادھار والا حصہ — بل پر نقد دیا ہو تو 0 دکھتا)؛
+  //   بل پر ادا رقم «وصولی» میں — اس لیے «کم وصولی» وہی رہتی ہے
+  let _inv = invoicesData; try{ _inv = _withArch(invoicesData, 'inv'); }catch(e){}
+  _inv.forEach(inv => { if(inv && inv.customer_id === c.customer_id && inv.status !== 'voided'){ const g = Number(inv.grand_total) || 0; add(gDay, invDay(inv), g); add(rDay, invDay(inv), g - _drGoodsOrig(inv)); } });
   (c.walletHistory || []).forEach(h => { if(!h) return; if(h.type === 'cash_given') add(gDay, h.date, h.amount); else if(h.type === 'receivable_collected') add(rDay, h.date, h.amount); });
   recoveryListData.forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') add(rDay, recDay(e), e.amount); });
   const dt = new Date(entryD + 'T12:00:00'); dt.setDate(dt.getDate() - 1);
@@ -36028,6 +36031,35 @@ function rlHistBodyHtml(c, sel, z, numF){
   const todayLbl = '🛒 ' + (isAaj ? 'آج' : bizFmt(T.d)) + ' کی خریداری (' + bizFmt(T.d) + ')';
   const todayVals = cell('خریداری', T.g, '#fff7ed', '#c2410c', '#fdba74') + cell('وصولی', T.r, '#f0fdf4', '#15803d', '#86efac') + cell('کم وصولی', T.s, T.s > 0 ? '#fef2f2' : '#f8fafc', T.s > 0 ? '#b91c1c' : '#64748b', T.s > 0 ? '#fca5a5' : '#e2e8f0');
   return { todayLbl, todayVals, lbl, vals: cell('خریداری', row.g, '#fff7ed', '#c2410c', '#fdba74') + cell('وصولی', row.r, '#f0fdf4', '#15803d', '#86efac') + cell('کم وصولی', row.s, row.s > 0 ? '#fef2f2' : '#f8fafc', row.s > 0 ? '#b91c1c' : '#64748b', row.s > 0 ? '#fca5a5' : '#e2e8f0'), rows: H.rows, sel: row.d };
+}
+// ---------- 🥬 FM0311TU497 (ہیلپ ڈیسک #41، صدام): وصولی والا گاہک کے سامنے اس دن کا مال (کون سی سبزی / فروٹ، نگ، ریٹ، رقم) دیکھ سکے —
+//   پہلے صرف ادھار رقم کے خانے تھے (نقد بل ہو تو «خریداری 0»)۔ صرف دیکھنے کے لیے، کسی حساب میں نہیں ----------
+function rlShowGoods(cid, day){
+  const c = customersData.find(x => x.customer_id === cid); if(!c) return;
+  let all = invoicesData; try{ all = _withArch(invoicesData, 'inv'); }catch(e){}
+  const bills = (all || []).filter(inv => inv && inv.customer_id === cid && inv.status !== 'voided' && invDay(inv) === day);
+  const esc = t => String(t == null ? '' : t).replace(/[<>&"]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[ch]));
+  const n = v => (Math.round((Number(v) || 0) * 100) / 100).toLocaleString();
+  let tot = 0, due = 0;
+  const body = bills.length ? bills.map(inv => {
+    const g = Number(inv.grand_total) || 0, d = _drGoodsOrig(inv); tot += g; due += d;
+    const rows = (inv.items || []).map(it => `<tr><td style="text-align:right; padding:3px 4px;">${esc(it.name)}${it.label ? ' <small style="color:#64748b;">' + esc(it.label) + '</small>' : ''}</td><td style="padding:3px 4px; direction:ltr;">${n(it.qty)}</td><td style="padding:3px 4px; direction:ltr;">${n(it.unitPrice)}</td><td style="padding:3px 4px; direction:ltr; font-weight:800;">${n((Number(it.qty) || 0) * (Number(it.unitPrice) || 0))}</td></tr>`).join('');
+    return `<div style="border:1px solid #e2e8f0; border-radius:10px; margin-bottom:8px; overflow:hidden;">
+      <div style="background:#f1f5f9; padding:4px 8px; font-weight:800; font-size:13px; display:flex; justify-content:space-between;"><span>🧾 ${esc(inv.invoice_no || '')}</span><span style="direction:ltr;">Rs. ${n(g)}</span></div>
+      <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:center;"><tr style="color:#64748b; font-size:11.5px;"><th style="text-align:right; padding:2px 4px;">مال</th><th>نگ</th><th>ریٹ</th><th>رقم</th></tr>${rows}</table>
+      ${d > 0 ? `<div style="padding:2px 8px 5px; font-size:12px; color:#b91c1c; font-weight:800;">ادھار: Rs. ${n(d)}</div>` : `<div style="padding:2px 8px 5px; font-size:12px; color:#15803d; font-weight:800;">نقد ادا</div>`}
+    </div>`; }).join('') : `<div style="text-align:center; color:#64748b; padding:18px 0;">اس دن ${esc(c.name)} کا کوئی بل نہیں<br><small>(دوسری تاریخ اوپر والی فہرست سے چنیں)</small></div>`;
+  document.getElementById('rlGoodsPop')?.remove();
+  const d = document.createElement('div'); d.id = 'rlGoodsPop'; d.dir = 'rtl';
+  d.style.cssText = 'position:fixed; inset:0; z-index:2147483500; background:rgba(15,23,42,.6); display:flex; align-items:center; justify-content:center; padding:14px;';
+  d.innerHTML = `<div style="background:#fff; border-radius:16px; width:100%; max-width:440px; max-height:86vh; display:flex; flex-direction:column; overflow:hidden;">
+      <div style="background:#92400e; color:#fff; padding:8px 12px; font-weight:900; font-size:15px;">🥬 ${esc(c.name)} — ${bizFmt(day)} کا مال</div>
+      <div style="overflow:auto; padding:10px;">${body}</div>
+      ${bills.length ? `<div style="padding:6px 12px; border-top:1px solid #e2e8f0; font-weight:900; font-size:14px; display:flex; justify-content:space-between;"><span>کل ${bills.length} بل</span><span style="direction:ltr;">Rs. ${n(tot)}${due > 0 ? ' · ادھار ' + n(due) : ''}</span></div>` : ''}
+      <button type="button" onclick="document.getElementById('rlGoodsPop').remove()" style="margin:8px 12px 12px; padding:10px; border:none; border-radius:12px; background:#e2e8f0; font-family:inherit; font-size:16px; font-weight:800; cursor:pointer;">✖ بند کریں</button>
+    </div>`;
+  d.addEventListener('click', ev => { if(ev.target === d) d.remove(); });
+  document.body.appendChild(d);
 }
 function rlHistPick(cid, val){
   rlHistSel[cid] = val;
@@ -36071,11 +36103,13 @@ function buildRlEmployeeCard(c, dr){
           </select>
         </div>
         <div id="rlHistVals-${cid}" style="display:flex; gap:3px;">${_hb.vals}</div>
+        <button type="button" onclick="rlShowGoods(${cid}, rlHistSel[${cid}] || '${_hb.sel}')" style="width:100%; margin-top:3px; padding:3px; border:1px dashed #d97706; border-radius:7px; background:#fff; color:#92400e; font-family:inherit; font-size:${z(11)}px; font-weight:800; cursor:pointer;">🥬 اس دن کا مال (سبزی / فروٹ) دیکھیں</button>
       </div>
       <!-- 🛒 FM1410WE389: ترتیب — اوپر کل کی خریداری، نیچے (رقم والے خانے کے بالکل سامنے) آج کی خریداری -->
       <div dir="rtl" style="background:#ecfdf5; border:1.5px solid #6ee7b7; border-radius:9px; padding:4px 6px; margin-bottom:5px;">
         <div style="font-size:${z(11.5)}px; font-weight:800; color:#065f46; margin-bottom:3px;">${_hb.todayLbl}</div>
         <div style="display:flex; gap:3px;">${_hb.todayVals}</div>
+        <button type="button" onclick="rlShowGoods(${cid}, rlEntryDate())" style="width:100%; margin-top:3px; padding:3px; border:1px dashed #059669; border-radius:7px; background:#fff; color:#065f46; font-family:inherit; font-size:${z(11)}px; font-weight:800; cursor:pointer;">🥬 آج کا مال دیکھیں</button>
       </div>`;
   const splitRowsHtml = isDone ? '' : rows.map((m, i) => `
       <div style="display:flex; gap:3px; align-items:center; margin-bottom:4px;">
