@@ -9566,12 +9566,22 @@ function renderGDriveFileList(files){
 async function selectGDriveBackupFile(fileId, fileName){
   document.getElementById('gdriveRestoreModal').classList.remove('show');
   showGDriveProgress('⏳ Downloading backup...'); // ---------- صدام کی ہدایت (FM3SEPTH10): ریسٹور کے دوران بھی واضح پراگرس ----------
+  rsProg(3, '☁️ گوگل ڈرائیو سے بیک اپ آ رہا ہے…');
   try{
     const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
       headers: { 'Authorization': 'Bearer ' + gDriveAccessToken }
     });
     if(!res.ok) throw new Error('Download failed: ' + res.status);
-    const backup = await res.json();
+    // ⏳ FM0311TU496: ڈاؤن لوڈ کی اصل پیش رفت (حجم معلوم ہو تو فیصد، ورنہ آہستہ آگے)
+    let backup;
+    try{
+      const total = +res.headers.get('content-length') || 0, rd = res.body.getReader(), parts = []; let got = 0;
+      for(;;){ const {done, value} = await rd.read(); if(done) break; parts.push(value); got += value.length;
+        rsProg(total ? 3 + got / total * 27 : Math.min(28, 3 + got / 200000), '☁️ ڈاؤن لوڈ — ' + (got / 1048576).toFixed(1) + ' MB'); }
+      const all = new Uint8Array(got); let o = 0; parts.forEach(p => { all.set(p, o); o += p.length; });
+      rsProg(32, '🔍 فائل جانچی جا رہی ہے…'); await rsTick();
+      backup = JSON.parse(new TextDecoder().decode(all));
+    }catch(e){ if(e instanceof SyntaxError) throw e; backup = await (await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } })).json(); }
     if(!backup.products || !backup.customers){
       hideGDriveProgress();
       showBackupConfirmModal('error', fileName, {message:'This does not look like a valid Fruit Mandi POS backup file.'});
@@ -9583,9 +9593,10 @@ async function selectGDriveBackupFile(fileId, fileName){
     pendingImportFileName = fileName + ' (Google Drive)';
     document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
     finishGDriveProgress('✅ Downloaded — please confirm');
+    rsProg(35, '✅ بیک اپ آ گیا — «Yes, Restore» دبائیں');
     document.getElementById('importConfirmModal').classList.add('show');
   }catch(err){
-    hideGDriveProgress();
+    hideGDriveProgress(); rsProgEnd(false, '❌ ڈاؤن لوڈ نہیں ہو سکا');
     alert('Could not download the file: ' + err.message);
   }
 }
@@ -9633,14 +9644,43 @@ function proceedToRestoreFilePicker(){
   if(inputId) document.getElementById(inputId)?.click();
 }
 
+// ---------- ⏳ FM0311TU496 (ہیلپ ڈیسک #40، صدام): بیک اپ واپس لاتے وقت صاف پیش رفت — ہر اسکرین پر اوپر چھوٹی پٹی
+//   (پہلے صرف مارکیوی کیپسول تھا جو بیک اپ / سیٹنگ کے صفحے پر نظر نہیں آتا تھا، اور فائل سے بحالی میں کچھ بھی نہیں)۔ بڑا پاپ اپ نہیں ----------
+let rsProgHideT = null;
+function rsProg(pct, label){
+  clearTimeout(rsProgHideT);
+  let el = document.getElementById('rsProgBar');
+  if(!el){
+    el = document.createElement('div'); el.id = 'rsProgBar'; el.dir = 'rtl';
+    el.style.cssText = 'position:fixed; top:10px; left:50%; transform:translateX(-50%); z-index:2147483600; width:min(92vw,420px); background:#0f172a; color:#fff; border:2px solid #eab308; border-radius:14px; padding:8px 12px 10px; box-shadow:0 8px 24px rgba(0,0,0,.35); font-family:inherit;';
+    el.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:14px; font-weight:800;"><span id="rsProgLbl"></span><b id="rsProgPct" style="font-family:Arial,sans-serif; color:#fde047;"></b></div><div style="height:10px; background:#334155; border-radius:6px; margin-top:6px; overflow:hidden;"><div id="rsProgFill" style="height:100%; width:0; background:linear-gradient(90deg,#22c55e,#eab308); border-radius:6px; transition:width .3s;"></div></div>';
+    document.body.appendChild(el);
+  }
+  el.style.display = 'block';
+  pct = Math.max(0, Math.min(100, Math.round(pct)));
+  document.getElementById('rsProgLbl').textContent = label || '';
+  document.getElementById('rsProgPct').textContent = pct + '%';
+  document.getElementById('rsProgFill').style.width = pct + '%';
+}
+function rsProgEnd(ok, label){
+  rsProg(100, label || (ok ? '✅ ڈیٹا بحال ہو گیا' : '❌ بحالی نہیں ہو سکی'));
+  if(!ok){ const f = document.getElementById('rsProgFill'); if(f) f.style.background = '#ef4444'; }
+  rsProgHideT = setTimeout(() => { const el = document.getElementById('rsProgBar'); if(el) el.remove(); }, ok ? 2500 : 4000);
+}
+const rsTick = () => new Promise(r => requestAnimationFrame(() => setTimeout(r, 30)));
 function importBackupData(event){
   const file = event.target.files[0];
   if(!file) return;
   const reader = new FileReader();
+  rsProg(3, '📂 فائل پڑھی جا رہی ہے…');
+  reader.onprogress = (ev) => { if(ev.lengthComputable) rsProg(3 + ev.loaded / ev.total * 27, '📂 فائل پڑھی جا رہی ہے…'); };
+  reader.onerror = () => rsProgEnd(false, '❌ فائل نہیں پڑھی جا سکی');
   reader.onload = (e) => {
     try{
+      rsProg(32, '🔍 فائل جانچی جا رہی ہے…');
       const backup = JSON.parse(e.target.result);
       if(!backup.products || !backup.customers){
+        rsProgEnd(false, '❌ درست بیک اپ فائل نہیں');
         showBackupConfirmModal('error', file.name, {message:'This does not look like a valid Fruit Mandi POS backup file.'});
         return;
       }
@@ -9648,9 +9688,11 @@ function importBackupData(event){
       if(backupKindErrorMsg(backup)){ showBackupConfirmModal('error', file.name, {message: backupKindErrorMsg(backup)}); return; } // 🔐 FM410SU304
       pendingImportBackup = backup;
       pendingImportFileName = file.name;
+      rsProg(35, '✅ فائل تیار — «Yes, Restore» دبائیں');
       document.getElementById('importConfirmFileChip').textContent = '📄 ' + file.name;
       document.getElementById('importConfirmModal').classList.add('show');
     } catch(err){
+      rsProgEnd(false, '❌ فائل خراب ہے');
       showBackupConfirmModal('error', file.name, {message: err.message});
     }
   };
@@ -9665,22 +9707,26 @@ function cancelImportConfirm(){
   pendingImportFileName = '';
   gdriveOpActive = false; // ---------- 🔒 اگر یہ Google Drive ری سٹور تھا اور صارف نے منسوخ کر دیا ----------
   document.getElementById('importConfirmModal').classList.remove('show');
+  const pb = document.getElementById('rsProgBar'); if(pb) pb.remove();
 }
 
 // ---------- "Yes, Restore" دبانے پر ہی اصل بحالی — پہلے موجود native confirm() کی جگہ خوبصورت، برانڈڈ پاپ اپ ----------
-function proceedWithImport(){
+async function proceedWithImport(){
   const backup = pendingImportBackup;
   const fileName = pendingImportFileName;
   document.getElementById('importConfirmModal').classList.remove('show');
   if(!backup) return;
   // 🔐 FM410SU304: آخری پہرہ — ہر بحالی (فائل، گوگل ڈرائیو، نیا ڈرائیو بیک اپ) یہیں سے گزرتی ہے
   const _kindErr = backupKindErrorMsg(backup);
-  if(_kindErr){ pendingImportBackup = null; pendingImportFileName = ''; try{ gdriveOpActive = false; }catch(e){} showBackupConfirmModal('error', fileName, {message: _kindErr}); return; }
+  if(_kindErr){ pendingImportBackup = null; pendingImportFileName = ''; try{ gdriveOpActive = false; }catch(e){} rsProgEnd(false); showBackupConfirmModal('error', fileName, {message: _kindErr}); return; }
 
   try{
+      rsProg(40, '🥬 پراڈکٹس بحال ہو رہے ہیں…'); await rsTick();
       productsData.length = 0; productsData.push(...backup.products);
+      rsProg(50, '👥 گاہک اور سپلائر…'); await rsTick();
       customersData.length = 0; customersData.push(...backup.customers);
       suppliersData.length = 0; suppliersData.push(...(backup.suppliers || []));
+      rsProg(60, '🧾 بل (' + (backup.invoices || []).length + ')…'); await rsTick();
       invoicesData.length = 0; invoicesData.push(...(backup.invoices || []));
       usersData.length = 0; usersData.push(...(backup.users || []));
       approvalRequests.length = 0; approvalRequests.push(...(backup.approvalRequests || []));
@@ -9699,6 +9745,7 @@ function proceedWithImport(){
       nextUserId = backup.nextUserId || nextUserId;
       nextRequestId = backup.nextRequestId || nextRequestId;
       nextBatchId = backup.nextBatchId || nextBatchId;
+      rsProg(70, '💵 خرچے، ادائیگیاں، وصولیاں…'); await rsTick();
       if(backup.settings) Object.assign(AppState.settings, backup.settings);
       if(typeof expenseData !== 'undefined'){ expenseData.length = 0; expenseData.push(...(backup.expenses || [])); }
       nextExpenseId = backup.nextExpenseId || nextExpenseId;
@@ -9717,12 +9764,16 @@ function proceedWithImport(){
       if(backup.expiryAlertDays != null) expiryAlertDays = backup.expiryAlertDays;
       if(typeof quickDockItems !== 'undefined' && backup.quickDockItems){ quickDockItems.length = 0; quickDockItems.push(...backup.quickDockItems); }
 
+      rsProg(85, '💾 فون میں محفوظ ہو رہا ہے…'); await rsTick();
       persistAllData(); // localStorage میں بھی محفوظ کر دیں (اگر یہاں کام کر رہا ہو تو فائدہ ہوگا)
+      rsProg(95, '🔄 اسکرینیں تازہ ہو رہی ہیں…'); await rsTick();
 
       showBackupConfirmModal('import', fileName, {
         products: productsData.length, customers: customersData.length, invoices: invoicesData.length
       });
+      rsProgEnd(true, '✅ ڈیٹا بحال ہو گیا — ' + customersData.length + ' گاہک، ' + invoicesData.length + ' بل');
   } catch(err){
+    rsProgEnd(false);
     showBackupConfirmModal('error', fileName, {message: err.message});
   } finally {
     pendingImportBackup = null;
@@ -10097,8 +10148,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0311TU495'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'وصولی والے کے لیے: ہر گاہک کا OK دبانے کے بعد «آج کی وصولی جمع کریں» پر اب غلطی کا پیغام نہیں — بتاتا ہے کہ وصولی جمع ہو چکی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0311TU496'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بیک اپ واپس لاتے وقت اوپر صاف پیش رفت کی پٹی (فیصد اور ہر قدم کا نام) — فائل سے بھی اور گوگل ڈرائیو سے بھی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
