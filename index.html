@@ -10097,8 +10097,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0311TU494'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ایک دن کی ہر وصولی بل پر الگ لائن میں — وقت اور نقد، جاز کیش، ایزی پیسہ، بینک کی تفصیل کے ساتھ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0311TU495'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'وصولی والے کے لیے: ہر گاہک کا OK دبانے کے بعد «آج کی وصولی جمع کریں» پر اب غلطی کا پیغام نہیں — بتاتا ہے کہ وصولی جمع ہو چکی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -36212,7 +36212,21 @@ function updateRlAmount(customerId, val){ updateRlSplit(customerId, 0, 'amount',
 
 function submitRecoveryList(_dateOk){
   const ids = Object.keys(rlSplitMap).map(Number).filter(id => rlTypedTotal(id) > 0 && !rlIsDone(id));
-  if(ids.length === 0){ alert('کم از کم ایک کسٹمر کی وصولی کی رقم لکھیں'); return; }
+  if(ids.length === 0){
+    // ✅ FM0311TU495 (ہیلپ ڈیسک #42): ہر گاہک کا OK دبانے سے وصولی اسی وقت جمع ہو جاتی ہے — پھر نیچے والا بٹن دبانے پر
+    //   «کم از کم ایک کسٹمر…» والا غلطی جیسا پیغام آتا تھا۔ اب بتائیں کہ آج کی وصولی پہلے ہی جمع ہو چکی ہے۔
+    const t = rlEntryDate();
+    const done = recoveryListData.filter(r => recDay(r) === t && r.status !== 'deleted');
+    if(done.length){
+      const custN = new Set(done.map(r => r.customer_id)).size;
+      const sum = done.reduce((a, r) => a + (Number(r.amount) || 0), 0);
+      alert('✅ آج کی وصولی پہلے ہی جمع ہو چکی ہے\n\n' + custN + ' گاہک — کل Rs. ' + sum.toLocaleString() + '\n\nہر گاہک کا ✅ OK دبانے سے وصولی اسی وقت ایڈمن تک پہنچ جاتی ہے۔ نئی وصولی ہو تو گاہک کے ڈبے میں رقم لکھ کر OK دبائیں۔');
+      goTo('home');
+      return;
+    }
+    alert('ابھی کسی گاہک کی وصولی نہیں لکھی گئی — گاہک کے ڈبے میں رقم لکھ کر ✅ OK دبائیں');
+    return;
+  }
   if(_dateOk !== true){ rlAskEntryDate(() => submitRecoveryList(true)); return; } // 📅 FM910FR350
   ids.forEach(id => {
     const c = customersData.find(x => x.customer_id === id);
