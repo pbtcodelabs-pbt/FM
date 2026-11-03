@@ -124,6 +124,8 @@ self.addEventListener('activate', (event) => {
 
 // ---------- فیچ — اسی اوریجن کی فائلیں: پہلے کیش، نہ ملے تو نیٹ ورک (اور نیٹ ورک سے ملنے پر خودکار کیش اپڈیٹ) ----------
 self.addEventListener('fetch', (event) => {
+  /* ہیلپ ڈیسک (#33): pbtcodelabs-pbt.github.io/help/ کی فائلیں (widget.js) کبھی کیش نہیں — ہر ایپ میں نیا بٹن فوراً */
+  try { const _hd = new URL(event.request.url); if (_hd.hostname === 'pbtcodelabs-pbt.github.io' && _hd.pathname.startsWith('/help/')) return; } catch (_e) {}
   const req = event.request;
   if (req.method !== 'GET') return;
 
