@@ -7934,6 +7934,8 @@ function __appHostKind(h, p){
         <button id="codeFilterBtn-all" class="codeStatusFilterBtn active" onclick="setCodeStatusFilter('all')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer;">سب</button>
         <button id="codeFilterBtn-green" class="codeStatusFilterBtn" onclick="setCodeStatusFilter('green')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer;">🟢 فعال</button>
         <button id="codeFilterBtn-used" class="codeStatusFilterBtn" onclick="setCodeStatusFilter('used')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer;">✅ استعمال شدہ</button>
+        <button id="codeFilterBtn-d15" class="codeStatusFilterBtn" onclick="setCodeStatusFilter('d15')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer;">⏳ 15 دن سے کم</button>
+        <button id="codeFilterBtn-d7" class="codeStatusFilterBtn" onclick="setCodeStatusFilter('d7')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer;">⚠️ 7 دن سے کم</button>
         <button id="codeFilterBtn-revoked" class="codeStatusFilterBtn" onclick="setCodeStatusFilter('revoked')" style="flex:1; padding:7px; border-radius:8px; border:none; font-size:11.5px; font-weight:800; cursor:pointer;">🚫 معطل</button>
       </div>
       <select id="codeMonthFilterSelect" onchange="renderIssuedCodesList()" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
@@ -10149,8 +10151,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0511TH504'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'سبسکرپشن: کوڈ بنانے / مدت بڑھانے سے پہلے رقم کی دو بار تصدیق + پاسورڈ؛ پینل سے مدت بڑھائیں، گاہک کا نمبر، کال، واٹس ایپ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0511TH505'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'سبسکرپشن: ہر گاہک کا اپنا ریٹ، مدت پاپ اپ میں، کل رقم / وصولی بدلیں؛ 7 / 15 دن والے فلٹر؛ 7 دن سے کم پر گاہک کو یاد دہانی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11152,10 +11154,33 @@ function renderSubscriptionBanner(){
 
   // ---------- روزانہ صرف ایک بار: ہلکا Toast یا (آخری 2 دن میں) زیادہ نمایاں پاپ اپ — صرف Free Trial کے دوران ----------
   if(AppState.settings.isOnFreeTrial) maybeShowTrialReminder(daysLeft);
+  else if(daysLeft <= 7) maybeShowPaidReminder(daysLeft); // #93
 }
 
 // ---------- 🎁 روزانہ ایک بار Trial یاد دہانی — 2 دن یا کم بچے ہوں تو زیادہ نمایاں (بٹن والا) پاپ اپ،
 // ورنہ صرف ہلکا سا خود بخود غائب ہونے والا Toast (بغیر کسی بٹن کے، تنگ نہیں کرتا) ----------
+// ---------- ⚠️ ہیلپ ڈیسک #93 (مالک کا حکم): پیڈ سبسکرپشن کے 7 دن سے کم رہ جائیں تو روز ایک بار پاپ اپ (صرف مالک / ایڈمن) ---------- -->
+function maybeShowPaidReminder(daysLeft){
+  try{
+    const todayStr = new Date().toISOString().slice(0,10);
+    if(AppState.settings.paidReminderShownOn === todayStr) return;
+    AppState.settings.paidReminderShownOn = todayStr; persistAllData();
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483500;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';
+    const red = daysLeft <= 3;
+    ov.innerHTML = `<div style="background:#fff;border-radius:16px;max-width:380px;width:100%;padding:18px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35);border-top:6px solid ${red ? '#dc2626' : '#f59e0b'}">
+      <div style="font-size:40px">${red ? '⛔' : '⏳'}</div>
+      <div style="font-size:18px;font-weight:900;color:${red ? '#b91c1c' : '#b45309'};margin:6px 0">${daysLeft <= 0 ? 'آج آپ کی سبسکرپشن کا آخری دن ہے' : `آپ کی سبسکرپشن ${daysLeft} دن میں ختم ہو رہی ہے`}</div>
+      <div style="font-size:14px;color:#334155;line-height:1.9">ختم ہونے کی تاریخ: <b dir="ltr">${formatDateDMY(AppState.settings.subscriptionExpiry)}</b><br>کام نہ رکے، اس لیے ابھی تجدید کروا لیں۔</div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button id="prLater" style="flex:1;padding:11px;border:none;border-radius:10px;background:#e2e8f0;color:#334155;font-weight:900;font-size:14px;cursor:pointer">بعد میں</button>
+        <button id="prRenew" style="flex:1;padding:11px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:900;font-size:14px;cursor:pointer">💬 تجدید کے لیے رابطہ</button>
+      </div></div>`;
+    document.body.appendChild(ov);
+    ov.querySelector('#prLater').onclick = () => ov.remove();
+    ov.querySelector('#prRenew').onclick = () => { ov.remove(); try{ openDevChat('subscription'); }catch(e){} };
+  }catch(e){}
+}
 function maybeShowTrialReminder(daysLeft){
   const todayStr = new Date().toISOString().slice(0,10);
   if(AppState.settings.trialReminderShownOn === todayStr) return; // آج ایک بار دکھا چکے
@@ -49225,19 +49250,20 @@ async function generateGiftCode(){
     daysVal = String(customDays);
   }
 
-  const _pay = await licPayConfirm({ title: 'نیا کوڈ', name: nameVal, mobile: ((document.getElementById('giftCodeMobileInput') || {}).value || '').trim(), days: isLifetime ? 36500 : Number(daysVal), plan: ((document.getElementById('giftCodePlanInput') || {}).value || '') });
+  const _pay = await licPayConfirm({ title: 'نیا کوڈ', name: nameVal, mobile: ((document.getElementById('giftCodeMobileInput') || {}).value || '').trim(), allowLifetime: true, days: isLifetime ? 36500 : Number(daysVal), plan: ((document.getElementById('giftCodePlanInput') || {}).value || '') });
   if(!_pay) return; // 💰 ہیلپ ڈیسک #92
+  const _lt = _pay.days >= 36500; daysVal = String(_pay.days); // #93: مدت پاپ اپ میں بدلی جا سکتی ہے
   const code = generateRandomGiftCode();
 
   const fields = {
     active: { booleanValue: true },
     createdAt: { integerValue: String(Date.now()) },
   };
-  if(isLifetime) fields.lifetime = { booleanValue: true };
+  if(_lt) fields.lifetime = { booleanValue: true };
   else fields.days = { integerValue: daysVal };
   if(uidVal) fields.boundUid = { stringValue: uidVal };
   if(nameVal) fields.customerName = { stringValue: nameVal };
-  fields.paidAmount = { integerValue: String(_pay.paid) }; fields.paidOn = { integerValue: String(Date.now()) };
+  fields.paidAmount = { integerValue: String(_pay.paid) }; fields.dueAmount = { integerValue: String(_pay.due || 0) }; fields.monthlyRate = { integerValue: String(_pay.rate || 0) }; fields.paidOn = { integerValue: String(Date.now()) };
   const _mobVal = ((document.getElementById('giftCodeMobileInput') || {}).value || '').trim(); if(_mobVal) fields.customerMobile = { stringValue: _mobVal }; // 📱 ہیلپ ڈیسک #92
 
   try{
@@ -49264,7 +49290,7 @@ let _codeStatusFilter = 'all'; // all | green | used | revoked
 
 function setCodeStatusFilter(val){
   _codeStatusFilter = val;
-  ['all','green','used','revoked'].forEach(k => {
+  ['all','green','used','revoked','d15','d7'].forEach(k => {
     document.getElementById('codeFilterBtn-'+k)?.classList.toggle('active', k === val);
   });
   renderIssuedCodesList();
@@ -49322,6 +49348,11 @@ function renderIssuedCodesList(){
     if(_codeStatusFilter === 'green' && (isRevoked || isUsed)) return false;
     if(_codeStatusFilter === 'used' && !isUsed) return false;
     if(_codeStatusFilter === 'revoked' && !isRevoked) return false;
+    if(_codeStatusFilter === 'd15' || _codeStatusFilter === 'd7'){ // #93: جن کے 15 / 7 دن سے کم رہ گئے (ختم ہو چکے بھی، 30 دن تک)
+      if(isRevoked || !isUsed || it.lifetime || !it.expiresAt) return false;
+      const _dl = Math.ceil((Number(it.expiresAt) - Date.now()) / 86400000);
+      if(_dl > (_codeStatusFilter === 'd7' ? 7 : 15) || _dl < -30) return false;
+    }
     if(monthVal !== 'all'){
       if(!it.createdAt) return false;
       const d = new Date(Number(it.createdAt));
@@ -49331,6 +49362,7 @@ function renderIssuedCodesList(){
     return true;
   });
 
+  if(_codeStatusFilter === 'd15' || _codeStatusFilter === 'd7') items = items.slice().sort((x, y) => Number(x.expiresAt) - Number(y.expiresAt)); // سب سے کم دن اوپر
   if(items.length === 0){
     wrap.innerHTML = '<div style="text-align:center; color:var(--muted); font-size:12.5px; padding:10px;">اس فلٹر کے مطابق کوئی کوڈ نہیں ملا</div>';
     return;
@@ -49402,7 +49434,7 @@ function _licMob(it){ return String((it && (it.customerMobile || it.activatedByM
 function _licWa(m){ let d = String(m || '').replace(/\D/g, ''); if(d.startsWith('00')) d = d.slice(2); if(d.startsWith('0')) d = '92' + d.slice(1); else if(d.length === 10 && d[0] === '3') d = '92' + d; return d; }
 function licContactRow(it){
   const m = _licMob(it);
-  const _pd = it.paidAmount ? `<div style="font-size:11.5px; color:#0f766e; font-weight:800; margin-bottom:5px;">💵 وصول: Rs ${Number(it.paidAmount).toLocaleString('en-US')}${it.extLog ? ' • ➕ ' + String(it.extLog).split(';').filter(Boolean).length + ' بار بڑھایا' : ''}</div>` : (it.extLog ? `<div style="font-size:11.5px; color:#0f766e; font-weight:800; margin-bottom:5px;">➕ ${String(it.extLog).split(';').filter(Boolean).length} بار بڑھایا</div>` : '');
+  const _pd = it.paidAmount ? `<div style="font-size:11.5px; color:#0f766e; font-weight:800; margin-bottom:5px;">💵 وصول: Rs ${Number(it.paidAmount).toLocaleString('en-US')}${it.monthlyRate ? ' • ریٹ ' + Number(it.monthlyRate).toLocaleString('en-US') + ' / مہینہ' : ''}${it.extLog ? ' • ➕ ' + String(it.extLog).split(';').filter(Boolean).length + ' بار بڑھایا' : ''}</div>` : (it.extLog ? `<div style="font-size:11.5px; color:#0f766e; font-weight:800; margin-bottom:5px;">➕ ${String(it.extLog).split(';').filter(Boolean).length} بار بڑھایا</div>` : '');
   const b = 'flex:1; padding:6px; border:none; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer; text-decoration:none; text-align:center;';
   if(!m) return _pd + `<div style="display:flex; gap:6px; margin-bottom:6px;"><button onclick="licSetMobile('${it.code}')" style="${b} background:#fef9c3; color:#854d0e;">📱 موبائل نمبر لگائیں</button></div>`;
   return _pd + `<div style="font-size:12px; margin-bottom:5px;">📱 <b dir="ltr">${m}</b> <a href="javascript:void 0" onclick="licSetMobile('${it.code}')" style="font-size:11px; color:#64748b;">✏️ بدلیں</a></div>
@@ -49438,53 +49470,79 @@ function licWhatsApp(code, expMs){
 function _licDur(days){ days = Number(days) || 0; if(days >= 36500) return '🌟 Lifetime (ہمیشہ)'; if(days % 365 === 0) return `${days / 365} سال (${days} دن)`; if(days % 30 === 0) return `${days / 30} مہینے (${days} دن)`; return `${days} دن`; }
 function _licNum(v){ return parseInt(String(v || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g, ''), 10) || 0; }
 function licPayConfirm(o){
+  // 💰 ہیلپ ڈیسک #93: ہر گاہک کا اپنا ریٹ (کوڈ پر `monthlyRate`)، مدت یہیں چنیں، کل رقم اور وصولی ہاتھ سے بدل سکیں
   return new Promise(resolve => {
     const KEY = 'fmLicMonthly';
-    let monthly = 0; try{ monthly = _licNum(localStorage.getItem(KEY)); }catch(e){}
-    const days = Number(o.days) || 0;
-    const months = days >= 36500 ? 0 : Math.max(1, Math.round(days / 30));
+    let lastRate = 0; try{ lastRate = _licNum(localStorage.getItem(KEY)); }catch(e){}
+    const prevRate = _licNum(o.prevRate);
+    const st = { days: Number(o.days) || 30, rate: prevRate || lastRate || 0, due: 0, dueEd: false, paid: 0, paidEd: false };
+    const CH = o.allowLifetime ? [30, 90, 180, 365, 36500] : [30, 90, 180, 365];
+    const monthsOf = d => d >= 36500 ? 0 : Math.max(1, Math.round(d / 30));
     const ov = document.createElement('div');
-    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:14px;direction:rtl;font-family:inherit';
-    const box = 'background:#fff;border-radius:16px;max-width:420px;width:100%;max-height:92vh;overflow:auto;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.35)';
-    const inp = 'width:100%;box-sizing:border-box;padding:10px;border:2px solid #cbd5e1;border-radius:10px;font-size:16px;font-weight:800;margin-top:4px';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:12px;direction:rtl;font-family:inherit';
+    const box = 'background:#fff;border-radius:16px;max-width:440px;width:100%;max-height:94vh;overflow:auto;padding:14px 16px;box-shadow:0 20px 50px rgba(0,0,0,.35)';
+    const inp = 'width:100%;box-sizing:border-box;padding:9px;border:2px solid #cbd5e1;border-radius:10px;font-size:16px;font-weight:800;margin-top:3px';
     const btn = (bg, c) => `flex:1;padding:11px;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;background:${bg};color:${c}`;
+    const lab = 'display:block;margin-top:9px;font-size:13px;font-weight:800';
+    const fmt = n => Number(n || 0).toLocaleString('en-US');
     const done = v => { ov.remove(); resolve(v); };
     const step1 = () => {
       ov.innerHTML = `<div style="${box}">
-        <div style="font-size:17px;font-weight:900;color:#b45309;margin-bottom:8px">⚠️ ${o.title || 'سبسکرپشن'} — تصدیق کریں</div>
-        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:14px;line-height:1.9">
-          👤 <b>${o.name || 'نام درج نہیں'}</b>${o.mobile ? ` • 📱 <b dir="ltr">${o.mobile}</b>` : ''}<br>
-          ⏱️ مدت: <b style="font-size:17px;color:#1d4ed8">${_licDur(days)}</b>${o.plan ? `<br>📦 پیکج: <b>${o.plan}</b>` : ''}
+        <div style="font-size:17px;font-weight:900;color:#b45309;margin-bottom:6px">⚠️ ${o.title || 'سبسکرپشن'} — تصدیق کریں</div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:14px;line-height:1.8">
+          👤 <b>${o.name || 'نام درج نہیں'}</b>${o.mobile ? ` • 📱 <b dir="ltr">${o.mobile}</b>` : ''}${o.plan ? ` • 📦 <b>${o.plan}</b>` : ''}
+          ${prevRate ? `<div style="color:#0f766e;font-weight:900">📌 اس گاہک کا مقرر کردہ ریٹ: Rs ${fmt(prevRate)} / مہینہ</div>` : ''}
+          ${o.prevNote ? `<div style="color:#64748b;font-size:12.5px">${o.prevNote}</div>` : ''}
         </div>
-        <label style="display:block;margin-top:10px;font-size:13px;font-weight:800">💵 ایک مہینے کی قیمت (روپے) — یاد رہے گی</label>
-        <input id="lpMonthly" inputmode="numeric" dir="ltr" style="${inp}" value="${monthly || ''}" placeholder="مثلاً 1000">
-        <div id="lpDue" style="margin-top:6px;font-size:15px;font-weight:900;color:#0f766e"></div>
-        <label style="display:block;margin-top:10px;font-size:13px;font-weight:800">✅ گاہک سے وصول شدہ رقم (روپے)</label>
-        <input id="lpPaid" inputmode="numeric" dir="ltr" style="${inp}" placeholder="جتنی رقم ملی">
-        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:13.5px;font-weight:700"><input type="checkbox" id="lpC1" style="width:20px;height:20px;flex:none"> گاہک نے واقعی <b>${_licDur(days)}</b> ہی مانگی ہے (غلطی سے دوسری مدت نہیں چنی)</label>
-        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;font-size:13.5px;font-weight:700"><input type="checkbox" id="lpC2" style="width:20px;height:20px;flex:none"> میں نے اس مدت کی پوری رقم وصول کر لی ہے</label>
-        <div id="lpErr" style="color:#b91c1c;font-weight:800;font-size:13px;margin-top:8px"></div>
-        <div style="display:flex;gap:8px;margin-top:12px"><button id="lpNo" style="${btn('#e2e8f0', '#334155')}">✖ منسوخ</button><button id="lpGo" style="${btn('#16a34a', '#fff')}">آگے ←</button></div>
+        <label style="${lab}">⏱️ مدت چنیں</label>
+        <div id="lpCh" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+        <input id="lpDays" inputmode="numeric" dir="ltr" style="${inp};font-size:14px" placeholder="یا دن لکھیں">
+        <div id="lpDur" style="margin-top:4px;font-size:16px;font-weight:900;color:#1d4ed8"></div>
+        <label style="${lab}">💵 ایک مہینے کا ریٹ (اس گاہک کے لیے)</label>
+        <input id="lpMonthly" inputmode="numeric" dir="ltr" style="${inp}" placeholder="مثلاً 2000">
+        <label style="${lab}">🧮 کل بنتی رقم <span style="color:#64748b;font-weight:600">(خود حساب — چاہیں تو بدلیں)</span></label>
+        <input id="lpDue" inputmode="numeric" dir="ltr" style="${inp};border-color:#0d9488">
+        <div id="lpCalc" style="font-size:12.5px;color:#0f766e;font-weight:800;margin-top:3px"></div>
+        <label style="${lab}">✅ گاہک سے وصول شدہ رقم</label>
+        <input id="lpPaid" inputmode="numeric" dir="ltr" style="${inp};border-color:#16a34a">
+        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:9px;font-size:13.5px;font-weight:700"><input type="checkbox" id="lpC1" style="width:20px;height:20px;flex:none"> <span>گاہک نے واقعی <b id="lpDur2"></b> ہی مانگی ہے</span></label>
+        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:7px;font-size:13.5px;font-weight:700"><input type="checkbox" id="lpC2" style="width:20px;height:20px;flex:none"> میں نے یہ رقم وصول کر لی ہے</label>
+        <div id="lpErr" style="color:#b91c1c;font-weight:800;font-size:13px;margin-top:7px"></div>
+        <div style="display:flex;gap:8px;margin-top:10px"><button id="lpNo" style="${btn('#e2e8f0', '#334155')}">✖ منسوخ</button><button id="lpGo" style="${btn('#16a34a', '#fff')}">آگے ←</button></div>
       </div>`;
       const $ = id => ov.querySelector('#' + id);
-      const upd = () => { const m = _licNum($('lpMonthly').value); $('lpDue').textContent = months && m ? `بنتی رقم: ${months} × ${m.toLocaleString('en-US')} = Rs ${(months * m).toLocaleString('en-US')}` : (months ? '' : 'Lifetime — رقم خود دیکھیں'); };
-      $('lpMonthly').oninput = upd; upd();
+      const paint = () => {
+        const m = monthsOf(st.days);
+        if(!st.dueEd) st.due = m * st.rate;
+        if(!st.paidEd) st.paid = st.due;
+        $('lpCh').innerHTML = CH.map(d => `<button data-d="${d}" style="flex:1;min-width:64px;padding:8px 4px;border-radius:9px;font-weight:900;font-size:12.5px;cursor:pointer;border:2px solid ${d === st.days ? '#1d4ed8' : '#cbd5e1'};background:${d === st.days ? '#dbeafe' : '#fff'};color:#1e3a8a">${d >= 36500 ? '🌟 Lifetime' : (d === 365 ? '1 سال' : (d / 30) + ' مہینہ' + (d > 30 ? 'ے' : ''))}</button>`).join('');
+        $('lpCh').querySelectorAll('button').forEach(b => b.onclick = () => { st.days = Number(b.dataset.d); $('lpDays').value = ''; st.dueEd = false; st.paidEd = false; paint(); });
+        $('lpDur').textContent = '⏱️ ' + _licDur(st.days);
+        $('lpDur2').textContent = _licDur(st.days);
+        if(document.activeElement !== $('lpMonthly')) $('lpMonthly').value = st.rate || '';
+        if(document.activeElement !== $('lpDue')) $('lpDue').value = st.due || '';
+        if(document.activeElement !== $('lpPaid')) $('lpPaid').value = st.paid || '';
+        $('lpCalc').textContent = m ? `${m} مہینے × Rs ${fmt(st.rate)} = Rs ${fmt(m * st.rate)}${st.dueEd && st.due !== m * st.rate ? ` → آپ نے Rs ${fmt(st.due)} کر دی` : ''}` : 'Lifetime — رقم خود لکھیں';
+      };
+      $('lpDays').oninput = () => { const d = _licNum($('lpDays').value); if(d >= 1 && d <= 3650){ st.days = d; st.dueEd = false; st.paidEd = false; paint(); } };
+      $('lpMonthly').oninput = () => { st.rate = _licNum($('lpMonthly').value); st.dueEd = false; st.paidEd = false; paint(); };
+      $('lpDue').oninput = () => { st.due = _licNum($('lpDue').value); st.dueEd = true; st.paidEd = false; paint(); };
+      $('lpPaid').oninput = () => { st.paid = _licNum($('lpPaid').value); st.paidEd = true; paint(); };
+      paint();
       $('lpNo').onclick = () => done(null);
       $('lpGo').onclick = () => {
-        const m = _licNum($('lpMonthly').value), paid = _licNum($('lpPaid').value), due = months * m;
-        if(!paid){ $('lpErr').textContent = 'وصول شدہ رقم لکھیں'; return; }
+        if(!st.paid){ $('lpErr').textContent = 'وصول شدہ رقم لکھیں'; return; }
         if(!$('lpC1').checked || !$('lpC2').checked){ $('lpErr').textContent = 'دونوں خانوں پر ✓ لگائیں'; return; }
-        try{ if(m) localStorage.setItem(KEY, String(m)); }catch(e){}
-        step2(paid, due);
+        try{ if(st.rate) localStorage.setItem(KEY, String(st.rate)); }catch(e){}
+        step2();
       };
     };
-    const step2 = (paid, due) => {
-      const short = due && paid < due;
+    const step2 = () => {
+      const short = st.due && st.paid < st.due;
       ov.innerHTML = `<div style="${box}">
         <div style="font-size:17px;font-weight:900;color:#b91c1c;margin-bottom:8px">⚠️ دوبارہ تصدیق</div>
-        <div style="font-size:15px;line-height:2">👤 <b>${o.name || '—'}</b><br>⏱️ <b style="color:#1d4ed8">${_licDur(days)}</b><br>💵 وصول: <b>Rs ${paid.toLocaleString('en-US')}</b>${due ? ` — بنتی رقم Rs ${due.toLocaleString('en-US')}` : ''}</div>
-        ${short ? `<div style="background:#fee2e2;color:#991b1b;border-radius:10px;padding:9px;font-weight:900;margin-top:6px">❗ وصول شدہ رقم بنتی رقم سے Rs ${(due - paid).toLocaleString('en-US')} کم ہے — پھر بھی جاری کرنا ہے؟</div>` : ''}
-        <div style="font-size:14px;font-weight:800;margin-top:8px">کیا یہ سب بالکل درست ہے؟</div>
+        <div style="font-size:15px;line-height:2">👤 <b>${o.name || '—'}</b><br>⏱️ <b style="color:#1d4ed8">${_licDur(st.days)}</b>${st.rate ? ` • ریٹ Rs ${fmt(st.rate)} / مہینہ` : ''}<br>🧮 بنتی رقم: <b>Rs ${fmt(st.due)}</b><br>💵 وصول: <b>Rs ${fmt(st.paid)}</b></div>
+        ${short ? `<div style="background:#fee2e2;color:#991b1b;border-radius:10px;padding:9px;font-weight:900;margin-top:6px">❗ وصولی Rs ${fmt(st.due - st.paid)} کم ہے<label style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:13.5px"><input type="checkbox" id="lpShort" style="width:20px;height:20px;flex:none"> ہاں، کم وصولی کے ساتھ ہی جاری کرنا ہے</label></div>` : ''}
         <label style="display:block;margin-top:10px;font-size:13px;font-weight:800">🔐 ڈویلپر پاسورڈ</label>
         <input id="lpPw" type="password" dir="ltr" style="${inp}" autocomplete="off">
         <div id="lpErr" style="color:#b91c1c;font-weight:800;font-size:13px;margin-top:8px"></div>
@@ -49493,8 +49551,9 @@ function licPayConfirm(o){
       const $ = id => ov.querySelector('#' + id);
       $('lpBack').onclick = step1;
       $('lpOk').onclick = async () => {
+        if(short && !$('lpShort').checked){ $('lpErr').textContent = 'کم وصولی والے خانے پر ✓ لگائیں، یا واپس جا کر رقم درست کریں'; return; }
         if(!(await devPasswordOk($('lpPw').value))){ $('lpErr').textContent = '❌ پاسورڈ غلط ہے'; return; }
-        done({ paid, due });
+        done({ paid: st.paid, due: st.due, rate: st.rate, days: st.days });
       };
       setTimeout(() => { try{ $('lpPw').focus(); }catch(e){} }, 50);
     };
@@ -49504,29 +49563,29 @@ function licPayConfirm(o){
 async function extendLicenseCode(code){
   const it = (_issuedCodesCache || []).find(x => x.code === code) || {};
   if(it.lifetime){ alert('🌟 یہ Lifetime کوڈ ہے — بڑھانے کی ضرورت نہیں'); return; }
-  const ans = prompt(`کوڈ ${code}${it.customerName ? ' — ' + it.customerName : ''}\n\nکتنے دن بڑھانے ہیں؟\n30 = ایک مہینہ، 90 = تین مہینے، 180 = چھ مہینے، 365 = ایک سال`, '30');
-  if(ans === null) return;
-  const add = parseInt(String(ans).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g, ''), 10);
-  if(!add || add < 1 || add > 3650){ alert('دن 1 سے 3650 تک لکھیں'); return; }
-  const _pay = await licPayConfirm({ title: 'مدت بڑھائیں', name: it.customerName, mobile: _licMob(it), days: add, plan: it.plan || '' });
+  const _xl = String(it.extLog || '').split(';').filter(Boolean);
+  const _pay = await licPayConfirm({ title: 'مدت بڑھائیں', name: it.customerName, mobile: _licMob(it), days: 30, plan: it.plan || '', prevRate: it.monthlyRate,
+    prevNote: (it.paidAmount ? `پہلی وصولی Rs ${Number(it.paidAmount).toLocaleString('en-US')}` : '') + (_xl.length ? ` • آخری بار: ${_xl[_xl.length - 1].replace(/:/g, ' ')}` : '') });
   if(!_pay) return;
+  const add = _pay.days;
   try{
     let path, fields, msg;
     if(it.activatedAt){
       const cur = Number(it.expiresAt) || 0;
       const base = Math.max(cur, Date.now());
       const nx = base + add * 86400000;
-      path = `licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=expiresAt&updateMask.fieldPaths=extLog&key=${FIREBASE_API_KEY}`;
+      path = `licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=expiresAt&updateMask.fieldPaths=extLog&updateMask.fieldPaths=monthlyRate&key=${FIREBASE_API_KEY}`;
       fields = { expiresAt: { integerValue: String(nx) } };
       msg = `✅ ${add} دن بڑھ گئے\nنئی تاریخ: ${new Date(nx).toLocaleDateString('en-GB')}\n\nگاہک کے فون پر ایپ کھلتے ہی (انٹرنیٹ کے ساتھ) خود چالو ہو جائے گی — کوئی کوڈ نہیں بھیجنا۔`;
     }else{
       const nd = (Number(it.days) || 0) + add;
-      path = `licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=days&updateMask.fieldPaths=extLog&key=${FIREBASE_API_KEY}`;
+      path = `licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=days&updateMask.fieldPaths=extLog&updateMask.fieldPaths=monthlyRate&key=${FIREBASE_API_KEY}`;
       fields = { days: { integerValue: String(nd) } };
       msg = `✅ یہ کوڈ ابھی لگا نہیں — اس کی مدت ${nd} دن ہو گئی`;
     }
-    const log = String(it.extLog || '') + `${new Date().toISOString().slice(0,10)}:+${add}:Rs${_pay.paid};`;
+    const log = String(it.extLog || '') + `${new Date().toISOString().slice(0,10)}:+${add}:Rs${_pay.paid}${_pay.due && _pay.paid !== _pay.due ? '/' + _pay.due : ''};`;
     fields.extLog = { stringValue: log.slice(-900) };
+    fields.monthlyRate = { integerValue: String(_pay.rate || Number(it.monthlyRate) || 0) };
     const res = await devFirestoreFetch(path, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ fields }) });
     if(!res || !res.ok){ alert('❌ مدت نہیں بڑھی — ڈویلپر لاگ اِن / انٹرنیٹ چیک کریں (' + (res ? res.status : '—') + ')'); return; }
     if(it.activatedAt && _licMob(it)){
