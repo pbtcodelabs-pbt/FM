@@ -7917,7 +7917,7 @@ function __appHostKind(h, p){
       <!-- ---------- ✍️ صدام کی ہدایت (نئی تجویز): کسی بھی عدد کے دن دینے کے لیے — مثلاً 3، 10، 15، 42 دن،
       جب پرانے کسٹمر کی سبسکرپشن جزوی طور پر باقی ہو اور اسے صرف اتنے ہی دن کا نیا کوڈ دینا ہو ---------- -->
       <input type="number" id="giftCodeCustomDaysInput" min="1" placeholder="دنوں کی تعداد لکھیں (مثلاً 15)" style="display:none; width:100%; padding:9px; margin-bottom:8px; border:1.5px solid var(--primary); border-radius:8px; font-size:13px;">
-      <input type="text" id="giftCodeUidInput" placeholder="مخصوص Device UID (اختیاری — خالی چھوڑ سکتے ہیں)" style="width:100%; padding:9px; margin-bottom:4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      <input type="text" id="giftCodeUidInput" placeholder="📲 گاہک کا Device UID — لکھیں تو کوڈ لکھے بغیر اس کے فون پر خود چالو" style="width:100%; padding:9px; margin-bottom:4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
       <div class="settingsHint" style="margin-top:0; margin-bottom:8px; font-size:11px;">ℹ️ یہ خانہ صرف اس وقت بھریں جب کوڈ کسی ایک مخصوص فون کے لیے لاک کرنا ہو۔ خالی چھوڑنے پر بھی، جیسے ہی کسٹمر کوڈ لگائے گا، اس کی ڈیوائس کی UID خودکار محفوظ ہو جائے گی — کسی کو میسج کر کے UID پہلے سے لینے کی ضرورت نہیں۔ اسی خودکار UID کی بدولت کریش/دوبارہ انسٹال ہونے پر بھی سبسکرپشن خودکار بحال ہو جاتی ہے، دوبارہ کوڈ نہیں مانگنا پڑتا۔</div>
       <button class="testPrintBtn" style="background:#dcfce7; color:#15803d;" onclick="generateGiftCode()">🎁 Generate Code</button>
       <div id="giftCodeResultWrap" style="display:none; margin-top:10px; background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:12px; text-align:center;">
@@ -10154,8 +10154,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0511TH510'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ایپ شیئر کے پوسٹر سے ڈویلپر کا نام اور نمبر ہٹایا — رابطہ Help Desk سے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0511TH511'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'کوڈ: مہینے لکھیں تو رقم خود؛ کوڈ بنتے ہی تفصیل + واٹس ایپ؛ UID والا کوڈ گاہک کے فون پر خود چالو'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -22457,6 +22457,29 @@ async function _licFindByUid(uid){
   }catch(e){}
   return best;
 }
+/* #97 (مالک کا حکم): کوڈ جس پر boundUid = اس فون کا UID اور ابھی لگا نہیں — کوڈ لکھے بغیر خود چالو */
+async function licAutoBound(uid){
+  if(!uid || navigator.onLine === false) return false;
+  const res = await fetch(`${FIRESTORE_BASE}:runQuery?key=${FIREBASE_API_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'licenses' }], where: { fieldFilter: { field: { fieldPath: 'boundUid' }, op: 'EQUAL', value: { stringValue: String(uid) } } }, limit: 20 } }) });
+  if(!res || !res.ok) return false;
+  const rows = await res.json();
+  for(const r of (Array.isArray(rows) ? rows : [])){
+    if(!r || !r.document) continue;
+    const d = _parseFirestoreFields(r.document.fields || {});
+    if(d.active === false || d.activatedAt) continue;
+    const code = decodeURIComponent(String(r.document.name || '').split('/').pop() || '');
+    const out = await activateSubscription(code);
+    if(out && out.success){
+      try{ if(typeof setupLoginScreen === 'function') setupLoginScreen(); }catch(e){}
+      try{ if(typeof renderSubscriptionBanner === 'function') renderSubscriptionBanner(); }catch(e){}
+      try{ const t = document.createElement('div'); t.textContent = '✅ سبسکرپشن چالو ہو گئی — ' + out.expiry + ' تک'; t.style.cssText = 'position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:2147483000;background:#15803d;color:#fff;padding:10px 16px;border-radius:12px;font-weight:800;direction:rtl'; document.body.appendChild(t); setTimeout(() => t.remove(), 6000); }catch(e){}
+      try{ const g = document.getElementById('subscriptionGateScreen'); if(g && g.style.display !== 'none' && g.style.display !== '') setTimeout(() => location.reload(), 1500); }catch(e){}
+      return true;
+    }
+  }
+  return false;
+}
 let _licRestoreBusy = null;
 async function restoreSubscriptionFromCloud(){
   // ---------- صرف تب چھوڑیں جب اصل (پیڈ) سبسکرپشن فعال ہو — مفت ٹرائل یا خالی ہو تو ہمیشہ تلاش کریں ---------- -->
@@ -22466,6 +22489,7 @@ async function restoreSubscriptionFromCloud(){
     try{ if(await fmPullShopLicense()) return true; }catch(e){} // 🏪 FM110TH274: مالک کے فون کی دکان والی سبسکرپشن
     const uid = getOrCreateDeviceUID();
     if(!uid) return false;
+    try{ if(await licAutoBound(uid)) return true; }catch(e){}   // #97: ڈویلپر نے اسی UID پر کوڈ بنایا ہو تو خود چالو
     const best = await _licFindByUid(uid);
     if(!best || !best.expiry) return false;
     const expD = new Date(best.expiry); expD.setHours(0,0,0,0);
@@ -49278,6 +49302,7 @@ async function generateGiftCode(){
     });
     if(!res.ok) throw new Error('Firestore write failed');
     lastGeneratedGiftCode = code;
+    try{ setTimeout(() => licCodeDone({ code, name: nameVal, mobile: ((document.getElementById('giftCodeMobileInput') || {}).value || '').trim(), days: _lt ? 36500 : Number(daysVal), uid: uidVal, paid: _pay.paid }), 50); }catch(e){}   // #97: بننے کے بعد صاف تفصیل + اگلا قدم
     document.getElementById('giftCodeResultText').textContent = code;
     document.getElementById('giftCodeResultWrap').style.display = 'block';
     loadIssuedCodesList(); // ---------- نیا کوڈ فہرست میں فوراً نظر آ جائے ----------
@@ -49450,6 +49475,33 @@ async function licPickContact(){
     return { name, tel };
   }catch(e){ return null; }
 }
+// ---------- ✅ #97 (مالک کا حکم): کوڈ بنتے ہی بڑا پاپ اپ — کوڈ، گاہک، مدت، اگلا قدم، گاہک کو واٹس ایپ ---------- -->
+function licCodeDone(o){
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:12px;direction:rtl';
+  const dur = typeof _licDur === 'function' ? _licDur(o.days) : (o.days + ' دن');
+  const wa = o.mobile ? _licWa(o.mobile) : '';
+  const steps = o.uid
+    ? '✅ یہ کوڈ گاہک کے فون (UID: ' + o.uid + ') سے جڑا ہے — اس کے فون پر انٹرنیٹ کے ساتھ ایپ کھلتے ہی <b>خود چالو</b> ہو جائے گا، کوڈ لکھنے کی ضرورت نہیں۔'
+    : '📲 گاہک اپنی ایپ میں «Activation Code» کے خانے میں یہ کوڈ لکھ کر Activate دبائے۔<br>💡 اگلی بار گاہک کا UID ساتھ لکھیں تو کوڈ لکھے بغیر اس کے فون پر خود چالو ہو جائے گا۔';
+  ov.innerHTML = `<div style="background:#fff;border-radius:16px;max-width:430px;width:100%;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
+    <div style="font-size:40px">✅</div>
+    <div style="font-size:18px;font-weight:900;color:#15803d">کوڈ بن گیا</div>
+    <div dir="ltr" style="font:900 26px/1.4 Arial,sans-serif;letter-spacing:2px;color:#0f172a;background:#f0fdf4;border:2px dashed #16a34a;border-radius:12px;padding:8px;margin:8px 0">${o.code}</div>
+    <div style="font-size:14px;line-height:1.9;text-align:right;background:#f8fafc;border-radius:10px;padding:8px 10px">👤 ${o.name || '—'}${o.mobile ? ' • 📱 <b dir="ltr">' + o.mobile + '</b>' : ''}<br>⏱️ مدت: <b>${dur}</b> (گاہک کے چالو کرتے ہی شروع)${o.paid ? '<br>💵 وصول: Rs ' + Number(o.paid).toLocaleString('en-US') : ''}</div>
+    <div style="font-size:13.5px;line-height:1.9;text-align:right;margin-top:8px;color:#334155">${steps}</div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="lcdWa" style="flex:1;padding:11px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:900;font-size:14px;cursor:pointer">💬 گاہک کو واٹس ایپ</button>
+      <button id="lcdCp" style="flex:1;padding:11px;border:none;border-radius:10px;background:#e0f2fe;color:#0369a1;font-weight:900;font-size:14px;cursor:pointer">📋 کوڈ کاپی</button>
+    </div>
+    <button id="lcdOk" style="width:100%;margin-top:8px;padding:11px;border:none;border-radius:10px;background:#e2e8f0;color:#334155;font-weight:900;font-size:14px;cursor:pointer">ٹھیک ہے — فہرست میں دیکھیں</button>
+  </div>`;
+  document.body.appendChild(ov);
+  const msg = `السلام علیکم${o.name ? ' ' + o.name : ''}!\n✅ آپ کی ایپ کا ایکٹیویشن کوڈ: ${o.code}\n⏱️ مدت: ${String(dur).replace(/<[^>]+>/g, '')}\n\n` + (o.uid ? 'انٹرنیٹ چالو کر کے ایپ ایک بار بند کر کے دوبارہ کھولیں — سبسکرپشن خود چالو ہو جائے گی۔' : 'ایپ میں «Activation Code» کے خانے میں یہ کوڈ لکھ کر Activate دبائیں۔');
+  ov.querySelector('#lcdWa').onclick = () => window.open((wa ? 'https://wa.me/' + wa : 'https://wa.me/') + '?text=' + encodeURIComponent(msg), '_blank');
+  ov.querySelector('#lcdCp').onclick = () => { try{ navigator.clipboard.writeText(o.code); }catch(e){} ov.querySelector('#lcdCp').textContent = '✅ کاپی ہو گیا'; };
+  ov.querySelector('#lcdOk').onclick = () => { ov.remove(); try{ const w = document.getElementById('issuedCodesListWrap'); if(w) w.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){} };
+}
 function _licMob(it){ return String((it && (it.customerMobile || it.activatedByMobile)) || '').trim(); }
 function _licWa(m){ let d = String(m || '').replace(/\D/g, ''); if(d.startsWith('00')) d = d.slice(2); if(d.startsWith('0')) d = '92' + d.slice(1); else if(d.length === 10 && d[0] === '3') d = '92' + d; return d; }
 function licContactRow(it){
@@ -49533,7 +49585,7 @@ function licPayConfirm(o){
         </div>
         <div style="margin-top:8px;font-size:13px;font-weight:800">⏱️ مدت چنیں</div>
         <div id="lpCh" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
-        <input id="lpDays" inputmode="numeric" dir="ltr" style="${inp};font-size:14px;font-weight:700" placeholder="یا دن لکھیں">
+        <input id="lpDays" inputmode="numeric" dir="ltr" style="${inp};font-size:14px;font-weight:700" placeholder="یا مہینے لکھیں (مثلاً 9)">
         <div style="display:flex;gap:8px;margin-top:8px">
           <div style="flex:1;min-width:0;background:#f0fdfa;border:2px solid #0d9488;border-radius:12px;padding:8px">
             <div style="font-size:12.5px;font-weight:900;color:#0f766e">🧮 کل بنتی رقم</div>
@@ -49572,7 +49624,7 @@ function licPayConfirm(o){
         if(document.activeElement !== $('lpDeal')) $('lpDeal').value = st.deal || '';
         if(document.activeElement !== $('lpPaid')) $('lpPaid').value = st.paid || '';
       };
-      $('lpDays').oninput = () => { const d = _licNum($('lpDays').value); if(d >= 1 && d <= 3650){ st.days = d; st.dealEd = false; st.paidEd = false; paint(); } };
+      $('lpDays').oninput = () => { const mo = _licNum($('lpDays').value); if(mo >= 1 && mo <= 120){ st.days = mo * 30; st.dealEd = false; st.paidEd = false; paint(); } };   // #101: مہینے لکھیں (دن نہیں)
       $('lpMonthly').oninput = () => { st.rate = _licNum($('lpMonthly').value); if(!(prev && prev.per)) st.dealEd = false; st.paidEd = st.paidEd && st.dealEd; paint(); };
       $('lpDeal').oninput = () => { st.deal = _licNum($('lpDeal').value); st.dealEd = true; st.paidEd = false; paint(); };
       $('lpPaid').oninput = () => { st.paid = _licNum($('lpPaid').value); st.paidEd = true; paint(); };
