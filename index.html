@@ -10151,8 +10151,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0511TH507'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'کوڈ بناتے وقت گاہک کا نام اور نمبر فون بک سے (📇)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0511TH508'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'کوڈ / مدت: مدت چنتے ہی کل رقم؛ ساتھ «سابقہ خریداری / ڈیل» کا ڈبہ، پھر وصولی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -49250,7 +49250,7 @@ async function generateGiftCode(){
     daysVal = String(customDays);
   }
 
-  const _pay = await licPayConfirm({ title: 'نیا کوڈ', name: nameVal, mobile: ((document.getElementById('giftCodeMobileInput') || {}).value || '').trim(), allowLifetime: true, days: isLifetime ? 36500 : Number(daysVal), plan: ((document.getElementById('giftCodePlanInput') || {}).value || '') });
+  const _pay = await licPayConfirm({ title: 'نیا کوڈ', name: nameVal, mobile: ((document.getElementById('giftCodeMobileInput') || {}).value || '').trim(), allowLifetime: true, prev: _licPrevByMobile((document.getElementById('giftCodeMobileInput') || {}).value), days: isLifetime ? 36500 : Number(daysVal), plan: ((document.getElementById('giftCodePlanInput') || {}).value || '') });
   if(!_pay) return; // 💰 ہیلپ ڈیسک #92
   const _lt = _pay.days >= 36500; daysVal = String(_pay.days); // #93: مدت پاپ اپ میں بدلی جا سکتی ہے
   const code = generateRandomGiftCode();
@@ -49488,41 +49488,66 @@ function licWhatsApp(code, expMs){
 // ---------- 💰 ہیلپ ڈیسک #92 (مالک کا حکم): کوڈ بنانے / مدت بڑھانے سے پہلے — مدت + رقم کی تصدیق، دوبارہ تصدیق، پھر ڈویلپر پاسورڈ ---------- -->
 function _licDur(days){ days = Number(days) || 0; if(days >= 36500) return '🌟 Lifetime (ہمیشہ)'; if(days % 365 === 0) return `${days / 365} سال (${days} دن)`; if(days % 30 === 0) return `${days / 30} مہینے (${days} دن)`; return `${days} دن`; }
 function _licNum(v){ return parseInt(String(v || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g, ''), 10) || 0; }
+// 🤝 #94: اس گاہک کی سابقہ خریداری (آخری بار کتنے دن، کتنے میں)
+function _licPrev(it){
+  if(!it) return null;
+  const xl = String(it.extLog || '').split(';').filter(Boolean);
+  let d = 0, amt = 0, on = '';
+  if(xl.length){ const m = xl[xl.length - 1].match(/^([\d-]+):\+(\d+)(?::Rs(\d+)(?:\/(\d+))?)?/); if(m){ on = m[1]; d = +m[2]; amt = +(m[4] || m[3] || 0); } }
+  if(!amt && (it.dueAmount || it.paidAmount)){ amt = Number(it.dueAmount || it.paidAmount) || 0; d = it.lifetime ? 36500 : (Number(it.days) || 0); on = it.paidOn ? new Date(Number(it.paidOn)).toISOString().slice(0, 10) : ''; }
+  const per = Number(it.monthlyRate) || (amt && d && d < 36500 ? Math.round(amt / Math.max(1, Math.round(d / 30))) : 0);
+  if(!amt && !per) return null;
+  return { per, amt, d, on, text: amt ? `${_licDur(d)} — Rs ${amt.toLocaleString('en-US')}${on ? ' (' + on.split('-').reverse().join('-') + ')' : ''}` : '' };
+}
+function _licPrevByMobile(mob){
+  const n = typeof _licPhoneNorm === 'function' ? _licPhoneNorm(mob) : String(mob || '');
+  if(!n || n.length < 10) return null;
+  const list = (_issuedCodesCache || []).filter(x => _licPhoneNorm(_licMob(x)) === n).sort((a, b) => Number(b.paidOn || b.createdAt || 0) - Number(a.paidOn || a.createdAt || 0));
+  for(const x of list){ const pv = _licPrev(x); if(pv) return pv; }
+  return null;
+}
 function licPayConfirm(o){
-  // 💰 ہیلپ ڈیسک #93: ہر گاہک کا اپنا ریٹ (کوڈ پر `monthlyRate`)، مدت یہیں چنیں، کل رقم اور وصولی ہاتھ سے بدل سکیں
+  // 💰 #93 / #94: مدت چنتے ہی رقم؛ ایک قطار میں «کل بنتی رقم» (معیاری ریٹ) + «سابقہ خریداری / اس بار کی ڈیل»؛ پھر وصولی
   return new Promise(resolve => {
-    const KEY = 'fmLicMonthly';
-    let lastRate = 0; try{ lastRate = _licNum(localStorage.getItem(KEY)); }catch(e){}
-    const prevRate = _licNum(o.prevRate);
-    const st = { days: Number(o.days) || 30, rate: prevRate || lastRate || 0, due: 0, dueEd: false, paid: 0, paidEd: false };
+    const KEY = 'fmLicMonthly' + (o.plan ? '_' + o.plan : '');
+    let lastRate = 0; try{ lastRate = _licNum(localStorage.getItem(KEY)) || _licNum(localStorage.getItem('fmLicMonthly')); }catch(e){}
+    const prev = o.prev || null;
+    const st = { days: Number(o.days) || 30, rate: lastRate || 1000, deal: 0, dealEd: false, paid: 0, paidEd: false };
     const CH = o.allowLifetime ? [30, 90, 180, 365, 36500] : [30, 90, 180, 365];
     const monthsOf = d => d >= 36500 ? 0 : Math.max(1, Math.round(d / 30));
     const ov = document.createElement('div');
-    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:12px;direction:rtl;font-family:inherit';
-    const box = 'background:#fff;border-radius:16px;max-width:440px;width:100%;max-height:94vh;overflow:auto;padding:14px 16px;box-shadow:0 20px 50px rgba(0,0,0,.35)';
-    const inp = 'width:100%;box-sizing:border-box;padding:9px;border:2px solid #cbd5e1;border-radius:10px;font-size:16px;font-weight:800;margin-top:3px';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:10px;direction:rtl;font-family:inherit';
+    const box = 'background:#fff;border-radius:16px;max-width:460px;width:100%;max-height:95vh;overflow:auto;padding:14px 14px;box-shadow:0 20px 50px rgba(0,0,0,.35)';
+    const inp = 'width:100%;box-sizing:border-box;padding:8px;border:2px solid #cbd5e1;border-radius:10px;font-size:17px;font-weight:900;margin-top:3px;text-align:center';
     const btn = (bg, c) => `flex:1;padding:11px;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;background:${bg};color:${c}`;
-    const lab = 'display:block;margin-top:9px;font-size:13px;font-weight:800';
     const fmt = n => Number(n || 0).toLocaleString('en-US');
     const done = v => { ov.remove(); resolve(v); };
     const step1 = () => {
       ov.innerHTML = `<div style="${box}">
         <div style="font-size:17px;font-weight:900;color:#b45309;margin-bottom:6px">⚠️ ${o.title || 'سبسکرپشن'} — تصدیق کریں</div>
-        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:14px;line-height:1.8">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:7px 10px;font-size:14px;line-height:1.7">
           👤 <b>${o.name || 'نام درج نہیں'}</b>${o.mobile ? ` • 📱 <b dir="ltr">${o.mobile}</b>` : ''}${o.plan ? ` • 📦 <b>${o.plan}</b>` : ''}
-          ${prevRate ? `<div style="color:#0f766e;font-weight:900">📌 اس گاہک کا مقرر کردہ ریٹ: Rs ${fmt(prevRate)} / مہینہ</div>` : ''}
-          ${o.prevNote ? `<div style="color:#64748b;font-size:12.5px">${o.prevNote}</div>` : ''}
         </div>
-        <label style="${lab}">⏱️ مدت چنیں</label>
+        <div style="margin-top:8px;font-size:13px;font-weight:800">⏱️ مدت چنیں</div>
         <div id="lpCh" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
-        <input id="lpDays" inputmode="numeric" dir="ltr" style="${inp};font-size:14px" placeholder="یا دن لکھیں">
-        <div id="lpDur" style="margin-top:4px;font-size:16px;font-weight:900;color:#1d4ed8"></div>
-        <label style="${lab}">💵 ایک مہینے کا ریٹ (اس گاہک کے لیے)</label>
-        <input id="lpMonthly" inputmode="numeric" dir="ltr" style="${inp}" placeholder="مثلاً 2000">
-        <label style="${lab}">🧮 کل بنتی رقم <span style="color:#64748b;font-weight:600">(خود حساب — چاہیں تو بدلیں)</span></label>
-        <input id="lpDue" inputmode="numeric" dir="ltr" style="${inp};border-color:#0d9488">
-        <div id="lpCalc" style="font-size:12.5px;color:#0f766e;font-weight:800;margin-top:3px"></div>
-        <label style="${lab}">✅ گاہک سے وصول شدہ رقم</label>
+        <input id="lpDays" inputmode="numeric" dir="ltr" style="${inp};font-size:14px;font-weight:700" placeholder="یا دن لکھیں">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <div style="flex:1;min-width:0;background:#f0fdfa;border:2px solid #0d9488;border-radius:12px;padding:8px">
+            <div style="font-size:12.5px;font-weight:900;color:#0f766e">🧮 کل بنتی رقم</div>
+            <div id="lpList" dir="ltr" style="font-size:21px;font-weight:900;color:#0f766e;text-align:center;margin:3px 0"></div>
+            <div id="lpListCalc" style="font-size:11.5px;color:#475569;text-align:center"></div>
+            <div style="font-size:11px;font-weight:800;color:#475569;margin-top:5px">ریٹ / مہینہ ✏️</div>
+            <input id="lpMonthly" inputmode="numeric" dir="ltr" style="${inp};font-size:14px;padding:5px">
+          </div>
+          <div style="flex:1;min-width:0;background:#fffbeb;border:2px solid #d97706;border-radius:12px;padding:8px">
+            <div style="font-size:12.5px;font-weight:900;color:#b45309">🤝 سابقہ خریداری / ڈیل</div>
+            <div style="font-size:11.5px;color:#475569;min-height:30px;line-height:1.5">${prev && prev.text ? 'پچھلی بار: <b>' + prev.text + '</b>' : 'پہلی خریداری — رقم خود لکھیں'}</div>
+            <div style="font-size:11px;font-weight:800;color:#475569;margin-top:3px">اس بار اس گاہک سے ✏️</div>
+            <input id="lpDeal" inputmode="numeric" dir="ltr" style="${inp};border-color:#d97706">
+            <div id="lpDealNote" style="font-size:11px;color:#b45309;text-align:center;margin-top:2px"></div>
+          </div>
+        </div>
+        <div style="margin-top:9px;font-size:13px;font-weight:800">✅ گاہک سے وصول شدہ رقم</div>
         <input id="lpPaid" inputmode="numeric" dir="ltr" style="${inp};border-color:#16a34a">
         <label style="display:flex;gap:8px;align-items:flex-start;margin-top:9px;font-size:13.5px;font-weight:700"><input type="checkbox" id="lpC1" style="width:20px;height:20px;flex:none"> <span>گاہک نے واقعی <b id="lpDur2"></b> ہی مانگی ہے</span></label>
         <label style="display:flex;gap:8px;align-items:flex-start;margin-top:7px;font-size:13.5px;font-weight:700"><input type="checkbox" id="lpC2" style="width:20px;height:20px;flex:none"> میں نے یہ رقم وصول کر لی ہے</label>
@@ -49531,48 +49556,50 @@ function licPayConfirm(o){
       </div>`;
       const $ = id => ov.querySelector('#' + id);
       const paint = () => {
-        const m = monthsOf(st.days);
-        if(!st.dueEd) st.due = m * st.rate;
-        if(!st.paidEd) st.paid = st.due;
+        const m = monthsOf(st.days), list = m * st.rate;
+        if(!st.dealEd) st.deal = prev && prev.per && m ? m * prev.per : list;
+        if(!st.paidEd) st.paid = st.deal;
         $('lpCh').innerHTML = CH.map(d => `<button data-d="${d}" style="flex:1;min-width:64px;padding:8px 4px;border-radius:9px;font-weight:900;font-size:12.5px;cursor:pointer;border:2px solid ${d === st.days ? '#1d4ed8' : '#cbd5e1'};background:${d === st.days ? '#dbeafe' : '#fff'};color:#1e3a8a">${d >= 36500 ? '🌟 Lifetime' : (d === 365 ? '1 سال' : (d / 30) + ' مہینہ' + (d > 30 ? 'ے' : ''))}</button>`).join('');
-        $('lpCh').querySelectorAll('button').forEach(b => b.onclick = () => { st.days = Number(b.dataset.d); $('lpDays').value = ''; st.dueEd = false; st.paidEd = false; paint(); });
-        $('lpDur').textContent = '⏱️ ' + _licDur(st.days);
+        $('lpCh').querySelectorAll('button').forEach(b => b.onclick = () => { st.days = Number(b.dataset.d); $('lpDays').value = ''; st.dealEd = false; st.paidEd = false; paint(); });
+        $('lpList').textContent = m ? 'Rs ' + fmt(list) : '—';
+        $('lpListCalc').textContent = m ? `${m} مہینے × ${fmt(st.rate)}` : 'Lifetime — ڈیل میں رقم لکھیں';
         $('lpDur2').textContent = _licDur(st.days);
+        $('lpDealNote').textContent = (m && st.deal && st.deal !== list) ? (st.deal < list ? `رعایت Rs ${fmt(list - st.deal)}` : `Rs ${fmt(st.deal - list)} زیادہ`) : '';
         if(document.activeElement !== $('lpMonthly')) $('lpMonthly').value = st.rate || '';
-        if(document.activeElement !== $('lpDue')) $('lpDue').value = st.due || '';
+        if(document.activeElement !== $('lpDeal')) $('lpDeal').value = st.deal || '';
         if(document.activeElement !== $('lpPaid')) $('lpPaid').value = st.paid || '';
-        $('lpCalc').textContent = m ? `${m} مہینے × Rs ${fmt(st.rate)} = Rs ${fmt(m * st.rate)}${st.dueEd && st.due !== m * st.rate ? ` → آپ نے Rs ${fmt(st.due)} کر دی` : ''}` : 'Lifetime — رقم خود لکھیں';
       };
-      $('lpDays').oninput = () => { const d = _licNum($('lpDays').value); if(d >= 1 && d <= 3650){ st.days = d; st.dueEd = false; st.paidEd = false; paint(); } };
-      $('lpMonthly').oninput = () => { st.rate = _licNum($('lpMonthly').value); st.dueEd = false; st.paidEd = false; paint(); };
-      $('lpDue').oninput = () => { st.due = _licNum($('lpDue').value); st.dueEd = true; st.paidEd = false; paint(); };
+      $('lpDays').oninput = () => { const d = _licNum($('lpDays').value); if(d >= 1 && d <= 3650){ st.days = d; st.dealEd = false; st.paidEd = false; paint(); } };
+      $('lpMonthly').oninput = () => { st.rate = _licNum($('lpMonthly').value); if(!(prev && prev.per)) st.dealEd = false; st.paidEd = st.paidEd && st.dealEd; paint(); };
+      $('lpDeal').oninput = () => { st.deal = _licNum($('lpDeal').value); st.dealEd = true; st.paidEd = false; paint(); };
       $('lpPaid').oninput = () => { st.paid = _licNum($('lpPaid').value); st.paidEd = true; paint(); };
       paint();
       $('lpNo').onclick = () => done(null);
       $('lpGo').onclick = () => {
+        if(!st.deal){ $('lpErr').textContent = 'اس گاہک سے طے شدہ رقم (ڈیل) لکھیں'; return; }
         if(!st.paid){ $('lpErr').textContent = 'وصول شدہ رقم لکھیں'; return; }
         if(!$('lpC1').checked || !$('lpC2').checked){ $('lpErr').textContent = 'دونوں خانوں پر ✓ لگائیں'; return; }
-        try{ if(st.rate) localStorage.setItem(KEY, String(st.rate)); }catch(e){}
+        try{ if(st.rate){ localStorage.setItem(KEY, String(st.rate)); localStorage.setItem('fmLicMonthly', String(st.rate)); } }catch(e){}
         step2();
       };
     };
     const step2 = () => {
-      const short = st.due && st.paid < st.due;
+      const m = monthsOf(st.days), list = m * st.rate, short = st.paid < st.deal;
       ov.innerHTML = `<div style="${box}">
         <div style="font-size:17px;font-weight:900;color:#b91c1c;margin-bottom:8px">⚠️ دوبارہ تصدیق</div>
-        <div style="font-size:15px;line-height:2">👤 <b>${o.name || '—'}</b><br>⏱️ <b style="color:#1d4ed8">${_licDur(st.days)}</b>${st.rate ? ` • ریٹ Rs ${fmt(st.rate)} / مہینہ` : ''}<br>🧮 بنتی رقم: <b>Rs ${fmt(st.due)}</b><br>💵 وصول: <b>Rs ${fmt(st.paid)}</b></div>
-        ${short ? `<div style="background:#fee2e2;color:#991b1b;border-radius:10px;padding:9px;font-weight:900;margin-top:6px">❗ وصولی Rs ${fmt(st.due - st.paid)} کم ہے<label style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:13.5px"><input type="checkbox" id="lpShort" style="width:20px;height:20px;flex:none"> ہاں، کم وصولی کے ساتھ ہی جاری کرنا ہے</label></div>` : ''}
+        <div style="font-size:15px;line-height:2">👤 <b>${o.name || '—'}</b><br>⏱️ <b style="color:#1d4ed8">${_licDur(st.days)}</b><br>${m ? `🧮 کل بنتی رقم: Rs ${fmt(list)}<br>` : ''}🤝 اس گاہک سے ڈیل: <b>Rs ${fmt(st.deal)}</b><br>💵 وصول: <b>Rs ${fmt(st.paid)}</b></div>
+        ${short ? `<div style="background:#fee2e2;color:#991b1b;border-radius:10px;padding:9px;font-weight:900;margin-top:6px">❗ وصولی ڈیل سے Rs ${fmt(st.deal - st.paid)} کم ہے<label style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:13.5px"><input type="checkbox" id="lpShort" style="width:20px;height:20px;flex:none"> ہاں، کم وصولی کے ساتھ ہی جاری کرنا ہے</label></div>` : ''}
         <label style="display:block;margin-top:10px;font-size:13px;font-weight:800">🔐 ڈویلپر پاسورڈ</label>
         <input id="lpPw" type="password" dir="ltr" style="${inp}" autocomplete="off">
         <div id="lpErr" style="color:#b91c1c;font-weight:800;font-size:13px;margin-top:8px"></div>
         <div style="display:flex;gap:8px;margin-top:12px"><button id="lpBack" style="${btn('#e2e8f0', '#334155')}">→ واپس</button><button id="lpOk" style="${btn('#b91c1c', '#fff')}">✅ ہاں، جاری کریں</button></div>
       </div>`;
       const $ = id => ov.querySelector('#' + id);
-      $('lpBack').onclick = step1;
+      $('lpBack').onclick = () => { step1(); };
       $('lpOk').onclick = async () => {
         if(short && !$('lpShort').checked){ $('lpErr').textContent = 'کم وصولی والے خانے پر ✓ لگائیں، یا واپس جا کر رقم درست کریں'; return; }
         if(!(await devPasswordOk($('lpPw').value))){ $('lpErr').textContent = '❌ پاسورڈ غلط ہے'; return; }
-        done({ paid: st.paid, due: st.due, rate: st.rate, days: st.days });
+        done({ paid: st.paid, due: st.deal, list, listRate: st.rate, rate: m ? Math.round(st.deal / m) : 0, days: st.days });
       };
       setTimeout(() => { try{ $('lpPw').focus(); }catch(e){} }, 50);
     };
@@ -49582,9 +49609,7 @@ function licPayConfirm(o){
 async function extendLicenseCode(code){
   const it = (_issuedCodesCache || []).find(x => x.code === code) || {};
   if(it.lifetime){ alert('🌟 یہ Lifetime کوڈ ہے — بڑھانے کی ضرورت نہیں'); return; }
-  const _xl = String(it.extLog || '').split(';').filter(Boolean);
-  const _pay = await licPayConfirm({ title: 'مدت بڑھائیں', name: it.customerName, mobile: _licMob(it), days: 30, plan: it.plan || '', prevRate: it.monthlyRate,
-    prevNote: (it.paidAmount ? `پہلی وصولی Rs ${Number(it.paidAmount).toLocaleString('en-US')}` : '') + (_xl.length ? ` • آخری بار: ${_xl[_xl.length - 1].replace(/:/g, ' ')}` : '') });
+  const _pay = await licPayConfirm({ title: 'مدت بڑھائیں', name: it.customerName, mobile: _licMob(it), days: 30, plan: it.plan || '', prev: _licPrev(it) });
   if(!_pay) return;
   const add = _pay.days;
   try{
