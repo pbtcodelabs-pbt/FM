@@ -10151,8 +10151,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0511TH505'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'سبسکرپشن: ہر گاہک کا اپنا ریٹ، مدت پاپ اپ میں، کل رقم / وصولی بدلیں؛ 7 / 15 دن والے فلٹر؛ 7 دن سے کم پر گاہک کو یاد دہانی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0511TH506'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ڈویلپر پینل: جاری کردہ کوڈز کی فہرست خود لوڈ ہوتی ہے (مدت بڑھائیں، نمبر، کال، واٹس ایپ)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -49704,6 +49704,7 @@ function devShowSec(key){
   u.querySelectorAll(':scope > .devSec').forEach(sec => { sec.style.display = sec.dataset.sec === key ? 'block' : 'none'; });
   if(key === 'unlock') devRenderUnlockSec();
   if(key === 'device') devRenderDeviceSec();
+  try{ const _w = document.getElementById('issuedCodesListWrap'); const _sc = _w && _w.closest('.devSec'); if(_w && (!_sc || _sc.dataset.sec === key)) loadIssuedCodesList(); }catch(e){} // #93: کوڈز کی فہرست خود لوڈ
   const tabs = document.getElementById('devTabsBar');
   u.scrollTop = 0;
 }
