@@ -10148,8 +10148,8 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0511TH501'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'Help Desk کا پیلا بٹن ہر جگہ — SOS کا نشان ختم'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0511TH502'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ہوم پر سبسکرپشن کی پٹی ڈویلپر ان لاک فون پر بھی نظر آتی ہے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -11100,7 +11100,20 @@ function renderSubscriptionBanner(){
   // ---------- صرف Home صفحے پر نظر آئے — باقی صفحات پر چھپی رہے (اب یہ ایلیمنٹ سیدھا screen-home کے اندر ہی رہتا ہے) ----------
   const activeScreen = document.querySelector('.screen.active');
   const isHomePage = activeScreen && activeScreen.id === 'screen-home';
-  if(!isHomePage || !isSubscriptionActive() || devPermUnlocked() || AppState.currentRole !== 'admin'){ row.style.display = 'none'; return; } // 🏪 FM110TH274: ملازم کو دن/ایکسپائری نہیں
+  if(!isHomePage || !isSubscriptionActive() || AppState.currentRole !== 'admin'){ row.style.display = 'none'; return; }
+  if(devPermUnlocked()){ // 🛠️ ہیلپ ڈیسک #92: ڈویلپر ان لاک فون پر پٹی غائب نہ ہو — اصل تاریخ + «ڈویلپر ان لاک»
+    const _exp = AppState.settings.subscriptionExpiry;
+    let _dl = null;
+    if(_exp){ const _t = new Date(); _t.setHours(0,0,0,0); const _e = new Date(_exp); _e.setHours(0,0,0,0); _dl = Math.round((_e - _t) / 86400000); }
+    document.getElementById('subBoxStartLabel').textContent = '🛠️ Developer';
+    document.getElementById('subBoxStartVal').textContent = 'Unlocked';
+    document.getElementById('subBoxEndVal').textContent = _exp ? formatDateDMY(_exp) : '∞';
+    document.getElementById('subBoxDaysVal').textContent = (_dl === null) ? 'Always' : (_dl < 0 ? 'Expired · Open' : `${_dl} day${_dl === 1 ? '' : 's'}`);
+    const _db = document.getElementById('subBoxDays');
+    _db.classList.remove('subBoxUrgentGlow'); _db.style.background = '#e0e7ff'; _db.style.color = '#3730a3';
+    row.style.display = 'flex';
+    return;
+  } // 🏪 FM110TH274: ملازم کو دن/ایکسپائری نہیں
 
   const daysLeft = daysLeftInSubscription();
   document.getElementById('subBoxStartLabel').textContent = AppState.settings.isOnFreeTrial ? '🎁 Free Trial' : 'Subscribed';
