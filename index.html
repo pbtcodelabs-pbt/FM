@@ -10154,8 +10154,11 @@ function getDeveloperContact(){
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
-const APP_BUILD_VERSION = 'FM0511TH511'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'کوڈ: مہینے لکھیں تو رقم خود؛ کوڈ بنتے ہی تفصیل + واٹس ایپ؛ UID والا کوڈ گاہک کے فون پر خود چالو'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+// 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
+// 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
+// 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
+const APP_BUILD_VERSION = 'FM0611FR514'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'پرانے ریٹ کی خرابی ٹھیک: آرڈر/کارٹ ہمیشہ سبزی کا تازہ ریٹ؛ بیوپاری کی ادائیگی میں ✏️ بدلیں / 🗑️ حذف'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16712,11 +16715,15 @@ function confirmRemoveFromCart(variantId){
 // ---------- 🏷️ FM810TH346: راولپنڈی/اسلام آباد کے دو ریٹ ختم ہونے کے بعد پینڈنگ آرڈرز اور بل میں
 // قیمتیں خالی (0) رہ جاتی تھیں، کیونکہ پہلے ریٹ صرف بٹن دبانے پر لگتا تھا۔ اب ایک ہی "قیمت فروخت" ہے، تو جس
 // آئٹم کی قیمت خالی ہو (اور ہاتھ سے نہ لکھی گئی ہو) اس پر سٹاک مینجمنٹ والی قیمت فروخت (یا چالان کا ریٹ) خودکار لگے ---------- -->
-function fillMissingSaleRates(items){
+function fillMissingSaleRates(items, forceAuto){
   let changed = false;
   (items || []).forEach(it => {
     if(!it || it.variant_id == null || it.loose_product_id || it.priceManual) return;
-    if(Number(it.unitPrice) > 0) return;
+    const had = Number(it.unitPrice) > 0;
+    // 🛠️ FM0611FR514 (صدام بھائی: «ریٹ تازہ کیے مگر ایپ پرانے ریٹ اٹھا رہی ہے»): پہلے یہاں قیمت ایک بار لگتے ہی آرڈر/کارٹ میں جم جاتی تھی
+    // (رقم > 0 ہو تو واپس لوٹ جاتا تھا)، بعد میں سبزی کا ریٹ بدلنے پر بھی پرانی رقم رہتی۔ اب جو لائن ہاتھ سے نہیں لگی
+    // (چالان والی، خودکار نشان والی، یا بل کا کارٹ) وہ ہمیشہ سبزی کے تازہ ترین ریٹ سے دوبارہ لگتی ہے۔ ہاتھ سے لگا ریٹ (priceManual) نہیں چھیڑا جاتا
+    if(had && !(forceAuto || it.autoRate || it.chalanAlloc)) return;
     const v = findVariantByVariantId(it.variant_id);
     if(!v) return;
     let price = 0, labor = null;
@@ -16726,9 +16733,10 @@ function fillMissingSaleRates(items){
     }catch(e){}
     if(!(price > 0)) price = Number(v.retail) || 0;
     if(price > 0){
-      it.unitPrice = price;
-      if(it.laborPerUnit == null) it.laborPerUnit = (labor != null) ? labor : (Number(v.sellLabor) || 0);
-      changed = true;
+      if(Number(it.unitPrice) !== price){ it.unitPrice = price; changed = true; }
+      if(!had) it.autoRate = true; // یہ قیمت خودکار لگی تھی — آئندہ ریٹ بدلے تو یہ بھی بدلے
+      if(it.laborPerUnit == null){ it.laborPerUnit = (labor != null) ? labor : (Number(v.sellLabor) || 0); changed = true; }
+      else if(labor != null && !it.laborManual && Number(it.laborPerUnit) !== Number(labor)){ it.laborPerUnit = labor; changed = true; }
     }
   });
   return changed;
@@ -16835,7 +16843,7 @@ function sortBillingCartBySerial(){
 }
 function renderCart(){
   sortBillingCartBySerial();
-  try{ fillMissingSaleRates(Billing.cart); }catch(e){} // 🏷️ FM810TH346: جس آئٹم کی قیمت خالی ہو، قیمت فروخت خودکار لگے
+  try{ fillMissingSaleRates(Billing.cart, true); }catch(e){} // 🏷️ FM810TH346 + FM0611FR514: خالی یا پرانی قیمت — تازہ ریٹ، قیمت فروخت خودکار لگے
   try{ applyChalanPricingToItems(Billing.cart, Billing.saleMode); }catch(e){} // 🧾 ہر چالان کا اپنا فروخت ریٹ
   saveBillingCartDraft(); // ---------- ہر تبدیلی کے بعد خودکار محفوظ — رفریش سے کارٹ ضائع نہ ہو ----------
   renderHomeUnfinishedCartCard(); // ---------- حفاظتی: ہوم پیج کا کارڈ بھی ہمیشہ اسی وقت تازہ ہو، چاہے ہوم پیج کا اپنا رینڈر کہیں نہ چلا ہو ----------
@@ -17858,6 +17866,7 @@ function updateReviewQty(idx, qty){
 function updateReviewRate(idx, rate){
   const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
   p.items[idx].unitPrice = Math.max(0, rate);
+  p.items[idx].priceManual = true; // ✍️ FM0611FR514
   renderPendingReview();
 }
 function removeReviewItem(idx){
@@ -25336,7 +25345,9 @@ function saveNewProduct(){
       const dupVariant = existingProduct.variants.find(v => (v.label || '').trim().toLowerCase() === variantLabel.trim().toLowerCase());
       if(dupVariant){
         if(!confirm(`"${name}" میں "${variantLabel || 'بغیر پیکنگ'}" پہلے سے موجود ہے۔ کیا آپ اسی کی قیمتیں/سٹاک نئی قدروں سے بدلنا چاہتے ہیں؟`)) return;
+        const _oR2 = dupVariant.retail, _oL2 = dupVariant.sellLabor; // 🛠️ FM0611FR514
         Object.assign(dupVariant, {barcode, purchase, labor, sellLabor, retail, wholesale, stock});
+        try{ fmApplyNewSalePrice(dupVariant, _oR2, _oL2); }catch(e){} // 🛠️ FM0611FR514: ریٹ بدلا تو پڑے مال کا ریٹ بھی نیا
         if(npProductPhotoDataUrl) dupVariant.image = npProductPhotoDataUrl;
       } else {
         existingProduct.variants.push({
@@ -30282,11 +30293,25 @@ function _pledEntries(kind, id){
     const d = _pledDay(po.date);
     out.push({ day: d, ts: ts(po.receivedAt || po.created_at, d), desc: '📦 مال آیا — ' + (po.items || []).length + ' سبزیاں', red: 0, green: poAmt(po) });
   });
+  // ✏️ FM0611FR514: بیوپاری کی ادائیگی/وصولی کی ہر سطر کو اس کے اصل payment_id سے جوڑیں تاکہ ایڈمن بدل/حذف کر سکے
+  const _sPays = (_withArch(paymentsData, 'pay') || []).filter(pm => pm && pm.party_type === 'supplier' && pm.party_id === id);
+  const _sUsed = new Set();
+  const _sFindPid = (dir, a, d) => {
+    const m = _sPays.find(pm => !_sUsed.has(pm.payment_id) && pm.direction === dir && Math.round(Number(pm.amount) || 0) === Math.round(a) && (_pledDay(bsPayDay(pm)) === d || _pledDay(pm.date) === d));
+    if(m){ _sUsed.add(m.payment_id); return m.payment_id; }
+    return undefined;
+  };
   (sp.ledgerHistory || []).forEach(h => {
     if(!h) return; const d = _pledDay(h.date), a = Number(h.amount) || 0; if(!a) return;
     const note = (typeof _payUserNote === 'function' ? _payUserNote(h.note) : h.note) || '';
-    if(h.type === 'payment') out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: (h.isDiscount ? '🏷️ چھوٹ' : '💵 ادائیگی بھیجی') + (note ? ' — ' + note : ''), red: a, green: 0 });
-    else if(h.type === 'received') out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: '📥 رقم آئی (ادھار لیا)' + (note ? ' — ' + note : ''), red: 0, green: a });
+    if(h.type === 'payment'){
+      const pid = h.isDiscount ? undefined : _sFindPid('out', a, d);
+      out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: (h.isDiscount ? '🏷️ چھوٹ' : '💵 ادائیگی بھیجی') + (note ? ' — ' + note : '') + ((pid != null && (_sPays.find(x => x.payment_id === pid) || {}).edited) ? ' (✏️ درست کی گئی)' : ''), red: a, green: 0, pid, sup: pid != null });
+    }
+    else if(h.type === 'received'){
+      const pid = _sFindPid('in', a, d);
+      out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: '📥 رقم آئی (ادھار لیا)' + (note ? ' — ' + note : '') + ((pid != null && (_sPays.find(x => x.payment_id === pid) || {}).edited) ? ' (✏️ درست کی گئی)' : ''), red: 0, green: a, pid, sup: pid != null });
+    }
   });
   return { party: sp, out, now: (Number(sp.total_payable) || 0) - (Number(sp.wallet_balance) || 0), sign: -1 };
 }
@@ -30405,6 +30430,139 @@ async function pmEditCollection(pid){
   _pmAfterChange(c);
   uAlert('✅ درست ہو گئی', `وصولی اب Rs. ${nAmt.toLocaleString('en-US')} — نیا بقایا Rs. ${Math.round(c.total_receivable).toLocaleString('en-US')}`, 'green');
 }
+
+// =====================================================================
+// ✏️ FM0611FR514 (صدام بھائی): بیوپاری کی ادائیگی / وصولی (لین دین میں) بدلنا یا حذف کرنا — صرف ایڈمن، پہلے تنبیہ، پھر ایڈمن PIN۔
+// پرانی ادائیگی کا اثر پورا واپس (بیوپاری کا بقایا، والٹ، کیش، کھاتے کی سطریں)، پھر نئی رقم دوبارہ لگتی ہے۔ ہر تبدیلی کا نشان
+// =====================================================================
+function _supPmFind(pid){
+  const pm = (paymentsData || []).find(x => x && x.payment_id === pid && x.party_type === 'supplier' && (x.direction === 'out' || x.direction === 'in'));
+  const s = pm ? (suppliersData || []).find(x => x && x.supplier_id === pm.party_id) : null;
+  return { pm, s };
+}
+function _supPmRows(pm){
+  const f = n => 'Rs. ' + Math.round(Number(n) || 0).toLocaleString('en-US');
+  return [{ label: 'بیوپاری', value: pm.party_name || '', big: true },
+    { label: pm.direction === 'out' ? 'ادائیگی' : 'وصولی (ادھار لیا)', value: f(pm.amount), bg: '#fee2e2', fg: '#7f1d1d' },
+    ...(Number(pm.discount) > 0 ? [{ label: '🏷️ چھوٹ', value: f(pm.discount), bg: '#fff7ed', fg: '#9a3412' }] : []),
+    { label: 'تاریخ', value: String(bsPayDay(pm) || '').split('-').reverse().join('/') },
+    ...(pm.method ? [{ label: 'طریقہ', value: pm.method }] : [])];
+}
+// کھاتے (ledgerHistory) سے اس ادائیگی کی ایک سطر نکالیں — پہلے اسی تاریخ کی، نہ ملے تو اسی رقم کی
+function _supLedRemove(s, test, day, dayAlt){
+  const L = s.ledgerHistory || [];
+  let i = L.findIndex(h => h && test(h) && (String(h.date || '').slice(0, 10) === day || String(h.date || '').slice(0, 10) === dayAlt));
+  if(i < 0) i = L.findIndex(h => h && test(h));
+  if(i >= 0) L.splice(i, 1);
+}
+function _supPmUndo(s, pm){
+  const amt = Number(pm.amount) || 0, disc = Number(pm.discount) || 0, wAdd = Number(pm.wallet_added) || 0;
+  const day = bsPayDay(pm), dayAlt = String(pm.date || '').slice(0, 10);
+  const hasBA = pm.balance_before != null && pm.balance_after != null;
+  const d = { amt, disc, wAdd };
+  if(pm.direction === 'out'){
+    const red = hasBA ? (Number(pm.balance_before) - Number(pm.balance_after)) : (amt - wAdd + disc); // بقایا میں کتنی کمی ہوئی تھی
+    s.total_payable = (Number(s.total_payable) || 0) + red;
+    const w = Number(s.wallet_balance) || 0;
+    if(w >= wAdd) s.wallet_balance = w - wAdd;
+    else { s.wallet_balance = 0; s.total_payable += (wAdd - w); } // والٹ پہلے ہی خرچ ہو چکا — باقی بقایا میں
+    financeDummy.cashInHand = (Number(financeDummy.cashInHand) || 0) + amt; // دی ہوئی نقد واپس کیش میں
+    _supLedRemove(s, h => h.type === 'payment' && !h.isDiscount && Math.round(Number(h.amount) || 0) === Math.round(amt), day, dayAlt);
+    if(disc > 0) _supLedRemove(s, h => h.type === 'payment' && h.isDiscount && Math.round(Number(h.amount) || 0) === Math.round(disc), day, dayAlt);
+    if(wAdd > 0) _supLedRemove(s, h => h.type === 'wallet_deposit' && Math.round(Number(h.amount) || 0) === Math.round(wAdd), day, dayAlt);
+  } else {
+    const addP = hasBA ? Math.max(0, Number(pm.balance_after) - Number(pm.balance_before)) : amt;
+    const fromW = Math.max(0, amt - addP);
+    s.total_payable = Math.max(0, (Number(s.total_payable) || 0) - addP);
+    s.wallet_balance = (Number(s.wallet_balance) || 0) + fromW;
+    financeDummy.cashInHand = (Number(financeDummy.cashInHand) || 0) - amt; // لی ہوئی نقد کیش سے واپس
+    _supLedRemove(s, h => h.type === 'received' && Math.round(Number(h.amount) || 0) === Math.round(amt), day, dayAlt);
+  }
+  return d;
+}
+function _supPmAfterChange(s){
+  persistAllData();
+  try{ pushSuppliersToCloud(); }catch(e){}
+  try{ pushFinanceToCloud(); }catch(e){}
+  try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+  try{
+    const open = document.getElementById('profileModal') && document.getElementById('profileModal').classList.contains('show') && currentProfileType === 'suppliers' && currentProfileId === s.supplier_id;
+    if(open){ openSupplierProfile(s.supplier_id); profileMainMode = 'transactions'; renderSupplierMainContent(s.supplier_id); }
+    else renderPartyLedger();
+  }catch(e){ try{ renderPartyLedger(); }catch(e2){} }
+}
+async function supPmDelete(pid){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'بیوپاری کی ادائیگی صرف ایڈمن حذف کر سکتا ہے۔'); return; }
+  const { pm, s } = _supPmFind(pid);
+  if(!pm || !s){ await uAlert('⚠️ ریکارڈ نہیں ملا', 'یہ ادائیگی پرانے آرکائیو میں ہے یا پہلے ہی حذف ہو چکی۔'); return; }
+  const isOut = pm.direction === 'out';
+  if(!(await uDialog({ title: isOut ? '⚠️ ادائیگی حذف کریں؟' : '⚠️ وصولی حذف کریں؟',
+    message: isOut ? 'یہ ادائیگی کھاتے سے نکل جائے گی اور بیوپاری کا بقایا اتنا <b>بڑھ جائے گا</b>۔ دی ہوئی نقد کیش میں واپس آ جائے گی۔ چھوٹ بھی ساتھ ختم ہو گی۔' : 'یہ وصولی کھاتے سے نکل جائے گی اور بیوپاری کا بقایا / والٹ پہلے والا ہو جائے گا۔ لی ہوئی نقد کیش سے کم ہو جائے گی۔',
+    rows: _supPmRows(pm), okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'red' }))) return;
+  if(!(await _askAdminPinForSerialMaster(isOut ? 'بیوپاری کی ادائیگی حذف کرنے کے لیے' : 'بیوپاری کی وصولی حذف کرنے کے لیے'))) return;
+  try{ pauseCloudPolling && pauseCloudPolling(10000); }catch(e){}
+  const before = Math.round(Number(s.total_payable) || 0);
+  const d = _supPmUndo(s, pm);
+  paymentsData = paymentsData.filter(x => x !== pm);
+  s.ledgerHistory = s.ledgerHistory || [];
+  s.ledgerHistory.unshift({ type: 'payment_deleted', amount: d.amt, date: bizDateKey(), at: new Date().toISOString(), by: (AppState.currentUser && AppState.currentUser.name) || 'admin', note: `${isOut ? 'ادائیگی' : 'وصولی'} حذف — ${bsPayDay(pm)} — Rs. ${d.amt.toLocaleString('en-US')}` });
+  _supPmAfterChange(s);
+  uAlert('✅ حذف ہو گئی', `${isOut ? 'ادائیگی' : 'وصولی'} Rs. ${d.amt.toLocaleString('en-US')} حذف — بقایا Rs. ${before.toLocaleString('en-US')} ← Rs. ${Math.round(Number(s.total_payable) || 0).toLocaleString('en-US')}`, 'green');
+}
+async function supPmEdit(pid){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'بیوپاری کی ادائیگی صرف ایڈمن بدل سکتا ہے۔'); return; }
+  const { pm, s } = _supPmFind(pid);
+  if(!pm || !s){ await uAlert('⚠️ ریکارڈ نہیں ملا', 'یہ ادائیگی پرانے آرکائیو میں ہے یا پہلے ہی حذف ہو چکی۔'); return; }
+  const isOut = pm.direction === 'out';
+  if(!(await uDialog({ title: isOut ? '⚠️ ادائیگی بدلیں؟' : '⚠️ وصولی بدلیں؟', message: 'بدلنے سے بیوپاری کا بقایا بھی بدل جائے گا۔ صرف غلطی درست کرنے کے لیے بدلیں۔', rows: _supPmRows(pm), okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'red' }))) return;
+  if(!(await _askAdminPinForSerialMaster(isOut ? 'بیوپاری کی ادائیگی بدلنے کے لیے' : 'بیوپاری کی وصولی بدلنے کے لیے'))) return;
+  const esc = x => (typeof escRlHtml === 'function' ? escRlHtml(x) : String(x == null ? '' : x).replace(/[<>"]/g, ''));
+  const day = bsPayDay(pm) || bizCurrentDate();
+  const note0 = (typeof _payUserNote === 'function' ? _payUserNote(pm.note) : pm.note) || '';
+  window.__sp = { amt: String(Number(pm.amount) || 0), day, note: note0 };
+  const box = 'width:100%; box-sizing:border-box; height:44px; margin-top:4px; border:1.5px solid #93c5fd; border-radius:10px; padding:0 10px; font-size:17px; font-weight:800;';
+  const ok = await uDialog({ title: isOut ? '✏️ ادائیگی درست کریں' : '✏️ وصولی درست کریں', okText: '💾 محفوظ کریں', cancelText: '✖ واپس', message:
+    `<div style="text-align:right; font-size:15px; font-weight:800;">رقم</div><input type="number" inputmode="decimal" value="${esc(window.__sp.amt)}" oninput="window.__sp.amt=this.value" style="${box} direction:ltr;">
+     <div style="text-align:right; font-size:15px; font-weight:800; margin-top:8px;">📅 تاریخ</div><input type="date" value="${esc(day)}" max="${esc(bizCurrentDate())}" oninput="window.__sp.day=this.value" style="${box}">
+     <div style="text-align:right; font-size:15px; font-weight:800; margin-top:8px;">نوٹ</div><input type="text" value="${esc(note0)}" oninput="window.__sp.note=this.value" style="${box} font-weight:600;">` });
+  if(!ok) return;
+  const nAmt = Math.round((parseFloat(window.__sp.amt) || 0) * 100) / 100;
+  if(nAmt <= 0){ await uAlert('⚠️ رقم درست نہیں', 'رقم صفر سے زیادہ ہو۔ پوری ادائیگی ختم کرنی ہو تو 🗑️ حذف دبائیں۔'); return; }
+  let nDay = /^\d{4}-\d{2}-\d{2}$/.test(window.__sp.day || '') ? window.__sp.day : day;
+  if(nDay > bizCurrentDate()) nDay = bizCurrentDate();
+  try{ pauseCloudPolling && pauseCloudPolling(10000); }catch(e){}
+  const oldDisc = Number(pm.discount) || 0;
+  const d = _supPmUndo(s, pm);
+  const balanceBefore = Number(s.total_payable) || 0;
+  const sp = calcSupplierSplit(s, nAmt, isOut ? oldDisc : 0, isOut ? 'pay' : 'receive');
+  s.total_payable = sp.payableAfter;
+  s.wallet_balance = sp.walletAfter;
+  s.ledgerHistory = s.ledgerHistory || [];
+  if(isOut){
+    financeDummy.cashInHand -= nAmt;
+    if(sp.discEff > 0) s.ledgerHistory.unshift({ type: 'payment', amount: sp.discEff, isDiscount: true, date: nDay, note: '🏷️ چھوٹ (ڈسکاؤنٹ)' + (window.__sp.note ? ' — ' + window.__sp.note : '') });
+    s.ledgerHistory.unshift({ type: 'payment', amount: nAmt, date: nDay, note: String(window.__sp.note || '').trim() });
+    if(sp.toWallet > 0) s.ledgerHistory.unshift({ type: 'wallet_deposit', amount: sp.toWallet, date: nDay, note: 'زیادہ ادائیگی — والٹ (ایڈوانس) میں جمع' });
+  } else {
+    financeDummy.cashInHand += nAmt;
+    s.ledgerHistory.unshift({ type: 'received', amount: nAmt, date: nDay, note: String(window.__sp.note || '').trim() || 'بیوپاری سے وصولی (ایڈوانس / ادھار)' });
+  }
+  const extra = [];
+  if(sp.discEff > 0) extra.push(`🏷️ چھوٹ Rs. ${sp.discEff.toLocaleString()}`);
+  if(sp.toWallet > 0) extra.push(`💳 Rs. ${sp.toWallet.toLocaleString()} والٹ میں جمع (نیا والٹ: Rs. ${s.wallet_balance.toLocaleString()})`);
+  if(sp.fromWallet > 0) extra.push(`💳 ایڈوانس واپس Rs. ${sp.fromWallet.toLocaleString()}`);
+  if(sp.addPayable > 0) extra.push(`➕ بیوپاری کے کھاتے میں جمع Rs. ${sp.addPayable.toLocaleString()}`);
+  const userNote = String(window.__sp.note || '').trim();
+  const fullNote = (userNote ? userNote + (extra.length ? ' — ' : '') : '') + extra.join(' — ');
+  Object.assign(pm, { amount: nAmt, balance_before: balanceBefore, balance_after: s.total_payable, wallet_added: sp.toWallet, wallet_after: s.wallet_balance, discount: sp.discEff,
+    biz_date: nDay, note: fullNote, edited: true, edited_at: new Date().toISOString(), edited_by: (AppState.currentUser && AppState.currentUser.name) || 'admin',
+    edit_from: { amount: d.amt, day } });
+  const cd = pm.cash_day || bizCurrentDate();
+  if(nDay < cd) pm.backdated = true; else delete pm.backdated;
+  s.ledgerHistory.unshift({ type: 'payment_edited', amount: nAmt, date: bizDateKey(), at: new Date().toISOString(), by: pm.edited_by, note: `${isOut ? 'ادائیگی' : 'وصولی'} درست — پہلے Rs. ${d.amt.toLocaleString('en-US')} (${day}) — اب Rs. ${nAmt.toLocaleString('en-US')} (${nDay})` });
+  _supPmAfterChange(s);
+  uAlert('✅ درست ہو گئی', `${isOut ? 'ادائیگی' : 'وصولی'} اب Rs. ${nAmt.toLocaleString('en-US')} — نیا بقایا Rs. ${Math.round(Number(s.total_payable) || 0).toLocaleString('en-US')}`, 'green');
+}
 function openPartyLedger(kind, id){
   pledState.kind = kind; pledState.id = id; pledState.embed = false;
   let ov = document.getElementById('pledOverlay');
@@ -30444,7 +30602,7 @@ function _pledTableHtml(R, forPrint){
   const th = 'position:sticky; top:0; z-index:2; padding:5px 4px; font-size:13px; font-weight:800; line-height:1.6; color:#fff; border:1px solid rgba(255,255,255,.4);';
   const body = R.rows.map(e => `<tr>
       <td style="padding:4px; border:1px solid #e2e8f0; font:700 12.5px/1.4 Arial,sans-serif; white-space:nowrap; direction:ltr; text-align:center;">${esc(e.day.split('-').reverse().join('/'))}</td>
-      <td style="padding:4px 6px; border:1px solid #e2e8f0; font-size:13.5px; line-height:1.7; text-align:right;">${esc(e.desc)}${!forPrint && e.pid != null && AppState.currentRole === 'admin' ? `<div style="display:flex; gap:6px; margin-top:3px;"><button type="button" onclick="pmEditCollection(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #2563eb; border-radius:8px; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">✏️ بدلیں</button><button type="button" onclick="pmDeleteCollection(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #dc2626; border-radius:8px; background:#fef2f2; color:#b91c1c; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">🗑️ حذف</button></div>` : ''}</td>
+      <td style="padding:4px 6px; border:1px solid #e2e8f0; font-size:13.5px; line-height:1.7; text-align:right;">${esc(e.desc)}${!forPrint && e.pid != null && AppState.currentRole === 'admin' ? `<div style="display:flex; gap:6px; margin-top:3px;"><button type="button" onclick="${e.sup ? 'supPmEdit' : 'pmEditCollection'}(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #2563eb; border-radius:8px; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">✏️ بدلیں</button><button type="button" onclick="${e.sup ? 'supPmDelete' : 'pmDeleteCollection'}(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #dc2626; border-radius:8px; background:#fef2f2; color:#b91c1c; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">🗑️ حذف</button></div>` : ''}</td>
       <td style="padding:4px; border:1px solid #fecaca; background:#fee2e2; color:#991b1b; font:900 14px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${f(e.red)}</td>
       <td style="padding:4px; border:1px solid #bbf7d0; background:#dcfce7; color:#166534; font:900 14px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${f(e.green)}</td>
       <td style="padding:4px; border:1px solid #e2e8f0; background:#f8fafc; color:${e.bal > 0 ? (R.isC ? '#991b1b' : '#7c2d12') : '#166534'}; font:800 13px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${Math.round(Math.abs(e.bal)).toLocaleString('en-US')}</td>
@@ -32849,6 +33007,7 @@ function updateAdvItemPrice(idx, price){
   const item = advOrderCart[idx];
   if(!item) return;
   item.unitPrice = Math.max(0, price);
+  item.priceManual = true; // ✍️ FM0611FR514: ہاتھ سے لگا ریٹ تازہ کاری سے نہ بدلے
   renderAdvOrderCart();
   updateAdvOrderFloatingCartBar();
 }
@@ -38010,8 +38169,8 @@ function fulfillAdvanceOrder(orderId){
   try{ fillMissingSaleRates(order.items); }catch(e){} // 🏷️ FM810TH346: خالی قیمتیں خودکار
   Billing.cart = order.items
     .filter(i => i.variant_id !== null) // ---------- کسٹم/رف آئٹمز جو انوینٹری میں نہیں، انہیں بل میں شامل نہیں کیا جا سکتا ----------
-    .map(i => { const _fv = findVariantByVariantId(i.variant_id); return {variant_id: i.variant_id, name: i.name, label: (_fv && _fv.label) || i.label || '', qty: i.qty, unitPrice: Number(i.unitPrice) || 0, chalanAlloc: i.chalanAlloc || null, laborPerUnit: (i.laborPerUnit != null) ? i.laborPerUnit : ((_fv && Number(_fv.sellLabor)) || 0), priceManual: !!i.priceManual}; });
-  try{ fillMissingSaleRates(Billing.cart); }catch(e){}
+    .map(i => { const _fv = findVariantByVariantId(i.variant_id); return {variant_id: i.variant_id, name: i.name, label: (_fv && _fv.label) || i.label || '', qty: i.qty, unitPrice: Number(i.unitPrice) || 0, chalanAlloc: i.chalanAlloc || null, laborPerUnit: (i.laborPerUnit != null) ? i.laborPerUnit : ((_fv && Number(_fv.sellLabor)) || 0), priceManual: !!i.priceManual, autoRate: !!i.autoRate}; });
+  try{ fillMissingSaleRates(Billing.cart, true); }catch(e){} // 🛠️ FM0611FR514
 
   const skippedCustom = order.items.filter(i => i.variant_id === null);
 
