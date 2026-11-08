@@ -10178,8 +10178,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM0811SU515'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'اپڈیٹ کے دوران ہی پرانا → نیا ورژن اور کیا بدلا نظر آتا ہے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0811SU516'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بیوپاری کے لین دین میں ہر ادائیگی / وصولی پر بدلیں اور حذف اب کام کرتے ہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -30315,23 +30315,29 @@ function _pledEntries(kind, id){
     out.push({ day: d, ts: ts(po.receivedAt || po.created_at, d), desc: '📦 مال آیا — ' + (po.items || []).length + ' سبزیاں', red: 0, green: poAmt(po) });
   });
   // ✏️ FM0611FR514: بیوپاری کی ادائیگی/وصولی کی ہر سطر کو اس کے اصل payment_id سے جوڑیں تاکہ ایڈمن بدل/حذف کر سکے
-  const _sPays = (_withArch(paymentsData, 'pay') || []).filter(pm => pm && pm.party_type === 'supplier' && pm.party_id === id);
+  const _sPays = (paymentsData || []).filter(pm => pm && pm.party_type === 'supplier' && pm.party_id === id); // FM0811SU516: آرکائیو والی ادائیگی کھاتے کی سطر (led) سے بدلے / حذف ہو
   const _sUsed = new Set();
   const _sFindPid = (dir, a, d) => {
     const m = _sPays.find(pm => !_sUsed.has(pm.payment_id) && pm.direction === dir && Math.round(Number(pm.amount) || 0) === Math.round(a) && (_pledDay(bsPayDay(pm)) === d || _pledDay(pm.date) === d));
     if(m){ _sUsed.add(m.payment_id); return m.payment_id; }
+    // 🛠️ FM0811SU516 (ہیلپ ڈیسک #126): تاریخ نہ ملے تو اسی رقم / سمت کی قریب ترین (7 دن تک) ادائیگی
+    const dn = x => { const t = Date.parse(String(x || '').slice(0, 10) + 'T12:00:00'); return isNaN(t) ? NaN : t / 864e5; };
+    let best = null, bd = 8;
+    _sPays.forEach(pm => { if(_sUsed.has(pm.payment_id) || pm.direction !== dir || Math.round(Number(pm.amount) || 0) !== Math.round(a)) return;
+      const k = Math.min(Math.abs(dn(bsPayDay(pm)) - dn(d)), Math.abs(dn(pm.date) - dn(d))); if(k < bd){ bd = k; best = pm; } });
+    if(best){ _sUsed.add(best.payment_id); return best.payment_id; }
     return undefined;
   };
-  (sp.ledgerHistory || []).forEach(h => {
+  (sp.ledgerHistory || []).forEach((h, _li) => {
     if(!h) return; const d = _pledDay(h.date), a = Number(h.amount) || 0; if(!a) return;
     const note = (typeof _payUserNote === 'function' ? _payUserNote(h.note) : h.note) || '';
     if(h.type === 'payment'){
       const pid = h.isDiscount ? undefined : _sFindPid('out', a, d);
-      out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: (h.isDiscount ? '🏷️ چھوٹ' : '💵 ادائیگی بھیجی') + (note ? ' — ' + note : '') + ((pid != null && (_sPays.find(x => x.payment_id === pid) || {}).edited) ? ' (✏️ درست کی گئی)' : ''), red: a, green: 0, pid, sup: pid != null });
+      out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: (h.isDiscount ? '🏷️ چھوٹ' : '💵 ادائیگی بھیجی') + (note ? ' — ' + note : '') + ((pid != null && (_sPays.find(x => x.payment_id === pid) || {}).edited) ? ' (✏️ درست کی گئی)' : ''), red: a, green: 0, pid, sup: pid != null, led: (pid == null && !h.isDiscount) ? { sid: id, i: _li } : null });
     }
     else if(h.type === 'received'){
       const pid = _sFindPid('in', a, d);
-      out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: '📥 رقم آئی (ادھار لیا)' + (note ? ' — ' + note : '') + ((pid != null && (_sPays.find(x => x.payment_id === pid) || {}).edited) ? ' (✏️ درست کی گئی)' : ''), red: 0, green: a, pid, sup: pid != null });
+      out.push({ day: d, ts: ts(h.at || h.created_at, d), desc: '📥 رقم آئی (ادھار لیا)' + (note ? ' — ' + note : '') + ((pid != null && (_sPays.find(x => x.payment_id === pid) || {}).edited) ? ' (✏️ درست کی گئی)' : ''), red: 0, green: a, pid, sup: pid != null, led: pid == null ? { sid: id, i: _li } : null });
     }
   });
   return { party: sp, out, now: (Number(sp.total_payable) || 0) - (Number(sp.wallet_balance) || 0), sign: -1 };
@@ -30543,11 +30549,11 @@ async function supPmEdit(pid){
   window.__sp = { amt: String(Number(pm.amount) || 0), day, note: note0 };
   const box = 'width:100%; box-sizing:border-box; height:44px; margin-top:4px; border:1.5px solid #93c5fd; border-radius:10px; padding:0 10px; font-size:17px; font-weight:800;';
   const ok = await uDialog({ title: isOut ? '✏️ ادائیگی درست کریں' : '✏️ وصولی درست کریں', okText: '💾 محفوظ کریں', cancelText: '✖ واپس', message:
-    `<div style="text-align:right; font-size:15px; font-weight:800;">رقم</div><input type="number" inputmode="decimal" value="${esc(window.__sp.amt)}" oninput="window.__sp.amt=this.value" style="${box} direction:ltr;">
+    `<div style="text-align:right; font-size:15px; font-weight:800;">رقم</div><input type="text" inputmode="decimal" value="${esc(window.__sp.amt)}" oninput="window.__sp.amt=this.value" style="${box} direction:ltr;">
      <div style="text-align:right; font-size:15px; font-weight:800; margin-top:8px;">📅 تاریخ</div><input type="date" value="${esc(day)}" max="${esc(bizCurrentDate())}" oninput="window.__sp.day=this.value" style="${box}">
      <div style="text-align:right; font-size:15px; font-weight:800; margin-top:8px;">نوٹ</div><input type="text" value="${esc(note0)}" oninput="window.__sp.note=this.value" style="${box} font-weight:600;">` });
   if(!ok) return;
-  const nAmt = Math.round((parseFloat(window.__sp.amt) || 0) * 100) / 100;
+  const nAmt = Math.round((parseFloat(String(window.__sp.amt || '').replace(/[۰-۹]/g, c => '۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[, ]/g, '')) || 0) * 100) / 100;
   if(nAmt <= 0){ await uAlert('⚠️ رقم درست نہیں', 'رقم صفر سے زیادہ ہو۔ پوری ادائیگی ختم کرنی ہو تو 🗑️ حذف دبائیں۔'); return; }
   let nDay = /^\d{4}-\d{2}-\d{2}$/.test(window.__sp.day || '') ? window.__sp.day : day;
   if(nDay > bizCurrentDate()) nDay = bizCurrentDate();
@@ -30583,6 +30589,69 @@ async function supPmEdit(pid){
   s.ledgerHistory.unshift({ type: 'payment_edited', amount: nAmt, date: bizDateKey(), at: new Date().toISOString(), by: pm.edited_by, note: `${isOut ? 'ادائیگی' : 'وصولی'} درست — پہلے Rs. ${d.amt.toLocaleString('en-US')} (${day}) — اب Rs. ${nAmt.toLocaleString('en-US')} (${nDay})` });
   _supPmAfterChange(s);
   uAlert('✅ درست ہو گئی', `${isOut ? 'ادائیگی' : 'وصولی'} اب Rs. ${nAmt.toLocaleString('en-US')} — نیا بقایا Rs. ${Math.round(Number(s.total_payable) || 0).toLocaleString('en-US')}`, 'green');
+}
+
+// 🛠️ FM0811SU516 (ہیلپ ڈیسک #126، صدام): کھاتے کی جس ادائیگی / وصولی کا الگ ادائیگی ریکارڈ نہ ملے (پرانا / دوسرے فون / کسی اور راستے سے)،
+// اس پر بھی ✏️ بدلیں / 🗑️ حذف — سیدھا کھاتے کی سطر سے: بقایا، کیش اور کھاتہ خود درست (صرف ایڈمن، تنبیہ + PIN)
+function _supLedGet(sid, i, amt){
+  const s = (suppliersData || []).find(x => x && x.supplier_id === sid); if(!s) return {};
+  const h = (s.ledgerHistory || [])[i];
+  if(!h || (h.type !== 'payment' && h.type !== 'received') || h.isDiscount || Math.round(Number(h.amount) || 0) !== Math.round(Number(amt) || 0)) return { s };
+  return { s, h };
+}
+function _supLedApply(s, isOut, amt, sign){ // sign = -1 → اثر واپس، +1 → اثر لگائیں
+  if(isOut){ s.total_payable = (Number(s.total_payable) || 0) - sign * amt; financeDummy.cashInHand = (Number(financeDummy.cashInHand) || 0) - sign * amt; }
+  else { s.total_payable = (Number(s.total_payable) || 0) + sign * amt; financeDummy.cashInHand = (Number(financeDummy.cashInHand) || 0) + sign * amt; }
+  if(s.total_payable < 0){ s.wallet_balance = (Number(s.wallet_balance) || 0) - s.total_payable; s.total_payable = 0; }
+}
+async function supLedDelete(sid, i, amt){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'بیوپاری کی ادائیگی صرف ایڈمن حذف کر سکتا ہے۔'); return; }
+  const { s, h } = _supLedGet(sid, i, amt);
+  if(!s || !h){ await uAlert('⚠️ ریکارڈ بدل گیا', 'کھاتہ ابھی تازہ ہوا ہے — دوبارہ کھول کر کوشش کریں۔'); try{ renderPartyLedger(); }catch(e){} return; }
+  const isOut = h.type === 'payment', a = Number(h.amount) || 0;
+  if(!(await uDialog({ title: isOut ? '⚠️ ادائیگی حذف کریں؟' : '⚠️ وصولی حذف کریں؟',
+    message: isOut ? 'یہ ادائیگی کھاتے سے نکل جائے گی اور بیوپاری کا بقایا اتنا <b>بڑھ جائے گا</b>۔ رقم کیش میں واپس آ جائے گی۔' : 'یہ وصولی کھاتے سے نکل جائے گی اور بیوپاری کا بقایا اتنا <b>کم ہو جائے گا</b>۔ رقم کیش سے کم ہو گی۔',
+    rows: [{ label: 'بیوپاری', value: s.name || '', big: true }, { label: isOut ? 'ادائیگی' : 'وصولی', value: 'Rs. ' + Math.round(a).toLocaleString('en-US'), bg: '#fee2e2', fg: '#7f1d1d' }, { label: 'تاریخ', value: String(h.date || '').slice(0, 10).split('-').reverse().join('/') }],
+    okText: 'ہاں، آگے', cancelText: '✖ واپس', tone: 'red' }))) return;
+  if(!(await _askAdminPinForSerialMaster(isOut ? 'بیوپاری کی ادائیگی حذف کرنے کے لیے' : 'بیوپاری کی وصولی حذف کرنے کے لیے'))) return;
+  const chk = _supLedGet(sid, i, amt); if(chk.h !== h){ await uAlert('⚠️ ریکارڈ بدل گیا', 'دوبارہ کوشش کریں۔'); return; }
+  try{ pauseCloudPolling && pauseCloudPolling(10000); }catch(e){}
+  const before = Math.round(Number(s.total_payable) || 0);
+  _supLedApply(s, isOut, a, -1);
+  s.ledgerHistory.splice(i, 1);
+  s.ledgerHistory.unshift({ type: 'payment_deleted', amount: a, date: bizDateKey(), at: new Date().toISOString(), by: (AppState.currentUser && AppState.currentUser.name) || 'admin', note: `${isOut ? 'ادائیگی' : 'وصولی'} حذف — ${String(h.date || '').slice(0, 10)} — Rs. ${Math.round(a).toLocaleString('en-US')}` });
+  _supPmAfterChange(s);
+  uAlert('✅ حذف ہو گئی', `${isOut ? 'ادائیگی' : 'وصولی'} Rs. ${Math.round(a).toLocaleString('en-US')} حذف — بقایا Rs. ${before.toLocaleString('en-US')} ← Rs. ${Math.round(Number(s.total_payable) || 0).toLocaleString('en-US')}`, 'green');
+}
+async function supLedEdit(sid, i, amt){
+  if(AppState.currentRole !== 'admin'){ await uAlert('🔒 صرف ایڈمن', 'بیوپاری کی ادائیگی صرف ایڈمن بدل سکتا ہے۔'); return; }
+  const { s, h } = _supLedGet(sid, i, amt);
+  if(!s || !h){ await uAlert('⚠️ ریکارڈ بدل گیا', 'کھاتہ ابھی تازہ ہوا ہے — دوبارہ کھول کر کوشش کریں۔'); try{ renderPartyLedger(); }catch(e){} return; }
+  const isOut = h.type === 'payment', a = Number(h.amount) || 0;
+  if(!(await _askAdminPinForSerialMaster(isOut ? 'بیوپاری کی ادائیگی بدلنے کے لیے' : 'بیوپاری کی وصولی بدلنے کے لیے'))) return;
+  const esc = x => String(x == null ? '' : x).replace(/[<>"]/g, '');
+  const day = String(h.date || '').slice(0, 10) || bizCurrentDate();
+  const note0 = (typeof _payUserNote === 'function' ? _payUserNote(h.note) : h.note) || '';
+  window.__sl = { amt: String(a), day, note: note0 };
+  const box = 'width:100%; box-sizing:border-box; height:44px; margin-top:4px; border:1.5px solid #93c5fd; border-radius:10px; padding:0 10px; font-size:17px; font-weight:800;';
+  const ok = await uDialog({ title: isOut ? '✏️ ادائیگی درست کریں' : '✏️ وصولی درست کریں', okText: '💾 محفوظ کریں', cancelText: '✖ واپس', message:
+    `<div style="text-align:right; font-size:15px; font-weight:800;">رقم</div><input type="text" inputmode="decimal" value="${esc(window.__sl.amt)}" oninput="window.__sl.amt=this.value" style="${box} direction:ltr;">
+     <div style="text-align:right; font-size:15px; font-weight:800; margin-top:8px;">📅 تاریخ</div><input type="date" value="${esc(day)}" max="${esc(bizCurrentDate())}" oninput="window.__sl.day=this.value" style="${box}">
+     <div style="text-align:right; font-size:15px; font-weight:800; margin-top:8px;">نوٹ</div><input type="text" value="${esc(note0)}" oninput="window.__sl.note=this.value" style="${box} font-weight:600;">` });
+  if(!ok) return;
+  const toEn = v => String(v || '').replace(/[۰-۹]/g, c => '۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[, ]/g, '');
+  const nAmt = Math.round((parseFloat(toEn(window.__sl.amt)) || 0) * 100) / 100;
+  if(nAmt <= 0){ await uAlert('⚠️ رقم درست نہیں', 'رقم صفر سے زیادہ ہو۔ پوری ادائیگی ختم کرنی ہو تو 🗑️ حذف دبائیں۔'); return; }
+  let nDay = /^\d{4}-\d{2}-\d{2}$/.test(window.__sl.day || '') ? window.__sl.day : day;
+  if(nDay > bizCurrentDate()) nDay = bizCurrentDate();
+  const chk = _supLedGet(sid, i, amt); if(chk.h !== h){ await uAlert('⚠️ ریکارڈ بدل گیا', 'دوبارہ کوشش کریں۔'); return; }
+  try{ pauseCloudPolling && pauseCloudPolling(10000); }catch(e){}
+  _supLedApply(s, isOut, a, -1);
+  _supLedApply(s, isOut, nAmt, +1);
+  Object.assign(h, { amount: nAmt, date: nDay, note: String(window.__sl.note || '').trim(), edited: true });
+  s.ledgerHistory.unshift({ type: 'payment_edited', amount: nAmt, date: bizDateKey(), at: new Date().toISOString(), by: (AppState.currentUser && AppState.currentUser.name) || 'admin', note: `${isOut ? 'ادائیگی' : 'وصولی'} درست — پہلے Rs. ${Math.round(a).toLocaleString('en-US')} (${day}) — اب Rs. ${Math.round(nAmt).toLocaleString('en-US')} (${nDay})` });
+  _supPmAfterChange(s);
+  uAlert('✅ درست ہو گئی', `${isOut ? 'ادائیگی' : 'وصولی'} اب Rs. ${Math.round(nAmt).toLocaleString('en-US')} — نیا بقایا Rs. ${Math.round(Number(s.total_payable) || 0).toLocaleString('en-US')}`, 'green');
 }
 function openPartyLedger(kind, id){
   pledState.kind = kind; pledState.id = id; pledState.embed = false;
@@ -30623,7 +30692,7 @@ function _pledTableHtml(R, forPrint){
   const th = 'position:sticky; top:0; z-index:2; padding:5px 4px; font-size:13px; font-weight:800; line-height:1.6; color:#fff; border:1px solid rgba(255,255,255,.4);';
   const body = R.rows.map(e => `<tr>
       <td style="padding:4px; border:1px solid #e2e8f0; font:700 12.5px/1.4 Arial,sans-serif; white-space:nowrap; direction:ltr; text-align:center;">${esc(e.day.split('-').reverse().join('/'))}</td>
-      <td style="padding:4px 6px; border:1px solid #e2e8f0; font-size:13.5px; line-height:1.7; text-align:right;">${esc(e.desc)}${!forPrint && e.pid != null && AppState.currentRole === 'admin' ? `<div style="display:flex; gap:6px; margin-top:3px;"><button type="button" onclick="${e.sup ? 'supPmEdit' : 'pmEditCollection'}(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #2563eb; border-radius:8px; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">✏️ بدلیں</button><button type="button" onclick="${e.sup ? 'supPmDelete' : 'pmDeleteCollection'}(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #dc2626; border-radius:8px; background:#fef2f2; color:#b91c1c; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">🗑️ حذف</button></div>` : ''}</td>
+      <td style="padding:4px 6px; border:1px solid #e2e8f0; font-size:13.5px; line-height:1.7; text-align:right;">${esc(e.desc)}${!forPrint && e.pid != null && AppState.currentRole === 'admin' ? `<div style="display:flex; gap:6px; margin-top:3px;"><button type="button" onclick="${e.sup ? 'supPmEdit' : 'pmEditCollection'}(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #2563eb; border-radius:8px; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">✏️ بدلیں</button><button type="button" onclick="${e.sup ? 'supPmDelete' : 'pmDeleteCollection'}(${e.pid})" style="flex:1; padding:3px 0; border:1.5px solid #dc2626; border-radius:8px; background:#fef2f2; color:#b91c1c; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">🗑️ حذف</button></div>` : ''}${!forPrint && !e.pid && e.led && AppState.currentRole === 'admin' ? `<div style="display:flex; gap:6px; margin-top:3px;"><button type="button" onclick="supLedEdit(${e.led && e.led.sid}, ${e.led && e.led.i}, ${Math.round(e.red || e.green || 0)})" style="flex:1; padding:3px 0; border:1.5px solid #2563eb; border-radius:8px; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">✏️ بدلیں</button><button type="button" onclick="supLedDelete(${e.led && e.led.sid}, ${e.led && e.led.i}, ${Math.round(e.red || e.green || 0)})" style="flex:1; padding:3px 0; border:1.5px solid #dc2626; border-radius:8px; background:#fef2f2; color:#b91c1c; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">🗑️ حذف</button></div>` : ''}</td>
       <td style="padding:4px; border:1px solid #fecaca; background:#fee2e2; color:#991b1b; font:900 14px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${f(e.red)}</td>
       <td style="padding:4px; border:1px solid #bbf7d0; background:#dcfce7; color:#166534; font:900 14px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${f(e.green)}</td>
       <td style="padding:4px; border:1px solid #e2e8f0; background:#f8fafc; color:${e.bal > 0 ? (R.isC ? '#991b1b' : '#7c2d12') : '#166534'}; font:800 13px/1.4 Arial,sans-serif; text-align:center; white-space:nowrap;">${Math.round(Math.abs(e.bal)).toLocaleString('en-US')}</td>
