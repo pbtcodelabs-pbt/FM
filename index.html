@@ -6398,6 +6398,8 @@ function __appHostKind(h, p){
           <div style="display:flex; align-items:center; gap:10px;">
             <span style="cursor:pointer; font-size:13px; font-weight:700; color:var(--primary-dark); background:#eef2ff; padding:5px 10px; border-radius:8px;" onclick="openEditBillCustomerModal()">✏️ Edit Customer</span>
             <span class="adminOnlyShort" style="cursor:pointer; font-size:13px; font-weight:700; color:#b91c1c; background:#fee2e2; padding:5px 10px; border-radius:8px; white-space:nowrap;" onclick="editBillShort()" title="بل کے لال ڈبے (ٹوٹل کم وصولی) کی رقم درست کریں">✏️ لال ڈبہ لکھیں</span>
+            <!-- FM0911MO518 (ہیلپ ڈیسک #191، صدام): بل کے اوپر سیدھا ↩️ واپسی -->
+            <span id="billReturnBtn" style="cursor:pointer; font-size:13px; font-weight:800; color:#fff; background:linear-gradient(180deg,#f97316,#c2410c); padding:5px 10px; border-radius:8px; white-space:nowrap;" onclick="(function(){ const id = currentPreviewInvoiceId; if(id == null) return; closeInvoicePreview(); openReturnItemModal(id); })()" title="اس بل کی کوئی چیز واپس کریں">↩️ واپسی</span>
             <span style="cursor:pointer;" onclick="closeInvoicePreview()">✖</span>
           </div>
         </div>
@@ -7328,7 +7330,11 @@ function __appHostKind(h, p){
       <div class="invoicePreviewBox">
         <div class="previewHeader">
           <strong style="font-family:'JameelNooriNastaleeqKasheeda','Noto Nastaliq Urdu',serif; font-weight:400; font-size:20px;">📦 بیوپاری خریداری</strong>
-          <span style="cursor:pointer;" onclick="closePoPreview()">✖</span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <!-- FM0911MO518 (ہیلپ ڈیسک #191، صدام): بیوپاری کے بل کے اوپر سیدھا ↩️ واپسی -->
+            <span id="poReturnBtn" style="cursor:pointer; font-size:13px; font-weight:800; color:#fff; background:linear-gradient(180deg,#f97316,#c2410c); padding:5px 10px; border-radius:8px; white-space:nowrap;" onclick="(function(){ const sid = currentPreviewPoSupplierId, i = currentPreviewPoIdx, p = getCurrentPreviewPo(); if(!p) return; if(p.po.status !== 'received'){ alert('یہ مال ابھی وصول نہیں ہوا — پہلے «🚚 مال وصول کریں»، پھر واپسی۔'); return; } closePoPreview(); openSupplierReturnModal(sid, i); })()" title="اس خریداری کی کوئی چیز بیوپاری کو واپس کریں">↩️ واپسی</span>
+            <span style="cursor:pointer;" onclick="closePoPreview()">✖</span>
+          </div>
         </div>
 
         <div class="previewStyleControls compactPsc">
@@ -10178,8 +10184,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM0911MO517'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بل میں مزدوری پھر شامل — چالان میں مزدوری 0 ہو تو سبزی کی مزدوری لگتی ہے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0911MO518'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'گاہک اور بیوپاری کے بل کے اوپر سیدھا ↩️ واپسی کا بٹن'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
