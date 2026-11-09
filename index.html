@@ -10178,8 +10178,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM0811SU516'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بیوپاری کے لین دین میں ہر ادائیگی / وصولی پر بدلیں اور حذف اب کام کرتے ہیں'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM0911MO517'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بل میں مزدوری پھر شامل — چالان میں مزدوری 0 ہو تو سبزی کی مزدوری لگتی ہے'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -16756,8 +16756,11 @@ function fillMissingSaleRates(items, forceAuto){
     if(price > 0){
       if(Number(it.unitPrice) !== price){ it.unitPrice = price; changed = true; }
       if(!had) it.autoRate = true; // یہ قیمت خودکار لگی تھی — آئندہ ریٹ بدلے تو یہ بھی بدلے
-      if(it.laborPerUnit == null){ it.laborPerUnit = (labor != null) ? labor : (Number(v.sellLabor) || 0); changed = true; }
-      else if(labor != null && !it.laborManual && Number(it.laborPerUnit) !== Number(labor)){ it.laborPerUnit = labor; changed = true; }
+      /* FM0911MO517 (ہیلپ ڈیسک #192، صدام بھائی: «بل میں مزدوری شامل نہیں ہو رہی»): FM0611FR514 سے چالان کی مزدوری 0 / خالی ہو تو
+         بل کی مزدوری بھی 0 کر دی جاتی (سبزی کی اپنی مزدوری کے باوجود) — اب چالان کی مزدوری 0 ہو تو سبزی کی مزدوری (v.sellLabor) */
+      const _lab = (labor != null && Number(labor) > 0) ? Number(labor) : (Number(v.sellLabor) || 0);
+      if(it.laborPerUnit == null){ it.laborPerUnit = _lab; changed = true; }
+      else if(!it.laborManual && Number(it.laborPerUnit) !== _lab && !(_lab === 0 && Number(it.laborPerUnit) > 0)){ it.laborPerUnit = _lab; changed = true; }
     }
   });
   return changed;
