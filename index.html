@@ -10184,8 +10184,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM0911MO518'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'گاہک اور بیوپاری کے بل کے اوپر سیدھا ↩️ واپسی کا بٹن'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1011TU519'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بیوپاری / گاہک کے کھاتے اور لین دین کے نیچے «◀ پچھلا / اگلا ▶» — بار بار فہرست میں نہیں جانا پڑے گا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -55935,6 +55935,51 @@ function openHelpDesk(){
   window.open('https://pbtcodelabs-pbt.github.io/help/?' + q + '#/app/FM', '_blank');
 }
 window.openHelpDesk = openHelpDesk;
+</script>
+<script type="text/fm-boot">
+/* FM1011TU519 (مالک کا حکم، ہیلپ ڈیسک #216): بیوپاری / گاہک کا کھاتہ (پروفائل، لین دین) کھلا ہو تو نیچے «◀ پچھلا / اگلا ▶» —
+   ترتیب وہی جو فہرست (کھاتے کی اسکرین) میں نظر آتی ہے (تلاش / فلٹر سمیت)، فہرست نہ کھلی ہو تو سیریل نمبر سے؛ بار بار ڈراپ ڈاؤن میں نہیں جانا */
+(function(){
+  const ORD = { customers: [], suppliers: [] };
+  function idsFromList(kind){
+    const w = document.getElementById('partyListWrap'); if(!w) return [];
+    const rx = kind === 'customers' ? /openCustomerProfile\((\d+)\)/ : /openSupplierProfile\((\d+)\)/, out = [];
+    w.querySelectorAll('[onclick]').forEach(el => { const m = rx.exec(el.getAttribute('onclick') || ''); if(m){ const n = +m[1]; if(!out.includes(n)) out.push(n); } });
+    return out;
+  }
+  if(typeof renderPartyList === 'function'){ const _r = renderPartyList; renderPartyList = function(){ const x = _r.apply(this, arguments); try{ const k = currentPartyTab === 'suppliers' ? 'suppliers' : 'customers', L = idsFromList(k); if(L.length) ORD[k] = L; }catch(e){} return x; }; window.renderPartyList = renderPartyList; }
+  function order(kind, cur){
+    let L = ORD[kind] || [];
+    if(!L.length || !L.includes(cur)){
+      const src = kind === 'customers' ? (customersData || []).filter(c => !c.isDormant || c.customer_id === cur) : (suppliersData || []);
+      L = src.slice().sort((a, b) => ((a.serial_no ?? 1e9) - (b.serial_no ?? 1e9)) || String(a.name || '').localeCompare(String(b.name || ''))).map(x => kind === 'customers' ? x.customer_id : x.supplier_id);
+    }
+    return L;
+  }
+  function nameOf(kind, id){ const L = kind === 'customers' ? customersData : suppliersData; const p = (L || []).find(x => (kind === 'customers' ? x.customer_id : x.supplier_id) === id); return p ? (p.name || '') : ''; }
+  function navHtml(kind, id, where){
+    const L = order(kind, id), i = L.indexOf(id), n = L.length; if(n < 2 || i < 0) return '';
+    const prev = L[(i - 1 + n) % n], next = L[(i + 1) % n], w = kind === 'customers' ? 'گاہک' : 'بیوپاری';
+    const b = (to, txt, nm) => `<button type="button" onclick="event.stopPropagation(); fmPartyGo('${kind}', ${to}, '${where}')" style="flex:1; min-width:0; padding:9px 6px; border:none; border-radius:12px; background:var(--primary,#16a34a); color:#fff; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; line-height:1.3;">${txt}<br><small style="font-size:11.5px; font-weight:600; opacity:.9; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${String(nm).replace(/[<>&"]/g, '')}</small></button>`;
+    return `<div id="fmPNav_${where}" dir="rtl" style="position:sticky; bottom:0; z-index:5; display:flex; gap:8px; align-items:center; padding:8px; margin-top:8px; background:rgba(255,255,255,.97); border-top:2px solid #e2e8f0; box-shadow:0 -4px 12px rgba(0,0,0,.08); border-radius:0 0 14px 14px;">
+      ${b(prev, '▶ پچھلا ' + w, nameOf(kind, prev))}<div style="flex:0 0 auto; font-size:13px; font-weight:800; color:#334155; font-family:Arial,sans-serif;">${i + 1} / ${n}</div>${b(next, 'اگلا ' + w + ' ◀', nameOf(kind, next))}</div>`;
+  }
+  window.fmPartyGo = function(kind, id, where){
+    if(where === 'led'){ openPartyLedger(kind, id); return; }
+    if(kind === 'customers') openCustomerProfile(id); else openSupplierProfile(id);
+    try{ const b = document.getElementById('profileBoxEl'); if(b) b.scrollTop = 0; }catch(e){}
+  };
+  function putProfile(kind, id){
+    const box = document.getElementById('profileBoxEl'); if(!box) return;
+    const old = document.getElementById('fmPNav_pro'); if(old) old.remove();
+    const h = navHtml(kind, id, 'pro'); if(h) box.insertAdjacentHTML('beforeend', h);
+  }
+  if(typeof openCustomerProfile === 'function'){ const _o = openCustomerProfile; openCustomerProfile = function(id){ const x = _o.apply(this, arguments); try{ putProfile('customers', +id); }catch(e){} return x; }; window.openCustomerProfile = openCustomerProfile; }
+  if(typeof openSupplierProfile === 'function'){ const _o = openSupplierProfile; openSupplierProfile = function(id){ const x = _o.apply(this, arguments); try{ putProfile('suppliers', +id); }catch(e){} return x; }; window.openSupplierProfile = openSupplierProfile; }
+  if(typeof renderPartyLedger === 'function'){ const _l = renderPartyLedger; renderPartyLedger = function(){ const x = _l.apply(this, arguments);
+    try{ const ov = document.getElementById('pledOverlay'); if(ov && pledState && !pledState.embed && (pledState.kind === 'customers' || pledState.kind === 'suppliers')){ const old = document.getElementById('fmPNav_led'); if(old) old.remove(); const box = ov.firstElementChild || ov; const h = navHtml(pledState.kind, +pledState.id, 'led'); if(h) box.insertAdjacentHTML('beforeend', h); } }catch(e){}
+    return x; }; window.renderPartyLedger = renderPartyLedger; }
+})();
 </script>
 <script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="FM" defer></script>
 <script>
