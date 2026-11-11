@@ -10184,8 +10184,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1011TU519'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'بیوپاری / گاہک کے کھاتے اور لین دین کے نیچے «◀ پچھلا / اگلا ▶» — بار بار فہرست میں نہیں جانا پڑے گا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1111WE520'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'گاہک کے بل اور بیوپاری کی خریداری کے اوپر «▶ پچھلی تاریخ / اگلی تاریخ ◀» — اسی گاہک / بیوپاری کے پچھلے اگلے بل'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -55979,6 +55979,49 @@ window.openHelpDesk = openHelpDesk;
   if(typeof renderPartyLedger === 'function'){ const _l = renderPartyLedger; renderPartyLedger = function(){ const x = _l.apply(this, arguments);
     try{ const ov = document.getElementById('pledOverlay'); if(ov && pledState && !pledState.embed && (pledState.kind === 'customers' || pledState.kind === 'suppliers')){ const old = document.getElementById('fmPNav_led'); if(old) old.remove(); const box = ov.firstElementChild || ov; const h = navHtml(pledState.kind, +pledState.id, 'led'); if(h) box.insertAdjacentHTML('beforeend', h); } }catch(e){}
     return x; }; window.renderPartyLedger = renderPartyLedger; }
+})();
+</script>
+<script type="text/fm-boot">
+/* FM1111WE520 (ہیلپ ڈیسک #190، صدام): گاہک کا بل / بیوپاری کی خریداری کھلی ہو تو اوپر «▶ پچھلی تاریخ | 3 / 12 | اگلی تاریخ ◀» —
+   اسی گاہک / بیوپاری کا پچھلا یا اگلا بل (تاریخ وار)؛ گاہک / بیوپاری نہیں بدلتا۔ صرف کھولنے کا راستہ، حساب کچھ نہیں بدلا */
+(function(){
+  const esc = s => String(s == null ? '' : s).replace(/[<>&"]/g, '');
+  const tsOf = x => { const t = Date.parse((x && (x.created_at || x.biz_date || x.date || x.receivedDate)) || ''); return isNaN(t) ? 0 : t; };
+  const dayOf = x => { const s = String((x && (x.biz_date || x.date || x.created_at)) || ''); const m = /(\d{4})-(\d{2})-(\d{2})/.exec(s); if(m) return m[3] + '/' + m[2] + '/' + m[1]; const t = tsOf(x); if(!t) return ''; const d = new Date(t); return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); };
+  const btn = (fn, arg, txt, sub) => `<button type="button" onclick="event.stopPropagation(); ${fn}(${arg})" style="flex:1; min-width:0; padding:7px 6px; border:none; border-radius:11px; background:var(--primary,#16a34a); color:#fff; font-family:inherit; font-size:14.5px; font-weight:800; cursor:pointer; line-height:1.3;">${txt}<br><small style="font-size:11.5px; font-weight:700; opacity:.92; font-family:Arial,sans-serif;">${esc(sub)}</small></button>`;
+  const off = txt => `<div style="flex:1; min-width:0; padding:7px 6px; border-radius:11px; background:#e2e8f0; color:#94a3b8; font-size:13px; font-weight:700; text-align:center; line-height:1.3;">${txt}<br><small style="font-size:11px;">—</small></div>`;
+  function bar(id, list, i, fn, argOf){
+    const n = list.length; if(n < 2 || i < 0) return '';
+    const p = list[i - 1], q = list[i + 1];
+    return `<div id="${id}" dir="rtl" style="display:flex; gap:8px; align-items:center; padding:6px 8px; background:#f1f5f9; border-bottom:2px solid #e2e8f0;">
+      ${p ? btn(fn, argOf(p), '▶ پچھلی تاریخ', dayOf(p)) : off('▶ پچھلی تاریخ')}<div dir="ltr" style="flex:0 0 auto; text-align:center; font-size:12.5px; font-weight:800; color:#334155; font-family:Arial,sans-serif;">${i + 1} / ${n}<br><small style="font-weight:700; color:#64748b;">${esc(dayOf(list[i]))}</small></div>${q ? btn(fn, argOf(q), 'اگلی تاریخ ◀', dayOf(q)) : off('اگلی تاریخ ◀')}</div>`;
+  }
+  function place(modalId, id, html){
+    const old = document.getElementById(id); if(old) old.remove(); if(!html) return;
+    const m = document.getElementById(modalId); const h = m && m.querySelector('.previewHeader'); if(h) h.insertAdjacentHTML('afterend', html);
+  }
+  /* گاہک کے بل */
+  function custBills(cid){
+    const seen = new Set(), out = [];
+    const add = a => (a || []).forEach(v => { if(v && v.customer_id === cid && v.status !== 'voided' && !seen.has(v.invoice_id)){ seen.add(v.invoice_id); out.push(v); } });
+    add(typeof invoicesData !== 'undefined' ? invoicesData : []);
+    try{ add(_archMem && _archMem.inv); }catch(e){}
+    return out.sort((a, b) => (tsOf(a) - tsOf(b)) || (String(a.invoice_id) < String(b.invoice_id) ? -1 : 1));
+  }
+  window.fmBillGo = function(id){ try{ openInvoicePreview(id); const b = document.querySelector('#invoicePreviewModal .invoicePreviewBox'); if(b) b.scrollTop = 0; }catch(e){} };
+  if(typeof openInvoicePreview === 'function'){ const _o = openInvoicePreview; openInvoicePreview = function(id){ const x = _o.apply(this, arguments);
+    try{ const inv = (invoicesData || []).find(v => v && v.invoice_id === id); let h = '';
+      if(inv && inv.customer_id != null){ const L = custBills(inv.customer_id); h = bar('fmBillNav', L, L.findIndex(v => v.invoice_id === id), 'fmBillGo', v => JSON.stringify(v.invoice_id).replace(/"/g, '&quot;')); }
+      place('invoicePreviewModal', 'fmBillNav', h); }catch(e){}
+    return x; }; window.openInvoicePreview = openInvoicePreview; }
+  /* بیوپاری کی خریداری */
+  window.fmPoGo = function(sid, idx){ try{ openPoPreview(sid, idx); const b = document.querySelector('#poPreviewModal .invoicePreviewBox'); if(b) b.scrollTop = 0; }catch(e){} };
+  if(typeof openPoPreview === 'function'){ const _p = openPoPreview; openPoPreview = function(sid, idx){ const x = _p.apply(this, arguments);
+    try{ const s = (suppliersData || []).find(v => v && v.supplier_id === sid); let h = '';
+      if(s){ const L = (s.purchaseHistory || []).map((po, k) => ({po, k, created_at: po && (po.created_at || po.receivedAt), date: po && (po.date || po.receivedDate)})).filter(o => o.po && (o.po.items || []).length && o.po.status !== 'voided' && o.po.status !== 'rejected').sort((a, b) => (tsOf(a) - tsOf(b)) || (a.k - b.k));
+        h = bar('fmPoNav', L, L.findIndex(o => o.k === idx), 'fmPoGo', o => JSON.stringify(sid).replace(/"/g, '&quot;') + ', ' + o.k); }
+      place('poPreviewModal', 'fmPoNav', h); }catch(e){}
+    return x; }; window.openPoPreview = openPoPreview; }
 })();
 </script>
 <script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="FM" defer></script>
