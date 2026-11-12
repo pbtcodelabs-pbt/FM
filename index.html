@@ -88,6 +88,8 @@ function __appHostKind(h, p){
         c.onsuccess = function(e){ var cur = e.target.result; if(cur){ out.set(cur.key, cur.value); cur.continue(); } }; t.oncomplete = function(){ res(out); }; t.onerror = function(){ rej(t.error); }; });
       var ks = keys(), stale = [];
       ks.forEach(function(k){ if(g.call(LS, k) === STUB && all.has(k)) cache.set(k, all.get(k)); });
+      // 🛟 FM1211TH523: چھوٹا خانہ (localStorage) مٹ گیا ہو مگر الماری میں ڈیٹا ہو تو اسے مٹانا نہیں — واپس لانا ہے
+      all.forEach(function(v, k){ if(!cache.has(k) && typeof k === 'string' && k.indexOf(PFX) === 0 && k !== PFX + 'settings' && g.call(LS, k) === null){ cache.set(k, v); try{ st.call(LS, k, STUB); }catch(e){} } });
       all.forEach(function(v, k){ if(!cache.has(k)) stale.push(k); });   // چھوٹے خانے میں نیا (اصل) ڈیٹا ہے تو الماری والی پرانی کاپی بیکار
       // پرانا بڑا ڈیٹا: پہلے الماری میں پکا، پھر چھوٹے خانے میں صرف نشان
       var move = ks.filter(function(k){ var v = g.call(LS, k); return v && v !== STUB && v.length >= MIN; });
@@ -10185,8 +10187,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1211TH522'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'آج کی سبزی / سابقہ ریکارڈ / چالانوں کا ریکارڈ و حساب میں تاریخ کا فلٹر (آج، کل، یہ ہفتہ، پچھلا ہفتہ، تاریخ) + پچھلا / اگلا دن؛ چالانوں پر بھی پکا پہرہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1211TH523'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'غائب بل خود واپس: فون کا بیک اپ + پرانی کلاؤڈ کاپی + سیف الماری کے آرڈر (27 اکتوبر – 2 نومبر)؛ الماری کا ڈیٹا اب کبھی نہیں مٹتا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -56060,49 +56062,90 @@ window.openHelpDesk = openHelpDesk;
 })();
 </script>
 <script type="text/fm-boot">
-/* 🛟 FM1211TH521 (صدام، 12 نومبر — «پچھلے دنوں کے بل / چالان غائب»): 11 نومبر شام ایک فون نے بلوں (27 اکتوبر – 7 نومبر) اور وصولیوں
-   (28 اکتوبر – 4 نومبر) کے کلاؤڈ ٹکڑے خالی لکھ دیے تھے (اب fmDelGuard کا پہرہ)۔ یہاں: اس فون کے 7 دن والے خودکار بیک اپ (fmAutoBackup_v1)
-   میں جو بل / ادائیگی ہو مگر اب فون اور کلاؤڈ دونوں میں نہ ہو (اور اس فون پر حذف نہ کی گئی ہو) — وہ واپس فہرست میں اور کلاؤڈ میں۔
-   ہر فون پر ایک بار خود (پہلے کلاؤڈ سے پورا ملاپ)، پھر «بیک اپ» میں 🛟 بٹن سے جب چاہیں۔ کچھ مٹتا یا بدلتا نہیں — صرف غائب واپس۔ */
+/* 🛟 FM1211TH521 → FM1211TH523 (صدام، 12 نومبر — «ایک ہی فون پر بھی پچھلے دنوں کا ریکارڈ غائب، سیف الماری سے واپس لاؤ»):
+   11 نومبر شام کلاؤڈ کے بل ٹکڑے (13 – 31 اکتوبر) اور وصولی ٹکڑا (21 – 31 اکتوبر) خالی لکھے گئے تھے (اب fmDelGuard کا پہرہ)۔
+   ایپ کھلتے ہی خود (بغیر بٹن) ہر فون پر — کچھ مٹتا یا بدلتا نہیں، صرف غائب واپس:
+   (1) فون کا 7 دن والا خودکار بیک اپ (fmAutoBackup_v1) — اصل بل / ادائیگیاں ہوبہو
+   (2) پرانی کلاؤڈ دستاویز shopData/invoices + payments (13 – 27 اکتوبر) — ہوبہو
+   (3) سیف الماری (کلاؤڈ sv_o_*) کے «مکمل ہوئے آرڈر» جن سے بل بنے (fulfilledInvoiceId) — اسی بل نمبر / گاہک / سبزی / مقدار سے بل دوبارہ؛
+       ریٹ آرڈر والے (بل بناتے وقت بدلا ریٹ معلوم نہیں)، اس لیے بل پر نشان _rec='vault' + «🗄️ سیف الماری سے»؛ بقایا (amount_due) صفر —
+       گاہک کا اصل بقایا / کھاتہ کبھی نہیں بدلتا
+   حذف شدہ (fmDelLog)، سب ریکارڈ صفر کرنے (zeroResetAt) سے پہلے کے، اور فون / کلاؤڈ میں موجود — کبھی نہیں۔ «بیک اپ» میں 🛟 بٹن سے دوبارہ بھی۔ */
 (function(){
   async function allBackups(){
     try{ const db = await _albOpen(); return ((await _albReq(db, 'readonly', st => st.getAll())) || []).sort((a, b) => String(b.day).localeCompare(String(a.day))); }catch(e){ return []; }
   }
+  function resetAt(){ let m = ''; (customersData || []).forEach(c => { const z = c && c.zeroResetAt ? String(c.zeroResetAt) : ''; if(z > m) m = z; }); return m; }
+  function monthsFrom(iso){
+    const out = [], now = new Date(); let y = +String(iso || '').slice(0, 4) || now.getFullYear(), mo = +String(iso || '').slice(5, 7) || (now.getMonth() + 1);
+    if(!iso){ const d = new Date(Date.now() - 62 * 86400000); y = d.getFullYear(); mo = d.getMonth() + 1; }
+    while(y * 100 + mo <= now.getFullYear() * 100 + now.getMonth() + 1){ out.push(y * 100 + mo); mo++; if(mo > 12){ mo = 1; y++; } }
+    return out;
+  }
+  function vaultInvoice(snaps, soldBy){
+    const s0 = snaps.slice().sort((a, b) => String(b.fulfilledAt || '').localeCompare(String(a.fulfilledAt || '')))[0];
+    const items = [];
+    snaps.forEach(s => (s.items || []).forEach(it => items.push(Object.assign({}, it, { priceManual: false, autoRate: !!it.autoRate }))));
+    const sub = items.reduce((a, it) => a + (Number(it.qty) || 0) * (Number(it.unitPrice) || 0), 0);
+    const lab = items.reduce((a, it) => a + (Number(it.qty) || 0) * (Number(it.laborPerUnit) || 0), 0);
+    const ext = snaps.reduce((a, s) => a + (s.extraCharges || []).reduce((b, c) => b + (Number(c.amount) || 0), 0), 0);
+    const at = s0.fulfilledAt || s0.createdAt;
+    let bd = ''; try{ bd = toLocalDateStr(new Date(at)); }catch(e){ bd = String(at).slice(0, 10); }
+    return { invoice_id: s0.fulfilledInvoiceId, customer_id: s0.customer_id, customer_name: s0.customerName || '', customer_phone: s0.customerPhone || '',
+      sold_by: soldBy, sale_mode: 'retail', payment_method: 'credit', items, discount: ext, discount_type: ext ? 'دیگر' : '', tax_percent: 0, tax_amount: 0,
+      grand_total: Math.round((sub + lab + ext) * 100) / 100, previous_balance: null, status: 'completed', created_at: at, biz_date: bd,
+      wallet_applied: 0, cash_received_now: 0, change_given: 0, change_credited_to_wallet: 0, amount_due: 0, paid_now: 0,
+      _rec: 'vault', _recOrders: snaps.map(s => s.id), admin_note: '🗄️ سیف الماری سے دوبارہ بنا — سبزی / مقدار اصل، ریٹ آرڈر والے' };
+  }
+  function renumber(list){ // دوبارہ بنے بلوں کا دن / مہینے کا نمبر — اسی دن / مہینے کے سب بلوں کی وقت والی ترتیب سے
+    const all = (invoicesData || []).filter(i => i && i.status !== 'voided');
+    const day = i => String(i.biz_date || i.created_at || '').slice(0, 10), mon = i => day(i).slice(0, 7), t = i => String(i.created_at || '');
+    list.forEach(r => {
+      const d = all.filter(i => day(i) === day(r)).sort((a, b) => t(a).localeCompare(t(b))).indexOf(r) + 1;
+      const m = all.filter(i => mon(i) === mon(r)).sort((a, b) => t(a).localeCompare(t(b))).indexOf(r) + 1;
+      r.daily_bill_no = String(d || ''); r.monthly_bill_no = String(m || ''); r.bill_seq = m || null; r.invoice_no = `Bill#${d}/${m}`;
+    });
+  }
   async function run(manual){
     if(window._fmRecBusy) return; window._fmRecBusy = true;
-    let nInv = 0, nPay = 0, days = new Set();
+    const cnt = { bk: 0, leg: 0, vault: 0, pay: 0 }, days = new Set();
     try{
       try{ await invSyncAll(); }catch(e){}
       try{ await paySyncAll(); }catch(e){}
-      const rows = await allBackups();
-      if(!rows.length){ if(manual) await uAlert('🛟 خودکار بیک اپ', 'اس فون میں کوئی خودکار بیک اپ نہیں ملا۔ جس فون پر ایڈمن کام کرتا ہے وہاں یہی بٹن دبائیں۔'); return; }
       const log = loadFromStorage('fmDelLog', {}) || {}, dI = log.inv || {}, dP = log.pay || {};
+      const RST = resetAt();
       const haveI = new Set(), haveP = new Set();
       (invoicesData || []).forEach(x => x && haveI.add(String(x.invoice_id)));
       (paymentsData || []).forEach(x => x && haveP.add(String(x.payment_id)));
+      try{ if(_archHas()) await _archLoad(); }catch(e){}
       try{ (_archMem.inv || []).forEach(x => x && haveI.add(String(x.invoice_id))); (_archMem.pay || []).forEach(x => x && haveP.add(String(x.payment_id))); }catch(e){}
-      const ar = loadFromStorage('invArchived', {}) || {}, pa = loadFromStorage('payArchived', {}) || {};
       const addI = [], addP = [];
-      for(const r of rows){
-        let b = null; try{ b = JSON.parse(r.json); }catch(e){}
-        if(!b) continue;
-        (Array.isArray(b.invoices) ? b.invoices : []).forEach(x => {
-          const id = x && x.invoice_id; if(id == null) return; const k = String(id);
-          if(haveI.has(k) || dI[k] || ar[_invShard(x)]) return;
-          const d0 = String(x.created_at || '').slice(0, 10); if(!manual && !(d0 >= '2026-10-27' && d0 <= '2026-11-08')) return; // خود: صرف خالی ہوئے دن
-          haveI.add(k); addI.push(Object.assign({}, x, { _rec521: 1 })); days.add(String(x.created_at || '').slice(0, 10));
-        });
-        (Array.isArray(b.payments) ? b.payments : []).forEach(x => {
-          const id = x && x.payment_id; if(id == null) return; const k = String(id);
-          if(haveP.has(k) || dP[k] || pa[_payShard(x)]) return;
-          const d1 = String(x.created_at || x.date || '').slice(0, 10); if(!manual && !(d1 >= '2026-10-28' && d1 <= '2026-11-05')) return;
-          haveP.add(k); addP.push(Object.assign({}, x, { _rec521: 1 }));
-        });
+      const okI = (x, src) => { const id = x && x.invoice_id; if(id == null) return false; const k = String(id); if(haveI.has(k) || dI[k]) return false; if(RST && String(x.created_at || '') <= RST) return false; haveI.add(k); days.add(String(x.biz_date || x.created_at || '').slice(0, 10)); cnt[src]++; return true; };
+      const okP = x => { const id = x && x.payment_id; if(id == null) return false; const k = String(id); if(haveP.has(k) || dP[k]) return false; if(RST && String(x.created_at || x.date || '') <= RST) return false; haveP.add(k); cnt.pay++; return true; };
+      // (1) فون کا خودکار بیک اپ
+      for(const r of await allBackups()){
+        let b = null; try{ b = JSON.parse(r.json); }catch(e){} if(!b) continue;
+        (Array.isArray(b.invoices) ? b.invoices : []).forEach(x => { if(okI(x, 'bk')) addI.push(Object.assign({}, x, { _rec: 'backup' })); });
+        (Array.isArray(b.payments) ? b.payments : []).forEach(x => { if(okP(x)) addP.push(Object.assign({}, x, { _rec: 'backup' })); });
       }
-      nInv = addI.length; nPay = addP.length;
-      if(nInv) invoicesData = _invSort([...(invoicesData || []), ...addI]);
-      if(nPay) paymentsData = _paySort([...(paymentsData || []), ...addP]);
-      if(nInv || nPay){
+      // (2) پرانی کلاؤڈ دستاویز (صرف پڑھنا)
+      try{ const r = await _xReadCloud({ key: 'invoices', idOf: x => x && x.invoice_id }); if(r.ok) r.list.forEach(x => { if(okI(x, 'leg')) addI.push(Object.assign({}, x)); }); }catch(e){}
+      try{ const r = await _xReadCloud({ key: 'payments', idOf: x => x && x.payment_id }); if(r.ok) r.list.forEach(x => { if(okP(x)) addP.push(Object.assign({}, x)); }); }catch(e){}
+      // (3) سیف الماری کے مکمل آرڈر → بل
+      const best = new Map();
+      for(const ym of monthsFrom(RST)) for(let n = 0; n <= 5; n++){
+        try{ const r = await _xReadCloud({ key: 'sv_o_' + ym + '_' + n, idOf: x => x && x.vid }); if(!r.ok) continue;
+          r.list.forEach(e => { const s = e && e.snap; if(!s || e.st !== 'fulfilled' || s.status !== 'fulfilled' || s.fulfilledInvoiceId == null) return; const p = best.get(s.id); if(!p || (Number(e.u) || 0) > (Number(p.u) || 0)) best.set(s.id, { u: e.u, s }); });
+        }catch(e){}
+      }
+      const grp = new Map(); best.forEach(({ s }) => { const k = String(s.fulfilledInvoiceId); if(!grp.has(k)) grp.set(k, []); grp.get(k).push(s); });
+      const sb = (() => { const c = {}; (invoicesData || []).forEach(i => { if(i && i.sold_by) c[i.sold_by] = (c[i.sold_by] || 0) + 1; }); return Object.keys(c).sort((a, b) => c[b] - c[a])[0] || 'Admin'; })();
+      const vaultAdded = [];
+      grp.forEach(snaps => { const inv = vaultInvoice(snaps, sb); if(okI(inv, 'vault')){ addI.push(inv); vaultAdded.push(inv); } });
+      if(addI.length) invoicesData = _invSort([...(invoicesData || []), ...addI]);
+      if(addP.length) paymentsData = _paySort([...(paymentsData || []), ...addP]);
+      if(vaultAdded.length) renumber(vaultAdded);
+      if(addI.length || addP.length){
         saveToStorage('invoices', invoicesData); saveToStorage('payments', paymentsData);
         try{ persistAllData(); }catch(e){}
         try{ await pushInvoicesToCloud(); }catch(e){}
@@ -56110,18 +56153,23 @@ window.openHelpDesk = openHelpDesk;
         try{ if(typeof currentScreenName !== 'undefined' && currentScreenName === 'billhistory') renderBillHistory(); }catch(e){}
         try{ if(typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary(); }catch(e){}
       }
-      saveToStorage('fmRec521', { at: Date.now(), inv: nInv, pay: nPay });
-      if(nInv || nPay){
+      saveToStorage('fmRec523', { at: Date.now(), ...cnt });
+      const nI = cnt.bk + cnt.leg + cnt.vault;
+      if(nI || cnt.pay){
         const dl = [...days].filter(Boolean).sort();
-        await uAlert('🛟 ریکارڈ واپس آ گیا', `خودکار بیک اپ سے <b>${nInv}</b> بل اور <b>${nPay}</b> وصولیاں / ادائیگیاں واپس فہرست اور کلاؤڈ میں آ گئیں۔` + (dl.length ? `<br><small>تاریخیں: ${dl.map(d => bizFmt(d)).join('، ')}</small>` : '') + '<br><small>دوسرے فونوں پر بھی چند منٹ میں خود آ جائیں گے۔</small>', 'green');
+        await uAlert('🛟 ریکارڈ واپس آ گیا', `<b>${nI}</b> بل اور <b>${cnt.pay}</b> وصولیاں / ادائیگیاں واپس فہرست اور کلاؤڈ میں آ گئیں۔`
+          + `<br><small>📱 فون کے بیک اپ سے ${cnt.bk} • ☁️ پرانی کلاؤڈ کاپی سے ${cnt.leg} • 🗄️ سیف الماری کے آرڈروں سے ${cnt.vault}</small>`
+          + (cnt.vault ? '<br><small>🗄️ والے بلوں میں سبزی اور مقدار اصل ہیں، ریٹ آرڈر والے — بقایا / کھاتہ نہیں بدلا۔</small>' : '')
+          + (dl.length ? `<br><small>تاریخیں: ${bizFmt(dl[0])} سے ${bizFmt(dl[dl.length - 1])}</small>` : '') + '<br><small>دوسرے فونوں پر بھی چند منٹ میں خود آ جائیں گے۔</small>', 'green');
       } else if(manual){
-        await uAlert('🛟 خودکار بیک اپ', 'بیک اپ میں ایسا کوئی بل یا وصولی نہیں ملی جو اب غائب ہو — سب کچھ پہلے سے موجود ہے۔', 'green');
+        await uAlert('🛟 ریکارڈ', 'کوئی غائب بل یا وصولی نہیں ملی — سب کچھ پہلے سے موجود ہے۔', 'green');
       }
-    }catch(e){ console.warn('fm recover', e); if(manual) try{ await uAlert('🛟 خودکار بیک اپ', 'ابھی واپس نہیں لایا جا سکا — انٹرنیٹ چیک کر کے دوبارہ دبائیں۔'); }catch(_){} }
+    }catch(e){ console.warn('fm recover', e); if(manual) try{ await uAlert('🛟 ریکارڈ', 'ابھی واپس نہیں لایا جا سکا — انٹرنیٹ چیک کر کے دوبارہ دبائیں۔'); }catch(_){} }
     finally{ window._fmRecBusy = false; }
   }
   window.fmRecoverRun = run;
-  setTimeout(() => { try{ if(!loadFromStorage('fmRec521', null)) run(false); }catch(e){} }, 45000);
+  window._fmVaultInvoice = vaultInvoice;
+  setTimeout(() => { try{ if(!loadFromStorage('fmRec523', null)) run(false); }catch(e){} }, 25000);
 })();
 </script>
 <script type="text/fm-boot">
