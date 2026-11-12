@@ -10185,8 +10185,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1211TH521'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'غائب بل / وصولیاں خودکار بیک اپ سے واپس + پکا پہرہ: کوئی فون اب کلاؤڈ کے بل / وصولیاں خالی نہیں کر سکتا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1211TH522'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'آج کی سبزی / سابقہ ریکارڈ / چالانوں کا ریکارڈ و حساب میں تاریخ کا فلٹر (آج، کل، یہ ہفتہ، پچھلا ہفتہ، تاریخ) + پچھلا / اگلا دن؛ چالانوں پر بھی پکا پہرہ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -20846,6 +20846,7 @@ function ensureChalanRateModal(){
       <button type="button" onclick="closeChalanRateModal(); openPurchaseChalanReport();" style="width:100%; margin-bottom:8px; padding:9px; border:none; border-radius:10px; background:#1e3a8a; color:#fff; font-weight:900; cursor:pointer;">📊 خرید اور چالان رپورٹ</button>
       <button type="button" id="chalanRateCashOnly" onclick="chalanCashOnly=!chalanCashOnly; if(chalanCashOnly) chalanRateModalTab='all'; renderChalanRateModal();" style="width:100%; margin-bottom:8px; padding:9px; border:2px solid #059669; border-radius:10px; background:#ecfdf5; color:#065f46; font-weight:900; cursor:pointer;">🔁 نقد خریداری کو ادھار میں بدلیں</button>
       <input type="text" id="chalanRateSearch" placeholder="🔍 سبزی کا نام یا سیریل نمبر" oninput="renderChalanRateModal()" style="width:100%; box-sizing:border-box; padding:9px; border:2px solid var(--primary); border-radius:10px; font-size:13px; text-align:center; margin-bottom:8px;">
+      <div id="chRateDBar"></div>
       <div id="chalanRateList"></div>
       <button type="button" onclick="closeChalanRateModal()" style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:10px; background:#f1f5f9; color:#334155; font-weight:800; cursor:pointer;">✖ بند کریں</button>
     </div>`;
@@ -20913,6 +20914,7 @@ function renderChalanRateModal(){
     }));
   }
   if(q) rows = rows.filter(r => r.p.name.toLowerCase().includes(q) || String(r.p.serial_no ?? '') === q);
+  try{ if(typeof _chRateIn === 'function') rows = rows.filter(r => _chRateIn(r.c)); }catch(e){} // 📅 FM1211TH522
   let cashHead = '';
   { const cb = document.getElementById('chalanRateCashOnly');
     if(cb){ cb.style.background = chalanCashOnly ? '#059669' : '#ecfdf5'; cb.style.color = chalanCashOnly ? '#fff' : '#065f46'; cb.textContent = chalanCashOnly ? '✖ سب چالان دکھائیں' : '🔁 نقد خریداری کو ادھار میں بدلیں'; } }
@@ -21179,6 +21181,7 @@ function renderChalanRateModal(){
     }));
   }
   if(q) rows = rows.filter(r => r.p.name.toLowerCase().includes(q) || String(r.p.serial_no ?? '') === q);
+  try{ if(typeof _chRateIn === 'function') rows = rows.filter(r => _chRateIn(r.c)); }catch(e){} // 📅 FM1211TH522
   let cashHead = '';
   { const cb = document.getElementById('chalanRateCashOnly');
     if(cb){ cb.style.background = chalanCashOnly ? '#059669' : '#ecfdf5'; cb.style.color = chalanCashOnly ? '#fff' : '#065f46'; cb.textContent = chalanCashOnly ? '✖ سب چالان دکھائیں' : '🔁 نقد خریداری کو ادھار میں بدلیں'; } }
@@ -23003,7 +23006,7 @@ function fmDelMark(kind, ids){
     const L = loadFromStorage('fmDelLog', {}) || {}, now = Date.now(), m = L[kind] = L[kind] || {};
     (ids || []).forEach(id => { if(id != null) m[String(id)] = now; });
     Object.keys(L).forEach(k => Object.keys(L[k] || {}).forEach(i => { if(now - L[k][i] > 90 * 86400000) delete L[k][i]; }));
-    saveToStorage('fmDelLog', L);
+    saveToStorage('fmDelLog', L); try{ _chDelCache = null; }catch(e){}
   }catch(e){}
 }
 function fmDelGuard(kind, merged, remote, idOf){
@@ -27782,6 +27785,7 @@ async function zeroAllStock(){
   if(!(await _askAdminPinForSerialMaster('تمام سٹاک زیرو کرنے کے لیے'))) return;
   try{ saveToStorage('zeroStockBackup', { at: new Date().toISOString(), list: _items.map(it => ({ v: it.variant.variant_id, s: it.variant.stock })) }); }catch(e){}
   // 🧹 FM610TU324 (صدام کی ہدایت): بالکل تازہ — سٹاک، تمام چالان، خرید ریٹ صفر؛ نام/پیکنگ/سیریل/فروخت ریٹ محفوظ
+  try{ fmDelMark('ch', [].concat(...(productsData || []).map(p => [].concat(...((p && p.variants) || []).map(v => ((v && v.chalans) || []).map(c => _chalanKey(c))))))); }catch(e){} // 🛡️ FM1211TH522
   (productsData || []).forEach(p => (p.variants || []).forEach(v => { v.stock = 0; v.chalans = []; v.reserved = 0; v.purchase = 0; if(v.batches) v.batches = []; }));
   // منشی کا سارا ریکارڈ صاف — باقی فونز کا پرانا ریکارڈ بھی واپس نہ آئے (clearedAt)
   try{ await fetchMunshiStockLogFromCloud(true); }catch(e){} // 🛡️ FM610TU326: سب فونز کا ریکارڈ پہلے ملا لیں
@@ -37266,7 +37270,9 @@ async function fmMasterResetAll(){
     const _day = bizDateKey();
     customersData.forEach(c => { c.total_receivable = 0; c.wallet_balance = 0; c.walletHistory = []; c.openingBalance = 0; c.zeroResetAt = _at; });
     suppliersData.forEach(s => { s.total_payable = 0; s.wallet_balance = 0; s.openingBalance = 0; s.purchaseHistory = []; s.ledgerHistory = []; });
+    try{ fmDelMark('ch', [].concat(...(productsData || []).map(p => [].concat(...((p && p.variants) || []).map(v => ((v && v.chalans) || []).map(c => _chalanKey(c))))))); }catch(e){} // 🛡️ FM1211TH522
     (productsData || []).forEach(p => (p.variants || []).forEach(v => { v.stock = 0; v.chalans = []; v.reserved = 0; v.purchase = 0; v.salesCount = 0; if(v.batches) v.batches = []; }));
+    try{ fmDelMark('inv', (invoicesData || []).map(x => x && x.invoice_id)); fmDelMark('pay', (paymentsData || []).map(x => x && x.payment_id)); }catch(e){} // 🛡️ FM1211TH522
     invoicesData = [];
     pendingBillsData = [];
     try{ (advanceOrdersData || []).forEach(o => _advRememberDeleted(o.id)); }catch(e){}
@@ -43232,6 +43238,8 @@ function stripImagesForSync(arr){
 const _SYNC_COUNTER_FIELDS = ['stock', 'salesCount'];
 const _SYNC_SKIP_FIELDS = ['reserved', 'image', 'chalans', 'nextChalanNo'];
 function _chalanKey(c){ return c.cid || (c.chalanNo + '_' + (c.ts || 0)); }
+let _chDelCache = null, _chDelAt = 0;
+function _chDelLogged(k){ try{ if(!_chDelCache || Date.now() - _chDelAt > 3000){ _chDelCache = (loadFromStorage('fmDelLog', {}) || {}).ch || {}; _chDelAt = Date.now(); } return !!_chDelCache[String(k)]; }catch(e){ return false; } }
 
 // ---------- ایک ورائنٹ کے چالان: مقدار = فرق سے، باقی خانے = جس طرف بدلا وہ؛ نئے چالان دونوں طرف سے شامل ---------- -->
 function _mergeChalans(bCh, lCh, rCh){
@@ -43243,7 +43251,7 @@ function _mergeChalans(bCh, lCh, rCh){
   rCh.forEach(r => {
     const k = _chalanKey(r); seen.add(k);
     const l = lm.get(k), b = bm.get(k);
-    if(!l){ if(b && _syncEq(b, r)) return; out.push(_syncClone(r)); return; } // مقامی طور پر حذف
+    if(!l){ if(b && _syncEq(b, r) && _chDelLogged(k)) return; out.push(_syncClone(r)); return; } // مقامی طور پر حذف — 🛡️ FM1211TH522: صرف جب واقعی حذف (سٹاک زیرو) درج ہو
     if(!b){ out.push(_syncClone(r)); return; }
     const m = {};
     new Set([...Object.keys(r), ...Object.keys(l)]).forEach(f => {
@@ -56114,6 +56122,161 @@ window.openHelpDesk = openHelpDesk;
   }
   window.fmRecoverRun = run;
   setTimeout(() => { try{ if(!loadFromStorage('fmRec521', null)) run(false); }catch(e){} }, 45000);
+})();
+</script>
+<script type="text/fm-boot">
+/* 📅 FM1211TH522 (صدام، 12 نومبر — «ہر جگہ تاریخ کا فلٹر: آج، کل، یہ ہفتہ، پچھلا ہفتہ، تاریخ چنیں + پچھلا / اگلا دن»):
+   مشترکہ پٹی fmDBar — آج کی سبزی / سابقہ ریکارڈ (ایک دن)، چالانوں کا ریکارڈ (دن یا ہفتہ)، چالانوں کا حساب (سب / دن / ہفتہ)،
+   تاریخوں کی فہرست (چپس + کیلنڈر)۔ چالانوں کے ریکارڈ میں فون کے خودکار بیک اپ والے پرانے چالان بھی (صرف دیکھنے کو، 🗄️)۔ حساب کچھ نہیں بدلا۔ */
+(function(){
+  const DAY = 86400000;
+  const k2d = k => new Date(k + 'T12:00:00');
+  const d2k = d => { const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
+  const addD = (k, n) => d2k(new Date(k2d(k).getTime() + n * DAY));
+  const today = () => bizDateKey();
+  const wkStart = k => { const d = k2d(k), w = (d.getDay() + 6) % 7; return addD(k, -w); }; // پیر سے
+  const UD = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
+  function preset(id){
+    const t = today();
+    if(id === 'today') return { from: t, to: t };
+    if(id === 'yday'){ const y = addD(t, -1); return { from: y, to: y }; }
+    if(id === 'week') return { from: wkStart(t), to: t };
+    if(id === 'lweek'){ const s = addD(wkStart(t), -7); return { from: s, to: addD(s, 6) }; }
+    return null;
+  }
+  function label(r){
+    if(!r) return 'تاریخ چنیں';
+    if(r.from === r.to){ const t = today(); return (r.from === t ? 'آج — ' : r.from === addD(t, -1) ? 'کل — ' : '') + UD[k2d(r.from).getDay()] + ' ' + bizFmt(r.from); }
+    return bizFmt(r.from) + ' سے ' + bizFmt(r.to);
+  }
+  const same = (a, b) => !!a && !!b && a.from === b.from && a.to === b.to;
+  const chipCss = on => `flex:1 1 0; min-width:0; padding:6px 2px; border-radius:999px; border:1.5px solid ${on ? '#0f766e' : '#cbd5e1'}; background:${on ? '#0f766e' : '#fff'}; color:${on ? '#fff' : '#334155'}; font-weight:900; font-size:12.5px; cursor:pointer; font-family:inherit; white-space:nowrap;`;
+  // fn: عالمی فنکشن کا نام — fn(from, to)، «سب» پر fn(null)؛ opts: {week, all}
+  window.fmDBar = function(fn, r, opts){
+    opts = opts || {};
+    const ch = (id, t) => { const pr = preset(id); return `<button type="button" onclick="${fn}('${pr.from}','${pr.to}')" style="${chipCss(same(pr, r))}">${t}</button>`; };
+    const span = r ? (Math.round((k2d(r.to) - k2d(r.from)) / DAY) + 1) : 1;
+    const isWk = !!r && span > 1 && span <= 7 && wkStart(r.from) === r.from; // یہ ہفتہ / پچھلا ہفتہ — پورا ہفتہ آگے پیچھے
+    const step = isWk ? 7 : span, unit = isWk ? 'ہفتہ' : (step > 1 ? step + ' دن' : 'دن');
+    const nav = dir => {
+      if(!r) return '';
+      let f = addD(r.from, dir * step), t2 = isWk ? addD(f, 6) : addD(r.to, dir * step); if(t2 > today()) t2 = today();
+      const dis = dir > 0 && f > today();
+      return `<button type="button" ${dis ? 'disabled' : ''} onclick="${fn}('${f}','${t2}')" style="flex:0 0 auto; padding:7px 9px; border:none; border-radius:10px; background:${dis ? '#e2e8f0' : '#1e3a8a'}; color:${dis ? '#94a3b8' : '#fff'}; font-weight:900; font-size:12.5px; cursor:${dis ? 'default' : 'pointer'}; font-family:inherit; white-space:nowrap;">${dir < 0 ? '▶ پچھلا ' + unit : 'اگلا ' + unit + ' ◀'}</button>`;
+    };
+    const pick = `<label style="position:relative; flex:1 1 auto; min-width:0; display:flex; align-items:center; justify-content:center; padding:7px 6px; border-radius:10px; background:#fef3c7; border:1.5px solid #f59e0b; color:#92400e; font-weight:900; font-size:13px; cursor:pointer; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">📅 ${label(r)}<input type="date" value="${r ? r.to : today()}" max="${today()}" onchange="if(this.value) ${fn}(this.value, this.value)" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;"></label>`;
+    return `<div class="fmDBar" dir="rtl" style="padding:6px 8px; background:#f8fafc; border-bottom:1.5px solid #e2e8f0; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+      <div style="display:flex; gap:5px; align-items:center;">${nav(-1)}${pick}${nav(1)}</div>
+      <div style="display:flex; gap:4px; margin-top:5px;">${opts.all ? `<button type="button" onclick="${fn}(null)" style="${chipCss(!r)}">سب</button>` : ''}${ch('today', 'آج')}${ch('yday', 'کل')}${opts.week ? ch('week', 'یہ ہفتہ') + ch('lweek', 'پچھلا ہفتہ') : ''}</div></div>`;
+  };
+
+  // ---------- 1) آج کی سبزی کس کس کو دی گئی / سابقہ ریکارڈ (ایک دن) ----------
+  window.fmDistGo = function(f){ openDistReport(f || today()); };
+  const _rdr = renderDistReport;
+  window.renderDistReport = renderDistReport = function(){
+    _rdr.apply(this, arguments);
+    try{
+      const wrap = document.getElementById('smDistWrap'); if(!wrap) return;
+      let bar = document.getElementById('fmDBarDist');
+      if(!bar){ bar = document.createElement('div'); bar.id = 'fmDBarDist'; wrap.parentNode.insertBefore(bar, wrap); }
+      const d = smDistViewDay || today();
+      bar.innerHTML = fmDBar('fmDistGo', { from: d, to: d }, {});
+    }catch(e){}
+  };
+
+  // ---------- 2) چالانوں کا ریکارڈ — دن یا ہفتہ؛ فون کے خودکار بیک اپ والے پرانے چالان بھی ----------
+  const BK = { map: null, busy: null };
+  function bkLoad(){
+    if(BK.map) return Promise.resolve(BK.map);
+    if(BK.busy) return BK.busy;
+    BK.busy = (async () => {
+      const m = new Map();
+      try{
+        const db = await _albOpen(); const rows = (await _albReq(db, 'readonly', st => st.getAll())) || [];
+        rows.sort((a, b) => String(b.day).localeCompare(String(a.day))).forEach(r => {
+          let b = null; try{ b = JSON.parse(r.json); }catch(e){} if(!b || !Array.isArray(b.products)) return;
+          b.products.forEach(p => p && (p.variants || []).forEach(v => v && (v.chalans || []).forEach(c => {
+            if(!c || !c.ts || isLegacyChalan(c)) return; const k = v.variant_id + '|' + _chalanKey(c);
+            if(!m.has(k)) m.set(k, { vid: v.variant_id, c });
+          })));
+        });
+      }catch(e){}
+      BK.map = m; BK.busy = null; return m;
+    })();
+    return BK.busy;
+  }
+  function bkExtra(){ // جو چالان اب فون میں نہیں (صرف دیکھنے کو)
+    const out = []; if(!BK.map) return out;
+    const have = new Set();
+    (productsData || []).forEach(p => p && (p.variants || []).forEach(v => v && (v.chalans || []).forEach(c => c && have.add(v.variant_id + '|' + _chalanKey(c)))));
+    BK.map.forEach((x, k) => { if(!have.has(k)) out.push(x); });
+    return out;
+  }
+  let RNG = null;
+  window.chalanDayRows = chalanDayRows = function(D){
+    const r = (RNG && RNG.from) ? RNG : { from: D, to: D }, multi = r.from !== r.to;
+    const inR = c => { const k = _chTodayKey(c.ts); return k >= r.from && k <= r.to; };
+    const rows = [];
+    const vMap = new Map(); (productsData || []).forEach(p => p && (p.variants || []).forEach(v => v && vMap.set(v.variant_id, { p, v })));
+    const push = (p, v, c, old) => {
+      const qty = Number(c.origQty ?? c.qty) || 0, rate = c.ratePending ? 0 : (Number(c.rate) || 0);
+      const src = c.isCash ? 'نقد خریداری' : (c.supplierName || (c.supplierId != null ? ((suppliersData || []).find(s => s && s.supplier_id === c.supplierId) || {}).name : '') || c.source || '—');
+      rows.push({ serial: p.serial_no, name: p.name + (old ? ' 🗄️' : ''), pack: (v.label || '') + (multi ? ' • ' + bizFmt(_chTodayKey(c.ts)).slice(0, 5) : ''), no: c.chalanNo, qty, left: Number(c.qty) || 0, rate, labor: Number(c.sellLabor) || 0, sale: Number(c.retail) || 0, src, amt: Math.round(qty * rate), pending: !!c.ratePending, by: c.by || '', _ts: c.ts || 0, _sn: Number(p.serial_no) || 1e9 });
+    };
+    (productsData || []).forEach(p => p && (p.variants || []).forEach(v => v && (v.chalans || []).forEach(c => { if(c && c.ts && !isLegacyChalan(c) && inR(c)) push(p, v, c, false); })));
+    bkExtra().forEach(x => { if(!inR(x.c)) return; const pv = vMap.get(x.vid); if(pv) push(pv.p, pv.v, x.c, true); });
+    rows.sort((a, b) => multi ? (a._ts - b._ts) : (a._sn - b._sn || a._ts - b._ts));
+    return rows;
+  };
+  window.fmChDayGo = function(f, t){ RNG = { from: f || today(), to: t || f || today() }; openChalanDayReport(RNG.from, true); };
+  const _ocd = openChalanDayReport;
+  window.openChalanDayReport = openChalanDayReport = function(D, keep){
+    if(!keep || !RNG) RNG = { from: D, to: D };
+    _ocd.call(this, D);
+    try{
+      const ov = document.getElementById('chDayOverlay'), head = ov && ov.firstElementChild; if(!head) return;
+      const bar = document.createElement('div'); bar.innerHTML = fmDBar('fmChDayGo', RNG, { week: true });
+      head.parentNode.insertBefore(bar.firstElementChild, head.nextSibling);
+      if(RNG.from !== RNG.to){ const t = head.querySelector('div'); if(t) t.textContent = '🧾 ' + bizFmt(RNG.from) + ' سے ' + bizFmt(RNG.to) + ' تک کے چالان'; }
+      if(!BK.map) bkLoad().then(m => { if(m.size && document.getElementById('chDayOverlay')?.style.display === 'flex') openChalanDayReport(D, true); });
+    }catch(e){}
+  };
+  window.openChalanHistory = openChalanHistory = function(){
+    bkLoad().then(() => {
+      const set = new Set();
+      (productsData || []).forEach(p => p && (p.variants || []).forEach(v => v && (v.chalans || []).forEach(c => { if(c && c.ts && !isLegacyChalan(c)) set.add(_chTodayKey(c.ts)); })));
+      bkExtra().forEach(x => set.add(_chTodayKey(x.c.ts)));
+      openDatePickList('📅 چالانوں کا ریکارڈ — تاریخ چنیں', Array.from(set).sort().reverse().slice(0, 120), d => openChalanDayReport(d), 'fmChDayGo');
+    });
+  };
+
+  // ---------- 3) تاریخوں کی فہرست: اوپر چپس + کیلنڈر ----------
+  const _odp = openDatePickList;
+  window.openDatePickList = openDatePickList = function(title, dates, onPick, rangeFn){
+    _odp.call(this, title, dates, onPick);
+    try{
+      window._fmDPPick = onPick; window._fmDPRange = rangeFn || null;
+      const ov = document.getElementById('smDatePickOv'), box = ov && ov.firstElementChild, head = box && box.firstElementChild; if(!head) return;
+      const b = document.createElement('div'); b.innerHTML = fmDBar('fmDPGo', null, { week: !!rangeFn });
+      head.parentNode.insertBefore(b.firstElementChild, head.nextSibling);
+    }catch(e){}
+  };
+  window.fmDPGo = function(f, t){
+    const ov = document.getElementById('smDatePickOv'); if(ov) ov.style.display = 'none';
+    if(!f) return;
+    if(f !== t && window._fmDPRange && typeof window[window._fmDPRange] === 'function'){ window[window._fmDPRange](f, t); return; }
+    if(typeof window._fmDPPick === 'function') window._fmDPPick(t || f);
+  };
+
+  // ---------- 4) چالانوں کا حساب — سب / دن / ہفتہ ----------
+  let CR = null;
+  window._chRateIn = function(c){ if(!CR) return true; const k = _chTodayKey(c && c.ts); return k >= CR.from && k <= CR.to; };
+  window.fmChRateGo = function(f, t){ CR = f ? { from: f, to: t || f } : null; try{ renderChalanRateModal(); }catch(e){} };
+  const _rcr = renderChalanRateModal;
+  window.renderChalanRateModal = renderChalanRateModal = function(){
+    _rcr.apply(this, arguments);
+    try{ const el = document.getElementById('chRateDBar'); if(el) el.innerHTML = fmDBar('fmChRateGo', CR, { week: true, all: true }); }catch(e){}
+  };
 })();
 </script>
 <script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="FM" defer></script>
