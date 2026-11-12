@@ -10187,8 +10187,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1211TH523'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'غائب بل خود واپس: فون کا بیک اپ + پرانی کلاؤڈ کاپی + سیف الماری کے آرڈر (27 اکتوبر – 2 نومبر)؛ الماری کا ڈیٹا اب کبھی نہیں مٹتا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1211TH524'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'فول پروف: بلوں اور وصولیوں کی دوسری کلاؤڈ نقل جو کبھی نہیں گھٹتی + روز خود غائب ریکارڈ کی جانچ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -56108,7 +56108,7 @@ window.openHelpDesk = openHelpDesk;
   }
   async function run(manual){
     if(window._fmRecBusy) return; window._fmRecBusy = true;
-    const cnt = { bk: 0, leg: 0, vault: 0, pay: 0 }, days = new Set();
+    const cnt = { bk: 0, mir: 0, leg: 0, vault: 0, pay: 0 }, days = new Set();
     try{
       try{ await invSyncAll(); }catch(e){}
       try{ await paySyncAll(); }catch(e){}
@@ -56128,6 +56128,8 @@ window.openHelpDesk = openHelpDesk;
         (Array.isArray(b.invoices) ? b.invoices : []).forEach(x => { if(okI(x, 'bk')) addI.push(Object.assign({}, x, { _rec: 'backup' })); });
         (Array.isArray(b.payments) ? b.payments : []).forEach(x => { if(okP(x)) addP.push(Object.assign({}, x, { _rec: 'backup' })); });
       }
+      // (1.5) 🪞 کلاؤڈ کی «کبھی نہ گھٹنے والی» نقل — ہوبہو
+      try{ if(typeof fmMirrorRead === 'function'){ (await fmMirrorRead('inv', RST)).forEach(x => { if(okI(x, 'mir')) addI.push(Object.assign({}, x)); }); (await fmMirrorRead('pay', RST)).forEach(x => { if(okP(x)) addP.push(Object.assign({}, x)); }); } }catch(e){}
       // (2) پرانی کلاؤڈ دستاویز (صرف پڑھنا)
       try{ const r = await _xReadCloud({ key: 'invoices', idOf: x => x && x.invoice_id }); if(r.ok) r.list.forEach(x => { if(okI(x, 'leg')) addI.push(Object.assign({}, x)); }); }catch(e){}
       try{ const r = await _xReadCloud({ key: 'payments', idOf: x => x && x.payment_id }); if(r.ok) r.list.forEach(x => { if(okP(x)) addP.push(Object.assign({}, x)); }); }catch(e){}
@@ -56150,15 +56152,16 @@ window.openHelpDesk = openHelpDesk;
         try{ persistAllData(); }catch(e){}
         try{ await pushInvoicesToCloud(); }catch(e){}
         try{ await paySyncAll(); }catch(e){}
+        try{ if(typeof fmMirrorRun === 'function') fmMirrorRun(true); }catch(e){}
         try{ if(typeof currentScreenName !== 'undefined' && currentScreenName === 'billhistory') renderBillHistory(); }catch(e){}
         try{ if(typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary(); }catch(e){}
       }
       saveToStorage('fmRec523', { at: Date.now(), ...cnt });
-      const nI = cnt.bk + cnt.leg + cnt.vault;
+      const nI = cnt.bk + cnt.mir + cnt.leg + cnt.vault;
       if(nI || cnt.pay){
         const dl = [...days].filter(Boolean).sort();
         await uAlert('🛟 ریکارڈ واپس آ گیا', `<b>${nI}</b> بل اور <b>${cnt.pay}</b> وصولیاں / ادائیگیاں واپس فہرست اور کلاؤڈ میں آ گئیں۔`
-          + `<br><small>📱 فون کے بیک اپ سے ${cnt.bk} • ☁️ پرانی کلاؤڈ کاپی سے ${cnt.leg} • 🗄️ سیف الماری کے آرڈروں سے ${cnt.vault}</small>`
+          + `<br><small>📱 فون کے بیک اپ سے ${cnt.bk} • 🪞 کلاؤڈ کی نقل سے ${cnt.mir} • ☁️ پرانی کلاؤڈ کاپی سے ${cnt.leg} • 🗄️ سیف الماری کے آرڈروں سے ${cnt.vault}</small>`
           + (cnt.vault ? '<br><small>🗄️ والے بلوں میں سبزی اور مقدار اصل ہیں، ریٹ آرڈر والے — بقایا / کھاتہ نہیں بدلا۔</small>' : '')
           + (dl.length ? `<br><small>تاریخیں: ${bizFmt(dl[0])} سے ${bizFmt(dl[dl.length - 1])}</small>` : '') + '<br><small>دوسرے فونوں پر بھی چند منٹ میں خود آ جائیں گے۔</small>', 'green');
       } else if(manual){
@@ -56325,6 +56328,64 @@ window.openHelpDesk = openHelpDesk;
     _rcr.apply(this, arguments);
     try{ const el = document.getElementById('chRateDBar'); if(el) el.innerHTML = fmDBar('fmChRateGo', CR, { week: true, all: true }); }catch(e){}
   };
+})();
+</script>
+<script type="text/fm-boot">
+/* 🪞 FM1211TH524 (مالک: «فول پروف — کبھی کچھ ضائع نہ ہو»): کلاؤڈ میں بلوں / ادائیگیوں کی دوسری «کبھی نہ گھٹنے والی» نقل —
+   invMirror_<ٹکڑا> / payMirror_<ٹکڑا>۔ ہر فون ہر 20 منٹ (اور ہم وقت سازی کے بعد) اپنے بل / ادائیگیاں اس نقل میں جوڑتا ہے؛ نقل سے کوئی چیز
+   صرف تب نکلتی ہے جب اسی فون پر واقعی حذف ہوئی ہو (fmDelLog)۔ اصل ٹکڑا کسی بھی وجہ سے خالی ہو جائے تو fmRecoverRun یہیں سے ہوبہو واپس لاتا ہے۔
+   واپسی کی جانچ روز ایک بار خود (fmRecDay)۔ */
+(function(){
+  const MIR = { inv: { pre: 'invMirror_', id: 'invoice_id', shard: i => _invShard(i), get: () => invoicesData },
+                pay: { pre: 'payMirror_', id: 'payment_id', shard: p => _payShard(p), get: () => paymentsData } };
+  let busy = false, lastAt = 0;
+  async function writeDoc(key, list, ut){
+    const body = JSON.stringify(list); if(body.length > 950000) return false;
+    const pre = ut ? `&currentDocument.updateTime=${encodeURIComponent(ut)}` : '&currentDocument.exists=false';
+    const res = await authFirestoreFetch(`shopData/${key}?key=${FIREBASE_API_KEY}${pre}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { json: { stringValue: body }, updatedAt: { integerValue: String(Date.now()) } } }) });
+    return !!(res && res.ok);
+  }
+  async function mirrorKind(kind){
+    const M = MIR[kind], sigs = loadFromStorage('fmMirSig_' + kind, {}) || {}, del = (loadFromStorage('fmDelLog', {}) || {})[kind] || {};
+    const groups = new Map();
+    (M.get() || []).forEach(x => { if(!x || x[M.id] == null) return; const sk = M.shard(x); if(sk === '0000000') return; if(!groups.has(sk)) groups.set(sk, []); groups.get(sk).push(x); });
+    for(const [sk, list] of groups){
+      const strip = typeof _xHeavyStrip === 'function' ? _xHeavyStrip(list) : list;
+      const sig = _sigH(_stableStr(strip));
+      if(sigs[sk] === sig) continue;
+      for(let a = 0; a < 3; a++){
+        const r = await _xReadCloud({ key: M.pre + sk, idOf: x => x && x[M.id] }); if(!r.ok) break;
+        const m = new Map(); (r.list || []).forEach(x => { if(x && x[M.id] != null) m.set(String(x[M.id]), x); });
+        strip.forEach(x => m.set(String(x[M.id]), x));
+        Object.keys(del).forEach(id => m.delete(String(id)));
+        const out = [...m.values()];
+        if(_stableStr(out) === _stableStr(r.list || [])){ sigs[sk] = sig; break; }
+        if(await writeDoc(M.pre + sk, out, r.updateTime)){ sigs[sk] = sig; break; }
+      }
+    }
+    saveToStorage('fmMirSig_' + kind, sigs);
+  }
+  async function fmMirrorRun(force){
+    if(busy || !navigator.onLine) return; if(!force && Date.now() - lastAt < 20 * 60000) return;
+    busy = true; lastAt = Date.now();
+    try{ if(!_invShardOff) await mirrorKind('inv'); }catch(e){ console.warn('mirror inv', e); }
+    try{ if(!_payShardOff) await mirrorKind('pay'); }catch(e){ console.warn('mirror pay', e); }
+    busy = false;
+  }
+  window.fmMirrorRun = fmMirrorRun;
+  // واپسی میں آئینہ بھی (سب سے پہلے — ہوبہو ڈیٹا)
+  window.fmMirrorRead = async function(kind, fromIso){
+    const out = [], now = new Date(); let d = new Date(fromIso ? String(fromIso).slice(0, 10) + 'T12:00:00' : Date.now() - 62 * 86400000);
+    const keys = new Set();
+    while(d <= now){ const sk = kind === 'inv' ? _invShard({ created_at: toLocalDateStr(d) + 'T00:00:00' }) : _payShard({ created_at: toLocalDateStr(d) + 'T00:00:00' }); keys.add(sk); d = new Date(d.getTime() + 86400000); }
+    for(const sk of keys){ try{ const r = await _xReadCloud({ key: MIR[kind].pre + sk, idOf: x => x && x[MIR[kind].id] }); if(r.ok) out.push(...(r.list || [])); }catch(e){} }
+    return out;
+  };
+  setTimeout(() => { fmMirrorRun(true); }, 60000);
+  setInterval(() => { fmMirrorRun(false); }, 5 * 60000);
+  // روز ایک بار خود واپسی کی جانچ
+  setTimeout(() => { try{ const t = bizDateKey(); if(loadFromStorage('fmRecDay', '') !== t && typeof fmRecoverRun === 'function'){ saveToStorage('fmRecDay', t); fmRecoverRun(false); } }catch(e){} }, 90000);
 })();
 </script>
 <script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="FM" defer></script>
