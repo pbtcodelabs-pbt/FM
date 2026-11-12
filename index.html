@@ -7560,6 +7560,7 @@ function __appHostKind(h, p){
           <h3>📱 روزانہ خودکار بیک اپ (فون میں)</h3>
           <div class="settingsHint">ہر دن کا بیک اپ خود بنتا ہے — پچھلے 7 دن محفوظ۔ ⬇️ سے فائل لیں (واٹس ایپ/ڈرائیو پر بھیج دیں)، ↩️ سے اسی دن کا ریکارڈ واپس لائیں۔</div>
           <div id="autoLocalBackupList" style="margin-top:8px;"></div>
+          <button type="button" onclick="fmRecoverRun(true)" style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:12px; background:linear-gradient(155deg,#f59e0b,#b45309); color:#fff; font-weight:900; font-size:14px; font-family:inherit; cursor:pointer;">🛟 غائب بل / وصولیاں خودکار بیک اپ سے واپس لائیں</button>
         </div>
 
         <!-- --- 🔒 Account Security — PIN سے محفوظ، صرف اسی دکان کے Admin کی اپنی سیکیورٹی سیٹنگز
@@ -10184,8 +10185,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1111WE520'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'گاہک کے بل اور بیوپاری کی خریداری کے اوپر «▶ پچھلی تاریخ / اگلی تاریخ ◀» — اسی گاہک / بیوپاری کے پچھلے اگلے بل'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1211TH521'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'غائب بل / وصولیاں خودکار بیک اپ سے واپس + پکا پہرہ: کوئی فون اب کلاؤڈ کے بل / وصولیاں خالی نہیں کر سکتا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -22993,6 +22994,31 @@ function _xReattach(cloudItem, localItem){
   return o;
 }
 function _xBaseKey(def){ return 'xsyncBase_' + def.key; }
+// 🛡️ FM1211TH521 (صدام، 11 نومبر: 27 اکتوبر – 7 نومبر کے بل اور 28 اکتوبر – 4 نومبر کی وصولیاں کلاؤڈ میں خالی ہو گئیں):
+//   جس فون میں کسی ٹکڑے کی «بنیاد» میں بل تھے مگر اپنی فہرست میں نہیں (الماری سے دیر سے آئے / مقامی ڈیٹا ادھورا)، تین طرفہ ملاپ
+//   انہیں «حذف» سمجھ کر کلاؤڈ میں خالی فہرست لکھ دیتا تھا۔ اب کلاؤڈ سے کوئی بل / ادائیگی صرف تب ہٹتی ہے جب اسی فون پر واقعی
+//   حذف کی گئی ہو (fmDelLog میں درج) — ورنہ ملاپ کے بعد بھی واپس فہرست میں رہتی ہے۔ مٹانا ہمیشہ fmDelMark سے۔
+function fmDelMark(kind, ids){
+  try{
+    const L = loadFromStorage('fmDelLog', {}) || {}, now = Date.now(), m = L[kind] = L[kind] || {};
+    (ids || []).forEach(id => { if(id != null) m[String(id)] = now; });
+    Object.keys(L).forEach(k => Object.keys(L[k] || {}).forEach(i => { if(now - L[k][i] > 90 * 86400000) delete L[k][i]; }));
+    saveToStorage('fmDelLog', L);
+  }catch(e){}
+}
+function fmDelGuard(kind, merged, remote, idOf){
+  try{
+    if(!Array.isArray(remote) || !remote.length) return merged;
+    const L = (loadFromStorage('fmDelLog', {}) || {})[kind] || {};
+    const have = new Set((merged || []).map(x => String(idOf(x))));
+    try{ const all = kind === 'inv' ? invoicesData : kind === 'pay' ? paymentsData : null; (all || []).forEach(x => have.add(String(idOf(x)))); }catch(e){} // دوسرے ٹکڑے میں چلا گیا (تاریخ بدلی) تو دوہرا نہیں
+    const back = remote.filter(x => { const id = idOf(x); return id != null && !have.has(String(id)) && !L[String(id)]; });
+    if(!back.length) return merged;
+    window._fmGuardHits = (window._fmGuardHits || 0) + back.length;
+    console.warn('🛡️ FM guard kept', kind, back.length);
+    return (merged || []).concat(back);
+  }catch(e){ return merged; }
+}
 function _xMerge(def, local, cloud){
   const base = loadFromStorage(_xBaseKey(def), null); // {id: str}
   const lm = new Map(), cm = new Map(), order = [];
@@ -23267,7 +23293,7 @@ async function _paySyncShard(sk){
     for(let a = 0; a < 3; a++){
       const cloud = await _xReadCloud(def);
       if(!cloud.ok){ if(cloud.status === 403) _payShardOff = true; break; }
-      const merged = _xMerge(def, (paymentsData || []).filter(p => _payShard(p) === sk), cloud.list);
+      const merged = fmDelGuard('pay', _xMerge(def, (paymentsData || []).filter(p => _payShard(p) === sk), cloud.list), cloud.list, x => x && x.payment_id); // 🛡️ FM1211TH521
       paymentsData = _paySort([...(paymentsData || []).filter(p => _payShard(p) !== sk), ...merged]);
       const strip = _xHeavyStrip(merged);
       if(_stableStr(strip) === _stableStr(cloud.list)){ _xSetBase(def, merged); ok = true; ut = cloud.updateTime; syn = merged; break; }
@@ -30414,7 +30440,7 @@ async function pmDeleteCollection(pid){
   if(!(await _askAdminPinForSerialMaster('وصولی حذف کرنا'))) return;
   pauseCloudPolling && pauseCloudPolling(10000);
   const P = _pmUndo(c, pm);
-  paymentsData = paymentsData.filter(x => x !== pm);
+  fmDelMark('pay', [pm.payment_id]); paymentsData = paymentsData.filter(x => x !== pm);
   c.walletHistory = c.walletHistory || [];
   c.walletHistory.unshift({ type: 'collection_deleted', amount: P.amt, date: bizDateKey(), at: new Date().toISOString(), by: (AppState.currentUser && AppState.currentUser.name) || 'admin', note: `وصولی حذف — ${bsPayDay(pm)} — ${pm.method || ''}` });
   _pmAfterChange(c);
@@ -30539,7 +30565,7 @@ async function supPmDelete(pid){
   try{ pauseCloudPolling && pauseCloudPolling(10000); }catch(e){}
   const before = Math.round(Number(s.total_payable) || 0);
   const d = _supPmUndo(s, pm);
-  paymentsData = paymentsData.filter(x => x !== pm);
+  fmDelMark('pay', [pm.payment_id]); paymentsData = paymentsData.filter(x => x !== pm);
   s.ledgerHistory = s.ledgerHistory || [];
   s.ledgerHistory.unshift({ type: 'payment_deleted', amount: d.amt, date: bizDateKey(), at: new Date().toISOString(), by: (AppState.currentUser && AppState.currentUser.name) || 'admin', note: `${isOut ? 'ادائیگی' : 'وصولی'} حذف — ${bsPayDay(pm)} — Rs. ${d.amt.toLocaleString('en-US')}` });
   _supPmAfterChange(s);
@@ -37287,7 +37313,7 @@ async function fmMasterResetAll(){
         badC.forEach(c => { c.total_receivable = 0; c.wallet_balance = 0; });
         badS.forEach(s => { s.total_payable = 0; s.wallet_balance = 0; });
         badV.forEach(v => { v.stock = 0; });
-        if(oldInv.length) invoicesData = invoicesData.filter(x => !(x && oldInvIds.has(x.invoice_id)));
+        if(oldInv.length){ fmDelMark('inv', oldInv.map(x => x.invoice_id)); } if(oldInv.length) invoicesData = invoicesData.filter(x => !(x && oldInvIds.has(x.invoice_id)));
         persistAllData();
         try{ await pushCustomersToCloud(); await pushSuppliersToCloud(); await pushProductsToCloud(); await pushInvoicesToCloud(); }catch(e){}
       }
@@ -43776,6 +43802,7 @@ async function _pushMergedRaw(cfg){
         const remote = JSON.parse(str);
         if(Array.isArray(remote)){
           let merged = _mergeRecordsThreeWay(_baseWithSent(cfg, remote), cfg.get(), remote, cfg.id, cfg.counters, cfg.hists, cfg.seed);
+          if(cfg.guard) merged = fmDelGuard(cfg.guard, merged, remote, x => x && x[cfg.id]); // 🛡️ FM1211TH521
           if(cfg.label) merged = await _shrinkLockCheck((cfg.dg ? _dgFilter(cfg.dg, remote) : remote).filter(x => !(cfg.id === 'customer_id' && isLegacyDemoCustomer(x))), merged, cfg.id, cfg.label); // 🔒 FM309WE#270
           if(cfg.dg) merged = _dgFilter(cfg.dg, merged); // 🛡️ FM610TU320: حذف شدہ کبھی واپس نہیں
           cfg.set(merged);
@@ -43853,7 +43880,7 @@ function _supCfg(){
     push: () => pushSuppliersToCloud() };
 }
 function _invCfg(){
-  return { path: INVOICES_DOC_PATH, id: 'invoice_id', counters: ['amount_due'], hists: [], seed: null,
+  return { path: INVOICES_DOC_PATH, id: 'invoice_id', counters: ['amount_due'], hists: [], seed: null, guard: 'inv',
     get: () => invoicesData, set: v => { invoicesData = v; },
     getBase: () => invoicesSyncBase, setBase: v => { invoicesSyncBase = _syncClone(v); try{ saveToStorage('invoicesSyncBase', invoicesSyncBase); }catch(e){} },
     save: () => { saveToStorage('invoices', invoicesData); },
@@ -44500,7 +44527,7 @@ function _invShard(i){
 }
 function _invSort(a){ return a.sort((x, y) => String(y.created_at || '').localeCompare(String(x.created_at || '')) || ((Number(y.invoice_id) || 0) - (Number(x.invoice_id) || 0))); }
 function _invShardCfg(sk){
-  return { path: _invB() + 'invoices_' + sk, id: 'invoice_id', counters: ['amount_due'], hists: [], seed: null, createOnly: true,
+  return { path: _invB() + 'invoices_' + sk, id: 'invoice_id', counters: ['amount_due'], hists: [], seed: null, createOnly: true, guard: 'inv',
     get: () => (invoicesData || []).filter(i => _invShard(i) === sk),
     set: v => { invoicesData = _invSort([...(invoicesData || []).filter(i => _invShard(i) !== sk), ...(v || [])]); },
     getBase: () => loadFromStorage('invSyncBase_' + sk, null),
@@ -44559,7 +44586,7 @@ async function _invFetchShard(cfg){
   if(!res || !res.ok) return { ok: false };
   const doc = await res.json(); let remote = [];
   try{ const st = doc.fields?.json?.stringValue; if(st){ const a = JSON.parse(st); if(Array.isArray(a)) remote = a; } }catch(e){ return { ok: false }; }
-  const merged = _mergeRecordsThreeWay(_baseWithSent(cfg, remote), cfg.get(), remote, 'invoice_id', ['amount_due'], [], null);
+  const merged = fmDelGuard('inv', _mergeRecordsThreeWay(_baseWithSent(cfg, remote), cfg.get(), remote, 'invoice_id', ['amount_due'], [], null), remote, x => x && x.invoice_id); // 🛡️ FM1211TH521
   cfg.set(merged); cfg.setBase(remote); cfg.save(); cfg.lastUT = doc.updateTime;
   const _same = _syncEq(merged, remote); cfg.synced = _same ? merged : null; // 🛠️ FM0111SU486
   return { ok: true, same: _same };
@@ -45524,7 +45551,7 @@ async function confirmBulkDeleteWithPin(){
     return;
   }
   const countDeleted = selectedBillIds.size;
-  invoicesData = invoicesData.filter(inv => !selectedBillIds.has(inv.invoice_id));
+  fmDelMark('inv', [...selectedBillIds]); invoicesData = invoicesData.filter(inv => !selectedBillIds.has(inv.invoice_id));
   pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): بلک ڈیلیٹ بھی فوراً کلاؤڈ میں (اندر ہی saveToStorage + persistAllData بھی ہو جاتا ہے) ----------
   document.getElementById('bulkDeletePinModal').classList.remove('show');
   alert(`✅ ${countDeleted} bill(s) permanently deleted.`);
@@ -45873,7 +45900,7 @@ function permanentlyDeleteBill(invoiceId){
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
   if(!inv) return;
   if(!confirm(`Permanently delete voided bill ${inv.invoice_no}? This cannot be undone.`)) return;
-  invoicesData = invoicesData.filter(i => i.invoice_id !== invoiceId);
+  fmDelMark('inv', [invoiceId]); invoicesData = invoicesData.filter(i => i.invoice_id !== invoiceId);
   persistAllData();
   renderBillHistory();
   pushInvoicesToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 4): مستقل ڈیلیٹ ہونا فوراً کلاؤڈ میں — دوسرے فون پر بھی غائب ہو ----------
@@ -56022,6 +56049,71 @@ window.openHelpDesk = openHelpDesk;
         h = bar('fmPoNav', L, L.findIndex(o => o.k === idx), 'fmPoGo', o => JSON.stringify(sid).replace(/"/g, '&quot;') + ', ' + o.k); }
       place('poPreviewModal', 'fmPoNav', h); }catch(e){}
     return x; }; window.openPoPreview = openPoPreview; }
+})();
+</script>
+<script type="text/fm-boot">
+/* 🛟 FM1211TH521 (صدام، 12 نومبر — «پچھلے دنوں کے بل / چالان غائب»): 11 نومبر شام ایک فون نے بلوں (27 اکتوبر – 7 نومبر) اور وصولیوں
+   (28 اکتوبر – 4 نومبر) کے کلاؤڈ ٹکڑے خالی لکھ دیے تھے (اب fmDelGuard کا پہرہ)۔ یہاں: اس فون کے 7 دن والے خودکار بیک اپ (fmAutoBackup_v1)
+   میں جو بل / ادائیگی ہو مگر اب فون اور کلاؤڈ دونوں میں نہ ہو (اور اس فون پر حذف نہ کی گئی ہو) — وہ واپس فہرست میں اور کلاؤڈ میں۔
+   ہر فون پر ایک بار خود (پہلے کلاؤڈ سے پورا ملاپ)، پھر «بیک اپ» میں 🛟 بٹن سے جب چاہیں۔ کچھ مٹتا یا بدلتا نہیں — صرف غائب واپس۔ */
+(function(){
+  async function allBackups(){
+    try{ const db = await _albOpen(); return ((await _albReq(db, 'readonly', st => st.getAll())) || []).sort((a, b) => String(b.day).localeCompare(String(a.day))); }catch(e){ return []; }
+  }
+  async function run(manual){
+    if(window._fmRecBusy) return; window._fmRecBusy = true;
+    let nInv = 0, nPay = 0, days = new Set();
+    try{
+      try{ await invSyncAll(); }catch(e){}
+      try{ await paySyncAll(); }catch(e){}
+      const rows = await allBackups();
+      if(!rows.length){ if(manual) await uAlert('🛟 خودکار بیک اپ', 'اس فون میں کوئی خودکار بیک اپ نہیں ملا۔ جس فون پر ایڈمن کام کرتا ہے وہاں یہی بٹن دبائیں۔'); return; }
+      const log = loadFromStorage('fmDelLog', {}) || {}, dI = log.inv || {}, dP = log.pay || {};
+      const haveI = new Set(), haveP = new Set();
+      (invoicesData || []).forEach(x => x && haveI.add(String(x.invoice_id)));
+      (paymentsData || []).forEach(x => x && haveP.add(String(x.payment_id)));
+      try{ (_archMem.inv || []).forEach(x => x && haveI.add(String(x.invoice_id))); (_archMem.pay || []).forEach(x => x && haveP.add(String(x.payment_id))); }catch(e){}
+      const ar = loadFromStorage('invArchived', {}) || {}, pa = loadFromStorage('payArchived', {}) || {};
+      const addI = [], addP = [];
+      for(const r of rows){
+        let b = null; try{ b = JSON.parse(r.json); }catch(e){}
+        if(!b) continue;
+        (Array.isArray(b.invoices) ? b.invoices : []).forEach(x => {
+          const id = x && x.invoice_id; if(id == null) return; const k = String(id);
+          if(haveI.has(k) || dI[k] || ar[_invShard(x)]) return;
+          const d0 = String(x.created_at || '').slice(0, 10); if(!manual && !(d0 >= '2026-10-27' && d0 <= '2026-11-08')) return; // خود: صرف خالی ہوئے دن
+          haveI.add(k); addI.push(Object.assign({}, x, { _rec521: 1 })); days.add(String(x.created_at || '').slice(0, 10));
+        });
+        (Array.isArray(b.payments) ? b.payments : []).forEach(x => {
+          const id = x && x.payment_id; if(id == null) return; const k = String(id);
+          if(haveP.has(k) || dP[k] || pa[_payShard(x)]) return;
+          const d1 = String(x.created_at || x.date || '').slice(0, 10); if(!manual && !(d1 >= '2026-10-28' && d1 <= '2026-11-05')) return;
+          haveP.add(k); addP.push(Object.assign({}, x, { _rec521: 1 }));
+        });
+      }
+      nInv = addI.length; nPay = addP.length;
+      if(nInv) invoicesData = _invSort([...(invoicesData || []), ...addI]);
+      if(nPay) paymentsData = _paySort([...(paymentsData || []), ...addP]);
+      if(nInv || nPay){
+        saveToStorage('invoices', invoicesData); saveToStorage('payments', paymentsData);
+        try{ persistAllData(); }catch(e){}
+        try{ await pushInvoicesToCloud(); }catch(e){}
+        try{ await paySyncAll(); }catch(e){}
+        try{ if(typeof currentScreenName !== 'undefined' && currentScreenName === 'billhistory') renderBillHistory(); }catch(e){}
+        try{ if(typeof renderHomeMoneySummary === 'function') renderHomeMoneySummary(); }catch(e){}
+      }
+      saveToStorage('fmRec521', { at: Date.now(), inv: nInv, pay: nPay });
+      if(nInv || nPay){
+        const dl = [...days].filter(Boolean).sort();
+        await uAlert('🛟 ریکارڈ واپس آ گیا', `خودکار بیک اپ سے <b>${nInv}</b> بل اور <b>${nPay}</b> وصولیاں / ادائیگیاں واپس فہرست اور کلاؤڈ میں آ گئیں۔` + (dl.length ? `<br><small>تاریخیں: ${dl.map(d => bizFmt(d)).join('، ')}</small>` : '') + '<br><small>دوسرے فونوں پر بھی چند منٹ میں خود آ جائیں گے۔</small>', 'green');
+      } else if(manual){
+        await uAlert('🛟 خودکار بیک اپ', 'بیک اپ میں ایسا کوئی بل یا وصولی نہیں ملی جو اب غائب ہو — سب کچھ پہلے سے موجود ہے۔', 'green');
+      }
+    }catch(e){ console.warn('fm recover', e); if(manual) try{ await uAlert('🛟 خودکار بیک اپ', 'ابھی واپس نہیں لایا جا سکا — انٹرنیٹ چیک کر کے دوبارہ دبائیں۔'); }catch(_){} }
+    finally{ window._fmRecBusy = false; }
+  }
+  window.fmRecoverRun = run;
+  setTimeout(() => { try{ if(!loadFromStorage('fmRec521', null)) run(false); }catch(e){} }, 45000);
 })();
 </script>
 <script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="FM" defer></script>
