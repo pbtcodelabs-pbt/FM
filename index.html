@@ -7564,7 +7564,7 @@ function __appHostKind(h, p){
           <div id="autoLocalBackupList" style="margin-top:8px;"></div>
           <button type="button" onclick="fmRecoverRun(true)" style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:12px; background:linear-gradient(155deg,#f59e0b,#b45309); color:#fff; font-weight:900; font-size:14px; font-family:inherit; cursor:pointer;">🛟 غائب بل / وصولیاں خودکار بیک اپ سے واپس لائیں</button>
         </div>
-        <!-- 🗄️ FM1311FR525 / SM1311FR268 (مالک کا حکم): سیف الماری — ہر دن کی پوری نقل کلاؤڈ میں، کبھی اوپر سے نہیں لکھی جاتی -->
+        <!-- 🗄️ FM1311FR526 / SM1311FR268 (مالک کا حکم): سیف الماری — ہر دن کی پوری نقل کلاؤڈ میں، کبھی اوپر سے نہیں لکھی جاتی -->
         <div class="settingsCard admin-only" id="fmVaultCard">
           <h3>🗄️ سیف الماری — ہر دن کا پورا ڈیٹا (کلاؤڈ)</h3>
           <div class="settingsHint">گاہک، بیوپاری، سبزیاں / چالان / سٹاک، بل، وصولیاں، خرچے، آرڈر — سب کی روزانہ پوری نقل۔ پچھلے 60 دن + ہر مہینے کی پہلی نقل ہمیشہ۔ کسی فون کا ادھورا ڈیٹا اچھی نقل کو کبھی نہیں ہٹاتا (📌)۔ «🧩 صرف غائب چیزیں واپس» موجود ڈیٹا کو ہاتھ نہیں لگاتا۔</div>
@@ -10199,7 +10199,7 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1311FR525'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1311FR526'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 const UPDATE_NOTE = 'سیف الماری: ہر دن کا پورا ڈیٹا کلاؤڈ میں محفوظ — کچھ بھی ضائع نہیں ہوگا، غائب چیزیں ایک بٹن سے واپس'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
@@ -10243,7 +10243,7 @@ const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_
    اور ہر Firestore درخواست کے ساتھ اس کا ID Token بھیجا جاتا ہے۔ اس کے بغیر
    Firestore Rules کو "کھلا" (سب کے لیے پڑھنے/لکھنے کی اجازت) رکھنا پڑتا، جو غیر محفوظ ہے۔
    ===================================================================== */
-const AUTH_SIGNUP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`;
+// FM1311FR526: گمنام سائن اپ ختم کر دیا گیا
 const AUTH_REFRESH_URL = `https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`;
 
 // ---------- موجودہ ID Token واپس کریں (اگر میعاد ختم ہو چکی ہو تو خاموشی سے refresh کر لیں،
@@ -10253,56 +10253,115 @@ const AUTH_REFRESH_URL = `https://securetoken.googleapis.com/v1/token?key=${FIRE
 // Google Cloud Console میں بلاک — یہی سب سے عام وجہ ہے جب GitHub Pages پر لاگ ان چلے مگر Firebase پر نہیں) ----------
 window.__cloudSyncError = null;
 
+function _isOwnerAuth(a){ return !!(a && a.owner === true && a.refreshToken); }
 async function ensureFirebaseAuth(){
   const auth = AppState.settings.fbAuth;
-  if(auth && auth.idToken && auth.expiresAt && auth.expiresAt > Date.now() + 60000){
+  if(!_isOwnerAuth(auth)){
+    window.__cloudSyncError = 'مالک لاگ ان ضروری ہے';
+    try{ ownerGateShow(); }catch(e){}
+    return null;
+  }
+  if(auth.idToken && auth.expiresAt && auth.expiresAt > Date.now() + 60000){
     window.__cloudSyncError = null;
-    return auth.idToken; // ابھی کافی وقت باقی ہے، دوبارہ نیٹ ورک کال کی ضرورت نہیں
+    return auth.idToken;
   }
   try{
-    if(auth && auth.refreshToken){
-      // ---------- پرانی anonymous شناخت ہی برقرار رکھیں — صرف token تازہ کریں ----------
-      const res = await fetch(AUTH_REFRESH_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(auth.refreshToken)}`
-      });
-      if(res.ok){
-        const data = await res.json();
-        AppState.settings.fbAuth = {
-          localId: data.user_id, idToken: data.id_token, refreshToken: data.refresh_token,
-          expiresAt: Date.now() + (parseInt(data.expires_in || '3600') * 1000)
-        };
-        persistAllData();
-        window.__cloudSyncError = null;
-        return AppState.settings.fbAuth.idToken;
-      }
-    }
-    // ---------- بالکل نئی anonymous شناخت بنائیں (پہلی بار، یا refresh ناکام ہونے پر) ----------
-    const res = await fetch(AUTH_SIGNUP_URL, {
+    const res = await fetch(AUTH_REFRESH_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ returnSecureToken: true })
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(auth.refreshToken)}`
     });
-    if(!res.ok){
-      let reason = `HTTP ${res.status}`;
-      try{ const errBody = await res.json(); if(errBody?.error?.message) reason = errBody.error.message; }catch(e2){}
-      window.__cloudSyncError = `Auth failed (${reason}) on ${location.hostname}`;
+    if(res.ok){
+      const data = await res.json();
+      AppState.settings.fbAuth = {
+        owner: true, email: auth.email || '',
+        localId: data.user_id, idToken: data.id_token, refreshToken: data.refresh_token,
+        expiresAt: Date.now() + (parseInt(data.expires_in || '3600') * 1000)
+      };
+      persistAllData();
+      window.__cloudSyncError = null;
+      return AppState.settings.fbAuth.idToken;
+    }
+    let reason = '';
+    try{ const eb = await res.json(); reason = (eb && eb.error && eb.error.message) || ''; }catch(e2){}
+    if(/TOKEN_EXPIRED|INVALID_REFRESH_TOKEN|USER_DISABLED|USER_NOT_FOUND|CREDENTIAL_TOO_OLD|INVALID_GRANT/i.test(reason)){
+      // مالک نے پاس ورڈ بدل دیا یا اکاؤنٹ بند کر دیا — اس موبائل کو دوبارہ لاگ ان کرنا ہو گا
+      delete AppState.settings.fbAuth;
+      persistAllData();
+      window.__cloudSyncError = 'لاگ ان ختم ہو گیا: ' + reason;
+      try{ ownerGateShow(); }catch(e3){}
       return null;
     }
-    const data = await res.json();
-    AppState.settings.fbAuth = {
-      localId: data.localId, idToken: data.idToken, refreshToken: data.refreshToken,
-      expiresAt: Date.now() + (parseInt(data.expiresIn || '3600') * 1000)
-    };
-    persistAllData();
-    window.__cloudSyncError = null;
-    return AppState.settings.fbAuth.idToken;
+    window.__cloudSyncError = `Auth failed (${reason || ('HTTP ' + res.status)}) on ${location.hostname}`;
+    return null;
   }catch(e){
     window.__cloudSyncError = `Network/Auth error on ${location.hostname}: ${e.message}`;
-    return null; // ---------- آف لائن — کوئی مسئلہ نہیں، اگلی بار انٹرنیٹ ملنے پر دوبارہ کوشش ہوگی ----------
+    return null; // انٹرنیٹ نہ ہو تو ایپ آف لائن چلتی رہے
   }
 }
+
+// ---------- مالک لاگ ان (FM1311FR526): گمنام لاگ ان ختم — صرف مالک کے ای میل/پاس ورڈ سے کلاؤڈ کھلتا ہے ----------
+// ایک بار اس موبائل پر مالک اکاؤنٹ لاگ ان ہو جائے تو سٹاف اپنے پن (PIN) سے ہی کام کرتا رہے گا
+async function ownerLogin(email, password){
+  const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: String(email || '').trim(), password: String(password || ''), returnSecureToken: true })
+  });
+  let j = {}; try{ j = await r.json(); }catch(e){}
+  if(!r.ok){
+    const m = (j && j.error && j.error.message) || '';
+    if(/EMAIL_NOT_FOUND|INVALID_PASSWORD|INVALID_LOGIN_CREDENTIALS/i.test(m)) throw new Error('ای میل یا پاس ورڈ غلط ہے');
+    if(/USER_DISABLED/i.test(m)) throw new Error('یہ اکاؤنٹ بند کر دیا گیا ہے');
+    if(/TOO_MANY_ATTEMPTS/i.test(m)) throw new Error('بہت زیادہ کوششیں ہو گئیں، کچھ دیر بعد دوبارہ کریں');
+    throw new Error('لاگ ان نہیں ہو سکا ' + (m ? '(' + m + ')' : ''));
+  }
+  AppState.settings.fbAuth = {
+    owner: true, email: j.email || String(email || '').trim(),
+    localId: j.localId, idToken: j.idToken, refreshToken: j.refreshToken,
+    expiresAt: Date.now() + (parseInt(j.expiresIn || '3600') * 1000)
+  };
+  persistAllData();
+  window.__cloudSyncError = null;
+  return true;
+}
+function ownerGateShow(){
+  if(window.__APP_WRONG_REPO) return;
+  if(document.getElementById('ownerGate')) return;
+  if(!document.body){ document.addEventListener('DOMContentLoaded', ownerGateShow, { once: true }); return; }
+  const d = document.createElement('div');
+  d.id = 'ownerGate';
+  d.setAttribute('dir', 'rtl');
+  d.style.cssText = 'position:fixed;inset:0;z-index:2147483646;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;font-family:Tahoma,Arial,sans-serif;';
+  d.innerHTML = '<div style="width:100%;max-width:360px;background:#1e293b;border-radius:16px;padding:22px;box-sizing:border-box;text-align:center;">'
+    + '<div style="font-size:44px;">🔒</div>'
+    + '<div style="font-size:21px;font-weight:700;margin:6px 0 4px;">مالک لاگ ان</div>'
+    + '<div style="font-size:14px;opacity:.85;margin-bottom:14px;line-height:1.8;">ایپ کھولنے کے لیے مالک کا ای میل اور پاس ورڈ ایک بار درج کریں</div>'
+    + '<input id="ownerGateEmail" type="email" autocomplete="username" placeholder="ای میل" dir="ltr" style="width:100%;box-sizing:border-box;padding:12px;margin-bottom:10px;border-radius:10px;border:0;font-size:16px;">'
+    + '<input id="ownerGatePass" type="password" autocomplete="current-password" placeholder="پاس ورڈ" dir="ltr" style="width:100%;box-sizing:border-box;padding:12px;margin-bottom:10px;border-radius:10px;border:0;font-size:16px;">'
+    + '<div id="ownerGateErr" style="color:#fca5a5;font-size:14px;min-height:22px;margin-bottom:6px;"></div>'
+    + '<button id="ownerGateBtn" style="width:100%;padding:13px;border:0;border-radius:10px;background:#16a34a;color:#fff;font-size:17px;font-weight:700;">لاگ ان</button>'
+    + '</div>';
+  document.body.appendChild(d);
+  const go = async () => {
+    const err = document.getElementById('ownerGateErr'), btn = document.getElementById('ownerGateBtn');
+    err.textContent = ''; btn.disabled = true; btn.textContent = 'انتظار کریں...';
+    try{
+      await ownerLogin(document.getElementById('ownerGateEmail').value, document.getElementById('ownerGatePass').value);
+      d.remove();
+      location.reload(); // لاگ ان کے بعد صاف طریقے سے کلاؤڈ ڈیٹا لوڈ ہو
+    }catch(e){
+      err.textContent = (e && e.message) ? e.message : 'لاگ ان نہیں ہو سکا';
+      if(/Failed to fetch|NetworkError|network/i.test(String(e && e.message))) err.textContent = 'انٹرنیٹ نہیں ہے، انٹرنیٹ چلا کر دوبارہ کوشش کریں';
+      btn.disabled = false; btn.textContent = 'لاگ ان';
+    }
+  };
+  document.getElementById('ownerGateBtn').addEventListener('click', go);
+  d.addEventListener('keydown', ev => { if(ev.key === 'Enter') go(); });
+}
+(function(){
+  const chk = () => { try{ if(!window.__APP_WRONG_REPO && !_isOwnerAuth(AppState.settings.fbAuth)) ownerGateShow(); }catch(e){} };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', chk); else chk();
+})();
 
 // ---------- Firestore کو authenticated (Bearer token) درخواست بھیجنے کا مختصر طریقہ ----------
 async function authFirestoreFetch(path, options = {}){
@@ -56401,7 +56460,7 @@ window.openHelpDesk = openHelpDesk;
 })();
 </script>
 <script type="text/fm-boot">
-/* 🗄️ FM1311FR525 / SM1311FR268 — سیف الماری: روزانہ مکمل نقل (مالک کا حکم، 13 نومبر: «ایک لائن بھی ضائع نہ ہو»)
+/* 🗄️ FM1311FR526 / SM1311FR268 — سیف الماری: روزانہ مکمل نقل (مالک کا حکم، 13 نومبر: «ایک لائن بھی ضائع نہ ہو»)
    ہر دن کا پورا ڈیٹا (گاہک، بیوپاری، سبزیاں + چالان + سٹاک، بل، وصولیاں / ادائیگیاں، خرچے، نقد خریداری، آرڈر، وصولی لسٹ، منشی کے بل،
    ڈائری، صارفین، سیٹنگ…) کلاؤڈ میں الگ دستاویزوں میں: shopData/vaultDay_<دن>_<خانہ>_p<n> (gzip + base64، ہر حصہ < 800KB)
    اور فہرست shopData/vaultDayIdx۔
