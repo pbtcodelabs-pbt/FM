@@ -7564,6 +7564,18 @@ function __appHostKind(h, p){
           <div id="autoLocalBackupList" style="margin-top:8px;"></div>
           <button type="button" onclick="fmRecoverRun(true)" style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:12px; background:linear-gradient(155deg,#f59e0b,#b45309); color:#fff; font-weight:900; font-size:14px; font-family:inherit; cursor:pointer;">🛟 غائب بل / وصولیاں خودکار بیک اپ سے واپس لائیں</button>
         </div>
+        <!-- 🗄️ FM1311FR525 / SM1311FR268 (مالک کا حکم): سیف الماری — ہر دن کی پوری نقل کلاؤڈ میں، کبھی اوپر سے نہیں لکھی جاتی -->
+        <div class="settingsCard admin-only" id="fmVaultCard">
+          <h3>🗄️ سیف الماری — ہر دن کا پورا ڈیٹا (کلاؤڈ)</h3>
+          <div class="settingsHint">گاہک، بیوپاری، سبزیاں / چالان / سٹاک، بل، وصولیاں، خرچے، آرڈر — سب کی روزانہ پوری نقل۔ پچھلے 60 دن + ہر مہینے کی پہلی نقل ہمیشہ۔ کسی فون کا ادھورا ڈیٹا اچھی نقل کو کبھی نہیں ہٹاتا (📌)۔ «🧩 صرف غائب چیزیں واپس» موجود ڈیٹا کو ہاتھ نہیں لگاتا۔</div>
+          <div id="fmVaultStatus" style="margin:8px 0; padding:8px 10px; border-radius:12px; background:#f0fdf4; color:#166534; font-size:13px; font-weight:700;"></div>
+          <div style="display:flex; gap:6px;">
+            <button type="button" onclick="fmVaultSaveNow()" style="flex:1; padding:11px; border:none; border-radius:12px; background:linear-gradient(155deg,#2563eb,#1e40af); color:#fff; font-weight:900; font-size:14px; font-family:inherit; cursor:pointer;">💾 ابھی محفوظ کریں</button>
+            <button type="button" onclick="fmVaultRender()" style="flex:1; padding:11px; border:none; border-radius:12px; background:#e0e7ff; color:#3730a3; font-weight:900; font-size:14px; font-family:inherit; cursor:pointer;">📂 الماری کھولیں</button>
+          </div>
+          <div id="fmVaultList" style="margin-top:8px;"></div>
+        </div>
+
 
         <!-- --- 🔒 Account Security — PIN سے محفوظ، صرف اسی دکان کے Admin کی اپنی سیکیورٹی سیٹنگز
              (ڈویلپر کی رابطہ معلومات اب یہاں نہیں — وہ الگ، چھپے ہوئے Developer Panel میں منتقل ہو چکی ہیں) --- -->
@@ -10187,8 +10199,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1211TH524'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'فول پروف: بلوں اور وصولیوں کی دوسری کلاؤڈ نقل جو کبھی نہیں گھٹتی + روز خود غائب ریکارڈ کی جانچ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1311FR525'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'سیف الماری: ہر دن کا پورا ڈیٹا کلاؤڈ میں محفوظ — کچھ بھی ضائع نہیں ہوگا، غائب چیزیں ایک بٹن سے واپس'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -56386,6 +56398,293 @@ window.openHelpDesk = openHelpDesk;
   setInterval(() => { fmMirrorRun(false); }, 5 * 60000);
   // روز ایک بار خود واپسی کی جانچ
   setTimeout(() => { try{ const t = bizDateKey(); if(loadFromStorage('fmRecDay', '') !== t && typeof fmRecoverRun === 'function'){ saveToStorage('fmRecDay', t); fmRecoverRun(false); } }catch(e){} }, 90000);
+})();
+</script>
+<script type="text/fm-boot">
+/* 🗄️ FM1311FR525 / SM1311FR268 — سیف الماری: روزانہ مکمل نقل (مالک کا حکم، 13 نومبر: «ایک لائن بھی ضائع نہ ہو»)
+   ہر دن کا پورا ڈیٹا (گاہک، بیوپاری، سبزیاں + چالان + سٹاک، بل، وصولیاں / ادائیگیاں، خرچے، نقد خریداری، آرڈر، وصولی لسٹ، منشی کے بل،
+   ڈائری، صارفین، سیٹنگ…) کلاؤڈ میں الگ دستاویزوں میں: shopData/vaultDay_<دن>_<خانہ>_p<n> (gzip + base64، ہر حصہ < 800KB)
+   اور فہرست shopData/vaultDayIdx۔
+   - پچھلے دنوں کی نقل کبھی اوپر سے نہیں لکھی جاتی — آج کی نقل دن میں تازہ ہوتی ہے (ڈیٹا بدلا ہو تو زیادہ سے زیادہ ہر 3 گھنٹے، صرف ایڈمن فون — روز ~20–40 لکھائیاں)، مگر ہمیشہ نئے خانے میں؛
+     فہرست صرف لکھائی مکمل ہونے کے بعد بدلتی ہے (آدھی لکھائی کبھی «تازہ» نہیں بنتی)۔
+   - 🛡️ گھٹنے کا پہرہ: نئی نقل میں گاہک / بیوپاری / سبزیاں / چالان / بل / ادائیگیاں پچھلی سے کم ہوں تو پچھلی نقل «📌 پکی» ہو جاتی ہے
+     (کبھی نہیں مٹتی) اور نئی الگ خانے میں — یعنی کسی فون کا ادھورا / خالی ڈیٹا اچھی نقل کو کبھی نہیں ہٹاتا۔
+   - رکھنا: پچھلے 60 دن کی ہر دن کی نقل + ہر مہینے کی پہلی نقل ہمیشہ + 📌 پکی ہمیشہ۔
+   - واپسی: «🧩 صرف غائب چیزیں واپس» (موجودہ ڈیٹا کو ہاتھ نہیں لگاتا، صرف جو اب فون میں نہیں — حذف درج والے نہیں) یا «↩️ پوری بحالی»
+     (عام بیک اپ والا راستہ proceedWithImport) یا «⬇️ فائل»۔ */
+(function(){
+  const PRE = 'vaultDay_', IDX = 'vaultDayIdx', PART = 780000, KEEP_DAYS = 60;
+  const EXTRA_KEYS = ['pendingBills', 'nextPendingId', 'munshiStockLog', 'nextMunshiLogId', 'returnRequests', 'nextReturnId', 'chLeftovers',
+    'dailyStockSnapshot', 'dailyRecoveryNotes', 'fmDelLog', 'recoveryDeletedIds', 'advDeletedIds', 'customPackingOptions', 'serialMaster',
+    'invArchived', 'payArchived', 'zeroResetAt'];
+  let busy = false, lastSig = (function(){ try{ return loadFromStorage('fmVaultSig', '') || ''; }catch(e){ return ''; } })(), lastPrune = '';
+  const day = () => { try{ return localDateKey().replace(/-/g, ''); }catch(e){ return new Date().toISOString().slice(0, 10).replace(/-/g, ''); } };
+  const isAdmin = () => { try{ return AppState.currentRole === 'admin'; }catch(e){ return false; } };
+
+  function chalanCount(prods){ let n = 0; (prods || []).forEach(p => ((p && p.variants) || []).forEach(v => { n += ((v && v.chalans) || []).length; })); return n; }
+  function counts(b){
+    return { c: (b.customers || []).length, s: (b.suppliers || []).length, p: (b.products || []).length, ch: chalanCount(b.products),
+      i: (b.invoices || []).length, pay: (b.payments || []).length, e: (b.expenses || []).length, cp: (b.cashPurchases || []).length,
+      o: (b.advanceOrders || []).length, r: (b.recoveryList || []).length };
+  }
+  const CORE = ['c', 's', 'p', 'ch', 'i', 'pay'];
+  function shrank(nw, old){ return !!old && CORE.some(k => (Number(nw[k]) || 0) < (Number(old[k]) || 0)); }
+  function emptyish(n){ return (n.c + n.s + n.p + n.i + n.pay) === 0; }
+
+  function buildFull(){
+    const b = buildBackupObject();
+    b.vault = { at: new Date().toISOString(), ver: (typeof APP_BUILD_VERSION !== 'undefined' ? APP_BUILD_VERSION : ''), extra: {} };
+    EXTRA_KEYS.forEach(k => { try{ const v = loadFromStorage(k, undefined); if(v !== undefined && v !== null) b.vault.extra[k] = v; }catch(e){} });
+    return b;
+  }
+  // ---------- gzip + base64 (پرانے براؤزر میں سادہ متن) ----------
+  function _b64(buf){ const u = new Uint8Array(buf); let s = ''; for(let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+  async function packStr(str){
+    try{
+      if(typeof CompressionStream === 'undefined') return { gz: 0, data: str };
+      const buf = await new Response(new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
+      return { gz: 1, data: _b64(buf) };
+    }catch(e){ return { gz: 0, data: str }; }
+  }
+  async function unpackStr(gz, data){
+    if(!gz) return data;
+    const bin = atob(data), u = new Uint8Array(bin.length); for(let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  }
+  // ---------- کلاؤڈ ----------
+  async function readDoc(key){
+    const res = await authFirestoreFetch(`shopData/${key}?key=${FIREBASE_API_KEY}`, { cache: 'no-store' });
+    if(res && res.status === 404) return { ok: true, missing: true, s: '', ut: null };
+    if(!res || !res.ok) return { ok: false };
+    const d = await res.json();
+    return { ok: true, s: (d.fields && d.fields.json && d.fields.json.stringValue) || '', ut: d.updateTime || null };
+  }
+  async function writeDoc(key, str, ut){
+    const pre = ut === undefined ? '' : (ut ? `&currentDocument.updateTime=${encodeURIComponent(ut)}` : '&currentDocument.exists=false');
+    const res = await authFirestoreFetch(`shopData/${key}?key=${FIREBASE_API_KEY}${pre}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { json: { stringValue: str }, updatedAt: { integerValue: String(Date.now()) } } }) });
+    return res ? res.status : 0;
+  }
+  async function delDoc(key){ try{ const r = await authFirestoreFetch(`shopData/${key}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' }); return !!(r && (r.ok || r.status === 404)); }catch(e){ return false; } }
+  async function readIdx(){ const r = await readDoc(IDX); if(!r.ok) return null; let L = []; try{ const p = JSON.parse(r.s || '[]'); if(Array.isArray(p)) L = p; }catch(e){} return { list: L, ut: r.ut, missing: !!r.missing }; }
+
+  // ---------- آج کی نقل لکھیں ----------
+  async function fmVaultSave(force){
+    if(busy) return { ok: false, why: 'busy' };
+    if(!isAdmin()) return { ok: false, why: 'admin' };
+    if(!navigator.onLine) return { ok: false, why: 'offline' };
+    busy = true;
+    try{
+      const full = buildFull(), n = counts(full);
+      if(emptyish(n)) return { ok: false, why: 'empty' }; // خالی فون کبھی الماری میں نہیں لکھتا
+      const json = JSON.stringify(full), sig = _sigH(json.replace(/"(at|exportedAt)":"[^"]*"/g, ''));
+      if(!force && sig === lastSig) return { ok: true, same: true };
+      const pk = await packStr(json);
+      const parts = []; for(let i = 0; i < pk.data.length; i += PART) parts.push(pk.data.slice(i, i + PART));
+      const D = day();
+      for(let attempt = 0; attempt < 4; attempt++){
+        const ix = await readIdx(); if(!ix) return { ok: false, why: 'read' };
+        const L = ix.list, today = L.filter(e => e && e.day === D);
+        const cur = today.filter(e => !e.old).sort((a, b) => String(b.at).localeCompare(String(a.at)))[0];
+        if(cur && cur.sig === sig && !force){ lastSig = sig; try{ saveToStorage('fmVaultSig', sig); }catch(e){} return { ok: true, same: true }; }
+        // 🛡️ گھٹنے کا پہرہ
+        let pinned = false;
+        if(cur && shrank(n, cur.n)){ cur.pin = 1; pinned = true; }
+        const used = new Set(today.map(e => e.slot));
+        let slot = ''; for(let k = 0; k < 40; k++){ const s = D + '_' + String.fromCharCode(97 + (k % 26)) + (k >= 26 ? 'z' : ''); if(!used.has(s)){ slot = s; break; } }
+        if(!slot) slot = D + '_' + Date.now().toString(36);
+        // پہلے سب حصے، پھر فہرست
+        for(let p = 0; p < parts.length; p++){
+          const st = await writeDoc(PRE + slot + '_p' + p, parts[p]);
+          if(st < 200 || st >= 300) return { ok: false, why: 'write ' + st };
+        }
+        const entry = { day: D, slot, at: new Date().toISOString(), parts: parts.length, gz: pk.gz, size: json.length, sig, n,
+          ver: full.vault.ver, by: (function(){ try{ return (AppState.currentUser && (AppState.currentUser.name || AppState.currentUser.username)) || 'admin'; }catch(e){ return 'admin'; } })() };
+        // آج کی پچھلی (غیر پکی) نقلیں «پرانی» — اگلی بار ان کے خانے دوبارہ استعمال ہوں گے، 📌 پکی ہمیشہ رہتی ہیں
+        const next = L.filter(e => !(e && e.day === D && !e.pin && !e.old)).concat(today.filter(e => !e.pin && !e.old).map(e => Object.assign({}, e, { old: 1 })));
+        // پرانی (old) کے خانے دوبارہ استعمال کے لیے ہٹا دیں — ان کے حصے نئے لکھنے میں بدل جائیں گے؛ صرف ایک پرانی رکھیں (پچھلی اچھی)
+        const olds = next.filter(e => e.day === D && e.old).sort((a, b) => String(b.at).localeCompare(String(a.at)));
+        const dropOld = new Set(olds.slice(1).map(e => e.slot));
+        const finalL = next.filter(e => !(e.day === D && e.old && dropOld.has(e.slot))).concat([entry]);
+        const st = await writeDoc(IDX, JSON.stringify(finalL), ix.missing ? null : ix.ut);
+        if(st >= 200 && st < 300){
+          lastSig = sig;
+          try{ saveToStorage('fmVaultLast', { at: entry.at, n, slot, pinned }); }catch(e){}
+          // ہٹائے گئے پرانے خانوں کے حصے مٹائیں (صرف آج کے، جو اب فہرست میں نہیں)
+          for(const e of olds.slice(1)) for(let p = 0; p < (e.parts || 0); p++) await delDoc(PRE + e.slot + '_p' + p);
+          try{ saveToStorage('fmVaultSig', sig); }catch(e){}
+          if(lastPrune !== D){ lastPrune = D; setTimeout(fmVaultPrune, 4000); } // دن میں ایک بار
+          try{ fmVaultRender(); }catch(e){}
+          return { ok: true, entry, pinned };
+        }
+        if(!(st === 400 || st === 409 || st === 412)) return { ok: false, why: 'idx ' + st };
+      }
+      return { ok: false, why: 'retry' };
+    }catch(e){ console.warn('vault save', e); return { ok: false, why: String(e && e.message || e) }; }
+    finally{ busy = false; }
+  }
+  // ---------- 60 دن سے پرانی روزانہ نقلیں ہٹائیں (مہینے کی پہلی نقل اور 📌 پکی ہمیشہ) ----------
+  async function fmVaultPrune(){
+    try{
+      if(!isAdmin()) return;
+      const ix = await readIdx(); if(!ix || !ix.list.length) return;
+      const cut = new Date(Date.now() - KEEP_DAYS * 86400000), cutD = cut.toISOString().slice(0, 10).replace(/-/g, '');
+      const firstOfMonth = {};
+      ix.list.filter(e => !e.old).forEach(e => { const m = String(e.day).slice(0, 6); if(!firstOfMonth[m] || String(e.day + e.at) < String(firstOfMonth[m].day + firstOfMonth[m].at)) firstOfMonth[m] = e; });
+      const keepSet = new Set(Object.values(firstOfMonth).map(e => e.slot));
+      const drop = ix.list.filter(e => String(e.day) < cutD && !e.pin && !keepSet.has(e.slot));
+      if(!drop.length) return;
+      const ds = new Set(drop.map(e => e.slot));
+      const st = await writeDoc(IDX, JSON.stringify(ix.list.filter(e => !ds.has(e.slot))), ix.ut);
+      if(!(st >= 200 && st < 300)) return;
+      for(const e of drop) for(let p = 0; p < (e.parts || 0); p++) await delDoc(PRE + e.slot + '_p' + p);
+    }catch(e){}
+  }
+  // ---------- ایک نقل پڑھیں ----------
+  async function loadEntry(e){
+    let data = '';
+    for(let p = 0; p < (e.parts || 0); p++){
+      const r = await readDoc(PRE + e.slot + '_p' + p);
+      if(!r.ok || r.missing) throw new Error('حصہ ' + (p + 1) + ' نہیں ملا');
+      data += r.s;
+    }
+    const json = await unpackStr(e.gz, data);
+    const b = JSON.parse(json);
+    if(!b || !Array.isArray(b.products) || !Array.isArray(b.customers)) throw new Error('نقل پڑھی نہیں جا سکی');
+    return b;
+  }
+  // ---------- 🧩 صرف غائب چیزیں واپس — موجود ڈیٹا کو ہاتھ نہیں لگاتا ----------
+  const LISTS = [
+    { k: 'customers', t: '👥 گاہک', id: 'customer_id', get: () => customersData },
+    { k: 'suppliers', t: '🚚 بیوپاری', id: 'supplier_id', get: () => suppliersData },
+    { k: 'products', t: '🥬 سبزیاں / پھل', id: 'product_id', get: () => productsData },
+    { k: 'invoices', t: '🧾 بل', id: 'invoice_id', del: 'inv', get: () => invoicesData },
+    { k: 'payments', t: '💵 وصولیاں / ادائیگیاں', id: 'payment_id', del: 'pay', get: () => paymentsData },
+    { k: 'expenses', t: '💸 خرچے', id: 'id', get: () => (typeof expenseData !== 'undefined' ? expenseData : null) },
+    { k: 'cashPurchases', t: '🛒 نقد خریداری', id: 'id', get: () => (typeof cashPurchasesData !== 'undefined' ? cashPurchasesData : null) },
+    { k: 'advanceOrders', t: '📦 آرڈر', id: 'id', get: () => (typeof advanceOrdersData !== 'undefined' ? advanceOrdersData : null) },
+    { k: 'recoveryList', t: '💰 وصولی لسٹ', id: 'id', get: () => (typeof recoveryListData !== 'undefined' ? recoveryListData : null) },
+    { k: 'diary', t: '📒 ڈائری', id: 'id', get: () => (typeof diaryData !== 'undefined' ? diaryData : null) },
+    { k: 'users', t: '👤 صارفین', id: 'user_id', get: () => usersData }
+  ];
+  function missingPlan(b){
+    const del = loadFromStorage('fmDelLog', {}) || {}, plan = [];
+    LISTS.forEach(L => {
+      const cur = L.get(); if(!Array.isArray(cur)) return;
+      const have = new Set(cur.map(x => x && x[L.id] != null ? String(x[L.id]) : null));
+      if(L.k === 'invoices' || L.k === 'payments'){ try{ (_archMem[L.k === 'invoices' ? 'inv' : 'pay'] || []).forEach(x => x && have.add(String(x[L.id]))); }catch(e){} }
+      const dl = L.del ? (del[L.del] || {}) : {};
+      const add = (b[L.k] || []).filter(x => x && x[L.id] != null && !have.has(String(x[L.id])) && !dl[String(x[L.id])]);
+      if(add.length) plan.push({ L, add, on: true });
+    });
+    // موجود سبزی کی غائب قسمیں (variants) اور غائب چالان
+    const vAdd = [], chAdd = [], chDel = del.ch || {};
+    (b.products || []).forEach(bp => {
+      const p = productsData.find(x => x && x.product_id === bp.product_id); if(!p) return;
+      (bp.variants || []).forEach(bv => {
+        const v = (p.variants || []).find(x => x && x.variant_id === bv.variant_id);
+        if(!v){ vAdd.push({ p, v: bv }); return; }
+        const hk = new Set((v.chalans || []).map(c => _chalanKey(c)));
+        (bv.chalans || []).forEach(c => { const k = _chalanKey(c); if(!hk.has(k) && !chDel[String(k)]) chAdd.push({ v, c, name: (p.name || p.product_name || '') + ' ' + (bv.name || bv.variant_name || '') }); });
+      });
+    });
+    if(vAdd.length) plan.push({ L: { k: '_var', t: '🥬 سبزی کی غائب قسمیں' }, add: vAdd, on: true });
+    if(chAdd.length) plan.push({ L: { k: '_ch', t: '📦 غائب چالان (سٹاک بھی ساتھ واپس آئے گا)' }, add: chAdd, on: false });
+    return plan;
+  }
+  function applyPlan(plan){
+    let n = 0;
+    plan.filter(x => x.on).forEach(x => {
+      if(x.L.k === '_var'){ x.add.forEach(a => { (a.p.variants = a.p.variants || []).push(JSON.parse(JSON.stringify(a.v))); n++; }); return; }
+      if(x.L.k === '_ch'){ x.add.forEach(a => { (a.v.chalans = a.v.chalans || []).push(JSON.parse(JSON.stringify(a.c))); n++; }); return; }
+      const arr = x.L.get(); x.add.forEach(it => { arr.push(JSON.parse(JSON.stringify(it))); n++; });
+    });
+    try{ recalcIdCounters(); }catch(e){}
+    try{ if(typeof nextPaymentId !== 'undefined'){ const m = paymentsData.reduce((a, x) => Math.max(a, Number(x.payment_id) || 0), 0); if(m >= nextPaymentId) nextPaymentId = m + 1; } }catch(e){}
+    try{ if(typeof nextSupplierId !== 'undefined'){ const m = suppliersData.reduce((a, x) => Math.max(a, Number(x.supplier_id) || 0), 0); if(m >= nextSupplierId) nextSupplierId = m + 1; } }catch(e){}
+    try{ if(typeof nextExpenseId !== 'undefined' && typeof expenseData !== 'undefined'){ const m = expenseData.reduce((a, x) => Math.max(a, Number(x.id) || 0), 0); if(m >= nextExpenseId) nextExpenseId = m + 1; } }catch(e){}
+    try{ if(typeof nextAdvOrderId !== 'undefined' && typeof advanceOrdersData !== 'undefined'){ const m = advanceOrdersData.reduce((a, x) => Math.max(a, Number(x.id) || 0), 0); if(m >= nextAdvOrderId) nextAdvOrderId = m + 1; } }catch(e){}
+    try{ if(typeof cashPurchasesData !== 'undefined') saveToStorage('cashPurchases', cashPurchasesData); }catch(e){}
+    try{ persistAllData(); }catch(e){}
+    try{ refreshAllScreens(); }catch(e){}
+    try{ if(typeof syncNow === 'function') setTimeout(() => syncNow(), 1500); }catch(e){}
+    try{ if(typeof extraSyncAll === 'function') setTimeout(() => extraSyncAll(), 2500); }catch(e){}
+    try{ if(typeof fmMirrorRun === 'function') setTimeout(() => fmMirrorRun(true), 8000); }catch(e){}
+    return n;
+  }
+
+  // ---------- اسکرین ----------
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const fmtDay = d => { d = String(d); return d.slice(6, 8) + '/' + d.slice(4, 6) + '/' + d.slice(0, 4); };
+  const chips = n => n ? `👥 ${n.c} · 🚚 ${n.s} · 🥬 ${n.p} · 📦 چالان ${n.ch} · 🧾 بل ${n.i} · 💵 ${n.pay} · 💸 ${n.e}` : '';
+  let _vList = [];
+  async function fmVaultRender(){
+    const el = document.getElementById('fmVaultList'), st = document.getElementById('fmVaultStatus'); if(!el) return;
+    try{ const l = loadFromStorage('fmVaultLast', null); if(st) st.innerHTML = l ? `✅ آخری نقل: <b>${new Date(l.at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</b> — ${chips(l.n)}${l.pinned ? '<br>📌 کم ڈیٹا ملا — پچھلی بڑی نقل پکی کر دی گئی' : ''}` : '⏳ پہلی نقل چند منٹ میں خود بن جائے گی'; }catch(e){}
+    el.innerHTML = '<div style="font-size:13px; color:#64748b;">⏳ الماری کھل رہی ہے…</div>';
+    let ix = null; try{ ix = await readIdx(); }catch(e){}
+    if(!ix){ el.innerHTML = '<div style="font-size:13px; color:#b91c1c;">انٹرنیٹ نہیں — الماری بعد میں کھلے گی (نقل کلاؤڈ میں محفوظ ہے)</div>'; return; }
+    _vList = ix.list.filter(e => e && !e.old).sort((a, b) => String(b.day + b.at).localeCompare(String(a.day + a.at)));
+    if(!_vList.length){ el.innerHTML = '<div style="font-size:13px; color:#64748b;">ابھی کوئی نقل نہیں — «💾 ابھی محفوظ کریں» دبائیں</div>'; return; }
+    const b = 'border:none; border-radius:999px; padding:6px 10px; font-weight:800; font-size:12px; cursor:pointer; font-family:inherit;';
+    el.innerHTML = _vList.map((e, i) => `<div dir="rtl" style="padding:8px 10px; margin-bottom:6px; border:1.5px solid ${e.pin ? '#f59e0b' : '#bfdbfe'}; border-radius:14px; background:${e.pin ? '#fffbeb' : '#eff6ff'};">
+      <div style="font-weight:900; font-size:14px;">${e.pin ? '📌 ' : '🗄️ '}${fmtDay(e.day)} <small style="color:#64748b; font-weight:700;">${new Date(e.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} · ${Math.round((e.size || 0) / 1024)} KB</small></div>
+      <div style="font-size:12px; color:#334155; margin:3px 0 6px;">${chips(e.n)}</div>
+      <div style="display:flex; gap:5px; flex-wrap:wrap;">
+        <button type="button" onclick="fmVaultMissing(${i})" style="${b} background:#16a34a; color:#fff;">🧩 صرف غائب چیزیں واپس</button>
+        <button type="button" onclick="fmVaultFull(${i})" style="${b} background:#fff7ed; color:#9a3412; border:1.5px solid #fdba74;">↩️ پوری بحالی</button>
+        <button type="button" onclick="fmVaultFile(${i})" style="${b} background:#e0e7ff; color:#3730a3;">⬇️ فائل</button></div></div>`).join('');
+  }
+  async function _get(i){ const e = _vList[i]; if(!e) return null; try{ if(typeof rsProg === 'function') rsProg(15, '🗄️ سیف الماری سے نقل آ رہی ہے…'); }catch(x){} try{ const b = await loadEntry(e); try{ rsProgEnd(true, '✅ نقل مل گئی'); }catch(x){} return { e, b }; }catch(err){ try{ rsProgEnd(false); }catch(x){} alert('❌ ' + (err && err.message || err)); return null; } }
+  window.fmVaultFile = async function(i){
+    const r = await _get(i); if(!r) return;
+    const blob = new Blob([JSON.stringify(r.b)], { type: 'application/json' }), url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'BK' + appKindCode() + '-vault-' + r.e.day + '.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => URL.revokeObjectURL(url), 4000);
+  };
+  window.fmVaultFull = async function(i){
+    const r = await _get(i); if(!r) return;
+    if(backupKindErrorMsg(r.b)){ alert(backupKindErrorMsg(r.b)); return; }
+    pendingImportBackup = r.b; pendingImportFileName = '🗄️ سیف الماری ' + fmtDay(r.e.day);
+    document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
+    document.getElementById('importConfirmModal').classList.add('show');
+  };
+  window.fmVaultMissing = async function(i){
+    const r = await _get(i); if(!r) return;
+    const plan = missingPlan(r.b);
+    let ov = document.getElementById('fmVaultSheet'); if(ov) ov.remove();
+    ov = document.createElement('div'); ov.id = 'fmVaultSheet';
+    ov.style.cssText = 'position:fixed; inset:0; z-index:100050; background:rgba(15,23,42,.55); display:flex; align-items:flex-end; justify-content:center;';
+    const rows = plan.map((x, k) => `<label style="display:flex; gap:8px; align-items:center; padding:9px 10px; border:1.5px solid #e2e8f0; border-radius:12px; margin-bottom:6px; font-weight:800;">
+      <input type="checkbox" data-k="${k}" ${x.on ? 'checked' : ''} style="width:20px; height:20px;"> <span style="flex:1;">${x.L.t}</span> <b style="color:#16a34a;">${x.add.length}</b></label>`).join('');
+    ov.innerHTML = `<div dir="rtl" style="background:#fff; width:100%; max-width:520px; max-height:88vh; overflow:auto; border-radius:20px 20px 0 0; padding:16px;">
+      <div style="font-weight:900; font-size:17px; margin-bottom:4px;">🧩 ${fmtDay(r.e.day)} کی نقل سے غائب چیزیں</div>
+      <div style="font-size:13px; color:#475569; margin-bottom:10px;">موجودہ ڈیٹا کو ہاتھ نہیں لگایا جائے گا — صرف وہ ریکارڈ جو اب فون میں نہیں (جان بوجھ کر حذف کیے بل / وصولیاں / چالان نہیں آئیں گے)۔</div>
+      ${plan.length ? rows : '<div style="padding:14px; background:#f0fdf4; border-radius:12px; font-weight:900; color:#15803d;">✅ کچھ بھی غائب نہیں — اس نقل کا ہر ریکارڈ فون میں موجود ہے</div>'}
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        ${plan.length ? '<button type="button" id="fmVaultGo" style="flex:1; padding:13px; border:none; border-radius:12px; background:#16a34a; color:#fff; font-weight:900; font-size:15px; font-family:inherit;">✅ واپس لائیں</button>' : ''}
+        <button type="button" id="fmVaultX" style="flex:1; padding:13px; border:none; border-radius:12px; background:#e2e8f0; font-weight:900; font-size:15px; font-family:inherit;">بند کریں</button></div></div>`;
+    document.body.appendChild(ov);
+    ov.querySelector('#fmVaultX').onclick = () => ov.remove();
+    const go = ov.querySelector('#fmVaultGo');
+    if(go) go.onclick = () => {
+      ov.querySelectorAll('input[data-k]').forEach(c => { plan[+c.dataset.k].on = c.checked; });
+      const n = applyPlan(plan); ov.remove();
+      alert('✅ ' + n + ' ریکارڈ سیف الماری سے واپس آ گئے اور کلاؤڈ پر بھی جا رہے ہیں');
+    };
+  };
+  window.fmVaultSaveNow = async function(){
+    const st = document.getElementById('fmVaultStatus'); if(st) st.textContent = '⏳ محفوظ ہو رہا ہے…';
+    const r = await fmVaultSave(true);
+    if(!r.ok){ if(st) st.textContent = r.why === 'offline' ? '📴 انٹرنیٹ نہیں — آتے ہی خود محفوظ ہو گا' : r.why === 'empty' ? '⚠️ اس فون میں ڈیٹا نہیں — الماری میں نہیں لکھا گیا' : '⚠️ ابھی محفوظ نہیں ہوا (' + r.why + ') — تھوڑی دیر میں خود دوبارہ'; return; }
+    fmVaultRender();
+  };
+  window.fmVaultSave = fmVaultSave; window.fmVaultRender = fmVaultRender; window.fmVaultLoadEntry = loadEntry; window.fmVaultMissingPlan = missingPlan;
+  // ---------- خود (فائربیس کا کوٹا بچانا — مالک کا حکم): ڈیٹا بدلا ہو تب ہی، زیادہ سے زیادہ ہر 3 گھنٹے؛ نہ بدلا ہو تو کلاؤڈ کو کچھ نہیں جاتا ----------
+  const GAP = 3 * 3600 * 1000;
+  const auto = () => { try{ const t = Number(loadFromStorage('fmVaultTry', 0)) || 0; if(Date.now() - t < GAP) return; saveToStorage('fmVaultTry', Date.now()); }catch(e){ return; } fmVaultSave(false); };
+  setTimeout(auto, 150000);
+  setInterval(auto, 30 * 60000);
+  setTimeout(() => { try{ if(document.getElementById('fmVaultList') && isAdmin()) fmVaultRender(); }catch(e){} }, 8000);
 })();
 </script>
 <script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="FM" defer></script>
