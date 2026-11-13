@@ -7972,6 +7972,17 @@ function __appHostKind(h, p){
 
       <!-- ---------- 📋 صدام کی ہدایت (FM3SEPTH10+09): تمام جاری کردہ کوڈز کی فہرست — نام، حالت (فعال/استعمال شدہ/معطل)،
            اور ہر ایک کو معطل یا مکمل ڈیلیٹ کرنے کا اختیار۔ اب فلٹر بھی — حالت کے حساب سے اور مہینے کے حساب سے ---------- -->
+      <!-- ---------- ⏩ FM1311FR527: صدام کی سبسکرپشن بڑھانے کا سادہ ڈبہ — صرف 3 بٹن، صرف ڈویلپر پاسورڈ ---------- -->
+      <div id="quickExtendBox" dir="rtl" style="background:#eff6ff; border:1.5px solid #93c5fd; border-radius:12px; padding:12px; margin-top:14px; margin-bottom:8px;">
+        <div style="font-size:15px; font-weight:900; color:#1d4ed8; margin-bottom:8px;">⏩ صدام کی سبسکرپشن بڑھائیں</div>
+        <div id="quickExtendInfo" style="font-size:12.5px; color:#334155; margin-bottom:8px;">بٹن دبائیں، پھر ڈویلپر پاسورڈ ڈالیں۔ صدام اور دونوں ملازم تینوں کی مدت ایک ساتھ بڑھے گی۔</div>
+        <div style="display:flex; gap:8px;">
+          <button class="testPrintBtn" style="flex:1; margin:0; background:#dbeafe; color:#1d4ed8;" onclick="devQuickExtend(30)">ایک مہینہ</button>
+          <button class="testPrintBtn" style="flex:1; margin:0; background:#dbeafe; color:#1d4ed8;" onclick="devQuickExtend(180)">چھ مہینے</button>
+          <button class="testPrintBtn" style="flex:1; margin:0; background:#dbeafe; color:#1d4ed8;" onclick="devQuickExtend(365)">سال</button>
+        </div>
+      </div>
+
       <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7; color:var(--primary-dark);">📋 جاری کردہ تمام کوڈز</div>
       <button class="testPrintBtn" style="background:#eef2ff; color:var(--primary-dark); margin-bottom:8px;" onclick="loadIssuedCodesList()">🔄 فہرست لوڈ/تازہ کریں</button>
       <!-- ---------- 🔎 فلٹر بار — صدام کی ہدایت (FM3SEPTH10) ---------- -->
@@ -10199,7 +10210,7 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1311FR526'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1311FR527'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 const UPDATE_NOTE = 'سیف الماری: ہر دن کا پورا ڈیٹا کلاؤڈ میں محفوظ — کچھ بھی ضائع نہیں ہوگا، غائب چیزیں ایک بٹن سے واپس'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
@@ -49800,7 +49811,7 @@ function renderIssuedCodesList(){
       ${licContactRow(it)}
       <div style="display:flex; gap:6px;">
         ${!isRevoked ? `<button onclick="suspendLicenseCode('${it.code}')" style="flex:1; padding:6px; background:#fef3c7; color:#92400e; border:none; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer;">⏸️ معطل کریں</button>` : `<button onclick="reactivateLicenseCode('${it.code}')" style="flex:1; padding:6px; background:#dcfce7; color:#15803d; border:none; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer;">▶️ دوبارہ فعال کریں</button>`}
-        ${!isRevoked ? `<button onclick="extendLicenseCode('${it.code}')" style="flex:1; padding:6px; background:#dbeafe; color:#1d4ed8; border:none; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer;">➕ مدت بڑھائیں</button>` : ''}
+        <!-- FM1311FR527: پرانا لمبا «مدت بڑھائیں» بٹن ہٹا دیا — اب اوپر والے ڈبے سے 3 بٹن -->
         <button onclick="deleteLicenseCode('${it.code}')" style="flex:1; padding:6px; background:#fee2e2; color:#b91c1c; border:none; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer;">🗑️ ڈیلیٹ کریں</button>
       </div>
     </div>`;
@@ -50026,6 +50037,60 @@ function licPayConfirm(o){
     };
     document.body.appendChild(ov); step1();
   });
+}
+// ---------- ⏩ FM1311FR527: صدام کی سبسکرپشن بڑھانے کا سادہ طریقہ — 3 بٹن (30 / 180 / 365)، صرف ڈویلپر پاسورڈ۔
+// موجودہ devPasswordOk اور devFirestoreFetch ہی استعمال ہوتے ہیں؛ صدام کا کوڈ = سب سے آخری میعاد والا فعال استعمال شدہ کوڈ ----------
+function _quickExtendAsk(days, code, curExp, newExp){
+  return new Promise(resolve => {
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:10px;direction:rtl;font-family:inherit';
+    const label = days === 30 ? 'ایک مہینہ' : (days === 180 ? 'چھ مہینے' : 'ایک سال');
+    const fd = t => new Date(t).toLocaleDateString('en-GB');
+    ov.innerHTML = `<div style="background:#fff;border-radius:16px;max-width:380px;width:100%;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.35)">
+      <div style="font-size:17px;font-weight:900;color:#1d4ed8;margin-bottom:8px">⏩ ${label} بڑھائیں</div>
+      <div style="font-size:14.5px;line-height:2">🔑 <b dir="ltr">${code}</b><br>📅 اب ختم ہوگی: <b dir="ltr">${fd(curExp)}</b><br>✅ بڑھنے کے بعد: <b dir="ltr">${fd(newExp)}</b></div>
+      <label style="display:block;margin-top:10px;font-size:13px;font-weight:800">🔐 ڈویلپر پاسورڈ</label>
+      <input id="qxPw" type="password" dir="ltr" autocomplete="off" style="width:100%;padding:10px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:15px;box-sizing:border-box">
+      <div id="qxErr" style="color:#b91c1c;font-weight:800;font-size:13px;margin-top:8px"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="qxNo" style="flex:1;padding:11px;border:none;border-radius:10px;background:#e2e8f0;color:#334155;font-weight:900;font-size:14px;cursor:pointer">منسوخ</button>
+        <button id="qxOk" style="flex:1;padding:11px;border:none;border-radius:10px;background:#1d4ed8;color:#fff;font-weight:900;font-size:14px;cursor:pointer">✅ بڑھائیں</button>
+      </div></div>`;
+    document.body.appendChild(ov);
+    const $ = id => ov.querySelector('#' + id);
+    const done = v => { ov.remove(); resolve(v); };
+    $('qxNo').onclick = () => done(null);
+    $('qxOk').onclick = async () => {
+      const pw = $('qxPw').value;
+      if(!(await devPasswordOk(pw))){ $('qxErr').textContent = '❌ پاسورڈ غلط ہے'; return; }
+      done(pw);
+    };
+    setTimeout(() => { try{ $('qxPw').focus(); }catch(e){} }, 50);
+  });
+}
+async function devQuickExtend(days){
+  days = Number(days);
+  if(![30, 180, 365].includes(days)) return;
+  try{ if(!_issuedCodesCache || !_issuedCodesCache.length) await loadIssuedCodesList(); }catch(e){}
+  const live = (_issuedCodesCache || []).filter(x => x.activatedAt && x.active !== false && !x.lifetime && Number(x.expiresAt) > 0);
+  if(!live.length){ alert('⚠️ صدام کا فعال کوڈ نہیں ملا — پہلے "فہرست لوڈ/تازہ کریں" دبائیں'); return; }
+  live.sort((a, b) => Number(b.expiresAt) - Number(a.expiresAt));
+  const it = live[0];
+  const cur = Number(it.expiresAt);
+  const base = Math.max(cur, Date.now());
+  const nx = base + days * 86400000;
+  const pw = await _quickExtendAsk(days, it.code, cur, nx);
+  if(pw === null) return;
+  try{ if(!fbDevSignedIn()) await fbDevSignIn(pw); }catch(e){}
+  try{
+    const log = String(it.extLog || '') + `${new Date().toISOString().slice(0,10)}:+${days};`;
+    const path = `licenses/${encodeURIComponent(it.code)}?updateMask.fieldPaths=expiresAt&updateMask.fieldPaths=extLog&key=${FIREBASE_API_KEY}`;
+    const fields = { expiresAt: { integerValue: String(nx) }, extLog: { stringValue: log.slice(-900) } };
+    const res = await devFirestoreFetch(path, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ fields }) });
+    if(!res || !res.ok){ alert('❌ مدت نہیں بڑھی — انٹرنیٹ / ڈویلپر شناخت چیک کریں (' + (res ? res.status : '—') + ')'); return; }
+    alert('✅ مدت بڑھ گئی\nنئی تاریخ: ' + new Date(nx).toLocaleDateString('en-GB') + '\n\nصدام کے فون پر ایپ کھلتے ہی (انٹرنیٹ کے ساتھ) چالو ہو جائے گی، ملازم اس کے بعد خود لے لیں گے۔');
+  }catch(e){ alert('❌ انٹرنیٹ نہیں — دوبارہ کوشش کریں'); return; }
+  loadIssuedCodesList();
 }
 async function extendLicenseCode(code){
   const it = (_issuedCodesCache || []).find(x => x.code === code) || {};
