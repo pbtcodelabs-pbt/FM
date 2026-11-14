@@ -10212,8 +10212,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1411SA529'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'ڈویلپر پینل: صدام کی سبسکرپشن بڑھانے کے لیے سادہ بٹن — ایک مہینہ، چھ مہینے، سال'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1411SA530'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'ڈویلپر پینل: صدام کا صحیح کوڈ اور صحیح باقی دن دکھانا ٹھیک کر دیا'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -50073,7 +50073,7 @@ function _quickExtendAsk(days, code, curExp, newExp){
 }
 function _quickSaddamCode(){
   const live = (_issuedCodesCache || []).filter(x => x.activatedAt && x.active !== false && !x.lifetime && Number(x.expiresAt) > 0 && /saddam|صدام/i.test(String(x.customerName || '')));
-  live.sort((a, b) => Number(b.expiresAt) - Number(a.expiresAt));
+  live.sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0) || Number(b.expiresAt) - Number(a.expiresAt)); // FM1411SA530: سب سے نیا بنا ہوا صدام کا کوڈ
   return live[0] || null;
 }
 function _quickDaysLeft(exp){ const t = new Date(); t.setHours(0,0,0,0); const e = new Date(Number(exp)); e.setHours(0,0,0,0); return Math.round((e - t) / 86400000); }
