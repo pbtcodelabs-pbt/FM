@@ -10218,8 +10218,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1511SU531'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'نیا «روزانہ حساب» صفحہ؛ آج کی ہر وصولی الگ الگ؛ سٹاک منفی نہیں؛ پینڈنگ آرڈر کا کل مزدوری سمیت'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1511SU532'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = 'بل پر دو ڈبے ایک قطار میں: کل تک کم وصولی (نارنجی) اور آج تک ٹوٹل کم وصولی (لال)'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -46571,10 +46571,10 @@ function _billPayLayout(invoice, fscale, rowScale){
   const redH = 0; // 🔴 (28 اکتوبر، صدام بھائی): لال ڈبہ اب بائیں — «ادائیگی کی تفصیل» کے نیچے (todayShort) // 🔴 FM1610FR393: اوپر جملہ + نیچے لال ڈبہ // 🔴 FM1610FR391: آج تک کی کل کم وصولی — بڑا ڈبہ
   const noteH = (y && y.notes) ? Math.round(sumRowH * 2.5) : 0; // 📝 نوٹ کی جگہ (زیادہ سے زیادہ دو سطریں، موٹی لکھائی)
   const yH = y ? (yTitleH + _payRowsH(_yBoxRows(y), sumRowH) + noteH + 2 + redH) : 0;
-  let todayShort = 0, todayD = '';
-  try{ const c = invoice.customer_id != null ? (customersData || []).find(x => x && x.customer_id === invoice.customer_id) : null; todayD = invDay(invoice); if(c && todayD) todayShort = custShortThrough(c, todayD, todayD); }catch(e){}
-  const shortH = todayShort > 0 ? Math.round(30 * fscale) + Math.round(58 * fscale) + 14 : 0;
-  return { sumRowH, titleH, boxH: boxH, boxOnlyH: boxH, shortH, todayShort, todayD, yTitleH, redH, noteH, yH, y, leftH: boxH + shortH };
+  let todayShort = 0, todayD = '', prevShort = 0, prevD = '';
+  try{ const c = invoice.customer_id != null ? (customersData || []).find(x => x && x.customer_id === invoice.customer_id) : null; todayD = invDay(invoice); if(c && todayD){ todayShort = custShortThrough(c, todayD, todayD); try{ const _pd = new Date(todayD + 'T12:00:00'); _pd.setDate(_pd.getDate() - 1); prevD = toLocalDateStr(_pd); prevShort = custShortThrough(c, prevD, prevD); }catch(e){} } }catch(e){} // FM1511SU532 (#254): کل تک کی کم وصولی بھی
+  const shortH = (todayShort > 0 || prevShort > 0) ? Math.round(30 * fscale) + Math.round(58 * fscale) + 14 : 0;
+  return { sumRowH, titleH, boxH: boxH, boxOnlyH: boxH, shortH, todayShort, todayD, prevShort, prevD, yTitleH, redH, noteH, yH, y, leftH: boxH + shortH };
 }
 // ---------- 📅 بل کی تاریخ سے ایک دن پہلے (کل) کی ادائیگی — بالکل روزانہ ریکوری رپورٹ والا حساب، صرف دیکھنے کے لیے ----------
 // 📝 FM1710SA398: ادائیگی/وصولی کے نوٹ میں سے صرف وہ حصہ جو ہاتھ سے لکھا گیا (خودکار حصے — والٹ، چھوٹ، ریکوری لسٹ/ملازم کا نام — نہیں)
@@ -46697,33 +46697,45 @@ function _subH(sub, rowH){ return sub ? Math.round(rowH * (_subLines(sub) === 2 
 function _payRowsH(rows, rowH){ return rows.reduce((a, r) => a + rowH + _subH(r[3], rowH), 0); }
 // 🔴 (28 اکتوبر، صدام بھائی): آج تک کی کل کم وصولی — بائیں ڈبے کے نیچے، ابھرا ہوا 3D لال کیپسول، موٹے صاف ہندسے
 // حساب: پچھلی سب کم وصولیاں + کل تک کا مال − آج تک کی وصولی (آج کا مال شامل نہیں، وہ کل ادا ہوتا ہے)
-function _drawShortCapsule(ctx, FP, L, R, top, lay, fscale){
+function _drawShortCapsuleOne(ctx, FP, L, R, top, lay, fscale, t1In, val, pal){
   const _UM = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];
   const _UD = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
   const _d = new Date(lay.todayD + 'T12:00:00');
-  const t1 = 'آج ' + _d.getDate() + ' ' + _UM[_d.getMonth()] + ' ' + _UD[_d.getDay()] + ' تک ٹوٹل کم وصولی';
+  const t1 = t1In || ('آج ' + _d.getDate() + ' ' + _UM[_d.getMonth()] + ' ' + _UD[_d.getDay()] + ' تک ٹوٹل کم وصولی');
+  pal = pal || ['#7f1d1d', '#f87171', '#dc2626', '#991b1b', '#450a0a'];
   const lh = Math.round(30 * fscale);
   ctx.save();
   ctx.fillStyle = '#000'; ctx.textAlign = 'center';
   let px = 16; ctx.font = FP(`bold ${px}px`);
   while(ctx.measureText(t1).width > (R - L) - 6 && px > 9){ px -= 1; ctx.font = FP(`bold ${px}px`); }
   ctx.fillText(t1, (L + R) / 2, top + lh - Math.round(8 * fscale));
-  const h = Math.round(58 * fscale), x = L + 2, w = (R - L) - 4, y = top + lh, rr = h / 2;
+  const h = Math.round((t1In ? 50 : 58) * fscale), x = L + 2, w = (R - L) - 4, y = top + lh, rr = h / 2;
   const cap = (dx, dy) => { ctx.beginPath(); ctx.moveTo(x + rr + dx, y + dy); ctx.lineTo(x + w - rr + dx, y + dy); ctx.arc(x + w - rr + dx, y + rr + dy, rr, -Math.PI / 2, Math.PI / 2); ctx.lineTo(x + rr + dx, y + h + dy); ctx.arc(x + rr + dx, y + rr + dy, rr, Math.PI / 2, Math.PI * 1.5); ctx.closePath(); };
-  cap(0, 5); ctx.fillStyle = '#7f1d1d'; ctx.fill(); // نیچے کا گہرا کنارہ (ابھار)
-  cap(0, 0); const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#f87171'); g.addColorStop(0.45, '#dc2626'); g.addColorStop(1, '#991b1b'); ctx.fillStyle = g; ctx.fill();
-  ctx.lineWidth = 2; ctx.strokeStyle = '#7f1d1d'; ctx.stroke();
+  cap(0, 5); ctx.fillStyle = pal[0]; ctx.fill(); // نیچے کا گہرا کنارہ (ابھار)
+  cap(0, 0); const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, pal[1]); g.addColorStop(0.45, pal[2]); g.addColorStop(1, pal[3]); ctx.fillStyle = g; ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = pal[0]; ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x + rr, y + 5); ctx.lineTo(x + w - rr, y + 5); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.stroke(); // اوپر چمک
-  const t2 = Math.round(lay.todayShort).toLocaleString('en-US');
-  let vx = 34; ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`;
+  const t2 = Math.round(val != null ? val : lay.todayShort).toLocaleString('en-US');
+  let vx = t1In ? 28 : 34; ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`;
   while(ctx.measureText(t2).width > w - rr && vx > 12){ vx -= 1; ctx.font = `900 ${Math.round(vx * fscale)}px Arial, sans-serif`; }
   const ty = y + h / 2 + Math.round(vx * fscale * 0.36);
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#450a0a'; ctx.fillText(t2, (L + R) / 2 + 2, ty + 3); // ہندسوں کا سایہ (ابھرے ہوئے)
-  ctx.lineWidth = Math.max(2, Math.round(3 * fscale)); ctx.strokeStyle = '#7f1d1d'; ctx.strokeText(t2, (L + R) / 2, ty);
+  ctx.fillStyle = pal[4]; ctx.fillText(t2, (L + R) / 2 + 2, ty + 3); // ہندسوں کا سایہ (ابھرے ہوئے)
+  ctx.lineWidth = Math.max(2, Math.round(3 * fscale)); ctx.strokeStyle = pal[0]; ctx.strokeText(t2, (L + R) / 2, ty);
   ctx.fillStyle = '#ffffff'; ctx.fillText(t2, (L + R) / 2, ty);
   ctx.restore();
   return y + h + 8;
+}
+// FM1511SU532 (ہیلپ ڈیسک #254، صدام): ایک قطار میں دو ڈبے — دائیں نارنجی «کل … تک کم وصولی» (`custShortThrough(c, کل, کل)`)، بائیں لال «آج … تک ٹوٹل کم وصولی»؛ دونوں تھوڑے چھوٹے
+function _drawShortCapsule(ctx, FP, L, R, top, lay, fscale){
+  if(!lay.prevD) return _drawShortCapsuleOne(ctx, FP, L, R, top, lay, fscale);
+  const _UM = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];
+  const _UD = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
+  const lbl = (D, pre, post) => { const d = new Date(D + 'T12:00:00'); return pre + ' ' + d.getDate() + ' ' + _UM[d.getMonth()] + ' ' + _UD[d.getDay()] + ' ' + post; };
+  const gap = Math.round(8 * fscale), mid = (L + R) / 2;
+  const b1 = _drawShortCapsuleOne(ctx, FP, mid + gap / 2, R, top, lay, fscale, lbl(lay.prevD, 'کل', 'تک کم وصولی'), lay.prevShort, ['#9a3412', '#fdba74', '#f97316', '#c2410c', '#431407']);
+  const b2 = _drawShortCapsuleOne(ctx, FP, L, mid - gap / 2, top, lay, fscale, lbl(lay.todayD, 'آج', 'تک ٹوٹل کم وصولی'), lay.todayShort);
+  return Math.max(b1, b2);
 }
 function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
   const y = lay.y; if(!y) return top;
@@ -46956,6 +46968,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
   if(invoice.customer_id){
     const _lay = _billPayLayout(invoice, fscale, rowScale); // 🧾 FM610TU323
     summaryBlockH = receiptAccounts.length ? _lay.leftH : Math.max(_lay.leftH, _lay.yH);
+    if(!receiptAccounts.length && _lay.prevD && _lay.shortH) summaryBlockH = Math.max(_lay.boxH, _lay.yH || 0) + _lay.shortH; // FM1511SU532 (#254): دونوں ڈبے نیچے پوری چوڑائی میں
     if(receiptAccounts.length && _lay.yH) estimatedHeight += _lay.yH + 14;
   } else {
     const laborChk = (invoice.items || []).reduce((s,i) => s + i.qty*(i.laborPerUnit||0), 0);
@@ -47345,13 +47358,16 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     ctx.beginPath(); ctx.moveTo(sumLeft, rowTop0); ctx.lineTo(sumRight, rowTop0); ctx.stroke();
     _drawPayRows(ctx, FP, sumLeft, sumRight, rowTop0, _payLay.sumRowH, [...summary.rows, [summary.finalLabel, summary.finalValue, true]], rc, _bw, fscale);
     summaryBottom = boxTop + boxH;
-    if(_payLay.todayShort > 0) summaryBottom = _drawShortCapsule(ctx, FP, sumLeft, sumRight, summaryBottom + 6, _payLay, fscale);
+    const _hasShort = _payLay.todayShort > 0 || _payLay.prevShort > 0;
+    const _shortWide = _hasShort && _payLay.prevD && !receiptAccounts.length; // FM1511SU532 (#254): دو ڈبے — دونوں خانوں کے نیچے پوری چوڑائی، ایک قطار
+    if(_hasShort && !_shortWide) summaryBottom = _drawShortCapsule(ctx, FP, sumLeft, sumRight, summaryBottom + 6, _payLay, fscale);
     summaryBlockHForCentering = summaryBottom - boxTop;
     // 📅 کل کی ادائیگی — دائیں طرف کی خالی جگہ میں (اکاؤنٹ/QR لگا ہو تو نیچے پوری چوڑائی میں)
     if(_payLay.y && !receiptAccounts.length){
       const yb = _drawYesterdayBox(ctx, FP, colX[4] + 8, tableRight, paymentBoxTop, _payLay, rc, _bw, fscale);
       summaryBottom = Math.max(summaryBottom, yb);
     }
+    if(_shortWide) summaryBottom = _drawShortCapsule(ctx, FP, sumLeft, tableRight, summaryBottom + 6, _payLay, fscale);
   }
 
   // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع، عمودی طور پر درمیان میں ----------
