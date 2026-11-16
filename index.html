@@ -10218,8 +10218,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1511SU533'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = 'نارنجی ڈبہ اب صرف کل کے دن کی کم وصولی؛ لال ڈبہ آج تک کی ٹوٹل کم وصولی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1611MO534'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '🔐 ہیلپ ڈیسک سے سیدھا اس ایپ کا ڈویلپر پینل — سب ایپس میں ایک ہی پاس ورڈ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -50249,7 +50249,7 @@ function devEnterAppDirectly(){
 // 🔐 FM210FR277: ڈویلپر پاسورڈ کی ایک ہی جانچ (ماسٹر پاسورڈ ہمیشہ؛ پینل سے بدلا ہوا الگ پاسورڈ بھی)
 async function devPasswordOk(entered){
   const enteredHash = await hashPin(String(entered || '').trim());
-  return (enteredHash === DEFAULT_DEV_PANEL_PASSWORD_HASH) || (!!AppState.settings.devPanelPasswordHash && enteredHash === AppState.settings.devPanelPasswordHash);
+  return (enteredHash === DEFAULT_DEV_PANEL_PASSWORD_HASH) || (!!AppState.settings.devPanelPasswordHash && enteredHash === AppState.settings.devPanelPasswordHash) || (typeof pbtHubPwOk === 'function' && await pbtHubPwOk(entered)); // PBT-DEVHUB
 }
 // 🔐 FM210FR278: "ڈویلپر کا فون" صرف اسی وقت تک جب تک ایپ کھلی ہے (sessionStorage) — ایپ بند ہوتے ہی یہ فون پھر
 // عام دکاندار کا فون؛ دکاندار کے فون پر ڈویلپر پینل کھولنے سے وہ ہمیشہ کے لیے "ڈویلپر کا فون" نہیں بنتا۔ کلاؤڈ پر کبھی نہیں جاتا
@@ -57008,6 +57008,18 @@ window.openHelpDesk = openHelpDesk;
   var p = window.__fmStoreReady;
   if(p && p.then) p.then(run, run); else run();
 })();
+</script>
+<script>
+/* 🔐 PBT-DEVHUB (مالک کا حکم، 16 نومبر 2026): ہیلپ ڈیسک «🔐 سب ڈویلپر پینل» سے سیدھا یہاں کا ڈویلپر پینل (`?devpanel=1`)
+   + ایک مشترکہ پاس ورڈ: ہیلپ ڈیسک اسی ویب سائٹ پر `pbt_devpass_v1` = SHA-256('PBTDEV|' + پاس ورڈ) رکھتا ہے — یہ پینل اسے بھی مانتا ہے (`pbtHubPwOk`)۔ */
+window.pbtHubPwOk = async function(p){
+  try{ const h = (function(){ try{ const f = document.createElement('iframe'); f.style.display = 'none'; document.documentElement.appendChild(f); const v = f.contentWindow.localStorage.getItem('pbt_devpass_v1'); f.remove(); return v; }catch(e){ return null; } })() || localStorage.getItem('pbt_devpass_v1');   /* ایپ کا اپنا نام والا خانہ نہیں — سیدھا ویب سائٹ کا */ if(!h || !p) return false;
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('PBTDEV|' + String(p).trim()));
+    return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('') === h; }catch(e){ return false; }
+};
+(function(){ try{ if(!/[?&]devpanel=1\b/.test(location.search)) return;
+  window.addEventListener('load', () => setTimeout(() => { try{ document.querySelectorAll('.modalOverlay.show').forEach(m=>m.classList.remove('show')); openDevSecretPanel(); const m = document.getElementById('devSecretModal'); if(m){ document.body.appendChild(m); m.style.zIndex = '2147483000'; } }catch(e){} }, 3500));
+}catch(e){} })();
 </script>
 </body>
 </html>
