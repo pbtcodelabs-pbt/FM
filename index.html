@@ -5545,6 +5545,11 @@ function __appHostKind(h, p){
           <button id="collectWallet" onclick="setCollectMode('wallet')" style="font-family:inherit;">💳 والٹ سے کاٹیں</button>
         </div>
         <input type="number" id="collectAmount" dir="rtl" placeholder="وصول شدہ رقم درج کریں" onfocus="this.select()" oninput="updateCollectRemainingHint()">
+        <!-- 💳 FM1711TU536: ایک وصولی کئی طریقوں سے (نقد + جاز کیش + ایزی پیسہ + بینک) — ہر تاریخ (آج سمیت) میں -->
+        <div id="collectSplitWrap" style="display:none;">
+          <div id="collectSplitRows"></div>
+          <button type="button" id="collectAddSplitBtn" onclick="addCollectSplitRow()" style="width:100%; padding:9px; margin-bottom:8px; background:#eef2ff; color:var(--primary-dark); border:1.5px dashed #a5b4fc; border-radius:9px; font-size:14px; font-weight:800; cursor:pointer; font-family:inherit;">➕ دوسرا طریقہ (نقد + جاز کیش + ایزی پیسہ + بینک…)</button>
+        </div>
         <div id="collectRemainingHint" style="display:none; padding:10px 12px; border-radius:10px; font-size:14.5px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark); line-height:2;"></div>
         <textarea id="collectNote" dir="rtl" placeholder="نوٹ (مثلاً ایزی پیسہ سے وصول ہوئے) — اختیاری" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:15px; min-height:44px; text-align:right;"></textarea>
         <button type="button" class="addBankAccBtn" onclick="attachPaymentSlipImage('collect')" style="font-family:inherit;">📷 رسید / سکرین شاٹ لگائیں (اختیاری)</button>
@@ -7380,8 +7385,8 @@ function __appHostKind(h, p){
             </div>
             <div class="pscCompactRow">
               <select id="popscFontFamilySelect" onchange="setPoFontFamily(this.value)" class="pscDropdown"></select>
-              <select id="popscThemeSelect" onchange="setReceiptColor(this.value)" class="pscDropdown"></select>
             </div>
+            <div class="pscCompactRow"><div id="popscThemePanel"></div></div>
             <div class="pscCompactRow">
               <label class="pscCheckLabel">
                 <input type="checkbox" id="popscA4Chk" onchange="togglePoPaperStyle(this.checked)"> 🖨️ Print A4
@@ -10213,12 +10218,13 @@ function getDeveloperContact(){
 // 🆕 FM2710TU460: نقد خریداری مہینہ وار کلاؤڈ ٹکڑوں میں؛ ریکوری لسٹ اور منشی سٹاک ریکارڈ کی کلاؤڈ کاپی صرف 30 دن (فون میں پورا)
 // 🆕 FM2710TU461: ڈبوں کے میٹر میں 📱 اس فون کی جگہ (localStorage) بھی
 // 🆕 FM2710TU462: آرڈر کبھی خاموشی سے نہیں مٹے گا (صرف حذف شدہ یا 3 دن پرانا مکمل)؛ غائب آرڈر سیف الماری سے خود واپس؛ غائب ڈرافٹ پر 1 چیز والا نیا آرڈر نہیں
+// 🆕 FM1711TU536: (1) گاہک کی وصولی (پروفائل ← وصولی) میں آج کی تاریخ سمیت ہر تاریخ پر ایک وصولی کئی طریقوں سے — نقد + جاز کیش + ایزی پیسہ + بینک، صرف نقد حصہ گلے میں (2) بل / بیوپاری چٹ کے 8 تھیم (پہلا بلیک نوائر ڈیفالٹ) گولیوں میں، بیک گراؤنڈ اور ٹیکسٹ کے الگ سلائیڈر (روشنی/شدت/گرمی)، ٹیکسٹ کے الگ رنگ — صرف واٹس ایپ/سکرین کے لیے، پرنٹ سیاہ/سفید ہی
 // 🆕 FM2710TU463: ✏️ بنے ہوئے بل میں ترمیم (صرف ایڈمن): نئی چیز، تعداد/ریٹ/مزدوری، چیز ہٹانا — سٹاک، بقایا، کیش خود درست
 // 🆕 FM2810WE471: 🗄️ بڑی الماری — 20 ہزار حروف سے بڑا ڈیٹا localStorage کی بجائے IndexedDB میں (چھوٹے خانے میں صرف نشان)، ایپ کھلنے سے پہلے یادداشت میں؛ پرانا ڈیٹا خود منتقل
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1611MO535'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1711TU537'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 const UPDATE_NOTE = '🔐 ڈویلپر پینل اب صرف ہیلپ ڈیسک سے کھلتا ہے — 7 بار دبانے والا راستہ ختم'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
@@ -39554,15 +39560,7 @@ function syncPoStyleControls(){
     fontSelect.value = AppState.settings.poFontId || 'segoe';
   }
 
-  const themeSelect = document.getElementById('popscThemeSelect');
-  if(themeSelect){
-    if(!themeSelect.dataset.filled){
-      const swatchIcon = {green:'🟢',blue:'🔵',peach:'🟠',lavender:'🟣',pink:'🌸',gray:'⚪',navy:'🔷',skydeep:'🌊',charcoal:'⬛',wine:'🍷',crispbw:'⬜'};
-      themeSelect.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<option value="${c.id}">${swatchIcon[c.id]||'🎨'} ${c.name}</option>`).join('');
-      themeSelect.dataset.filled = '1';
-    }
-    themeSelect.value = AppState.settings.receiptColorId || 'green';
-  }
+  renderBillThemePanel('popscThemePanel'); // 🎨 FM1711TU536
 
   document.getElementById('popscA4Chk').checked = AppState.settings.poPrintStyle === 'a4';
   const orientRow = document.getElementById('popscOrientRow');
@@ -40823,6 +40821,7 @@ function openCollectModal(customerId){
   activeCollectMode = 'cash';
   document.getElementById('collectModalTitle').textContent = `💰 ${c.name} — وصولی`;
   refreshCollectReceivableHint(c);
+  collectSplitRows = [{ amount: 0, method: 'cash' }]; renderCollectSplit(); // 💳 FM1711TU536
   setCollectMode('cash');
   document.getElementById('collectAmount').value = '';
   document.getElementById('collectNote').value = '';
@@ -40858,6 +40857,8 @@ function updateCollectRemainingHint(){
   if(!c || amount <= 0){ hint.style.display = 'none'; return; }
   const sp = calcCollectSplit(c, amount, activeCollectMode);
   hint.style.display = 'block';
+  const _ml = activeCollectMode === 'cash' ? collectMethodsList() : [];
+  const _mlTxt = _ml.length > 1 ? `💵 کل وصولی: <b>Rs. ${amount.toLocaleString()}</b> (${_ml.map(m => RECOVERY_METHODS[m.method] + ' ' + m.amount.toLocaleString()).join(' + ')})<br>` : '';
   if(activeCollectMode === 'wallet'){
     const wal = c.wallet_balance || 0;
     const bad = amount > wal || amount > sp.due;
@@ -40870,18 +40871,63 @@ function updateCollectRemainingHint(){
   }
   if(sp.toWallet > 0){
     hint.style.background = '#f0fdf4'; hint.style.color = '#166534';
-    hint.innerHTML = `📊 اس کا بقایا تھا: Rs. ${sp.due.toLocaleString()}<br>` +
+    hint.innerHTML = _mlTxt + `📊 اس کا بقایا تھا: Rs. ${sp.due.toLocaleString()}<br>` +
       `📥 آپ وصول کر رہے ہیں: Rs. ${amount.toLocaleString()}<br>` +
       (sp.due > 0 ? `✅ بقایا مکمل صاف<br>` : '') +
       `<span style="font-size:16px;">💳 والٹ میں جمع ہوں گے: <b>+ Rs. ${sp.toWallet.toLocaleString()}</b></span><br>` +
       `💰 نیا والٹ بیلنس: Rs. ${sp.walletAfter.toLocaleString()}`;
   } else {
     hint.style.background = '#eef2ff'; hint.style.color = 'var(--primary-dark)';
-    hint.innerHTML = `اس وصولی کے بعد باقی بقایا: Rs. ${sp.remaining.toLocaleString()}`;
+    hint.innerHTML = _mlTxt + `اس وصولی کے بعد باقی بقایا: Rs. ${sp.remaining.toLocaleString()}`;
   }
+}
+// ---------- 💳 FM1711TU536: وصولی کی کئی قطاریں (رقم + طریقہ) — کل رقم خودکار collectAmount میں ----------
+let collectSplitRows = [{ amount: 0, method: 'cash' }];
+function renderCollectSplit(){
+  const box = document.getElementById('collectSplitRows'); if(!box) return;
+  box.innerHTML = collectSplitRows.map((m, i) => `
+    <div style="display:flex; gap:5px; align-items:center; margin-bottom:6px;">
+      <input type="number" min="0" inputmode="numeric" dir="rtl" placeholder="${i === 0 ? 'رقم' : 'مزید رقم'}" value="${m.amount ? m.amount : ''}" onfocus="this.select()" oninput="updateCollectSplit(${i}, 'amount', this.value)" style="flex:1 1 0; min-width:0; margin:0; padding:9px 6px; text-align:center; font-size:16px; font-weight:800;">
+      <select onchange="updateCollectSplit(${i}, 'method', this.value)" style="flex:0 0 96px; padding:9px 3px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:14px;">
+        ${Object.keys(RECOVERY_METHODS).map(k => `<option value="${k}" ${m.method === k ? 'selected' : ''}>${RECOVERY_METHODS[k]}</option>`).join('')}
+      </select>
+      ${i > 0 ? `<button type="button" onclick="removeCollectSplitRow(${i})" style="flex:0 0 auto; width:30px; height:30px; border:none; border-radius:50%; background:#fee2e2; color:#b91c1c; font-size:13px; cursor:pointer;">✖</button>` : '<span style="flex:0 0 30px;"></span>'}
+    </div>`).join('');
+}
+function syncCollectTotal(){
+  const total = collectSplitRows.reduce((a, m) => a + (Number(m.amount) || 0), 0);
+  document.getElementById('collectAmount').value = total > 0 ? total : '';
+  updateCollectRemainingHint();
+}
+function updateCollectSplit(i, field, val){
+  if(!collectSplitRows[i]) return;
+  if(field === 'amount') collectSplitRows[i].amount = Math.max(0, parseFloat(val) || 0);
+  else collectSplitRows[i].method = val;
+  syncCollectTotal();
+}
+function addCollectSplitRow(){
+  const used = collectSplitRows.map(r => r.method);
+  collectSplitRows.push({ amount: 0, method: Object.keys(RECOVERY_METHODS).find(k => !used.includes(k)) || 'cash' });
+  renderCollectSplit();
+}
+function removeCollectSplitRow(i){
+  collectSplitRows.splice(i, 1);
+  if(!collectSplitRows.length) collectSplitRows.push({ amount: 0, method: 'cash' });
+  renderCollectSplit(); syncCollectTotal();
+}
+function collectMethodsList(){
+  const merged = {};
+  collectSplitRows.forEach(m => { const a = Number(m.amount) || 0; if(a > 0) merged[m.method] = (merged[m.method] || 0) + a; });
+  return Object.keys(merged).map(k => ({ method: k, amount: merged[k] }));
 }
 function setCollectMode(mode){
   activeCollectMode = mode;
+  { // 💳 FM1711TU536: نقد وصولی میں قطاریں، والٹ میں سادہ ایک رقم
+    const w = document.getElementById('collectSplitWrap'), a = document.getElementById('collectAmount');
+    if(w) w.style.display = mode === 'cash' ? 'block' : 'none';
+    if(a) a.style.display = mode === 'cash' ? 'none' : '';
+    if(mode === 'cash'){ const t = collectSplitRows.reduce((x, m) => x + (Number(m.amount) || 0), 0); if(a) a.value = t > 0 ? t : ''; }
+  }
   document.getElementById('collectCash').classList.toggle('active', mode === 'cash');
   document.getElementById('collectWallet').classList.toggle('active', mode === 'wallet');
   updateCollectRemainingHint();
@@ -40910,6 +40956,8 @@ function saveCollectReceivable(){
   }
 
   const sp = calcCollectSplit(c, amount, activeCollectMode);
+  const _methods = activeCollectMode === 'cash' ? collectMethodsList() : []; // 💳 FM1711TU536
+  const _cashPart = activeCollectMode === 'cash' ? (_methods.length ? _methods.filter(m => m.method === 'cash').reduce((a, m) => a + m.amount, 0) : amount) : 0;
   // ---------- 💳 صدام کی ہدایت (FM28SEP شام): بقایا سے زیادہ وصولی — پہلے یہاں روک دیا جاتا تھا، اب تصدیقی پیغام میں
   // پورا حساب لکھا آتا ہے اور اضافی رقم خودکار کسٹمر کے والٹ (ایڈوانس) میں جمع ہو جاتی ہے ---------- -->
   if(sp.toWallet > 0){
@@ -40944,7 +40992,7 @@ function saveCollectReceivable(){
   if(activeCollectMode === 'wallet'){
     c.wallet_balance -= amount; // ✅ Firestore Sync (قدم 1) — نیچے pushCustomersToCloud() موجود ہے
   } else {
-    financeDummy.cashInHand += amount; // TODO: نقدی لیجر (cash ledger) میں INSERT
+    financeDummy.cashInHand += _cashPart; // 💳 FM1711TU536: صرف نقد حصہ گلے میں؛ جاز کیش/ایزی پیسہ/بینک نہیں
     c.wallet_balance += sp.toWallet;   // ---------- 💳 اضافی رقم والٹ (ایڈوانس) میں ----------
     pushFinanceToCloud(); // ---------- ☁️ صدام کی ہدایت (6 ستمبر، قدم 7): نقد وصولی سے Cash in Hand بڑھنا فوراً کلاؤڈ میں ----------
   }
@@ -40956,7 +41004,7 @@ function saveCollectReceivable(){
   if(today > _curDay) today = _curDay;
   const _back = today < _curDay;
   if(sp.toDue > 0){
-    c.walletHistory.unshift({ type: 'receivable_collected', amount: sp.toDue, via: activeCollectMode, date: today, note: ((document.getElementById('collectNote') || {}).value || '').trim() }); // 📝 FM1710SA398: نوٹ کھاتے میں بھی
+    c.walletHistory.unshift({ type: 'receivable_collected', amount: sp.toDue, via: (_methods.length === 1 ? _methods[0].method : activeCollectMode), ...(_methods.length ? { methods: _methods } : {}), date: today, note: ((document.getElementById('collectNote') || {}).value || '').trim() }); // 📝 FM1710SA398: نوٹ کھاتے میں بھی
   }
   if(sp.toWallet > 0){
     c.walletHistory.unshift({ type: 'deposit', amount: sp.toWallet, via: 'cash', date: today,
@@ -40977,7 +41025,8 @@ function saveCollectReceivable(){
     balance_after: c.total_receivable,
     wallet_added: sp.toWallet,
     wallet_after: c.wallet_balance,
-    method: activeCollectMode === 'wallet' ? 'Wallet' : 'Cash',
+    method: activeCollectMode === 'wallet' ? 'Wallet' : (_methods.length ? (recoverySplitLabel({ methods: _methods }) || 'Cash') : 'Cash'),
+    ...(activeCollectMode === 'wallet' ? {} : { cash_amount: _cashPart }),
     slip_image: paymentSlipImages.collect,
     note: collectNote,
     biz_date: today, cash_day: _curDay, ...(_back ? { backdated: true } : {}), // 📅 FM2310FR436
@@ -47378,7 +47427,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
     // باکس دوسری طرف لیتا ہے، تاکہ QR کوڈ صاف، بڑا اور بغیر اوورلیپ کے نظر آئے ---------- -->
     const leftCx = (colX[4] + tableRight) / 2;
     const lineH = 16;
-    const qrSize = Math.min(150, (tableRight - colX[4]) - 16);
+    const qrSize = Math.min(150, (tableRight - colX[4]) - 32);
     // ---------- پہلے پورے بلاک کی اونچائی معلوم کر لیں تاکہ اسے دستیاب جگہ میں عمودی طور پر درمیان میں رکھ سکیں ----------
     let blockH = 0;
     receiptAccounts.forEach(acc => {
@@ -47386,7 +47435,7 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
       if(acc.name) blockH += lineH; // account holder کا نام
       blockH += lineH; // number
     });
-    if(receiptQrImg) blockH += 10 + qrSize + 12 + 14 + 8;
+    if(receiptQrImg) blockH += 10 + qrSize + 12 + 14 + 8 + 12;
     const availH = Math.max(blockH, (summaryBlockHForCentering || blockH));
     let ly = paymentBoxTop + Math.max(0, (availH - blockH) / 2) + lineH;
     ctx.textAlign = 'center';
@@ -47402,16 +47451,12 @@ async function _renderInvoiceToCanvasInner(invoice, paperWidthMM = 80, highlight
       ctx.fillText(acc.number || '', leftCx, ly); ly += lineH;
     });
     if(receiptQrImg){
-      ly += 6;
+      ly += 12;
       const qrX = leftCx - qrSize/2;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(qrX-4, ly-4, qrSize+8, qrSize+8);
-      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
-      ctx.strokeRect(qrX-4, ly-4, qrSize+8, qrSize+8);
       ctx.save();
-      drawBinarizedQR(ctx, receiptQrImg, qrX, ly, qrSize);
+      drawBinarizedQR(ctx, receiptQrImg, qrX, ly, qrSize, true);
       ctx.restore();
-      ly += qrSize + 14;
+      ly += qrSize + 20;
       ctx.font = F('10px');
       ctx.fillStyle = '#1a1a1a';
       ctx.fillText('Scan to Pay', leftCx, ly);
@@ -47925,16 +47970,7 @@ function syncPreviewStyleControls(){
     sel.value = AppState.settings[sectionFontMap[selId]] || '';
   });
 
-  const swatchWrap = document.getElementById('pscColorSwatches');
-  if(swatchWrap){
-    try{
-      swatchWrap.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<button onclick="setReceiptColor('${c.id}')" title="${c.name}" style="width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px #cbd5e1; background:${c.bg}; cursor:pointer; padding:0; flex:0 0 auto;" data-swatch-id="${c.id}"></button>`).join('');
-      swatchWrap.querySelectorAll('button').forEach(btn => {
-        const active = btn.dataset.swatchId === (AppState.settings.receiptColorId || 'green');
-        btn.style.boxShadow = active ? '0 0 0 2.5px #1e293b' : '0 0 0 1.5px #cbd5e1';
-      });
-    }catch(e){ console.error('swatch render failed', e); }
-  }
+  renderBillThemePanel('pscColorSwatches'); // 🎨 FM1711TU536
   document.getElementById('pscA4Chk').checked = AppState.settings.invoicePrintStyle === 'a4';
   { const w = document.getElementById('pscWishChk'); if(w) w.checked = AppState.settings.printShowWish !== false; billWishBtnSync(); }
   const iOrientRow = document.getElementById('pscOrientRow');
@@ -48110,7 +48146,27 @@ document.addEventListener('click', (e) => {
 // ---------- QR کوڈ کو خالص سیاہ/سفید میں تبدیل کر کے پرنٹ کریں — اپ لوڈ کی گئی تصویر JPEG کمپریشن
 // کی وجہ سے کناروں پر دھندلی ہو سکتی ہے، جو تھرمل پرنٹر پر سکیننگ ناکام ہونے کی سب سے بڑی وجہ ہے۔
 // یہاں ہر پکسل کو مکمل کالا یا مکمل سفید کر دیتے ہیں (کوئی گرے شیڈ نہیں بچتی) ----------
-function drawBinarizedQR(ctx, img, x, y, size){
+/* QR کا خوبصورت بلاک: سفید خانہ + باریک بارڈر + چاروں کونوں پر موٹے نشان (سکین فریم) — QR ہمیشہ خالص سیاہ/سفید، اپنے بارڈر کے اندر۔
+   بل پر تھیم کا رنگ کچھ بھی ہو، یہ حصہ رنگ سے محفوظ رہتا ہے (billThemeApply اسے دوبارہ سادہ سیاہ/سفید سے بحال کرتا ہے) */
+function drawQrFrame(ctx, x, y, size){
+  const p = Math.max(6, Math.round(size * 0.07)), bx = x - p, by = y - p, bs = size + 2 * p, r = 6;
+  ctx.save();
+  ctx.fillStyle = '#ffffff'; roundRectPathGlobal(ctx, bx, by, bs, bs, r); ctx.fill();
+  ctx.strokeStyle = '#333333'; ctx.lineWidth = 1.5; roundRectPathGlobal(ctx, bx, by, bs, bs, r); ctx.stroke();
+  const L = Math.max(10, Math.round(bs * 0.16)), o = 3;
+  ctx.strokeStyle = '#000000'; ctx.lineWidth = 3.5; ctx.lineCap = 'square';
+  [[bx - o, by - o, 1, 1], [bx + bs + o, by - o, -1, 1], [bx - o, by + bs + o, 1, -1], [bx + bs + o, by + bs + o, -1, -1]].forEach(([cx, cy, sx, sy]) => {
+    ctx.beginPath(); ctx.moveTo(cx + sx * L, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy + sy * L); ctx.stroke();
+  });
+  ctx.restore();
+  try{
+    const t = ctx.getTransform(), m = 6, cv = ctx.canvas;
+    (cv.__qrRects = cv.__qrRects || []).push({ x: Math.floor((bx - o - m) * t.a + t.e), y: Math.floor((by - o - m) * t.d + t.f), w: Math.ceil((bs + 2 * (o + m)) * t.a), h: Math.ceil((bs + 2 * (o + m)) * t.d) });
+  }catch(e){}
+  return p;
+}
+function drawBinarizedQR(ctx, img, x, y, size, frame){
+  if(frame) drawQrFrame(ctx, x, y, size);
   const off = document.createElement('canvas');
   off.width = size; off.height = size;
   const octx = off.getContext('2d');
@@ -48132,6 +48188,7 @@ function drawBinarizedQR(ctx, img, x, y, size){
 }
 
 function canvasToGrayscale(sourceCanvas){
+  if(sourceCanvas && sourceCanvas.__plain) sourceCanvas = sourceCanvas.__plain; // 🎨 FM1711TU536: پرنٹ ہمیشہ اصل سیاہ/سفید سے، تھیم والے رنگوں سے نہیں
   const gray = document.createElement('canvas');
   gray.width = sourceCanvas.width;
   gray.height = sourceCanvas.height;
@@ -48628,10 +48685,180 @@ const RECEIPT_COLOR_PRESETS = [
   {id:'wine',     name:'Wine',     bg:'#4c0519', text:'#ffffff', border:'#fda4af', dark:true},   // گہرا مروں/شراب رنگ
   // ---------- خالص سیاہ/سفید — کوئی رنگ نہیں، صرف گہرا سیاہ متن اور بارڈر (پکا، دھندلا نہیں) ----------
   {id:'crispbw',  name:'Crisp B&W', bg:'#ffffff', text:'#0a0a0a', border:'#0a0a0a'},
+  // ---------- 🎨 FM1711TU536: بل/چٹ کے 7 نئے خوبصورت تھیمز (واٹس ایپ شیئر کے لیے) — پہلا "بلیک نوائر" (crispbw) ڈیفالٹ ----------
+  {id:'emerald',  name:'زمردی',      bg:'#064e3b', text:'#ecfdf5', border:'#6ee7b7', dark:true},
+  {id:'royalblue',name:'شاہی نیلا',  bg:'#1e3a8a', text:'#eff6ff', border:'#93c5fd', dark:true},
+  {id:'rose',     name:'گلاب',       bg:'#ffe4e6', text:'#881337', border:'#e11d48'},
+  {id:'gold',     name:'سنہری',      bg:'#fef3c7', text:'#78350f', border:'#b45309'},
+  {id:'plum',     name:'بینگنی',     bg:'#3b0764', text:'#faf5ff', border:'#d8b4fe', dark:true},
+  {id:'teal',     name:'فیروزی',     bg:'#ccfbf1', text:'#134e4a', border:'#0d9488'},
+  {id:'sunset',   name:'غروبِ آفتاب', bg:'#7c2d12', text:'#ffedd5', border:'#fdba74', dark:true},
 ];
-function getReceiptColor(){
-  return RECEIPT_COLOR_PRESETS.find(c => c.id === AppState.settings.receiptColorId) || RECEIPT_COLOR_PRESETS[0];
+let billPlainDepth = 0; // 🎨 FM1711TU536: تھیم فعال ہو تو بل پہلے سادہ بلیک/وائٹ بنتا ہے، پھر دو رنگی (duotone) تھیم لگتی ہے
+function billThemeActive(){
+  const a = AppState.settings.receiptAdj;
+  return (AppState.settings.receiptColorId || 'crispbw') !== 'crispbw' || !!(a && (a.bgL || a.bgS || a.bgW || a.txtL || a.txtS || a.txtHex));
 }
+function getReceiptColor(){
+  if(billPlainDepth > 0) return RECEIPT_COLOR_PRESETS.find(c => c.id === 'crispbw');
+  return getReceiptColorThemed();
+}
+function getReceiptColorThemed(){
+  const base = RECEIPT_COLOR_PRESETS.find(c => c.id === AppState.settings.receiptColorId) || RECEIPT_COLOR_PRESETS[0];
+  const a = AppState.settings.receiptAdj;
+  if(!a || !(a.bgL || a.bgS || a.bgW || a.txtL || a.txtS || a.txtHex)) return base;
+  const bg = billAdjHex(base.bg, a.bgW || 0, a.bgS || 0, a.bgL || 0);
+  const text = billAdjHex(a.txtHex || base.text, 0, a.txtS || 0, a.txtL || 0);
+  return Object.assign({}, base, { bg, text, dark: billLum(bg) < 0.4 });
+}
+
+// =========================================================================
+// 🎨 FM1711TU536: بل / چٹ تھیم پینل — 8 تھیمز (پہلا بلیک نوائر ڈیفالٹ) گولیوں (pills) کی شکل میں،
+// بیک گراؤنڈ اور ٹیکسٹ کے الگ الگ سلائیڈر (روشنی / شدت / گرمی)، ٹیکسٹ کے رنگ الگ منتخب کریں۔ صرف سکرین اور واٹس ایپ شیئر کے لیے؛
+// پرنٹ اب بھی ہمیشہ سیاہ/سفید (canvasToGrayscale)۔
+// =========================================================================
+const BILL_THEME_IDS = ['crispbw', 'emerald', 'royalblue', 'rose', 'gold', 'plum', 'teal', 'sunset'];
+const BILL_THEME_LABELS = { crispbw: '⚫ بلیک نوائر (ڈیفالٹ)', emerald: '🟢 زمردی', royalblue: '🔵 شاہی نیلا', rose: '🌹 گلاب', gold: '🟡 سنہری', plum: '🟣 بینگنی', teal: '🩵 فیروزی', sunset: '🌅 غروبِ آفتاب' };
+const BILL_TEXT_COLORS = ['#0a0a0a', '#ffffff', '#1e3a8a', '#2563eb', '#0f766e', '#15803d', '#065f46', '#b91c1c', '#9f1239', '#c2410c', '#a16207', '#6d28d9', '#be185d', '#78350f', '#475569'];
+function billHexToHsl(hex){
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); const n = parseInt(m ? m[1] : '000000', 16);
+  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  let h = 0, s = 0;
+  if(d){ s = d / (1 - Math.abs(2 * l - 1)); if(mx === r) h = ((g - b) / d) % 6; else if(mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h = (h * 60 + 360) % 360; }
+  return [h, s, l];
+}
+function billHslToHex(h, s, l){
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+  if(h < 60){ r = c; g = x; } else if(h < 120){ r = x; g = c; } else if(h < 180){ g = c; b = x; } else if(h < 240){ g = x; b = c; } else if(h < 300){ r = x; b = c; } else { r = c; b = x; }
+  const t = v => Math.round(Math.max(0, Math.min(1, v + m)) * 255).toString(16).padStart(2, '0');
+  return '#' + t(r) + t(g) + t(b);
+}
+function billLum(hex){ const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); const n = parseInt(m ? m[1] : '000000', 16); return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255; }
+// w: گرمی (-100 ٹھنڈا … +100 گرم)، sat: شدت (-100 … +100)، l: روشنی (-100 مدھم … +100 تیز)
+function billAdjHex(hex, w, sat, l){
+  let [h, s, L] = billHexToHsl(hex);
+  if(w){ const tgt = w > 0 ? 30 : 215, a = Math.abs(w) / 100; const d = ((tgt - h + 540) % 360) - 180; h = (h + d * a * 0.7 + 360) % 360; s = Math.max(s, a * 0.45); }
+  if(sat > 0) s = s + (1 - s) * sat / 100; else if(sat < 0) s = s * (1 + sat / 100);
+  L = Math.max(0.03, Math.min(0.97, L + (l / 100) * 0.35));
+  return billHslToHex(h, Math.max(0, Math.min(1, s)), L);
+}
+let _billThemeTimer = null, _billThemeSaveTimer = null;
+function billThemeRefreshPreviews(){
+  clearTimeout(_billThemeTimer);
+  _billThemeTimer = setTimeout(() => {
+    try{
+      if(document.getElementById('invoicePreviewModal')?.classList.contains('show')) rerenderInvoicePreview();
+      if(document.getElementById('poPreviewModal')?.classList.contains('show')) rerenderPoPreview();
+      if(document.getElementById('advOrderPreviewModal')?.classList.contains('show')) rerenderAdvOrderPreview();
+      if(document.getElementById('reportPreviewModal')?.classList.contains('show')) renderReportToCanvas();
+    }catch(e){ console.error('bill theme refresh failed', e); }
+  }, 50);
+}
+function billThemeSaveSoon(){ clearTimeout(_billThemeSaveTimer); _billThemeSaveTimer = setTimeout(() => { try{ persistAllData(); }catch(e){} }, 500); }
+function billAdj(){ return AppState.settings.receiptAdj || (AppState.settings.receiptAdj = { bgL: 0, bgS: 0, bgW: 0, txtL: 0, txtS: 0, txtHex: null }); }
+function setBillTheme(id){
+  AppState.settings.receiptAdj = { bgL: 0, bgS: 0, bgW: 0, txtL: 0, txtS: 0, txtHex: null }; // ہر نیا تھیم صاف شروع
+  setReceiptColor(id);
+}
+function setBillAdj(key, val){
+  billAdj()[key] = Math.round(Number(val) || 0);
+  const lbl = document.querySelectorAll('[data-bt-val="' + key + '"]'); lbl.forEach(e => { e.textContent = (billAdj()[key] > 0 ? '+' : '') + billAdj()[key]; });
+  billThemeSaveSoon(); billThemeRefreshPreviews();
+}
+function setBillTextColor(hex){
+  billAdj().txtHex = hex || null; billAdj().txtL = 0; billAdj().txtS = 0;
+  billThemeSaveSoon(); billThemeRenderAllPanels(); billThemeRefreshPreviews();
+}
+function resetBillAdj(){
+  AppState.settings.receiptAdj = { bgL: 0, bgS: 0, bgW: 0, txtL: 0, txtS: 0, txtHex: null };
+  billThemeSaveSoon(); billThemeRenderAllPanels(); billThemeRefreshPreviews();
+}
+function billThemePanelHtml(){
+  const cur = AppState.settings.receiptColorId || 'crispbw', a = billAdj();
+  const pills = BILL_THEME_IDS.map(id => {
+    const c = RECEIPT_COLOR_PRESETS.find(x => x.id === id); if(!c) return '';
+    const on = id === cur;
+    return `<button type="button" onclick="setBillTheme('${id}')" style="flex:0 0 auto; padding:5px 11px; border-radius:999px; border:2px solid ${c.border}; background:${c.bg}; color:${c.text}; font-family:inherit; font-size:12.5px; font-weight:800; cursor:pointer; ${on ? 'box-shadow:0 0 0 3px #f59e0b; transform:scale(1.04);' : 'opacity:.92;'}">${BILL_THEME_LABELS[id]}</button>`;
+  }).join('');
+  const slider = (key, label, grad) => `
+    <div style="display:flex; align-items:center; gap:6px; margin:3px 0;">
+      <span style="flex:0 0 46px; font-size:11.5px; font-weight:700; color:#334155;">${label}</span>
+      <input type="range" min="-100" max="100" step="1" value="${a[key] || 0}" oninput="setBillAdj('${key}', this.value)" style="flex:1; min-width:0; accent-color:#0f766e; ${grad ? 'background:' + grad + '; height:8px; border-radius:6px;' : ''}">
+      <b data-bt-val="${key}" dir="ltr" style="flex:0 0 32px; text-align:center; font-size:11px; color:#0f766e;">${(a[key] || 0) > 0 ? '+' : ''}${a[key] || 0}</b>
+    </div>`;
+  const txtSw = ['<button type="button" onclick="setBillTextColor(null)" title="تھیم کا اپنا رنگ" style="flex:0 0 auto; height:26px; padding:0 8px; border-radius:999px; border:2px solid ' + (!a.txtHex ? '#1e293b' : '#cbd5e1') + '; background:#fff; font-family:inherit; font-size:11px; font-weight:800; cursor:pointer;">خودکار</button>']
+    .concat(BILL_TEXT_COLORS.map(h => `<button type="button" onclick="setBillTextColor('${h}')" style="flex:0 0 auto; width:26px; height:26px; border-radius:50%; border:2px solid #fff; background:${h}; cursor:pointer; padding:0; box-shadow:${(a.txtHex || '').toLowerCase() === h ? '0 0 0 3px #f59e0b' : '0 0 0 1.5px #94a3b8'};"></button>`)).join('');
+  return `<div dir="rtl" style="width:100%; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+    <div style="font-size:12px; font-weight:800; color:#0f766e; margin-bottom:4px;">🎨 بل / چٹ تھیم (واٹس ایپ کے لیے)</div>
+    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">${pills}</div>
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:6px 9px; margin-bottom:6px;">
+      <div style="font-size:12px; font-weight:800; color:#334155;">🖼️ بیک گراؤنڈ</div>
+      ${slider('bgL', '🔆 روشنی', 'linear-gradient(90deg,#111,#888,#fff)')}
+      ${slider('bgS', '🎚️ شدت', 'linear-gradient(90deg,#9ca3af,#ef4444)')}
+      ${slider('bgW', '🌡️ گرمی', 'linear-gradient(90deg,#60a5fa,#e5e7eb,#fb923c)')}
+    </div>
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:6px 9px;">
+      <div style="font-size:12px; font-weight:800; color:#334155; margin-bottom:4px;">🔤 ٹیکسٹ کا رنگ</div>
+      <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:5px;">${txtSw}</div>
+      ${slider('txtL', '🔆 روشنی', 'linear-gradient(90deg,#111,#888,#fff)')}
+      ${slider('txtS', '🎚️ شدت', 'linear-gradient(90deg,#9ca3af,#ef4444)')}
+    </div>
+    <button type="button" onclick="resetBillAdj()" style="margin-top:6px; padding:5px 12px; border:1.5px solid #cbd5e1; background:#fff; border-radius:8px; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;">↺ سلائیڈرز ری سیٹ</button>
+  </div>`;
+}
+function renderBillThemePanel(containerId){
+  const el = document.getElementById(containerId); if(!el) return;
+  el.style.cssText = 'display:block; width:100%; flex:1 1 100%;';
+  el.innerHTML = billThemePanelHtml();
+}
+function billThemeRenderAllPanels(){ ['pscColorSwatches', 'popscThemePanel', 'rpscColorSwatches'].forEach(renderBillThemePanel); }
+// ---------- دو رنگی نقشہ: سفید → بیک گراؤنڈ رنگ، سیاہ → ٹیکسٹ رنگ، درمیانی سرمئی ان کے ملاپ سے ----------
+function billThemeApply(cv){
+  if(!cv || !cv.width || !cv.height) return;
+  const rc = getReceiptColorThemed();
+  const hx = h => { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const B = hx(rc.bg), T = hx(rc.text);
+  const plain = document.createElement('canvas'); plain.width = cv.width; plain.height = cv.height;
+  plain.getContext('2d').drawImage(cv, 0, 0);
+  const ctx = cv.getContext('2d');
+  const img = ctx.getImageData(0, 0, cv.width, cv.height), d = img.data;
+  for(let i = 0; i < d.length; i += 4){
+    const t = (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]) / 255;
+    d[i] = T[0] + (B[0] - T[0]) * t; d[i + 1] = T[1] + (B[1] - T[1]) * t; d[i + 2] = T[2] + (B[2] - T[2]) * t;
+  }
+  ctx.putImageData(img, 0, 0);
+  // QR کا بلاک رنگ نہ لے — اسی جگہ سادہ (سیاہ/سفید) کاپی واپس
+  try{ (cv.__qrRects || []).forEach(q => { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(plain, q.x, q.y, q.w, q.h, q.x, q.y, q.w, q.h); ctx.restore(); }); }catch(e){}
+  cv.__qrRects = [];
+  cv.__plain = plain;
+}
+let billThemeInFlight = 0;
+function installBillThemeWrappers(){
+  if(window.__billThemeWrapped) return; window.__billThemeWrapped = true;
+  const wrap = (name, getCv) => {
+    const raw = window[name]; if(typeof raw !== 'function') return;
+    window[name] = async function(...args){
+      const on = billThemeActive();
+      billThemeInFlight++; if(on) billPlainDepth++;
+      let r;
+      try{ r = await raw.apply(this, args); }
+      finally{ if(on) billPlainDepth--; billThemeInFlight--; }
+      try{
+        const cv = getCv(args);
+        if(cv){ if(on && billThemeInFlight === 0) billThemeApply(cv); else if(!on){ cv.__plain = null; cv.__qrRects = []; } }
+      }catch(e){ console.error('bill theme apply failed', e); }
+      return r;
+    };
+  };
+  wrap('renderInvoiceToCanvas', () => document.getElementById('invoiceCanvas'));
+  wrap('renderInvoiceToA4Canvas', () => document.getElementById('invoiceCanvas'));
+  wrap('renderPoToCanvas', () => document.getElementById('poCanvas'));
+  wrap('renderReportToCanvas', () => document.getElementById('reportCanvas'));
+  wrap('renderAdvOrderToCanvas', a => a[1] || document.getElementById('advOrderCanvas'));
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installBillThemeWrappers); else installBillThemeWrappers();
 
 // =========================================================================
 // 🎨 ریکوری پوسٹر — فونٹ/رنگ صرف اسی کے لیے، عام Bill & Print Settings سے آزاد (صدام کی ہدایت FM3SEPTH10)
@@ -52038,10 +52265,9 @@ async function renderPartyProfilePosterToCanvas(party, kind, accounts, dueAmount
     if(acc.qr){
       iy += 10;
       const qrSize = 100;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(cx-qrSize/2-5, iy, qrSize+10, qrSize+10);
-      drawBinarizedQR(ctx, acc.qrImg, cx-qrSize/2, iy+5, qrSize);
-      iy += qrSize + 20;
+      iy += 8;
+      drawBinarizedQR(ctx, acc.qrImg, cx-qrSize/2, iy+8, qrSize, true);
+      iy += qrSize + 28;
       ctx.fillStyle = accent;
       ctx.font = `600 13px Poppins, sans-serif`;
       ctx.fillText('Scan to Pay', cx, iy);
@@ -52367,16 +52593,7 @@ function syncReportStyleControls(){
     });
   }
 
-  const rSwatchWrap = document.getElementById('rpscColorSwatches');
-  if(rSwatchWrap){
-    try{
-      rSwatchWrap.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<button onclick="setReceiptColor('${c.id}')" title="${c.name}" style="width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px #cbd5e1; background:${c.bg}; cursor:pointer; padding:0; flex:0 0 auto;" data-swatch-id="${c.id}"></button>`).join('');
-      rSwatchWrap.querySelectorAll('button').forEach(btn => {
-        const active = btn.dataset.swatchId === (AppState.settings.receiptColorId || 'green');
-        btn.style.boxShadow = active ? '0 0 0 2.5px #1e293b' : '0 0 0 1.5px #cbd5e1';
-      });
-    }catch(e){ console.error('report swatch render failed', e); }
-  }
+  renderBillThemePanel('rpscColorSwatches'); // 🎨 FM1711TU536
 }
 function setReportFontFamily(fontId){
   AppState.settings.reportFontId = fontId;
