@@ -2217,7 +2217,7 @@ function __appHostKind(h, p){
        کنٹرولز کے اوپر چڑھ جاتا (بٹن نظر آتے تھے مگر دبانے پر کچھ نہیں ہوتا تھا کیونکہ اصل میں اوپر کینوس کی
        تہہ موجود ہوتی)۔ اب پورا ڈبہ خود ایک ہی، سیدھا سادہ سکرول ایریا ہے — کوئی الگ اندرونی سکرول خانہ نہیں،
        اس لیے کوئی چیز کبھی کسی دوسری چیز کے اوپر نہیں چڑھ سکتی۔ ہیڈر (عنوان/✖) ہمیشہ سب سے اوپر چپکا رہتا ہے ---------- */
-  .invoicePreviewBox{background:#fff; border-radius:var(--radius); padding:0; width:340px; max-height:85vh; display:block; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch;}
+  .invoicePreviewBox{background:#fff; border-radius:var(--radius); padding:0; width:340px; max-height:90vh; display:block; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch;}
   /* ---------- 🛠️ صدام کی ہدایت (17 ستمبر، رات، دوسری بار): flex-direction:column بھی بعض فونز پر کینوس کی
        اصل اونچائی کو خود بخود چھوٹا سمجھ لیتا تھا (آخری قطاریں اور "کل منافع" کی لائن کینوس کے کنارے سے کٹ
        کر نیچے کے بٹنوں سے جا ملتی، ایسا لگتا سکرول رک گیا ہو)۔ اب یہ خالص عام (block) ترتیب ہے — کوئی
@@ -2240,6 +2240,23 @@ function __appHostKind(h, p){
   .pscToggleBtn{border:1.5px solid #d8dee8; background:#fff !important; color:var(--muted) !important; font-weight:600 !important; padding:5px 10px !important; border-radius:6px; cursor:pointer;}
   .pscToggleBtn.active{background:var(--primary) !important; color:#fff !important; border-color:var(--primary) !important;}
   .invoicePreviewBox canvas{width:100%; display:block;}
+
+  /* 🎨 FM1711TU538: بل رنگ کی کمپیکٹ پٹی — ہیڈر کے نیچے چپکی رہتی ہے، بل کے اوپر ہر وقت نظر آتی ہے۔
+     چھوٹے پل (8 تھیم) + بیک گراؤنڈ/ٹیکسٹ کے بٹن؛ بٹن دبانے پر صرف ایک پتلی ایک لائن کی پٹی کھلتی ہے، بل نہیں چھپتا */
+  .billThemeBar{position:sticky; top:var(--pvHdrH,52px); z-index:5; background:#fff; border-bottom:1px solid #e2e8f0; box-shadow:0 2px 6px rgba(15,23,42,.10); padding:4px 6px; direction:rtl;}
+  .btPills{display:flex; gap:3px;}
+  .btPill{flex:1 1 0; min-width:0; height:22px; padding:0; border-radius:999px; font-family:inherit; font-size:10.5px; font-weight:800; line-height:1; cursor:pointer; border-width:2px; border-style:solid;}
+  .btChips{display:flex; gap:4px; margin-top:4px;}
+  .btChip{flex:1 1 0; min-width:0; height:24px; padding:0 4px; border:1.5px solid #cbd5e1; background:#f8fafc; color:#334155; border-radius:999px; font-family:inherit; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap;}
+  .btChip.on{background:#0f766e; border-color:#0f766e; color:#fff;}
+  .btChip.btReset{flex:0 0 34px;}
+  .btStrip{margin-top:4px; padding:3px 4px; background:#f1f5f9; border-radius:10px;}
+  .btSliders{display:flex; gap:6px; align-items:center;}
+  .btSl{flex:1 1 0; min-width:0; display:flex; align-items:center; gap:2px; direction:ltr;}
+  .btSl span{font-size:12px; flex:0 0 auto;}
+  .btSl input{flex:1 1 auto; min-width:0; width:100%; height:18px; margin:0; accent-color:#0f766e; border-radius:6px;}
+  .btSl b{flex:0 0 22px; text-align:center; font-size:9.5px; color:#0f766e;}
+  .btTxtRow{display:flex; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding:1px 1px 4px; direction:rtl;}
   /* ---------- کمپیکٹ کنٹرول پینل — کینوس/بل کو زیادہ سے زیادہ جگہ دینے کے لیے،
      اوزار (سٹائل کنٹرولز) کم سے کم جگہ لیں — برش/رنگ کے ڈبے چھوٹے، کینوس بڑا ---------- */
   .compactPsc{display:flex; flex-direction:column; gap:5px; padding:8px 10px;}
@@ -6412,6 +6429,7 @@ function __appHostKind(h, p){
           </div>
         </div>
 
+        <div class="billThemeBar" id="pscColorSwatches"></div>
         <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے (کمپیکٹ — بل زیادہ نظر آئے) ---------- -->
         <div class="previewStyleControls compactPsc">
           <div class="pscCompactRow pscEssentialRow">
@@ -6474,10 +6492,6 @@ function __appHostKind(h, p){
                 <span class="pscLabel" style="min-width:110px;">🔢 ہندسے (ریٹ/قیمت/ٹوٹل)</span>
                 <select id="pscNumberFontSelect" onchange="setSectionFontFamily('printFontNumberId', this.value)" class="pscDropdown"></select>
               </div>
-            </div>
-            <div class="pscCompactRow">
-              <span class="pscLabel">🎨</span>
-              <div id="pscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
             </div>
             <div class="pscCompactRow">
               <label class="pscCheckLabel">
@@ -7344,6 +7358,7 @@ function __appHostKind(h, p){
             <span style="cursor:pointer;" onclick="closePoPreview()">✖</span>
           </div>
         </div>
+        <div class="billThemeBar" id="popscThemePanel"></div>
 
         <div class="previewStyleControls compactPsc">
           <div class="pscCompactRow pscEssentialRow">
@@ -7386,7 +7401,6 @@ function __appHostKind(h, p){
             <div class="pscCompactRow">
               <select id="popscFontFamilySelect" onchange="setPoFontFamily(this.value)" class="pscDropdown"></select>
             </div>
-            <div class="pscCompactRow"><div id="popscThemePanel"></div></div>
             <div class="pscCompactRow">
               <label class="pscCheckLabel">
                 <input type="checkbox" id="popscA4Chk" onchange="togglePoPaperStyle(this.checked)"> 🖨️ Print A4
@@ -8046,6 +8060,7 @@ function __appHostKind(h, p){
       <strong id="reportPreviewTitle" dir="rtl" style="flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-align:center; padding-left:30px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif; font-size:26px; font-weight:700; line-height:1.9; color:#134e2c; letter-spacing:0; text-shadow:0 1px 0 rgba(255,255,255,.9), 0.4px 0 0 currentColor, -0.4px 0 0 currentColor;">🖨️ Report Preview</strong>
       <span style="cursor:pointer; flex:0 0 30px; text-align:center;" onclick="closeReportPreview()">✖</span>
     </div>
+    <div class="billThemeBar" id="rpscColorSwatches"></div>
 
     <div class="previewStyleControls compactPsc" id="reportStyleControlsWrap">
       <div class="pscCompactRow pscEssentialRow">
@@ -8108,10 +8123,6 @@ function __appHostKind(h, p){
         </div>
         <div class="pscCompactRow">
           <div id="rpscNumberFontWheel" class="pscFontWheel"></div>
-        </div>
-        <div class="pscCompactRow">
-          <span class="pscLabel">🎨</span>
-          <div id="rpscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
         </div>
         <div class="pscCompactRow">
           <label class="pscCheckLabel">
@@ -10224,7 +10235,7 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1711TU537'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const APP_BUILD_VERSION = 'FM1711TU538'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
 const UPDATE_NOTE = '🔐 ڈویلپر پینل اب صرف ہیلپ ڈیسک سے کھلتا ہے — 7 بار دبانے والا راستہ ختم'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
@@ -48758,9 +48769,11 @@ function billThemeRefreshPreviews(){
 }
 function billThemeSaveSoon(){ clearTimeout(_billThemeSaveTimer); _billThemeSaveTimer = setTimeout(() => { try{ persistAllData(); }catch(e){} }, 500); }
 function billAdj(){ return AppState.settings.receiptAdj || (AppState.settings.receiptAdj = { bgL: 0, bgS: 0, bgW: 0, txtL: 0, txtS: 0, txtHex: null }); }
-function setBillTheme(id){
+function setBillTheme(id, btn){
   AppState.settings.receiptAdj = { bgL: 0, bgS: 0, bgW: 0, txtL: 0, txtS: 0, txtHex: null }; // ہر نیا تھیم صاف شروع
   setReceiptColor(id);
+  billThemeRenderAllPanels();
+  billThemeFocusBill(btn && btn.closest ? btn.closest('.invoicePreviewBox') : null);
 }
 function setBillAdj(key, val){
   billAdj()[key] = Math.round(Number(val) || 0);
@@ -48775,42 +48788,60 @@ function resetBillAdj(){
   AppState.settings.receiptAdj = { bgL: 0, bgS: 0, bgW: 0, txtL: 0, txtS: 0, txtHex: null };
   billThemeSaveSoon(); billThemeRenderAllPanels(); billThemeRefreshPreviews();
 }
+let _billThemeOpen = null; // 'bg' | 'txt' | null — کون سی پتلی پٹی کھلی ہے
 function billThemePanelHtml(){
   const cur = AppState.settings.receiptColorId || 'crispbw', a = billAdj();
   const pills = BILL_THEME_IDS.map(id => {
     const c = RECEIPT_COLOR_PRESETS.find(x => x.id === id); if(!c) return '';
     const on = id === cur;
-    return `<button type="button" onclick="setBillTheme('${id}')" style="flex:0 0 auto; padding:5px 11px; border-radius:999px; border:2px solid ${c.border}; background:${c.bg}; color:${c.text}; font-family:inherit; font-size:12.5px; font-weight:800; cursor:pointer; ${on ? 'box-shadow:0 0 0 3px #f59e0b; transform:scale(1.04);' : 'opacity:.92;'}">${BILL_THEME_LABELS[id]}</button>`;
+    return `<button type="button" class="btPill" title="${(BILL_THEME_LABELS[id] || '').replace(/"/g, '')}" onclick="setBillTheme('${id}', this)" style="border-color:${c.border}; background:${c.bg}; color:${c.text}; ${on ? 'box-shadow:0 0 0 2px #f59e0b; transform:scale(1.07);' : 'opacity:.9;'}">Aa</button>`;
   }).join('');
-  const slider = (key, label, grad) => `
-    <div style="display:flex; align-items:center; gap:6px; margin:3px 0;">
-      <span style="flex:0 0 46px; font-size:11.5px; font-weight:700; color:#334155;">${label}</span>
-      <input type="range" min="-100" max="100" step="1" value="${a[key] || 0}" oninput="setBillAdj('${key}', this.value)" style="flex:1; min-width:0; accent-color:#0f766e; ${grad ? 'background:' + grad + '; height:8px; border-radius:6px;' : ''}">
-      <b data-bt-val="${key}" dir="ltr" style="flex:0 0 32px; text-align:center; font-size:11px; color:#0f766e;">${(a[key] || 0) > 0 ? '+' : ''}${a[key] || 0}</b>
-    </div>`;
-  const txtSw = ['<button type="button" onclick="setBillTextColor(null)" title="تھیم کا اپنا رنگ" style="flex:0 0 auto; height:26px; padding:0 8px; border-radius:999px; border:2px solid ' + (!a.txtHex ? '#1e293b' : '#cbd5e1') + '; background:#fff; font-family:inherit; font-size:11px; font-weight:800; cursor:pointer;">خودکار</button>']
-    .concat(BILL_TEXT_COLORS.map(h => `<button type="button" onclick="setBillTextColor('${h}')" style="flex:0 0 auto; width:26px; height:26px; border-radius:50%; border:2px solid #fff; background:${h}; cursor:pointer; padding:0; box-shadow:${(a.txtHex || '').toLowerCase() === h ? '0 0 0 3px #f59e0b' : '0 0 0 1.5px #94a3b8'};"></button>`)).join('');
-  return `<div dir="rtl" style="width:100%; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
-    <div style="font-size:12px; font-weight:800; color:#0f766e; margin-bottom:4px;">🎨 بل / چٹ تھیم (واٹس ایپ کے لیے)</div>
-    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">${pills}</div>
-    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:6px 9px; margin-bottom:6px;">
-      <div style="font-size:12px; font-weight:800; color:#334155;">🖼️ بیک گراؤنڈ</div>
-      ${slider('bgL', '🔆 روشنی', 'linear-gradient(90deg,#111,#888,#fff)')}
-      ${slider('bgS', '🎚️ شدت', 'linear-gradient(90deg,#9ca3af,#ef4444)')}
-      ${slider('bgW', '🌡️ گرمی', 'linear-gradient(90deg,#60a5fa,#e5e7eb,#fb923c)')}
-    </div>
-    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:6px 9px;">
-      <div style="font-size:12px; font-weight:800; color:#334155; margin-bottom:4px;">🔤 ٹیکسٹ کا رنگ</div>
-      <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:5px;">${txtSw}</div>
-      ${slider('txtL', '🔆 روشنی', 'linear-gradient(90deg,#111,#888,#fff)')}
-      ${slider('txtS', '🎚️ شدت', 'linear-gradient(90deg,#9ca3af,#ef4444)')}
-    </div>
-    <button type="button" onclick="resetBillAdj()" style="margin-top:6px; padding:5px 12px; border:1.5px solid #cbd5e1; background:#fff; border-radius:8px; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;">↺ سلائیڈرز ری سیٹ</button>
-  </div>`;
+  const sl = (key, ico, grad) => `<label class="btSl"><span>${ico}</span><input type="range" min="-100" max="100" step="1" value="${a[key] || 0}" oninput="setBillAdj('${key}', this.value)" style="${grad ? 'background:' + grad + ';' : ''}"><b data-bt-val="${key}">${(a[key] || 0) > 0 ? '+' : ''}${a[key] || 0}</b></label>`;
+  let strip = '';
+  if(_billThemeOpen === 'bg'){
+    strip = `<div class="btStrip"><div class="btSliders">${sl('bgL', '🔆', 'linear-gradient(90deg,#111,#888,#fff)')}${sl('bgS', '🎚️', 'linear-gradient(90deg,#9ca3af,#ef4444)')}${sl('bgW', '🌡️', 'linear-gradient(90deg,#60a5fa,#e5e7eb,#fb923c)')}</div></div>`;
+  } else if(_billThemeOpen === 'txt'){
+    const auto = `<button type="button" onclick="setBillTextColor(null)" title="تھیم کا اپنا رنگ" style="flex:0 0 auto; height:22px; padding:0 8px; border-radius:999px; border:2px solid ${!a.txtHex ? '#1e293b' : '#cbd5e1'}; background:#fff; font-family:inherit; font-size:10.5px; font-weight:800; cursor:pointer;">خودکار</button>`;
+    const dots = BILL_TEXT_COLORS.map(h => `<button type="button" onclick="setBillTextColor('${h}')" style="flex:0 0 auto; width:22px; height:22px; border-radius:50%; border:2px solid #fff; background:${h}; cursor:pointer; padding:0; box-shadow:${(a.txtHex || '').toLowerCase() === h ? '0 0 0 2.5px #f59e0b' : '0 0 0 1.5px #94a3b8'};"></button>`).join('');
+    strip = `<div class="btStrip"><div class="btTxtRow">${auto}${dots}</div><div class="btSliders">${sl('txtL', '🔆', 'linear-gradient(90deg,#111,#888,#fff)')}${sl('txtS', '🎚️', 'linear-gradient(90deg,#9ca3af,#ef4444)')}</div></div>`;
+  }
+  return `<div class="btPills">${pills}</div>
+    <div class="btChips">
+      <button type="button" class="btChip ${_billThemeOpen === 'bg' ? 'on' : ''}" onclick="billThemeToggle('bg', this)">🖼️ بیک گراؤنڈ</button>
+      <button type="button" class="btChip ${_billThemeOpen === 'txt' ? 'on' : ''}" onclick="billThemeToggle('txt', this)">🔤 ٹیکسٹ</button>
+      <button type="button" class="btChip btReset" title="ری سیٹ" onclick="resetBillAdj()">↺</button>
+    </div>${strip}`;
+}
+// ہیڈر کی اونچائی ناپ کر پٹی کو اس کے عین نیچے چپکاتا ہے (ہر ڈبے کا ہیڈر الگ اونچائی کا ہو سکتا ہے)
+function billThemeBindHdr(box){
+  if(!box || box._btHdrBound) return;
+  const hd = box.querySelector('.previewHeader'); if(!hd) return;
+  const set = () => { const h = hd.offsetHeight; if(h) box.style.setProperty('--pvHdrH', h + 'px'); };
+  try{ if(window.ResizeObserver) new ResizeObserver(set).observe(hd); }catch(e){}
+  set(); box._btHdrBound = true;
+}
+// پٹی کے نیچے بل کو لا کر کھڑا کر دیتا ہے تاکہ ایڈیٹ کرتے وقت بل سامنے رہے
+function billThemeFocusBill(box){
+  if(!box) return;
+  requestAnimationFrame(() => {
+    try{
+      const bar = box.querySelector('.billThemeBar'), hd = box.querySelector('.previewHeader');
+      const sa = box.querySelector('.invoicePreviewScrollArea');
+      if(!bar || !sa || !hd) return;
+      const want = box.getBoundingClientRect().top + hd.offsetHeight + bar.offsetHeight;
+      box.scrollTop += sa.getBoundingClientRect().top - want;
+    }catch(e){}
+  });
+}
+function billThemeToggle(which, btn){
+  const box = btn && btn.closest ? btn.closest('.invoicePreviewBox') : null;
+  _billThemeOpen = (_billThemeOpen === which) ? null : which;
+  billThemeRenderAllPanels();
+  billThemeFocusBill(box);
 }
 function renderBillThemePanel(containerId){
   const el = document.getElementById(containerId); if(!el) return;
-  el.style.cssText = 'display:block; width:100%; flex:1 1 100%;';
+  billThemeBindHdr(el.closest('.invoicePreviewBox'));
   el.innerHTML = billThemePanelHtml();
 }
 function billThemeRenderAllPanels(){ ['pscColorSwatches', 'popscThemePanel', 'rpscColorSwatches'].forEach(renderBillThemePanel); }
