@@ -10275,8 +10275,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM1711TU542'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = '🔄 اپڈیٹ اب پیچھے خاموشی سے لگتی ہے — کوئی کارڈ یا رکاوٹ نہیں؛ صرف مالک کے فون پر اوپر باریک پٹی'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
+const APP_BUILD_VERSION = 'FM1811WE543'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '💰 گاہک کی وصولی (آج یا پچھلی تاریخ) اب کئی حصوں میں: نقد / جاز کیش / ایزی پیسہ / بینک — ہر حصہ الگ، کل ایک ساتھ'; // 🆕 ہر ورژن پر ایک چھوٹی لائن کہ کیا بدلا — اپڈیٹ مکمل والے کارڈ میں دکھتی ہے
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -57356,6 +57356,69 @@ window.openHelpDesk = openHelpDesk;
   window.fmDayClose = function(){ document.getElementById('fmDayOv')?.remove(); };
   window.fmDayGo = function(f){ if(!f) return; D = String(f).slice(0, 10); paint(); };
   window.fmDayTab = function(k){ TAB = k; paint(); };
+})();
+</script>
+<script type="text/fm-boot">
+/* FM1811WE543 (مالک کا حکم — «آج کی وصولی بھی حصوں میں»): گاہک کی «💰 وصولی» میں بھی ریکوری لسٹ جیسے کئی طریقے —
+   نقد / جاز کیش / ایزی پیسہ / بینک + «➕ دوسرا طریقہ»؛ ہر حصے کی الگ رقم ادائیگی کے ریکارڈ میں (`method` = «نقد 500 + جاز کیش 500»، `methods`)،
+   کل رقم ایک ساتھ، کیش میں صرف نقد حصہ (`cash_amount`، `cashInHand`)۔ تاریخ آج ہو یا پچھلی — ایک جیسا۔ */
+(function(){
+  var M = (typeof RECOVERY_METHODS !== 'undefined' && RECOVERY_METHODS) || { cash: 'نقد', jazzcash: 'جاز کیش', easypaisa: 'ایزی پیسہ', bank: 'بینک' };
+  var m0 = 'cash', rows = [];
+  function $(id){ return document.getElementById(id); }
+  function num(v){ return Math.max(0, parseFloat(v) || 0); }
+  function opts(sel){ return Object.keys(M).map(function(k){ return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + M[k] + '</option>'; }).join(''); }
+  function parts(){
+    var by = {}, add = function(m, a){ if(a > 0) by[m] = (by[m] || 0) + a; };
+    add(m0, num(($('collectAmount') || {}).value)); rows.forEach(function(r){ add(r.method, num(r.amount)); });
+    return Object.keys(by).map(function(k){ return { method: k, amount: by[k] }; });
+  }
+  function total(){ return parts().reduce(function(a, p){ return a + p.amount; }, 0); }
+  var ST = 'width:100%;box-sizing:border-box;padding:9px 6px;border:1.5px solid #dbe1ea;border-radius:9px;font-family:inherit;font-size:15px;';
+  function draw(){
+    var a = $('collectAmount'); if(!a) return; var b = $('colSplit');
+    if(!b){ b = document.createElement('div'); b.id = 'colSplit'; b.setAttribute('dir', 'rtl'); b.style.cssText = 'margin:6px 0 8px;'; a.insertAdjacentElement('afterend', b); }
+    var wallet = (typeof activeCollectMode !== 'undefined' && activeCollectMode === 'wallet');
+    b.style.display = wallet ? 'none' : 'block';
+    var tot = total(), many = rows.length > 0;
+    b.innerHTML = '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><span style="font-weight:800;white-space:nowrap">طریقہ:</span><select id="colM0" style="' + ST + 'flex:1" onchange="colSplitM0(this.value)">' + opts(m0) + '</select></div>'
+      + rows.map(function(r, i){ return '<div style="display:flex;gap:5px;align-items:center;margin-bottom:6px">'
+        + '<input type="number" min="0" inputmode="numeric" placeholder="مزید رقم" value="' + (r.amount || '') + '" oninput="colSplitSet(' + i + ',\'amount\',this.value)" style="' + ST + 'flex:1 1 0;min-width:0;text-align:center;font-weight:800">'
+        + '<select onchange="colSplitSet(' + i + ',\'method\',this.value)" style="' + ST + 'flex:0 0 112px">' + opts(r.method) + '</select>'
+        + '<button type="button" onclick="colSplitDel(' + i + ')" style="flex:0 0 auto;width:30px;height:30px;border:none;border-radius:50%;background:#fee2e2;color:#b91c1c;font-size:13px;cursor:pointer">✖</button></div>'; }).join('')
+      + '<button type="button" onclick="colSplitAdd()" style="width:100%;padding:9px;border:1.5px dashed #a5b4fc;border-radius:10px;background:#eef2ff;color:#1e3a8a;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer">➕ دوسرا طریقہ (نقد / جاز کیش / ایزی پیسہ / بینک)</button>'
+      + (many ? '<div id="colSplitTot" style="margin-top:7px;padding:8px 10px;border-radius:10px;background:#dcfce7;color:#14532d;font-weight:900;font-size:16px">کل وصولی: Rs. ' + tot.toLocaleString() + '<div style="font-size:12.5px;font-weight:700">' + parts().map(function(p){ return M[p.method] + ' ' + p.amount.toLocaleString(); }).join(' + ') + '</div></div>' : '');
+  }
+  function hint(){ try{ var a = $('collectAmount'), keep = a.value, t = total(); if(rows.length && t > 0) a.value = String(t); _hint(); a.value = keep; }catch(e){} }
+  function tot1(){ var t = $('colSplitTot'); if(t){ t.firstChild.textContent = 'کل وصولی: Rs. ' + total().toLocaleString(); t.lastChild.textContent = parts().map(function(p){ return M[p.method] + ' ' + p.amount.toLocaleString(); }).join(' + '); } }
+  window.colSplitM0 = function(v){ m0 = v; draw(); hint(); };
+  window.colSplitSet = function(i, f, v){ if(!rows[i]) return; rows[i][f] = f === 'amount' ? num(v) : v; if(f === 'method') draw(); else tot1(); hint(); };
+  window.colSplitAdd = function(){ var used = [m0].concat(rows.map(function(r){ return r.method; })); rows.push({ amount: 0, method: Object.keys(M).find(function(k){ return used.indexOf(k) < 0; }) || 'cash' }); draw(); };
+  window.colSplitDel = function(i){ rows.splice(i, 1); draw(); hint(); };
+  var _open = window.openCollectModal, _mode = window.setCollectMode, _hint = window.updateCollectRemainingHint, _save = window.saveCollectReceivable;
+  if(typeof _open !== 'function' || typeof _save !== 'function') return;
+  window.openCollectModal = function(){ m0 = 'cash'; rows = []; var r = _open.apply(this, arguments); draw(); return r; };
+  if(typeof _mode === 'function') window.setCollectMode = function(){ var r = _mode.apply(this, arguments); draw(); return r; };
+  if(typeof _hint === 'function') window.updateCollectRemainingHint = function(){ tot1(); return hint(); };
+  window.saveCollectReceivable = function(){
+    if(typeof activeCollectMode !== 'undefined' && activeCollectMode === 'wallet') return _save.apply(this, arguments);
+    var ps = parts(), tot = ps.reduce(function(a, p){ return a + p.amount; }, 0);
+    if(!ps.length || (ps.length === 1 && ps[0].method === 'cash')) { var a0 = $('collectAmount'), k0 = a0.value; if(tot > 0) a0.value = String(tot); try{ return _save.apply(this, arguments); } finally { a0.value = k0; } }
+    var cashPart = ps.filter(function(p){ return p.method === 'cash'; }).reduce(function(a, p){ return a + p.amount; }, 0), nonCash = tot - cashPart;
+    var label = ps.length === 1 ? M[ps[0].method] : ps.map(function(p){ return M[p.method] + ' ' + p.amount.toLocaleString(); }).join(' + ');
+    var a = $('collectAmount'), keep = a.value, cid = (typeof activeCollectCustomerId !== 'undefined') ? activeCollectCustomerId : null, did = false;
+    var _rp = window.recordPaymentEntry;
+    window.recordPaymentEntry = function(e){ try{ if(e && e.direction === 'in' && e.party_type === 'customer'){ e.method = label; e.cash_amount = cashPart; e.methods = ps; did = true; } }catch(x){} return _rp.apply(this, arguments); };
+    a.value = String(tot);
+    try{ _save.apply(this, arguments); }
+    finally{ window.recordPaymentEntry = _rp; a.value = keep; }
+    if(did){
+      try{ if(nonCash > 0 && typeof financeDummy !== 'undefined'){ financeDummy.cashInHand -= nonCash; if(typeof pushFinanceToCloud === 'function') pushFinanceToCloud(); } }catch(e){}
+      try{ var c = (customersData || []).find(function(x){ return x.customer_id === cid; }); var h = c && (c.walletHistory || []).find(function(x){ return x && x.type === 'receivable_collected'; }); if(h){ h.via = ps.length === 1 ? ps[0].method : 'mixed'; h.methods = ps; } }catch(e){}
+      try{ persistAllData(); }catch(e){}
+      rows = []; m0 = 'cash';
+    }
+  };
 })();
 </script>
 <script>
