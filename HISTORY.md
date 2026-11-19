@@ -51,3 +51,4 @@
 - **FM1811WE543 (مالک کا حکم — «آج کی وصولی بھی حصوں میں»):** گاہک کی «💰 وصولی» (`collectModal`) میں کئی طریقے: «طریقہ» (نقد / جاز کیش / ایزی پیسہ / بینک) + «➕ دوسرا طریقہ» + کل؛ ادائیگی کا `method` = «نقد 500 + جاز کیش 500…»، `methods`، `cash_amount` = صرف نقد، `cashInHand` سے غیر نقد منہا؛ آج یا پچھلی تاریخ ایک جیسا (SM1811WE298 جیسا)۔
 - 19 Nov 2026: CLAUDE.md — every reply to the owner starts with «قبلہ عالی جاہ میں آپ کی نرم گوئی اور اچھے اخلاق کا مشکور ہوں، صورتحال یہ ہے…» (owner's order).
 - FM1911TH544 (19 Nov 2026, #292): challan / stock page top buttons compact (#saTopBtns + #smChCompact292: one line each, 34px, smaller font; labels «📊 آج کی تقسیم», «🧾 چالانوں کا حساب»).
+- 19 Nov 2026: CLAUDE.md — reply opening line changed to the owner's new sentence.
