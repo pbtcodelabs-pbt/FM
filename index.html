@@ -10282,8 +10282,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM2211SU545'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = '💰 گاہک کی وصولی: آج کی تاریخ میں بھی کئی حصے (نقد / جاز کیش / ایزی پیسہ / بینک) — ایک صاف نظام، وصولی کارڈ میں آج کی ہر وصولی الگ لائن';
+const APP_BUILD_VERSION = 'FM2211SU546'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '💳 بل پر آج کی وصولی بھی حصوں میں (نقد / جاز کیش / ایزی پیسہ / بینک) — کل والے ڈبے جیسا؛ آج دو وصولیاں ہوں تو ہر ایک الگ لائن';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -46595,6 +46595,8 @@ function getBillSummaryRows(invoice){
   // وصولیاں بل سے پہلے ہوتی ہیں)۔ سابقہ بقایہ وصولی سے پہلے والا دکھایا جاتا ہے تاکہ اوپر سے نیچے حساب پورا ملے:
   // سابقہ (وصولی سے پہلے) + یہ بل = تازہ ٹوٹل؛ تازہ ٹوٹل − ابھی وصول = حتمی بقایہ ---------- -->
   let recBefore = 0;
+  const _todayRecs = []; // 💳 FM2211SU546 (مالک کا حکم — «آج کی وصولی بھی ڈبوں میں»): آج کی ہر وصولی + اس کے حصے (نقد / جاز کیش / ایزی پیسہ / بینک) — کل والے ڈبے جیسا
+  const _splitOfPm = (pm) => { const sp = {}; try{ const b = bsPaySplit(pm); Object.keys(b).forEach(k => { const a = Number(b[k]) || 0; if(a > 0) sp[k] = (sp[k] || 0) + a; }); }catch(e){} return sp; };
   try{
     if(invoice.customer_id){
       const _ts2 = (v) => new Date(v || 0).getTime() || 0;
@@ -46611,7 +46613,7 @@ function getBillSummaryRows(invoice){
       recBefore = (paymentsData || []).filter(pm => pm && pm.party_type === 'customer' && pm.party_id === invoice.customer_id && pm.direction === 'in'
           && (pm.biz_date ? pm.biz_date === _bDay : _ts2(pm.created_at) > calDayStart.getTime()) // 📅 صرف اسی کاروباری دن کی وصولی — کل کی وصولی آج کے بل میں نہیں
           && _ts2(pm.created_at) > fromTs && _ts2(pm.created_at) <= billTs2)
-        .reduce((a, pm) => a + _pmToDue(pm), 0);
+        .reduce((a, pm) => { const v = _pmToDue(pm); if(v > 0) _todayRecs.push({ amt: v, at: pm.cash_at || pm.created_at || '', split: _splitOfPm(pm) }); return a + v; }, 0);
     }
   }catch(e){ recBefore = 0; }
 
@@ -46646,9 +46648,9 @@ function getBillSummaryRows(invoice){
       if(!laterSameDay){
         const paidLater = (paymentsData || []).filter(pm => pm && pm.party_type === 'customer' && pm.party_id === invoice.customer_id && pm.direction === 'in'
             && bsPayDay(pm) === _day && _ts(pm.created_at) > billTs)
-          .reduce((a, pm) => a + _pmToDue(pm), 0);
+          .reduce((a, pm) => { const v = _pmToDue(pm); if(v > 0) _todayRecs.push({ amt: v, at: pm.cash_at || pm.created_at || '', split: _splitOfPm(pm) }); return a + v; }, 0);
         const pend = (recoveryListData || []).filter(r => r && r.customer_id === invoice.customer_id && r.status === 'pending' && recDay(r) === _day)
-          .reduce((a, r) => a + (Number(r.amount) || 0), 0);
+          .reduce((a, r) => { const v = Number(r.amount) || 0; if(v > 0){ const sp = {}; getRecoverySplit(r).forEach(m => { const k = bsMethodKey(m.method); const x = Number(m.amount) || 0; if(x > 0) sp[k] = (sp[k] || 0) + x; }); _todayRecs.push({ amt: v, at: r.createdAt || '', split: sp }); } return a + v; }, 0);
         laterRecovery = paidLater + pend;
       }
     }
@@ -46662,7 +46664,18 @@ function getBillSummaryRows(invoice){
   rows.push(['آج کا بل', thisBill]);
   rows.push(['سابقہ رقم', prevGross]);
   rows.push(['ٹوٹل رقم', totalAmount]);
-  rows.push(['وصولی رقم', recoveredAmount]);
+  // 💳 FM2211SU546: آج کی وصولی کے حصے — بل کے ساتھ نقد (بل کا طریقہ) + والٹ + بل سے پہلے / بعد کی ہر وصولی
+  if(cashNow > 0){ let k = 'cash'; try{ k = bsMethodKey(invoice.payment_method); if(k === 'wallet') k = 'cash'; }catch(e){} _todayRecs.unshift({ amt: cashNow, at: invoice.created_at || '', split: { [k]: cashNow }, bill: true }); }
+  if(walletApplied > 0) _todayRecs.push({ amt: walletApplied, at: invoice.created_at || '', split: { wallet: walletApplied }, bill: true });
+  const _tSplit = {}; _todayRecs.forEach(x => Object.keys(x.split || {}).forEach(k => { _tSplit[k] = (_tSplit[k] || 0) + x.split[k]; }));
+  const _spTxt = sp => { const L = (typeof _Y_SPLIT_LBL !== 'undefined' && _Y_SPLIT_LBL) || {}; const ks = ['cash', 'jazzcash', 'easypaisa', 'bank', 'wallet', 'other'].filter(k => (sp[k] || 0) > 0); return ks.length ? '(' + ks.map(k => (L[k] || k) + ' ' + Math.round(sp[k]).toLocaleString()).join('  ·  ') + ')' : ''; };
+  const _tSub = (recoveredAmount > 0 && Object.keys(_tSplit).some(k => k !== 'cash')) || _todayRecs.length >= 2 ? _spTxt(_tSplit) : '';
+  if(recoveredAmount > 0 && _todayRecs.length >= 2){   // کل والے ڈبے جیسا: ہر وصولی الگ لائن (وقت + حصے)، پھر کل وصولی
+    _todayRecs.sort((a, b) => String(a.at).localeCompare(String(b.at)));
+    const _tm = a => { try{ if(!a) return ''; const d = new Date(a); if(isNaN(d)) return ''; let h = d.getHours(), m = d.getMinutes(); const ap = h < 12 ? 'صبح' : (h < 16 ? 'دوپہر' : (h < 19 ? 'شام' : 'رات')); h = h % 12 || 12; return ap + ' ' + h + ':' + String(m).padStart(2, '0'); }catch(e){ return ''; } };
+    _todayRecs.forEach((x, i) => { const t = _tm(x.at); rows.push(['وصولی ' + (i + 1) + (t ? ' — ' + t : ''), x.amt, false, _spTxt(x.split)]); });
+  }
+  rows.push(['وصولی رقم', recoveredAmount, false, _tSub]);
   const finalLabel = 'قابلِ ادا رقم';
   const finalValue = payableAmount;
 
@@ -46674,8 +46687,8 @@ function getBillSummaryRows(invoice){
 function _billPayLayout(invoice, fscale, rowScale){
   const sumRowH = Math.round(30 * fscale * rowScale); // ↕ FM910FR353: قطار کنٹرول کا پورا اثر
   const titleH = Math.max(Math.round(26 * rowScale), Math.round(32 * fscale));
-  const n = getBillSummaryRows(invoice).rows.length + 1;
-  const boxH = titleH + n * sumRowH + 2;
+  const _sr = getBillSummaryRows(invoice), n = _sr.rows.length + 1;
+  const boxH = titleH + _payRowsH([..._sr.rows, [_sr.finalLabel, _sr.finalValue, true]], sumRowH) + 2;   // 💳 FM2211SU546: حصوں والی ضمنی لائن کی جگہ بھی
   const y = getYesterdayPayInfo(invoice);
   const yTitleH = Math.round(54 * fscale);
   const redH = 0; // 🔴 (28 اکتوبر، صدام بھائی): لال ڈبہ اب بائیں — «ادائیگی کی تفصیل» کے نیچے (todayShort) // 🔴 FM1610FR393: اوپر جملہ + نیچے لال ڈبہ // 🔴 FM1610FR391: آج تک کی کل کم وصولی — بڑا ڈبہ
