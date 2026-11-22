@@ -52,3 +52,4 @@
 - 19 Nov 2026: CLAUDE.md — every reply to the owner starts with «قبلہ عالی جاہ میں آپ کی نرم گوئی اور اچھے اخلاق کا مشکور ہوں، صورتحال یہ ہے…» (owner's order).
 - FM1911TH544 (19 Nov 2026, #292): challan / stock page top buttons compact (#saTopBtns + #smChCompact292: one line each, 34px, smaller font; labels «📊 آج کی تقسیم», «🧾 چالانوں کا حساب»).
 - 19 Nov 2026: CLAUDE.md — reply opening line changed to the owner's new sentence.
+- **FM2211SU545 (مالک کا حکم — «آج کی وصولی حصوں میں»، صدام):** گاہک کی «💰 وصولی» میں آج کی تاریخ پر بھی نقد / جاز کیش / ایزی پیسہ / بینک کے حصے ٹھیک محفوظ (جانچ: 500 × 4 = 2,000، ہر حصہ الگ)؛ FM میں دو تقسیم والے نظام ایک ساتھ تھے (FM1711TU536 کی قطاریں + FM1811WE543 کا «طریقہ / ➕») — 543 والا اب نہیں چلتا جب `collectSplitWrap` ہو؛ وصولی کارڈ (`rlHistBodyHtml` `_recDay`) میں آج / چنی تاریخ کی ہر وصولی الگ لائن — ریکوری لسٹ کے ساتھ گاہک کی «💰 وصولی» (`paymentsData`) بھی، حصوں سمیت۔ حساب نہیں بدلا۔
