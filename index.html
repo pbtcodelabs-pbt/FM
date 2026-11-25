@@ -10283,8 +10283,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM2511WE549'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = '🔴 بل کے دو ڈبے درست: دائیں «کل تک ٹوٹل کم وصولی» (پرانا بقایا)، بائیں «آج کی کم وصولی» = کل کا تازہ مال − آج کی وصولی؛ دونوں کا جوڑ = ٹوٹل';
+const APP_BUILD_VERSION = 'FM2611TH550'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '🆔 فروٹ منڈی کی اپنی FM ID — پیکج اب ہیلپ ڈیسک سے سیدھا لگتا ہے (کوئی کوڈ نہیں)، پرانا پیکج ویسا رہتا ہے اور کبھی کم نہیں ہوتا';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -57474,6 +57474,115 @@ window.openHelpDesk = openHelpDesk;
       rows = []; m0 = 'cash';
     }
   };
+})();
+</script>
+<script type="text/fm-boot">
+/* 🆔 FM2611TH550 (مالک کا حکم — «صدام کو سبزی منڈی جیسا پیکج نظام، ہیلپ ڈیسک سے پیکج اور دن باقی»): فروٹ منڈی کی اپنی «FM ID»
+   مالک (ایڈمن) کا فون: سرور (AIO worker /aioid، app FM) سے ایک ID (مثلاً FM48213) — لاگ اِن / «Subscription Required» پر نظر؛
+   ہر 6 گھنٹے ایپ کی موجودہ آخری تاریخ (`exp0`) بھی بھیجتا ہے — ہیلپ ڈیسک «✅ Activate package ← فروٹ منڈی» میں «N دن باقی» (15 سے کم پیلا، 7 سے کم لال)؛
+   ہیلپ ڈیسک سے پیکج → یہ فون خود (/entclaim app FM kind a) → نئی تاریخ **صرف اگر پرانی سے آگے** (پرانا پیکج کبھی کم / ختم نہیں) + 🎉۔
+   پرانا کوڈ / ڈویلپر پینل والا نظام ویسا ہی چلتا ہے۔ ملازم (منشی) کے فون پر نہیں۔ کلید: localStorage fmIdV1 (FM کی اپنی، fmPos_ نہیں) */
+(function(){
+  const W = 'https://aio-pos-verify.pbtcodelabs.workers.dev';
+  const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const K = "font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;";
+  function me(){ try{ return JSON.parse(localStorage.getItem('fmIdV1') || 'null') || {}; }catch(e){ return {}; } }
+  function save(m){ try{ localStorage.setItem('fmIdV1', JSON.stringify(m)); }catch(e){} }
+  const st = () => (typeof AppState !== 'undefined' && AppState.settings) || {};
+  const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const dmy = v => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v || '')); return m ? m[3] + '/' + m[2] + '/' + m[1] : String(v || ''); };
+  const isAdmin = () => typeof AppState !== 'undefined' && AppState.currentRole === 'admin';
+  const ownerPhone = () => { if(!isAdmin()) return ''; const p = String(st().businessPhone || '').replace(/[^0-9]/g, ''); return p.length >= 10 ? p : ''; };
+  function fpv(){ try{ const f = [String(navigator.userAgent || '').replace(/\d+/g, ''), Math.min(screen.width, screen.height), Math.max(screen.width, screen.height), navigator.hardwareConcurrency || 2, new Date().getTimezoneOffset(), navigator.language || '', navigator.platform || ''].join('|');
+    let h1 = 5381, h2 = 52711; for(let i = 0; i < f.length; i++){ const c = f.charCodeAt(i); h1 = (h1 * 33) ^ c; h2 = (h2 * 31 + c) | 0; } return (h1 >>> 0).toString(36) + (h2 >>> 0).toString(36); }catch(e){ return ''; } }
+  function devKey(mob){ const m = me(); if(m.dev) return m.dev; const f = fpv() || Math.random().toString(36).slice(2, 12); let h = 0; const k = f + '|' + String(mob).slice(-10); for(let i = 0; i < k.length; i++){ h = ((h << 5) - h + k.charCodeAt(i)) | 0; } m.dev = 'F' + f + (h >>> 0).toString(36); save(m); return m.dev; }
+  async function post(path, body){ const r = await fetch(W + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); return r.json(); }
+  /* ایپ کا اپنا موجودہ پیکج (پرانا کوڈ) — دن کے آخر تک */
+  function exp0(){ try{ const x = st().subscriptionExpiry; if(!x || st().isOnFreeTrial) return 0; const d = new Date(String(x).slice(0, 10) + 'T23:59:59'); return isNaN(d) ? 0 : d.getTime(); }catch(e){ return 0; } }
+  let regBusy = false;
+  async function reg(force){
+    const mob = ownerPhone(), m = me(); if(regBusy || mob.length < 10 || navigator.onLine === false) return;
+    if(m.id && !force && Date.now() - (m.r0 || 0) < 6 * 3600e3 && (m.e0 || 0) === exp0()) return;   /* ID ہو تو ہر 6 گھنٹے یا تاریخ بدلنے پر تازگی */
+    regBusy = true;
+    try{
+      const s = st(), name = (String(s.businessName || '').trim() || 'فروٹ منڈی') + (s.ownerName ? ' — ' + String(s.ownerName).trim() : '');
+      const e0 = exp0();
+      const r = await post('/aioid', { op: 'reg', app: 'FM', dev: devKey(mob), fp: fpv(), name: name.slice(0, 60), mobile: '0' + mob.slice(-10), gmail: '', exp0: e0 });
+      if(r && r.ok && r.id){ const m2 = me(); const neu = !m2.id; m2.id = r.id; m2.mob = mob; m2.at = m2.at || Date.now(); m2.r0 = Date.now(); m2.e0 = e0; save(m2); paint(); if(neu) check(true); }
+    }catch(e){}
+    regBusy = false;
+  }
+  window.fmIdCopy = function(btn){ const id = me().id || ''; const done = () => { if(btn){ const t = btn.textContent; btn.textContent = '✅'; setTimeout(() => { btn.textContent = t; }, 1500); } };
+    try{ navigator.clipboard.writeText(id).then(done, () => prompt('Copy', id)); }catch(e){ prompt('Copy', id); } };
+  window.fmIdRefresh = function(btn){ if(btn){ btn.disabled = true; btn.textContent = '⏳'; } last = 0; (me().id ? check(true) : reg(true)).then(() => { if(btn){ btn.disabled = false; btn.textContent = '🔄'; } paint(); }); };
+  function cardHTML(small){
+    const m = me(); if(!m.id) return '';
+    let stTxt = ''; try{ if(isSubscriptionActive()) stTxt = '✅ پیکج — ' + daysLeftInSubscription() + ' دن باقی (' + dmy(st().subscriptionExpiry) + ' تک)'; }catch(e){}
+    const bt = 'width:auto!important;min-width:0!important;margin:0!important;padding:3px 8px!important;border-radius:8px!important;font-size:13px!important;font-weight:800;line-height:1.4;flex:0 0 auto';
+    return '<div class="fmIdCard" dir="rtl" title="آپ کا پیکج اسی ID پر لگتا ہے — یہ فون خود چالو ہو جاتا ہے، کوئی کوڈ نہیں" style="display:block;width:fit-content;max-width:100%;margin:' + (small ? '0 auto 10px' : '8px auto 0') + ';background:#f0fdf4;border:1.5px solid #15803d;border-radius:10px;padding:4px 8px;text-align:center;' + K + '">'
+      + '<div style="display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:nowrap"><span style="font-size:13px;font-weight:800;color:#14532d;white-space:nowrap">🆔 FM ID</span>'
+      + '<b style="font:900 18px/1.3 Arial,sans-serif;letter-spacing:1px;direction:ltr;color:#15803d">' + E(m.id) + '</b>'
+      + '<button type="button" onclick="fmIdCopy(this)" style="' + bt + ';border:0;background:#15803d!important;color:#fff!important">📋</button>'
+      + '<button type="button" onclick="fmIdRefresh(this)" style="' + bt + ';border:1.5px solid #15803d;background:#fff!important;color:#15803d!important">🔄</button></div>'
+      + (stTxt ? '<div style="font-size:12px;color:#166534;font-weight:800">' + E(stTxt) + '</div>' : '') + '</div>';
+  }
+  function paint(){
+    try{
+      if(!ownerPhone()){ document.querySelectorAll('.fmIdCard').forEach(x => x.remove()); return; }
+      const h = cardHTML(false), lb = document.getElementById('loginLicenseInfoBox');
+      if(lb && h){ let c = document.getElementById('fmIdLogin'); if(!c){ c = document.createElement('div'); c.id = 'fmIdLogin'; } if(c.nextElementSibling !== lb) lb.before(c); if(c.innerHTML !== h) c.innerHTML = h; }
+      const g = document.getElementById('subGateStatus');
+      if(g && h){ let c = document.getElementById('fmIdGate'); if(!c){ c = document.createElement('div'); c.id = 'fmIdGate'; g.insertAdjacentElement('afterend', c); } const h2 = cardHTML(true); if(c.innerHTML !== h2) c.innerHTML = h2; }
+    }catch(e){}
+  }
+  function celebrate(expStr, days, life){
+    try{
+      const o0 = document.getElementById('fmIdCele'); if(o0) o0.remove();
+      const o = document.createElement('div'); o.id = 'fmIdCele';
+      o.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(5,46,22,.82);display:flex;align-items:center;justify-content:center;padding:18px';
+      o.innerHTML = '<div dir="rtl" style="background:#fff;border-radius:22px;max-width:380px;width:100%;padding:22px 18px 18px;text-align:center;box-shadow:0 14px 44px rgba(0,0,0,.5);' + K + '">'
+        + '<div style="font-size:54px;line-height:1.2">🎉</div><div style="font-size:24px;font-weight:900;color:#15803d;margin:4px 0 8px">مبارک ہو! آپ کا پیکج چالو ہو گیا</div>'
+        + '<div style="font-size:17px;color:#334155;line-height:2.1">' + (life ? '♾️ لائف ٹائم' : '⏳ <b style="font-family:Arial,sans-serif">' + days + '</b> دن — <b style="font-family:Arial,sans-serif">' + E(dmy(expStr)) + '</b> تک') + '<br>🆔 FM ID: <b style="font-family:Arial,sans-serif;direction:ltr">' + E(me().id) + '</b></div>'
+        + '<button type="button" onclick="document.getElementById(\'fmIdCele\').remove()" style="margin-top:14px;width:auto!important;padding:9px 34px!important;border:none!important;border-radius:999px!important;background:#15803d!important;color:#fff!important;font-size:18px;font-weight:800">جزاک اللہ ✅</button></div>';
+      document.body.appendChild(o);
+    }catch(e){}
+  }
+  let last = 0, busy = false;
+  async function check(force){
+    const m = me(), s = st(); if(!m.id || !m.dev || busy || !ownerPhone() || navigator.onLine === false) return;
+    if(!force && Date.now() - last < 10 * 60e3) return;
+    busy = true; last = Date.now();
+    try{
+      const r = await post('/entclaim', { app: 'FM', kind: 'a', aio: m.id, adev: m.dev, dev: m.dev });
+      if(r && r.ok && r.active){
+        const expStr = r.life ? '2099-12-31' : ymd(new Date(r.exp));
+        if(s.fmIdExp !== expStr){
+          const gate = document.getElementById('subscriptionGateScreen'), gateOn = gate && gate.style.display && gate.style.display !== 'none';
+          const cur = String(s.subscriptionExpiry || '').slice(0, 10);
+          /* 🟥 پرانا پیکج کبھی کم نہیں: نئی تاریخ صرف اگر موجودہ سے آگے ہو (یا ٹرائل / کوئی پیکج نہ ہو) */
+          if(!cur || s.isOnFreeTrial || expStr > cur){ if(s.fmPrevExp == null) s.fmPrevExp = (cur && cur !== s.fmIdExp && !s.isOnFreeTrial) ? cur : ''; s.subscriptionExpiry = expStr; s.subscriptionActivatedOn = ymd(new Date()); }   /* پرانا (کوڈ والا) آخری دن یاد — معطل ہونے پر وہی واپس */
+          s.isOnFreeTrial = false; s.fmIdExp = expStr; s.fmIdKey = r.key || ('a:' + m.id);
+          try{ persistAllData(); }catch(e){}
+          try{ setupLoginScreen(); }catch(e){} try{ renderSubscriptionBanner(); }catch(e){} try{ renderLoginLicenseInfo(); }catch(e){} try{ syncSubscriptionToCloud(); }catch(e){}
+          let days = 0; try{ days = daysLeftInSubscription(); }catch(e){}
+          celebrate(s.subscriptionExpiry, days, !!r.life);
+          m.e0 = -1; save(m); reg(true);   /* ہیلپ ڈیسک میں نئی تاریخ فوراً */
+          if(gateOn) setTimeout(() => { try{ location.reload(); }catch(e){} }, 6000);
+        }
+      } else if(r && r.ok === false && r.reason === 'revoked' && s.fmIdKey){   /* ہیلپ ڈیسک سے معطل — صرف وہی دن واپس جو FM ID سے لگے تھے؛ پرانا کوڈ والا پیکج ویسا */
+        if(String(s.subscriptionExpiry || '').slice(0, 10) === s.fmIdExp) s.subscriptionExpiry = s.fmPrevExp || ymd(new Date(Date.now() - 864e5));
+        s.fmIdExp = ''; s.fmIdKey = ''; delete s.fmPrevExp;
+        try{ persistAllData(); setupLoginScreen(); renderSubscriptionBanner(); }catch(e){}
+      }
+    }catch(e){}
+    busy = false; paint();
+  }
+  window.fmIdCheck = check; window.fmIdMe = me;
+  try{ const r0 = window.renderLoginLicenseInfo; if(typeof r0 === 'function') window.renderLoginLicenseInfo = renderLoginLicenseInfo = function(){ const x = r0.apply(this, arguments); paint(); return x; }; }catch(e){}
+  setTimeout(() => { reg(); check(true); paint(); }, 4000);
+  setInterval(() => { reg(); check(false); paint(); }, 30e3);
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ reg(); check(false); } });
+  window.addEventListener('online', () => { reg(); check(true); });
 })();
 </script>
 <script type="text/fm-boot">
