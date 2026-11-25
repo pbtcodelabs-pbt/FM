@@ -1,0 +1,27 @@
+# 📱 ایپ بلڈر (APP-BUILDER) کی بنی APK یہاں کی پبلک ریلیز میں — ہمیشہ ایک ہی لنک، بغیر لاگ اِن ڈاؤن لوڈ
+# بلڈر کی ریپو پرائیویٹ ہے (چابیاں)، اس لیے وہاں کا لنک لاگ اِن کے بغیر 404؛ APK فائل apk-drop/ میں آتی ہے → یہ ریلیز بنا کر فائل ہٹا دیتا ہے۔
+name: publish-apk
+on:
+  push:
+    branches: [main]
+    paths: ['apk-drop/**']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-apk
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "ریلیز"
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          set -e
+          F=$(ls apk-drop/*.apk 2>/dev/null | head -1); [ -n "$F" ] || { echo "کوئی APK نہیں"; exit 0; }
+          gh release delete fm-webview-apk -y --cleanup-tag || true
+          gh release create fm-webview-apk "$F" --title "📱 فروٹ منڈی — APK (ویب ویو)" --notes "کروم کا ڈیٹا / ہسٹری صاف کرنے سے ایپ کا ڈیٹا نہیں مٹتا۔ ڈاؤن لوڈ کر کے انسٹال کریں — اپڈیٹس ویب سائٹ سے خود آتی ہیں۔ $(basename $F)"
+          git config user.name "apk-bot"; git config user.email "actions@users.noreply.github.com"
+          git rm -rq apk-drop && git commit -qm "APK ریلیز میں — apk-drop صاف" && git push -q || true
