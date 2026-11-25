@@ -10283,8 +10283,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM2511WE548'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = '➕ بل پر اضافی چارجز (ریڑھی / رکشہ…) سبزیوں کی فہرست میں؛ ✏️ چالان کارڈ پر ایک ہی جگہ آمد، خرید، مزدوری، قیمت فروخت اور بیوپاری؛ 💪 مزدوری رپورٹ پر تاریخ کا فلٹر؛ 🔴 لال ڈبے میں جمع / تفریق / ضرب / تقسیم کا حساب';
+const APP_BUILD_VERSION = 'FM2511WE549'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '🔴 بل کے دو ڈبے درست: دائیں «کل تک ٹوٹل کم وصولی» (پرانا بقایا)، بائیں «آج کی کم وصولی» = کل کا تازہ مال − آج کی وصولی؛ دونوں کا جوڑ = ٹوٹل';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -37138,6 +37138,13 @@ function _custGoodsOn(c, d){ // اس دن کا ادھار مال (بل + نقد 
   (c.walletHistory || []).forEach(h => { if(h && h.type === 'cash_given' && h.date === d) g += Number(h.amount) || 0; });
   return g;
 }
+function _custRecOn(c, d){ // FM2511WE549 (#423): اس دن کی وصولی — بالکل custShortThrough والے rD کا ایک دن
+  let r = 0;
+  (invoicesData || []).forEach(inv => { if(!inv || inv.customer_id !== c.customer_id || inv.status === 'voided' || invDay(inv) !== d) return; const billCash = Math.max(0, (Number(inv.paid_now) || 0) - (Number(inv.wallet_applied) || 0)); r += Math.max(0, (Number(inv.cash_received_now) || 0) - billCash); });
+  (c.walletHistory || []).forEach(h => { if(h && h.type === 'receivable_collected' && h.date === d && !(h.via === 'wallet' && /^Auto-applied/.test(String(h.note || '')))) r += Number(h.amount) || 0; });
+  (recoveryListData || []).forEach(e => { if(e && e.customer_id === c.customer_id && e.status === 'pending' && recDay(e) === d) r += Number(e.amount) || 0; });
+  return r;
+}
 function custShortThrough(c, D, noGoodsDay){ // noGoodsDay: اس دن کا مال شامل نہیں (آج کا مال کل ادا ہوتا ہے) — صرف اس دن کی وصولی
   if(!c) return 0;
   const hist = c.walletHistory || [];
@@ -46712,7 +46719,7 @@ function _billPayLayout(invoice, fscale, rowScale){
   const noteH = (y && y.notes) ? Math.round(sumRowH * 2.5) : 0; // 📝 نوٹ کی جگہ (زیادہ سے زیادہ دو سطریں، موٹی لکھائی)
   const yH = y ? (yTitleH + _payRowsH(_yBoxRows(y), sumRowH) + noteH + 2 + redH) : 0;
   let todayShort = 0, todayD = '', prevShort = 0, prevD = '';
-  try{ const c = invoice.customer_id != null ? (customersData || []).find(x => x && x.customer_id === invoice.customer_id) : null; todayD = invDay(invoice); if(c && todayD){ todayShort = custShortThrough(c, todayD, todayD); try{ const _pd = new Date(todayD + 'T12:00:00'); _pd.setDate(_pd.getDate() - 1); prevD = toLocalDateStr(_pd); const _pd2 = new Date(_pd); _pd2.setDate(_pd2.getDate() - 1); const prev2 = toLocalDateStr(_pd2); prevShort = Math.max(0, Math.round((custShortThrough(c, prevD, prevD) - custShortThrough(c, prev2, prev2)) * 100) / 100); }catch(e){} } /* 1511SU (#254 مالک کی درستی): نارنجی = صرف کل کے دن کی کم وصولی (کل تک کی کل − پرسوں تک کی کل)، لال = آج تک ٹوٹل */ }catch(e){} // FM1511SU532 (#254): کل تک کی کم وصولی بھی
+  try{ const c = invoice.customer_id != null ? (customersData || []).find(x => x && x.customer_id === invoice.customer_id) : null; todayD = invDay(invoice); if(c && todayD){ todayShort = custShortThrough(c, todayD, todayD); try{ const _pd = new Date(todayD + 'T12:00:00'); _pd.setDate(_pd.getDate() - 1); prevD = toLocalDateStr(_pd); /* FM2511WE549 (مالک + صدام بھائی، ہیلپ ڈیسک #423): دائیں «کل <تاریخ> تک ٹوٹل کم وصولی» = پرانا بقایا؛ بائیں «آج <تاریخ> کی کم وصولی» = کل کا تازہ مال − آج کی وصولی (جو کم رہا)؛ دونوں کا جوڑ = آج تک کی ٹوٹل کم وصولی (`custShortThrough` ویسا) */ const _tot = todayShort; const _gY = _custGoodsOn(c, prevD), _rT = _custRecOn(c, todayD); const _adjT = (c.shortAdj || []).some(x => x && x.date === todayD && isFinite(Number(x.after))); const _new = _adjT ? 0 : Math.max(0, Math.min(_tot, Math.round(_gY - _rT))); todayShort = _new; prevShort = Math.max(0, Math.round(_tot - _new)); }catch(e){} } /* 1511SU (#254 مالک کی درستی): نارنجی = صرف کل کے دن کی کم وصولی (کل تک کی کل − پرسوں تک کی کل)، لال = آج تک ٹوٹل */ }catch(e){} // FM1511SU532 (#254): کل تک کی کم وصولی بھی
   const shortH = (todayShort > 0 || prevShort > 0) ? Math.round(30 * fscale) + Math.round(58 * fscale) + 14 : 0;
   return { sumRowH, titleH, boxH: boxH, boxOnlyH: boxH, shortH, todayShort, todayD, prevShort, prevD, yTitleH, redH, noteH, yH, y, leftH: boxH + shortH };
 }
@@ -46873,8 +46880,8 @@ function _drawShortCapsule(ctx, FP, L, R, top, lay, fscale){
   const _UD = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
   const lbl = (D, pre, post) => { const d = new Date(D + 'T12:00:00'); return pre + ' ' + d.getDate() + ' ' + _UM[d.getMonth()] + ' ' + _UD[d.getDay()] + ' ' + post; };
   const gap = Math.round(8 * fscale), mid = (L + R) / 2;
-  const b1 = _drawShortCapsuleOne(ctx, FP, mid + gap / 2, R, top, lay, fscale, lbl(lay.prevD, 'کل', 'کی کم وصولی'), lay.prevShort, ['#9a3412', '#fdba74', '#f97316', '#c2410c', '#431407']);
-  const b2 = _drawShortCapsuleOne(ctx, FP, L, mid - gap / 2, top, lay, fscale, lbl(lay.todayD, 'آج', 'تک ٹوٹل کم وصولی'), lay.todayShort);
+  const b1 = _drawShortCapsuleOne(ctx, FP, mid + gap / 2, R, top, lay, fscale, lbl(lay.prevD, 'کل', 'تک ٹوٹل کم وصولی'), lay.prevShort, ['#9a3412', '#fdba74', '#f97316', '#c2410c', '#431407']);
+  const b2 = _drawShortCapsuleOne(ctx, FP, L, mid - gap / 2, top, lay, fscale, lbl(lay.todayD, 'آج', 'کی کم وصولی'), lay.todayShort);
   return Math.max(b1, b2);
 }
 function _drawYesterdayBox(ctx, FP, L, R, top, lay, rc, bw, fscale){
