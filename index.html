@@ -28,6 +28,19 @@ function __appHostKind(h, p){
 })();
 </script>
 <script>
+/* 🚪 FM2611TH551 (مالک کا حکم): یہ فون دکان سے الگ ہو چکا ہو (fmDetached) تو دکان کے سرور (فائربیس / ورکر) سے کچھ نہ آئے، نہ جائے —
+   دوبارہ جوڑنا صرف مالک (ایڈمن) کے PIN سے (نیچے fmDetach بلاک) */
+(function(){
+  try{
+    if(!localStorage.getItem('fmDetached')) return;
+    window.__fmDetached = true;
+    var BAD = /firestore\.googleapis|identitytoolkit|securetoken|firebaseio|workers\.dev|googleapis\.com\/(drive|upload)/;
+    var f0 = window.fetch;
+    if(f0) window.fetch = function(u){ try{ var s = typeof u === 'string' ? u : (u && u.url) || ''; if(!window.__fmRejoinOk && BAD.test(s)) return Promise.reject(new TypeError('detached')); }catch(e){} return f0.apply(this, arguments); };
+  }catch(e){}
+})();
+</script>
+<script>
 /* 🗄️ FM2810WE471: بڑی الماری — مالک کی ہدایت: «سٹوریج فل ہونے کا کوئی مسئلہ پیدا نہ ہو»
    فون کا چھوٹا خانہ (localStorage) صرف تقریباً 5MB کا ہے؛ وہ بھرتے ہی بل نہیں بنتے تھے۔
    اب 20 ہزار حروف سے بڑی ہر چیز (بل، ادائیگیاں، سبزیاں، گاہک، بیوپاری…) فون کی بڑی الماری (IndexedDB — سینکڑوں MB) میں رہتی ہے،
@@ -10283,8 +10296,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM2611TH550'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = '🆔 فروٹ منڈی کی اپنی FM ID — پیکج اب ہیلپ ڈیسک سے سیدھا لگتا ہے (کوئی کوڈ نہیں)، پرانا پیکج ویسا رہتا ہے اور کبھی کم نہیں ہوتا';
+const APP_BUILD_VERSION = 'FM2611TH551'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '👆 ملازم بھی فنگر پرنٹ سے داخل (مالک کی طرح) — پن ساتھ چلتا ہے؛ 🚪 «یہ فون دکان سے الگ کریں» دو تصدیقوں + PIN کے بعد، فون سے دکان کا ڈیٹا صاف؛ 🔐 مالک کا جی میل لاگ اِن کی الگ حفاظتی نقل — بار بار نہ مانگے';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -57639,6 +57652,225 @@ function chEditAll(variantId, chalanNo){
     try{ if(typeof uAlert === 'function') uAlert('✅ محفوظ ہو گیا', `${nm} — چالان #${chalanNo}: آمد ${nq}${delta ? ' (' + (delta > 0 ? '+' : '') + delta + ')' : ''}، خرید ${rate}، قیمت فروخت ${isb}`, 'green'); }catch(e){}
   };
 }
+</script>
+<script type="text/fm-boot" id="fmDetachBio551">
+/* 🚪👆 FM2611TH551 (مالک کا حکم):
+   (1) «🚪 یہ فون دکان سے الگ کریں» — صرف لاگ اِن ← «مزید آپشنز» میں سب سے نیچے چھوٹا (مالک کے اپنے فون پر نہیں)؛ دو تصدیقیں + اسی فون (ملازم) کا PIN →
+       اس فون سے دکان کا سارا ڈیٹا صاف (fmPos_ سوائے settings، بڑی الماری، سیف والٹ، خودکار بیک اپ، تصویریں) + fmDetached → سرور بند، پورا صفحہ «الگ ہے»؛
+       دوبارہ جوڑنا صرف مالک (ایڈمن) کے PIN سے۔ دکان کا اصل ریکارڈ کلاؤڈ میں ویسا۔
+   (2) 👆 فنگر پرنٹ لاگ اِن ملازم کے لیے بھی (fm_bioStaff، اسی فون کا) — مالک والا fm_bioCred ویسا؛ پن سے اندر آنے پر ایک بار پوچھتا ہے
+       («ابھی نہیں» = 30 دن نہیں)؛ مینو «👆 فنگر پرنٹ لاگ اِن» سے آن / بند۔ پن ہمیشہ ساتھ چلتا ہے۔ */
+(function(){
+  const K = "font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;";
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const ask = (o) => (typeof uDialog === 'function') ? uDialog(o) : Promise.resolve(confirm(String(o.message || '').replace(/<[^>]+>/g, '\n')));
+  const owner = () => { try{ return JSON.parse(localStorage.getItem('fm_phoneOwner') || 'null'); }catch(e){ return null; } };
+  const digits = s => String(s || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g, '');
+  const delDb = n => new Promise(res => { try{ const r = indexedDB.deleteDatabase(n); r.onsuccess = r.onerror = () => res(); r.onblocked = () => setTimeout(res, 1500); setTimeout(res, 4000); }catch(e){ res(); } });
+  function wipeLocal(){
+    const P = (typeof STORAGE_PREFIX === 'string') ? STORAGE_PREFIX : 'fmPos_';
+    const ks = []; try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.indexOf(P) === 0 && k !== P + 'settings') ks.push(k); } }catch(e){}
+    ks.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+    ['fm_phoneOwner', 'fm_bioCred', 'fm_bioStaff', 'fm_bioFailed'].forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+  }
+  async function wipeDbs(){
+    try{ if(window.__bigStore && __bigStore.flush) await __bigStore.flush(); }catch(e){}
+    try{ await new Promise(res => { const rq = indexedDB.open('fmBigStore_v1', 1); rq.onupgradeneeded = () => { try{ rq.result.createObjectStore('kv'); }catch(e){} };
+      rq.onsuccess = () => { try{ const db = rq.result, t = db.transaction('kv', 'readwrite'), c = t.objectStore('kv').openCursor();
+        c.onsuccess = e => { const cur = e.target.result; if(cur){ const k = String(cur.key); if(k.indexOf('fmPos_') === 0 && k !== 'fmPos_settings') cur.delete(); cur.continue(); } };
+        t.oncomplete = () => { db.close(); res(); }; t.onerror = () => { db.close(); res(); }; }catch(e){ res(); } };
+      rq.onerror = () => res(); rq.onblocked = () => res(); setTimeout(res, 4000); }); }catch(e){}
+    await Promise.all(['fmSafeVaultDB', 'fmAutoBackup_v1', 'fmPos_images_v1'].map(delDb));
+  }
+
+  // ================= 🚪 فون الگ کرنا =================
+  window.fmStaffLeave = async function(){
+    const st = (AppState && AppState.settings) || {}, shop = st.businessName || 'دکان';
+    const o = owner();
+    if(o && o.role === 'admin'){ alert('یہ مالک (ایڈمن) کا فون ہے — اسے دکان سے الگ نہیں کیا جاتا۔'); return; }
+    const ok1 = await ask({ title: '🚪 دکان سے الگ کریں', message: 'یہ فون «' + esc(shop) + '» سے الگ ہو جائے گا۔<br>• <b>اس فون سے اس دکان کا سارا ڈیٹا صاف ہو جائے گا — آپ اس فون پر دکان کا کام نہیں کر سکیں گے</b><br>• دکان کا اصل ریکارڈ مالک کے پاس کلاؤڈ میں محفوظ رہے گا<br>• دوبارہ جوڑنا صرف مالک کے PIN سے', okText: 'آگے', cancelText: '✖ نہیں', tone: 'red' });
+    if(!ok1) return;
+    const ok2 = await ask({ title: '⚠️ پکا؟', message: '«' + esc(shop) + '» سے یہ فون واقعی الگ کرنا ہے؟', okText: '✅ ہاں، الگ کریں', cancelText: '✖ نہیں', tone: 'red' });
+    if(!ok2) return;
+    const cu = (AppState && AppState.currentUser) || {};
+    const me = (usersData || []).find(u => (o && String(u.user_id) === String(o.id)) || (cu.name && u.name === cu.name && u.role === 'salesman'));
+    const cand = me ? [me] : (usersData || []).filter(u => u.pin && (u.role === 'salesman' || u.role === 'admin'));
+    if(cand.length){
+      const w = prompt('🔑 آخری تصدیق: ' + (me ? '«' + me.name + '» کا' : 'اس فون کا') + ' PIN لکھیں — PIN صحیح ہو گا تو ہی یہ فون دکان سے الگ ہو گا');
+      if(w == null){ alert('✖ الگ نہیں کیا — فون اسی دکان میں ہے۔'); return; }
+      const h = await hashPin(digits(w));
+      if(!cand.some(u => u.pin === h)){ alert('❌ PIN غلط ہے — فون الگ نہیں کیا گیا، اسی دکان میں ہے۔'); return; }
+    }
+    window.__fmLeaving = true;
+    try{ const _si = Storage.prototype.setItem; Storage.prototype.setItem = function(k, v){ if(window.__fmLeaving && typeof k === 'string' && k.indexOf('fmPos_') === 0 && k !== 'fmPos_settings') return; return _si.apply(this, arguments); }; }catch(e){}
+    try{ localStorage.setItem('fmDetached', JSON.stringify({ at: Date.now(), shop, name: me ? me.name : '' })); }catch(e){}
+    wipeLocal(); await wipeDbs(); wipeLocal();
+    try{ sessionStorage.clear(); }catch(e){}
+    alert('✅ یہ فون «' + shop + '» سے الگ ہو گیا — اس فون سے دکان کا ڈیٹا صاف کر دیا گیا۔');
+    location.reload();
+  };
+  setInterval(() => { try{
+    const tg = document.getElementById('loginMoreOptions'); if(!tg) return;
+    let b = document.getElementById('fmLeaveBtn'); const o = owner();
+    if(window.__fmDetached || (o && o.role === 'admin')){ if(b) b.remove(); return; }
+    if(!b){ b = document.createElement('button'); b.id = 'fmLeaveBtn'; b.type = 'button'; b.onclick = () => fmStaffLeave();
+      b.textContent = '🚪 یہ فون اس دکان سے الگ کریں';
+      b.setAttribute('style', 'margin-top:34px !important; width:auto !important; display:block; margin-inline:auto !important; padding:3px 12px !important; background:transparent !important; color:#b91c1c !important; border:1px dashed #fca5a5 !important; border-radius:10px !important; font-weight:700 !important; font-size:12px !important; box-shadow:none !important;' + K); }
+    if(tg.lastElementChild !== b) tg.appendChild(b);
+  }catch(e){} }, 1500);
+
+  // الگ شدہ فون: پورا صفحہ بند — صرف مالک کا PIN دوبارہ جوڑتا ہے
+  function detachedScreen(){
+    if(!window.__fmDetached) return;
+    let d = {}; try{ d = JSON.parse(localStorage.getItem('fmDetached') || '{}') || {}; }catch(e){}
+    let o = document.getElementById('fmDetachedOv'); if(o) return;
+    o = document.createElement('div'); o.id = 'fmDetachedOv'; o.setAttribute('dir', 'rtl');
+    o.style.cssText = 'position:fixed;inset:0;z-index:2147483646;background:linear-gradient(160deg,#064e3b,#022c22);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;text-align:center;' + K;
+    o.innerHTML = '<div style="font-size:58px">🚪</div><div style="font-size:24px;font-weight:800;line-height:2">یہ فون دکان سے الگ ہے</div>'
+      + '<div style="font-size:16px;line-height:2;opacity:.92">' + (d.shop ? '«' + esc(d.shop) + '» ' : '') + 'کا ڈیٹا اس فون سے صاف کر دیا گیا ہے۔<br>دوبارہ جوڑنے کے لیے دکان کے مالک کا PIN چاہیے۔</div>'
+      + '<button type="button" id="fmRejoinBtn" style="border:none;border-radius:14px;padding:11px 22px;background:#fde68a;color:#78350f;font-weight:800;font-size:18px;cursor:pointer;' + K + '">🔑 مالک کے PIN سے دوبارہ جوڑیں</button>'
+      + '<div id="fmRejoinMsg" style="font-size:15px;min-height:24px"></div>';
+    document.body.appendChild(o);
+    o.querySelector('#fmRejoinBtn').onclick = rejoin;
+  }
+  async function rejoin(){
+    const m = document.getElementById('fmRejoinMsg');
+    const w = prompt('🔑 دکان کے مالک (ایڈمن) کا PIN لکھیں'); if(w == null) return;
+    m.textContent = '⏳ تصدیق ہو رہی ہے…';
+    window.__fmRejoinOk = true;
+    let ok = false;
+    try{ if(typeof fetchUsersFromCloud === 'function') await fetchUsersFromCloud(true); }catch(e){}
+    try{ const h = await hashPin(digits(w)); ok = (usersData || []).some(u => u.role === 'admin' && u.is_active !== false && u.pin === h); }catch(e){}
+    if(ok){ try{ localStorage.removeItem('fmDetached'); }catch(e){} m.textContent = '✅ دوبارہ جڑ گیا — ایپ کھل رہی ہے…'; setTimeout(() => location.reload(), 900); return; }
+    window.__fmRejoinOk = false;
+    try{ localStorage.removeItem('fmPos_users'); }catch(e){}
+    m.textContent = (usersData || []).some(u => u.role === 'admin') ? '❌ PIN غلط ہے' : '📶 انٹرنیٹ چالو کر کے دوبارہ کوشش کریں';
+  }
+  if(window.__fmDetached){
+    wipeLocal(); wipeDbs();
+    const go = () => { detachedScreen(); setInterval(detachedScreen, 2000); };
+    if(document.body) go(); else document.addEventListener('DOMContentLoaded', go);
+  }
+
+  // ================= 🔐 مالک کا جی میل لاگ اِن بار بار نہ مانگے =================
+  // FM2611TH551: لاگ اِن (fbAuth) کی ایک الگ نقل IndexedDB «fmAuthKeep» میں + براؤزر سے پکی جگہ؛ چھوٹا خانہ (settings) مٹ جائے اور نقل ہو تو خود واپس — جی میل دوبارہ نہیں
+  const AK = { db: 'fmAuthKeep', st: 'kv' };
+  const akOpen = () => new Promise((res, rej) => { const r = indexedDB.open(AK.db, 1); r.onupgradeneeded = () => { try{ r.result.createObjectStore(AK.st); }catch(e){} }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  async function akGet(){ try{ const db = await akOpen(); return await new Promise(res => { const q = db.transaction(AK.st).objectStore(AK.st).get('a'); q.onsuccess = () => { db.close(); res(q.result || null); }; q.onerror = () => { db.close(); res(null); }; }); }catch(e){ return null; } }
+  async function akPut(v){ try{ const db = await akOpen(); await new Promise(res => { const t = db.transaction(AK.st, 'readwrite'); t.objectStore(AK.st).put(v, 'a'); t.oncomplete = t.onerror = () => { db.close(); res(); }; }); }catch(e){} }
+  let _akLast = '';
+  async function akSync(){
+    if(window.__fmDetached || window.__fmLeaving) return;
+    const a = AppState && AppState.settings && AppState.settings.fbAuth;
+    if(typeof _isOwnerAuth === 'function' && _isOwnerAuth(a)){ if(a.refreshToken !== _akLast){ _akLast = a.refreshToken; await akPut({ owner: true, email: a.email || '', refreshToken: a.refreshToken, localId: a.localId, at: Date.now() }); } return; }
+    const k = await akGet();
+    if(k && k.owner && k.refreshToken){
+      AppState.settings.fbAuth = { owner: true, email: k.email || '', localId: k.localId, refreshToken: k.refreshToken, idToken: '', expiresAt: 0 };
+      try{ persistAllData(); }catch(e){}
+      const g = document.getElementById('ownerGate'); if(g){ g.remove(); location.reload(); }
+    }
+  }
+  try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(p => { if(!p) navigator.storage.persist(); }); }catch(e){}
+  if(!window.__fmDetached){ setTimeout(akSync, 600); setInterval(akSync, 60000); }
+  // پاس ورڈ بدلنے / اکاؤنٹ بند ہونے پر اصل کوڈ fbAuth مٹاتا ہے — تب نقل بھی ختم (پرانی چابی واپس نہ آئے)
+  const _efa = window.ensureFirebaseAuth;
+  if(typeof _efa === 'function') window.ensureFirebaseAuth = ensureFirebaseAuth = async function(){
+    const had = AppState.settings && AppState.settings.fbAuth; const r = await _efa.apply(this, arguments);
+    if(had && !AppState.settings.fbAuth){ try{ await akPut(null); }catch(e){} _akLast = ''; }
+    return r;
+  };
+
+  // ================= 👆 ملازم کا فنگر پرنٹ لاگ اِن =================
+  const SK = 'fm_bioStaff';
+  const staffCred = () => { try{ const c = JSON.parse(localStorage.getItem(SK) || 'null'); return c && c.id ? c : null; }catch(e){ return null; } };
+  const staffUser = () => { const c = staffCred(); if(!c) return null; return (usersData || []).find(u => u.role === 'salesman' && u.is_active !== false && (String(u.user_id) === String(c.userId))) || null; };
+  async function enableStaffBio(u){
+    if(!(await isBioSupported())){ alert('❌ اس فون میں فنگر پرنٹ کی سہولت نہیں ملی — فون کی سیٹنگ میں فنگر پرنٹ / اسکرین لاک لگا ہو اور ایپ Chrome میں کھلی ہو۔'); return false; }
+    try{
+      const cred = await navigator.credentials.create({ publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)), rp: { name: 'فروٹ منڈی' },
+        user: { id: new TextEncoder().encode('fm-staff-' + u.user_id), name: u.name, displayName: u.name },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },
+        timeout: 60000, attestation: 'none' } });
+      if(!cred) throw new Error('no');
+      localStorage.setItem(SK, JSON.stringify({ id: _bioB64(cred.rawId), userId: u.user_id, name: u.name, at: Date.now() }));
+      alert('✅ فنگر پرنٹ لاگ اِن آن — اب لاگ اِن صفحے پر اپنے نام کے ساتھ 👆 دبا کر سیدھا اندر آئیں (ایپ کھلتے ہی خود بھی پوچھے گی)۔');
+      staffIcon(); return true;
+    }catch(e){ alert('❌ فنگر پرنٹ آن نہیں ہو سکا' + (e && e.name === 'NotAllowedError' ? ' (منسوخ یا وقت ختم)' : '') + '۔'); return false; }
+  }
+  let _sb = false;
+  window.fmStaffBioLogin = async function(){
+    if(_sb) return; const c = staffCred(), u = staffUser();
+    if(!c || !u){ alert('فنگر پرنٹ لاگ اِن آن نہیں — PIN سے داخل ہوں۔'); return; }
+    _sb = true;
+    try{
+      const a = await navigator.credentials.get({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), allowCredentials: [{ type: 'public-key', id: _bioUnB64(c.id) }], userVerification: 'required', timeout: 60000 } });
+      if(a){ window.__bioVerified = true; _sb = false; finishLogin(u, true); return; }
+    }catch(e){
+      if(!(e && e.name === 'NotAllowedError')){ try{ localStorage.removeItem(SK); }catch(x){} staffIcon(); alert('❌ اس فون میں فنگر پرنٹ کی چابی نہیں ملی — PIN سے داخل ہوں، پھر مینو سے «👆 فنگر پرنٹ لاگ اِن» دوبارہ آن کریں۔'); }
+    }
+    _sb = false;
+  };
+  function staffIcon(){
+    const pi = document.getElementById('employeePinInput'), row = pi && pi.closest('.loginRoleRow'), t = row && row.querySelector('.loginRoleTitle');
+    if(!t) return;
+    let ic = document.getElementById('fmBioStaffIcon'); const u = staffUser();
+    if(!u){ if(ic) ic.style.display = 'none'; return; }
+    if(!ic){ t.style.display = 'flex'; t.style.alignItems = 'center'; t.style.justifyContent = 'space-between'; t.style.gap = '8px';
+      ic = document.createElement('span'); ic.id = 'fmBioStaffIcon'; ic.title = 'فنگر پرنٹ سے لاگ اِن'; ic.textContent = '👆';
+      ic.style.cssText = 'font-size:22px;cursor:pointer;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))'; ic.onclick = () => fmStaffBioLogin(); t.appendChild(ic); }
+    ic.style.display = 'inline-block';
+    const sel = document.getElementById('employeeLoginSelect');
+    if(sel && [...sel.options].some(op => String(op.value) === String(u.user_id)) && !sel.dataset.fmBioSet){ sel.value = String(u.user_id); sel.dataset.fmBioSet = '1'; }
+  }
+  setInterval(() => { try{ staffIcon(); }catch(e){} }, 1500);
+  let _autoTried = false;
+  setInterval(() => { try{
+    const ls = document.getElementById('loginScreen'); const vis = ls && getComputedStyle(ls).display !== 'none';
+    if(!vis){ _autoTried = false; return; }
+    if(_autoTried || window.__fmDetached || !staffUser()) return;
+    try{ if(sessionStorage.getItem('fmStaffBioAuto')) return; sessionStorage.setItem('fmStaffBioAuto', '1'); }catch(e){}
+    const o = owner(); if(o && o.role === 'admin') return; // مالک کے فون پر اپنا والا خودکار
+    _autoTried = true; fmStaffBioLogin();
+  }catch(e){} }, 1200);
+
+  // پن سے اندر آنے کے بعد ایک بار پوچھیں
+  const _fl = window.finishLogin;
+  if(typeof _fl === 'function') window.finishLogin = finishLogin = function(user){
+    const r = _fl.apply(this, arguments);
+    try{ if(r !== false && user && !window.__bioVerified) setTimeout(() => offer(user), 1800); }catch(e){}
+    return r;
+  };
+  async function offer(u){
+    if(window.__fmDetached || !(await isBioSupported())) return;
+    const key = 'fm_bioAsk_' + u.user_id; let t = 0; try{ t = +localStorage.getItem(key) || 0; }catch(e){}
+    if(Date.now() - t < 30 * 864e5) return;
+    if(u.role === 'admin' && getBioCred()) return;
+    if(u.role === 'salesman'){ const c = staffCred(); if(c && String(c.userId) === String(u.user_id)) return; }
+    if(u.role !== 'admin' && u.role !== 'salesman') return;
+    try{ localStorage.setItem(key, String(Date.now())); }catch(e){}
+    const ok = await ask({ title: '👆 فنگر پرنٹ سے داخلہ', message: '«' + esc(u.name) + '» — اگلی بار PIN لکھے بغیر صرف <b>فون کے فنگر پرنٹ</b> سے ایپ میں داخل ہوں؟<br><small>PIN بھی ساتھ چلتا رہے گا</small>', okText: '👆 ہاں، آن کریں', cancelText: 'ابھی نہیں', tone: 'green' });
+    if(!ok) return;
+    if(u.role === 'admin') await enableBioLogin(); else await enableStaffBio(u);
+  }
+  // مینو: «👆 فنگر پرنٹ لاگ اِن» آن / بند (مالک اور ملازم دونوں)
+  window.fmBioMenu = async function(){
+    try{ toggleSidebar(); }catch(e){}
+    const role = AppState.currentRole, u = (usersData || []).find(x => x.name === (AppState.currentUser || {}).name && x.role === role);
+    if(!u){ alert('دوبارہ لاگ اِن کریں'); return; }
+    const on = role === 'admin' ? !!getBioCred() : !!(staffCred() && String(staffCred().userId) === String(u.user_id));
+    if(on){ const ok = await ask({ title: '👆 فنگر پرنٹ لاگ اِن', message: 'اس فون پر فنگر پرنٹ لاگ اِن آن ہے۔ بند کریں؟ (PIN سے لاگ اِن چلتا رہے گا)', okText: 'بند کریں', cancelText: 'رہنے دیں', tone: 'amber' }); if(!ok) return;
+      try{ localStorage.removeItem(role === 'admin' ? 'fm_bioCred' : SK); }catch(e){} try{ renderBioSettingsCard(); }catch(e){} staffIcon(); alert('✅ بند ہو گیا'); return; }
+    if(role === 'admin') await enableBioLogin(); else if(role === 'salesman') await enableStaffBio(u);
+  };
+  setInterval(() => { try{
+    if(document.getElementById('fmBioNav')) return;
+    const p = [...document.querySelectorAll('.navItem')].find(n => /openMyPinChangeModal/.test(n.getAttribute('onclick') || '')); if(!p) return;
+    const n = document.createElement('div'); n.className = 'navItem'; n.id = 'fmBioNav'; n.setAttribute('data-screen', ''); n.setAttribute('onclick', 'fmBioMenu()');
+    n.style.cssText = 'background:#065f46; color:#fff;'; n.textContent = '👆 فنگر پرنٹ لاگ اِن'; p.after(n);
+  }catch(e){} }, 2000);
+})();
 </script>
 <script>
 /* 🗄️ FM2810WE471: بڑی الماری کا ڈیٹا یادداشت میں آنے کے بعد ایپ کا کوڈ چلتا ہے (ترتیب وہی)؛ اگر صفحہ پہلے ہی پورا کھل چکا ہو تو
