@@ -8412,6 +8412,7 @@ function __appHostKind(h, p){
           <h3 style="margin:0; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','PDMSMultan','Noto Nastaliq Urdu',serif;">💪 مزدوری فروخت رپورٹ</h3>
           <span onclick="closeLaborReport()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
         </div>
+<div id="laborDBar" style="margin:2px 0 6px;"></div>
         <canvas id="laborReportCanvas" style="width:100%; border-radius:10px; margin:6px 0; box-shadow:0 4px 14px rgba(0,0,0,.18); background:#fff;"></canvas>
         <div class="modalBtns" style="flex-wrap:wrap;">
           <button class="cancelBtn" onclick="closeLaborReport()">بند کریں</button>
@@ -10282,8 +10283,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM2411TU547'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = '📅 تاریخ کا پہیہ نیا ہلکا انداز: سفید، بیچ میں سبز پٹی، دن کے ساتھ ہفتے کا دن اور اوپر پوری تاریخ';
+const APP_BUILD_VERSION = 'FM2511WE548'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '➕ بل پر اضافی چارجز (ریڑھی / رکشہ…) سبزیوں کی فہرست میں؛ ✏️ چالان کارڈ پر ایک ہی جگہ آمد، خرید، مزدوری، قیمت فروخت اور بیوپاری؛ 💪 مزدوری رپورٹ پر تاریخ کا فلٹر؛ 🔴 لال ڈبے میں جمع / تفریق / ضرب / تقسیم کا حساب';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -21377,7 +21378,7 @@ function renderChalanRateModal(){
           <div style="flex:0 0 auto; background:#134e2c; color:#fff; border-radius:9px; padding:3px 8px; font-family:UrduAll,Arial,Helvetica,sans-serif; font-weight:900;">#${c.chalanNo}</div>
         </div>
         <div style="display:flex; align-items:center; gap:6px; margin-top:4px; font-size:11.5px; flex-wrap:wrap;">
-          <span style="font-weight:900; color:#1e3a8a; background:#eff6ff; border-radius:7px; padding:2px 7px; font-family:UrduAll,Arial,Helvetica,sans-serif;">آمد: ${c.origQty ?? c.qty}${c.munshiQty != null && c.munshiQty !== (c.origQty ?? c.qty) ? ` <s style="color:#94a3b8; font-size:10px;">${c.munshiQty}</s>` : ''}</span>${isChalanAdmin() ? `<button type="button" onclick="editChalanQty(${v.variant_id}, ${c.chalanNo})" title="آمد کی مقدار درست کریں" style="height:26px; padding:0 9px; border:none; border-radius:8px; background:#1d4ed8; color:#fff; font-weight:900; font-size:12px; cursor:pointer; box-shadow:0 2px 0 #1e3a8a; font-family:inherit;">✏️ ایڈٹ</button>` : ''}
+          <span style="font-weight:900; color:#1e3a8a; background:#eff6ff; border-radius:7px; padding:2px 7px; font-family:UrduAll,Arial,Helvetica,sans-serif;">آمد: ${c.origQty ?? c.qty}${c.munshiQty != null && c.munshiQty !== (c.origQty ?? c.qty) ? ` <s style="color:#94a3b8; font-size:10px;">${c.munshiQty}</s>` : ''}</span>${isChalanAdmin() ? `<button type="button" onclick="chEditAll(${v.variant_id}, ${c.chalanNo})" title="آمد، خرید، مزدوری، قیمت فروخت، بیوپاری — سب یہاں بدلیں" style="height:26px; padding:0 9px; border:none; border-radius:8px; background:#1d4ed8; color:#fff; font-weight:900; font-size:12px; cursor:pointer; box-shadow:0 2px 0 #1e3a8a; font-family:inherit;">✏️ ایڈٹ</button>` : ''}
           <span style="font-weight:900; color:#134e2c; background:#dcfce7; border-radius:7px; padding:2px 7px; font-family:UrduAll,Arial,Helvetica,sans-serif;">باقی: ${c.qty}</span>
           <span style="color:var(--muted); font-family:UrduAll,Arial,Helvetica,sans-serif; font-size:10.5px;">${chalanDateLabel(c.ts)}</span>${c.by ? `<span style="color:var(--muted); font-size:11px;">✍️ ${c.by}</span>` : ''}
         </div>
@@ -21577,6 +21578,13 @@ async function editChalanQty(variantId, chalanNo){
   const booked = c.bookedSupplierId != null && Number(c.rate) > 0;
   if(booked) rows.push({ label: 'بیوپاری کے کھاتے میں فرق', value: 'Rs. ' + Math.round(delta * Number(c.rate)).toLocaleString('en-US') });
   if(!(await uDialog({ title: '✅ تصدیق', message: `<b>${nm}</b> — چالان #${chalanNo} کی آمد بدلیں؟`, rows, okText: '✅ ہاں، درست کریں', cancelText: '✖ نہیں', tone: 'green' }))) return;
+  _chApplyQty(v, c, old, nq, delta);
+  try{ renderChalanRateModal(); }catch(e){}
+  try{ if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || ''); }catch(e){}
+  uAlert('✅ درست ہو گیا', `${nm} — چالان #${chalanNo} کی آمد ${old} سے ${nq} ہو گئی، سٹاک ${delta > 0 ? '+' : ''}${delta}۔`, 'green');
+}
+/* FM2511WE548 (ہیلپ ڈیسک #421): آمد بدلنے کا اصل حساب الگ فنکشن — «✏️ ایڈٹ» کی ایک ہی شیٹ (آمد + خرید + مزدوری + قیمت فروخت + بیوپاری) بھی یہی استعمال کرتی ہے؛ حساب وہی پرانا */
+function _chApplyQty(v, c, old, nq, delta){
   if(c.munshiQty == null) c.munshiQty = old; // منشی کی لکھی اصل مقدار یاد رہے
   c.origQty = nq;
   c.qty = Math.max(0, _chRound((Number(c.qty) || 0) + delta));
@@ -21601,9 +21609,6 @@ async function editChalanQty(variantId, chalanNo){
   try{ pauseCloudPolling(20000); }catch(e){}
   try{ pushProductsToCloud(); }catch(e){}
   if(suppliersChanged){ try{ pushSuppliersToCloud(); }catch(e){} }
-  try{ renderChalanRateModal(); }catch(e){}
-  try{ if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || ''); }catch(e){}
-  uAlert('✅ درست ہو گیا', `${nm} — چالان #${chalanNo} کی آمد ${old} سے ${nq} ہو گئی، سٹاک ${delta > 0 ? '+' : ''}${delta}۔`, 'green');
 }
 
 
@@ -29012,7 +29017,9 @@ function shareCustomerLedgerReport(){
    💪 صدام کی ہدایت (FM4SEPFR30): مزدوری فروخت رپورٹ — آج جتنے بھی بل بنے، ہر کسٹمر سے کتنی مزدوری وصول
    ہوئی، الگ الگ + کل ٹوٹل۔ اردو نستعلیق، RTL، A4 پرنٹ ایبل + واٹس ایپ شیئر ایبل (سٹاک رپورٹ جیسا) ---------- -->
    ===================================================================== */
+function fmLabGo(f, t){ window.LAB_RNG = { from: f, to: t || f }; renderLaborReportToCanvas(document.getElementById('laborReportCanvas')); }   /* FM2511WE548 (#422) */
 async function openLaborReport(){
+  window.LAB_RNG = { from: bizDateKey(), to: bizDateKey() };
   document.getElementById('laborReportModal')?.classList.add('show');
   await new Promise(r => setTimeout(r, 30));
   await renderLaborReportToCanvas(document.getElementById('laborReportCanvas'));
@@ -29033,8 +29040,10 @@ async function renderLaborReportToCanvas(canvasEl){
   }catch(e){}
 
   // ---------- آج کے تمام مکمل شدہ بل — ہر بل کی مزدوری = ہر آئٹم کی (تعداد × فی یونٹ مزدوری) کا مجموعہ ---------- -->
-  const todayStr = new Date().toDateString();
-  const todaysInvoices = invoicesData.filter(inv => new Date(inv.created_at).toDateString() === todayStr);
+  /* FM2511WE548 (صدام بھائی، ہیلپ ڈیسک #422): اوپر تاریخ کا فلٹر (fmDBar) — اصل آج، کوئی بھی دن / ہفتہ / تاریخ سے تاریخ */
+  const _lr = window.LAB_RNG || (window.LAB_RNG = { from: bizDateKey(), to: bizDateKey() });
+  try{ const _b = document.getElementById('laborDBar'); if(_b && typeof window.fmDBar === 'function') _b.innerHTML = window.fmDBar('fmLabGo', _lr, { week: true }); }catch(e){}
+  const todaysInvoices = invoicesData.filter(inv => inv && inv.status !== 'voided' && invDay(inv) >= _lr.from && invDay(inv) <= _lr.to);
 
   const byCustomer = {};
   let grandBillsWithLabor = 0;
@@ -29083,7 +29092,7 @@ async function renderLaborReportToCanvas(canvasEl){
 
   ctx.font = F(13, true);
   ctx.fillStyle = '#b45309';
-  const todayDisp = new Date().toLocaleDateString('en-GB');
+  const todayDisp = (window.LAB_RNG && window.LAB_RNG.from !== window.LAB_RNG.to) ? bizFmt(window.LAB_RNG.from) + ' تا ' + bizFmt(window.LAB_RNG.to) : bizFmt((window.LAB_RNG || {}).from || bizDateKey());
   ctx.fillText(`💪 مزدوری فروخت رپورٹ — ${todayDisp}`, pxWidth/2, y); y += 26;
 
   drawSolidLine(ctx, y, pxWidth); y += 14;
@@ -29106,7 +29115,7 @@ async function renderLaborReportToCanvas(canvasEl){
   if(rows.length === 0){
     ctx.font = F(13, false);
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('آج کسی بھی بل میں مزدوری شامل نہیں کی گئی', pxWidth/2, hy + rowH/2 + 5);
+    ctx.fillText('اس تاریخ میں کسی بھی بل میں مزدوری شامل نہیں کی گئی', pxWidth/2, hy + rowH/2 + 5);
     hy += rowH;
   } else {
     ctx.font = F(12, false);
@@ -37101,10 +37110,13 @@ async function editBillShort(){
   const D = invDay(inv); if(!D) return;
   const cur = custShortThrough(c, D, D);
   const f = n => 'Rs. ' + Math.round(n).toLocaleString('en-US');
-  const v = await uDialog({ title: '✏️ لال ڈبہ — <bdi dir="auto">' + escRlHtml(c.name) + '</bdi>', message: `ابھی «${bizFmt(D)} تک ٹوٹل کم وصولی»: <b dir="ltr" style="display:inline-block;padding:1px 10px;border-radius:999px;background:#fee2e2;color:#b91c1c;">${f(cur)}</b><br>صحیح رقم لکھیں (صفر لکھیں تو ڈبہ نہیں چھپے گا):<div style="font-size:13px;color:#64748b;line-height:1.7;">صرف لال ڈبہ اور ریکوری لسٹ کی کم وصولی بدلے گی — گاہک کا بقایا (کھاتہ) نہیں بدلے گا</div>`, input: 'text', okText: 'آگے ←', cancelText: '✖ واپس' });
+  const v = await uDialog({ title: '✏️ لال ڈبہ — <bdi dir="auto">' + escRlHtml(c.name) + '</bdi>', message: `ابھی «${bizFmt(D)} تک ٹوٹل کم وصولی»: <b dir="ltr" style="display:inline-block;padding:1px 10px;border-radius:999px;background:#fee2e2;color:#b91c1c;">${f(cur)}</b><br>صحیح رقم لکھیں — یا حساب، مثلاً <b dir="ltr">8813+5000</b> / <b dir="ltr">140104-2000</b> (صفر لکھیں تو ڈبہ نہیں چھپے گا):<div style="font-size:13px;color:#64748b;line-height:1.7;">صرف لال ڈبہ اور ریکوری لسٹ کی کم وصولی بدلے گی — گاہک کا بقایا (کھاتہ) نہیں بدلے گا</div>`, input: 'text', okText: 'آگے ←', cancelText: '✖ واپس' });
   if(v === null || v === false || String(v).trim() === '') return;
-  const target = Math.round(Number(String(v).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[,\s]/g, '')));
-  if(!isFinite(target) || target < 0){ await uAlert('غلط رقم', 'صحیح رقم لکھیں (صفر یا اس سے زیادہ)۔'); return; }
+  // ➕➖✖️➗ FM2511WE548 (صدام بھائی، ہیلپ ڈیسک #419 / #423): خانے میں حساب بھی — مثلاً 8813+5000، 140104-2000، 500*3، 9000/2 (× ÷ بھی)؛ جواب خود نکلتا ہے (پہلے صرف سیدھی رقم، ورنہ «غلط رقم»)
+  const _ex = String(v).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[,\s]/g, '').replace(/[×xX]/g, '*').replace(/÷/g, '/').replace(/[−–—]/g, '-').replace(/٫/g, '.');
+  let target = NaN;
+  if(/^[0-9.+\-*/()]+$/.test(_ex) && !/[+\-*/]{2,}[*/]/.test(_ex)){ try{ target = Math.round(Number(Function('"use strict";return (' + _ex + ')')())); }catch(e){ target = NaN; } }
+  if(!isFinite(target) || target < 0){ await uAlert('غلط رقم', 'صحیح رقم یا حساب لکھیں (مثلاً 8813+5000 یا 140104-2000) — جواب صفر یا اس سے زیادہ ہو۔'); return; }
   if(target === cur){ await uAlert('کوئی فرق نہیں', 'لال ڈبے میں پہلے ہی یہی رقم ہے۔'); return; }
   if(!(await uDialog({ title: '⚠️ تصدیق', tone: 'amber', okText: '✅ درست کریں', cancelText: '✖ واپس', rows: [
       { label: 'ابھی لال ڈبہ', value: f(cur) }, { label: 'صحیح رقم', value: f(target), big: true },
@@ -46941,6 +46953,13 @@ function _drawWishBox(ctx, F, L, R, top, W, rc){
 
 async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchKey = null){
   const canvas0 = document.getElementById('invoiceCanvas');
+  /* FM2511WE548 (صدام بھائی، ہیلپ ڈیسک #420): گاہک کے بل پر «➕ اضافی چارجز» (ریڑھی / رکشہ / بائیک / کوچ) کی رقم ٹوٹل میں تو شامل تھی مگر کہیں لکھی نظر نہیں آتی تھی —
+     اب سبزیوں والی فہرست کے آخر میں الگ قطار (نام = قسم، پیکنگ «اضافی»، 1 × رقم)۔ صرف تصویر کی نقل — اصل بل / ٹوٹل / حساب ویسے (آج کا بل = grand_total) */
+  try{
+    const _ex = Number(invoice && invoice.discount) || 0;
+    if(invoice && invoice.customer_id && _ex > 0 && Array.isArray(invoice.items) && !invoice.items.some(it => it && it._fmExtra))
+      invoice = Object.assign({}, invoice, { items: invoice.items.concat([{ name: invoice.discount_type || 'اضافی چارجز', label: 'اضافی', qty: 1, unitPrice: _ex, laborPerUnit: 0, variant_id: null, _fmExtra: true }]) });
+  }catch(e){}
   try{
     return await _renderInvoiceToCanvasInner(invoice, paperWidthMM, highlightMatchKey);
   }catch(err){
@@ -57449,6 +57468,61 @@ window.openHelpDesk = openHelpDesk;
     }
   };
 })();
+</script>
+<script type="text/fm-boot">
+/* FM2511WE548 (صدام بھائی، ہیلپ ڈیسک #421): چالان کارڈ کا «✏️ ایڈٹ» اب ایک ہی شیٹ — آمد، 💰 خرید، 💪 مزدوری، 🏷️ قیمت فروخت اور 🏭 بیوپاری
+   سب ایک جگہ بدلیں؛ «✅ محفوظ» = پہلے آمد (پرانا `_chApplyQty` حساب) پھر وہی پرانا `saveChalanAccounting` (کھاتہ / روزانہ خریداری) — کوئی نیا حساب نہیں */
+function chEditAll(variantId, chalanNo){
+  if(typeof isChalanAdmin === 'function' && !isChalanAdmin()){ alert('🔒 صرف ایڈمن چالان بدل سکتا ہے'); return; }
+  const fv = findProductAndVariant(variantId), p = fv.p, v = fv.v; if(!v) return;
+  const c = (v.chalans || []).find(x => x.chalanNo === chalanNo); if(!c) return;
+  const key = variantId + '_' + chalanNo, g = id => document.getElementById(id);
+  const old = Number(c.origQty != null ? c.origQty : c.qty) || 0, sold = Math.max(0, _chRound(old - (Number(c.qty) || 0)));
+  const val = (id, d) => { const e = g(id); return e ? e.value : (d == null ? '' : d); };
+  const srcBtn = g('chSrc_' + key);
+  const nm = (p ? p.name : '') + (v.label ? ' (' + v.label + ')' : '');
+  let m = g('chEditAllModal'); if(m) m.remove();
+  m = document.createElement('div'); m.className = 'modalOverlay show'; m.id = 'chEditAllModal'; m.style.zIndex = '10050';
+  const box = (id, label, color, value) => `<div style="flex:1; min-width:0; text-align:center;"><div style="font-size:12px; font-weight:900; color:${color}; line-height:1.5;">${label}</div><input type="text" inputmode="decimal" id="${id}" value="${value == null ? '' : value}" placeholder="0" onfocus="this.select()" style="width:100%; height:44px; box-sizing:border-box; border:2px solid ${color}; border-radius:10px; text-align:center; font-weight:900; font-size:17px; font-family:UrduAll,Arial,Helvetica,sans-serif;"></div>`;
+  m.innerHTML = `<div class="modalBox" dir="rtl" style="max-width:420px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
+    <h3 style="margin:0 0 4px;">✏️ چالان #${chalanNo} — سب کچھ بدلیں</h3>
+    <div style="font-weight:900; font-size:15px; margin-bottom:8px;">${nm}</div>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">${box('ceaQty', '📦 آمد', '#1d4ed8', old)}</div>
+    ${sold > 0 ? `<div style="font-size:12px; color:#92400e; background:#fffbeb; border-radius:8px; padding:4px 8px; margin:-4px 0 8px;">اس چالان سے <b style="font-family:Arial">${sold}</b> بک چکا ہے — آمد اس سے کم نہیں ہو سکتی</div>` : ''}
+    <div style="display:flex; gap:6px; margin-bottom:10px;">${box('ceaRate', '💰 خرید', '#b45309', val('chRate_' + key, c.rate))}${box('ceaLab', '💪 مزدوری', '#7c3aed', val('chLab_' + key, c.sellLabor))}${box('ceaIsb', '🏷️ قیمت فروخت', '#dc2626', val('chIsb_' + key, c.retail))}</div>
+    <div style="font-size:12px; font-weight:900; color:#0369a1; margin-bottom:3px;">🏭 بیوپاری / نقد</div>
+    <button type="button" id="ceaSrc" style="width:100%; height:44px; border:2px solid #0369a1; border-radius:10px; background:#fff; font:inherit; font-size:16px; font-weight:800; cursor:pointer;">${srcBtn ? srcBtn.textContent : 'چنیں ▾'}</button>
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <button type="button" id="ceaOk" style="flex:2; padding:13px; border:none; border-radius:12px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; font:inherit; font-size:17px; font-weight:900; cursor:pointer;">✅ محفوظ کریں</button>
+      <button type="button" id="ceaNo" style="flex:1; padding:13px; border:1.5px solid #64748b; border-radius:12px; background:#fff; font:inherit; font-size:16px; cursor:pointer;">✖ واپس</button>
+    </div></div>`;
+  document.body.appendChild(m);
+  const close = () => { clearInterval(t); m.remove(); };
+  /* بیوپاری: وہی پرانا چننے والا (کارڈ کے بٹن پر لکھتا ہے)؛ یہاں نام ساتھ ساتھ تازہ */
+  g('ceaSrc').onclick = () => { if(typeof openChSupplierPicker === 'function') openChSupplierPicker(key); };
+  const t = setInterval(() => { const b = g('chSrc_' + key), s = g('ceaSrc'); if(b && s && s.textContent !== b.textContent) s.textContent = b.textContent; if(!document.body.contains(m)) clearInterval(t); }, 300);
+  g('ceaNo').onclick = close;
+  m.onclick = e => { if(e.target === m) close(); };
+  g('ceaOk').onclick = () => {
+    const nq = _chRound(parseFloat(String(g('ceaQty').value).replace(',', '.')));
+    if(!(nq >= 0) || isNaN(nq)){ alert('⚠️ آمد میں صرف ہندسے لکھیں'); g('ceaQty').focus(); return; }
+    if(nq < sold){ alert('⚠️ اس چالان سے ' + sold + ' پہلے ہی بک چکا ہے — آمد ' + sold + ' سے کم نہیں ہو سکتی'); g('ceaQty').focus(); return; }
+    if(!g('chRate_' + key)){ alert('⚠️ کارڈ نہیں ملا — صفحہ دوبارہ کھولیں'); return; }
+    /* پہلے کارڈ کے خانوں میں نئی قیمتیں (saveChalanAccounting انہی سے پڑھتا ہے اور خالی / غلط پر روکتا ہے) */
+    g('chRate_' + key).value = g('ceaRate').value; g('chLab_' + key).value = g('ceaLab').value; g('chIsb_' + key).value = g('ceaIsb').value;
+    const rate = parseFloat(String(g('ceaRate').value).replace(',', '.')), isb = parseFloat(String(g('ceaIsb').value).replace(',', '.'));
+    const src = (g('chSrc_' + key) || {}).dataset ? g('chSrc_' + key).dataset.value : '';
+    if(!(rate > 0)){ alert('⚠️ خرید قیمت لکھیں'); g('ceaRate').focus(); return; }
+    if(!(isb > 0)){ alert('⚠️ قیمت فروخت لکھیں'); g('ceaIsb').focus(); return; }
+    if(String(g('ceaLab').value).trim() === ''){ alert('⚠️ مزدوری لکھیں (نہ ہو تو 0 لکھیں)'); g('ceaLab').focus(); return; }
+    if(!src){ alert('⚠️ بیوپاری یا نقد چنیں'); return; }
+    const delta = _chRound(nq - old);
+    if(delta !== 0) _chApplyQty(v, c, old, nq, delta);
+    close();
+    saveChalanAccounting(variantId, chalanNo);
+    try{ if(typeof uAlert === 'function') uAlert('✅ محفوظ ہو گیا', `${nm} — چالان #${chalanNo}: آمد ${nq}${delta ? ' (' + (delta > 0 ? '+' : '') + delta + ')' : ''}، خرید ${rate}، قیمت فروخت ${isb}`, 'green'); }catch(e){}
+  };
+}
 </script>
 <script>
 /* 🗄️ FM2810WE471: بڑی الماری کا ڈیٹا یادداشت میں آنے کے بعد ایپ کا کوڈ چلتا ہے (ترتیب وہی)؛ اگر صفحہ پہلے ہی پورا کھل چکا ہو تو
