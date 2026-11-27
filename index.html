@@ -10298,8 +10298,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM2611TH554'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = '⏻ لاگ آؤٹ اب گول سرخ پاور بٹن سے — پہلے «Logout / Yes / Cancel» پوچھتا ہے (سب ایپس میں ایک جیسا)';
+const APP_BUILD_VERSION = 'FM2811SA555'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '🧮 چالان ✏️ ایڈٹ: نگ × فی نگ خرید = ٹوٹل (اُلٹا بھی)، قیمت فروخت خود بھرتی، 🗑️ حذف • 🛒 وصولی پر کل کا مال اب منشی کے فون پر بھی';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -15073,6 +15073,10 @@ function goTo(screenName, _isHistoryNav){
     // (صرف 3 ڈیفالٹ نظر آتے) — کیونکہ یہ اسکرین کسٹمر کلاؤڈ سے منگواتی ہی نہیں تھی۔ اب یہاں بھی فوراً + ہر 12 سیکنڈ ----------
     fetchCustomersFromCloud(false).then(ok => { if(ok) renderRecoveryListScreen(); });
     startCustomersPolling();
+    // ---------- 🛒 FM2811SA555 (ہیلپ ڈیسک #444، صدام فروٹ منڈی): «کل کی خریداری / کل کا مال» بلوں سے بنتا ہے، اور وصولی والے
+    // (منشی) کے فون پر یہ سکرین بل کلاؤڈ سے منگواتی ہی نہیں تھی (بل صرف «بل ہسٹری» کھولنے پر آتے) — اس لیے صرف اس فون پر نظر آتا جس پر بل بنے۔
+    // اب سکرین کھلتے ہی بل بھی خاموشی سے منگوا کر کارڈ دوبارہ بنتے ہیں ----------
+    try{ rlRefreshInvoices(true); }catch(e){}
   }
   if(screenName === 'customers' || screenName === 'suppliers'){
     fetchCustomersFromCloud(false);
@@ -21497,7 +21501,7 @@ function saveChalanAccounting(variantId, chalanNo){
   if(!c) return;
   const key = `${variantId}_${chalanNo}`;
   const num = (id) => _chRound(parseFloat(String(document.getElementById(id)?.value || '').replace(',', '.')));
-  const rate = num('chRate_' + key), labor = num('chLab_' + key), isb = num('chIsb_' + key), rwp = isb;
+  const rate = Math.round((parseFloat(String(document.getElementById('chRate_' + key)?.value || '').replace(',', '.')) || 0) * 10000) / 10000, labor = num('chLab_' + key), isb = num('chIsb_' + key), rwp = isb; // 🧮 FM2811SA555 (#443): خرید ریٹ 4 اعشاریہ تک — ٹوٹل ÷ نگ سے نکلا ریٹ ضرب دینے پر پھر وہی ٹوٹل دے
   const src = document.getElementById('chSrc_' + key)?.dataset.value || '';
   if(!(rate > 0)){ alert('⚠️ خرید قیمت لکھیں'); document.getElementById('chRate_' + key)?.focus(); return; }
   if(!(isb > 0)){ alert('⚠️ قیمت فروخت لکھیں'); document.getElementById('chIsb_' + key)?.focus(); return; }
@@ -43216,11 +43220,32 @@ async function _fetchRecoveryListRaw(silent){
   }
 }
 
+// ---------- 🛒 FM2811SA555 (#444): وصولی سکرین پر بل کلاؤڈ سے تازہ کریں؛ بل بدلے ہوں تو کارڈ دوبارہ بنیں (صرف دیکھنے والا حصہ — کوئی حساب نہیں بدلتا) ----------
+let _rlInvBusy = false, _rlInvSig = '';
+async function rlRefreshInvoices(force){
+  if(_rlInvBusy) return false;
+  _rlInvBusy = true;
+  try{
+    const ok = await fetchInvoicesFromCloud(true); // کچھ ٹکڑے نہ بھی آئیں تو جو آ گئے وہ دکھا دیں
+    const sig = (invoicesData || []).length + '|' + (invoicesData || []).reduce((a, i) => a + (Number(i && i.invoice_id) || 0), 0);
+    const changed = sig !== _rlInvSig; _rlInvSig = sig;
+    if((changed || force) && typeof currentScreenName !== 'undefined' && currentScreenName === 'recoveryList'){
+      const ae = document.activeElement; // کوئی رقم لکھی جا رہی ہو تو اسے نہ چھیڑیں — بعد کی باری میں
+      const typing = ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && document.getElementById('rlEmployeeList') && document.getElementById('rlEmployeeList').contains(ae);
+      if(!typing && document.getElementById('rlEmployeeList') && !document.body.classList.contains('role-admin')) renderRecoveryListScreen();
+    }
+    return !!ok;
+  }catch(e){ return false; }
+  finally{ _rlInvBusy = false; }
+}
+let _rlPollTick = 0;
 function startRecoveryListPolling(){
   stopRecoveryListPolling();
+  _rlPollTick = 0;
   recoveryListPollTimer = setInterval(() => {
     if(document.hidden) return;
     fetchRecoveryListFromCloud(false);
+    if(++_rlPollTick % 5 === 0){ try{ rlRefreshInvoices(false); }catch(e){} } // 🛒 FM2811SA555: ہر ~60 سیکنڈ بعد بل بھی
   }, 12000);
 }
 function stopRecoveryListPolling(){
@@ -57619,15 +57644,19 @@ function chEditAll(variantId, chalanNo){
   m.innerHTML = `<div class="modalBox" dir="rtl" style="max-width:420px; font-family:'JameelNooriNastaleeqKasheeda','JameelNooriNastaleeq','Noto Nastaliq Urdu',serif;">
     <h3 style="margin:0 0 4px;">✏️ چالان #${chalanNo} — سب کچھ بدلیں</h3>
     <div style="font-weight:900; font-size:15px; margin-bottom:8px;">${nm}</div>
-    <div style="display:flex; gap:8px; margin-bottom:8px;">${box('ceaQty', '📦 آمد', '#1d4ed8', old)}</div>
+    <div style="margin-bottom:8px; text-align:center; background:#eff6ff; border:2px solid #1d4ed8; border-radius:12px; padding:6px 8px;"><div style="font-size:14px; font-weight:900; color:#1d4ed8; line-height:1.6;">📦 موصول ہوئے نگ (آمد)</div><input type="text" inputmode="decimal" id="ceaQty" value="${old}" placeholder="0" onfocus="this.select()" style="width:65%; height:54px; box-sizing:border-box; border:2px solid #1d4ed8; border-radius:10px; text-align:center; font-weight:900; font-size:32px; color:#1e3a8a; background:#fff; font-family:UrduAll,Arial,Helvetica,sans-serif;"></div>
     ${sold > 0 ? `<div style="font-size:12px; color:#92400e; background:#fffbeb; border-radius:8px; padding:4px 8px; margin:-4px 0 8px;">اس چالان سے <b style="font-family:Arial">${sold}</b> بک چکا ہے — آمد اس سے کم نہیں ہو سکتی</div>` : ''}
-    <div style="display:flex; gap:6px; margin-bottom:10px;">${box('ceaRate', '💰 خرید', '#b45309', val('chRate_' + key, c.rate))}${box('ceaLab', '💪 مزدوری', '#7c3aed', val('chLab_' + key, c.sellLabor))}${box('ceaIsb', '🏷️ قیمت فروخت', '#dc2626', val('chIsb_' + key, c.retail))}</div>
+    <div style="display:flex; gap:6px; margin-bottom:8px;">${box('ceaRate', '💰 فی نگ خرید', '#b45309', val('chRate_' + key, c.rate))}${box('ceaTot', '🧮 ٹوٹل خرید رقم', '#0f766e', (Number(val('chRate_' + key, c.rate)) > 0 && old > 0) ? Math.round(old * Number(val('chRate_' + key, c.rate))) : '')}</div>
+    <div style="display:flex; gap:6px; margin-bottom:4px;">${box('ceaLab', '💪 فی نگ مزدوری', '#7c3aed', val('chLab_' + key, c.sellLabor))}${box('ceaIsb', '🏷️ فی نگ قیمت فروخت', '#dc2626', val('chIsb_' + key, c.retail))}</div>
+    <div id="ceaFinal" style="font-size:12.5px; font-weight:900; color:#991b1b; text-align:center; min-height:20px;"></div>
+    <div style="font-size:11.5px; color:#475569; background:#f8fafc; border-radius:8px; padding:4px 8px; margin-bottom:10px; line-height:1.8;">🔗 نگ × فی نگ خرید = ٹوٹل (اُلٹا بھی: ٹوٹل لکھیں تو فی نگ خود نکلے گا)۔ فی نگ خرید یا مزدوری بدلیں تو قیمت فروخت = خرید + مزدوری خود بھر جاتی ہے، ہاتھ سے بدل سکتے ہیں۔ دھیان: بل پر مزدوری، قیمت فروخت کے اوپر الگ بھی جڑتی ہے۔</div>
     <div style="font-size:12px; font-weight:900; color:#0369a1; margin-bottom:3px;">🏭 بیوپاری / نقد</div>
     <button type="button" id="ceaSrc" style="width:100%; height:44px; border:2px solid #0369a1; border-radius:10px; background:#fff; font:inherit; font-size:16px; font-weight:800; cursor:pointer;">${srcBtn ? srcBtn.textContent : 'چنیں ▾'}</button>
     <div style="display:flex; gap:8px; margin-top:14px;">
       <button type="button" id="ceaOk" style="flex:2; padding:13px; border:none; border-radius:12px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; font:inherit; font-size:17px; font-weight:900; cursor:pointer;">✅ محفوظ کریں</button>
       <button type="button" id="ceaNo" style="flex:1; padding:13px; border:1.5px solid #64748b; border-radius:12px; background:#fff; font:inherit; font-size:16px; cursor:pointer;">✖ واپس</button>
-    </div></div>`;
+    </div>
+    <button type="button" id="ceaDel" style="width:100%; margin-top:10px; padding:9px; border:1.5px dashed #dc2626; border-radius:12px; background:#fef2f2; color:#b91c1c; font:inherit; font-size:14px; font-weight:800; cursor:pointer;">🗑️ یہ چالان حذف کریں</button></div>`;
   document.body.appendChild(m);
   const close = () => { clearInterval(t); m.remove(); };
   /* بیوپاری: وہی پرانا چننے والا (کارڈ کے بٹن پر لکھتا ہے)؛ یہاں نام ساتھ ساتھ تازہ */
@@ -57635,6 +57664,52 @@ function chEditAll(variantId, chalanNo){
   const t = setInterval(() => { const b = g('chSrc_' + key), s = g('ceaSrc'); if(b && s && s.textContent !== b.textContent) s.textContent = b.textContent; if(!document.body.contains(m)) clearInterval(t); }, 300);
   g('ceaNo').onclick = close;
   m.onclick = e => { if(e.target === m) close(); };
+  /* 🧮 FM2811SA555 (ہیلپ ڈیسک #443، صدام فروٹ منڈی): نگ × فی نگ خرید = ٹوٹل (اُلٹا بھی)، قیمت فروخت = فی نگ خرید + مزدوری (خود بھرتی، ہاتھ سے بدل سکتے ہیں) */
+  const _n = id => { const x = parseFloat(String(g(id).value).replace(',', '.')); return isFinite(x) ? x : NaN; };
+  const _r2 = x => Math.round(x * 100) / 100, _r4 = x => Math.round(x * 10000) / 10000;
+  const _set = (id, x) => { g(id).value = (x === '' || !isFinite(x)) ? '' : String(x); };
+  const _final = () => { const i = _n('ceaIsb'), l = _n('ceaLab'); g('ceaFinal').textContent = i > 0 ? 'بل پر فی نگ کل (قیمت فروخت + مزدوری): ' + _r2(i + (l > 0 ? l : 0)) : ''; };
+  const _autoSale = () => { const r = _n('ceaRate'), l = _n('ceaLab'); if(r > 0) _set('ceaIsb', _r2(r + (l > 0 ? l : 0))); };
+  const _fromRate = () => { const q = _n('ceaQty'), r = _n('ceaRate'); if(q > 0 && r > 0) _set('ceaTot', Math.round(q * r)); else _set('ceaTot', ''); _autoSale(); _final(); };
+  const _fromTot = () => { const q = _n('ceaQty'), t = _n('ceaTot'); if(q > 0 && t > 0) _set('ceaRate', _r4(t / q)); else if(!(t > 0)) _set('ceaRate', ''); _autoSale(); _final(); };
+  const _fromQty = () => { const q = _n('ceaQty'), r = _n('ceaRate'); if(q > 0 && r > 0) _set('ceaTot', Math.round(q * r)); else _set('ceaTot', ''); };
+  const _fromLab = () => { _autoSale(); _final(); };
+  g('ceaRate').addEventListener('input', _fromRate);
+  g('ceaTot').addEventListener('input', _fromTot);
+  g('ceaQty').addEventListener('input', _fromQty);
+  g('ceaLab').addEventListener('input', _fromLab);
+  g('ceaIsb').addEventListener('input', _final);
+  _final();
+  /* 🗑️ چالان حذف — صرف ایڈمن؛ صرف تب جب اس سے کچھ بکا نہ ہو، آرڈر میں بک نہ ہو، اور کسی خریداری/آرڈر ریکارڈ سے جڑا نہ ہو */
+  g('ceaDel').onclick = () => {
+    const cur = Number(c.qty) || 0;
+    const reserved = Number((typeof getChalanReservedMap === 'function' ? (getChalanReservedMap(variantId) || {}) : {})[String(chalanNo)]) || 0;
+    if(sold > 0){ alert('⚠️ اس چالان سے ' + sold + ' نگ بک چکا ہے — حذف نہیں ہو سکتا۔ پہلے اسی کے بل درست کریں۔'); return; }
+    if(reserved > 0){ alert('⚠️ اس چالان میں ' + reserved + ' نگ آرڈرز کے لیے بک ہے — حذف نہیں ہو سکتا۔'); return; }
+    if(c.poRef != null){ alert('⚠️ یہ چالان خریداری/آرڈر کے ریکارڈ سے جڑا ہے — یہاں سے حذف نہیں ہو سکتا۔'); return; }
+    const amt = c.bookedSupplierId != null ? Math.round(Number(c.bookedAmount) || 0) : 0;
+    if(!confirm('🗑️ ' + nm + ' — چالان #' + chalanNo + '\n\nآمد: ' + old + ' نگ\nسٹاک سے ' + cur + ' نگ کم ہو گا' + (amt > 0 ? '\nبیوپاری کے کھاتے سے Rs. ' + amt.toLocaleString() + ' ہٹے گا' : '') + '\n\nواقعی حذف کریں؟')) return;
+    if(!confirm('⚠️ آخری تصدیق: چالان #' + chalanNo + ' مکمل ہٹ جائے گا۔ پکا حذف کریں؟')) return;
+    close();
+    let supChanged = false;
+    if(c.bookedSupplierId != null){
+      const so = suppliersData.find(s => s.supplier_id === c.bookedSupplierId);
+      if(so){ so.total_payable = (Number(so.total_payable) || 0) - (Number(c.bookedAmount) || 0); normalizeSupplierBalance(so); supChanged = true; }
+    }
+    try{ _chRemoveFromDailyRecords(chalanKeyOf(v, c)); supChanged = true; saveToStorage('cashPurchases', cashPurchasesData); }catch(e){}
+    v.stock = Math.max(0, _chRound((Number(v.stock) || 0) - cur));
+    try{ const L = loadFromStorage('chDeletedLog', []) || []; L.unshift({ at: Date.now(), by: (AppState.currentUser && AppState.currentUser.name) || '', name: nm, variant_id: variantId, chalan: JSON.parse(JSON.stringify(c)) }); saveToStorage('chDeletedLog', L.slice(0, 50)); }catch(e){}
+    try{ fmDelMark('ch', [_chalanKey(c)]); }catch(e){}
+    v.chalans = (v.chalans || []).filter(x => x !== c);
+    persistAllData();
+    AppState.settings.productsPendingSync = true;
+    try{ pauseCloudPolling(20000); }catch(e){}
+    try{ pushProductsToCloud(); }catch(e){}
+    if(supChanged){ try{ pushSuppliersToCloud(); }catch(e){} }
+    try{ renderChalanRateModal(); refreshChalanRateFab(); }catch(e){}
+    try{ if(document.getElementById('stockAdjustmentListWrap')) renderStockAdjustmentScreen(document.getElementById('stockAdjSearchInput')?.value || ''); }catch(e){}
+    try{ if(typeof uAlert === 'function') uAlert('🗑️ حذف ہو گیا', nm + ' — چالان #' + chalanNo + ' ہٹا دیا گیا۔', 'green'); }catch(e){}
+  };
   g('ceaOk').onclick = () => {
     const nq = _chRound(parseFloat(String(g('ceaQty').value).replace(',', '.')));
     if(!(nq >= 0) || isNaN(nq)){ alert('⚠️ آمد میں صرف ہندسے لکھیں'); g('ceaQty').focus(); return; }
