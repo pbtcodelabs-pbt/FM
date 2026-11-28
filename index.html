@@ -10298,8 +10298,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM2811SA555'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = '🧮 چالان ✏️ ایڈٹ: نگ × فی نگ خرید = ٹوٹل (اُلٹا بھی)، قیمت فروخت خود بھرتی، 🗑️ حذف • 🛒 وصولی پر کل کا مال اب منشی کے فون پر بھی';
+const APP_BUILD_VERSION = 'FM2811SA556'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '💪 چالان ✏️: مزدوری صرف ایک بار — قیمت فروخت = فی نگ خرید، بل پر مزدوری الگ';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -57649,7 +57649,7 @@ function chEditAll(variantId, chalanNo){
     <div style="display:flex; gap:6px; margin-bottom:8px;">${box('ceaRate', '💰 فی نگ خرید', '#b45309', val('chRate_' + key, c.rate))}${box('ceaTot', '🧮 ٹوٹل خرید رقم', '#0f766e', (Number(val('chRate_' + key, c.rate)) > 0 && old > 0) ? Math.round(old * Number(val('chRate_' + key, c.rate))) : '')}</div>
     <div style="display:flex; gap:6px; margin-bottom:4px;">${box('ceaLab', '💪 فی نگ مزدوری', '#7c3aed', val('chLab_' + key, c.sellLabor))}${box('ceaIsb', '🏷️ فی نگ قیمت فروخت', '#dc2626', val('chIsb_' + key, c.retail))}</div>
     <div id="ceaFinal" style="font-size:12.5px; font-weight:900; color:#991b1b; text-align:center; min-height:20px;"></div>
-    <div style="font-size:11.5px; color:#475569; background:#f8fafc; border-radius:8px; padding:4px 8px; margin-bottom:10px; line-height:1.8;">🔗 نگ × فی نگ خرید = ٹوٹل (اُلٹا بھی: ٹوٹل لکھیں تو فی نگ خود نکلے گا)۔ فی نگ خرید یا مزدوری بدلیں تو قیمت فروخت = خرید + مزدوری خود بھر جاتی ہے، ہاتھ سے بدل سکتے ہیں۔ دھیان: بل پر مزدوری، قیمت فروخت کے اوپر الگ بھی جڑتی ہے۔</div>
+    <div style="font-size:11.5px; color:#475569; background:#f8fafc; border-radius:8px; padding:4px 8px; margin-bottom:10px; line-height:1.8;">🔗 نگ × فی نگ خرید = ٹوٹل (اُلٹا بھی: ٹوٹل لکھیں تو فی نگ خود نکلے گا)۔ فی نگ خرید بدلیں تو قیمت فروخت خود بھر جاتی ہے، ہاتھ سے بدل سکتے ہیں۔ بل پر مزدوری ایک بار الگ جڑتی ہے۔</div>
     <div style="font-size:12px; font-weight:900; color:#0369a1; margin-bottom:3px;">🏭 بیوپاری / نقد</div>
     <button type="button" id="ceaSrc" style="width:100%; height:44px; border:2px solid #0369a1; border-radius:10px; background:#fff; font:inherit; font-size:16px; font-weight:800; cursor:pointer;">${srcBtn ? srcBtn.textContent : 'چنیں ▾'}</button>
     <div style="display:flex; gap:8px; margin-top:14px;">
@@ -57669,11 +57669,11 @@ function chEditAll(variantId, chalanNo){
   const _r2 = x => Math.round(x * 100) / 100, _r4 = x => Math.round(x * 10000) / 10000;
   const _set = (id, x) => { g(id).value = (x === '' || !isFinite(x)) ? '' : String(x); };
   const _final = () => { const i = _n('ceaIsb'), l = _n('ceaLab'); g('ceaFinal').textContent = i > 0 ? 'بل پر فی نگ کل (قیمت فروخت + مزدوری): ' + _r2(i + (l > 0 ? l : 0)) : ''; };
-  const _autoSale = () => { const r = _n('ceaRate'), l = _n('ceaLab'); if(r > 0) _set('ceaIsb', _r2(r + (l > 0 ? l : 0))); };
+  const _autoSale = () => { const r = _n('ceaRate'); if(r > 0) _set('ceaIsb', _r2(r)); }; /* FM2811SA556: مزدوری صرف ایک بار — بل پر الگ جڑتی ہے، قیمت فروخت میں شامل نہیں */
   const _fromRate = () => { const q = _n('ceaQty'), r = _n('ceaRate'); if(q > 0 && r > 0) _set('ceaTot', Math.round(q * r)); else _set('ceaTot', ''); _autoSale(); _final(); };
   const _fromTot = () => { const q = _n('ceaQty'), t = _n('ceaTot'); if(q > 0 && t > 0) _set('ceaRate', _r4(t / q)); else if(!(t > 0)) _set('ceaRate', ''); _autoSale(); _final(); };
   const _fromQty = () => { const q = _n('ceaQty'), r = _n('ceaRate'); if(q > 0 && r > 0) _set('ceaTot', Math.round(q * r)); else _set('ceaTot', ''); };
-  const _fromLab = () => { _autoSale(); _final(); };
+  const _fromLab = () => { _final(); };
   g('ceaRate').addEventListener('input', _fromRate);
   g('ceaTot').addEventListener('input', _fromTot);
   g('ceaQty').addEventListener('input', _fromQty);
