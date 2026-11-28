@@ -10298,8 +10298,8 @@ function getDeveloperContact(){
 // 🆕 FM0611FR514: پہلے سے موجود سبزی کی قیمتیں نئے پراڈکٹ فارم سے بدلیں تو بھی چالانوں کا ریٹ نیا
 // 🆕 FM0611FR514: آرڈرز/کارٹ میں پرانا ریٹ جم جاتا تھا — اب ہاتھ سے نہ لگا ہوا ریٹ ہمیشہ سبزی کے تازہ ریٹ (یا چالان کے تازہ ریٹ) سے خودکار لگتا ہے
 // 🆕 FM0611FR514: بیوپاری کے لین دین میں ادائیگی/وصولی پر ✏️ بدلیں اور 🗑️ حذف (صرف ایڈمن، تنبیہ + PIN) — بقایا، والٹ، کیش، کھاتہ خود درست
-const APP_BUILD_VERSION = 'FM2811SA556'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
-const UPDATE_NOTE = '💪 چالان ✏️: مزدوری صرف ایک بار — قیمت فروخت = فی نگ خرید، بل پر مزدوری الگ';
+const APP_BUILD_VERSION = 'FM2811SA557'; // 🔢 آخر میں #نمبر = اب تک کے کل ورژن (ہر نئے ورژن پر ایک بڑھے گا)
+const UPDATE_NOTE = '🛒 وصولی صفحہ: منشی کے فون پر بھی کل کی خریداری / کل کا مال کلاؤڈ سے براہِ راست نظر آئے گا';
 
 // ---------- ⏱️ صدام کی ہدایت (4 ستمبر): جب بھی نیا ورژن لوڈ ہو، اوپر چلنے والی مووِنگ پٹی (marquee) کے
 // اندر یہ بتانا ہے کہ تازہ ترین ورژن کتنے منٹ پہلے لوڈ ہوا — یہ نیچے والے "اپڈیٹ دستیاب ہے" ڈبے سے بالکل
@@ -36565,7 +36565,7 @@ function rlHistRows(c){
   const add = (o, d, v) => { if(!d) return; o[d] = (o[d] || 0) + (Number(v) || 0); };
   // 🛒 FM0311TU497 (ہیلپ ڈیسک #41، صدام): «خریداری» = اس دن کے بلوں کی پوری رقم (پہلے صرف ادھار والا حصہ — بل پر نقد دیا ہو تو 0 دکھتا)؛
   //   بل پر ادا رقم «وصولی» میں — اس لیے «کم وصولی» وہی رہتی ہے
-  let _inv = invoicesData; try{ _inv = _withArch(invoicesData, 'inv'); }catch(e){}
+  let _inv = invoicesData; try{ _inv = rlInvAll(); }catch(e){} /* FM2811SA557 (#444) */
   _inv.forEach(inv => { if(inv && inv.customer_id === c.customer_id && inv.status !== 'voided'){ const g = Number(inv.grand_total) || 0; add(gDay, invDay(inv), g); add(rDay, invDay(inv), g - _drGoodsOrig(inv)); } });
   (c.walletHistory || []).forEach(h => { if(!h) return; if(h.type === 'cash_given') add(gDay, h.date, h.amount); else if(h.type === 'receivable_collected') add(rDay, h.date, h.amount); });
   recoveryListData.forEach(e => { if(e.customer_id === c.customer_id && e.status === 'pending') add(rDay, recDay(e), e.amount); });
@@ -36611,7 +36611,7 @@ function rlHistBodyHtml(c, sel, z, numF){
 //   پہلے صرف ادھار رقم کے خانے تھے (نقد بل ہو تو «خریداری 0»)۔ صرف دیکھنے کے لیے، کسی حساب میں نہیں ----------
 function rlShowGoods(cid, day){
   const c = customersData.find(x => x.customer_id === cid); if(!c) return;
-  let all = invoicesData; try{ all = _withArch(invoicesData, 'inv'); }catch(e){}
+  let all = invoicesData; try{ all = rlInvAll(); }catch(e){} /* FM2811SA557 (#444) */
   const bills = (all || []).filter(inv => inv && inv.customer_id === cid && inv.status !== 'voided' && invDay(inv) === day);
   const esc = t => String(t == null ? '' : t).replace(/[<>&"]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[ch]));
   const n = v => (Math.round((Number(v) || 0) * 100) / 100).toLocaleString();
@@ -43221,20 +43221,58 @@ async function _fetchRecoveryListRaw(silent){
 }
 
 // ---------- 🛒 FM2811SA555 (#444): وصولی سکرین پر بل کلاؤڈ سے تازہ کریں؛ بل بدلے ہوں تو کارڈ دوبارہ بنیں (صرف دیکھنے والا حصہ — کوئی حساب نہیں بدلتا) ----------
+/* 🛒 FM2811SA557 (#444، صدام فروٹ منڈی): منشی کے فون پر «کل کی خریداری» اب بھی خالی رہتی تھی — کارڈ فون کے محفوظ بلوں سے بنتا ہے اور عام ہم وقت سازی
+   (seen / sig / بنیاد) کسی وجہ سے ان کا کل کا ٹکڑا نہ لاتی تو کچھ نہ دکھتا۔ اب وصولی سکرین کلاؤڈ کے حالیہ بل (آخری 15 دن) براہِ راست پڑھ کر صرف
+   «دیکھنے» کی یادداشت میں رکھتی ہے (فون کے بلوں / ہم وقت سازی / کسی حساب کو نہیں چھیڑتی)؛ صرف بدلے ہوئے ٹکڑے دوبارہ پڑھے جاتے ہیں (کم پڑھائی) */
+const _rlCloudInv = { shards: {}, busy: null, at: 0 };
+function rlCloudInvList(){ const o = []; Object.keys(_rlCloudInv.shards).forEach(k => { const s = _rlCloudInv.shards[k]; if(s && s.list) o.push(...s.list); }); return o; }
+async function rlLoadCloudInv(force){
+  if(_rlCloudInv.busy) return _rlCloudInv.busy;
+  _rlCloudInv.busy = (async () => {
+    try{
+      const r = await _invIdxRead(); if(!r || !r.ok) return false;
+      const m = (r.idx && r.idx.m) || {}, lim = Date.now() - 15 * 86400000;
+      let any = false;
+      for(const sk of Object.keys(m)){
+        const mm = sk.match(/^(\d{4})(\d{2})(\d)$/); if(!mm) continue;
+        const endMs = Date.UTC(+mm[1], +mm[2] - 1, 1 + (+mm[3]) * 5); // ٹکڑے کا آخری دن (تقریباً)
+        if(endMs < lim) continue;
+        const cur = _rlCloudInv.shards[sk], ut = String(m[sk] || '');
+        if(!force && cur && cur.ut === ut) continue;
+        const x = await _xReadCloud({ key: 'invoices_' + sk });
+        if(x && x.ok){ _rlCloudInv.shards[sk] = { ut, list: x.list || [] }; any = true; }
+      }
+      _rlCloudInv.at = Date.now();
+      return any;
+    }catch(e){ return false; }
+    finally{ _rlCloudInv.busy = null; }
+  })();
+  return _rlCloudInv.busy;
+}
+function rlInvAll(){ // فون کے بل (+ ہٹائے ہوئے پرانے) + کلاؤڈ کے حالیہ بل جو اس فون پر نہیں — فون والا ہمیشہ مقدم
+  let base = invoicesData || [];
+  try{ base = _withArch(invoicesData, 'inv'); }catch(e){}
+  const ex = rlCloudInvList(); if(!ex.length) return base;
+  const have = new Set(base.map(x => x && x.invoice_id));
+  const add = ex.filter(x => x && x.invoice_id != null && !have.has(x.invoice_id));
+  return add.length ? base.concat(add) : base;
+}
 let _rlInvBusy = false, _rlInvSig = '';
 async function rlRefreshInvoices(force){
   if(_rlInvBusy) return false;
   _rlInvBusy = true;
   try{
     const ok = await fetchInvoicesFromCloud(true); // کچھ ٹکڑے نہ بھی آئیں تو جو آ گئے وہ دکھا دیں
-    const sig = (invoicesData || []).length + '|' + (invoicesData || []).reduce((a, i) => a + (Number(i && i.invoice_id) || 0), 0);
+    let okC = false; try{ okC = await rlLoadCloudInv(!!force); }catch(e){} // FM2811SA557: عام ہم وقت سازی نہ بھی لائے تو کلاؤڈ سے براہِ راست
+    const _all = rlInvAll();
+    const sig = _all.length + '|' + _all.reduce((a, i) => a + (Number(i && i.invoice_id) || 0), 0);
     const changed = sig !== _rlInvSig; _rlInvSig = sig;
     if((changed || force) && typeof currentScreenName !== 'undefined' && currentScreenName === 'recoveryList'){
       const ae = document.activeElement; // کوئی رقم لکھی جا رہی ہو تو اسے نہ چھیڑیں — بعد کی باری میں
       const typing = ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && document.getElementById('rlEmployeeList') && document.getElementById('rlEmployeeList').contains(ae);
       if(!typing && document.getElementById('rlEmployeeList') && !document.body.classList.contains('role-admin')) renderRecoveryListScreen();
     }
-    return !!ok;
+    return !!(ok || okC);
   }catch(e){ return false; }
   finally{ _rlInvBusy = false; }
 }
